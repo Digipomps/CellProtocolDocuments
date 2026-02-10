@@ -64,8 +64,8 @@ Current implementation details that affect agent output:
 
 - `SkeletonObject` decoding expects a wrapper key `"Object"`, while encoding does not include it.  
   Agents should generate JSON using the wrapper to be safe.
-- There is a spelling inconsistency between `flowELementSkeleton` and `flowElementSkeleton`.  
-  Follow the names listed in [12_Skeleton_Spec.md](12_Skeleton_Spec.md).
+- Some stored JSON may still use the legacy key `flowELementSkeleton`.  
+  Use `flowElementSkeleton` for new output, and consider backward compatibility if needed.
 
 ## 7. Minimal Template
 

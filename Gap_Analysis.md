@@ -73,14 +73,14 @@ The core concepts are well covered, but these are missing:
 
 These are not necessarily bugs, but they should be documented because they affect tooling and agent output.
 
-- **Skeleton JSON wrapper rules are inconsistent.**  
-  `SkeletonObject.encode()` encodes without the `Object` wrapper key, while `SkeletonElement` decoding expects `{"Object": {...}}`.  
-  This should be clarified or fixed.  
+- **Legacy Object wrapper.**  
+  Old JSON may store unwrapped `SkeletonObject` values.  
+  Decoding should support both wrapped and unwrapped formats.  
   Code: `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
 
-- **Key naming inconsistencies.**  
-  `flowELementSkeleton` vs `flowElementSkeleton` appear in different structs and coding keys.  
-  Tooling should either normalize or document which spelling is expected.  
+- **Legacy key spelling.**  
+  Some stored JSON may still use `flowELementSkeleton`.  
+  If backward compatibility is needed, support both keys in decoding.  
   Code: `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
 
 - **README references docs not present in the code repo.**  

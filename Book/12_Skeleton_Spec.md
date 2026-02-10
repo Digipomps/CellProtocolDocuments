@@ -149,10 +149,10 @@ Fields:
 - `keypath` (String, optional)
 - `filterTypes` (String array, optional)
 - `elements` (ValueTypeList, optional)
-- `flowELementSkeleton` (VStack, optional)
+- `flowElementSkeleton` (VStack, optional)
 - `modifiers` (optional)
 
-Note: `flowELementSkeleton` uses the current spelling in code.
+Note: `flowElementSkeleton` is the canonical spelling in code.
 
 ### 3.7 Object
 
@@ -171,7 +171,7 @@ Fields:
 - `elements` (map of string → SkeletonElement)
 - `modifiers` (optional)
 
-Important: `SkeletonObject.encode()` currently does **not** wrap output in `{ "Object": ... }`, while decoding expects the wrapper. If you are generating JSON manually, use the wrapped form above to be safe.
+Encoding now uses the wrapped `{ "Object": ... }` form. Decoding also accepts legacy unwrapped objects that contain `elements` at the top level.
 
 ### 3.8 Reference
 
@@ -337,6 +337,6 @@ See:
 The current implementation has two interoperability risks:
 
 1. **Object wrapper mismatch**: encoding vs decoding differs for `Object`.  
-2. **Key spelling mismatch**: `flowELementSkeleton` vs `flowElementSkeleton`.  
+2. **Legacy key spelling**: some stored JSON may still use `flowELementSkeleton`.  
 
 If you are generating JSON manually or with agents, use the names shown in this spec to be consistent with decoding.
