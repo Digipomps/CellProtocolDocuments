@@ -137,3 +137,11 @@ See:
 
 - `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Book/11_Developer_Guide_Cell.md`
 - `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Book/12_Skeleton_Spec.md`
+
+## 8. Running Skeleton Tests (Xcode)
+
+Skeleton encoding/decoding tests live in the `CellBaseTests` target.
+
+- Open the `CellProtocol` workspace in Xcode.
+- Select the `CellBaseTests` test target.
+- Run the `SkeletonTests` test suite.
