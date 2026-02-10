@@ -185,3 +185,14 @@ Book Extras provide the broader conceptual framework needed to use HAVEN:
 
 This material completes the reference documentation and supports developers,
 researchers, and communities working with the HAVEN ecosystem.
+
+---
+
+## 9. Documentation Map (Implementation)
+
+If you are building software (not just reading concepts), start here:
+
+- [10_Quickstart.md](10_Quickstart.md) — Minimal runnable setup  
+- [11_Developer_Guide_Cell.md](11_Developer_Guide_Cell.md) — Step-by-step cell implementation  
+- [12_Skeleton_Spec.md](12_Skeleton_Spec.md) — Skeleton UI JSON spec  
+- [13_Agent_Instructions.md](13_Agent_Instructions.md) — Agent workflow and checklist

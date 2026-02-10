@@ -10,3 +10,8 @@ Husk at jeg også implementerer og har tilgang til alt i CellProtocol så om det
 
 Dokumentasjon skrives på engelsk så lenge jeg ikke eksplisitt sier noe annet.
 Dokumentasjon og forslag til prompter legges i md filer
+
+Agent entrypoint (implementation work):
+- Start with the developer docs in `Book/10_Quickstart.md` and `Book/11_Developer_Guide_Cell.md`.
+- For UI output, follow the JSON rules in `Book/12_Skeleton_Spec.md`.
+- For agent workflow and checklist, follow `Book/13_Agent_Instructions.md`.
