@@ -142,6 +142,12 @@ See:
 
 Skeleton encoding/decoding tests live in the `CellBaseTests` target.
 
-- Open the `CellProtocol` workspace in Xcode.
-- Select the `CellBaseTests` test target.
+- Open the workspace you use for app development (for example `Binding.xcworkspace`).
+- Ensure the workspace includes the local `CellProtocol` package folder (not just a remote reference).
+- Select the `CellBaseTests` test target in the test plan.
 - Run the `SkeletonTests` test suite.
+
+If `CellBaseTests` shows as “missing”, verify these two entries match your local layout:
+
+- `/Users/kjetil/Build/Digipomps/HAVEN/Binding/Binding.xcworkspace/contents.xcworkspacedata` includes `group:../CellProtocol`
+- `/Users/kjetil/Build/Digipomps/HAVEN/Binding/Binding.xcodeproj/xcshareddata/xctestplans/Binding.xctestplan` uses `container:../CellProtocol`

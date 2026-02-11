@@ -2,22 +2,20 @@
 
 This report compares the existing conceptual documentation in `CellProtocolDocuments/Book` to the actual Swift implementation in `CellProtocol`. It identifies gaps that prevent developers and code agents from implementing cells and skeleton-based UIs reliably.
 
-## 1) Coverage Summary
+## 1) Coverage Summary (Updated)
 
 The conceptual book is strong and consistent:
 
 - Protocol intent, guarantees, and boundaries are documented.
 - Core interfaces, identity, agreements, flows, resolver, scaffold, transport, and purpose are explained.
 
-What is missing is **implementation-level guidance** and **agent instructions**. There are no docs that connect these concepts to the actual Swift APIs, runtime defaults, or serialization formats.
+Previously missing **implementation-level guidance** and **agent instructions** have now been added. The docs now connect concepts to Swift APIs, runtime defaults, and serialization formats, and include a runnable Quickstart and Skeleton spec.
 
-## 2) Missing Developer-Facing Documentation
+## 2) Developer-Facing Documentation Status
 
-### 2.1 Quickstart / "Hello Cell"
-Missing:
-- A minimal, working setup using the actual runtime defaults.
-- How to initialize `CellBase.defaultIdentityVault` and `CellBase.defaultCellResolver`.
-- How to register cell resolves and load a cell via `CellResolver`.
+### 2.1 Quickstart / "Hello Cell" — Addressed
+Now covered in:
+- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Book/10_Quickstart.md`
 
 Relevant code:
 - `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Cells/CellBase.swift`
@@ -25,12 +23,9 @@ Relevant code:
 - `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift`
 - `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellApple/IdentityVault.swift`
 
-### 2.2 "How to implement a Cell"
-Missing:
-- A step-by-step process for creating a new cell that uses `GeneralCell`.
-- How to define schema, intercepts, and access control.
-- How to publish `FlowElement` output.
-- How to use `Agreement`, `ConnectContext`, and `CellUsageScope` in practice.
+### 2.2 "How to implement a Cell" — Addressed
+Now covered in:
+- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Book/11_Developer_Guide_Cell.md`
 
 Relevant code:
 - `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Cells/GeneralCell/GeneralCell.swift`
@@ -38,64 +33,52 @@ Relevant code:
 - `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Agreement/Agreement.swift`
 - `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Agreement/ConnectContext.swift`
 
-### 2.3 Skeleton UI specification
-Missing:
-- A formal JSON schema or spec for `SkeletonElement`.
-- Clear encoding rules for each element type.
-- Binding rules (keypaths, topics, flow element skeleton usage).
+### 2.3 Skeleton UI specification — Addressed
+Now covered in:
+- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Book/12_Skeleton_Spec.md`
 
 Relevant code:
 - `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
 - `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/SkeletonElementView.swift`
 - `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/SkeletonDescriptions.swift`
 
-## 3) Missing Agent Instructions
+## 3) Agent Instructions — Addressed
 
-Agents need an explicit, repeatable workflow that maps user requests into:
+Agent workflow is now defined in:
+- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Book/13_Agent_Instructions.md`
 
-1. A new cell implementation (Swift).
-2. A `CellConfiguration` describing its dependencies.
-3. A `SkeletonElement` definition for UI rendering.
+## 4) Conceptual Documentation Gaps (Remaining)
 
-Missing:
-- A checklist or recipe that references the actual `CellBase` APIs.
-- A definition of “done” (tests or runtime verification).
+The core concepts are covered, but still missing:
 
-## 4) Conceptual Documentation Gaps
-
-The core concepts are well covered, but these are missing:
-
-- How the conceptual interfaces map to the actual Swift types and runtime defaults.
-- A stable “developer API map” that lists the key types and modules.
+- A stable “developer API map” listing the key types and modules.
 - Integration patterns between `CellApple` and `CellVapor` (mobile vs server scaffolds).
+- A consolidated runtime lifecycle diagram (init → resolve → usage → persistence).
 
-## 5) Specific Correctness/Interoperability Issues to Document
+## 5) Specific Correctness/Interoperability Issues (Status)
 
-These are not necessarily bugs, but they should be documented because they affect tooling and agent output.
-
-- **Legacy Object wrapper.**  
-  Old JSON may store unwrapped `SkeletonObject` values.  
-  Decoding should support both wrapped and unwrapped formats.  
+- **Object wrapper mismatch** — Resolved in code and documented in Skeleton spec.  
+  `SkeletonObject` now decodes wrapped and unwrapped forms, and encodes wrapped.  
   Code: `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
 
-- **Legacy key spelling.**  
-  Some stored JSON may still use `flowELementSkeleton`.  
-  If backward compatibility is needed, support both keys in decoding.  
+- **Legacy key spelling (`flowELementSkeleton`)** — Standardized to `flowElementSkeleton` in code and docs.  
+  Backward compatibility is not required at this time.  
   Code: `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
 
-- **README references docs not present in the code repo.**  
-  The README in `CellProtocol` references files that live in `CellProtocolDocuments` and is stale if used alone.
+- **README references docs not present in the code repo** — Addressed by updated README that points to `CellProtocolDocuments`.
 
-## 6) Recommended Additions (New Docs)
+## 6) Delivered Additions
 
-These are the concrete additions that will close the gaps:
+The gaps were closed with these additions:
 
-1. `Quickstart` for real runnable setup.  
-2. `Developer Guide: Implementing a Cell`.  
-3. `Skeleton Spec` (JSON encoding + examples).  
+1. Quickstart (runnable setup + tests).  
+2. Developer Guide (cell implementation workflow).  
+3. Skeleton Spec (JSON encoding + examples).  
+4. Agent Instructions (repeatable workflow).  
+5. Troubleshooting (Xcode testplan + skeleton issues).
 
-The next three files are created as part of this task:
-
+Files:
 - `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Book/10_Quickstart.md`
 - `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Book/11_Developer_Guide_Cell.md`
 - `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Book/12_Skeleton_Spec.md`
+- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Book/13_Agent_Instructions.md`

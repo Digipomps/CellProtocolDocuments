@@ -158,3 +158,16 @@ See:
 - Add `Explore` metadata and schema descriptions.
 - Define meaningful `Agreement` and conditions.
 - Add real tests in `Tests/`.
+
+## 10. Troubleshooting
+
+If `CellBaseTests` shows as “missing” in Xcode:
+
+- Ensure the workspace includes the local `CellProtocol` folder (not only a remote package reference).
+- In the workspace, add `CellProtocol` via “Add Files to…” and choose the folder, or verify the workspace file includes `group:../CellProtocol`.
+- In the test plan, ensure the `CellBaseTests` entry uses `container:../CellProtocol`.
+
+If Skeleton encoding/decoding fails:
+
+- Run `SkeletonTests` and check the JSON fixtures under `Tests/CellBaseTests/Fixtures/`.
+- Verify the fixture uses the correct casing for `flowElementSkeleton` and `SkeletonObject` encoding matches the wrapper format.
