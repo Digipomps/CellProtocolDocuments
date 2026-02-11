@@ -98,3 +98,43 @@ public actor ExampleCell: GeneralCell {
 
 - Default runtime bootstrapping  
   `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift`
+
+## 9. PerspectiveCell Pattern (Required for Weighted Matching)
+
+When implementing a `GeneralCell` subclass that exposes `Perspective` functionality:
+
+- Expose read snapshots via `GET` intercepts (for example `perspective.state`).
+- Expose parameterized matching/query operations via `SET` intercepts:
+  - `perspective.query.activePurposes`
+  - `perspective.query.interestsFromActivePurposes`
+  - `perspective.query.match`
+- Return explicit weighted payloads only. Do not infer hidden features or implicit scores.
+- Keep scoring deterministic and documented:
+  - direct purpose route
+  - via-interest route
+- Include enough data for downstream ranking and explainability:
+  - source/target purpose refs and weights
+  - interest refs and weights when route is via-interest
+  - route type and final match score
+
+Reference contract for cross-device/scaffold matching:
+
+- Support `referenceMode` (`local`, `portable`, `both`) in query payloads.
+- Include `referenceStrategy` in responses.
+- Use portable refs for interoperability when local refs differ across runtimes.
+
+See Chapter 14 for the runtime contract and request/response fields:
+
+- [14_Perspective_Runtime_Matching.md](14_Perspective_Runtime_Matching.md)
+
+## 10. Documentation Placement Policy
+
+Agents must place documentation based on ownership and portability:
+
+- Core protocol/runtime behavior required for CellProtocol/HAVEN interoperability:
+  - document in `CellProtocolDocuments` (this repo).
+- App, product, or commercial behavior built on top of CellProtocol/HAVEN:
+  - document in app/vendor repositories (for example DiMy repos).
+
+If a doc starts in an app repo but describes shared protocol behavior, promote it to
+`CellProtocolDocuments` and leave a short pointer in the app repo.
