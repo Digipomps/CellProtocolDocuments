@@ -27,7 +27,8 @@ This repository contains the official documentation for HAVEN CellProtocol. It i
    - [10_Quickstart.md](Book/10_Quickstart.md)  
    - [11_Developer_Guide_Cell.md](Book/11_Developer_Guide_Cell.md)  
    - [12_Skeleton_Spec.md](Book/12_Skeleton_Spec.md)  
-   - [13_Agent_Instructions.md](Book/13_Agent_Instructions.md)
+   - [13_Agent_Instructions.md](Book/13_Agent_Instructions.md)  
+   - [14_Perspective_Runtime_Matching.md](Book/14_Perspective_Runtime_Matching.md)
 
 7. Supplementary Material  
    - [Book_Extras.md](Book/Book_Extras.md)
@@ -45,3 +46,4 @@ If you are implementing code or UI:
 - Then follow [11_Developer_Guide_Cell.md](Book/11_Developer_Guide_Cell.md)
 - Use [12_Skeleton_Spec.md](Book/12_Skeleton_Spec.md) for UI JSON
 - Follow [13_Agent_Instructions.md](Book/13_Agent_Instructions.md) for workflow and checklist
+- Use [14_Perspective_Runtime_Matching.md](Book/14_Perspective_Runtime_Matching.md) when implementing weighted purpose/interest queries and cross-perspective matching
