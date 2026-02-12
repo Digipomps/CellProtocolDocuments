@@ -88,16 +88,16 @@ public actor ExampleCell: GeneralCell {
 ## 8. Where to Look in Code
 
 - `GeneralCell` implementation  
-  `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Cells/GeneralCell/GeneralCell.swift`
+  `CellProtocol/Sources/CellBase/Cells/GeneralCell/GeneralCell.swift`
 
 - `CellResolver` registration  
-  `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Cells/CellResolver/CellResolver.swift`
+  `CellProtocol/Sources/CellBase/Cells/CellResolver/CellResolver.swift`
 
 - `SkeletonElement` encoding  
-  `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
+  `CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
 
 - Default runtime bootstrapping  
-  `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift`
+  `CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift`
 
 ## 9. PerspectiveCell Pattern (Required for Weighted Matching)
 

@@ -15,37 +15,37 @@ Previously missing **implementation-level guidance** and **agent instructions** 
 
 ### 2.1 Quickstart / "Hello Cell" — Addressed
 Now covered in:
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Book/10_Quickstart.md`
+- `CellProtocolDocuments/Book/10_Quickstart.md`
 
 Relevant code:
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Cells/CellBase.swift`
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Cells/CellResolver/CellResolver.swift`
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift`
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellApple/IdentityVault.swift`
+- `CellProtocol/Sources/CellBase/Cells/CellBase.swift`
+- `CellProtocol/Sources/CellBase/Cells/CellResolver/CellResolver.swift`
+- `CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift`
+- `CellProtocol/Sources/CellApple/IdentityVault.swift`
 
 ### 2.2 "How to implement a Cell" — Addressed
 Now covered in:
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Book/11_Developer_Guide_Cell.md`
+- `CellProtocolDocuments/Book/11_Developer_Guide_Cell.md`
 
 Relevant code:
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Cells/GeneralCell/GeneralCell.swift`
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Protocols/CellProtocol.swift`
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Agreement/Agreement.swift`
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Agreement/ConnectContext.swift`
+- `CellProtocol/Sources/CellBase/Cells/GeneralCell/GeneralCell.swift`
+- `CellProtocol/Sources/CellBase/Protocols/CellProtocol.swift`
+- `CellProtocol/Sources/CellBase/Agreement/Agreement.swift`
+- `CellProtocol/Sources/CellBase/Agreement/ConnectContext.swift`
 
 ### 2.3 Skeleton UI specification — Addressed
 Now covered in:
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Book/12_Skeleton_Spec.md`
+- `CellProtocolDocuments/Book/12_Skeleton_Spec.md`
 
 Relevant code:
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/SkeletonElementView.swift`
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/SkeletonDescriptions.swift`
+- `CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
+- `CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/SkeletonElementView.swift`
+- `CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/SkeletonDescriptions.swift`
 
 ## 3) Agent Instructions — Addressed
 
 Agent workflow is now defined in:
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Book/13_Agent_Instructions.md`
+- `CellProtocolDocuments/Book/13_Agent_Instructions.md`
 
 ## 4) Conceptual Documentation Gaps (Remaining)
 
@@ -59,11 +59,11 @@ The core concepts are covered, but still missing:
 
 - **Object wrapper mismatch** — Resolved in code and documented in Skeleton spec.  
   `SkeletonObject` now decodes wrapped and unwrapped forms, and encodes wrapped.  
-  Code: `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
+  Code: `CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
 
 - **Legacy key spelling (`flowELementSkeleton`)** — Standardized to `flowElementSkeleton` in code and docs.  
   Backward compatibility is not required at this time.  
-  Code: `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
+  Code: `CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
 
 - **README references docs not present in the code repo** — Addressed by updated README that points to `CellProtocolDocuments`.
 
@@ -78,7 +78,7 @@ The gaps were closed with these additions:
 5. Troubleshooting (Xcode testplan + skeleton issues).
 
 Files:
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Book/10_Quickstart.md`
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Book/11_Developer_Guide_Cell.md`
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Book/12_Skeleton_Spec.md`
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Book/13_Agent_Instructions.md`
+- `CellProtocolDocuments/Book/10_Quickstart.md`
+- `CellProtocolDocuments/Book/11_Developer_Guide_Cell.md`
+- `CellProtocolDocuments/Book/12_Skeleton_Spec.md`
+- `CellProtocolDocuments/Book/13_Agent_Instructions.md`

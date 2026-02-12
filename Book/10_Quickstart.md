@@ -14,7 +14,7 @@ The package exposes multiple libraries:
 - `CellApple` (Apple runtime: IdentityVault + bridging + UI utilities)
 - `CellVapor` (server runtime)
 
-See `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Package.swift`.
+See `CellProtocol/Package.swift`.
 
 ## 2. Minimal Apple Runtime Setup
 
@@ -46,7 +46,7 @@ struct DemoApp: App {
 
 `AppInitializer` lives in:
 
-`/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift`
+`CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift`
 
 ## 3. Manual Setup (No AppInitializer)
 
@@ -96,7 +96,7 @@ public actor EchoCell: GeneralCell {
 
 `GeneralCell` and intercepts are defined in:
 
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Cells/GeneralCell/GeneralCell.swift`
+- `CellProtocol/Sources/CellBase/Cells/GeneralCell/GeneralCell.swift`
 
 ## 5. Register the Cell
 
@@ -135,8 +135,8 @@ Once you can resolve a cell and call `get`/`set`, you should:
 
 See:
 
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Book/11_Developer_Guide_Cell.md`
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Book/12_Skeleton_Spec.md`
+- `CellProtocolDocuments/Book/11_Developer_Guide_Cell.md`
+- `CellProtocolDocuments/Book/12_Skeleton_Spec.md`
 
 ## 8. Running Skeleton Tests (Xcode)
 
@@ -149,5 +149,5 @@ Skeleton encoding/decoding tests live in the `CellBaseTests` target.
 
 If `CellBaseTests` shows as “missing”, verify these two entries match your local layout:
 
-- `/Users/kjetil/Build/Digipomps/HAVEN/Binding/Binding.xcworkspace/contents.xcworkspacedata` includes `group:../CellProtocol`
-- `/Users/kjetil/Build/Digipomps/HAVEN/Binding/Binding.xcodeproj/xcshareddata/xctestplans/Binding.xctestplan` uses `container:../CellProtocol`
+- `Binding/Binding.xcworkspace/contents.xcworkspacedata` includes `group:../CellProtocol`
+- `Binding/Binding.xcodeproj/xcshareddata/xctestplans/Binding.xctestplan` uses `container:../CellProtocol`

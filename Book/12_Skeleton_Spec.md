@@ -2,8 +2,8 @@
 
 This chapter defines the JSON encoding and element semantics for Skeleton UI, based on the current Swift implementation in:
 
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/SkeletonElementView.swift`
+- `CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
+- `CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/SkeletonElementView.swift`
 
 ## 1. Encoding Rule (All Elements)
 
@@ -59,7 +59,7 @@ Many elements accept `modifiers`. The available fields are:
 
 Source:
 
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
+- `CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
 
 ## 3. Elements
 
@@ -329,8 +329,8 @@ Many elements use `keypath` or `url`:
 
 See:
 
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/SkeletonElementView.swift`
+- `CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
+- `CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/SkeletonElementView.swift`
 
 ## 5. Encoding Caveats
 

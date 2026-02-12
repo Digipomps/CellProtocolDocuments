@@ -14,7 +14,7 @@ Before coding, define:
 
 These map directly to CellProtocol interfaces in:
 
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Protocols/CellProtocol.swift`
+- `CellProtocol/Sources/CellBase/Protocols/CellProtocol.swift`
 
 ## 2. Create a Cell Class
 
@@ -46,7 +46,7 @@ public actor ExampleCell: GeneralCell {
 
 Relevant implementation:
 
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Cells/GeneralCell/GeneralCell.swift`
+- `CellProtocol/Sources/CellBase/Cells/GeneralCell/GeneralCell.swift`
 
 Notes:
 
@@ -81,8 +81,8 @@ pushFlowElement(msg, requester: owner)
 
 Relevant code:
 
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/FeedItem/FlowElement.swift`
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Cells/GeneralCell/GeneralCell.swift`
+- `CellProtocol/Sources/CellBase/FeedItem/FlowElement.swift`
+- `CellProtocol/Sources/CellBase/Cells/GeneralCell/GeneralCell.swift`
 
 ## 5. Register the Cell with the Resolver
 
@@ -101,7 +101,7 @@ try await resolver.addCellResolve(
 
 Resolver implementation:
 
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/Cells/CellResolver/CellResolver.swift`
+- `CellProtocol/Sources/CellBase/Cells/CellResolver/CellResolver.swift`
 
 ## 6. Provide a CellConfiguration
 
@@ -113,7 +113,7 @@ A `CellConfiguration` describes:
 
 Structs:
 
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/Sources/CellBase/CellConfiguration/CellConfiguration.swift`
+- `CellProtocol/Sources/CellBase/CellConfiguration/CellConfiguration.swift`
 
 Minimal example:
 
@@ -143,7 +143,7 @@ Skeleton UI lets the client render a cell configuration without hardcoded views.
 
 See:
 
-- `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Book/12_Skeleton_Spec.md`
+- `CellProtocolDocuments/Book/12_Skeleton_Spec.md`
 
 ## 8. Checklist (Minimal Done Definition)
 
