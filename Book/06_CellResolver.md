@@ -109,7 +109,67 @@ Resolver acts as a supervisor:
 
 Cells never crash the system; Resolver contains all faults.
 
-## 8. Summary
+## 8. Remote Host Routing (`cell://<host>/<CellName>`)
+
+Resolver now supports explicit routing from remote `cell://` references to
+WebSocket bridge endpoints.
+
+Use case:
+
+- input: `cell://example.org/LoginCell`
+- resolved bridge endpoint: `ws(s)://example.org/<websocketEndpoint>/LoginCell`
+
+Registration API:
+
+```swift
+let resolver = CellResolver.sharedInstance
+resolver.registerRemoteCellHost(
+    "example.org",
+    route: RemoteCellHostRoute(
+        websocketEndpoint: "publishersws",
+        schemePreference: .automatic
+    )
+)
+```
+
+Route model:
+
+- `RemoteCellHostRoute.websocketEndpoint`  
+  Path prefix used before `<CellName>` (default: `publishersws`)
+- `RemoteCellHostRoute.schemePreference`  
+  - `.automatic`: selects `ws` in debug/dev mode and `wss` in production mode
+  - `.ws`: forces `ws` (still blocked by production policy)
+  - `.wss`: forces `wss`
+
+Lifecycle helpers:
+
+- `registerRemoteCellHost(_:, route:)`
+- `unregisterRemoteCellHost(_:)`
+- `remoteCellHostRoutesSnapshot()`
+
+If a remote `cell://host/...` reference is used without registration, resolver
+throws `missingRemoteCellHostRegistration`.
+
+## 9. Resolver-Level WebSocket Security Policy
+
+Resolver now enforces a global WebSocket security policy via `CellBase`:
+
+```swift
+CellBase.webSocketSecurityPolicy = .developmentOnlyInsecureAllowed
+// or
+CellBase.webSocketSecurityPolicy = .requireTLS
+```
+
+Behavior:
+
+- In development mode, insecure `ws://` can be allowed for local iteration.
+- In production mode (`.requireTLS`), insecure `ws://` is rejected.
+- Rejections throw `insecureWebSocketNotAllowed(endpoint:)`.
+
+This enforcement applies both to direct `ws://...` endpoints and to
+`cell://host/...` references that resolve to WebSocket URLs.
+
+## 10. Summary
 
 The CellResolver is the “law keeper” of HAVEN:
 
@@ -118,5 +178,7 @@ The CellResolver is the “law keeper” of HAVEN:
 - protects flows, identity, and state  
 - keeps the system deterministic  
 - orchestrates lifecycle, replay, and error handling  
+- enforces transport security policy for WebSocket endpoints  
+- resolves remote host routes from `cell://host/...` to `ws(s)://...`
 
 Without the Resolver, trust in distributed computation would not be possible.
