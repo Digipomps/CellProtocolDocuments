@@ -54,6 +54,7 @@ It also sets transport defaults for security:
 - allows insecure `ws://` only in debug/dev mode
 - requires `wss://` in release mode
 - supports default remote host mapping for `cell://<host>/<CellName>`
+- uses cryptographically secure OS entropy for key material in vault/runtime
 
 ## 3. Manual Setup (No AppInitializer)
 
@@ -85,6 +86,12 @@ func configureCellBase() async {
         "example.org",
         route: RemoteCellHostRoute(websocketEndpoint: "publishersws", schemePreference: .automatic)
     )
+
+    // Cryptographic randomness:
+    // use SecureRandom for key/IV/nonce material (never String.random / Int.random)
+    let key = try? SecureRandom.alphanumericString(length: 32)
+    let iv = try? SecureRandom.alphanumericString(length: 16)
+    _ = (key, iv)
 
     // Optional but recommended: typed cell storage + document root
     CellBase.documentRootPath = "/path/to/documents"
