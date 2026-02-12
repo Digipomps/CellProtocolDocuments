@@ -125,7 +125,53 @@ Transport is required to preserve:
 
 Transport cannot add or remove authority.
 
-## 7. Developer Notes
+## 7. WebSocket Policy (Dev vs Prod)
+
+CellProtocol now supports explicit WebSocket security policy so development can
+use `ws://`, while production requires `wss://`.
+
+Policy surface:
+
+```swift
+CellBase.webSocketSecurityPolicy = .developmentOnlyInsecureAllowed
+// or
+CellBase.webSocketSecurityPolicy = .requireTLS
+```
+
+Runtime rule:
+
+- `.developmentOnlyInsecureAllowed`: `ws://` is allowed in debug workflows.
+- `.requireTLS`: `ws://` is rejected, `wss://` is required.
+
+This is enforced in resolver endpoint handling, not just by convention.
+
+## 8. Remote `cell://host` Bridge Mapping
+
+For remote hosts, `cell://host/<CellName>` can be mapped to WebSocket bridge
+endpoints using a host registry.
+
+Example mapping:
+
+- `cell://example.org/LoginCell`
+- -> `wss://example.org/publishersws/LoginCell` (prod)
+- -> `ws://example.org/publishersws/LoginCell` (dev, when allowed)
+
+Registration:
+
+```swift
+resolver.registerRemoteCellHost(
+    "example.org",
+    route: RemoteCellHostRoute(
+        websocketEndpoint: "publishersws",
+        schemePreference: .automatic
+    )
+)
+```
+
+This makes transport selection deterministic and removes hardcoded endpoint
+construction from feature code.
+
+## 9. Developer Notes
 
 - do not rely on timing guarantees  
 - preserve ASCII safety  
@@ -133,8 +179,10 @@ Transport cannot add or remove authority.
 - prefer WebRTC for local-first systems  
 - use bundles for intermittent connectivity  
 - log envelope inconsistencies for diagnostics  
+- keep `ws://` limited to development environments  
+- register remote host routes centrally during bootstrap
 
-## 8. Summary
+## 10. Summary
 
 Bridging and Transport make HAVEN:
 

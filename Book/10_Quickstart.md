@@ -48,6 +48,14 @@ struct DemoApp: App {
 
 `CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift`
 
+It also sets transport defaults for security:
+
+- registers both `ws` and `wss` transports
+- allows insecure `ws://` only in debug/dev mode
+- requires `wss://` in release mode
+- supports default remote host mapping for `cell://<host>/<CellName>`
+- uses cryptographically secure OS entropy for key material in vault/runtime
+
 ## 3. Manual Setup (No AppInitializer)
 
 If you want full control, you can initialize the defaults directly:
@@ -63,6 +71,27 @@ func configureCellBase() async {
 
     let resolver = CellResolver.sharedInstance
     CellBase.defaultCellResolver = resolver
+
+    // Transport policy:
+    // - debug/dev: ws can be allowed
+    // - prod: require wss
+    CellBase.webSocketSecurityPolicy = .developmentOnlyInsecureAllowed
+
+    try? await resolver.registerTransport(AppleBridgeTransport.self, for: "ws")
+    try? await resolver.registerTransport(AppleBridgeTransport.self, for: "wss")
+
+    // Remote host mapping:
+    // cell://example.org/LoginCell -> ws(s)://example.org/publishersws/LoginCell
+    resolver.registerRemoteCellHost(
+        "example.org",
+        route: RemoteCellHostRoute(websocketEndpoint: "publishersws", schemePreference: .automatic)
+    )
+
+    // Cryptographic randomness:
+    // use SecureRandom for key/IV/nonce material (never String.random / Int.random)
+    let key = try? SecureRandom.alphanumericString(length: 32)
+    let iv = try? SecureRandom.alphanumericString(length: 16)
+    _ = (key, iv)
 
     // Optional but recommended: typed cell storage + document root
     CellBase.documentRootPath = "/path/to/documents"

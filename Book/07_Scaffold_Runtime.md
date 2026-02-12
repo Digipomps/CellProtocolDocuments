@@ -36,6 +36,13 @@ Responsible for:
 ### 2.3 Identity Vault  
 Manages private keys, rotation, signing, and local cryptographic operations.
 
+Runtime hardening rule:
+
+- all generated key/IV/nonce bytes must come from OS-backed CSPRNG sources
+  (Apple: `SecRandomCopyBytes`, Linux: `/dev/urandom`)
+- deterministic or convenience random APIs are not valid entropy sources for
+  cryptographic material
+
 ### 2.4 Replay Engine  
 Ensures state and events can always be reconstructed.
 

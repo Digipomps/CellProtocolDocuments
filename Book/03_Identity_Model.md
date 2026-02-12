@@ -48,6 +48,13 @@ The vault is responsible for:
 - signing messages  
 - safe rotation of keys  
 - revocation support  
+- generating key material from cryptographically secure OS entropy sources  
+  (`SecRandomCopyBytes` on Apple platforms, `/dev/urandom` on Linux)
+
+Security requirement:
+
+- non-cryptographic generators (for example `String.random` / `Int.random`) must
+  never be used for keys, IVs, nonces, or seed material.
 
 Cells and Resolvers only see public keys and signatures, never private keys.
 
