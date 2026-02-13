@@ -24,9 +24,18 @@ This file is the shared source of truth for architecture concepts and collaborat
 - Enforce authorization per keypath inside the cell.
 - Publish events and updates through flow topics, not ad-hoc side channels.
 
+## Agreement and Contract Evolution Rules
+- Authorization is capability-based and identity-bound. Do not model access control as static role labels.
+- Agreement templates may be applied with explicit rollout behavior:
+  - only for new connections, or
+  - including re-evaluation of already connected identities.
+- If re-evaluation makes a connection non-compliant, implementations may require renewed `signContract` or revoke access only when contract terms/conditions allow it.
+- Agreement artifacts should be signable by all parties and retrievable for storage in each party-controlled entity context.
+- Default connect behavior remains `ConnectState`-driven: if `signContract` is returned, user review/signing flow is expected.
+- If a proposed solution may conflict with documented CellProtocol concepts, discuss with the user before implementation.
+
 ## Working Conventions
 - Decompose work into small, verifiable steps.
 - Explain failures and blockers explicitly.
 - Keep docs in English unless explicitly requested otherwise.
 - Update documentation together with behavior changes.
-
