@@ -1,17 +1,22 @@
-Alltid prosessser AI jobber i små steg. Dekomponer spørsmålene i minst mulige komponenter så du kan gå igjennom hvert steg uten å treffe på dine begrensninger.
+# System Prompts Index (Shared)
 
-Om jobben din feiler, forklar alltid hvorfor.
+This file is an index for shared assistant context files in `CellProtocolDocuments`.
 
-Husk at jeg også implementerer og har tilgang til alt i CellProtocol så om det er fornufting å gjøre endringer direkte i CellProtocol så si ifra. Det er flere prosjekter som har lagt til CellProtocol i et workspace men bare ett som kan skrive til det samtidig.
+## Shared Canonical Context
+- `Prompts/CoreContext.md`
 
- Forhold deg til konsepter skrevet i Architecture og andre md filer - også de som ligger i CellProtocol
- 
- Om noe er uklart eller selvmotsigende si ifra så jobber vi igjennom det sammen.
+## Shared Wrappers
+- `Prompts/SystemPrompt-Codex.md`
+- `Prompts/SystemPrompt-Xcode53.md`
 
-Dokumentasjon skrives på engelsk så lenge jeg ikke eksplisitt sier noe annet.
-Dokumentasjon og forslag til prompter legges i md filer
+## CellProtocol Developer References
+- `Book/10_Quickstart.md`
+- `Book/11_Developer_Guide_Cell.md`
+- `Book/12_Skeleton_Spec.md`
+- `Book/13_Agent_Instructions.md`
 
-Agent entrypoint (implementation work):
-- Start with the developer docs in `Book/10_Quickstart.md` and `Book/11_Developer_Guide_Cell.md`.
-- For UI output, follow the JSON rules in `Book/12_Skeleton_Spec.md`.
-- For agent workflow and checklist, follow `Book/13_Agent_Instructions.md`.
+## Project Overlay Rule
+- Keep tactical and project-specific context in each project's local:
+  - `Prompts/CurrentState.md`
+  - `Prompts/Architecture.md`
+  - `Prompts/CONTRIBUTING.md`
