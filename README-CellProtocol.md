@@ -37,6 +37,8 @@ This repository contains the official documentation for HAVEN CellProtocol. It i
 
 - [Gap_Analysis.md](Gap_Analysis.md) — Implementation gaps vs current docs  
 - [SystemPrompts.md](Prompts/SystemPrompts.md) — Guidance for AI/system prompts
+- [SSH_SETUP.md](SSH_SETUP.md) — SSH og package-resolve playbook for Digipomps
+- [DEVELOPERS.md](DEVELOPERS.md) — Utviklerguide og inngang til verktøy og rutiner
 
 ## Agent Entrypoint
 

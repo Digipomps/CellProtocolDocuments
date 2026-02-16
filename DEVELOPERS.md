@@ -16,3 +16,20 @@ Direktelenker:
 ## Retningslinjer for endringer
 - Hold SSH_SETUP.md oppdatert når nøkkel-/repo-policy endres.
 - Legg til flere seksjoner her (DEVELOPERS.md) for gjentatte oppgaver/rutiner som bør være synlige for både utviklere og assistenter.
+## Docker: lokal bygging og remote deploy (dev.haven)
+
+Denne seksjonen beskriver hvordan du bygger Docker lokalt og deretter deployer (bygger/kjører) på dev.haven.
+
+### Forutsetninger
+- Docker installert lokalt.
+- Tilgang til dev.haven.digipomps.org (IP: 207.127.94.25) med privatnøkkel.
+- Docker installert på serveren (kan aktiveres med systemctl, se under).
+
+### SSH til dev.haven
+Bruk denne kommandoen (som oppgitt):
+
+```bash
+ssh -i ~/.ssh/ssh-key-2025-03-20.key opc@207.127.94.25
+
+
+
