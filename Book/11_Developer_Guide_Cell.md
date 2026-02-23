@@ -51,7 +51,7 @@ Relevant implementation:
 Notes:
 
 - `addInterceptForSet(...)` registers the key in the schema dictionary internally.
-- `addInterceptForGet(...)` does **not** register schema by default.
+- `addInterceptForGet(...)` also registers a default schema (`{"method":"get"}`).
 - Only the owner (or pre-init hook) can set intercepts.
 
 ## 3. Define Schema and Descriptions
@@ -61,7 +61,23 @@ Notes:
 - `schemaDict` — key → schema
 - `schemaDescriptionDict` — key → description
 
-These are used by `Explore` calls. The current runtime only auto-registers schema on `addInterceptForSet`. If you want schema for read-only keys, register them explicitly.
+These are used by `Explore` calls. The runtime auto-registers default schemas for both `addInterceptForSet` and `addInterceptForGet`.
+
+If you need richer schema/description for tooling, use explicit schema registration:
+
+```swift
+await cell.registerExploreSchema(
+    requester: owner,
+    key: "my.readonly.key",
+    schema: .object([
+        "method": .string("get"),
+        "returns": .string("Object")
+    ]),
+    description: .string("Returns a read-only snapshot.")
+)
+```
+
+Schema descriptions can be read via `schemaDescriptionForKey(...)`.
 
 ## 4. Emit FlowElements
 
