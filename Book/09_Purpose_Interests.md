@@ -1,4 +1,4 @@
-
+    
 # Chapter 09 — Purpose and Interests
 
 Purpose and Interests introduce a semantic, human-aligned layer into HAVEN.  
