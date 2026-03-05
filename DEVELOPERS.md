@@ -1,35 +1,35 @@
 # DEVELOPERS
 
-Velkommen! Dette er inngangen for utviklere og assistenter (Codex/AI) til praktiske rutiner og lenker i prosjektet.
+Inngang for utviklere og AI-assistenter til praktiske rutiner i HAVEN-dokumentasjonen.
 
-## SSH og Package Resolve (kritisk for Digipomps-repoer)
-Se playbook:
-- SSH_SETUP.md (i prosjektroten) — inneholder steg-for-steg for å fikse SSH/SwiftPM-problemer, inkludert known_hosts, ssh-agent/Keychain, Xcode/SwiftPM-cacher og diagnosekommandoer.
+## 1. Start Here
 
-Direktelenker:
-- [SSH_SETUP.md](SSH_SETUP.md)
+- Les dokumentindeks: `README-CellProtocol.md`
+- Les utviklerkapitler først:
+  - `Book/10_Quickstart.md`
+  - `Book/11_Developer_Guide_Cell.md`
+  - `Book/12_Skeleton_Spec.md`
+  - `Book/13_Agent_Instructions.md`
+  - `Book/14_Perspective_Runtime_Matching.md`
+  - `Book/15_Documentation_Discovery_and_RAG.md`
 
-## Onboarding og nyttige snarveier
-- Åpne Xcode-prosjektet, og hvis pakker feiler/henger: følg SSH_SETUP.md først.
-- Dersom du trenger mer kontekst i en Codex-tråd, referer til denne filen og SSH_SETUP.md.
+## 2. Operasjonelle Playbooks
 
-## Retningslinjer for endringer
-- Hold SSH_SETUP.md oppdatert når nøkkel-/repo-policy endres.
-- Legg til flere seksjoner her (DEVELOPERS.md) for gjentatte oppgaver/rutiner som bør være synlige for både utviklere og assistenter.
-## Docker: lokal bygging og remote deploy (dev.haven)
+- SSH/package-resolve: `SSH_SETUP.md`
+- Prompt policy og systemprompts: `Prompts/SystemPrompts.md`
+- Dokumentasjonsgap: `Gap_Analysis.md`
+- Cross-repo audit: `Deliverables/Documentation_Audit_2026-03-05.md`
 
-Denne seksjonen beskriver hvordan du bygger Docker lokalt og deretter deployer (bygger/kjører) på dev.haven.
+## 3. Endringspolicy for dokumentasjon
 
-### Forutsetninger
-- Docker installert lokalt.
-- Tilgang til dev.haven.digipomps.org (IP: 207.127.94.25) med privatnøkkel.
-- Docker installert på serveren (kan aktiveres med systemctl, se under).
+- Oppdater dokumentasjon i samme PR/commit som funksjonell kodeendring.
+- For kontrakter/endepunkter: oppdater både brukerrettet doc og agentrettet doc.
+- For bakoverkompatibilitet: dokumenter eksplisitt om legacy format fortsatt støttes.
+- Unngå absolute lokale paths; bruk repo-relative paths i markdown.
 
-### SSH til dev.haven
-Bruk denne kommandoen (som oppgitt):
+## 4. RAG-vennlig dokumentasjonspraksis
 
-```bash
-ssh -i ~/.ssh/ssh-key-2025-03-20.key opc@207.127.94.25
-
-
-
+- Hvert doc må ha tydelig formål, scope og målgruppe i toppseksjon.
+- Inkluder konkrete keypaths/endepunkter som egne listepunkter.
+- Hold en stabil canonical path per tema for å unngå duplikat sannheter.
+- Legg inn `Last verified against code` med dato når kontrakt/endepunkt beskrives.

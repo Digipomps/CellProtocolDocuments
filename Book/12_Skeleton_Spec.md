@@ -334,9 +334,10 @@ See:
 
 ## 5. Encoding Caveats
 
-The current implementation has two interoperability risks:
+Current behavior:
 
-1. **Object wrapper mismatch**: encoding vs decoding differs for `Object`.  
-2. **Legacy key spelling**: some stored JSON may still use `flowELementSkeleton`.  
+1. `SkeletonObject` encodes with wrapped form `{ "Object": ... }`.
+2. `SkeletonObject` decoding accepts both wrapped and legacy unwrapped object form.
+3. New payloads should use canonical key `flowElementSkeleton`.
 
-If you are generating JSON manually or with agents, use the names shown in this spec to be consistent with decoding.
+If you are generating JSON manually or with agents, emit canonical field names and wrapped `Object` format.

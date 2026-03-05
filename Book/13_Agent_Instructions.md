@@ -62,10 +62,9 @@ The output is acceptable only if:
 
 Current implementation details that affect agent output:
 
-- `SkeletonObject` decoding expects a wrapper key `"Object"`, while encoding does not include it.  
-  Agents should generate JSON using the wrapper to be safe.
-- Some stored JSON may still use the legacy key `flowELementSkeleton`.  
-  Use `flowElementSkeleton` for new output, and consider backward compatibility if needed.
+- `SkeletonObject` now encodes wrapped (`"Object"`) and decodes both wrapped and legacy unwrapped forms.
+- Some stored JSON may still use legacy key `flowELementSkeleton`.
+  Use canonical key `flowElementSkeleton` for all new output.
 
 ## 7. Minimal Template
 

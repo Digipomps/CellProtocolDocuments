@@ -196,3 +196,5 @@ If you are building software (not just reading concepts), start here:
 - [11_Developer_Guide_Cell.md](11_Developer_Guide_Cell.md) — Step-by-step cell implementation  
 - [12_Skeleton_Spec.md](12_Skeleton_Spec.md) — Skeleton UI JSON spec  
 - [13_Agent_Instructions.md](13_Agent_Instructions.md) — Agent workflow and checklist
+- [14_Perspective_Runtime_Matching.md](14_Perspective_Runtime_Matching.md) — Weighted perspective matching runtime contract
+- [15_Documentation_Discovery_and_RAG.md](15_Documentation_Discovery_and_RAG.md) — Search/discovery contract for humans and AI
