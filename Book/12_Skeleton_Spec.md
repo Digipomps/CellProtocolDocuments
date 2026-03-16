@@ -3,7 +3,13 @@
 This chapter defines the JSON encoding and element semantics for Skeleton UI, based on the current Swift implementation in:
 
 - `CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
-- `CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/SkeletonElementView.swift`
+- `CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonView.swift`
+- `CellScaffold/Public/js/skeleton-runtime.js`
+
+Important:
+
+- `SkeletonElementView.swift` is deprecated and should not be treated as the canonical Apple renderer anymore.
+- The canonical model still lives in `SkeletonDescription.swift`. Web and Apple runtimes may tolerate extra shapes, but portable JSON should follow the model, not renderer-only shortcuts.
 
 ## 1. Encoding Rule (All Elements)
 
@@ -56,6 +62,8 @@ Many elements accept `modifiers`. The available fields are:
 - `lineLimit` (Int)
 - `multilineTextAlignment` (String)
 - `minimumScaleFactor` (Double)
+- `styleRole` (String)
+- `styleClasses` (String array)
 
 Source:
 
@@ -107,6 +115,10 @@ Fields:
 - `padding` (Double, optional)
 - `modifiers` (optional)
 
+Renderer note:
+- Web runtime can resolve `url` directly to `<img src=...>`.
+- The canonical Apple renderer now supports remote `url` loading through `AsyncImage`, with local/system fallback when loading fails.
+
 ### 3.4 Spacer
 
 ```json
@@ -127,8 +139,29 @@ Fields:
 { "VStack": [ { "Text": { "text": "A" } }, { "Text": { "text": "B" } } ] }
 ```
 
+```json
+{
+  "HStack": {
+    "elements": [
+      { "Text": { "text": "A" } },
+      { "Text": { "text": "B" } }
+    ],
+    "spacing": 12,
+    "modifiers": {
+      "padding": 8
+    }
+  }
+}
+```
+
 Fields:
-- array of `SkeletonElement`
+- `elements` (array of `SkeletonElement`)
+- `spacing` (Double, optional)
+- `modifiers` (optional)
+
+Encoding note:
+- Bare array form is still valid and remains the compact encoding for simple stacks without `spacing` or `modifiers`.
+- Object form with `elements` is the portable form when `spacing` or stack-level `modifiers` are used.
 
 ### 3.6 List
 
@@ -148,6 +181,13 @@ Fields:
 - `topic` (String, optional)
 - `keypath` (String, optional)
 - `filterTypes` (String array, optional)
+- `selectionMode` (`none` | `single` | `multiple`, optional)
+- `selectionValueKeypath` (String, optional, required for `item_id` / `selected_ids`)
+- `selectionStateKeypath` (String, optional)
+- `selectionActionKeypath` (String, optional)
+- `activationActionKeypath` (String, optional)
+- `selectionPayloadMode` (`item` | `item_id` | `selected_items` | `selected_ids`, optional)
+- `allowsEmptySelection` (Bool, optional)
 - `elements` (ValueTypeList, optional)
 - `flowElementSkeleton` (VStack, optional)
 - `modifiers` (optional)
@@ -262,6 +302,9 @@ Fields:
 - `content` (array of SkeletonElement)
 - `modifiers` (optional)
 
+Important:
+- `content` is an array. A single wrapped element must still be encoded inside an array.
+
 ### 3.13 ZStack
 
 ```json
@@ -288,10 +331,15 @@ Fields:
       { "type": "adaptive", "min": 120, "max": 200 }
     ],
     "spacing": 8,
-    "elements": [
-      { "Text": { "text": "A" } },
-      { "Text": { "text": "B" } }
-    ]
+    "keypath": "conferenceParticipantShell.state.matches.recommendations",
+    "itemSkeleton": {
+      "Section": {
+        "content": [
+          { "Text": { "keypath": "title" } },
+          { "Text": { "keypath": "detail" } }
+        ]
+      }
+    }
   }
 }
 ```
@@ -299,8 +347,15 @@ Fields:
 Fields:
 - `columns` (array of `{ type, value?, min?, max? }`)
 - `spacing` (Double, optional)
-- `elements` (array of SkeletonElement)
+- `keypath` (String, optional)
+- `itemSkeleton` (SkeletonElement, optional)
+- `elements` (array of SkeletonElement, optional)
 - `modifiers` (optional)
+
+Behavior:
+- `elements` is for static grids.
+- `keypath + itemSkeleton` is the portable pattern for data-bound card grids.
+- Grid keeps an internal `id` for SwiftUI identity, but the portable JSON form does not need to encode it.
 
 ### 3.15 Toggle
 
@@ -330,7 +385,8 @@ Many elements use `keypath` or `url`:
 See:
 
 - `CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
-- `CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/SkeletonElementView.swift`
+- `CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonView.swift`
+- `CellScaffold/Public/js/skeleton-runtime.js`
 
 ## 5. Encoding Caveats
 
@@ -340,4 +396,12 @@ Current behavior:
 2. `SkeletonObject` decoding accepts both wrapped and legacy unwrapped object form.
 3. New payloads should use canonical key `flowElementSkeleton`.
 
-If you are generating JSON manually or with agents, emit canonical field names and wrapped `Object` format.
+If you are generating JSON manually or with agents, emit canonical field names, wrapped `Object` format, and the names shown in this spec to stay consistent with decoding.
+
+## 6. Current Practical Gaps
+
+These are real, repo-confirmed limits as of March 2026:
+
+1. `styleRole` / `styleClasses` exist in the model and web runtime, while Apple currently exposes them mainly as accessibility metadata rather than a full native theme mapping.
+2. Skeleton still lacks first-class `Badge` / `Chip` and `Gauge` / `Progress` primitives, so metadata-heavy dashboards still rely on styled `Text` and custom cells.
+3. Collection grids are now data-bindable, but domain contracts still need to expose card-worthy state. A renderer primitive alone does not create an honest dashboard.
