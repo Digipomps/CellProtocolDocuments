@@ -194,6 +194,47 @@ Fields:
 
 Note: `flowElementSkeleton` is the canonical spelling in code.
 
+### 3.6a Picker
+
+```json
+{
+  "Picker": {
+    "label": "Velg spor",
+    "placeholder": "Velg et spor",
+    "keypath": "conferencePublishedContent.state.program.tracks",
+    "optionLabelKeypath": "title",
+    "selectionValueKeypath": "id",
+    "selectionStateKeypath": "contentPublishing.selectDraftTrack",
+    "selectionActionKeypath": "contentPublishing.selectDraftTrack",
+    "selectionPayloadMode": "item_id",
+    "allowsEmptySelection": false
+  }
+}
+```
+
+Fields:
+- `label` (String, optional)
+- `placeholder` (String, optional)
+- `keypath` (String, optional)
+- `elements` (ValueTypeList, optional)
+- `optionLabelKeypath` (String, optional)
+- `selectionValueKeypath` (String, optional, required for `item_id` / `selected_ids`)
+- `selectionStateKeypath` (String, optional)
+- `selectionActionKeypath` (String, optional)
+- `selectionPayloadMode` (`item` | `item_id` | `selected_items` | `selected_ids`, optional)
+- `allowsEmptySelection` (Bool, optional)
+- `modifiers` (optional)
+
+Notes:
+- `Picker` is intentionally a thin single-selection primitive over the same payload contract as `List`.
+- The payload shape on selection is the same canonical object used by list single-selection:
+  - `selectionMode`
+  - `trigger`
+  - `selectedIndex`
+  - `selected`
+- Apple renders `Picker` as a native menu-style picker.
+- Web renders `Picker` as a native `<select>` and uses the same `selectionActionKeypath` / `selectionStateKeypath` flow as list selection.
+
 ### 3.7 Object
 
 ```json
@@ -404,4 +445,4 @@ These are real, repo-confirmed limits as of March 2026:
 
 1. `styleRole` / `styleClasses` exist in the model and web runtime, while Apple currently exposes them mainly as accessibility metadata rather than a full native theme mapping.
 2. Skeleton still lacks first-class `Badge` / `Chip` and `Gauge` / `Progress` primitives, so metadata-heavy dashboards still rely on styled `Text` and custom cells.
-3. Collection grids are now data-bindable, but domain contracts still need to expose card-worthy state. A renderer primitive alone does not create an honest dashboard.
+3. Collection grids are now data-bindable, and `Picker` now exists as a first-class single-selection primitive. Domain contracts still need to expose honest option lists and state snapshots; a renderer primitive alone does not create an honest workflow.
