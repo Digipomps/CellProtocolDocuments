@@ -5,6 +5,9 @@ This file is an index for shared assistant context files in `CellProtocolDocumen
 ## Shared Canonical Context
 - `Prompts/CoreContext.md`
 
+## Shared Feature Prompts
+- `Prompts/AttachmentSurface_ThreadPrompt.md`
+
 ## Shared Wrappers
 - `Prompts/SystemPrompt-Codex.md`
 - `Prompts/SystemPrompt-Xcode53.md`
