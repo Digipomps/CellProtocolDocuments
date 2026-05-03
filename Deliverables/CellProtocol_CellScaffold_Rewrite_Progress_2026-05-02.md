@@ -17,6 +17,9 @@ This note captures the current implementation state so a later Codex thread can 
 - CellProtocol Vapor bridge transport cleanup: `VaporBridgeTransport` now uses a shared event loop group instead of creating unmanaged event loop groups per setup, and noisy transport prints were moved to bridge diagnostics.
 - CellProtocol transport/sendability cleanup: `VaporBridgeTransport` now has locked delegate/socket/cleanup state, idempotent close cleanup, no-websocket send cleanup, and a sendable identity snapshot path for visiting identities. `LightweightBridgeTransport` now uses sendable protocol surfaces, locked weak delegate storage, sendable reconnect context/plan, and no longer carries an unused mutable `Identity` through reconnect state.
 - CellProtocol Vapor transport regressions: added `VaporBridgeTransportTests` for idempotent delegate unregister on close, text-mode no-websocket cleanup, and identity snapshot round-tripping.
+- CellProtocol Apple transport cleanup: `AppleBridgeTransport` now has locked delegate/socket/cleanup state, idempotent unregister cleanup for disconnect/error/no-socket send, safe command routing via `BridgeCommand.command`, diagnostic logging instead of transport prints, binary/text send tests, and BridgeIdentityVault fallback for visiting identities when the delegate is a bridge.
+- CellProtocol Apple websocket adapter cleanup: internal `WebSocketTaskConnection` wrappers are final, explicitly `@unchecked Sendable`, use locked weak delegate storage, and import Combine/OpenCombine with `@preconcurrency`, removing the focused WebSocketConnection sendability warnings without changing public wire behavior.
+- CellProtocol Apple transport regressions: added `AppleBridgeTransportTests` for binary/text sends, no-socket cleanup, send-failure cleanup, disconnect/error cleanup, unknown command routing, and identity-vault fallback behavior.
 - CellProtocol build cleanup encountered during transport warning pass: `IdentityLinkCompletion.swift` now propagates the throwing identity descriptor call instead of failing compilation when the file participates in SwiftPM builds.
 - CellScaffold bridgehead cleanup: corrected public implementation name to `VaporBridgehead`, kept legacy `VaporBrigehead` typealias, preserved `/bridgehead/:pubId/:bridgeId`, replaced force-unwrapped parameters with Vapor parameter validation, and moved setup prints to request logging.
 - CellScaffold test isolation: `PersonalCopilotV1Tests` now saves/restores `CellBase.defaultCellResolver` so direct chat-hub tests do not leak resolver state from other suites.
@@ -31,10 +34,10 @@ This note captures the current implementation state so a later Codex thread can 
 
 ## Verification Completed
 
-- CellProtocol full suite, unsandboxed: `swift test` passed 381 tests, 0 failures after the transport/sendability batch.
+- CellProtocol full suite, unsandboxed: `swift test` passed 393 tests, 0 failures after the Apple transport batch.
 - CellScaffold full suite with local CellProtocol: `CELLPROTOCOL_LOCAL_PACKAGE_PATH=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol swift test` passed 579 tests, 3 skipped, 0 failures.
-- Targeted CellProtocol checks passed: `PersistenceTests`, `ResolverTests`, `AgreementCodingTests`, `BridgeTests`, `LightweightBridgeTransportTests`, `VaporBridgeTransportTests`.
-- CellProtocol warning-oriented target build passed: `swift build --target CellVapor -Xswiftc -warn-concurrency`. Remaining warnings are mainly broader global/runtime isolation work such as `CellBase.defaultCellResolver`, `CellBase.sendDataAsText`, identity vault globals, and unrelated domain-cell isolation warnings.
+- Targeted CellProtocol checks passed: `PersistenceTests`, `ResolverTests`, `AgreementCodingTests`, `BridgeTests`, `AppleBridgeTransportTests`, `LightweightBridgeTransportTests`, `VaporBridgeTransportTests`.
+- CellProtocol warning-oriented target builds passed: `swift build --target CellVapor -Xswiftc -warn-concurrency` and `swift build --target CellApple -Xswiftc -warn-concurrency`. Remaining warnings are mainly broader global/runtime isolation work such as `CellBase.defaultCellResolver`, `CellBase.sendDataAsText`, identity vault globals/protocol sendability, Porthole skeleton task captures, and unrelated domain-cell isolation warnings.
 - Targeted CellScaffold checks passed: `PersonalCopilotV1Tests`, `ConferenceSurfaceRoutesTests`.
 - JavaScript syntax check passed: `node --check scripts/skeleton-iterate.js`.
 - Skeleton scenarios passed against local `http://127.0.0.1:9099`:
@@ -47,15 +50,15 @@ This note captures the current implementation state so a later Codex thread can 
 
 - Sandboxed `swift test` can fail because SwiftPM, build.db, Documents, and keychain access are blocked. The authoritative full suite results above were run unsandboxed.
 - `Scripts/run_skeleton_parity_suite.sh` was not run in CellScaffold because that script is not present there. It appears to belong to a different repo/workflow; ask Kjetil before running a Binding-level parity suite.
-- Swift 6 sendability warnings remain, but the earlier focused Lightweight transport warnings are cleared. The remaining warnings are mostly global runtime state and broader identity/domain isolation work, so they should be handled as the `CellRuntimeEnvironment`/global-state cleanup rather than by suppressing warnings locally.
+- Swift 6 sendability warnings remain, but the earlier focused Lightweight/Vapor/Apple transport and WebSocketConnection warnings are cleared. The remaining warnings are mostly global runtime state and broader identity/domain/Porthole isolation work, so they should be handled as the `CellRuntimeEnvironment`/global-state cleanup rather than by suppressing warnings locally.
 - Test logs still contain expected/noisy diagnostics such as initial missing files, denied demo references, and identity-vault serialization warnings. These are not test failures, but they are useful future cleanup if we want lower-noise CI.
 - Both repos have many dirty files and untracked additions that predate or sit outside this specific batch. Do not revert broad worktree changes without explicit approval.
 - During the final full test, `EntityAnchorCell` briefly reported missing `identityLinks` helpers while another SwiftPM process/build snapshot was active. A subsequent targeted `swift build --target CellVapor` and full `swift test` both passed, so this was treated as a stale/concurrent build snapshot rather than a current source error.
 
 ## Recommended Next Steps
 
-1. Continue the "thin adapter" work for platform transports by reviewing `AppleBridgeTransport` against the now-cleaner Lightweight/Vapor semantics: ready handshake, text/binary send behavior, close cleanup, delegate routing, and visiting identity vault behavior.
-2. Start the `CellRuntimeEnvironment`/global-state cleanup behind existing `CellBase.*` source-compatible statics; this should reduce the remaining `CellBase.defaultCellResolver`, vault, storage, websocket-policy, and logging warnings without changing public API.
+1. Start the `CellRuntimeEnvironment`/global-state cleanup behind existing `CellBase.*` source-compatible statics; this should reduce the remaining `CellBase.defaultCellResolver`, vault, storage, websocket-policy, and logging warnings without changing public API.
+2. Continue identity/vault sendability cleanup around `IdentityVaultProtocol`, `Identity`, and platform vault actors; keep legacy vault decode/migration behavior intact.
 3. Reduce noisy runtime prints/logs in Porthole bootstrap and scaffold setup where they are not contractually useful.
 4. Run CellScaffold full suite again after the next integration-affecting CellProtocol batch.
 5. Ask before running external parity suites outside CellScaffold, especially the Binding-level `Scripts/run_skeleton_parity_suite.sh`.
