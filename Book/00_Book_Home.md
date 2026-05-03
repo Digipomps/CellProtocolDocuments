@@ -77,6 +77,8 @@ The goal is one canonical markdown landing page that works across vault, web, Sw
 
 ### Supplementary Material
 
+- [Chapter 17 — Conference Ownership and Dataflow](17_Conference_Ownership_Dataflow.md)
+- [Chapter 18 — ConferenceConnectionHubCell, Agreements, and Entity Lifecycle](18_Conference_ConnectionHub_Agreement_Entity_Lifecycle.md)
 - [Book Extras](Book_Extras.md)
 
 ## Operational Entry Points
@@ -121,4 +123,5 @@ Use these when moving from reading to working:
 - `book_catalog.json` is the machine-readable tree for vault, Swift, web, and RAG browse flows.
 - `16_Book_Reference_Workspace.md` defines the canonical browse/render contract for the book itself.
 - Mermaid fences should stay in source markdown and render inline in clients that implement the reference workspace contract.
-- Chapter 17 captures the current ground truth and the recommended next implementation steps for a proper docs workbench.
+- The documentation workbench chapter captures the current ground truth and the recommended next implementation steps for a proper docs workbench.
+- The conference supplementary chapters capture ownership/dataflow and ConnectionHub/agreement lifecycle ground truth.
