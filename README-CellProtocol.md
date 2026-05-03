@@ -30,6 +30,7 @@ This repository contains the official documentation for HAVEN CellProtocol. It i
    - [13_Agent_Instructions.md](Book/13_Agent_Instructions.md)  
    - [14_Perspective_Runtime_Matching.md](Book/14_Perspective_Runtime_Matching.md)
    - [15_Documentation_Discovery_and_RAG.md](Book/15_Documentation_Discovery_and_RAG.md)
+   - [16_Book_Reference_Workspace.md](Book/16_Book_Reference_Workspace.md)
 
 7. Supplementary Material  
    - [Book_Extras.md](Book/Book_Extras.md)
@@ -38,6 +39,8 @@ This repository contains the official documentation for HAVEN CellProtocol. It i
 
 - [Gap_Analysis.md](Gap_Analysis.md) — Implementation gaps vs current docs  
 - [Documentation_Audit_2026-03-05.md](Deliverables/Documentation_Audit_2026-03-05.md) — Cross-repo doc freshness audit and actions  
+- [00_Book_Home.md](Book/00_Book_Home.md) — Vault landing note for opening `Book` directly in Obsidian or another markdown browser
+- [book_catalog.json](Book/book_catalog.json) — Machine-readable Book index for vault/web/RAG browse flows
 - [SystemPrompts.md](Prompts/SystemPrompts.md) — Guidance for AI/system prompts
 - [SSH_SETUP.md](SSH_SETUP.md) — SSH og package-resolve playbook for Digipomps
 - [DEVELOPERS.md](DEVELOPERS.md) — Utviklerguide og inngang til verktøy og rutiner
@@ -52,3 +55,4 @@ If you are implementing code or UI:
 - Follow [13_Agent_Instructions.md](Book/13_Agent_Instructions.md) for workflow and checklist
 - Use [14_Perspective_Runtime_Matching.md](Book/14_Perspective_Runtime_Matching.md) when implementing weighted purpose/interest queries and cross-perspective matching
 - Use [15_Documentation_Discovery_and_RAG.md](Book/15_Documentation_Discovery_and_RAG.md) for practical documentation discovery and RAG requirements
+- Use [16_Book_Reference_Workspace.md](Book/16_Book_Reference_Workspace.md) for the canonical vault/web/Swift browse contract for `Book`

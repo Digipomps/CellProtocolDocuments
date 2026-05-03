@@ -138,6 +138,11 @@ Fields:
     "topic": "feed.topic",
     "keypath": "cell:///Porthole/feed",
     "filterTypes": ["event"],
+    "selectionMode": "single",
+    "selectionValueKeypath": "agreementId",
+    "selectionStateKeypath": "workbench.selection.set",
+    "activationActionKeypath": "workbench.selection.open",
+    "selectionPayloadMode": "item_id",
     "elements": [],
     "modifiers": { "padding": 8 }
   }
@@ -148,11 +153,64 @@ Fields:
 - `topic` (String, optional)
 - `keypath` (String, optional)
 - `filterTypes` (String array, optional)
+- `selectionMode` (String, optional: `none` | `single` | `multiple`)
+- `selectionValueKeypath` (String, optional, row-relative keypath used to derive stable selected values)
+- `selectionStateKeypath` (String, optional, explicit `set` target for publishing the current selection snapshot)
+- `selectionActionKeypath` (String, optional, explicit `set` target fired on user selection change)
+- `activationActionKeypath` (String, optional, explicit `set` target fired on explicit row activation)
+- `selectionPayloadMode` (String, optional: `item` | `item_id` | `selected_items` | `selected_ids`)
+- `allowsEmptySelection` (Bool, optional)
 - `elements` (ValueTypeList, optional)
 - `flowElementSkeleton` (VStack, optional)
 - `modifiers` (optional)
 
 Note: `flowElementSkeleton` is the canonical spelling in code.
+
+Behavior:
+- If no selection fields are present, `List` behaves as a read-only/render-only list like before.
+- Renderers may keep local visual selection state, but must not invent hidden remote writes.
+- `selectionStateKeypath`, `selectionActionKeypath`, and `activationActionKeypath` may only trigger because of explicit user interaction.
+- They must not trigger on initial render, decode, refresh, or because a row disappeared from the backing dataset.
+- Selection is distinct from activation:
+  - selection updates selection state
+  - activation performs an explicit action
+- Multi-select payload order must follow source list order, not click order.
+- If `selectionPayloadMode` is `item_id` or `selected_ids`, `selectionValueKeypath` is required.
+
+Deterministic selection payload contract:
+
+Single-select example:
+
+```json
+{
+  "selectionMode": "single",
+  "trigger": "select",
+  "selectedIndex": 2,
+  "selected": "agreement-123"
+}
+```
+
+Multi-select example:
+
+```json
+{
+  "selectionMode": "multiple",
+  "trigger": "select",
+  "selectedIndices": [1, 3, 4],
+  "selected": ["agreement-101", "agreement-204", "agreement-205"]
+}
+```
+
+Activation example:
+
+```json
+{
+  "selectionMode": "single",
+  "trigger": "activate",
+  "selectedIndex": 2,
+  "selected": "agreement-123"
+}
+```
 
 ### 3.7 Object
 

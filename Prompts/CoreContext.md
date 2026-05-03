@@ -11,6 +11,9 @@ This file is the shared source of truth for architecture concepts and collaborat
 - `Book/11_Developer_Guide_Cell.md`
 - `Book/12_Skeleton_Spec.md`
 - `Book/13_Agent_Instructions.md`
+- `Book/14_Perspective_Runtime_Matching.md`
+- `Book/15_Documentation_Discovery_and_RAG.md`
+- `Book/16_Book_Reference_Workspace.md`
 
 ## Core Concepts
 - `CellConfiguration`: declarative configuration payload for cells and skeleton UI.

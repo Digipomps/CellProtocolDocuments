@@ -198,3 +198,4 @@ If you are building software (not just reading concepts), start here:
 - [13_Agent_Instructions.md](13_Agent_Instructions.md) — Agent workflow and checklist
 - [14_Perspective_Runtime_Matching.md](14_Perspective_Runtime_Matching.md) — Weighted perspective matching runtime contract
 - [15_Documentation_Discovery_and_RAG.md](15_Documentation_Discovery_and_RAG.md) — Search/discovery contract for humans and AI
+- [16_Book_Reference_Workspace.md](16_Book_Reference_Workspace.md) — Canonical vault/web/Swift browse contract for the Book itself

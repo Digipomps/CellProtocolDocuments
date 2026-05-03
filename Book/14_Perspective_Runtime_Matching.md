@@ -60,6 +60,58 @@ Implemented helpers:
 - `upsertActivePurpose(...)`
 - `upsertActiveInterest(...)`
 
+### 2.8 `EntityRepresentation.agreementRefs` for cross-scaffold agreement discovery
+
+`EntityRepresentation` now has canonical support for:
+
+- `agreementRefs: [AgreementReference]`
+
+`AgreementReference` is intentionally lightweight. It is the stable bridge from
+an entity representation to a separate signed-agreement store.
+
+Recommended fields:
+
+- `id`
+- `label`
+- `counterparty`
+- `purpose`
+- `dataPointer`
+- `recordState`
+- `savedAt`
+- `savedAtText`
+- `recordKeypath`
+- `sourceEntityKeypath`
+
+Design rule:
+
+- keep full signed agreements outside `EntityRepresentation`
+- expose only lightweight references in `EntityRepresentation.agreementRefs`
+- let applications resolve the full record through `recordKeypath`
+
+This keeps social/entity context light while still allowing deterministic lookup
+of the agreement that explains why access exists.
+
+### 2.9 Canonical signed-agreement entity projection
+
+CellProtocol now includes:
+
+- `SignedAgreementRecord`
+- `SignedAgreementEntity`
+
+`SignedAgreementEntity` is the canonical "full record" side of the model.
+
+Recommended projection pattern:
+
+1. Store the full signed agreement as `SignedAgreementRecord` in a dedicated
+   signed-agreement entity.
+2. Derive lightweight `AgreementReference`s from that entity.
+3. Copy those refs into `EntityRepresentation.agreementRefs`.
+
+This produces a stable two-layer model:
+
+- full audit/history in the signed-agreement entity
+- lightweight relationship/navigation data in `EntityRepresentation`
+
 ## 3. Implemented Phase 1 API in `PerspectiveCell`
 
 All external behavior is exposed via intercepts.

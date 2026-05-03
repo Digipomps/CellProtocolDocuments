@@ -12,6 +12,7 @@ Inngang for utviklere og AI-assistenter til praktiske rutiner i HAVEN-dokumentas
   - `Book/13_Agent_Instructions.md`
   - `Book/14_Perspective_Runtime_Matching.md`
   - `Book/15_Documentation_Discovery_and_RAG.md`
+  - `Book/16_Book_Reference_Workspace.md`
 
 ## 2. Operasjonelle Playbooks
 
@@ -33,3 +34,4 @@ Inngang for utviklere og AI-assistenter til praktiske rutiner i HAVEN-dokumentas
 - Inkluder konkrete keypaths/endepunkter som egne listepunkter.
 - Hold en stabil canonical path per tema for å unngå duplikat sannheter.
 - Legg inn `Last verified against code` med dato når kontrakt/endepunkt beskrives.
+- Bruk `Book/book_catalog.json` som maskinlesbar doc-tree for vault, web-rendering og RAG-oppkobling.

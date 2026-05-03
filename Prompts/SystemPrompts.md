@@ -14,6 +14,9 @@ This file is an index for shared assistant context files in `CellProtocolDocumen
 - `Book/11_Developer_Guide_Cell.md`
 - `Book/12_Skeleton_Spec.md`
 - `Book/13_Agent_Instructions.md`
+- `Book/14_Perspective_Runtime_Matching.md`
+- `Book/15_Documentation_Discovery_and_RAG.md`
+- `Book/16_Book_Reference_Workspace.md`
 
 ## Project Overlay Rule
 - Keep tactical and project-specific context in each project's local:
