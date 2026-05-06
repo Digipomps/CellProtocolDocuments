@@ -1,0 +1,48 @@
+Porthole
+Live
+Tilbake
+Conference Sponsor Follow-up
+Library (66)
+View
+Edit
+Vis detaljer
+Pipeline
+Consent
+Unlock
+Follow Up
+Ownership & Access
+Sponsor-owned shell
+Owned by the sponsor or exhibitor identity that resolves `cell:///ConferenceSponsorShell`. Current owner UUID: 2EC6EF2A-E9B1-4A78-AEF1-8CF6779B798B.
+Owner-only cell read. Organizer review should happen through handoff summaries and aggregates, not by reading sponsor follow-up shells directly.
+Owner-only `dispatchAction` for qualification, unlock, reclaim, retention review, retention sweep, export, and inbox refresh inside sponsor-owned follow-up state.
+Porthole and web preview can resolve this shell through `ConferenceSponsorPreviewShell`, while Binding can still resolve the same sponsor-owned truth directly with the sponsor identity.
+LeadVault, ConsentReceipt, ExhibitorAccess, sponsor agreement refs, and sponsor chronicle are sponsor-owned artifacts once handoff is complete.
+This shell is intentionally downstream from the organizer aggregate. It should only see what was explicitly handed off, consented, and materialized into sponsor-owned truth, and it must reclaim, review, and eventually purge sponsor-owned residue when retention policy requires it.
+state.followUp
+Audience: sponsor-owner
+Mode: read · Storage: lead-vault
+Fresh handoffs and qualification pipeline live in sponsor-owned LeadVault state.
+state.compliance
+Audience: sponsor-owner
+Mode: read · Storage: consent-receipt + sponsor-entity
+Consent receipts, agreement refs, and chronicle entries define whether sponsor retention is legitimate.
+state.retention
+Audience: sponsor-owner
+Mode: read · Storage: exhibitor-access + sponsor-entity
+Unlocks, reclaim status, retention review decisions, SLA sweep state, export, webhook credits, and audit traces stay in sponsor-owned operational storage.
+dispatchAction
+Audience: sponsor-owner
+Mode: write · Storage: conference-sponsor-shell
+Only the sponsor owner may qualify leads, unlock contact, reclaim sponsor retention, review reclaimed records, run retention sweep, or export sponsor follow-up state through this shell.
+Consent & Agreements
+Consent receipts and agreement refs define what sponsor follow-up may actually keep and use.
+0 consent receipt(s) currently sit in the sponsor boundary.
+0 sponsor agreement ref(s) are visible yet.
+0 retention/event trail entry(ies) are saved in sponsor chronicle.
+Sponsor Entity unavailable: notFound
+Consent receipts
+Ingen elementer
+Agreement refs
+Ingen elementer
+Chronicle
+Ingen elementer
