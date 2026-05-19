@@ -153,8 +153,8 @@ endpoints using a host registry.
 Example mapping:
 
 - `cell://example.org/LoginCell`
-- -> `wss://example.org/publishersws/LoginCell` (prod)
-- -> `ws://example.org/publishersws/LoginCell` (dev, when allowed)
+- -> `wss://example.org/bridgehead/LoginCell` (prod)
+- -> `ws://example.org/bridgehead/LoginCell` (dev, when allowed)
 
 Registration:
 
@@ -162,7 +162,7 @@ Registration:
 resolver.registerRemoteCellHost(
     "example.org",
     route: RemoteCellHostRoute(
-        websocketEndpoint: "publishersws",
+        websocketEndpoint: "bridgehead",
         schemePreference: .automatic
     )
 )
