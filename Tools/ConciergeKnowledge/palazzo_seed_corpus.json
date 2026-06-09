@@ -1,0 +1,1321 @@
+{
+  "contract_version": "concierge-knowledge-v0.1",
+  "created_at": "2026-05-28",
+  "tenant": {
+    "id": "palazzo-comunale-oslo",
+    "name": "Palazzo Communale",
+    "kind": "restaurant",
+    "primary_locale": "nb-NO",
+    "secondary_locales": [
+      "en"
+    ]
+  },
+  "sources": [
+    {
+      "id": "src-palazzo-site",
+      "title": "Palazzo Communale website",
+      "url": "https://palazzocomunale.no/",
+      "section": "home",
+      "owner": "Palazzo Communale",
+      "source_type": "partner_public_web",
+      "adapter": "crawler",
+      "status": "active",
+      "license": "partner/public web terms - permission required for production reuse",
+      "last_verified": "2026-05-28",
+      "refresh_cadence_days": 7
+    },
+    {
+      "id": "src-palazzo-ristorante",
+      "title": "Palazzo Communale ristorante page",
+      "url": "https://palazzocomunale.no/ristorante",
+      "section": "restaurant profile",
+      "owner": "Palazzo Communale",
+      "source_type": "partner_public_web",
+      "adapter": "crawler",
+      "status": "active",
+      "license": "partner/public web terms - permission required for production reuse",
+      "last_verified": "2026-05-28",
+      "refresh_cadence_days": 7
+    },
+    {
+      "id": "src-palazzo-panetteria",
+      "title": "Palazzo Communale panetteria page",
+      "url": "https://palazzocomunale.no/panetteria",
+      "section": "bakery profile",
+      "owner": "Palazzo Communale",
+      "source_type": "partner_public_web",
+      "adapter": "crawler",
+      "status": "active",
+      "license": "partner/public web terms - permission required for production reuse",
+      "last_verified": "2026-05-28",
+      "refresh_cadence_days": 7
+    },
+    {
+      "id": "src-palazzo-chambre",
+      "title": "Palazzo Communale chambre page",
+      "url": "https://palazzocomunale.no/chambre",
+      "section": "event and private room profile",
+      "owner": "Palazzo Communale",
+      "source_type": "partner_public_web",
+      "adapter": "crawler",
+      "status": "active",
+      "license": "partner/public web terms - permission required for production reuse",
+      "last_verified": "2026-05-28",
+      "refresh_cadence_days": 7
+    },
+    {
+      "id": "src-palazzo-menu-pdf",
+      "title": "Palazzo Communale menu PDF",
+      "url": "https://palazzocomunale.no/s/Meny-med-drikkemeny-mars.pdf",
+      "section": "menu and drinks",
+      "owner": "Palazzo Communale",
+      "source_type": "partner_public_pdf",
+      "adapter": "ocr_pdf",
+      "status": "active",
+      "license": "partner/public web terms - permission required for production reuse",
+      "last_verified": "2026-05-28",
+      "refresh_cadence_days": 3,
+      "notes": "Image-based PDF. Seed extraction requires OCR plus staff verification before guest-safe use."
+    },
+    {
+      "id": "src-vinmonopolet-api",
+      "title": "Vinmonopolet data sharing/API information",
+      "url": "https://www.vinmonopolet.no/om-oss/presse/datadeling",
+      "section": "product data",
+      "owner": "Vinmonopolet",
+      "source_type": "public_api_reference",
+      "adapter": "api",
+      "status": "candidate",
+      "license": "source terms apply",
+      "last_verified": "2026-05-28",
+      "refresh_cadence_days": 30
+    },
+    {
+      "id": "src-matvaretabellen-api",
+      "title": "Norwegian Food Composition Table API",
+      "url": "https://www.matvaretabellen.no/en/api/",
+      "section": "food nutrients",
+      "owner": "Matvaretabellen",
+      "source_type": "public_api_reference",
+      "adapter": "api",
+      "status": "candidate",
+      "license": "source terms apply",
+      "last_verified": "2026-05-28",
+      "refresh_cadence_days": 90
+    },
+    {
+      "id": "src-mattilsynet-allergen",
+      "title": "Mattilsynet allergen information for food sold over counter",
+      "url": "https://www.mattilsynet.no/mat-og-drikke/merking-av-mat/merking-av-matvarer-som-selges-over-disk/allergenmerking",
+      "section": "allergen information",
+      "owner": "Mattilsynet",
+      "source_type": "public_guidance",
+      "adapter": "crawler",
+      "status": "active",
+      "license": "public authority guidance",
+      "last_verified": "2026-05-28",
+      "refresh_cadence_days": 30
+    },
+    {
+      "id": "src-helsedir-alcohol-ad",
+      "title": "Helsedirektoratet guidance on alcohol advertising ban",
+      "url": "https://www.helsedirektoratet.no/tema/alkohol/forbud-mot-alkoholreklame",
+      "section": "alcohol advertising",
+      "owner": "Helsedirektoratet",
+      "source_type": "public_guidance",
+      "adapter": "crawler",
+      "status": "active",
+      "license": "public authority guidance",
+      "last_verified": "2026-05-28",
+      "refresh_cadence_days": 30
+    },
+    {
+      "id": "src-eu-eambrosia",
+      "title": "EU eAmbrosia geographical indications register",
+      "url": "https://data.europa.eu/data/datasets/eambrosia-eu-geographical-indications-register/",
+      "section": "GI register",
+      "owner": "European Commission",
+      "source_type": "public_register",
+      "adapter": "api_or_bulk",
+      "status": "candidate",
+      "license": "source terms apply",
+      "last_verified": "2026-05-28",
+      "refresh_cadence_days": 30
+    },
+    {
+      "id": "src-brreg-api",
+      "title": "Brønnøysundregistrene Enhetsregisteret API",
+      "url": "https://data.brreg.no/enhetsregisteret/api/dokumentasjon/no/index.html",
+      "section": "legal entity data",
+      "owner": "Brønnøysundregistrene",
+      "source_type": "public_api_reference",
+      "adapter": "api",
+      "status": "candidate",
+      "license": "source terms apply",
+      "last_verified": "2026-05-28",
+      "refresh_cadence_days": 30
+    },
+    {
+      "id": "src-osm-license",
+      "title": "OpenStreetMap copyright and license",
+      "url": "https://www.openstreetmap.org/copyright/no/",
+      "section": "map and POI data",
+      "owner": "OpenStreetMap contributors",
+      "source_type": "public_open_data",
+      "adapter": "overpass",
+      "status": "candidate",
+      "license": "ODbL",
+      "last_verified": "2026-05-28",
+      "refresh_cadence_days": 90
+    },
+    {
+      "id": "src-wikidata-sparql",
+      "title": "Wikidata Query Service",
+      "url": "https://www.wikidata.org/wiki/Help:Queries",
+      "section": "SPARQL query service",
+      "owner": "Wikidata",
+      "source_type": "public_open_data",
+      "adapter": "sparql",
+      "status": "candidate",
+      "license": "CC0",
+      "last_verified": "2026-05-28",
+      "refresh_cadence_days": 90
+    },
+    {
+      "id": "src-entur-api",
+      "title": "Entur Journey Planner / OpenTripPlanner",
+      "url": "https://om.entur.no/aktuelle-saker/opentripplanner-2-0-is-here",
+      "section": "public transport routing",
+      "owner": "Entur",
+      "source_type": "public_api_reference",
+      "adapter": "api",
+      "status": "candidate",
+      "license": "source terms apply",
+      "last_verified": "2026-05-28",
+      "refresh_cadence_days": 90
+    }
+  ],
+  "allergens": [
+    {
+      "code": "HV",
+      "name": "wheat/gluten",
+      "name_nb": "hvete/gluten",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-mattilsynet-allergen"
+      ]
+    },
+    {
+      "code": "M",
+      "name": "milk",
+      "name_nb": "melk",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-mattilsynet-allergen"
+      ]
+    },
+    {
+      "code": "E",
+      "name": "egg",
+      "name_nb": "egg",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-mattilsynet-allergen"
+      ]
+    },
+    {
+      "code": "PE",
+      "name": "peanuts",
+      "name_nb": "peanøtter",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-mattilsynet-allergen"
+      ]
+    },
+    {
+      "code": "N",
+      "name": "nuts",
+      "name_nb": "nøtter",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-mattilsynet-allergen"
+      ]
+    },
+    {
+      "code": "S",
+      "name": "soy",
+      "name_nb": "soya",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-mattilsynet-allergen"
+      ]
+    },
+    {
+      "code": "F",
+      "name": "fish",
+      "name_nb": "fisk",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-mattilsynet-allergen"
+      ]
+    },
+    {
+      "code": "SK",
+      "name": "shellfish",
+      "name_nb": "skalldyr",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-mattilsynet-allergen"
+      ]
+    },
+    {
+      "code": "BL",
+      "name": "molluscs",
+      "name_nb": "bløtdyr",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-mattilsynet-allergen"
+      ]
+    },
+    {
+      "code": "SE",
+      "name": "celery",
+      "name_nb": "selleri",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-mattilsynet-allergen"
+      ]
+    },
+    {
+      "code": "SN",
+      "name": "mustard",
+      "name_nb": "sennep",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-mattilsynet-allergen"
+      ]
+    },
+    {
+      "code": "SF",
+      "name": "sesame seeds",
+      "name_nb": "sesamfrø",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-mattilsynet-allergen"
+      ]
+    },
+    {
+      "code": "L",
+      "name": "lupin",
+      "name_nb": "lupin",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-mattilsynet-allergen"
+      ]
+    },
+    {
+      "code": "SU",
+      "name": "sulphites",
+      "name_nb": "sulfitt",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-mattilsynet-allergen"
+      ]
+    }
+  ],
+  "menu_items": [
+    {
+      "id": "menu-pane-campagna",
+      "name": "Pane di campagna focaccia e olio",
+      "category": "antipasti",
+      "description_nb": "Landbrød, focaccia og olivenolje.",
+      "price_nok": 65,
+      "allergen_codes": [
+        "HV",
+        "L"
+      ],
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "human_verified_allergens": false,
+      "tags": [
+        "bread",
+        "focaccia",
+        "starter",
+        "menu"
+      ]
+    },
+    {
+      "id": "menu-arancini",
+      "name": "Arancini",
+      "category": "antipasti",
+      "description_nb": "Friterte risboller fylt med ragu, safran og ost.",
+      "price_nok": 165,
+      "allergen_codes": [
+        "HV",
+        "E",
+        "M",
+        "L"
+      ],
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "human_verified_allergens": false,
+      "tags": [
+        "rice",
+        "ragu",
+        "saffron",
+        "cheese",
+        "sicily",
+        "menu"
+      ]
+    },
+    {
+      "id": "menu-ostriche",
+      "name": "Ostriche",
+      "category": "antipasti",
+      "description_nb": "Østers Fine de Claire, 3 eller 6 stk.",
+      "price_nok": 145,
+      "price_note": "3/6 stk price split needs verification",
+      "allergen_codes": [
+        "BL"
+      ],
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "human_verified_allergens": false,
+      "tags": [
+        "oysters",
+        "seafood",
+        "menu"
+      ]
+    },
+    {
+      "id": "menu-carpaccio-polpo",
+      "name": "Carpaccio di polpo",
+      "category": "antipasti",
+      "description_nb": "Blekksprutcarpaccio med kokt potet, stracciatella, olivenolje og sitron.",
+      "price_nok": 225,
+      "allergen_codes": [
+        "BL",
+        "M"
+      ],
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "human_verified_allergens": false,
+      "tags": [
+        "octopus",
+        "stracciatella",
+        "seafood",
+        "menu"
+      ]
+    },
+    {
+      "id": "menu-vitello-tonnato",
+      "name": "Vitello tonnato",
+      "category": "antipasti",
+      "description_nb": "Tynne skiver kalvestek med tunfiskmajones, ristet kalvehjerte og capers.",
+      "price_nok": 265,
+      "allergen_codes": [
+        "F"
+      ],
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "human_verified_allergens": false,
+      "tags": [
+        "veal",
+        "tuna",
+        "fish",
+        "menu"
+      ]
+    },
+    {
+      "id": "menu-busiate-primavera",
+      "name": "Busiate Primavera",
+      "category": "primi",
+      "description_nb": "Pasta med asparges, erter, fave, mandler, salvie, myrtle og sitron.",
+      "price_nok": 295,
+      "allergen_codes": [
+        "HV",
+        "N",
+        "SU"
+      ],
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "human_verified_allergens": false,
+      "tags": [
+        "pasta",
+        "almonds",
+        "vegetable",
+        "sicily",
+        "menu"
+      ]
+    },
+    {
+      "id": "menu-pasta-vongole",
+      "name": "Pasta vongole",
+      "category": "primi",
+      "description_nb": "Linguine med teppeskjell, hvitvin, sitron og bladpersille.",
+      "price_nok": 345,
+      "allergen_codes": [
+        "HV",
+        "BL",
+        "SU"
+      ],
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "human_verified_allergens": false,
+      "tags": [
+        "pasta",
+        "clams",
+        "white wine",
+        "seafood",
+        "menu"
+      ]
+    },
+    {
+      "id": "menu-orata-forno",
+      "name": "Orata al forno a legna",
+      "category": "secondi",
+      "description_nb": "Havbrasme bakt i vedfyrt ovn med urter, sitron og bladpersille.",
+      "price_nok": 435,
+      "allergen_codes": [
+        "F"
+      ],
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "human_verified_allergens": false,
+      "tags": [
+        "fish",
+        "sea bream",
+        "wood fired",
+        "menu"
+      ]
+    },
+    {
+      "id": "menu-tagliata-cuvette",
+      "name": "Tagliata di manzo Cuvette con lenticchie di Modica prestato al vino rosso",
+      "category": "secondi",
+      "description_nb": "Skiver av roastbeef med rødvinsbraiserte linser fra Modica, salat og potet.",
+      "price_nok": 395,
+      "allergen_codes": [
+        "S",
+        "SU"
+      ],
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "human_verified_allergens": false,
+      "tags": [
+        "beef",
+        "modica",
+        "lentils",
+        "red wine",
+        "menu"
+      ]
+    },
+    {
+      "id": "menu-agnello-bronte",
+      "name": "Agnello arrosto con salsa di pistacchio di Bronte",
+      "category": "secondi",
+      "description_nb": "Lammecarre med pistasj fra Bronte, gulrot og bakt løk.",
+      "price_nok": 395,
+      "allergen_codes": [
+        "N",
+        "SU"
+      ],
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "human_verified_allergens": false,
+      "tags": [
+        "lamb",
+        "bronte",
+        "pistachio",
+        "sicily",
+        "menu"
+      ]
+    },
+    {
+      "id": "menu-torta-mascarpone-pistacchi",
+      "name": "Torta di mascarpone e pistacchi",
+      "category": "dolce",
+      "description_nb": "Ovnsbakt ostekake på mascarpone og pistasj fra Bronte.",
+      "price_nok": 165,
+      "allergen_codes": [
+        "HV",
+        "M",
+        "E",
+        "N",
+        "L"
+      ],
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "human_verified_allergens": false,
+      "tags": [
+        "dessert",
+        "mascarpone",
+        "pistachio",
+        "bronte",
+        "menu"
+      ]
+    },
+    {
+      "id": "menu-crema-limone",
+      "name": "Crema di limone Siciliana",
+      "category": "dolce",
+      "description_nb": "Karamellisert sitronkrem og sitronsorbet.",
+      "price_nok": 165,
+      "allergen_codes": [
+        "M"
+      ],
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "human_verified_allergens": false,
+      "tags": [
+        "dessert",
+        "lemon",
+        "sicily",
+        "menu"
+      ]
+    },
+    {
+      "id": "menu-formaggi-misti",
+      "name": "Formaggi misti",
+      "category": "dolce",
+      "description_nb": "Utvalg av oster med fikener.",
+      "price_nok": 255,
+      "allergen_codes": [
+        "M"
+      ],
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "human_verified_allergens": false,
+      "tags": [
+        "cheese",
+        "dessert",
+        "menu"
+      ]
+    },
+    {
+      "id": "menu-pizza-margherita",
+      "name": "Pizza Margherita",
+      "category": "pizze",
+      "description_nb": "San Marzano tomatsaus, mozzarella og basilikum.",
+      "price_nok": 245,
+      "allergen_codes": [
+        "HV",
+        "M",
+        "L"
+      ],
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "human_verified_allergens": false,
+      "tags": [
+        "pizza",
+        "tomato",
+        "mozzarella",
+        "menu"
+      ]
+    },
+    {
+      "id": "menu-pizza-siciliana",
+      "name": "Pizza Siciliana",
+      "category": "pizze",
+      "description_nb": "San Marzano tomatsaus, aubergine, tomat, oliven, kapers, caciocavallo og mozzarella.",
+      "price_nok": 245,
+      "allergen_codes": [
+        "HV",
+        "L",
+        "M"
+      ],
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "human_verified_allergens": false,
+      "tags": [
+        "pizza",
+        "sicily",
+        "aubergine",
+        "caciocavallo",
+        "menu"
+      ]
+    },
+    {
+      "id": "menu-pizza-vulcano",
+      "name": "Pizza Vulcano",
+      "category": "pizze",
+      "description_nb": "Pecorino, San Marzano tomatsaus, chili, nduja og grana.",
+      "price_nok": 285,
+      "allergen_codes": [
+        "HV",
+        "M"
+      ],
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "human_verified_allergens": false,
+      "tags": [
+        "pizza",
+        "nduja",
+        "chili",
+        "menu"
+      ]
+    },
+    {
+      "id": "menu-pizza-tartufo-umami",
+      "name": "Pizza Tartufo Umami",
+      "category": "pizze",
+      "description_nb": "Pizza med trøffelsalami, taleggio og mozzarella.",
+      "price_nok": 345,
+      "allergen_codes": [
+        "HV",
+        "L",
+        "M"
+      ],
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "human_verified_allergens": false,
+      "tags": [
+        "pizza",
+        "truffle",
+        "salami",
+        "taleggio",
+        "menu"
+      ]
+    },
+    {
+      "id": "menu-pizza-sauna",
+      "name": "Pizza Sauna",
+      "category": "pizze",
+      "description_nb": "San Marzano tomatsaus, nduja, oregano, hvitløk og kapers.",
+      "price_nok": 225,
+      "allergen_codes": [
+        "HV",
+        "L",
+        "F",
+        "S"
+      ],
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "human_verified_allergens": false,
+      "tags": [
+        "pizza",
+        "nduja",
+        "spicy",
+        "menu"
+      ]
+    }
+  ],
+  "beverage_items": [
+    {
+      "id": "bev-frydenlund-05",
+      "name": "Frydenlund 0.5",
+      "category": "alcoholic_beer",
+      "price_nok": 125,
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "availability_verified": false,
+      "tags": [
+        "beer",
+        "alcohol",
+        "beverage"
+      ]
+    },
+    {
+      "id": "bev-frydenlund-025",
+      "name": "Frydenlund 0.25",
+      "category": "alcoholic_beer",
+      "price_nok": 65,
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "availability_verified": false,
+      "tags": [
+        "beer",
+        "alcohol",
+        "beverage"
+      ]
+    },
+    {
+      "id": "bev-peroni",
+      "name": "Peroni",
+      "category": "alcoholic_beer",
+      "price_nok": 130,
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "availability_verified": false,
+      "tags": [
+        "beer",
+        "italian",
+        "alcohol",
+        "beverage"
+      ]
+    },
+    {
+      "id": "bev-peroni-glutenfri",
+      "name": "Peroni Glutenfri",
+      "category": "alcoholic_beer",
+      "price_nok": 130,
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "availability_verified": false,
+      "tags": [
+        "beer",
+        "gluten free",
+        "alcohol",
+        "beverage"
+      ]
+    },
+    {
+      "id": "bev-brooklyn-ipa",
+      "name": "Brooklyn IPA",
+      "category": "alcoholic_beer",
+      "price_nok": 155,
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "availability_verified": false,
+      "tags": [
+        "beer",
+        "ipa",
+        "alcohol",
+        "beverage"
+      ]
+    },
+    {
+      "id": "bev-carlsberg-free",
+      "name": "Carlsberg Free",
+      "category": "non_alcoholic",
+      "price_nok": 72,
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "availability_verified": false,
+      "tags": [
+        "non alcoholic",
+        "beer",
+        "beverage"
+      ]
+    },
+    {
+      "id": "bev-alkoholfri-vin",
+      "name": "Alkoholfri vin",
+      "category": "non_alcoholic",
+      "price_nok": 95,
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "availability_verified": false,
+      "tags": [
+        "non alcoholic",
+        "wine",
+        "beverage"
+      ]
+    },
+    {
+      "id": "bev-alkoholfri-gin-tonic",
+      "name": "Alkoholfri Gin Tonic",
+      "category": "non_alcoholic",
+      "price_nok": 95,
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "availability_verified": false,
+      "tags": [
+        "non alcoholic",
+        "mocktail",
+        "beverage"
+      ]
+    },
+    {
+      "id": "bev-eplemost",
+      "name": "Eplemost",
+      "category": "non_alcoholic",
+      "price_nok": 62,
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "availability_verified": false,
+      "tags": [
+        "apple juice",
+        "non alcoholic",
+        "beverage"
+      ]
+    },
+    {
+      "id": "bev-farris",
+      "name": "Farris",
+      "category": "non_alcoholic",
+      "price_nok": 89,
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "availability_verified": false,
+      "tags": [
+        "water",
+        "non alcoholic",
+        "beverage"
+      ]
+    },
+    {
+      "id": "bev-italian-soda",
+      "name": "Italiensk soda",
+      "category": "non_alcoholic",
+      "price_nok": 69,
+      "price_note": "Ask waiter for current flavor",
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "availability_verified": false,
+      "tags": [
+        "soda",
+        "non alcoholic",
+        "beverage"
+      ]
+    },
+    {
+      "id": "bev-dagens-mocktail",
+      "name": "Dagens Mocktail",
+      "category": "non_alcoholic",
+      "price_nok": 69,
+      "price_note": "Ask waiter for current mocktail",
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "human_verified": false,
+      "availability_verified": false,
+      "tags": [
+        "mocktail",
+        "non alcoholic",
+        "beverage"
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "ingredient-pistacchio-bronte",
+      "name": "Pistacchio di Bronte",
+      "description": "Menu-linked Sicilian pistachio reference. GI/protected-name status must be checked in eAmbrosia before making protected-origin claims.",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-eu-eambrosia"
+      ],
+      "needs_human_review": true,
+      "tags": [
+        "pistachio",
+        "bronte",
+        "sicily",
+        "gi"
+      ]
+    },
+    {
+      "id": "ingredient-lenticchie-modica",
+      "name": "Lenticchie di Modica",
+      "description": "Menu-linked Modica lentil reference. Treat as restaurant wording until supplier/product documentation is ingested.",
+      "source_ids": [
+        "src-palazzo-menu-pdf"
+      ],
+      "needs_human_review": true,
+      "tags": [
+        "lentils",
+        "modica",
+        "sicily"
+      ]
+    },
+    {
+      "id": "ingredient-san-marzano",
+      "name": "San Marzano tomatoes",
+      "description": "Menu-linked tomato reference used in pizzas. Protected-origin and supplier claims require dedicated source verification.",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-eu-eambrosia"
+      ],
+      "needs_human_review": true,
+      "tags": [
+        "tomato",
+        "pizza",
+        "gi"
+      ]
+    }
+  ],
+  "producers": [
+    {
+      "id": "producer-palazzo-communale",
+      "name": "Palazzo Communale",
+      "kind": "restaurant",
+      "description": "Restaurant-owned public content and menu source.",
+      "source_ids": [
+        "src-palazzo-site",
+        "src-palazzo-menu-pdf"
+      ],
+      "tags": [
+        "partner",
+        "restaurant"
+      ]
+    }
+  ],
+  "regions": [
+    {
+      "id": "region-sicily",
+      "name": "Sicily",
+      "country": "Italy",
+      "description": "Primary culinary context for Palazzo's Sicilian/Monsu-inspired profile.",
+      "source_ids": [
+        "src-palazzo-ristorante",
+        "src-wikidata-sparql",
+        "src-eu-eambrosia"
+      ],
+      "tags": [
+        "sicily",
+        "italy",
+        "region",
+        "food",
+        "wine"
+      ]
+    },
+    {
+      "id": "region-bronte",
+      "name": "Bronte",
+      "country": "Italy",
+      "description": "Menu-linked place for pistachio references; production-grade origin claims require GI/supplier verification.",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-eu-eambrosia"
+      ],
+      "needs_human_review": true,
+      "tags": [
+        "bronte",
+        "pistachio",
+        "sicily"
+      ]
+    },
+    {
+      "id": "region-modica",
+      "name": "Modica",
+      "country": "Italy",
+      "description": "Menu-linked place for lentil reference; production-grade origin claims require supplier verification.",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-eu-eambrosia"
+      ],
+      "needs_human_review": true,
+      "tags": [
+        "modica",
+        "lentils",
+        "sicily"
+      ]
+    },
+    {
+      "id": "region-grunerlokka-vulkan",
+      "name": "Grunerlokka/Vulkan/Akerselva",
+      "country": "Norway",
+      "description": "Nearby Oslo context for walking, transit, and pre/post-dinner guidance. Use OpenStreetMap/Entur adapters before answering route-specific questions.",
+      "source_ids": [
+        "src-palazzo-site",
+        "src-osm-license",
+        "src-entur-api"
+      ],
+      "tags": [
+        "oslo",
+        "area",
+        "transport",
+        "nearby"
+      ]
+    }
+  ],
+  "places": [
+    {
+      "id": "place-palazzo-communale",
+      "name": "Palazzo Communale",
+      "address": "Brenneriveien 11, Oslo",
+      "description": "Restaurant tenant location record. Verify against Palazzo and public map data before exposing navigation details to guests.",
+      "source_ids": [
+        "src-palazzo-site",
+        "src-osm-license"
+      ],
+      "needs_human_review": true,
+      "tags": [
+        "restaurant",
+        "oslo",
+        "brenneriveien",
+        "place"
+      ]
+    }
+  ],
+  "pairings": [
+    {
+      "id": "pairing-arancini-sicilian-white",
+      "menu_item_id": "menu-arancini",
+      "menu_item_name": "Arancini",
+      "guidance": "A dry Sicilian white or sparkling style may be a sensible internal discussion point, but current bottles are not verified.",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-helsedir-alcohol-ad"
+      ],
+      "needs_human_review": true,
+      "tags": [
+        "arancini",
+        "wine",
+        "pairing",
+        "sicily"
+      ]
+    },
+    {
+      "id": "pairing-vongole-mineral-white",
+      "menu_item_id": "menu-pasta-vongole",
+      "menu_item_name": "Pasta vongole",
+      "guidance": "A mineral white wine style can match clams and lemon in principle; ask the sommelier for current availability.",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-helsedir-alcohol-ad"
+      ],
+      "needs_human_review": true,
+      "tags": [
+        "vongole",
+        "wine",
+        "pairing",
+        "seafood"
+      ]
+    },
+    {
+      "id": "pairing-agnello-red",
+      "menu_item_id": "menu-agnello-bronte",
+      "menu_item_name": "Agnello arrosto con salsa di pistacchio di Bronte",
+      "guidance": "For lamb and pistachio, ask the sommelier for a current red wine option; no bottle list is ingested.",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-helsedir-alcohol-ad"
+      ],
+      "needs_human_review": true,
+      "tags": [
+        "lamb",
+        "wine",
+        "pairing",
+        "pistachio"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "claim-palazzo-profile",
+      "title": "Restaurant profile",
+      "text": "Palazzo Communale should be treated as a Palazzo-owned restaurant knowledge domain with ristorante, panetteria, chambre, menu, event, and area context.",
+      "source_ids": [
+        "src-palazzo-site",
+        "src-palazzo-ristorante",
+        "src-palazzo-panetteria",
+        "src-palazzo-chambre"
+      ],
+      "confidence": "medium",
+      "needs_human_review": true,
+      "tags": [
+        "profile",
+        "restaurant",
+        "concierge"
+      ]
+    },
+    {
+      "id": "claim-opening-hours",
+      "title": "Opening hours",
+      "text": "The public site was available at verification time, but opening-hours extraction must be refreshed before guest-facing answers. If the exact hours are missing from the structured record, answer with a source link or ask staff.",
+      "source_ids": [
+        "src-palazzo-site"
+      ],
+      "confidence": "low",
+      "needs_human_review": true,
+      "tags": [
+        "opening",
+        "hours",
+        "current",
+        "structured"
+      ],
+      "warnings": [
+        "Opening hours are volatile; require crawler extraction or staff verification."
+      ]
+    },
+    {
+      "id": "claim-menu-pdf-image-based",
+      "title": "Menu PDF extraction status",
+      "text": "The current menu source is an image-based PDF. OCR output and visual extraction must be human-verified before menu, price, or allergen answers are guest-safe.",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-mattilsynet-allergen"
+      ],
+      "confidence": "high",
+      "needs_human_review": true,
+      "tags": [
+        "menu",
+        "ocr",
+        "allergen",
+        "guardrail"
+      ]
+    },
+    {
+      "id": "claim-allergen-guardrail",
+      "title": "Allergen answer rule",
+      "text": "Allergen answers must cite a current item-level source and be verified before they are exposed to guests.",
+      "source_ids": [
+        "src-mattilsynet-allergen"
+      ],
+      "confidence": "high",
+      "needs_human_review": false,
+      "tags": [
+        "allergen",
+        "safety",
+        "guardrail"
+      ]
+    },
+    {
+      "id": "claim-alcohol-guardrail",
+      "title": "Alcohol answer rule",
+      "text": "Alcohol answers must stay factual and sober, avoid promotional language, and respect Norwegian alcohol advertising rules.",
+      "source_ids": [
+        "src-helsedir-alcohol-ad"
+      ],
+      "confidence": "high",
+      "needs_human_review": false,
+      "tags": [
+        "alcohol",
+        "wine",
+        "compliance",
+        "guardrail"
+      ]
+    },
+    {
+      "id": "claim-wine-list-gap",
+      "title": "Wine list data gap",
+      "text": "No verified wine list, bottle availability, producer sheet, importer sheet, or inventory feed is ingested yet.",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-vinmonopolet-api"
+      ],
+      "confidence": "high",
+      "needs_human_review": true,
+      "tags": [
+        "wine",
+        "availability",
+        "gap"
+      ]
+    },
+    {
+      "id": "claim-gi-register-needed",
+      "title": "Protected origin claim rule",
+      "text": "Protected-origin claims for DOP, IGP, DOC, DOCG, or TSG names should be linked to eAmbrosia or another official register record before use.",
+      "source_ids": [
+        "src-eu-eambrosia"
+      ],
+      "confidence": "high",
+      "needs_human_review": false,
+      "tags": [
+        "gi",
+        "dop",
+        "igp",
+        "wine",
+        "food"
+      ]
+    },
+    {
+      "id": "claim-area-routing-gap",
+      "title": "Area and routing data rule",
+      "text": "Nearby-place and route answers should use OpenStreetMap and Entur adapters, with attribution and current route checks, before being exposed to guests.",
+      "source_ids": [
+        "src-osm-license",
+        "src-entur-api"
+      ],
+      "confidence": "medium",
+      "needs_human_review": false,
+      "tags": [
+        "area",
+        "transport",
+        "nearby",
+        "routing"
+      ]
+    },
+    {
+      "id": "claim-legal-entity-data",
+      "title": "Legal entity data source",
+      "text": "Brønnøysundregistrene can be used for legal entity lookup, but this seed does not yet include an organization number or verified entity match for Palazzo Communale.",
+      "source_ids": [
+        "src-brreg-api"
+      ],
+      "confidence": "medium",
+      "needs_human_review": true,
+      "tags": [
+        "entity",
+        "brreg",
+        "organization"
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "id": "policy-structured-first",
+      "name": "Structured lookup before generation",
+      "text": "Menu, price, allergen, opening-hour, and availability answers must resolve structured records before text generation.",
+      "source_ids": [
+        "src-palazzo-menu-pdf",
+        "src-mattilsynet-allergen"
+      ]
+    },
+    {
+      "id": "policy-citation-required",
+      "name": "Citation required",
+      "text": "Every factual answer must return citations, last_verified, confidence, audience, and needs_human_review.",
+      "source_ids": [
+        "src-palazzo-site"
+      ]
+    },
+    {
+      "id": "policy-no-hidden-side-effects",
+      "name": "No hidden side effects",
+      "text": "Concierge knowledge lookup may not refresh remote sources, call providers, or expose guest data without explicit action and grants.",
+      "source_ids": [
+        "src-palazzo-site"
+      ]
+    }
+  ]
+}
