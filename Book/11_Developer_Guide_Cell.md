@@ -61,9 +61,45 @@ Notes:
 - `schemaDict` — key → schema
 - `schemaDescriptionDict` — key → description
 
-These are used by `Explore` calls. The runtime auto-registers default schemas for both `addInterceptForSet` and `addInterceptForGet`.
+These are used by `Explore` calls. The runtime can auto-register default
+schemas for both `addInterceptForSet` and `addInterceptForGet`, but that legacy
+fallback is not sufficient for skeleton or agent authoring because it usually
+contains `unknown` input/return shape.
 
-If you need richer schema/description for tooling, use explicit schema registration:
+For new or production Cell work, register a complete Explore contract before or
+alongside each intercept:
+
+```swift
+await cell.registerExploreContract(
+    requester: owner,
+    key: "my.action",
+    method: .set,
+    input: ExploreContract.objectSchema(
+        properties: [
+            "title": ExploreContract.schema(type: "string")
+        ],
+        requiredKeys: ["title"]
+    ),
+    returns: ExploreContract.objectSchema(
+        properties: [
+            "status": ExploreContract.schema(type: "string")
+        ],
+        requiredKeys: ["status"]
+    ),
+    permissions: ["-w--"],
+    flowEffects: [
+        ExploreContract.flowEffect(
+            trigger: .set,
+            topic: "my.action.completed",
+            contentType: "object"
+        )
+    ],
+    description: .string("Runs the action and emits a completion event.")
+)
+```
+
+If you need lower-level compatibility with older code, use explicit schema
+registration:
 
 ```swift
 await cell.registerExploreSchema(
@@ -78,6 +114,10 @@ await cell.registerExploreSchema(
 ```
 
 Schema descriptions can be read via `schemaDescriptionForKey(...)`.
+
+See [Chapter 22 - Explore Contracts for Skeleton and Cell Authoring](22_Explore_Contracts_For_Skeleton_Authoring.md)
+for the current contract completeness standard, audit tool, and skeleton
+validator workflow.
 
 ## 4. Emit FlowElements
 

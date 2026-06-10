@@ -19,6 +19,51 @@ The Scaffold runtime aims to provide:
 
 The Scaffold is intentionally small, stable, and predictable.
 
+## 1.1 Scaffold Boundaries and Repo Strategy
+
+`CellScaffold` should be treated as a reference/workbench scaffold, not as the
+long-term deployment unit for every HAVEN or DiMy surface.
+
+Near-term, it is acceptable to incubate new runtime capabilities inside
+`CellScaffold` while their interfaces are still changing. Once the seams are
+clear, domain-specific or operationally-specific runtime surfaces should be
+split into their own focused scaffolds.
+
+Recommended boundary:
+
+- `Digipomps/HAVEN` keeps open, reusable protocol/runtime work:
+  CellProtocol, generic cells, diagnostics, reference scaffolds, documentation,
+  and public examples.
+- DiMy-specific products should move into separate scaffolds or repos, for
+  example conference, SMI, miniting, or other commercial/domain-specific
+  surfaces.
+- The user simulation runtime should eventually become a minimal scaffold of
+  its own, depending only on CellProtocol/CellBase, the needed transport/runtime
+  libraries, and scenario/persona artifacts.
+
+This avoids turning the reference scaffold into a monolith and makes it easier
+to run, deploy, license, scale, and audit each surface independently.
+
+Extraction should not happen too early. First let the implementation prove the
+right shape inside the workbench scaffold, then extract when the boundary is
+visible.
+
+Trigger to revisit this decision:
+
+- the user simulation scaffold has passed real bridgehead integration against a
+  target scaffold
+- the coordinator/worker API, metrics, sharding, and run-artifact format are
+  stable enough that downstream users can depend on them
+- at least one domain-specific DiMy surface needs deployment without the full
+  CellScaffold workbench payload
+- shared bootstrap concerns are clear enough to extract into a small
+  `ScaffoldRuntime` or `CellScaffoldKit` layer instead of copying runtime setup
+  across repos
+
+When these conditions are met, prefer extracting the simulator first. It has a
+clean operational purpose, a narrow dependency surface, and fewer product UI
+concerns than conference or SMI scaffolds.
+
 ## 2. Major Components
 
 ### 2.1 Resolver  

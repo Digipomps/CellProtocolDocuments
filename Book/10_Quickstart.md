@@ -81,10 +81,10 @@ func configureCellBase() async {
     try? await resolver.registerTransport(AppleBridgeTransport.self, for: "wss")
 
     // Remote host mapping:
-    // cell://example.org/LoginCell -> ws(s)://example.org/publishersws/LoginCell
+    // cell://example.org/LoginCell -> ws(s)://example.org/bridgehead/LoginCell
     resolver.registerRemoteCellHost(
         "example.org",
-        route: RemoteCellHostRoute(websocketEndpoint: "publishersws", schemePreference: .automatic)
+        route: RemoteCellHostRoute(websocketEndpoint: "bridgehead", schemePreference: .automatic)
     )
 
     // Cryptographic randomness:

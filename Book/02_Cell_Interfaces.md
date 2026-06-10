@@ -60,6 +60,10 @@ Explore describes the Cell in a machine readable way. Typical fields include:
 Explore has no side effects and never exposes private state. It is essential
 for tooling, documentation and graph visualisation.
 
+For skeleton and generated Cell authoring, Explore contracts must describe the
+operation shape, not only the key name. See
+[Chapter 22 - Explore Contracts for Skeleton and Cell Authoring](22_Explore_Contracts_For_Skeleton_Authoring.md).
+
 ## 5. GroupProtocol (optional)
 
 GroupProtocol is used when decisions require more than one identity. It may

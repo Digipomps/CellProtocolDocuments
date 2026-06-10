@@ -19,6 +19,7 @@ This repository contains the official documentation for HAVEN CellProtocol. It i
 
 4. Connectivity & Semantics  
    - [08_Bridging_Transport.md](Book/08_Bridging_Transport.md)
+   - [21_Contact_Endpoint_Cell.md](Book/21_Contact_Endpoint_Cell.md)
 
 5. Semantics, Trust & Human Alignment  
    - [09_Purpose_Interests.md](Book/09_Purpose_Interests.md)
@@ -31,6 +32,7 @@ This repository contains the official documentation for HAVEN CellProtocol. It i
    - [14_Perspective_Runtime_Matching.md](Book/14_Perspective_Runtime_Matching.md)
    - [15_Documentation_Discovery_and_RAG.md](Book/15_Documentation_Discovery_and_RAG.md)
    - [16_Book_Reference_Workspace.md](Book/16_Book_Reference_Workspace.md)
+   - [22_Explore_Contracts_For_Skeleton_Authoring.md](Book/22_Explore_Contracts_For_Skeleton_Authoring.md)
 
 7. Supplementary Material  
    - [Book_Extras.md](Book/Book_Extras.md)
@@ -56,3 +58,5 @@ If you are implementing code or UI:
 - Use [14_Perspective_Runtime_Matching.md](Book/14_Perspective_Runtime_Matching.md) when implementing weighted purpose/interest queries and cross-perspective matching
 - Use [15_Documentation_Discovery_and_RAG.md](Book/15_Documentation_Discovery_and_RAG.md) for practical documentation discovery and RAG requirements
 - Use [16_Book_Reference_Workspace.md](Book/16_Book_Reference_Workspace.md) for the canonical vault/web/Swift browse contract for `Book`
+- Use [21_Contact_Endpoint_Cell.md](Book/21_Contact_Endpoint_Cell.md) when implementing CellProtocol-closed contact endpoints with TTL, private routes, notification wakeup, and entity anchoring
+- Use [22_Explore_Contracts_For_Skeleton_Authoring.md](Book/22_Explore_Contracts_For_Skeleton_Authoring.md) before generating skeletons or new Cells from public key contracts
