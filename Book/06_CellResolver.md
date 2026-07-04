@@ -126,7 +126,7 @@ let resolver = CellResolver.sharedInstance
 resolver.registerRemoteCellHost(
     "example.org",
     route: RemoteCellHostRoute(
-        websocketEndpoint: "publishersws",
+        websocketEndpoint: "bridgehead",
         schemePreference: .automatic
     )
 )
@@ -135,7 +135,7 @@ resolver.registerRemoteCellHost(
 Route model:
 
 - `RemoteCellHostRoute.websocketEndpoint`  
-  Path prefix used before `<CellName>` (default: `publishersws`)
+  Path prefix used before `<CellName>` (default: `bridgehead`)
 - `RemoteCellHostRoute.schemePreference`  
   - `.automatic`: selects `ws` in debug/dev mode and `wss` in production mode
   - `.ws`: forces `ws` (still blocked by production policy)

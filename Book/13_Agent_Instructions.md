@@ -29,14 +29,20 @@ If any of these are ambiguous, ask for clarification before implementing.
 2. Implement `get` and `set` intercepts.  
    - Use `addInterceptForGet` and `addInterceptForSet`.
 3. Register schema entries for the keys you expose.  
-   - `addInterceptForSet` registers schema automatically.  
-   - If a key is read-only, register its schema explicitly.
+   - Use complete `registerExploreContract(...)` entries for production work.
+   - Do not rely on implicit default contracts except during legacy migration.
+   - If a key is read-only, register its return schema explicitly.
 4. Emit events using `FlowElement` and `pushFlowElement(...)`.
 5. Register the cell with the resolver.  
    - Add to your scaffold or initializer (e.g. `AppInitializer`).
 6. Define a `CellConfiguration` describing dependencies and initial setup.
 7. Build a `SkeletonElement` tree for UI rendering.
-8. Provide a JSON sample for the configuration and skeleton.
+8. Validate skeleton bindings against Explore before preview:
+   - `python3 Tools/Explore/skeleton_explore_validator.py --configuration ... --manifest ...`
+9. Provide a JSON sample for the configuration and skeleton.
+
+For Explore-first skeleton/cell authoring, follow
+[Chapter 22 - Explore Contracts for Skeleton and Cell Authoring](22_Explore_Contracts_For_Skeleton_Authoring.md).
 
 ## 4. Output Requirements
 

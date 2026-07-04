@@ -14,6 +14,8 @@ The goal is one canonical markdown landing page that works across vault, web, Sw
 - [Chapter 10 — Quickstart](10_Quickstart.md)
 - [Chapter 11 — Developer Guide: Implementing a Cell](11_Developer_Guide_Cell.md)
 - [Chapter 12 — Skeleton Specification](12_Skeleton_Spec.md)
+- [Chapter 22 — Explore Contracts for Skeleton and Cell Authoring](22_Explore_Contracts_For_Skeleton_Authoring.md)
+- [Chapter 29 — Claim Argument Model](29_Claim_Argument_Model.md)
 
 ## What We Have Right Now
 
@@ -59,10 +61,12 @@ The goal is one canonical markdown landing page that works across vault, web, Sw
 ### Connectivity and Semantics
 
 - [Chapter 08 — Bridging and Transport](08_Bridging_Transport.md)
+- [Chapter 21 — Contact Endpoint Cell](21_Contact_Endpoint_Cell.md)
 
 ### Semantics, Trust, and Human Alignment
 
 - [Chapter 09 — Purpose and Interests](09_Purpose_Interests.md)
+- [Chapter 29 — Claim Argument Model](29_Claim_Argument_Model.md)
 
 ### Developer Guides
 
@@ -74,6 +78,7 @@ The goal is one canonical markdown landing page that works across vault, web, Sw
 - [Chapter 15 — Documentation Discovery and RAG](15_Documentation_Discovery_and_RAG.md)
 - [Chapter 16 — Book Reference Workspace](16_Book_Reference_Workspace.md)
 - [Chapter 17 — Documentation Workbench Landing and Development Plan](17_Documentation_Workbench_Landing_and_Development_Plan.md)
+- [Chapter 22 — Explore Contracts for Skeleton and Cell Authoring](22_Explore_Contracts_For_Skeleton_Authoring.md)
 
 ### Supplementary Material
 
@@ -111,6 +116,7 @@ Use these when moving from reading to working:
 - [Chapter 11 — Developer Guide: Implementing a Cell](11_Developer_Guide_Cell.md)
 - [Chapter 12 — Skeleton Specification](12_Skeleton_Spec.md)
 - [Chapter 13 — Agent Instructions (Cells + Skeleton UI)](13_Agent_Instructions.md)
+- [Chapter 22 — Explore Contracts for Skeleton and Cell Authoring](22_Explore_Contracts_For_Skeleton_Authoring.md)
 
 ### If you are working on docs plus AI retrieval
 
@@ -125,3 +131,7 @@ Use these when moving from reading to working:
 - Mermaid fences should stay in source markdown and render inline in clients that implement the reference workspace contract.
 - The documentation workbench chapter captures the current ground truth and the recommended next implementation steps for a proper docs workbench.
 - The conference supplementary chapters capture ownership/dataflow and ConnectionHub/agreement lifecycle ground truth.
+- The contact endpoint chapter defines the CellProtocol-closed pattern for leaving a reachable, TTL-bound contact cell in a scaffold.
+- The claim argument model chapter defines the runtime structures for claims,
+  support nodes, counterarguments with polarity, and deterministic graded
+  argument evaluation, sharing wire vocabulary with the text reliability chapter.

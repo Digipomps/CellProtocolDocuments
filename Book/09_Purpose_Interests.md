@@ -31,6 +31,10 @@ Properties:
 
 Purpose makes intent machine-readable and human-understandable.
 
+Purpose is declared intent, not an assertion about the world. Claims and the
+argument structures that support or attack them have their own model family;
+see `Book/29_Claim_Argument_Model.md`.
+
 ## 2. Goals — Measurable Success
 
 Every Purpose may have one or more **Goals**, which define measurable success:

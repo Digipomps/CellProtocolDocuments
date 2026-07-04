@@ -14,16 +14,21 @@ This file is the shared source of truth for architecture concepts and collaborat
 - `Book/14_Perspective_Runtime_Matching.md`
 - `Book/15_Documentation_Discovery_and_RAG.md`
 - `Book/16_Book_Reference_Workspace.md`
+- `Book/22_Explore_Contracts_For_Skeleton_Authoring.md`
 
 ## Core Concepts
 - `CellConfiguration`: declarative configuration payload for cells and skeleton UI.
 - `SkeletonElement`: declarative UI tree rendered by platform-specific renderers.
 - `Meddle.get/set`: authoritative state and command interface for cells.
 - `Emit.flow`: runtime publishing channel via `FlowElement`.
+- `Explore`: machine-readable contract surface for keys, input/return schemas,
+  permissions, and flow effects.
 - `Perspective`: purpose/interest graph and matching context.
 
 ## Interface Constraints
 - Expose state/behavior with interceptors (`addInterceptForGet`, `addInterceptForSet`).
+- Register every production key with a complete Explore contract before using
+  it from a skeleton or another generated Cell.
 - Enforce authorization per keypath inside the cell.
 - Publish events and updates through flow topics, not ad-hoc side channels.
 

@@ -52,6 +52,10 @@ Agent workflow is now defined in:
 The core concepts are covered, but still missing:
 
 - A stable “developer API map” listing the key types and modules.
+- Full production coverage for machine-readable Explore contracts. Phase 1 is
+  now documented in `Book/22_Explore_Contracts_For_Skeleton_Authoring.md`, with
+  audit and skeleton validation tools under `Tools/Explore/`, but legacy cells
+  still need backfilled explicit `registerExploreContract(...)` entries.
 - Integration patterns between `CellApple` and `CellVapor` (mobile vs server scaffolds).
 - A consolidated runtime lifecycle diagram (init → resolve → usage → persistence).
 

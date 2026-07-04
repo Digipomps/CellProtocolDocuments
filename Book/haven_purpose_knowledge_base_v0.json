@@ -1,0 +1,2010 @@
+{
+  "schema": "haven.purpose-knowledge-base.v0",
+  "createdAt": "2026-06-14",
+  "status": "draft-canonical-source",
+  "rootPurposeRef": "purpose://root",
+  "rootPrinciple": {
+    "canonicalPhraseNo": "Alle mennesker er like mye verdt",
+    "interpretation": "HAVEN development choices should preserve equal human worth, agency, dignity, privacy, and the ability to participate without hidden scoring or coercive profiling.",
+    "goalRef": "goal.root.equal-human-worth"
+  },
+  "compatibility": {
+    "currentRuntimeTaxonomy": "haven.purpose-taxonomy.v1",
+    "currentRuntimeSource": "CellScaffold/Sources/App/Support/PurposeDecomposition.swift",
+    "wireRootRef": "purpose://root",
+    "model": "single-parent-tree-with-cross-cutting-facets",
+    "changePolicy": "This knowledge base keeps the current purpose://root ref. New branches marked candidate do not change runtime taxonomy until reviewed and ported."
+  },
+  "nodeDefaults": {
+    "statusMeanings": {
+      "active": "Already represented by the current CellScaffold purpose taxonomy or directly derived from it.",
+      "draft": "Documented as a durable HAVEN purpose, but not yet wired as canonical runtime taxonomy.",
+      "candidate": "Potential branch for review before runtime adoption."
+    },
+    "goalRequirement": "Every purpose node needs an achievable Goal with observable success signals and a verifier.",
+    "personalDataRule": "Personal facts and preferences must be explicit, owner-scoped, inspectable, and deletable."
+  },
+  "nodes": [
+    {
+      "purposeRef": "purpose://root",
+      "parentRef": null,
+      "title": "Alle mennesker er like mye verdt",
+      "summary": "Top-level normative anchor for HAVEN purposes.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.root.equal-human-worth",
+        "lifecycle": "continuous",
+        "outcome": "HAVEN choices preserve equal worth, human agency, and explicit accountable purpose.",
+        "successSignals": [
+          "New purposes can be traced to a child of purpose://root.",
+          "No accepted purpose requires hidden profiling, irreversible user lock-in, or unexplained ranking of people.",
+          "User-facing capabilities expose clear purpose, owner control, and reviewable consequences."
+        ],
+        "verifier": "PurposeKnowledgeBase review plus contract/security review for new canonical branches."
+      },
+      "interests": [
+        "human-worth",
+        "agency",
+        "dignity",
+        "fairness",
+        "accountability"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "equal human worth",
+          "human dignity",
+          "menneskeverd",
+          "likeverd"
+        ],
+        "tokens": [
+          "human",
+          "worth",
+          "dignity",
+          "agency",
+          "fairness",
+          "likeverd"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://human-agency",
+      "parentRef": "purpose://root",
+      "title": "Human agency and understanding",
+      "summary": "Help people understand, choose, delegate, review, and reverse digital actions.",
+      "status": "draft",
+      "goal": {
+        "goalRef": "goal.human-agency",
+        "lifecycle": "continuous",
+        "outcome": "A person can understand what HAVEN is doing for them and can approve, pause, revoke, or revise meaningful actions.",
+        "successSignals": [
+          "Sensitive actions have explicit confirmation or a documented grant.",
+          "User-facing summaries expose what will happen, what data is used, and what can be undone.",
+          "Human review queues aggregate similar decisions instead of forcing repetitive approvals."
+        ],
+        "verifier": "Action-plan risk review, consent checkpoints, and review-queue audit."
+      },
+      "interests": [
+        "agency",
+        "explainability",
+        "consent",
+        "delegation"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "owner agency",
+          "human control",
+          "brukerkontroll"
+        ],
+        "tokens": [
+          "approve",
+          "review",
+          "revoke",
+          "understand",
+          "consent",
+          "control"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://contact.communication",
+      "parentRef": "purpose://human-agency",
+      "title": "Contact and communication",
+      "summary": "Help people initiate, continue, or refuse contact with explicit purpose and privacy boundaries.",
+      "status": "draft",
+      "goal": {
+        "goalRef": "goal.contact.communication",
+        "lifecycle": "continuous",
+        "outcome": "A person can communicate or be introduced without exposing private contact data outside consent and grants.",
+        "successSignals": [
+          "Contact action is represented as draft, request, follow-up, or denied private data.",
+          "Private fields such as phone and email are not revealed without consent.",
+          "Recipient intent and allowed purpose are visible before sending."
+        ],
+        "verifier": "ContactEndpointCell tests, conference prompt fixtures, and privacy-boundary checks."
+      },
+      "matchingHints": {
+        "aliases": [
+          "contact",
+          "communication",
+          "kontakt",
+          "melding",
+          "tlf",
+          "telefon",
+          "e-post",
+          "epost"
+        ],
+        "tokens": [
+          "contact",
+          "message",
+          "invite",
+          "email",
+          "phone",
+          "privacy",
+          "consent"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://contact.introduction",
+      "parentRef": "purpose://contact.communication",
+      "title": "Contact introduction",
+      "summary": "Introduce or connect people through a purpose-bound contact request.",
+      "status": "draft",
+      "goal": {
+        "goalRef": "goal.contact.introduction",
+        "lifecycle": "event",
+        "outcome": "A contact introduction is prepared or delivered without leaking private contact information.",
+        "successSignals": [
+          "Introduction has requester, intended recipient, purpose, and message draft.",
+          "Send/deliver requires explicit user action or grant.",
+          "Private contact data remains hidden unless explicitly consented."
+        ],
+        "verifier": "ContactEndpointCell and meeting-request prompt tests."
+      },
+      "capabilityHints": [
+        "cell:///ContactEndpoint",
+        "cell:///ContactRegistry"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "introduction",
+          "connect me with",
+          "hook meg opp",
+          "sett opp møte"
+        ],
+        "tokens": [
+          "introduce",
+          "connect",
+          "meeting",
+          "coffee",
+          "invite",
+          "recipient",
+          "draft"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://contact.followup",
+      "parentRef": "purpose://contact.communication",
+      "title": "Contact follow-up",
+      "summary": "Continue an existing contact or meeting thread with explicit recipient and message context.",
+      "status": "draft",
+      "goal": {
+        "goalRef": "goal.contact.followup",
+        "lifecycle": "event",
+        "outcome": "A follow-up message can be drafted for the correct recipient without auto-sending.",
+        "successSignals": [
+          "Recipient is resolved or clarification is requested.",
+          "Message stays draft until explicit send action.",
+          "Previous context is cited when used."
+        ],
+        "verifier": "Contact follow-up and pronoun-resolution prompt fixtures."
+      },
+      "matchingHints": {
+        "aliases": [
+          "follow up",
+          "oppfølging",
+          "skriv til henne"
+        ],
+        "tokens": [
+          "followup",
+          "reply",
+          "message",
+          "draft",
+          "recipient",
+          "pronoun"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://event.participation",
+      "parentRef": "purpose://human-agency",
+      "title": "Event participation",
+      "summary": "Help a person participate in an event by understanding agenda, people, privacy, and next useful actions.",
+      "status": "draft",
+      "goal": {
+        "goalRef": "goal.event.participation",
+        "lifecycle": "continuous",
+        "outcome": "A participant can decide what to attend, who to meet, and what to share without hidden pressure or data leakage.",
+        "successSignals": [
+          "Agenda recommendations cite event context and time.",
+          "Meeting actions remain drafts until confirmed.",
+          "Privacy-sensitive requests deny private data or require consent."
+        ],
+        "verifier": "Conference prompt fixtures and event-surface canaries."
+      },
+      "matchingHints": {
+        "aliases": [
+          "conference",
+          "event",
+          "konferanse",
+          "hva skjer nå"
+        ],
+        "tokens": [
+          "event",
+          "conference",
+          "agenda",
+          "session",
+          "people",
+          "sponsor",
+          "privacy"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://event.agenda.recommendation",
+      "parentRef": "purpose://event.participation",
+      "title": "Event agenda recommendation",
+      "summary": "Recommend or open an agenda item based on current time, interests, constraints, and available event context.",
+      "status": "draft",
+      "goal": {
+        "goalRef": "goal.event.agenda.recommendation",
+        "lifecycle": "event",
+        "outcome": "The user gets a relevant agenda recommendation or a clear missing-context response.",
+        "successSignals": [
+          "Recommendation includes session identity or time when known.",
+          "Missing room/person/context is acknowledged instead of invented.",
+          "Open-session action uses an explicit action keypath or remains read-only."
+        ],
+        "verifier": "Conference agenda prompt fixtures."
+      },
+      "matchingHints": {
+        "aliases": [
+          "what should I attend",
+          "hva bør jeg få med meg",
+          "neste sesjon",
+          "hva skjer nå",
+          "før lunsj",
+          "Neste",
+          "Ka bør eg gå på"
+        ],
+        "tokens": [
+          "agenda",
+          "session",
+          "attend",
+          "recommend",
+          "open",
+          "time",
+          "lunch"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://event.meeting.draft-request",
+      "parentRef": "purpose://event.participation",
+      "title": "Event meeting draft request",
+      "summary": "Draft an event meeting request or introduction while requiring explicit user action before sending.",
+      "status": "draft",
+      "facetRefs": [
+        "purpose://contact.introduction",
+        "purpose://access.audit.privacy"
+      ],
+      "goal": {
+        "goalRef": "goal.event.meeting.draft-request",
+        "lifecycle": "event",
+        "outcome": "A relevant meeting or coffee request is drafted for the right person and never silently sent.",
+        "successSignals": [
+          "Person and meeting intent are extracted or clarification is requested.",
+          "Draft state is visible before send.",
+          "Private contact fields are not exposed."
+        ],
+        "verifier": "Conference meeting-request and contact-introduction fixtures."
+      },
+      "matchingHints": {
+        "aliases": [
+          "coffee with Nora",
+          "fikse en kaffe",
+          "draft meeting request",
+          "kaffe med Nora",
+          "Hook meg opp",
+          "møte etterpå"
+        ],
+        "tokens": [
+          "meeting",
+          "coffee",
+          "nora",
+          "invite",
+          "draft",
+          "send",
+          "after"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://event.schedule.change-request",
+      "parentRef": "purpose://event.participation",
+      "title": "Event schedule change request",
+      "summary": "Propose a schedule change for an event item while requiring role checks and confirmation.",
+      "status": "draft",
+      "facetRefs": [
+        "purpose://access.audit.privacy"
+      ],
+      "goal": {
+        "goalRef": "goal.event.schedule.change-request",
+        "lifecycle": "event",
+        "outcome": "A schedule change is proposed or queued for approval without silently changing the event program.",
+        "successSignals": [
+          "Target session or agenda item is identified or clarification is requested.",
+          "Role and confirmation requirements are visible.",
+          "No schedule mutation is committed without approval."
+        ],
+        "verifier": "Conference schedule-change fixtures and schedule mutation confirmation tests."
+      },
+      "matchingHints": {
+        "aliases": [
+          "Flytt den sponsor-greia",
+          "til etter lunsj",
+          "schedule change",
+          "flytt sesjon"
+        ],
+        "tokens": [
+          "flytt",
+          "schedule",
+          "agenda",
+          "lunsj",
+          "sponsor",
+          "confirmation"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://event.privacy-preserving-networking",
+      "parentRef": "purpose://event.participation",
+      "title": "Privacy-preserving event networking",
+      "summary": "Help people meet others at an event while limiting profile visibility and private data exposure.",
+      "status": "draft",
+      "facetRefs": [
+        "purpose://access.audit.privacy",
+        "purpose://preference.owner-controlled"
+      ],
+      "goal": {
+        "goalRef": "goal.event.privacy-preserving-networking",
+        "lifecycle": "continuous",
+        "outcome": "The user can network with consent controls and without exposing more profile data than intended.",
+        "successSignals": [
+          "Privacy preference is explained or set as a draft action.",
+          "Aggregate-only or consented-only reports are distinguished from private data requests.",
+          "Private contact requests are denied or routed to consent workflow."
+        ],
+        "verifier": "Conference privacy, sponsor, and networking prompt fixtures."
+      },
+      "matchingHints": {
+        "aliases": [
+          "anonymous networking",
+          "ikke dele profilen",
+          "privacy preserving networking",
+          "sponsor få vite",
+          "alle e-postene",
+          "anonym men møte folk",
+          "sponsorreglene"
+        ],
+        "tokens": [
+          "anonymous",
+          "profile",
+          "privacy",
+          "networking",
+          "sponsor",
+          "consent",
+          "aggregate"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://digital-work",
+      "parentRef": "purpose://root",
+      "title": "Digital work",
+      "summary": "Purposes that help people or scaffolds coordinate, collect, share, inspect, and improve digital work.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.digital-work.support-useful-work",
+        "lifecycle": "continuous",
+        "outcome": "Digital work surfaces make useful work easier without hiding state, purpose, or access boundaries.",
+        "successSignals": [
+          "A user can identify the current task or artifact state.",
+          "Actions map to real cell keypaths or documented missing capabilities.",
+          "Work outputs can be inspected, shared, or tested according to their purpose."
+        ],
+        "verifier": "Cell contract checks, action-plan coverage, and GUI smoke tests."
+      },
+      "interests": [
+        "work",
+        "coordination",
+        "productivity"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "work",
+          "digital productivity",
+          "arbeid"
+        ],
+        "tokens": [
+          "project",
+          "task",
+          "survey",
+          "document",
+          "share",
+          "status",
+          "work"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://digital-work.coordinate",
+      "parentRef": "purpose://digital-work",
+      "title": "Coordinate work",
+      "summary": "Plan, coordinate, share, and track work across people, agents, or scaffolds.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.digital-work.coordinate",
+        "lifecycle": "continuous",
+        "outcome": "People and scaffolds can see who is doing what, what is blocked, and what needs a decision.",
+        "successSignals": [
+          "Project/task state exposes open, blocked, done, and awaiting-review counts.",
+          "Sharing paths preserve recipient access boundaries.",
+          "Outstanding decisions can be queued for a human or delegated agent."
+        ],
+        "verifier": "ProjectPortfolioCell, WorkItemCell, share-flow, and review-queue tests."
+      },
+      "interests": [
+        "coordination",
+        "planning",
+        "sharing"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "coordinate projects",
+          "work management",
+          "prosjektstyring"
+        ],
+        "tokens": [
+          "coordinate",
+          "project",
+          "task",
+          "status",
+          "outstanding",
+          "share"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://project-work.overview-and-sharing",
+      "parentRef": "purpose://digital-work.coordinate",
+      "title": "Project work overview and sharing",
+      "summary": "Manage projects, tasks, sharing, and current outstanding work.",
+      "status": "active",
+      "facetRefs": [
+        "purpose://gui.quality.functional-accessible",
+        "purpose://access.audit.privacy",
+        "purpose://test.acceptance.project-work"
+      ],
+      "goal": {
+        "goalRef": "goal.project-work.overview-and-sharing",
+        "lifecycle": "continuous",
+        "outcome": "A user can share desired project intent and see current status plus outstanding work.",
+        "successSignals": [
+          "ProjectPortfolio.state can expose status, health, priority, milestones, and counts.",
+          "WorkItem.state can expose open, blocked, in-progress, done, comments, subtasks, and relations.",
+          "IdeaTaskWorkspace/IdeaTaskShare can prepare, deliver, and open a selected snapshot for a recipient."
+        ],
+        "verifier": "ExecutablePurposeGroundingCellTests, ProjectPortfolioCellTests, WorkItemCellTests, and share-flow contract tests."
+      },
+      "capabilityHints": [
+        "cell:///ProjectPortfolio",
+        "cell:///WorkItem",
+        "cell:///IdeaTaskWorkspace",
+        "cell:///IdeaTaskShare"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "projects and tasks",
+          "prosjekter og oppgavehåndtering",
+          "project overview",
+          "prosjektstyring",
+          "prosjektstatus",
+          "utestående arbeid",
+          "blokkerte ting",
+          "prosjektflaten"
+        ],
+        "tokens": [
+          "project",
+          "task",
+          "share",
+          "overview",
+          "status",
+          "outstanding",
+          "milestone",
+          "blocker"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://project-work.project-portfolio",
+      "parentRef": "purpose://project-work.overview-and-sharing",
+      "title": "Project portfolio",
+      "summary": "Track project status, health, priorities, milestones, releases, and capacity.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.project-work.project-portfolio",
+        "lifecycle": "continuous",
+        "outcome": "Project status, health, priority, and milestone/release state can be read and counted.",
+        "successSignals": [
+          "ProjectPortfolio.state exposes openCount, activeCount, blockedCount, health counts, roadmapTable, and milestoneTable."
+        ],
+        "verifier": "ProjectPortfolioCellTests and ProjectPortfolio.state assertions."
+      },
+      "capabilityHints": [
+        "cell:///ProjectPortfolio.state",
+        "cell:///ProjectPortfolio.projects",
+        "cell:///ProjectPortfolio.query",
+        "cell:///ProjectPortfolio.purposeGoal"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "project list",
+          "portfolio",
+          "prosjektoversikt"
+        ],
+        "tokens": [
+          "portfolio",
+          "project",
+          "health",
+          "priority",
+          "milestone",
+          "release"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://project-work.work-items",
+      "parentRef": "purpose://project-work.overview-and-sharing",
+      "title": "Work items",
+      "summary": "Track tasks, bugs, decisions, comments, subtasks, relations, and blockers.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.project-work.work-items",
+        "lifecycle": "continuous",
+        "outcome": "Open, blocked, in-progress, and done work can be tracked with relations and supporting evidence.",
+        "successSignals": [
+          "WorkItem.state exposes total/open/blocked counts, board lanes, dependency risk, and selected item detail."
+        ],
+        "verifier": "WorkItemCellTests and WorkItem.state assertions."
+      },
+      "capabilityHints": [
+        "cell:///WorkItem.state",
+        "cell:///WorkItem.items",
+        "cell:///WorkItem.query",
+        "cell:///WorkItem.board.moveCard",
+        "cell:///WorkItem.addComment",
+        "cell:///WorkItem.addSubtask",
+        "cell:///WorkItem.purposeGoal"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "tasks",
+          "oppgaver",
+          "work board"
+        ],
+        "tokens": [
+          "task",
+          "bug",
+          "decision",
+          "comment",
+          "subtask",
+          "blocker",
+          "dependency"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://project-work.share-selected-intent",
+      "parentRef": "purpose://project-work.overview-and-sharing",
+      "title": "Share selected project intent",
+      "summary": "Prepare, deliver, and open a selected project/work snapshot for a recipient.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.project-work.sharing",
+        "lifecycle": "event",
+        "outcome": "A selected idea/work snapshot can be prepared, delivered, and opened by an admitted recipient.",
+        "successSignals": [
+          "IdeaTaskWorkspace.prepareShareInvite returns a preview.",
+          "IdeaTaskWorkspace.deliverShareInvite records delivery state.",
+          "IdeaTaskShare.acceptInvitationAccess opens accepted shared state for the recipient."
+        ],
+        "verifier": "IdeaTaskWorkspace and IdeaTaskShare share-flow tests."
+      },
+      "capabilityHints": [
+        "cell:///IdeaTaskWorkspace.ideaWorkspace.prepareShareInvite",
+        "cell:///IdeaTaskWorkspace.ideaWorkspace.deliverShareInvite",
+        "cell:///IdeaTaskShare.acceptInvitationAccess"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "share project",
+          "del prosjekt",
+          "send project snapshot",
+          "ekstern mottaker",
+          "dele et prosjektutkast",
+          "uten å sende hele arbeidsloggen"
+        ],
+        "tokens": [
+          "share",
+          "recipient",
+          "snapshot",
+          "invite",
+          "delivery",
+          "open"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://project-work.current-status-and-outstanding",
+      "parentRef": "purpose://project-work.overview-and-sharing",
+      "title": "Current status and outstanding work",
+      "summary": "Show where a project stands now and what remains outstanding.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.project-work.current-overview",
+        "lifecycle": "continuous",
+        "outcome": "The user can see current project position and outstanding work in one overview.",
+        "successSignals": [
+          "ProjectPortfolio.state and WorkItem.state expose matching open/blocked/risk/upcoming counts and query rows.",
+          "The overview identifies waiting-on-human and waiting-on-cell states separately."
+        ],
+        "verifier": "Combined ProjectPortfolio/WorkItem state assertions and GUI smoke."
+      },
+      "capabilityHints": [
+        "cell:///ProjectPortfolio.state",
+        "cell:///ProjectPortfolio.query",
+        "cell:///WorkItem.state",
+        "cell:///WorkItem.query"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "where are we now",
+          "hvor prosjektet er nå",
+          "what is outstanding",
+          "hva som fortsatt gjenstår",
+          "hva som er utestående"
+        ],
+        "tokens": [
+          "now",
+          "status",
+          "overview",
+          "outstanding",
+          "remaining",
+          "blocked",
+          "waiting"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://digital-work.collect-structured-input",
+      "parentRef": "purpose://digital-work",
+      "title": "Collect structured input",
+      "summary": "Collect structured answers or evidence from people or systems.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.digital-work.collect-structured-input",
+        "lifecycle": "event-or-campaign",
+        "outcome": "Structured input can be authored, delivered, collected, inspected, and exported with consent and evidence boundaries.",
+        "successSignals": [
+          "Input schema is visible.",
+          "Submission state is explicit.",
+          "Responses can be read or exported according to grants."
+        ],
+        "verifier": "QuestionnaireCampaignCell tests and response/export assertions."
+      },
+      "matchingHints": {
+        "aliases": [
+          "survey",
+          "questionnaire",
+          "spørreundersøkelse"
+        ],
+        "tokens": [
+          "survey",
+          "questionnaire",
+          "form",
+          "response",
+          "answer",
+          "input"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://content.review-before-publish",
+      "parentRef": "purpose://digital-work",
+      "title": "Review content before publish",
+      "summary": "Prepare publication of notes, summaries, or public content with review, consent, and explicit confirmation.",
+      "status": "draft",
+      "facetRefs": [
+        "purpose://access.audit.privacy",
+        "purpose://gui.quality.functional-accessible"
+      ],
+      "goal": {
+        "goalRef": "goal.content.review-before-publish",
+        "lifecycle": "event",
+        "outcome": "Content can be reviewed and approved before any publish action happens.",
+        "successSignals": [
+          "Target content and publication destination are identified or clarification is requested.",
+          "Privacy-sensitive or personal content is reviewed before publication.",
+          "No content is marked published without explicit confirmation."
+        ],
+        "verifier": "Published-content review fixtures and publish-action confirmation tests."
+      },
+      "matchingHints": {
+        "aliases": [
+          "publisere notatene",
+          "publisere Q&A",
+          "post oppsummeringen",
+          "review before publish"
+        ],
+        "tokens": [
+          "publish",
+          "publisere",
+          "post",
+          "oppsummering",
+          "notater",
+          "review"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://questionnaire.campaign.complete",
+      "parentRef": "purpose://digital-work.collect-structured-input",
+      "title": "Complete questionnaire campaign",
+      "summary": "Create, deliver, answer, inspect, and analyze a questionnaire campaign.",
+      "status": "active",
+      "facetRefs": [
+        "purpose://gui.quality.functional-accessible",
+        "purpose://questionnaire.access.audit",
+        "purpose://test.acceptance.questionnaire",
+        "purpose://preference.owner-controlled",
+        "purpose://source.methodology.current"
+      ],
+      "aliases": [
+        "purpose://questionnaire.campaign"
+      ],
+      "goal": {
+        "goalRef": "goal.questionnaire.complete-campaign",
+        "lifecycle": "campaign",
+        "outcome": "A user can create, deliver, answer, inspect, and analyze a consent-gated questionnaire.",
+        "successSignals": [
+          "Respondent form opens, saves draft, submits, and records consent state.",
+          "Admin authoring can configure questions, consent, pages, and lifecycle.",
+          "Responses can be collected, read, exported, and analyzed without leaking invitation payloads."
+        ],
+        "verifier": "QuestionnaireCampaignCell tests, PromptPurposeLab fixtures, and GUI smoke."
+      },
+      "capabilityHints": [
+        "cell:///QuestionnaireCampaign"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "survey campaign",
+          "questionnaire campaign",
+          "lage en spørreundersøkelse",
+          "spørreundersøkelse",
+          "spørreskjema",
+          "survey",
+          "brukerintervju skjema",
+          "lager surveyen",
+          "Når vi lager surveyen"
+        ],
+        "tokens": [
+          "survey",
+          "questionnaire",
+          "respondent",
+          "admin",
+          "response",
+          "consent",
+          "export",
+          "analysis"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://questionnaire.respondent.form",
+      "parentRef": "purpose://questionnaire.campaign.complete",
+      "title": "Respondent questionnaire form",
+      "summary": "Expose consent, questions, draft save, submit, and withdrawal paths for a respondent.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.questionnaire.respondent-form",
+        "lifecycle": "campaign",
+        "outcome": "Respondent can answer and submit only after consent.",
+        "successSignals": [
+          "Respondent open link returns the expected campaign context.",
+          "Draft save persists answers without marking final submission.",
+          "Submit records submitted state, consent state, and receipt ID."
+        ],
+        "verifier": "QuestionnaireCampaign respondent flow tests."
+      },
+      "capabilityHints": [
+        "cell:///QuestionnaireCampaign.respondent.openLink",
+        "cell:///QuestionnaireCampaign.respondent.saveDraft",
+        "cell:///QuestionnaireCampaign.respondent.submit"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "respondent form",
+          "survey respondent",
+          "spørreskjema for svar",
+          "lagre kladd",
+          "sende inn svar",
+          "etter samtykke",
+          "respondenten må kunne"
+        ],
+        "tokens": [
+          "respondent",
+          "answer",
+          "submit",
+          "draft",
+          "consent",
+          "receipt"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://questionnaire.admin.authoring",
+      "parentRef": "purpose://questionnaire.campaign.complete",
+      "title": "Questionnaire admin authoring",
+      "summary": "Configure title, context, consent, questions, pages, and lifecycle.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.questionnaire.admin-authoring",
+        "lifecycle": "campaign",
+        "outcome": "Admin can configure a campaign without editing code.",
+        "successSignals": [
+          "Campaign settings setters update state.",
+          "Questions can be added, edited, ordered, and validated.",
+          "Admin can preview lifecycle and response policy before launch."
+        ],
+        "verifier": "QuestionnaireCampaign admin setter and authoring tests."
+      },
+      "capabilityHints": [
+        "cell:///QuestionnaireCampaign.campaign.updateSettings",
+        "cell:///QuestionnaireCampaign.questions.add",
+        "cell:///QuestionnaireCampaign.questions.update",
+        "cell:///QuestionnaireCampaign.questions.reorder"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "survey admin",
+          "question authoring",
+          "adminside for spørsmål",
+          "sette opp spørsmål",
+          "samtykketekst",
+          "skjemasider"
+        ],
+        "tokens": [
+          "admin",
+          "author",
+          "question",
+          "settings",
+          "configure",
+          "preview"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://questionnaire.delivery.consent",
+      "parentRef": "purpose://questionnaire.campaign.complete",
+      "title": "Questionnaire delivery and consent",
+      "summary": "Select recipients, send access-proof links, and preserve consent boundaries.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.questionnaire.delivery",
+        "lifecycle": "campaign",
+        "outcome": "Only selected reachable recipients receive access-proof invitations.",
+        "successSignals": [
+          "Delivery preview reports ready and blocked recipients.",
+          "Invitation payload avoids leaking questionnaire content.",
+          "Consent text and withdrawal boundary are visible before submission."
+        ],
+        "verifier": "Questionnaire delivery tests and transport payload policy."
+      },
+      "capabilityHints": [
+        "cell:///QuestionnaireCampaign.delivery.preview",
+        "cell:///QuestionnaireCampaign.delivery.sendReady",
+        "cell:///QuestionnaireCampaign.recipients",
+        "cell:///QuestionnaireCampaign.groups"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "survey delivery",
+          "recipient consent",
+          "utsendelse av spørreundersøkelse",
+          "velg mottakere",
+          "send invitasjon",
+          "åpne lenken"
+        ],
+        "tokens": [
+          "delivery",
+          "recipient",
+          "invite",
+          "send",
+          "consent",
+          "withdraw"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://questionnaire.responses.collect",
+      "parentRef": "purpose://questionnaire.campaign.complete",
+      "title": "Collect questionnaire responses",
+      "summary": "Store draft and submitted answers with consent state and receipt IDs.",
+      "status": "active",
+      "aliases": [
+        "purpose://questionnaire.response"
+      ],
+      "goal": {
+        "goalRef": "goal.questionnaire.collect",
+        "lifecycle": "campaign",
+        "outcome": "Responses are persisted separately from invitation transport.",
+        "successSignals": [
+          "Submitted answers appear only after respondent submit.",
+          "Draft answers remain distinguishable from submitted answers.",
+          "Consent and receipt evidence are queryable according to grants."
+        ],
+        "verifier": "QuestionnaireResponse and QuestionnaireCampaign tests."
+      },
+      "capabilityHints": [
+        "cell:///QuestionnaireCampaign.responses",
+        "cell:///QuestionnaireCampaign.responses.state",
+        "cell:///QuestionnaireCampaign.respondent.submit"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "collect survey responses",
+          "motta svar",
+          "response collection",
+          "lagre kvittering",
+          "skille kladd fra innsending"
+        ],
+        "tokens": [
+          "collect",
+          "response",
+          "answers",
+          "submitted",
+          "draft",
+          "receipt"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://questionnaire.responses.analyze",
+      "parentRef": "purpose://questionnaire.campaign.complete",
+      "title": "Analyze questionnaire responses",
+      "summary": "Inspect counts and export response data transparently.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.questionnaire.analyze",
+        "lifecycle": "campaign",
+        "outcome": "Admin can read, export, and analyze response data according to consent and grants.",
+        "successSignals": [
+          "Response counts are visible.",
+          "Export JSON/CSV includes only permitted fields.",
+          "Analysis summaries cite the response set and filters used."
+        ],
+        "verifier": "Questionnaire response export and analysis tests."
+      },
+      "capabilityHints": [
+        "cell:///QuestionnaireCampaign.responses",
+        "cell:///QuestionnaireCampaign.exportJSON",
+        "cell:///QuestionnaireCampaign.analysis"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "analyze survey",
+          "export responses",
+          "analysere svar",
+          "eksportere svar",
+          "lese svar"
+        ],
+        "tokens": [
+          "analyze",
+          "analysis",
+          "export",
+          "inspect",
+          "count",
+          "summary"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://gui.quality.functional-accessible",
+      "parentRef": "purpose://quality",
+      "title": "Functional accessible GUI",
+      "summary": "Ensure controls are labeled, focusable, visually stable, aesthetic, and wired to real actions.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.gui.quality",
+        "lifecycle": "continuous",
+        "outcome": "All visible controls work, text and fields do not overlap, and keyboard/focus behavior is usable.",
+        "successSignals": [
+          "Buttons trigger real keypaths or explicit disabled states.",
+          "Text fields can receive input and persist or validate it.",
+          "Browser/Binding smoke passes without overlap in required viewports."
+        ],
+        "verifier": "Skeleton validation, GUI smoke, keyboard/focus checks, and screenshot inspection."
+      },
+      "matchingHints": {
+        "aliases": [
+          "GUI must work",
+          "estetisk GUI",
+          "accessible UI",
+          "knapper skal virke",
+          "tekstfelt skal virke",
+          "søkefelt",
+          "overlapper",
+          "pen adminflate"
+        ],
+        "tokens": [
+          "gui",
+          "ui",
+          "button",
+          "field",
+          "focus",
+          "keyboard",
+          "label",
+          "overlap",
+          "aesthetic"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://quality",
+      "parentRef": "purpose://root",
+      "title": "Quality",
+      "summary": "Cross-cutting quality purposes that support user-facing and scaffold-facing work.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.quality",
+        "lifecycle": "continuous",
+        "outcome": "Capabilities are reliable, understandable, useful, and maintainable.",
+        "successSignals": [
+          "Contracts exist for key behavior.",
+          "Failures are observable and recoverable.",
+          "Quality gates are tied to the purpose they protect."
+        ],
+        "verifier": "Contract tests, runtime probes, and documented acceptance criteria."
+      },
+      "matchingHints": {
+        "aliases": [
+          "quality",
+          "production readiness",
+          "kvalitet"
+        ],
+        "tokens": [
+          "quality",
+          "reliable",
+          "stable",
+          "test",
+          "acceptance",
+          "production"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://governance",
+      "parentRef": "purpose://root",
+      "title": "Governance",
+      "summary": "Cross-cutting privacy, access, audit, preference, and owner-control purposes.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.governance",
+        "lifecycle": "continuous",
+        "outcome": "Access and state changes are explicit, bounded, auditable, and owner-respecting.",
+        "successSignals": [
+          "Sensitive reads and writes require visible grants or confirmations.",
+          "Preference and entity facts are owner-scoped and deletable.",
+          "Audit trails explain what changed and why."
+        ],
+        "verifier": "Resolver grant tests, audit-feed checks, and privacy review."
+      },
+      "matchingHints": {
+        "aliases": [
+          "governance",
+          "privacy",
+          "access control",
+          "styring"
+        ],
+        "tokens": [
+          "access",
+          "privacy",
+          "audit",
+          "grant",
+          "consent",
+          "preference",
+          "owner"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://access.audit.privacy",
+      "parentRef": "purpose://governance",
+      "title": "Access, audit and privacy",
+      "summary": "Keep visibility grant-bound and mutations auditable.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.access.audit.privacy",
+        "lifecycle": "continuous",
+        "outcome": "Reads, writes, shares, and exports follow explicit grants and leave reviewable evidence.",
+        "successSignals": [
+          "Resolver denies missing grants.",
+          "Sensitive action plans identify risk level and confirmation needs.",
+          "Audit/feed entries explain successful mutations."
+        ],
+        "verifier": "Resolver policy tests and flow/audit assertions."
+      },
+      "matchingHints": {
+        "aliases": [
+          "privacy and audit",
+          "access audit",
+          "personvern",
+          "tilgangskontroll",
+          "ingen skjult profilering",
+          "samtykke og audit"
+        ],
+        "tokens": [
+          "access",
+          "privacy",
+          "audit",
+          "permission",
+          "grant",
+          "export",
+          "share"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://questionnaire.access.audit",
+      "parentRef": "purpose://access.audit.privacy",
+      "title": "Questionnaire access audit",
+      "summary": "Keep questionnaire responses consent-gated and transport payloads minimal.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.questionnaire.access-audit",
+        "lifecycle": "continuous",
+        "outcome": "Admin visibility follows consent and invitation transport does not leak questionnaire content.",
+        "successSignals": [
+          "Privacy policy state is visible.",
+          "Access decisions are represented in audit/feed events.",
+          "Invitation payloads contain access proof rather than response content."
+        ],
+        "verifier": "Privacy gate and invitation content tests."
+      },
+      "capabilityHints": [
+        "cell:///QuestionnaireCampaign.privacy",
+        "cell:///QuestionnaireCampaign.feed",
+        "cell:///QuestionnaireCampaign.contracts"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "questionnaire privacy",
+          "survey audit",
+          "spørreskjema personvern",
+          "tilgangskontroll og audit",
+          "hvem som leste svar",
+          "leste svar",
+          "Spørreskjemaet må ha samtykke"
+        ],
+        "tokens": [
+          "questionnaire",
+          "privacy",
+          "audit",
+          "consent",
+          "payload",
+          "transport"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://preference.owner-controlled",
+      "parentRef": "purpose://governance",
+      "title": "Owner-controlled preferences",
+      "summary": "Keep reusable preference facts explicit, scoped, inspectable, and deletable.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.preference.owner-controlled",
+        "lifecycle": "continuous",
+        "outcome": "HAVEN can reuse owner-approved preference evidence without hidden profiling.",
+        "successSignals": [
+          "Reusable preferences are stored as explicit evidence records.",
+          "Perspective may weight active context but does not silently mutate owner facts.",
+          "The owner can delete or revise stored preference records."
+        ],
+        "verifier": "Entity/Perspective mutation tests and owner preference review."
+      },
+      "matchingHints": {
+        "aliases": [
+          "Kjetil pleier å ville ha",
+          "owner preferences",
+          "preference evidence",
+          "kunne slettes",
+          "eksplisitt preferanse",
+          "skjult profilering"
+        ],
+        "tokens": [
+          "preference",
+          "owner",
+          "evidence",
+          "explicit",
+          "deletable",
+          "profile"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://validation",
+      "parentRef": "purpose://root",
+      "title": "Validation",
+      "summary": "Purposes that prove behavior through acceptance, contract, replay, GUI, and regression checks.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.validation",
+        "lifecycle": "continuous",
+        "outcome": "HAVEN can tell whether a purpose has been achieved or is blocked.",
+        "successSignals": [
+          "Each canonical purpose has at least one measurable Goal.",
+          "Goal evaluations return achieved, at_risk, blocked, missed, or unknown with evidence.",
+          "Regression tests protect deterministic purpose decomposition."
+        ],
+        "verifier": "GoalEvaluationCell tests, contract probes, and prompt fixtures."
+      },
+      "matchingHints": {
+        "aliases": [
+          "tests",
+          "validation",
+          "acceptance",
+          "akseptansetester",
+          "formålet er oppnådd"
+        ],
+        "tokens": [
+          "test",
+          "verify",
+          "acceptance",
+          "goal",
+          "evidence",
+          "regression"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://test.acceptance",
+      "parentRef": "purpose://validation",
+      "title": "Acceptance tests",
+      "summary": "Prove that a purpose can be achieved and stays stable.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.test.acceptance",
+        "lifecycle": "event",
+        "outcome": "A purpose has executable checks that demonstrate the user-facing or scaffold-facing outcome.",
+        "successSignals": [
+          "Relevant unit/contract tests pass.",
+          "Fixtures cover positive, negative, and ambiguous prompts where applicable.",
+          "GUI smoke exists for user-facing surfaces."
+        ],
+        "verifier": "Swift test filters, npm prompt-purpose audits, and browser canaries where relevant."
+      },
+      "matchingHints": {
+        "aliases": [
+          "acceptance criteria",
+          "done definition",
+          "akseptansetester",
+          "formålet faktisk er oppnådd"
+        ],
+        "tokens": [
+          "acceptance",
+          "fixture",
+          "contract",
+          "smoke",
+          "done"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://test.acceptance.purpose-decomposition",
+      "parentRef": "purpose://test.acceptance",
+      "title": "Purpose decomposition acceptance",
+      "summary": "Protect deterministic prompt decomposition and model-proposal boundaries.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.test.acceptance.purpose-decomposition",
+        "lifecycle": "event",
+        "outcome": "Equivalent prompts produce stable purpose coverage, and model proposals cannot override HAVEN validation.",
+        "successSignals": [
+          "Known fixtures pass deterministic resolver checks.",
+          "Ambiguous prompts ask for clarification or candidate review.",
+          "Hallucinated capabilities are rejected or moved to missing."
+        ],
+        "verifier": "ExecutablePurposeGroundingCellTests, PurposeKnowledge evaluator, and PromptPurposeLab audits."
+      },
+      "matchingHints": {
+        "aliases": [
+          "decomposition tests",
+          "purpose fixture",
+          "prompt eval",
+          "evalsett",
+          "testsett"
+        ],
+        "tokens": [
+          "decomposition",
+          "fixture",
+          "model",
+          "proposal",
+          "hallucinated",
+          "deterministic"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://test.acceptance.hallucination-evaluation",
+      "parentRef": "purpose://test.acceptance",
+      "title": "Hallucination evaluation gate",
+      "summary": "Periodically test that chat, purpose decomposition, model-assisted proposals, and source-backed answers do not invent facts, refs, capabilities, or unsupported certainty.",
+      "status": "draft",
+      "goal": {
+        "goalRef": "goal.test.acceptance.hallucination-evaluation",
+        "lifecycle": "continuous",
+        "outcome": "HAVEN can periodically pass a hallucination evaluation suite and report regressions before hallucinated claims become accepted knowledge or user-facing behavior.",
+        "successSignals": [
+          "Hallucinated purposeRefs, goalRefs, capability refs, keypaths, and source citations are rejected or reported as missing.",
+          "Unsupported factual claims are either grounded with checked sources, clearly marked as inference, or answered as unknown.",
+          "Known negative, adversarial, stale-source, and ambiguous fixtures do not become false canonical purposes.",
+          "When the target threshold has been met, later runs preserve the quality band instead of optimizing past it with regressions elsewhere."
+        ],
+        "thresholds": {
+          "hallucinatedRefRate": "<= 0.01",
+          "unsupportedClaimRate": "<= 0.03",
+          "unknownWhenUnsupportedRate": ">= 0.90",
+          "citationIntegrityRate": ">= 0.95",
+          "noSideEffectViolations": true
+        },
+        "verifier": "PurposeKnowledge evaluator, model-output scorer, citation/source audit, adversarial prompt fixtures, and sampled human review."
+      },
+      "facetRefs": [
+        "purpose://source.methodology.current"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "hallucination evaluation",
+          "hallucination gate",
+          "hallucination eval",
+          "factuality eval",
+          "hallusinerings evaluering",
+          "hallusinasjonstest",
+          "hallusinerings test",
+          "bestå hallusinerings evaluering",
+          "ikke finne på ting"
+        ],
+        "tokens": [
+          "hallucination",
+          "hallucinated",
+          "hallusinasjon",
+          "hallusinering",
+          "hallusinerings",
+          "factuality",
+          "unsupported",
+          "citation",
+          "source",
+          "unknown"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://test.acceptance.questionnaire",
+      "parentRef": "purpose://test.acceptance",
+      "title": "Questionnaire acceptance tests",
+      "summary": "Protect questionnaire decomposition and campaign behavior.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.questionnaire.acceptance-tests",
+        "lifecycle": "event",
+        "outcome": "Questionnaire prompts produce stable purpose coverage and campaign contracts keep working.",
+        "successSignals": [
+          "Questionnaire positive, negative, and ambiguous fixtures pass.",
+          "QuestionnaireCampaign admin/respondent/export tests pass.",
+          "GUI smoke covers admin and respondent surfaces."
+        ],
+        "verifier": "ExecutablePurposeGroundingCellTests, QuestionnaireCampaignCellTests, and GUI smoke."
+      },
+      "matchingHints": {
+        "aliases": [
+          "questionnaire test",
+          "survey acceptance"
+        ],
+        "tokens": [
+          "questionnaire",
+          "survey",
+          "acceptance",
+          "fixture",
+          "campaign",
+          "regression"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://test.acceptance.project-work",
+      "parentRef": "purpose://test.acceptance",
+      "title": "Project work acceptance tests",
+      "summary": "Protect project/work decomposition and cell behavior.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.project-work.acceptance-tests",
+        "lifecycle": "event",
+        "outcome": "Project/work prompts produce stable purpose coverage and existing cells keep their contracts.",
+        "successSignals": [
+          "Project/work positive, negative, and ambiguous fixtures pass.",
+          "ProjectPortfolioCellTests and WorkItemCellTests pass.",
+          "Share-flow and overview tests cover the requested user workflow."
+        ],
+        "verifier": "ExecutablePurposeGroundingCellTests, ProjectPortfolioCellTests, WorkItemCellTests, and share-flow checks."
+      },
+      "matchingHints": {
+        "aliases": [
+          "project work test",
+          "task management acceptance"
+        ],
+        "tokens": [
+          "project",
+          "task",
+          "acceptance",
+          "fixture",
+          "portfolio",
+          "workitem"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://knowledge",
+      "parentRef": "purpose://root",
+      "title": "Knowledge and methodology",
+      "summary": "Purposes that provide source evidence, freshness, methods, and reusable knowledge for decisions.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.knowledge",
+        "lifecycle": "continuous",
+        "outcome": "HAVEN decisions can cite current internal state, stable local knowledge, and checked external sources when needed.",
+        "successSignals": [
+          "Source records include path or URL, checked date, status, and applies-to fields.",
+          "Stale or unfamiliar external claims require a fresh source check.",
+          "Machine-readable knowledge is versioned and traceable to documents or code."
+        ],
+        "verifier": "Documentation/RAG audit and source freshness checks."
+      },
+      "matchingHints": {
+        "aliases": [
+          "knowledge base",
+          "methodology",
+          "source evidence",
+          "kunnskapsbase"
+        ],
+        "tokens": [
+          "knowledge",
+          "source",
+          "method",
+          "evidence",
+          "freshness",
+          "catalog"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://source.methodology.current",
+      "parentRef": "purpose://knowledge",
+      "title": "Current methodology sources",
+      "summary": "Use source evidence with checked dates and stale-source policy.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.source.methodology",
+        "lifecycle": "continuous",
+        "outcome": "Claims about outside practice, law, standards, or model/runtime behavior are based on source records that can be rechecked.",
+        "successSignals": [
+          "External source records have URL, domain, checkedAt, and status.",
+          "Unstable facts trigger browsing or official-source checks.",
+          "Source evidence is attached to the purpose node it supports."
+        ],
+        "verifier": "SourcePolicy checks and RAG/source audit."
+      },
+      "matchingHints": {
+        "aliases": [
+          "sources",
+          "external evidence",
+          "faglige kilder",
+          "offisielle kilder",
+          "URL domene dato",
+          "sjekk kilder",
+          "gode metodekilder",
+          "surveyen",
+          "kildene er ferske"
+        ],
+        "tokens": [
+          "source",
+          "external",
+          "official",
+          "checked",
+          "stale",
+          "methodology"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://knowledge.explain-policy",
+      "parentRef": "purpose://knowledge",
+      "title": "Explain policy or rules",
+      "summary": "Explain rules, policy, or consent boundaries in plain language without inventing authority.",
+      "status": "draft",
+      "goal": {
+        "goalRef": "goal.knowledge.explain-policy",
+        "lifecycle": "event",
+        "outcome": "The user receives a clear explanation of the relevant rule and what actions are allowed, blocked, or require consent.",
+        "successSignals": [
+          "Explanation names the relevant policy or missing source.",
+          "Plain-language mode is supported without condescension.",
+          "The explanation distinguishes aggregate, consented, and private data."
+        ],
+        "verifier": "Policy explanation fixtures and source-grounding checks."
+      },
+      "matchingHints": {
+        "aliases": [
+          "forklare sponsorreglene",
+          "forklar reglene",
+          "explain policy",
+          "som om jeg er fem"
+        ],
+        "tokens": [
+          "explain",
+          "forklare",
+          "policy",
+          "regler",
+          "sponsorregler",
+          "samtykke"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://grounding",
+      "parentRef": "purpose://root",
+      "title": "Grounding",
+      "summary": "Purposes that map prompts to executable, verified, side-effect-aware action plans.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.grounding",
+        "lifecycle": "continuous",
+        "outcome": "A prompt can be decomposed into purpose nodes, achievable Goals, required capabilities, missing pieces, and safe action plans.",
+        "successSignals": [
+          "grounding.decompose returns stable purpose coverage for equivalent inputs.",
+          "Unknown capabilities are reported as missing instead of hallucinated.",
+          "Side effects require explicit action plans and grants."
+        ],
+        "verifier": "ExecutablePurposeGroundingCellTests and prompt-purpose audits."
+      },
+      "matchingHints": {
+        "aliases": [
+          "purpose decomposition",
+          "prompt grounding",
+          "formålsdekomponering",
+          "dekomponer promptet",
+          "trygge action plans"
+        ],
+        "tokens": [
+          "grounding",
+          "decompose",
+          "prompt",
+          "purpose",
+          "goal",
+          "capability"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://grounding.local-model-assisted-decomposition",
+      "parentRef": "purpose://grounding",
+      "title": "Local model assisted decomposition",
+      "summary": "Use a local model as proposal engine while HAVEN keeps deterministic authority.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.grounding.local-model-assisted-decomposition",
+        "lifecycle": "continuous",
+        "outcome": "A local model may suggest templates and hints without mutating final purpose trees or hidden profile state.",
+        "successSignals": [
+          "modelPolicy.mode=proposal falls back deterministically when unavailable.",
+          "Model output can only select templates, propose hints, or expose rejected claims.",
+          "Final PurposeNode output is built by HAVEN templates and validators."
+        ],
+        "verifier": "Stubbed LocalLLM tests, invalid JSON tests, and no Perspective/Entity mutation tests."
+      },
+      "matchingHints": {
+        "aliases": [
+          "local LLM",
+          "model assisted purpose decomposition",
+          "lokal modell",
+          "forslagsmotor",
+          "HAVEN-validatoren"
+        ],
+        "tokens": [
+          "local",
+          "model",
+          "llm",
+          "proposal",
+          "template",
+          "fallback"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://purpose-taxonomy.capture-and-place",
+      "parentRef": "purpose://grounding",
+      "title": "Capture and place new purposes",
+      "summary": "Detect new purpose candidates, find their nearest ancestor, and queue review when automatic placement is uncertain or consent is required.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.purpose-taxonomy.capture-and-place",
+        "lifecycle": "continuous",
+        "outcome": "New purpose candidates are captured, deduplicated, placed under the nearest known ancestor, and escalated only when needed.",
+        "successSignals": [
+          "Candidate has a proposed parent, confidence, evidence, and missing capability list.",
+          "High-confidence safe placements are staged automatically without changing canonical taxonomy.",
+          "Consent-sensitive or low-confidence placements enter a human review accumulator."
+        ],
+        "verifier": "Purpose intake accumulator tests and taxonomy review queue audit."
+      },
+      "matchingHints": {
+        "aliases": [
+          "new purpose intake",
+          "taxonomy accumulator",
+          "formålsfangst",
+          "plasser dem i treet",
+          "menneskelig review",
+          "nye formål automatisk"
+        ],
+        "tokens": [
+          "candidate",
+          "new",
+          "purpose",
+          "taxonomy",
+          "place",
+          "review",
+          "accumulator"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://scaffold.operations",
+      "parentRef": "purpose://root",
+      "title": "Scaffold operations",
+      "summary": "Purposes for scaffolds to keep themselves connected, observable, recoverable, and aligned with HAVEN.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.scaffold.operations",
+        "lifecycle": "continuous",
+        "outcome": "A scaffold can detect whether operational purposes are achieved, at risk, or blocked.",
+        "successSignals": [
+          "Health checks emit events when network or peer contact changes.",
+          "PerspectiveCell can react to operational state changes as contextual signals.",
+          "Recovery helpers are selected by purpose and capability, not hidden scripts."
+        ],
+        "verifier": "Health/ping GoalEvaluation tests and scaffold event replay."
+      },
+      "matchingHints": {
+        "aliases": [
+          "scaffold drift",
+          "HAVEN contact",
+          "operations"
+        ],
+        "tokens": [
+          "scaffold",
+          "network",
+          "ping",
+          "health",
+          "recover",
+          "contact"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://personal-context.semantic-state",
+      "parentRef": "purpose://human-agency",
+      "title": "Personal semantic context state",
+      "summary": "Represent owner-defined labels such as Home, Work, or lunch time without exposing raw location/time unless explicitly granted.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.personal-context.semantic-state",
+        "lifecycle": "continuous",
+        "outcome": "Personal context labels become active, approaching, or ended based on owner-approved observations and tolerances.",
+        "successSignals": [
+          "SemanticLocation label is evaluated from private location evidence with freshness and precision bounds.",
+          "SemanticTime label is evaluated in the owner's timezone with clear active windows.",
+          "Composite context Goals can combine labels without leaking raw observations."
+        ],
+        "verifier": "Semantic location/time cells, GoalEvaluationCell, and privacy-bound event tests."
+      },
+      "matchingHints": {
+        "aliases": [
+          "home",
+          "work",
+          "lunch time",
+          "semantic location",
+          "Hjemme",
+          "på jobben",
+          "lunsjtiden",
+          "lunsjtid",
+          "lokal tidssone",
+          "nærmer meg Hjemme",
+          "Send event når jeg nærmer meg Hjemme"
+        ],
+        "tokens": [
+          "home",
+          "work",
+          "location",
+          "time",
+          "lunch",
+          "semantic",
+          "context"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://value-and-commons",
+      "parentRef": "purpose://root",
+      "title": "Value and commons",
+      "summary": "Purposes for returning value, protecting commons, and avoiding extractive platform dynamics.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.value-and-commons",
+        "lifecycle": "continuous",
+        "outcome": "Value flows are transparent, bounded by policy, and do not undermine equal human worth or owner agency.",
+        "successSignals": [
+          "Credits, payouts, grants, or value-return mechanisms have explicit policy and regulatory review.",
+          "Contribution evidence is inspectable and contestable.",
+          "No user is reduced to an opaque monetization score."
+        ],
+        "verifier": "DiMy policy review, regulatory guardrail review, and value-flow audit."
+      },
+      "matchingHints": {
+        "aliases": [
+          "DiMy",
+          "value redistribution",
+          "commons",
+          "returnere verdi",
+          "opaque score",
+          "spore bidrag"
+        ],
+        "tokens": [
+          "value",
+          "commons",
+          "credits",
+          "contribution",
+          "grant",
+          "rebate"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://prompt.unknown",
+      "parentRef": "purpose://root",
+      "title": "Unknown prompt purpose",
+      "summary": "Fallback when a prompt has no known canonical purpose yet.",
+      "status": "active",
+      "goal": {
+        "goalRef": "goal.prompt.unknown",
+        "lifecycle": "event",
+        "outcome": "Unknown prompts are handled safely by reporting missing coverage, candidate purposes, and review needs.",
+        "successSignals": [
+          "No false canonical purpose is asserted.",
+          "Candidate placement includes nearest known ancestor and confidence.",
+          "Human review is queued when needed."
+        ],
+        "verifier": "Negative and ambiguous prompt fixtures."
+      },
+      "matchingHints": {
+        "aliases": [
+          "unknown",
+          "unmapped prompt"
+        ],
+        "tokens": [
+          "unknown",
+          "unresolved",
+          "missing",
+          "candidate"
+        ]
+      }
+    }
+  ],
+  "facets": [
+    {
+      "purposeRef": "purpose://gui.quality.functional-accessible",
+      "appliesTo": [
+        "user-facing-capability",
+        "admin-surface",
+        "respondent-surface",
+        "project-work-surface"
+      ]
+    },
+    {
+      "purposeRef": "purpose://access.audit.privacy",
+      "appliesTo": [
+        "read",
+        "write",
+        "share",
+        "export",
+        "personal-data"
+      ]
+    },
+    {
+      "purposeRef": "purpose://test.acceptance",
+      "appliesTo": [
+        "canonical-purpose",
+        "user-facing-workflow",
+        "scaffold-operational-purpose"
+      ]
+    },
+    {
+      "purposeRef": "purpose://source.methodology.current",
+      "appliesTo": [
+        "external-claims",
+        "standards",
+        "laws",
+        "product-recommendations",
+        "model-runtime-facts"
+      ]
+    }
+  ],
+  "matchingIndexPlan": {
+    "target": "Faster candidate selection than full sparse cosine for common purpose routing.",
+    "normalization": [
+      "Lowercase and ASCII-fold incoming text for index keys while retaining original text for explanation.",
+      "Map canonical purposeRefs and aliases through a hash map before lexical scoring.",
+      "Keep Norwegian and English aliases on the same node when HAVEN users commonly mix terms."
+    ],
+    "indexes": [
+      {
+        "name": "canonicalRefMap",
+        "type": "hash-map",
+        "use": "O(1) canonical purposeRef and alias lookup."
+      },
+      {
+        "name": "tokenInvertedIndex",
+        "type": "token-to-purposeRef postings",
+        "use": "Shortlist candidate nodes from prompt tokens, capability names, interests, and visible keypaths."
+      },
+      {
+        "name": "ancestorIntervalIndex",
+        "type": "dfs-entry-exit",
+        "use": "O(1) ancestor checks for single-parent tree nodes."
+      },
+      {
+        "name": "ancestorBitsetIndex",
+        "type": "fixed-width bitset",
+        "use": "Fast lowest-common-ancestor and shared-heritage checks with bitwise AND and deepest-set-bit lookup for small/medium taxonomies."
+      },
+      {
+        "name": "facetIndex",
+        "type": "facetRef-to-purposeRef postings",
+        "use": "Attach cross-cutting GUI, privacy, source, and validation purposes without distorting the main tree ancestor."
+      },
+      {
+        "name": "goalVerifierIndex",
+        "type": "goalRef-to-verifier/capability map",
+        "use": "Route from a matched purpose to the evidence needed to test achievement."
+      }
+    ],
+    "rankingOrder": [
+      "Exact purposeRef or alias match.",
+      "Capability/keypath match against known cells.",
+      "High-signal token matches from node aliases and goal success signals.",
+      "Ancestor depth preference for specific nodes.",
+      "Facet attachment for cross-cutting quality/governance/validation.",
+      "Sparse cosine or embedding rerank only over the top-K shortlist."
+    ],
+    "lcaStrategy": {
+      "smallTaxonomy": "Use ancestor bitsets and precomputed depth arrays.",
+      "largeTaxonomy": "Use Euler tour entry/exit for isAncestor plus binary lifting for LCA.",
+      "crossCuttingFacets": "Exclude facets from primary LCA, then report all-purpose LCA separately."
+    }
+  },
+  "sourceRefs": [
+    {
+      "id": "local:Book09",
+      "path": "Book/09_Purpose_Interests.md",
+      "status": "checked",
+      "checkedAt": "2026-06-14",
+      "appliesTo": [
+        "purpose",
+        "goals",
+        "interests",
+        "privacy"
+      ]
+    },
+    {
+      "id": "local:Book14",
+      "path": "Book/14_Perspective_Runtime_Matching.md",
+      "status": "checked",
+      "checkedAt": "2026-06-14",
+      "appliesTo": [
+        "perspective",
+        "matching",
+        "portableRefs"
+      ]
+    },
+    {
+      "id": "local:PurposeGoalEvaluation",
+      "path": "Deliverables/Purpose_Goal_Evaluation_Analysis_2026-06-11.md",
+      "status": "checked",
+      "checkedAt": "2026-06-14",
+      "appliesTo": [
+        "goals",
+        "goal-evaluation",
+        "purpose-to-goal mapping"
+      ]
+    },
+    {
+      "id": "local:CellScaffoldPurposeDecomposition",
+      "path": "CellScaffold/Sources/App/Support/PurposeDecomposition.swift",
+      "status": "checked",
+      "checkedAt": "2026-06-14",
+      "appliesTo": [
+        "runtime-taxonomy",
+        "grounding.decompose",
+        "grounding.taxonomy.resolve"
+      ]
+    },
+    {
+      "id": "external:HalluLens2025",
+      "url": "https://arxiv.org/abs/2504.17550",
+      "domain": "arxiv.org",
+      "status": "checked",
+      "checkedAt": "2026-06-20",
+      "appliesTo": [
+        "hallucination-evaluation",
+        "hallucination-taxonomy",
+        "dynamic-test-generation"
+      ]
+    },
+    {
+      "id": "external:WildHallucinations2024",
+      "url": "https://arxiv.org/abs/2407.17468",
+      "domain": "arxiv.org",
+      "status": "checked",
+      "checkedAt": "2026-06-20",
+      "appliesTo": [
+        "factuality",
+        "real-world-entity-queries",
+        "source-backed-fact-checking"
+      ]
+    },
+    {
+      "id": "external:HalluDial2024",
+      "url": "https://arxiv.org/abs/2406.07070",
+      "domain": "arxiv.org",
+      "status": "checked",
+      "checkedAt": "2026-06-20",
+      "appliesTo": [
+        "dialogue-level-hallucination",
+        "faithfulness",
+        "rationale-and-localization"
+      ]
+    }
+  ]
+}

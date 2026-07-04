@@ -10,6 +10,11 @@ Important:
 
 - `SkeletonElementView.swift` is deprecated and should not be treated as the canonical Apple renderer anymore.
 - The canonical model still lives in `SkeletonDescription.swift`. Web and Apple runtimes may tolerate extra shapes, but portable JSON should follow the model, not renderer-only shortcuts.
+- Production skeletons must validate key bindings against Explore contracts
+  before preview or commit. Use
+  [Chapter 22 - Explore Contracts for Skeleton and Cell Authoring](22_Explore_Contracts_For_Skeleton_Authoring.md)
+  and `Tools/Explore/skeleton_explore_validator.py` when a skeleton reads from
+  or writes to a Cell.
 
 ## 1. Encoding Rule (All Elements)
 
@@ -64,10 +69,23 @@ Many elements accept `modifiers`. The available fields are:
 - `minimumScaleFactor` (Double)
 - `styleRole` (String)
 - `styleClasses` (String array)
+- `motionHint` (String enum: `appear` | `expand` | `collapse` |
+  `minimize` | `restore` | `replace` | `emphasize`)
+- `motionSourceRole` (String)
 
 Source:
 
 - `CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift`
+
+Motion note:
+
+- `motionHint` is semantic metadata, not renderer-owned keyframes. It tells
+  Porthole/Binding why an element appeared or changed.
+- `motionSourceRole` points to a semantic source such as `chat-composer`,
+  `suggestion-card` or `minimized-helper-pill`.
+- Renderers must respect reduced-motion preferences and may replace movement
+  with fade/highlight or no animation.
+- Motion must never be the only signal that a component appeared.
 
 ## 3. Elements
 
@@ -467,6 +485,172 @@ Fields:
 - `isOn` (Bool)
 - `modifiers` (optional)
 
+### 3.16 Visualization
+
+`Visualization` is the generic skeleton element for renderer-owned visual surfaces. Maps use the existing element with `kind: "map"`; do not introduce product-specific map element names.
+
+Portable map skeleton pattern:
+
+```json
+{
+  "Visualization": {
+    "kind": "map",
+    "keypath": "spatial.state.map",
+    "stateKeypath": "spatial.state.selection",
+    "actionKeypath": "spatial.selectFeature"
+  }
+}
+```
+
+Fields:
+- `kind` (String, required; `map` is the portable spatial map kind)
+- `keypath` (String, optional, resolves the visualization data/spec from state)
+- `stateKeypath` (String, optional, resolves current selection/state)
+- `actionKeypath` (String, optional, fired only by explicit user interaction)
+- `spec` (ValueType, optional inline spec)
+- `modifiers` (optional)
+
+`kind: "map"` expects a `MapVisualizationSpec`:
+
+```json
+{
+  "coordinateSpace": "geospatial",
+  "base": {
+    "kind": "tiles",
+    "urlTemplate": "https://tiles.example/{z}/{x}/{y}.png",
+    "attribution": "Map data attribution"
+  },
+  "viewport": {
+    "center": [10.7522, 59.9139],
+    "zoom": 14
+  },
+  "fit": "fitFeatures",
+  "features": [
+    {
+      "id": "artifact-oslo-1",
+      "geometry": {
+        "type": "point",
+        "coordinates": [10.7522, 59.9139]
+      },
+      "label": "Coffee note",
+      "selectable": true,
+      "properties": {
+        "schema": "haven.spatial.feature.v1",
+        "featureId": "artifact-oslo-1",
+        "kind": "artifact",
+        "positionDisclosure": "coarse",
+        "accuracyMeters": 250,
+        "purposeRefs": ["personal.chat.assist.spatial-query"],
+        "interestRefs": ["coffee"],
+        "matchExplanation": {
+          "summary": "Matched purpose and interest.",
+          "matchedPurposeRefs": ["personal.chat.assist.spatial-query"],
+          "matchedInterestRefs": ["coffee"],
+          "score": 13
+        },
+        "contactEndpoint": {
+          "endpointId": "contact-anna",
+          "displayName": "Anna",
+          "cellEndpoint": "cell:///ContactEndpoint"
+        },
+        "mediaRefs": [
+          {
+            "id": "image-1",
+            "kind": "image",
+            "cellEndpoint": "cell:///Media/image-1",
+            "previewKeypath": "preview"
+          },
+          {
+            "id": "anchor-1",
+            "kind": "ar"
+          }
+        ],
+        "visibility": "nearby",
+        "expiresAt": "2026-05-29T12:00:00Z",
+        "sourceCellEndpoint": "cell:///SpatialArtifact",
+        "proofRefs": ["proof:publisher-consent"]
+      }
+    }
+  ],
+  "revision": "spatial-v1"
+}
+```
+
+Map spec fields:
+- `coordinateSpace`: `geospatial` or `planar`
+- `base`: optional `tiles` or `image` base. Omit it when the host owns the provider/base-map policy.
+- `viewport`: optional `center`, `zoom`, or `bounds`
+- `fit`: `manual`, `fitBase`, or `fitFeatures`
+- `features`: array of point/polyline/polygon features
+- `revision`: optional stable revision string for renderer diffing
+
+Spatial feature payload:
+- `MapVisualizationFeature.properties` may carry `schema: "haven.spatial.feature.v1"`.
+- Required identity fields are `featureId`, `kind`, `positionDisclosure`, `purposeRefs`, `visibility`, and `expiresAt`.
+- Optional context fields are `accuracyMeters`, `interestRefs`, `matchExplanation`, `contactEndpoint`, `mediaRefs`, `sourceCellEndpoint`, and `proofRefs`.
+- `contactEndpoint` must be a safe `ContactEndpointCell` reference. Do not expose raw routes, push tokens, global user IDs, or private owner hashes.
+- Media is represented as refs, not blobs. AR in v1 is either `mediaRefs[].kind = "ar"` or `kind = "arAnchor"` with a normal marker fallback.
+
+Privacy defaults:
+- Coarse, time-limited position is the default.
+- Precise position requires an explicit grant.
+- Spatial publication requires an explicit purpose and TTL.
+- Expired or revoked features must not project into the map.
+- Co-Pilot may query, explain, or draft; publish/revoke actions require an explicit user action.
+
+Renderer notes:
+- Web uses Leaflet for portable map rendering and should keep the base provider neutral. If `tile.openstreetmap.org` tiles are used, the host must follow OSMF tile policy for attribution, identifiable client behavior, caching, and no bulk/offline prefetch.
+- Apple uses MapKit for geospatial maps and planar rendering for image/floor maps.
+- Real AR camera overlays are a host capability, not part of the v1 skeleton map contract.
+
+References for this contract:
+- OSMF tile policy: https://operations.osmfoundation.org/policies/tiles/
+- W3C Geolocation privacy guidance: https://www.w3.org/TR/geolocation/
+- Leaflet layer/vector/GeoJSON reference: https://leafletjs.com/reference.html
+- Apple MapKit reference: https://developer.apple.com/documentation/mapkit
+
+`kind: "calendar"` expects a `CalendarVisualizationSpec` backed by canonical
+HAVEN calendar data. Do not introduce a new `Calendar` skeleton element; the
+portable renderer surface is still `Visualization`.
+
+Portable calendar skeleton pattern:
+
+```json
+{
+  "Visualization": {
+    "kind": "calendar",
+    "keypath": "calendar.state.visualization",
+    "stateKeypath": "calendar.state.selectedOccurrenceID",
+    "actionKeypath": "calendar.queryOccurrences"
+  }
+}
+```
+
+`CalendarVisualizationSpec` fields:
+- `schema`: `haven.calendar.visualization.v1`
+- `view`: `agenda`, `day`, `week`, `month`, or `timeline`
+- `range`: object with `startAt` and `endAt`
+- `timezone`: IANA timezone string or `UTC`
+- `itemsKeypath`: keypath for expanded `CalendarOccurrence` rows, normally `calendar.occurrences`
+- `selectionKeypath`: optional keypath for current occurrence selection
+- `actionKeypath`: optional action keypath for explicit user requests
+- `capabilities`: host capability flags, for example selection or import/export affordances
+- `display`: renderer labels and empty-state text
+- `fallback`: list/grid fallback metadata for renderers that do not support calendar layout
+- `occurrences`: expanded occurrence rows for the requested range
+
+Calendar data is a Cell contract, not renderer-owned state:
+- Authoritative item data uses `haven.calendar.item.v1`.
+- Collections use `haven.calendar.collection.v1`.
+- Render rows use `haven.calendar.occurrence.v1`.
+- Recurrence is stored close to iCalendar (`rrule`, `rdate`, `exdate`, `recurrenceId`), but renderers consume already-expanded occurrences for a concrete range.
+- ICS import/export preserves the iCalendar identity and time semantics where possible; CalDAV and native EventKit-style calendars are adapters over the same canonical store, not new skeleton data models.
+
+Renderer notes:
+- Web/Porthole and Apple/Porthole render agenda/day/week/month/timeline as readable occurrence lists in v1.
+- Unsupported renderers must show the `fallback` list/grid and a visible diagnostic rather than a blank surface.
+- Drag/drop, complex recurrence editing, and native calendar permission prompts are host capabilities outside the v1 skeleton contract.
+
 ## 4. Keypath Rules
 
 Many elements use `keypath` or `url`:
@@ -496,4 +680,5 @@ These are real, repo-confirmed limits as of March 2026:
 
 1. `styleRole` / `styleClasses` exist in the model and web runtime, while Apple currently exposes them mainly as accessibility metadata rather than a full native theme mapping.
 2. Skeleton still lacks first-class `Badge` / `Chip` and `Gauge` / `Progress` primitives, so metadata-heavy dashboards still rely on styled `Text` and custom cells.
-3. Collection grids are now data-bindable, and `Picker` now exists as a first-class single-selection primitive. Domain contracts still need to expose honest option lists and state snapshots; a renderer primitive alone does not create an honest workflow.
+3. Collection grids are now data-bindable, `Picker` now exists as a first-class single-selection primitive, and `Visualization(kind: "map")` exists for portable map surfaces. Domain contracts still need to expose honest option lists, state snapshots, and spatial privacy rules; a renderer primitive alone does not create an honest workflow.
+4. `Visualization(kind: "map")` supports marker/vector/image-map fallback today. AR camera overlays, provider-specific offline maps, and native device permission prompts remain host capabilities outside the v1 skeleton contract.
