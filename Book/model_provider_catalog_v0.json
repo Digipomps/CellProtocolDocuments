@@ -1,0 +1,668 @@
+{
+  "version": 0,
+  "status": "seed",
+  "lastUpdated": "2026-06-18",
+  "purpose": "Seed catalog for HAVEN model/provider selection. This file stores public provider/model metadata and HAVEN routing guidance only. It must never contain API keys or prompt contents.",
+  "credentialPolicy": {
+    "secretStorage": "Store raw API keys only in a SecretCredentialCell-backed vault, Keychain, or HAVENAgentD secret store.",
+    "scaffoldAccess": "Scaffolds receive a capability to invoke a provider for a purpose; they should not receive raw API keys by default.",
+    "neverStoreSecretsIn": [
+      "Book",
+      "Deliverables",
+      "CellConfiguration",
+      "Skeleton",
+      "Prompts",
+      "benchmark results",
+      "logs",
+      "Git"
+    ]
+  },
+  "modelKnowledgeRAG": {
+    "toolRoot": "Tools/ModelKnowledge",
+    "manifest": "Tools/ModelKnowledge/model_knowledge_sources.json",
+    "corpus": "Tools/ModelKnowledge/generated/model_knowledge_corpus.jsonl",
+    "currentMode": "lexical-seed",
+    "nextMode": "embedding-plus-reranker",
+    "secretPolicy": "Provider keys are read from SecretCredentialCell/AgentD when available; temporary env vars are process-local only and must never be written to generated artifacts."
+  },
+  "dataClasses": [
+    "synthetic",
+    "public",
+    "internal_non_sensitive",
+    "private_profile",
+    "private_contact_info",
+    "private_notes",
+    "sponsor_leads_with_consent",
+    "sponsor_leads_without_consent",
+    "payment",
+    "health",
+    "children",
+    "credential_secret"
+  ],
+  "matchingWeights": {
+    "default": {
+      "quality": 0.35,
+      "privacyLocality": 0.25,
+      "taskSpecificBenchmark": 0.2,
+      "latency": 0.1,
+      "cost": 0.05,
+      "operationalStability": 0.05
+    },
+    "securitySensitive": {
+      "note": "privacyLocality, DPA status, license and allowed data class are hard gates before ranking.",
+      "quality": 0.25,
+      "privacyLocality": 0.35,
+      "taskSpecificBenchmark": 0.2,
+      "latency": 0.05,
+      "cost": 0.05,
+      "operationalStability": 0.1
+    }
+  },
+  "purposeProfiles": [
+    {
+      "purposeRef": "purpose://personal.ai.private-draft",
+      "title": "Local private draft",
+      "preferredRoutes": [
+        "local-agentd",
+        "on-device"
+      ],
+      "allowedDataClasses": [
+        "synthetic",
+        "public",
+        "internal_non_sensitive",
+        "private_profile",
+        "private_notes"
+      ],
+      "externalProviderDefault": "deny-unless-explicit-agreement"
+    },
+    {
+      "purposeRef": "purpose://conference.co-pilot.participant-guidance",
+      "title": "Conference participant guidance",
+      "preferredRoutes": [
+        "local-agentd",
+        "local-gguf",
+        "approved-hosted"
+      ],
+      "allowedDataClasses": [
+        "synthetic",
+        "public",
+        "internal_non_sensitive"
+      ],
+      "qualitySignals": [
+        "Norwegian daily speech benchmark",
+        "agenda/policy grounding",
+        "safe refusal behavior"
+      ]
+    },
+    {
+      "purposeRef": "purpose://conference.co-pilot.model-evaluation",
+      "title": "Conference model evaluation",
+      "preferredRoutes": [
+        "hosted-aggregator",
+        "hosted-open-weight-serverless",
+        "local-agentd"
+      ],
+      "allowedDataClasses": [
+        "synthetic",
+        "public"
+      ],
+      "externalProviderDefault": "allow-with-test-credential-and-spend-cap"
+    },
+    {
+      "purposeRef": "purpose://conference.co-pilot.multimodal-qa",
+      "title": "Multimodal conference QA",
+      "preferredRoutes": [
+        "local-mlx-vlm",
+        "approved-hosted-multimodal"
+      ],
+      "allowedDataClasses": [
+        "synthetic",
+        "public",
+        "internal_non_sensitive"
+      ],
+      "requiresExplicitUserSelection": true
+    },
+    {
+      "purposeRef": "purpose://docs.rag.answer-with-citations",
+      "title": "Book/docs RAG answer with citations",
+      "preferredRoutes": [
+        "embedding",
+        "reranker",
+        "local-agentd",
+        "approved-hosted"
+      ],
+      "allowedDataClasses": [
+        "public",
+        "internal_non_sensitive"
+      ],
+      "qualitySignals": [
+        "citation correctness",
+        "source path grounding"
+      ]
+    },
+    {
+      "purposeRef": "purpose://model.prompt-adaptation",
+      "title": "RAG prompt adaptation",
+      "preferredRoutes": [
+        "deterministic-cell",
+        "local-agentd"
+      ],
+      "allowedDataClasses": [
+        "public",
+        "internal_non_sensitive"
+      ],
+      "qualitySignals": [
+        "prompt manifest hash",
+        "source ref preservation",
+        "target model profile match"
+      ]
+    },
+    {
+      "purposeRef": "purpose://developer.protocol-code-reasoning",
+      "title": "Developer protocol/code reasoning",
+      "preferredRoutes": [
+        "local-agentd",
+        "approved-hosted-frontier",
+        "hosted-open-weight-serverless"
+      ],
+      "allowedDataClasses": [
+        "synthetic",
+        "public",
+        "internal_non_sensitive"
+      ],
+      "externalProviderDefault": "allow-after-context-minimization"
+    },
+    {
+      "purposeRef": "purpose://privacy.pii-preflight",
+      "title": "PII and sensitive-data preflight",
+      "preferredRoutes": [
+        "pii-preflight",
+        "local-agentd"
+      ],
+      "allowedDataClasses": [
+        "synthetic",
+        "public",
+        "internal_non_sensitive",
+        "private_profile",
+        "private_contact_info",
+        "private_notes",
+        "sponsor_leads_with_consent"
+      ],
+      "externalProviderDefault": "deny"
+    },
+    {
+      "purposeRef": "purpose://model.provider-discovery",
+      "title": "Provider and model discovery",
+      "preferredRoutes": [
+        "hosted-aggregator",
+        "hosted-open-weight-serverless"
+      ],
+      "allowedDataClasses": [
+        "synthetic",
+        "public"
+      ],
+      "externalProviderDefault": "allow-with-test-credential-and-spend-cap"
+    }
+  ],
+  "metadataHarvestJobs": [
+    {
+      "jobID": "provider.models.fetch",
+      "purpose": "Fetch provider model IDs and availability where an API exists.",
+      "requiresCredential": true,
+      "credentialAccess": "SecretCredentialCell secretRef"
+    },
+    {
+      "jobID": "provider.pricing.fetch",
+      "purpose": "Snapshot pricing, plan, concurrency and route-cost metadata.",
+      "requiresCredential": false
+    },
+    {
+      "jobID": "provider.privacy.fetch",
+      "purpose": "Snapshot privacy, logging, retention, region and DPA source URLs.",
+      "requiresCredential": false
+    },
+    {
+      "jobID": "hf.modelcard.fetch",
+      "purpose": "Snapshot Hugging Face model-card metadata for open candidates.",
+      "requiresCredential": false
+    },
+    {
+      "jobID": "local.runtime.probe",
+      "purpose": "Measure local runtime compatibility, token speed, memory and hardware backend.",
+      "requiresCredential": false
+    },
+    {
+      "jobID": "benchmark.run",
+      "purpose": "Run HAVEN benchmark packs and record source/result hashes.",
+      "requiresCredential": "only for hosted providers"
+    },
+    {
+      "jobID": "catalog.merge",
+      "purpose": "Merge harvested facts with source timestamps and provenance.",
+      "requiresCredential": false
+    },
+    {
+      "jobID": "purpose.fit.score",
+      "purpose": "Compute model-to-purpose fit after hard policy filters.",
+      "requiresCredential": false
+    }
+  ],
+  "providers": [
+    {
+      "providerID": "nanogpt",
+      "displayName": "NanoGPT",
+      "routeType": "hosted-aggregator",
+      "baseURL": "https://nano-gpt.com/api/v1",
+      "apiCompatibility": [
+        "openai-chat-completions",
+        "openai-images",
+        "video-submit-poll",
+        "audio",
+        "embeddings"
+      ],
+      "auth": {
+        "supportedHeaders": [
+          "Authorization: Bearer",
+          "x-api-key"
+        ],
+        "maxKeysObserved": 20
+      },
+      "pricing": {
+        "model": "pay-as-you-go",
+        "notes": "Pricing page said text model API usage is billed at list prices with no percentage markup except opt-in cases such as provider pinning and BYOK."
+      },
+      "privacy": {
+        "summary": "Local browser history by default; providers receive request content needed to answer. Optional PII redaction, BYOK, fallback controls and some TEE/private model paths.",
+        "promptLoggingClaim": "Depends on selected provider route; NanoGPT privacy page says provider receives content and provider retention controls still matter.",
+        "chatHistory": "Local browser storage by default unless sync/sharing/cloud features are enabled."
+      },
+      "gdprPosture": {
+        "status": "needs-review-before-personal-data",
+        "notes": "Aggregator routes may involve closed-source providers, open-weight hosting partners, PII redaction subprocessors, media/search providers or TEE paths. Use only public/synthetic data until Agreement/DPA/provider route is explicit."
+      },
+      "havenRecommendation": {
+        "useFor": [
+          "broad model discovery",
+          "price/performance sweeps",
+          "synthetic Co-pilot benchmark prompts",
+          "image/video/audio model exploration",
+          "TEE/private-route experiments"
+        ],
+        "avoidFor": [
+          "private entity data",
+          "raw sponsor leads",
+          "private contact info",
+          "vault notes",
+          "credential-bearing prompts"
+        ],
+        "firstStep": "Create one low-budget testing credential with strict spend limits and no private data."
+      },
+      "sources": [
+        "https://nano-gpt.com/api",
+        "https://docs.nano-gpt.com/authentication",
+        "https://nano-gpt.com/pricing",
+        "https://nano-gpt.com/privacy"
+      ],
+      "sourceCheckedAt": "2026-06-18"
+    },
+    {
+      "providerID": "featherless",
+      "displayName": "Featherless",
+      "routeType": "hosted-open-weight-serverless",
+      "baseURL": "https://api.featherless.ai/v1",
+      "apiCompatibility": [
+        "openai-chat-completions",
+        "openai-completions",
+        "models",
+        "tokenize"
+      ],
+      "auth": {
+        "supportedHeaders": [
+          "Authorization/Bearer-style API key per docs"
+        ],
+        "accountLoginOptionsObserved": [
+          "email-password",
+          "google",
+          "huggingface",
+          "github",
+          "discord"
+        ],
+        "notes": "Featherless login page offers Sign in with Hugging Face. Store the Featherless API key/session as the provider credential; model Hugging Face as the account login provider when that is how the operator signs in."
+      },
+      "pricing": {
+        "model": "subscription-concurrency",
+        "observedPlans": [
+          {
+            "name": "Basic",
+            "monthlyUSD": 10,
+            "limit": "Models up to 15B, 2 concurrent connections"
+          },
+          {
+            "name": "Premium",
+            "monthlyUSD": 25,
+            "limit": "Catalogue access, up to 4 concurrent connections"
+          },
+          {
+            "name": "Agent/Business unit",
+            "monthlyUSDRange": [
+              100,
+              200
+            ],
+            "limit": "Larger model access, up to 8 concurrent connections, up to 256K context, sandbox/unit"
+          }
+        ]
+      },
+      "privacy": {
+        "summary": "API docs claim chats, prompts and completions sent through API are not logged and are processed in real time. Hosted chat history is stored separately and auto-deleted after 30 days inactivity.",
+        "promptLoggingClaim": "No API prompt/completion logging per docs.",
+        "chatHistory": "Hosted chat stores history separately; use API for HAVEN tests."
+      },
+      "gdprPosture": {
+        "status": "needs-review-before-personal-data",
+        "notes": "Privacy policy says account/payment data and usage metrics are collected, prompts/completions are not stored, and personal data is not transferred internationally. DPA, subprocessors, infrastructure region and model-license terms still need review for HAVEN personal data."
+      },
+      "havenRecommendation": {
+        "useFor": [
+          "open-weight model discovery before local download",
+          "Qwen/Gemma/Mistral/DeepSeek/Kimi/RWKV/GPT-OSS comparison",
+          "synthetic benchmark sweeps",
+          "deciding which models deserve MLX/GGUF work"
+        ],
+        "avoidFor": [
+          "private entity data before DPA review",
+          "hosted chat for sensitive testing",
+          "models whose licenses are unclear for HAVEN use"
+        ],
+        "firstStep": "Start with the lowest plan that can run the benchmark candidate set; use API, not hosted chat, for reproducible tests."
+      },
+      "sources": [
+        "https://featherless.ai/",
+        "https://featherless.ai/docs/quickstart-guide",
+        "https://featherless.ai/docs/overview",
+        "https://featherless.ai/docs/plans",
+        "https://featherless.ai/docs/privacy-and-logging",
+        "https://featherless.ai/legal/privacy-policy",
+        "https://featherless.ai/legal/terms-of-service"
+      ],
+      "sourceCheckedAt": "2026-06-18"
+    },
+    {
+      "providerID": "mistral",
+      "displayName": "Mistral AI",
+      "routeType": "hosted-frontier-and-open-provider",
+      "baseURL": "https://api.mistral.ai/v1",
+      "apiCompatibility": [
+        "chat-completions",
+        "models",
+        "embeddings",
+        "ocr",
+        "agents"
+      ],
+      "auth": {
+        "supportedHeaders": [
+          "Authorization: Bearer"
+        ],
+        "apiKeyConsole": "https://console.mistral.ai",
+        "notes": "Mistral Studio docs describe activating Studio and generating API keys; API reference examples use MISTRAL_API_KEY and Bearer authentication."
+      },
+      "pricing": {
+        "model": "provider-billed-api-usage",
+        "notes": "Pricing and workspace limits must be checked in Mistral Studio before production use."
+      },
+      "privacy": {
+        "summary": "Hosted Mistral route. Treat as external provider until DPA, region, retention and workspace policy are reviewed.",
+        "promptLoggingClaim": "Needs current legal/admin review before personal HAVEN data.",
+        "chatHistory": "API route, not Studio playground/chat history."
+      },
+      "gdprPosture": {
+        "status": "needs-review-before-personal-data",
+        "notes": "Useful EU/provider comparison candidate, but private data requires explicit Agreement/DPA/subprocessor/region review."
+      },
+      "havenRecommendation": {
+        "useFor": [
+          "synthetic Co-pilot benchmark sweeps",
+          "EU hosted provider comparison",
+          "coding/protocol reasoning experiments",
+          "Mistral-specific model discovery"
+        ],
+        "avoidFor": [
+          "private entity data before DPA review",
+          "credential-bearing prompts",
+          "deterministic policy/action authority"
+        ],
+        "firstStep": "Use mistral-small-latest on synthetic benchmark cases, then compare with Mistral medium/large only when cost and privacy policy are explicit."
+      },
+      "sources": [
+        "https://docs.mistral.ai/",
+        "https://docs.mistral.ai/api/",
+        "https://docs.mistral.ai/api/endpoint/models",
+        "https://console.mistral.ai"
+      ],
+      "sourceCheckedAt": "2026-06-19"
+    },
+    {
+      "providerID": "haven-local-m5",
+      "displayName": "Local MacBook Pro M5 / HAVENAgentD",
+      "routeType": "local-agentd",
+      "baseURL": "http://127.0.0.1",
+      "apiCompatibility": [
+        "openai-compatible-local-server",
+        "cellprotocol-agent-local-model"
+      ],
+      "privacy": {
+        "summary": "Preferred route for private prompts when the model can run locally. Still requires Agreement, purpose, logging and retention policy.",
+        "promptLoggingClaim": "Controlled by local runtime and HAVENAgentD configuration."
+      },
+      "gdprPosture": {
+        "status": "preferred-for-private-data-with-agreement",
+        "notes": "Local execution reduces transfer risk but does not replace Agreement, retention, audit or DPIA decisions."
+      },
+      "havenRecommendation": {
+        "useFor": [
+          "private drafting",
+          "Norwegian conference Co-pilot experiments",
+          "multimodal screenshot/poster/audio tests selected by user",
+          "local fallback"
+        ],
+        "avoidFor": [
+          "policy authority",
+          "autonomous publish/delete/send/schedule actions"
+        ]
+      },
+      "sources": [
+        "Deliverables/Gemma4_Local_Runtime_Test_Log_2026-06-12.md",
+        "Deliverables/HavenAgentD_Gemma4_MLX_Runtime_Integration_2026-06-12.md"
+      ],
+      "sourceCheckedAt": "2026-06-17"
+    }
+  ],
+  "models": [
+    {
+      "modelID": "Qwen3-8B-Q4_K_M",
+      "providerID": "haven-local-m5",
+      "route": "local-gguf",
+      "modalities": [
+        "text"
+      ],
+      "localPath": "Artifacts/local-models/gguf/Qwen3-8B-GGUF/Qwen3-8B-Q4_K_M.gguf",
+      "benchmark": {
+        "name": "CoPilotChatLanguageBenchmark representative 8-case Norwegian",
+        "score": "38/48",
+        "percent": 79.2
+      },
+      "strengths": [
+        "best tested local text-only benchmark score",
+        "Norwegian Co-pilot helper candidate"
+      ],
+      "weaknesses": [
+        "not a policy/action authority",
+        "needs deterministic guardrails"
+      ],
+      "recommendation": "local-text-baseline",
+      "purposeFit": [
+        {
+          "purposeRef": "purpose://conference.co-pilot.participant-guidance",
+          "fit": "strong",
+          "reason": "Best measured local text-only score on Norwegian Co-pilot benchmark."
+        },
+        {
+          "purposeRef": "purpose://personal.ai.private-draft",
+          "fit": "medium",
+          "reason": "Local text generation with no external transfer, but still needs guardrails."
+        }
+      ],
+      "allowedDataClasses": [
+        "synthetic",
+        "public",
+        "internal_non_sensitive",
+        "private_profile",
+        "private_notes"
+      ],
+      "blockedDataClasses": [
+        "credential_secret"
+      ]
+    },
+    {
+      "modelID": "Gemma 4 E4B QAT MLX/VLM",
+      "providerID": "haven-local-m5",
+      "route": "local-mlx-vlm",
+      "modalities": [
+        "text",
+        "image",
+        "audio"
+      ],
+      "localPath": "Artifacts/gemma4-runtime/mlx/mlx-community-gemma-4-E4B-it-qat-4bit",
+      "benchmark": {
+        "name": "CoPilotChatLanguageBenchmark representative 8-case Norwegian",
+        "score": "36/48",
+        "percent": 75.0
+      },
+      "strengths": [
+        "best tested Gemma result",
+        "Apple Silicon MLX/VLM path",
+        "multimodal candidate"
+      ],
+      "weaknesses": [
+        "safety dimension still weak",
+        "requires HAVENAgentD/provider profile for product-shaped use"
+      ],
+      "recommendation": "primary-local-multimodal-candidate",
+      "purposeFit": [
+        {
+          "purposeRef": "purpose://conference.co-pilot.multimodal-qa",
+          "fit": "strong",
+          "reason": "Best local Gemma result and MLX/VLM multimodal route on M5."
+        },
+        {
+          "purposeRef": "purpose://conference.co-pilot.participant-guidance",
+          "fit": "medium",
+          "reason": "Close to Qwen3-8B text benchmark, but weaker safety dimension."
+        },
+        {
+          "purposeRef": "purpose://personal.ai.private-draft",
+          "fit": "medium",
+          "reason": "Local/private route, useful when multimodal context is selected."
+        }
+      ],
+      "allowedDataClasses": [
+        "synthetic",
+        "public",
+        "internal_non_sensitive",
+        "private_profile",
+        "private_notes"
+      ],
+      "blockedDataClasses": [
+        "credential_secret",
+        "sponsor_leads_without_consent"
+      ]
+    },
+    {
+      "modelID": "BAAI/bge-m3",
+      "providerID": "local-or-hosted",
+      "route": "embedding",
+      "modalities": [
+        "embeddings"
+      ],
+      "strengths": [
+        "multilingual retrieval",
+        "good fit for Book/RAG/agenda/policy"
+      ],
+      "recommendation": "default-embedding-candidate",
+      "purposeFit": [
+        {
+          "purposeRef": "purpose://docs.rag.answer-with-citations",
+          "fit": "strong",
+          "reason": "Multilingual embedding candidate for docs, agenda and policy retrieval."
+        }
+      ],
+      "allowedDataClasses": [
+        "public",
+        "internal_non_sensitive"
+      ],
+      "blockedDataClasses": [
+        "credential_secret"
+      ]
+    },
+    {
+      "modelID": "BAAI/bge-reranker-v2-m3",
+      "providerID": "local-or-hosted",
+      "route": "reranker",
+      "modalities": [
+        "text"
+      ],
+      "strengths": [
+        "multilingual reranking",
+        "improves RAG precision"
+      ],
+      "recommendation": "default-reranker-candidate",
+      "purposeFit": [
+        {
+          "purposeRef": "purpose://docs.rag.answer-with-citations",
+          "fit": "strong",
+          "reason": "Improves RAG precision after retrieval."
+        }
+      ],
+      "allowedDataClasses": [
+        "public",
+        "internal_non_sensitive"
+      ],
+      "blockedDataClasses": [
+        "credential_secret"
+      ]
+    },
+    {
+      "modelID": "urchade/gliner_multi_pii-v1",
+      "providerID": "local-or-hosted",
+      "route": "pii-preflight",
+      "modalities": [
+        "text"
+      ],
+      "strengths": [
+        "local PII/entity preflight"
+      ],
+      "weaknesses": [
+        "guardrail only, not proof of compliance"
+      ],
+      "recommendation": "privacy-preflight-candidate",
+      "purposeFit": [
+        {
+          "purposeRef": "purpose://privacy.pii-preflight",
+          "fit": "strong",
+          "reason": "Local PII/entity extraction guardrail before external routing or sharing."
+        }
+      ],
+      "allowedDataClasses": [
+        "synthetic",
+        "public",
+        "internal_non_sensitive",
+        "private_profile",
+        "private_contact_info",
+        "private_notes",
+        "sponsor_leads_with_consent"
+      ],
+      "blockedDataClasses": [
+        "credential_secret"
+      ]
+    }
+  ]
+}

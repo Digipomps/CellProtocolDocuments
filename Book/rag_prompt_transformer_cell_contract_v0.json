@@ -1,0 +1,213 @@
+{
+  "contractVersion": 1,
+  "cell": "RAGPromptTransformerCell",
+  "status": "draft",
+  "lastVerified": "2026-07-01",
+  "responsibility": "Transform RAG source packages and target model profiles into model-adapted prompt packages without retrieval, model invocation, or mutation.",
+  "purposeRefs": [
+    "purpose://docs.rag.answer-with-citations",
+    "purpose://model.prompt-adaptation"
+  ],
+  "boundaries": {
+    "doesNotSearchCorpus": true,
+    "doesNotInvokeModel": true,
+    "doesNotStoreSecrets": true,
+    "doesNotApproveProviderRoutes": true,
+    "canonicalCitationsRequired": true
+  },
+  "operations": [
+    {
+      "keypath": "ragPrompt.transform",
+      "method": "set",
+      "summary": "Accepts a RAG source package and target model profile; returns a model-adapted prompt package.",
+      "permissions": [
+        "-w--"
+      ],
+      "input": {
+        "type": "object",
+        "requiredKeys": [
+          "question",
+          "targetModel",
+          "rag"
+        ],
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "purposeRef": {
+            "type": "string"
+          },
+          "targetModel": {
+            "type": "object",
+            "requiredKeys": [
+              "modelID"
+            ],
+            "properties": {
+              "modelID": {
+                "type": "string"
+              },
+              "providerID": {
+                "type": "string"
+              },
+              "route": {
+                "type": "string"
+              },
+              "family": {
+                "type": "string"
+              },
+              "contextWindow": {
+                "type": "integer"
+              }
+            }
+          },
+          "answerStyle": {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "format": {
+                "type": "string"
+              },
+              "maxWords": {
+                "type": "integer"
+              }
+            }
+          },
+          "rag": {
+            "type": "object",
+            "requiredKeys": [
+              "chunks"
+            ],
+            "properties": {
+              "query": {
+                "type": "string"
+              },
+              "chunks": {
+                "type": "list"
+              },
+              "coverageWarnings": {
+                "type": "list"
+              }
+            }
+          },
+          "constraints": {
+            "type": "object",
+            "properties": {
+              "dataClass": {
+                "type": "string"
+              },
+              "mustCover": {
+                "type": "list"
+              },
+              "forbiddenClaims": {
+                "type": "list"
+              }
+            }
+          }
+        }
+      },
+      "returns": {
+        "type": "object",
+        "requiredKeys": [
+          "status",
+          "promptPackageVersion",
+          "systemPrompt",
+          "userPrompt",
+          "promptManifest",
+          "qualityChecks"
+        ],
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "promptPackageVersion": {
+            "type": "integer"
+          },
+          "targetModel": {
+            "type": "object"
+          },
+          "systemPrompt": {
+            "type": "string"
+          },
+          "userPrompt": {
+            "type": "string"
+          },
+          "citationPolicy": {
+            "type": "object"
+          },
+          "qualityChecks": {
+            "type": "list"
+          },
+          "promptManifest": {
+            "type": "object"
+          },
+          "warnings": {
+            "type": "list"
+          }
+        }
+      },
+      "flowEffects": [
+        {
+          "trigger": "set",
+          "topic": "rag.prompt.transformed",
+          "contentType": "object",
+          "minimumCount": 1
+        }
+      ]
+    },
+    {
+      "keypath": "ragPrompt.profiles",
+      "method": "get",
+      "summary": "Lists built-in model prompt profiles and their adaptation hints.",
+      "permissions": [
+        "r---"
+      ],
+      "input": {
+        "type": "null"
+      },
+      "returns": {
+        "type": "list"
+      },
+      "flowEffects": []
+    },
+    {
+      "keypath": "ragPrompt.qualityCheck",
+      "method": "set",
+      "summary": "Runs deterministic post-answer checks against a generated answer and prompt manifest.",
+      "permissions": [
+        "-w--"
+      ],
+      "input": {
+        "type": "object",
+        "requiredKeys": [
+          "answer",
+          "promptManifest",
+          "qualityChecks"
+        ],
+        "properties": {
+          "answer": {
+            "type": "string"
+          },
+          "promptManifest": {
+            "type": "object"
+          },
+          "qualityChecks": {
+            "type": "list"
+          }
+        }
+      },
+      "returns": {
+        "type": "object"
+      },
+      "flowEffects": [
+        {
+          "trigger": "set",
+          "topic": "rag.prompt.qualityChecked",
+          "contentType": "object",
+          "minimumCount": 1
+        }
+      ]
+    }
+  ]
+}

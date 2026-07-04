@@ -39,6 +39,12 @@ If any of these are ambiguous, ask for clarification before implementing.
 7. Build a `SkeletonElement` tree for UI rendering.
 8. Validate skeleton bindings against Explore before preview:
    - `python3 Tools/Explore/skeleton_explore_validator.py --configuration ... --manifest ...`
+   - Add `--require-owner-access` for production skeletons unless the host shell
+     explicitly guarantees a persistent owner-entity / Co-Pilot affordance
+     outside the portable skeleton.
+   - Include root-scoped `modifiers.visibility.when.keypath` conditionals in
+     this validation. Treat item/context-scoped visibility paths as local
+     render-context reads unless an exported item schema says otherwise.
 9. Provide a JSON sample for the configuration and skeleton.
 
 For Explore-first skeleton/cell authoring, follow

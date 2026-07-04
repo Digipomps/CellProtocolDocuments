@@ -15,6 +15,11 @@ The goal is one canonical markdown landing page that works across vault, web, Sw
 - [Chapter 11 — Developer Guide: Implementing a Cell](11_Developer_Guide_Cell.md)
 - [Chapter 12 — Skeleton Specification](12_Skeleton_Spec.md)
 - [Chapter 22 — Explore Contracts for Skeleton and Cell Authoring](22_Explore_Contracts_For_Skeleton_Authoring.md)
+- [Chapter 24 — Model Providers, Credentials, and Selection](24_Model_Providers_Credentials_And_Selection.md)
+- [Chapter 25 — SecretCredentialCell](25_SecretCredentialCell.md)
+- [Chapter 26 — Model Knowledge and Purpose Matching](26_Model_Knowledge_And_Purpose_Matching.md)
+- [Chapter 27 — Text Reliability Analysis](27_Text_Reliability_Analysis.md)
+- [Chapter 28 — RAGPromptTransformerCell](28_RAG_Prompt_Transformer_Cell.md)
 - [Chapter 29 — Claim Argument Model](29_Claim_Argument_Model.md)
 
 ## What We Have Right Now
@@ -51,6 +56,7 @@ The goal is one canonical markdown landing page that works across vault, web, Sw
 
 - [Chapter 03 — Identity Model](03_Identity_Model.md)
 - [Chapter 04 — Agreements and Contracts](04_Agreements_Contracts.md)
+- [Chapter 25 — SecretCredentialCell](25_SecretCredentialCell.md)
 
 ### Event Model and Execution
 
@@ -66,6 +72,11 @@ The goal is one canonical markdown landing page that works across vault, web, Sw
 ### Semantics, Trust, and Human Alignment
 
 - [Chapter 09 — Purpose and Interests](09_Purpose_Interests.md)
+- [Chapter 23 — HAVEN Purpose Knowledge Base](23_Purpose_Knowledge_Base.md)
+- [Chapter 24 — Model Providers, Credentials, and Selection](24_Model_Providers_Credentials_And_Selection.md)
+- [Chapter 26 — Model Knowledge and Purpose Matching](26_Model_Knowledge_And_Purpose_Matching.md)
+- [Chapter 27 — Text Reliability Analysis](27_Text_Reliability_Analysis.md)
+- [Chapter 28 — RAGPromptTransformerCell](28_RAG_Prompt_Transformer_Cell.md)
 - [Chapter 29 — Claim Argument Model](29_Claim_Argument_Model.md)
 
 ### Developer Guides
@@ -132,6 +143,13 @@ Use these when moving from reading to working:
 - The documentation workbench chapter captures the current ground truth and the recommended next implementation steps for a proper docs workbench.
 - The conference supplementary chapters capture ownership/dataflow and ConnectionHub/agreement lifecycle ground truth.
 - The contact endpoint chapter defines the CellProtocol-closed pattern for leaving a reachable, TTL-bound contact cell in a scaffold.
+- The purpose knowledge base chapter defines the root purpose, current purpose tree, Goal expectations, and matching/indexing strategy for prompt decomposition.
+- The model providers and credentials chapter defines the current secret-handling rule, provider selection matrix, and model/provider catalog seed for cross-scaffold AI routing.
+- The SecretCredentialCell chapter defines the credential vault, Keychain/ChaChaPoly storage shape, public keypaths, denial behavior, and audit rules.
+- The model knowledge chapter defines the metadata-harvest and purpose-matching pipeline for choosing models by task, hardware, cost, privacy, and GDPR posture.
+- The text reliability chapter defines the quote-anchored pipeline for evaluating claims, argumentation, rhetoric, source support, and Add2Entity analysis sidecars without generating replacement content.
+- The RAG prompt transformer chapter defines the boundary between docs MCP lookup,
+  RAG retrieval, model-specific prompt packaging, and provider invocation.
 - The claim argument model chapter defines the runtime structures for claims,
   support nodes, counterarguments with polarity, and deterministic graded
   argument evaluation, sharing wire vocabulary with the text reliability chapter.

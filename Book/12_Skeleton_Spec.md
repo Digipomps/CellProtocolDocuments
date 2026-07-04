@@ -15,6 +15,24 @@ Important:
   [Chapter 22 - Explore Contracts for Skeleton and Cell Authoring](22_Explore_Contracts_For_Skeleton_Authoring.md)
   and `Tools/Explore/skeleton_explore_validator.py` when a skeleton reads from
   or writes to a Cell.
+- Production skeletons must preserve access to the owner's own entity. A
+  user-authored or AI-authored skeleton must not be able to trap the user in a
+  surface with no route back to their entity, Co-Pilot, or owner-controlled
+  recovery interface. The portable v1 way to satisfy this is an existing
+  visible interface element, usually a `Button`, `Reference`, or embedded
+  chat/composer bound to an owner-scoped Co-Pilot or entity-extension Cell. A
+  host shell may also enforce the affordance outside the skeleton, but that
+  shell guarantee must be explicit in validation/review.
+
+Purpose:
+
+- `purpose://skeleton.owner-entity-access`
+
+Goal:
+
+- `goal.skeleton.owner-entity-access`: every production-rendered skeleton has a
+  visible, tested affordance that lets the authenticated owner reach their own
+  entity/Co-Pilot context or a shell-provided equivalent.
 
 ## 1. Encoding Rule (All Elements)
 
@@ -60,6 +78,7 @@ Many elements accept `modifiers`. The available fields are:
 - `borderColor` (hex color string)
 - `opacity` (Double)
 - `hidden` (Bool)
+- `visibility` (object; conditional presentation rule)
 - `foregroundColor` (hex color string)
 - `fontStyle` (String)
 - `fontSize` (Double)
@@ -72,6 +91,8 @@ Many elements accept `modifiers`. The available fields are:
 - `motionHint` (String enum: `appear` | `expand` | `collapse` |
   `minimize` | `restore` | `replace` | `emphasize`)
 - `motionSourceRole` (String)
+- `presentation` (object; overlay/drawer/sheet/popover/modal behavior for an
+  existing element)
 
 Source:
 
@@ -86,6 +107,154 @@ Motion note:
 - Renderers must respect reduced-motion preferences and may replace movement
   with fade/highlight or no animation.
 - Motion must never be the only signal that a component appeared.
+
+### 2.1 Conditional Visibility
+
+`modifiers.visibility` is a presentation-only conditional rule. New renderers
+evaluate it against data that is already present in the render context.
+
+Example:
+
+```json
+{
+  "Text": {
+    "text": "Invite helper",
+    "modifiers": {
+      "visibility": {
+        "when": {
+          "scope": "root",
+          "keypath": "chat.intent.kind",
+          "equals": "invite"
+        }
+      }
+    }
+  }
+}
+```
+
+Rule fields:
+
+- `when` (object, optional): condition expression. If absent, the element is
+  visible unless `hidden` is true.
+- `scope` (`root` | `item` | `context`, optional): defaults to `root`.
+- `keypath` (String, optional): dot-path inside the selected scope.
+- `exists` (Bool, optional): checks whether the keypath resolves.
+- `equals` (JSON value, optional): compares resolved value for equality.
+- `notEquals` (JSON value, optional): inverse equality check.
+- `in` (array, optional): resolved value must match one listed value.
+- `contains` (JSON value, optional): list membership or string substring check.
+- `allOf` (array of conditions, optional): all children must be true.
+- `anyOf` (array of conditions, optional): at least one child must be true.
+- `not` (condition, optional): child must be false.
+
+Semantics:
+
+- `modifiers.hidden: true` has precedence and always hides the element.
+- A malformed condition, missing keypath value, or failed comparison evaluates
+  to hidden. This is a fail-closed rendering rule.
+- `root` reads from the skeleton root data. `item` reads from the current
+  row/item when rendering list/grid/reference item skeletons. `context` reads
+  from the nearest render context and may be the root or item depending on the
+  renderer.
+- Conditions do not perform asynchronous Cell reads. They must not use
+  `cell://` as a hidden data-fetch mechanism.
+- Root-scoped visibility keypaths that read Cell state must be validated against
+  Explore contracts just like `Text.keypath`, `List.keypath`, and action
+  bindings.
+
+Compatibility:
+
+- JSON with `modifiers.visibility` remains parser-compatible with older
+  decoders that ignore unknown modifier fields.
+- Older renderers that do not implement `visibility` will show the element.
+  Therefore conditionals must not be used to enforce authorization, consent,
+  grants, privacy, or sensitive data minimization. Cells and resolver policy
+  must still withhold data and deny actions.
+- A top-level `{ "Conditional": ... }` element is not part of the v1 format.
+  Unknown wrapper elements still fail in current Swift decoding.
+
+### 2.2 Presentation
+
+`modifiers.presentation` gives an existing skeleton element first-class
+overlay/popup/sheet behavior without introducing new element wrappers.
+`presentation` is presentation metadata only. It must not be used for
+authorization, grants, privacy, consent, or data minimization.
+
+Portable skeletons should keep `modifiers.visibility` as the source of truth for
+whether the presentation is open. `openStateKeypath` is optional metadata for
+tooling and diagnostics, not a replacement for `visibility`.
+
+Fields:
+
+- `kind` (`overlay` | `drawer` | `sheet` | `popover` | `modal`, required)
+- `placement` (`leading` | `trailing` | `top` | `bottom` | `center` |
+  `anchor`, optional)
+- `closeActionKeypath` (String, optional): action dispatched when the renderer
+  dismisses the presentation
+- `openStateKeypath` (String, optional): simple state keypath corresponding to
+  the visibility rule
+- `dismissOnBackdrop` (Bool, optional): whether clicking outside dispatches the
+  close action
+- `backdropStyle` (`none` | `dim` | `blur`, optional)
+- `escapeKeyBehavior` (`disabled` | `closeAction`, optional)
+- `focusTrap` (Bool, optional): modal presentations should trap focus; drawers
+  and popovers should opt in only when they truly block background interaction
+- `anchorRole` / `anchorKeypath` (String, optional): portable popover anchoring
+  hints
+- `zIndex` (Int, optional): ordering hint within the renderer presentation stack
+- `mobileFallback` (object, optional): `kind` and/or `placement` override for
+  narrow/mobile layouts
+- `accessibilityLabel` (String, optional): label for dialog-like presentations
+  when the renderer cannot infer one from visible content
+
+Dismiss semantics:
+
+- If `dismissOnBackdrop` is true or `escapeKeyBehavior` is `closeAction`, the
+  skeleton should provide `closeActionKeypath`.
+- Porthole dispatches close actions with a payload shaped like
+  `{ "source": "skeleton.presentation", "reason": "escape|backdrop", ... }`.
+- Only the topmost open presentation should handle Escape, backdrop clicks, and
+  focus trapping.
+
+Accessibility:
+
+- `modal` must make background content inert before setting `aria-modal=true`.
+- Focus should move into a modal on open and return to the previous focused
+  element on close.
+- Non-modal `drawer`, `sheet`, and `popover` presentations must not claim modal
+  semantics unless the renderer actually blocks background interaction.
+
+Example:
+
+```json
+{
+  "Section": {
+    "header": { "Text": { "text": "Card details" } },
+    "content": [],
+    "modifiers": {
+      "visibility": {
+        "when": {
+          "keypath": "workItems.state.selectedItemIsOpen",
+          "equals": true
+        }
+      },
+      "presentation": {
+        "kind": "drawer",
+        "placement": "trailing",
+        "closeActionKeypath": "workItems.clearSelection",
+        "openStateKeypath": "workItems.state.selectedItemIsOpen",
+        "dismissOnBackdrop": false,
+        "backdropStyle": "none",
+        "escapeKeyBehavior": "closeAction",
+        "focusTrap": false,
+        "zIndex": 10,
+        "mobileFallback": { "kind": "sheet", "placement": "bottom" },
+        "accessibilityLabel": "Card details"
+      }
+    }
+  }
+}
+```
 
 ## 3. Elements
 

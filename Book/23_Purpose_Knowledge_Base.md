@@ -102,6 +102,7 @@ flowchart TD
     Questionnaire --> Analyze["purpose://questionnaire.responses.analyze<br/>Analyze responses"]
 
     Quality --> GUI["purpose://gui.quality.functional-accessible<br/>Functional accessible GUI"]
+    GUI --> OwnerAccess["purpose://skeleton.owner-entity-access<br/>Owner entity access affordance (draft)"]
     Governance --> AccessAudit["purpose://access.audit.privacy<br/>Access, audit and privacy"]
     AccessAudit --> QAudit["purpose://questionnaire.access.audit<br/>Questionnaire access audit"]
     Governance --> Preferences["purpose://preference.owner-controlled<br/>Owner-controlled preferences"]
@@ -126,10 +127,31 @@ Examples:
 - `purpose://project-work.work-items` has `goal.project-work.work-items`: `WorkItem.state` must expose open, blocked, in-progress, done, board, relation, and evidence state.
 - `purpose://project-work.share-selected-intent` has `goal.project-work.sharing`: a selected snapshot must be prepared, delivered, and opened by an admitted recipient.
 - `purpose://gui.quality.functional-accessible` has `goal.gui.quality`: controls must work, fields must accept input, labels/focus must be present, and screenshots/smoke checks must show no overlapping UI.
+- `purpose://skeleton.owner-entity-access` has `goal.skeleton.owner-entity-access`: every production skeleton must include a visible owner-entity / Co-Pilot affordance, or an explicitly documented host-shell equivalent, so generated UI cannot lock the user away from their own entity context.
 - `purpose://test.acceptance.hallucination-evaluation` has `goal.test.acceptance.hallucination-evaluation`: periodic eval runs must reject invented purposeRefs, capabilities, keypaths, citations, and unsupported certainty.
 - `purpose://personal-context.semantic-state` is still candidate: a semantic label such as Home, Work, or lunch time should be evaluated from owner-approved private observations rather than raw public GPS/time leakage.
 
 The practical rule is simple: a purpose that cannot name an observable Goal is not ready to become canonical.
+
+### Owner Entity Access In Skeletons
+
+`purpose://skeleton.owner-entity-access` is a draft child of
+`purpose://gui.quality.functional-accessible` because it is a concrete
+interface invariant: the rendered surface must not trap the owner in a
+user-authored or AI-authored skeleton that lacks a path back to the owner's
+entity, Co-Pilot, or recovery shell.
+
+The Goal is achieved when validation and smoke testing can show one of two
+things:
+
+- the skeleton itself contains a visible, working `Button`, `Reference`,
+  embedded chat/composer, or similar affordance bound to an owner-scoped
+  entity/Co-Pilot Cell or shell action
+- the host shell explicitly guarantees the affordance outside the portable
+  skeleton and that guarantee is documented in the review artifact
+
+This is not an authorization shortcut. Resolver policy still controls the
+actual entity data and actions. The affordance only prevents UI lockout.
 
 ### Hallucination Evaluation Gate
 

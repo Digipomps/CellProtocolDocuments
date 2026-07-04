@@ -191,6 +191,16 @@ Minimum binding expectations:
   operations.
 - `Visualization.keypath`: matching `get` operation returning object/list.
 - `Visualization.actionKeypath`: matching `set` operation.
+- `modifiers.visibility.when.keypath` with `scope: "root"` or omitted scope:
+  matching `get` operation with a displayable/scalar/object/list/null-compatible
+  return type. `scope: "item"` and `scope: "context"` are local render-context
+  reads and should be checked against the item/context schema where available,
+  not treated as remote Cell reads by default.
+- `modifiers.presentation.openStateKeypath`: matching `get` operation when
+  provided. Portable skeletons should still use `modifiers.visibility` as the
+  open/closed source of truth.
+- `modifiers.presentation.closeActionKeypath`: matching `set` operation when
+  Escape/backdrop/native dismiss can close the presentation.
 
 Calendar skeletons use the same rule: `Visualization(kind: "calendar")` must
 bind to a readable `haven.calendar.visualization.v1` or store-state object, and
@@ -245,6 +255,7 @@ python3 Tools/Explore/skeleton_explore_validator.py \
   --configuration path/to/CellConfiguration.json \
   --manifest path/to/ExploreManifest.json \
   --default-endpoint cell:///Porthole \
+  --require-owner-access \
   --json-output /tmp/skeleton-validation.json \
   --markdown-output /tmp/skeleton-validation.md
 ```
@@ -265,8 +276,28 @@ The validator accepts:
 - raw operation arrays
 - a manifest index containing endpoint/path pairs
 
-It extracts skeleton bindings and checks that each binding has a matching
-Explore operation with a compatible method and type.
+It extracts skeleton bindings, including root-scoped
+`modifiers.visibility.when.keypath` conditions and presentation
+`openStateKeypath`/`closeActionKeypath` fields, and checks that each binding has
+a matching Explore operation with a compatible method and type. The validator
+recurses through `allOf`, `anyOf`, and `not` visibility expressions. It does not
+currently validate `item`/`context` visibility paths against per-item schemas;
+review those manually until item schema export is available.
+
+When `--require-owner-access` is set, the validator also checks for a visible
+owner/entity access affordance. This is the static guardrail for
+`purpose://skeleton.owner-entity-access`: a generated or user-authored skeleton
+must leave the owner a path back to their own entity, Co-Pilot, or an
+equivalent shell-provided recovery interface. The v1 checker recognizes
+existing `Button`, `Reference`, `TextField`/`TextArea`, list/grid/picker/tab
+bindings whose label, endpoint, keypath, topic, or payload clearly points to
+Co-Pilot, chat, owner entity, entity anchor, or entity extension access.
+
+If a runtime shell guarantees this affordance outside the portable skeleton,
+document that shell guarantee in the scenario/review artifact. Do not rely on
+`modifiers.visibility` to hide or reveal the only owner-access path; access to
+the recovery affordance must not depend on data the broken skeleton might fail
+to load.
 
 ## Authoring Workflow
 
@@ -293,6 +324,8 @@ When authoring a skeleton from existing Cells:
 4. Validate the skeleton statically.
 5. Preview in Porthole.
 6. Treat missing contracts as Cell work, not UI polish.
+7. For production skeletons, run the owner-access check or document the
+   renderer shell that guarantees equivalent access.
 
 When a desired UI cannot be validated:
 

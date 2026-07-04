@@ -1,0 +1,128 @@
+{
+  "schema": "haven.text_reliability.analysis_contract.v1",
+  "analysisSchema": "haven.text_reliability.analysis.v1",
+  "inputSchemas": [
+    "haven.text_reliability.input_set.v1",
+    "haven.add2entity.webpage-capture.v1"
+  ],
+  "defaultPolicy": {
+    "source_mode": "verifying",
+    "language": "auto",
+    "jurisdiction": null,
+    "high_stakes": false,
+    "human_review_required": true,
+    "allowed_domains": []
+  },
+  "sourceModes": {
+    "text_only": "Use only the submitted text and sources named inside it.",
+    "verifying": "Use external lookup only to verify, contradict, or mark missing support for submitted claims.",
+    "investigative": "Search for missing and contrary sources, while keeping that material separate from the text's own argument."
+  },
+  "claimTypes": [
+    "factual",
+    "causal",
+    "normative",
+    "predictive",
+    "statistical",
+    "project_capability"
+  ],
+  "claimStrengths": [
+    "assertive",
+    "moderated",
+    "speculative"
+  ],
+  "sourceCheckStatuses": [
+    "supported",
+    "partly_supported",
+    "contradicted",
+    "source_missing",
+    "not_found",
+    "not_checkable"
+  ],
+  "sourceAuditStatuses": [
+    "text_only_not_audited",
+    "needs_external_source_audit",
+    "source_cue_without_anchor",
+    "source_missing"
+  ],
+  "claimOrigins": [
+    "sentence",
+    "markdown_table_row"
+  ],
+  "rhetoricTypes": [
+    "ethos",
+    "pathos",
+    "logos",
+    "framing",
+    "loaded_language",
+    "contrast",
+    "strawman",
+    "false_dichotomy",
+    "anecdotal_evidence",
+    "cherry_picking",
+    "authority_appeal",
+    "certainty_inflation"
+  ],
+  "reliabilityDimensions": [
+    "source_grounding",
+    "logical_coherence",
+    "transparency",
+    "rhetorical_pressure",
+    "uncertainty_handling",
+    "fact_checkability"
+  ],
+  "requiredOutputFields": [
+    "schema",
+    "generated_at",
+    "policy",
+    "input_summary",
+    "markdown_structure",
+    "claim_ledger",
+    "claim_clusters",
+    "claim_source_matrix",
+    "argument_map",
+    "argument_graph",
+    "rhetoric_findings",
+    "source_audits",
+    "source_checks",
+    "contrary_evidence",
+    "quantitative_models",
+    "reliability_dimensions",
+    "uncertainties",
+    "audit_log"
+  ],
+  "quantitativeModels": [
+    {
+      "model_id": "productivity-compound-level-effect",
+      "kind": "productivity_compound_level_effect",
+      "description": "Computes level-effect scenarios for additional annual productivity growth in percentage points over a base GDP or production level. This is a sizing model, not causal attribution."
+    }
+  ],
+  "hardRules": [
+    "Every finding must reference an exact quote anchor or a source anchor.",
+    "Inference must be explicitly marked with is_inferred=true.",
+    "The analyzer must not rewrite the source text or generate improved arguments for the author.",
+    "The deterministic reference tool must not claim external source support unless a source-auditor step has actually checked the source.",
+    "Add2Entity integration must produce a sidecar analysis and must not mutate entity state without a separate explicit user action."
+  ],
+  "add2entity": {
+    "captureSchema": "haven.add2entity.webpage-capture.v1",
+    "textPath": "content.text",
+    "metadataFields": [
+      "captureID",
+      "capturedAt",
+      "url",
+      "canonicalURL",
+      "title",
+      "siteName",
+      "author",
+      "publishedTime",
+      "language",
+      "description",
+      "target",
+      "rag"
+    ],
+    "sidecarSchema": "haven.text_reliability.add2entity_sidecar.v1",
+    "mutatesEntity": false
+  }
+}

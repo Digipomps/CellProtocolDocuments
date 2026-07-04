@@ -32,6 +32,14 @@ The focus is not only browsing markdown, but also moving between:
 - The RAG MVP already supports case listing, query, corpus inspection, links, and member operations.
 - Chapter 15 already defines the required discovery and RAG contract for documentation.
 
+#### MCP docs access
+
+- `Tools/HavenDocsMCP/haven_docs_mcp.py` provides a local read-only MCP server
+  over the canonical Book catalog and entrypoint docs.
+- The MCP surface exposes resources, read-only lookup tools, and static
+  reading-path prompts; it does not replace `/rag-mvp`, adapt prompts for target
+  models, mutate Vault/Todo state, or write repo files.
+
 #### Vault / Obsidian-style note operations
 
 - `CellScaffold` already exposes `/vault/api/*` for note create, update, get, list, and link operations.
@@ -109,6 +117,8 @@ That is enough for capability proof, but not enough for smooth doc work:
 
 - the user must leave the reading context
 - RAG answers are not yet visually colocated with the chapter being read
+- RAG source packages are not yet passed through a dedicated prompt transformer
+  before model invocation
 - there is no direct “save this answer as note” flow from the docs surface
 
 ### 4.4 Vault and Todo exist, but are not yet part of one thought-flow
@@ -232,6 +242,8 @@ Recommended implementation constraint:
 
 - reuse the existing `/rag-mvp/api/*` endpoints
 - do not fork a second RAG backend contract just for the landing page
+- use `RAGPromptTransformerCell` when the embedded component needs to adapt a
+  retrieved source package for a selected model route
 
 Done when:
 
