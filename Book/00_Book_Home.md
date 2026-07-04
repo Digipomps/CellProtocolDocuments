@@ -21,6 +21,7 @@ The goal is one canonical markdown landing page that works across vault, web, Sw
 - [Chapter 27 — Text Reliability Analysis](27_Text_Reliability_Analysis.md)
 - [Chapter 28 — RAGPromptTransformerCell](28_RAG_Prompt_Transformer_Cell.md)
 - [Chapter 29 — Claim Argument Model](29_Claim_Argument_Model.md)
+- [Chapter 30 — Panel Task Decomposition Workflow](30_Panel_Task_Decomposition_Workflow.md)
 
 ## What We Have Right Now
 
@@ -78,6 +79,7 @@ The goal is one canonical markdown landing page that works across vault, web, Sw
 - [Chapter 27 — Text Reliability Analysis](27_Text_Reliability_Analysis.md)
 - [Chapter 28 — RAGPromptTransformerCell](28_RAG_Prompt_Transformer_Cell.md)
 - [Chapter 29 — Claim Argument Model](29_Claim_Argument_Model.md)
+- [Chapter 30 — Panel Task Decomposition Workflow](30_Panel_Task_Decomposition_Workflow.md)
 
 ### Developer Guides
 
@@ -153,3 +155,6 @@ Use these when moving from reading to working:
 - The claim argument model chapter defines the runtime structures for claims,
   support nodes, counterarguments with polarity, and deterministic graded
   argument evaluation, sharing wire vocabulary with the text reliability chapter.
+- The panel task decomposition chapter defines how advisory panel tasks are
+  grounded in declared purposes with Goals and claim structures, with subtasks
+  deduced from evaluation gaps until every goal is terminal.

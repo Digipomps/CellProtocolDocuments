@@ -220,6 +220,8 @@ V1 adviser roles:
 - final adjudicator.
 
 The adviser panel is a workflow and prompt contract, not a global runtime object.
+Purpose- and claim-grounded task decomposition for panel work is defined in
+`Book/30_Panel_Task_Decomposition_Workflow.md`.
 The final adjudicator may only conclude from quote anchors, source anchors and
 explicitly marked inferences.
 

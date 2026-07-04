@@ -7,6 +7,7 @@ This file is an index for shared assistant context files in `CellProtocolDocumen
 
 ## Shared Feature Prompts
 - `Prompts/AttachmentSurface_ThreadPrompt.md`
+- `Prompts/Advisory_Panel_Task_Decomposition.md`
 
 ## Shared Wrappers
 - `Prompts/SystemPrompt-Codex.md`
