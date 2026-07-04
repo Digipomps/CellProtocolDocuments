@@ -20,6 +20,8 @@ Inngang for utviklere og AI-assistenter til praktiske rutiner i HAVEN-dokumentas
 - Prompt policy og systemprompts: `Prompts/SystemPrompts.md`
 - Dokumentasjonsgap: `Gap_Analysis.md`
 - Cross-repo audit: `Deliverables/Documentation_Audit_2026-03-05.md`
+- Read-only MCP for dokumentasjonsoppslag: `Tools/HavenDocsMCP/README.md`
+- RAG prompt transformer-kontrakt: `Book/28_RAG_Prompt_Transformer_Cell.md`
 
 ## 3. Endringspolicy for dokumentasjon
 
@@ -35,3 +37,7 @@ Inngang for utviklere og AI-assistenter til praktiske rutiner i HAVEN-dokumentas
 - Hold en stabil canonical path per tema for å unngå duplikat sannheter.
 - Legg inn `Last verified against code` med dato når kontrakt/endepunkt beskrives.
 - Bruk `Book/book_catalog.json` som maskinlesbar doc-tree for vault, web-rendering og RAG-oppkobling.
+- Bruk `Tools/HavenDocsMCP` når en MCP-klient trenger read-only ressurser,
+  søk, seksjonslesing og statiske lesestiprompts over den kanoniske dokumentasjonen.
+- Bruk `RAGPromptTransformerCell` når RAG-resultater skal pakkes om til en
+  prompt for en bestemt språkmodell.

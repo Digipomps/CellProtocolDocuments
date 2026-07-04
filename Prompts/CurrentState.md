@@ -12,6 +12,15 @@ Keep it concise. Replace stale bullets instead of growing an unbounded log.
 - Phase 1 of Explore-first skeleton/cell authoring has started. The working
   standard is `Book/22_Explore_Contracts_For_Skeleton_Authoring.md`; tools live
   in `Tools/Explore/`.
+- Skeleton conditional visibility v1 is implemented as
+  `modifiers.visibility.when`, with Swift model tests, Apple/Porthole rendering,
+  CellScaffold web runtime support, Playwright coverage, and Explore validator
+  extraction for root-scoped condition keypaths.
+- Production skeletons now have an explicit owner-access invariant:
+  `purpose://skeleton.owner-entity-access`. Use
+  `Tools/Explore/skeleton_explore_validator.py --require-owner-access` or
+  document a host-shell Co-Pilot/entity affordance so generated UI cannot lock
+  the owner out of their own entity context.
 - Fast path for testing entity extension from `Co-Pilot Chat`: owner-scoped
   capability discovery is implemented in `CellScaffold` as
   `chatHub.state.entityExtension` / `chatHub.entityExtension.scan`, while the
@@ -42,6 +51,7 @@ Keep it concise. Replace stale bullets instead of growing an unbounded log.
 - `Prompts/SystemPrompts.md`
 - `DEVELOPERS.md`
 - `Book/21_Contact_Endpoint_Cell.md`
+- `Deliverables/Skeleton_Conditional_Visibility_Proposal_2026-06-12.md`
 
 ## Files Changed Recently
 
@@ -58,6 +68,7 @@ Keep it concise. Replace stale bullets instead of growing an unbounded log.
 - `Prompts/CurrentState.md`
 - `Prompts/Architecture.md`
 - `Prompts/CONTRIBUTING.md`
+- `Deliverables/Skeleton_Conditional_Visibility_Proposal_2026-06-12.md`
 
 ## Decisions
 
@@ -66,6 +77,13 @@ Keep it concise. Replace stale bullets instead of growing an unbounded log.
 - Phase 1 uses static tooling first: audit Swift source for implicit contracts
   and validate skeleton bindings against exported Explore manifests before
   runtime preview.
+- Conditional visibility is presentation logic only. Use
+  `modifiers.visibility` for non-sensitive UI state; do not use it for
+  authorization, consent, grants, privacy, or data minimization. Root-scoped
+  visibility keypaths must validate against Explore contracts.
+- Owner/entity access is a production skeleton invariant. It can be satisfied
+  by a visible skeleton affordance or an explicit renderer shell guarantee, but
+  it must not depend on conditional visibility or decorative copy alone.
 - `Co-Pilot Chat` can expose an owner-scoped entity-extension map as a first
   test surface, but it must remain grant-checked, click-before-side-effect,
   explicitly discoverable, and non-correlating across domains.
@@ -92,16 +110,18 @@ Keep it concise. Replace stale bullets instead of growing an unbounded log.
    it to prioritize contract backfill.
 2. Validate representative CellConfiguration skeletons once matching
    ExploreManifest/ExploreContractCatalog exports are available.
-3. Hardening for entity extension: scalable registry/index, proof-chain
+3. Add a non-sensitive Co-Pilot or conference pilot surface that uses
+   `modifiers.visibility` and verify Porthole/Binding parity on real data.
+4. Hardening for entity extension: scalable registry/index, proof-chain
    extraction to `CellProtocol`, wake/persist lifecycle, and real device/cloud
    provider adapters.
-4. Revisit simulator repo extraction when `UserSimulationScaffold` has passed
+5. Revisit simulator repo extraction when `UserSimulationScaffold` has passed
    real `/bridgehead` integration and its coordinator/worker API, metrics,
    sharding, and JSONL artifacts have stabilized.
-5. Verify that the new prompt overlay files are coherent and easy to maintain.
-6. Update this file whenever a new task materially changes repo state.
-7. Expand the template only if future work shows a clear missing section.
+6. Verify that the new prompt overlay files are coherent and easy to maintain.
+7. Update this file whenever a new task materially changes repo state.
+8. Expand the template only if future work shows a clear missing section.
 
 ## Last Updated
 
-- 2026-05-28 by Codex
+- 2026-06-12 by Codex
