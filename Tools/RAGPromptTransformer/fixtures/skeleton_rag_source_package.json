@@ -1,0 +1,69 @@
+{
+  "question": "Forklar hvordan CellProtocol Skeleton virker.",
+  "purposeRef": "purpose://docs.rag.answer-with-citations",
+  "targetModel": {
+    "modelID": "qwen3-8b-q4",
+    "providerID": "haven-local-m5",
+    "route": "local-gguf",
+    "family": "qwen3"
+  },
+  "answerStyle": {
+    "language": "norsk",
+    "format": "six_numbered_points",
+    "maxWords": 550
+  },
+  "rag": {
+    "query": "CellProtocol Skeleton keypath Explore owner access",
+    "chunks": [
+      {
+        "path": "Book/12_Skeleton_Spec.md",
+        "heading": "1. Encoding Rule (All Elements)",
+        "lineStart": 37,
+        "lineEnd": 59,
+        "text": "Each element is encoded as a single-key object where the key is the element type and the value is that element's payload. Lists of elements are encoded as arrays of these single-key objects.",
+        "score": 18.2
+      },
+      {
+        "path": "Book/12_Skeleton_Spec.md",
+        "heading": "4. Keypath Rules",
+        "lineStart": 823,
+        "lineEnd": 835,
+        "text": "Many elements use keypath or url. cell:// URLs are resolved through the CellResolver. Relative keypaths are often resolved as cell:///Porthole/<keypath> in the current UI.",
+        "score": 16.9
+      },
+      {
+        "path": "Book/22_Explore_Contracts_For_Skeleton_Authoring.md",
+        "heading": "Skeleton Binding Rules",
+        "lineStart": 165,
+        "lineEnd": 221,
+        "text": "Skeleton authoring must validate every remote binding before preview or commit. Text.keypath and Text.url require matching get operations. Button.keypath with payload requires a matching set operation.",
+        "score": 16.8
+      },
+      {
+        "path": "Book/22_Explore_Contracts_For_Skeleton_Authoring.md",
+        "heading": "Skeleton Explore validator",
+        "lineStart": 251,
+        "lineEnd": 301,
+        "text": "When --require-owner-access is set, the validator checks for a visible owner/entity access affordance so a generated or user-authored skeleton leaves the owner a path back to their own entity, Co-Pilot, or equivalent shell-provided recovery interface.",
+        "score": 16.1
+      }
+    ],
+    "coverageWarnings": []
+  },
+  "constraints": {
+    "dataClass": "internal_non_sensitive",
+    "mustCover": [
+      "single-key JSON encoding",
+      "CellConfiguration, discovery, cellReferences/default endpoint",
+      "keypath/url binding and get/set behavior",
+      "Explore validation before preview/commit",
+      "owner/entity access guardrail",
+      "encoding caveats and current limits"
+    ],
+    "forbiddenClaims": [
+      "unsupported Skeleton element types",
+      "provider credentials",
+      "uncited implementation claims"
+    ]
+  }
+}

@@ -22,6 +22,24 @@ SCALAR_TYPES = {"string", "integer", "number", "float", "bool", "boolean"}
 DISPLAY_TYPES = SCALAR_TYPES | {"object", "list", "array", "unknown"}
 LIST_TYPES = {"list", "array"}
 OBJECT_TYPES = {"object"}
+OWNER_ACCESS_PURPOSE_REF = "purpose://skeleton.owner-entity-access"
+OWNER_ACCESS_TERMS = {
+    "co-pilot",
+    "copilot",
+    "chat",
+    "chathub",
+    "entity",
+    "entityanchor",
+    "entityextension",
+    "owner",
+    "ownentity",
+    "egen entitet",
+    "min entitet",
+    "mi entitet",
+    "eier-entitet",
+    "eierentitet",
+    "assistent",
+}
 
 
 @dataclass
@@ -59,6 +77,14 @@ class Finding:
     endpoint: str
     key: str
     method: str
+
+
+@dataclass
+class OwnerAccessAffordance:
+    path: str
+    element: str
+    reason: str
+    value: str
 
 
 def canonical_type(type_name: str | None) -> str:
@@ -251,7 +277,128 @@ def collect_bindings(
         return
 
     for key, value in node.items():
-        collect_bindings(value, f"{path}.{key}", references, default_endpoint, bindings)
+            collect_bindings(value, f"{path}.{key}", references, default_endpoint, bindings)
+
+
+def normalize_affordance_text(value: Any) -> str:
+    return str(value or "").strip().lower().replace("_", "").replace("-", "")
+
+
+def contains_owner_access_term(value: Any) -> bool:
+    normalized = normalize_affordance_text(value)
+    if not normalized:
+        return False
+    compact_terms = {normalize_affordance_text(term) for term in OWNER_ACCESS_TERMS}
+    return any(term and term in normalized for term in compact_terms)
+
+
+def collect_owner_access_affordances(
+    node: Any,
+    path: str,
+    affordances: list[OwnerAccessAffordance],
+) -> None:
+    if isinstance(node, list):
+        for index, item in enumerate(node):
+            collect_owner_access_affordances(item, f"{path}[{index}]", affordances)
+        return
+
+    if not isinstance(node, dict):
+        return
+
+    if len(node) == 1:
+        element, payload = next(iter(node.items()))
+        collect_owner_access_element(element, payload, path, affordances)
+        return
+
+    for key, value in node.items():
+        collect_owner_access_affordances(value, f"{path}.{key}", affordances)
+
+
+def collect_owner_access_element(
+    element: str,
+    payload: Any,
+    path: str,
+    affordances: list[OwnerAccessAffordance],
+) -> None:
+    if isinstance(payload, list):
+        for index, child in enumerate(payload):
+            collect_owner_access_affordances(child, f"{path}.{element}[{index}]", affordances)
+        return
+    if not isinstance(payload, dict):
+        return
+
+    modifiers = payload.get("modifiers")
+    if isinstance(modifiers, dict) and modifiers.get("hidden") is True:
+        return
+
+    candidate_fields: list[tuple[str, Any]] = []
+    if element == "Button":
+        candidate_fields = [
+            ("label", payload.get("label")),
+            ("keypath", payload.get("keypath")),
+            ("url", payload.get("url")),
+            ("payload", payload.get("payload")),
+        ]
+    elif element in {"TextArea", "TextField"}:
+        candidate_fields = [
+            ("placeholder", payload.get("placeholder")),
+            ("sourceKeypath", payload.get("sourceKeypath")),
+            ("targetKeypath", payload.get("targetKeypath")),
+        ]
+    elif element == "Reference":
+        candidate_fields = [
+            ("keypath", payload.get("keypath")),
+            ("topic", payload.get("topic")),
+        ]
+    elif element in {"List", "Grid", "Picker", "Tabs"}:
+        candidate_fields = [
+            ("keypath", payload.get("keypath")),
+            ("tabsKeypath", payload.get("tabsKeypath")),
+            ("selectionActionKeypath", payload.get("selectionActionKeypath")),
+            ("activationActionKeypath", payload.get("activationActionKeypath")),
+        ]
+
+    for field, value in candidate_fields:
+        if contains_owner_access_term(value):
+            affordances.append(
+                OwnerAccessAffordance(
+                    path=f"{path}.{element}.{field}",
+                    element=element,
+                    reason=field,
+                    value=str(value),
+                )
+            )
+            break
+
+    for child_key in ("elements", "content", "header", "footer", "flowElementSkeleton", "itemSkeleton"):
+        if child_key in payload:
+            collect_owner_access_affordances(payload[child_key], f"{path}.{element}.{child_key}", affordances)
+
+    if element == "Tabs":
+        for index, panel in enumerate(payload.get("panels") or []):
+            if isinstance(panel, dict):
+                collect_owner_access_affordances(panel.get("content") or [], f"{path}.Tabs.panels[{index}].content", affordances)
+
+
+def validate_owner_access(required: bool, affordances: list[OwnerAccessAffordance]) -> list[Finding]:
+    if not required or affordances:
+        return []
+    return [
+        Finding(
+            severity="error",
+            code="missing_owner_entity_access",
+            message=(
+                "Production skeleton must include a visible owner-entity or Co-Pilot access affordance "
+                "so generated UI cannot lock the user away from their own entity."
+            ),
+            path="$.skeleton",
+            element="CellConfiguration",
+            role="ownerAccess",
+            endpoint="",
+            key=OWNER_ACCESS_PURPOSE_REF,
+            method="interface",
+        )
+    ]
 
 
 def add_binding(
@@ -298,6 +445,8 @@ def collect_element_bindings(
         return
     if not isinstance(payload, dict):
         return
+
+    collect_modifier_bindings(payload.get("modifiers"), f"{path}.{element}.modifiers", references, default_endpoint, bindings)
 
     if element == "Text":
         add_binding(bindings, path, element, "display", payload.get("keypath") or payload.get("url"), "get", DISPLAY_TYPES, references, default_endpoint)
@@ -352,6 +501,81 @@ def collect_element_bindings(
     for child_key in ("elements", "content", "header", "footer"):
         if child_key in payload:
             collect_bindings(payload[child_key], f"{path}.{element}.{child_key}", references, default_endpoint, bindings)
+
+
+def collect_modifier_bindings(
+    modifiers: Any,
+    path: str,
+    references: dict[str, str],
+    default_endpoint: str,
+    bindings: list[Binding],
+) -> None:
+    if not isinstance(modifiers, dict):
+        return
+    visibility = modifiers.get("visibility")
+    if isinstance(visibility, dict):
+        when = visibility.get("when")
+        collect_visibility_condition_bindings(when, f"{path}.visibility.when", references, default_endpoint, bindings)
+
+    presentation = modifiers.get("presentation")
+    if isinstance(presentation, dict):
+        add_binding(
+            bindings,
+            path,
+            "Presentation",
+            "openState",
+            presentation.get("openStateKeypath"),
+            "get",
+            DISPLAY_TYPES | {"null"},
+            references,
+            default_endpoint,
+        )
+        add_binding(
+            bindings,
+            path,
+            "Presentation",
+            "closeAction",
+            presentation.get("closeActionKeypath"),
+            "set",
+            {"object", "unknown", "null"},
+            references,
+            default_endpoint,
+        )
+
+
+def collect_visibility_condition_bindings(
+    condition: Any,
+    path: str,
+    references: dict[str, str],
+    default_endpoint: str,
+    bindings: list[Binding],
+) -> None:
+    if not isinstance(condition, dict):
+        return
+
+    scope = str(condition.get("scope") or "root")
+    raw_keypath = condition.get("keypath")
+    if scope == "root" and isinstance(raw_keypath, str) and raw_keypath.strip():
+        add_binding(
+            bindings,
+            path,
+            "Visibility",
+            "condition",
+            raw_keypath,
+            "get",
+            DISPLAY_TYPES | {"null"},
+            references,
+            default_endpoint,
+        )
+
+    for key in ("allOf", "anyOf"):
+        children = condition.get(key)
+        if isinstance(children, list):
+            for index, child in enumerate(children):
+                collect_visibility_condition_bindings(child, f"{path}.{key}[{index}]", references, default_endpoint, bindings)
+
+    if isinstance(condition.get("not"), dict):
+        collect_visibility_condition_bindings(condition["not"], f"{path}.not", references, default_endpoint, bindings)
 
 
 def find_operation(
@@ -446,7 +670,13 @@ def validate(bindings: list[Binding], operations_by_endpoint: dict[str, list[Ope
     return findings
 
 
-def render_markdown(config_path: Path, bindings: list[Binding], findings: list[Finding]) -> str:
+def render_markdown(
+    config_path: Path,
+    bindings: list[Binding],
+    findings: list[Finding],
+    owner_access_affordances: list[OwnerAccessAffordance],
+    require_owner_access: bool,
+) -> str:
     counts: dict[str, int] = {}
     for finding in findings:
         counts[finding.severity] = counts.get(finding.severity, 0) + 1
@@ -458,13 +688,27 @@ def render_markdown(config_path: Path, bindings: list[Binding], findings: list[F
         "## Summary",
         "",
         f"- Bindings checked: {len(bindings)}",
+        f"- Owner/entity access required: {str(require_owner_access).lower()}",
+        f"- Owner/entity access affordances: {len(owner_access_affordances)}",
         f"- Findings: {len(findings)}",
         f"- Errors: {counts.get('error', 0)}",
         f"- Warnings: {counts.get('warn', 0)}",
         "",
-        "## Bindings",
+        "## Owner/Entity Access",
         "",
     ]
+    if not owner_access_affordances:
+        lines.append("No owner/entity access affordance found in the skeleton.")
+    else:
+        for affordance in owner_access_affordances:
+            lines.append(
+                f"- `{affordance.path}` {affordance.element}/{affordance.reason}: `{affordance.value}`"
+            )
+    lines.extend([
+        "",
+        "## Bindings",
+        "",
+    ])
     if not bindings:
         lines.append("No skeleton bindings found.")
     else:
@@ -501,6 +745,11 @@ def main() -> int:
     parser.add_argument("--json-output", type=Path)
     parser.add_argument("--markdown-output", type=Path)
     parser.add_argument("--fail-on-error", action="store_true")
+    parser.add_argument(
+        "--require-owner-access",
+        action="store_true",
+        help="Require a visible owner-entity / Co-Pilot affordance in the skeleton.",
+    )
     args = parser.parse_args()
 
     config = load_json(args.configuration)
@@ -510,16 +759,25 @@ def main() -> int:
 
     bindings: list[Binding] = []
     collect_bindings(skeleton, "$.skeleton", references, default_endpoint, bindings)
+    owner_access_affordances: list[OwnerAccessAffordance] = []
+    collect_owner_access_affordances(skeleton, "$.skeleton", owner_access_affordances)
     findings = validate(bindings, operations_by_endpoint)
+    findings.extend(validate_owner_access(args.require_owner_access, owner_access_affordances))
 
     report = {
         "configuration": str(args.configuration),
         "defaultEndpoint": default_endpoint,
         "references": references,
         "bindings": [asdict(binding) for binding in bindings],
+        "ownerAccess": {
+            "required": args.require_owner_access,
+            "purposeRef": OWNER_ACCESS_PURPOSE_REF,
+            "affordances": [asdict(affordance) for affordance in owner_access_affordances],
+        },
         "findings": [asdict(finding) for finding in findings],
         "summary": {
             "bindings": len(bindings),
+            "ownerAccessAffordances": len(owner_access_affordances),
             "errors": sum(1 for finding in findings if finding.severity == "error"),
             "warnings": sum(1 for finding in findings if finding.severity == "warn"),
         },
@@ -530,7 +788,10 @@ def main() -> int:
         args.json_output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     if args.markdown_output:
         args.markdown_output.parent.mkdir(parents=True, exist_ok=True)
-        args.markdown_output.write_text(render_markdown(args.configuration, bindings, findings), encoding="utf-8")
+        args.markdown_output.write_text(
+            render_markdown(args.configuration, bindings, findings, owner_access_affordances, args.require_owner_access),
+            encoding="utf-8",
+        )
 
     print(json.dumps(report["summary"], indent=2, sort_keys=True))
     if args.fail_on_error and report["summary"]["errors"] > 0:
