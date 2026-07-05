@@ -1,0 +1,40 @@
+{
+  "panelID": "fractal_dimension_value_2026-07-04",
+  "purposeRef": "purpose://haven.advisory-panel.value-metrics",
+  "dataClass": "synthetic",
+  "temperature": 0.2,
+  "maxTokens": 8000,
+  "sharedBrief": "You are advising the HAVEN/CellProtocol project. Answer in English.\n\nCONTEXT\nHAVEN/CellProtocol is a local-first, permissioned data protocol. Data lives in typed 'Cells' (nodes) connected by explicit references; purposes/interests form a purpose graph; argument graphs (claims, evidence, objections, support/attack edges) power decision tools. These are typed property graphs / multigraphs, grown organically by users and agents. Realistic scale today: hundreds to tens of thousands of nodes per domain; possibly millions protocol-wide later. Diameters are small (small-world-ish). Every mutation is captured as a replayable flow event, so usage traces (reads, traversals, action flows) are available in principle, though content itself may be private.\n\nPROPOSAL UNDER EVALUATION\nUse the fractal dimension of these graphs (e.g. box-covering dimension per Song-Havlin-Makse, or cluster-growing dimension) as a general, CONTENT-BLIND measure of the value of graph-structured data: ideally both current value and potential value, without inspecting node/edge content. Intended uses: (a) comparing datasets when exchanging them, to get a rough sense of relative value/complexity; (b) measuring growth over time, e.g. as a success metric for a purpose whose goal is 'increase value'; (c) tracking the value of the HAVEN network as a whole as it grows.\n\nQUESTIONS - answer each, numbered\nQ1. Estimability: Is fractal dimension well-defined and reliably estimable on graphs of this scale and character (small-world, typed, often only 10^2-10^4 nodes, small diameter)? Address finite-size effects, box-covering approximation error, and what minimum scale/diameter is needed for a trustworthy estimate.\nQ2. Meaning: What does network fractal dimension actually capture structurally? Is there any defensible theoretical or empirical link between fractal dimension and the value, information content, or usefulness of the underlying data?\nQ3. Current vs potential value: Can content-blind structure distinguish CURRENT value from POTENTIAL value at all? If yes, propose distinct structural proxies for each (e.g. usage-weighted metrics for current value; open triads, structural holes, boundary growth for potential value).\nQ4. Alternatives and complements: Rank the most defensible content-blind structural metrics for this purpose (e.g. graph entropy variants, von Neumann/spectral entropy, spectral dimension, compressibility/MDL, motif diversity, degree heterogeneity, component structure, network-value laws like Metcalfe/Reed/Odlyzko). Justify the ranking.\nQ5. Goodhart/gaming: If such a metric influences dataset pricing or purpose success, how will it be gamed (synthetic nodes/edges, structure inflation)? What design choices make it robust (provenance weighting, identity binding, usage weighting, cost anchoring)?\nQ6. Concrete recommendation: Specify a minimal, implementable metric suite and estimation procedure for typed property graphs of this scale, including how to track growth over time and how to normalize across datasets of different sizes.\nQ7. Verdict: Should HAVEN adopt fractal dimension as a headline value metric - yes, no, or in what limited role? One decisive paragraph.\n\nFORMAT\nNumbered answers Q1-Q7. Maximum ~1200 words total. Cite established literature where relevant (author + year is enough). State uncertainty explicitly. Do not flatter the proposal; disagree wherever the evidence warrants it.",
+  "panelists": [
+    {
+      "name": "GPT-5.5",
+      "modelID": "openai/gpt-5.5",
+      "role": "network-science and fractal-geometry rigor reviewer",
+      "roleInstructions": "Prioritize mathematical correctness about fractal dimension on networks: definitions, estimators, finite-size effects, small-world conflicts with fractal scaling. Be precise about what the literature actually shows."
+    },
+    {
+      "name": "GLM-5.2",
+      "modelID": "zai-org/glm-5.2:thinking",
+      "role": "independent methodological critic",
+      "roleInstructions": "Evaluate the proposal from outside the project's assumptions. Focus on whether structure-only valuation is methodologically sound at all, and on the strongest alternative or complementary metrics."
+    },
+    {
+      "name": "Gemini-3.1-Pro",
+      "modelID": "google/gemini-3.1-pro-preview",
+      "role": "measurement-theory and operationalization advisor",
+      "roleInstructions": "Focus on measurement validity (construct, convergent, predictive), normalization across dataset sizes, estimation protocols, and what a practical implementable pipeline looks like."
+    },
+    {
+      "name": "DeepSeek-V4-Pro",
+      "modelID": "deepseek/deepseek-v4-pro:thinking",
+      "role": "contrarian red-team reviewer",
+      "roleInstructions": "Attack the proposal. Find the failure modes: where fractal dimension is undefined, misleading, or gameable; where content-blind valuation breaks down; where the growth-metric use case creates perverse incentives. Steelman only what survives attack."
+    },
+    {
+      "name": "Kimi-K2.6",
+      "modelID": "moonshotai/kimi-k2.6:thinking",
+      "role": "data-economics and valuation perspective",
+      "roleInstructions": "Ground the discussion in the economics of data valuation: option value of data, task-dependence of value, data-market pricing practice, Shapley-style data valuation, and network-value laws. Say clearly what structure alone can and cannot price."
+    }
+  ]
+}
