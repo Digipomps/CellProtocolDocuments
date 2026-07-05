@@ -13,6 +13,10 @@ Panel roles used: network-science rigor reviewer, independent methodological
 critic, measurement-theory advisor, contrarian red team, data-economics
 advisor. Human decision owner: Kjetil.
 
+2026-07-04 addendum (§8–§9): the proposed profile was implemented and run on
+three real HAVEN graphs (empirical validation), and the packaging question —
+Python metric cells in the existing `PyCellProtocol` scaffold — is assessed.
+
 Raw panel artifact:
 `Tools/ModelKnowledge/generated/panel_fractal_dimension_value_2026-07-04_20260704T094413Z.json`
 
@@ -382,7 +386,125 @@ Metcalfe's n².
 - **(c) HAVEN network value:** track profile trajectories protocol-wide;
   claim growth in trends, never in single-scalar headlines.
 
-## 8. Limitations Of This Round
+## 8. Empirical Validation On Real HAVEN Graphs (2026-07-04 addendum)
+
+To move the recommendation from theory to evidence, the profile (pillars 1,
+3, 4) was implemented in pure Python and run on three real, structurally
+distinct HAVEN graphs. Tools (no third-party dependencies):
+
+- Extractor: `Tools/ModelKnowledge/extract_haven_graphs.py`
+- Profile + null-model z-scores + bootstrap stability:
+  `Tools/ModelKnowledge/structural_value_profile.py` (Jacobi eigensolver for
+  von Neumann entropy; Erdős–Rényi null ensemble; edge-drop bootstrap)
+- Profiles: `Tools/ModelKnowledge/generated/graphs/profile_*.json`
+
+Graphs (content-blind edgelists, `Tools/ModelKnowledge/generated/graphs/`):
+
+| Graph | Kind | N | E (dir) | Character |
+|---|---|---|---|---|
+| `haven_purpose_graph` | purpose tree (Book 23 mermaid) | 48 | 47 | pure tree |
+| `haven_book_link_graph` | Book cross-reference graph | 33 | 80 | small-world citation |
+| `haven_claim_source_graph` | claim↔source (candidate_claims) | 12 | 9 | fragmented bipartite |
+
+Results (seed 7, 100 nulls, 100 bootstraps at 10% edge drop):
+
+| Metric | purpose tree | book link | claim–source |
+|---|---|---|---|
+| diameter (usable box scales) | 7 | 2 | 2 |
+| giant-component fraction | 1.00 | 0.94 | 0.42 |
+| open-triad ratio | 1.00 | 0.83 | 1.00 |
+| mean local clustering | 0.00 | 0.75 | 0.00 |
+| articulation points / bridges | 17 / 47 | 1 / 14 | 4 / 9 |
+| von Neumann entropy (norm.) | 0.942 | 0.981 | 0.828 |
+| degree entropy (norm.) | 0.314 | 0.497 | 0.332 |
+| compressibility ratio | 0.515 | 0.423 | 0.813 |
+| z(vN entropy) vs random | +3.08 | +17.8 | −1.14 |
+| z(clustering) vs random | −1.05 | +14.3 | −0.77 |
+| **fractal gate: estimable?** | **no** | **no** | **no** |
+
+Findings:
+
+1. **Q1 confirmed on real HAVEN data.** All three graphs expose only 2–7
+   usable box scales, far below the ~15 threshold. The fractal gate returns
+   "not estimable" on every real graph — the panel's estimability objection
+   is now empirical, not just theoretical, for HAVEN as it exists today.
+2. **The profile discriminates, in the direction Q2 predicted.** The
+   book-link graph — the integrated, cross-referenced, arguably most valuable
+   one — is the *least* fractal (diameter 2) yet the most structurally
+   non-random (z = +17.8 spectral entropy, +14.3 clustering). Exactly the
+   panel's point: value tracks integration, and integration is anti-fractal.
+   The fragmented claim–source graph is statistically indistinguishable from
+   random (z ≈ −1) and is correctly flagged as thin structural signal.
+3. **Which metrics to trust at this scale.** Bootstrap coefficients of
+   variation under 10% edge perturbation: von Neumann entropy (norm.) is the
+   most stable metric (CV 0.001–0.006 across all three graphs); degree
+   entropy (norm.) is stable (CV ≤ 0.15); mean clustering and effective
+   diameter are volatile on small N (CV up to 0.17). Practical calibration:
+   at HAVEN's current scale, lead with spectral + degree entropy and report
+   clustering/diameter only with confidence intervals.
+
+This addendum satisfies the "empirical calibration" open item from the first
+pass and strengthens the verdict: not only is fractal dimension theoretically
+ill-posed here, it is empirically unestimable on the actual graphs, while the
+proposed profile is computable, stable in its load-bearing components, and
+discriminating.
+
+## 9. Architecture Note: Python Metric Cells In The Existing Scaffold
+
+The metric tools above are currently standalone scripts under
+`Tools/ModelKnowledge/`. The natural next question — raised by Kjetil — is
+whether such Python functionality should live as **cells in a dedicated
+Python scaffold**, giving HAVEN a reusable Python "toolbox" of cells.
+
+Grounding fact: this does not need a new scaffold. `PyCellProtocol` already
+provides the toolbox chassis:
+
+- `cellprotocol.general_cell.GeneralCell` — get/set handlers, grants,
+  `FlowElement` audit, `cell_scope`, Explore.
+- `cellprotocol.cells.function_cell.FunctionCell` with `@cell`/`@get`/`@set`
+  decorators — literally "expose a Python function as a cell". This *is* the
+  general Python-tool-as-cell primitive.
+- `cellprotocol.cells.graph.GraphIndexCell` — an existing graph cell with
+  nodes/edges, reindex and neighbor keypaths.
+- `cellprotocol_scaffold` — an ASGI scaffold with bridge routes, diagnostics
+  and a `pycell scaffold serve` CLI; wire-compatible with the Swift runtime.
+
+Assessment: **useful — yes; new parallel scaffold — no.** The right move is a
+native metric cell (e.g. `StructuralValueProfileCell`) in `PyCellProtocol`,
+not a loose script bag and not a competing scaffold. This aligns with the
+HAVEN native-cell rule (native cells first; integration cells acceptable;
+GitHub primary). Concretely:
+
+- Wrap `structural_value_profile.py` as a cell: `set graph.profile.compute`
+  with an edgelist payload returns pillars 1/3/4 + z-scores + stability; the
+  computation is a pure, replayable function of the input (good FlowElement
+  determinism).
+- Reuse `GraphIndexCell` as the input surface so the profile cell reads an
+  already-indexed graph rather than re-parsing corpora.
+- Keep pillar 2 (current value) sourced from FlowElement traversal counts at
+  the resolver, never fabricated — the cell must return "unavailable" when no
+  usage grant/traces are present, matching the tool's current behavior.
+- Preserve Swift wire parity: keypaths, payload shapes and failure behavior
+  must match anything later mirrored into the Swift runtime; the Python cell
+  is the reference implementation, not a divergent fork.
+
+Why a Python cell toolbox is worth it here specifically: the defensible value
+metrics (spectral/von Neumann entropy, MDL, motif counts, null-model
+z-scores) are numerically heavy and have mature Python ecosystems (numpy,
+scipy, networkx) that Swift lacks. A Python metric-cell lane lets HAVEN run
+the analytically demanding pillars where the libraries live, behind the same
+resolver/grant/FlowElement contract, while Swift keeps the interactive
+surfaces. Boundaries that must hold: the cells stay content-blind and
+side-effect-free (analysis, not mutation of source entities); any heavy
+dependency (numpy/scipy) is optional and declared; and promoting a script to
+a cell is code work that goes through review, not an ad-hoc addition.
+
+Recommendation: add `StructuralValueProfileCell` to `PyCellProtocol` as the
+first entry in a small, reviewed Python metric-cell toolbox, backed by
+`GraphIndexCell`, rather than standing up a new scaffold. Decision pending
+Kjetil's sign-off (see open items).
+
+## 10. Limitations Of This Round
 
 - Single-round panel, no deliberation or rebuttal phase; unanimity may
   partly reflect shared training-data priors (correlated errors), though the
@@ -394,7 +516,7 @@ Metcalfe's n².
   on HAVEN data.
 - Panel responses are model outputs, not human peer review.
 
-## 9. Decision Log And Open Items
+## 11. Decision Log And Open Items
 
 Decisions recorded (panel recommends; Kjetil decides):
 
@@ -404,20 +526,25 @@ Decisions recorded (panel recommends; Kjetil decides):
    hypothesis for content-blind value measurement — pending Kjetil's
    sign-off.
 
+Decision 3 (added 2026-07-04): the Python-cell packaging question is assessed
+in §9 — recommend a native `StructuralValueProfileCell` in `PyCellProtocol`,
+not a new scaffold. Pending Kjetil's sign-off.
+
 Open items:
 
 - [ ] Kjetil: approve/reject the Structural Value Profile direction.
+- [ ] Kjetil: approve/reject packaging as a native `StructuralValueProfileCell`
+      in `PyCellProtocol` (backed by `GraphIndexCell`), per §9.
 - [ ] Candidate purpose intake: `purpose://value-and-commons.structural-value-metrics`.
-- [ ] Empirical calibration: compute pillars 1–4 on 2–3 real HAVEN graphs
-      (e.g. a purpose tree, an argument graph, a conference cell graph) and
-      inspect stability before any goal binds to them. Requires approval as
-      new tooling/cell work (native-cell rule applies to any runtime cell).
+- [x] Empirical calibration: pillars 1/3/4 computed on three real HAVEN graphs
+      with null-model z-scores and bootstrap stability (§8). Pillar 2 left
+      unavailable pending FlowElement usage traces. Done 2026-07-04.
 - [ ] Revisit the fractal diagnostic if/when protocol-wide graphs exceed
       ~10⁵ nodes with diameter ≳ 15–20.
 - [ ] Decide whether profile snapshots should become FlowElement-visible
       audit events (aligns with Model_Toolbox_Advisory audit-event pattern).
 
-## 10. References
+## 12. References
 
 Verified against external sources 2026-07-04:
 
@@ -451,3 +578,6 @@ Goodhart (1975).
 - Panel runner: `Tools/ModelKnowledge/run_advisory_panel.py`
 - NanoGPT model snapshot used for panelist selection:
   `Tools/ModelKnowledge/generated/nanogpt_models_20260704T081559Z.json`
+- Graph extractor: `Tools/ModelKnowledge/extract_haven_graphs.py`
+- Profile computation: `Tools/ModelKnowledge/structural_value_profile.py`
+- Extracted graphs + profiles: `Tools/ModelKnowledge/generated/graphs/`
