@@ -449,6 +449,30 @@ ill-posed here, it is empirically unestimable on the actual graphs, while the
 proposed profile is computable, stable in its load-bearing components, and
 discriminating.
 
+### 8.1 Use-case (a) validated: dataset exchange comparison
+
+The exchange use case was tested directly with a second cell,
+`GraphMetricsCompareCell` (§9), which puts two profiles side by side and
+reports a null-normalized "nutrition label" — never a price. Comparing the
+purpose tree (A) against the book-link graph (B), seed 7, 100 nulls:
+
+| Scorecard axis | purpose-tree | book-links | leader |
+|---|---|---|---|
+| structural richness (z, spectral entropy) | +3.08 | +17.77 | book-links |
+| integration (z, clustering) | −1.05 | +14.28 | book-links |
+| realized use (pillar 2) | — | — | unavailable (no usage traces) |
+
+The comparison reproduces, as an exchange verdict, exactly what §8 found node
+by node: the larger graph by raw N (purpose tree, N=48) is *not* the richer
+one; the smaller, more integrated book-link graph (N=33) carries far more
+non-random structure and wins both content-blind axes, while realized-use is
+honestly reported as unavailable rather than guessed. This is the intended
+behavior for use case (a): a size-normalized structural comparison that
+refuses to masquerade as a price. Growth use case (b) is covered by the same
+cell's `mode:"growth"` path, which classifies deltas as realized-use /
+integration / expansion and raises a padding warning when N grows while
+structure thins (covered by a regression test).
+
 ## 9. Architecture Note: Python Metric Cells In The Existing Scaffold
 
 The metric tools above are currently standalone scripts under
@@ -501,8 +525,33 @@ a cell is code work that goes through review, not an ad-hoc addition.
 
 Recommendation: add `StructuralValueProfileCell` to `PyCellProtocol` as the
 first entry in a small, reviewed Python metric-cell toolbox, backed by
-`GraphIndexCell`, rather than standing up a new scaffold. Decision pending
-Kjetil's sign-off (see open items).
+`GraphIndexCell`, rather than standing up a new scaffold.
+
+### 9.1 Implemented (2026-07-04)
+
+The recommendation was implemented in this round, so the toolbox is now two
+native cells rather than a proposal:
+
+- `cellprotocol.cells.structural_value_profile.StructuralValueProfileCell` —
+  `set graph.profile.load` / `graph.profile.compute` returns pillars 1/3/4 +
+  null-model z-scores + bootstrap stability + the fractal gate. Pillar 2
+  returns `"unavailable"` unless usage traces are supplied; the computation is
+  a pure, deterministic function (`compute_profile`) so the emitted
+  FlowElement audit is replayable.
+- `cellprotocol.cells.graph_metrics_compare.GraphMetricsCompareCell` —
+  `set graph.compare.profiles` / `graph.compare.graphs`, exchange and growth
+  modes, sharing the same `compute_profile` source of truth so numbers match
+  the profile cell exactly.
+
+Both are analysis-only and content-blind, registered in
+`cellprotocol.cells.__init__`, and covered by tests in `tests/test_cells.py`
+(profile parity against the standalone tool on the real book-link graph;
+exchange comparison; growth padding-warning). The standalone
+`Tools/ModelKnowledge/` scripts remain as the dependency-free reference and
+extractor. Heavy pillars (motif counts, richer spectral methods) can later use
+numpy/scipy behind the same contract as an optional, declared dependency.
+Decision on adopting the direction and promoting beyond these two cells still
+pending Kjetil's sign-off (see open items).
 
 ## 10. Limitations Of This Round
 
@@ -511,9 +560,12 @@ Kjetil's sign-off (see open items).
   independently verified literature carries the load-bearing points.
 - Literature audit covered the five load-bearing citation clusters only;
   other citations are as reported by panelists.
-- No empirical experiment was run on actual HAVEN graphs; the estimability
-  conclusion follows from theory and scale arithmetic, not from measurement
-  on HAVEN data.
+- The empirical validation (§8) covers three graphs at N=12–48; it confirms
+  the estimability and discrimination claims at HAVEN's *current* scale but
+  does not probe behavior near the 10⁵-node regime where a fractal diagnostic
+  might become defined. The stability CVs are from 10% edge-drop bootstraps
+  only, not node removal or alternative null models (ER only, not
+  degree-preserving configuration nulls).
 - Panel responses are model outputs, not human peer review.
 
 ## 11. Decision Log And Open Items
@@ -527,18 +579,22 @@ Decisions recorded (panel recommends; Kjetil decides):
    sign-off.
 
 Decision 3 (added 2026-07-04): the Python-cell packaging question is assessed
-in §9 — recommend a native `StructuralValueProfileCell` in `PyCellProtocol`,
-not a new scaffold. Pending Kjetil's sign-off.
+in §9 and implemented in §9.1 — native `StructuralValueProfileCell` and
+`GraphMetricsCompareCell` in `PyCellProtocol`, not a new scaffold. Direction
+still pending Kjetil's sign-off.
 
 Open items:
 
 - [ ] Kjetil: approve/reject the Structural Value Profile direction.
-- [ ] Kjetil: approve/reject packaging as a native `StructuralValueProfileCell`
-      in `PyCellProtocol` (backed by `GraphIndexCell`), per §9.
+- [x] Packaging as native cells in `PyCellProtocol` (not a new scaffold):
+      `StructuralValueProfileCell` + `GraphMetricsCompareCell` implemented,
+      registered, and tested 2026-07-04 (§9.1). Adoption/promotion beyond
+      these two still needs sign-off.
 - [ ] Candidate purpose intake: `purpose://value-and-commons.structural-value-metrics`.
 - [x] Empirical calibration: pillars 1/3/4 computed on three real HAVEN graphs
-      with null-model z-scores and bootstrap stability (§8). Pillar 2 left
-      unavailable pending FlowElement usage traces. Done 2026-07-04.
+      with null-model z-scores and bootstrap stability (§8); exchange
+      comparison validated on two graphs (§8.1). Pillar 2 left unavailable
+      pending FlowElement usage traces. Done 2026-07-04.
 - [ ] Revisit the fractal diagnostic if/when protocol-wide graphs exceed
       ~10⁵ nodes with diameter ≳ 15–20.
 - [ ] Decide whether profile snapshots should become FlowElement-visible
@@ -581,3 +637,7 @@ Goodhart (1975).
 - Graph extractor: `Tools/ModelKnowledge/extract_haven_graphs.py`
 - Profile computation: `Tools/ModelKnowledge/structural_value_profile.py`
 - Extracted graphs + profiles: `Tools/ModelKnowledge/generated/graphs/`
+- Native cells (PyCellProtocol repo):
+  `src/cellprotocol/cells/structural_value_profile.py`,
+  `src/cellprotocol/cells/graph_metrics_compare.py`; tests in
+  `tests/test_cells.py`.
