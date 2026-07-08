@@ -1,0 +1,847 @@
+{
+  "schema": "cellprotocol.developerIdentityPack.v0",
+  "version": 0,
+  "generatedAt": "2026-07-06T00:00:00Z",
+  "description": "Public descriptors for simulated developer/staging entities. Private keys remain in IdentityVaults and are not represented here.",
+  "identityDomains": [
+    {
+      "identityDomain": "domain:personal:dev",
+      "purpose": "Personal owner-controlled development identity."
+    },
+    {
+      "identityDomain": "domain:team:haven-dev",
+      "purpose": "HAVEN developer team collaboration identity."
+    },
+    {
+      "identityDomain": "domain:conference:arendalsuka-demo",
+      "purpose": "Conference/event demo identity."
+    },
+    {
+      "identityDomain": "domain:device:local-dev",
+      "purpose": "Local device identity for bridge and enrollment tests."
+    },
+    {
+      "identityDomain": "domain:agent:personal-copilot-dev",
+      "purpose": "Personal Co-Pilot agent identity."
+    },
+    {
+      "identityDomain": "domain:swarm:staging",
+      "purpose": "Staging swarm node/admission identity."
+    }
+  ],
+  "vaults": [
+    {
+      "vaultRef": "vault://cellscaffold-staging/dev-sim/eira",
+      "kind": "IdentityVault",
+      "hostCell": "cell://staging.haven.digipomps.org/IdentityVault",
+      "ownerEntityRef": "entity:dev-sim:eira",
+      "exportsKeyMaterial": false
+    },
+    {
+      "vaultRef": "vault://cellscaffold-staging/dev-sim/jonas",
+      "kind": "IdentityVault",
+      "hostCell": "cell://staging.haven.digipomps.org/IdentityVault",
+      "ownerEntityRef": "entity:dev-sim:jonas",
+      "exportsKeyMaterial": false
+    },
+    {
+      "vaultRef": "vault://cellscaffold-staging/dev-sim/mina",
+      "kind": "IdentityVault",
+      "hostCell": "cell://staging.haven.digipomps.org/IdentityVault",
+      "ownerEntityRef": "entity:dev-sim:mina",
+      "exportsKeyMaterial": false
+    },
+    {
+      "vaultRef": "vault://cellscaffold-staging/dev-sim/noor",
+      "kind": "IdentityVault",
+      "hostCell": "cell://staging.haven.digipomps.org/IdentityVault",
+      "ownerEntityRef": "entity:dev-sim:noor",
+      "exportsKeyMaterial": false
+    },
+    {
+      "vaultRef": "vault://cellscaffold-staging/dev-sim/service",
+      "kind": "IdentityVault",
+      "hostCell": "cell://staging.haven.digipomps.org/IdentityVault",
+      "ownerEntityRef": "entity:dev-sim:service-agent",
+      "exportsKeyMaterial": false
+    }
+  ],
+  "accessPolicy": {
+    "ownerAccess": "ownerProofRequired",
+    "defaultNonOwnerAccess": "denied",
+    "requiresExplicitGrant": true,
+    "nonOwnerRequirements": [
+      "resolverAcceptedContract",
+      "exactCapability",
+      "requesterSignature",
+      "freshPurposeBoundProof"
+    ],
+    "notes": [
+      "EntityRepresentation and contact endpoint refs are not authority.",
+      "Each protected action must be checked by Resolver against a Contract/capability."
+    ]
+  },
+  "entities": [
+    {
+      "entityRef": "entity:dev-sim:eira",
+      "displayName": "Eira Solheim",
+      "simulation": {
+        "enabled": true,
+        "kind": "human",
+        "disclosureLabel": "Simulated developer persona"
+      },
+      "identityDomains": [
+        "domain:personal:dev",
+        "domain:team:haven-dev",
+        "domain:conference:arendalsuka-demo",
+        "domain:device:local-dev",
+        "domain:agent:personal-copilot-dev"
+      ],
+      "identities": [
+        {
+          "identityRef": "identity:dev-sim:eira:personal",
+          "uuid": "11111111-1111-4111-8111-111111111101",
+          "identityDomain": "domain:personal:dev",
+          "displayName": "Eira Solheim personal dev",
+          "publicKeyFingerprint": "sha256:1427e6481d771dacd5206534f315829bb4aecc745c830fa45b2087f7670c816d",
+          "homeVaultReference": "vault://cellscaffold-staging/dev-sim/eira",
+          "keyMaterialPolicy": {
+            "storage": "IdentityVault",
+            "exportAllowed": false,
+            "fixtureContains": "public-descriptor-only"
+          }
+        },
+        {
+          "identityRef": "identity:dev-sim:eira:team",
+          "uuid": "11111111-1111-4111-8111-111111111102",
+          "identityDomain": "domain:team:haven-dev",
+          "displayName": "Eira Solheim HAVEN team",
+          "publicKeyFingerprint": "sha256:b7ab134033a370a3a9cadffe9809b19a0d3a129db8fe9c074bd4916d6c5c3759",
+          "homeVaultReference": "vault://cellscaffold-staging/dev-sim/eira",
+          "keyMaterialPolicy": {
+            "storage": "IdentityVault",
+            "exportAllowed": false,
+            "fixtureContains": "public-descriptor-only"
+          }
+        },
+        {
+          "identityRef": "identity:dev-sim:eira:conference",
+          "uuid": "11111111-1111-4111-8111-111111111103",
+          "identityDomain": "domain:conference:arendalsuka-demo",
+          "displayName": "Eira Solheim conference demo",
+          "publicKeyFingerprint": "sha256:71bb910933ec8cdb949da783eb5853d5d15208d387d4812484535bed2f150179",
+          "homeVaultReference": "vault://cellscaffold-staging/dev-sim/eira",
+          "keyMaterialPolicy": {
+            "storage": "IdentityVault",
+            "exportAllowed": false,
+            "fixtureContains": "public-descriptor-only"
+          }
+        },
+        {
+          "identityRef": "identity:dev-sim:eira:device",
+          "uuid": "11111111-1111-4111-8111-111111111104",
+          "identityDomain": "domain:device:local-dev",
+          "displayName": "Eira Solheim local device",
+          "publicKeyFingerprint": "sha256:ee94bf20abe10f4a9a9400d57cd76f4a775c8c032a4478ece5a308be9a3f9561",
+          "homeVaultReference": "vault://cellscaffold-staging/dev-sim/eira",
+          "keyMaterialPolicy": {
+            "storage": "IdentityVault",
+            "exportAllowed": false,
+            "fixtureContains": "public-descriptor-only"
+          }
+        },
+        {
+          "identityRef": "identity:dev-sim:eira:agent",
+          "uuid": "11111111-1111-4111-8111-111111111105",
+          "identityDomain": "domain:agent:personal-copilot-dev",
+          "displayName": "Eira Solheim Co-Pilot agent",
+          "publicKeyFingerprint": "sha256:7891d9c55e2013339b7451c2ed5ef4b16152ea512c796f9eebb9b539470f5049",
+          "homeVaultReference": "vault://cellscaffold-staging/dev-sim/eira",
+          "keyMaterialPolicy": {
+            "storage": "IdentityVault",
+            "exportAllowed": false,
+            "fixtureContains": "public-descriptor-only"
+          }
+        }
+      ],
+      "entityRepresentation": {
+        "name": "Eira Solheim",
+        "types": [],
+        "subTypes": [],
+        "parts": [],
+        "partOf": [],
+        "purposes": [],
+        "interests": [],
+        "entities": [],
+        "states": [],
+        "agreementRefs": []
+      },
+      "entityRepresentationExtensions": {
+        "schema": "haven.entityRepresentation.simulated.v0",
+        "representationPolicy": {
+          "includedRoots": [
+            "entityRepresentation.name",
+            "entityRepresentation.chatInviteProfile",
+            "person.contact.endpoints"
+          ],
+          "omittedRoots": [
+            "private route material",
+            "proof bodies",
+            "relations graph",
+            "chronicle history"
+          ]
+        },
+        "identityRefs": [
+          {
+            "identityRef": "identity:dev-sim:eira:personal",
+            "identityDomain": "domain:personal:dev"
+          },
+          {
+            "identityRef": "identity:dev-sim:eira:team",
+            "identityDomain": "domain:team:haven-dev"
+          },
+          {
+            "identityRef": "identity:dev-sim:eira:conference",
+            "identityDomain": "domain:conference:arendalsuka-demo"
+          },
+          {
+            "identityRef": "identity:dev-sim:eira:device",
+            "identityDomain": "domain:device:local-dev"
+          },
+          {
+            "identityRef": "identity:dev-sim:eira:agent",
+            "identityDomain": "domain:agent:personal-copilot-dev"
+          }
+        ],
+        "contactEndpointRefs": [
+          {
+            "endpointId": "contact-dev-sim-eira-chat",
+            "endpointCell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+            "purposes": [
+              "purpose://personal.chat.invite.receive",
+              "purpose://contact.introduction"
+            ],
+            "acceptedTopics": [
+              "contact.request",
+              "chat.invitation"
+            ],
+            "policy": {
+              "mode": "ownerApprovalRequired",
+              "requireSignature": true,
+              "requireExpiry": true
+            },
+            "routeMaterial": {
+              "storedInside": "ContactEndpointCell",
+              "exposedInFixture": false
+            }
+          }
+        ],
+        "chatInviteProfile": {
+          "lookupTokens": [
+            "eira",
+            "product",
+            "havendev",
+            "conference"
+          ],
+          "contactEndpointRefs": [
+            "contact-dev-sim-eira-chat"
+          ],
+          "purposeRefs": [
+            "purpose://personal.chat.invite.receive"
+          ],
+          "interestRefs": [
+            "invite-only-chat",
+            "contact-endpoint",
+            "developer-testing"
+          ]
+        }
+      },
+      "accessPolicy": {
+        "ownerAccess": "ownerProofRequired",
+        "defaultNonOwnerAccess": "denied",
+        "requiresExplicitGrant": true
+      }
+    },
+    {
+      "entityRef": "entity:dev-sim:jonas",
+      "displayName": "Jonas Berg",
+      "simulation": {
+        "enabled": true,
+        "kind": "human",
+        "disclosureLabel": "Simulated developer persona"
+      },
+      "identityDomains": [
+        "domain:personal:dev",
+        "domain:team:haven-dev",
+        "domain:conference:arendalsuka-demo",
+        "domain:device:local-dev"
+      ],
+      "identities": [
+        {
+          "identityRef": "identity:dev-sim:jonas:personal",
+          "uuid": "22222222-2222-4222-8222-222222222201",
+          "identityDomain": "domain:personal:dev",
+          "displayName": "Jonas Berg personal dev",
+          "publicKeyFingerprint": "sha256:85aea4c2cf3913998274c17c8286b633f87e071e18b13820d95a4d7fc94149cf",
+          "homeVaultReference": "vault://cellscaffold-staging/dev-sim/jonas",
+          "keyMaterialPolicy": {
+            "storage": "IdentityVault",
+            "exportAllowed": false,
+            "fixtureContains": "public-descriptor-only"
+          }
+        },
+        {
+          "identityRef": "identity:dev-sim:jonas:team",
+          "uuid": "22222222-2222-4222-8222-222222222202",
+          "identityDomain": "domain:team:haven-dev",
+          "displayName": "Jonas Berg HAVEN team",
+          "publicKeyFingerprint": "sha256:51d81e541926e70a09940058b85c6c46639730e2f66af8ce880126f93b4abfd5",
+          "homeVaultReference": "vault://cellscaffold-staging/dev-sim/jonas",
+          "keyMaterialPolicy": {
+            "storage": "IdentityVault",
+            "exportAllowed": false,
+            "fixtureContains": "public-descriptor-only"
+          }
+        },
+        {
+          "identityRef": "identity:dev-sim:jonas:conference",
+          "uuid": "22222222-2222-4222-8222-222222222203",
+          "identityDomain": "domain:conference:arendalsuka-demo",
+          "displayName": "Jonas Berg conference demo",
+          "publicKeyFingerprint": "sha256:c3f06bf48c8f7841a7fd971590b0778f00f4a2e166d70e85211ff0cc85b46002",
+          "homeVaultReference": "vault://cellscaffold-staging/dev-sim/jonas",
+          "keyMaterialPolicy": {
+            "storage": "IdentityVault",
+            "exportAllowed": false,
+            "fixtureContains": "public-descriptor-only"
+          }
+        },
+        {
+          "identityRef": "identity:dev-sim:jonas:device",
+          "uuid": "22222222-2222-4222-8222-222222222204",
+          "identityDomain": "domain:device:local-dev",
+          "displayName": "Jonas Berg local device",
+          "publicKeyFingerprint": "sha256:d7cd7ef05fc3a78c8938bf20c4e3f9cf25f9792523775f1185df9c4efe410b8d",
+          "homeVaultReference": "vault://cellscaffold-staging/dev-sim/jonas",
+          "keyMaterialPolicy": {
+            "storage": "IdentityVault",
+            "exportAllowed": false,
+            "fixtureContains": "public-descriptor-only"
+          }
+        }
+      ],
+      "entityRepresentation": {
+        "name": "Jonas Berg",
+        "types": [],
+        "subTypes": [],
+        "parts": [],
+        "partOf": [],
+        "purposes": [],
+        "interests": [],
+        "entities": [],
+        "states": [],
+        "agreementRefs": []
+      },
+      "entityRepresentationExtensions": {
+        "schema": "haven.entityRepresentation.simulated.v0",
+        "representationPolicy": {
+          "includedRoots": [
+            "entityRepresentation.name",
+            "entityRepresentation.chatInviteProfile",
+            "person.contact.endpoints"
+          ],
+          "omittedRoots": [
+            "private route material",
+            "proof bodies",
+            "relations graph",
+            "chronicle history"
+          ]
+        },
+        "identityRefs": [
+          {
+            "identityRef": "identity:dev-sim:jonas:personal",
+            "identityDomain": "domain:personal:dev"
+          },
+          {
+            "identityRef": "identity:dev-sim:jonas:team",
+            "identityDomain": "domain:team:haven-dev"
+          },
+          {
+            "identityRef": "identity:dev-sim:jonas:conference",
+            "identityDomain": "domain:conference:arendalsuka-demo"
+          },
+          {
+            "identityRef": "identity:dev-sim:jonas:device",
+            "identityDomain": "domain:device:local-dev"
+          }
+        ],
+        "contactEndpointRefs": [
+          {
+            "endpointId": "contact-dev-sim-jonas-chat",
+            "endpointCell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+            "purposes": [
+              "purpose://personal.chat.invite.receive",
+              "purpose://contact.introduction"
+            ],
+            "acceptedTopics": [
+              "contact.request",
+              "chat.invitation"
+            ],
+            "policy": {
+              "mode": "ownerApprovalRequired",
+              "requireSignature": true,
+              "requireExpiry": true
+            },
+            "routeMaterial": {
+              "storedInside": "ContactEndpointCell",
+              "exposedInFixture": false
+            }
+          }
+        ],
+        "chatInviteProfile": {
+          "lookupTokens": [
+            "jonas",
+            "security",
+            "backend",
+            "havendev"
+          ],
+          "contactEndpointRefs": [
+            "contact-dev-sim-jonas-chat"
+          ],
+          "purposeRefs": [
+            "purpose://personal.chat.invite.receive"
+          ],
+          "interestRefs": [
+            "invite-only-chat",
+            "contact-endpoint",
+            "security-review"
+          ]
+        }
+      },
+      "accessPolicy": {
+        "ownerAccess": "ownerProofRequired",
+        "defaultNonOwnerAccess": "denied",
+        "requiresExplicitGrant": true
+      }
+    },
+    {
+      "entityRef": "entity:dev-sim:mina",
+      "displayName": "Mina Aas",
+      "simulation": {
+        "enabled": true,
+        "kind": "human",
+        "disclosureLabel": "Simulated conference persona"
+      },
+      "identityDomains": [
+        "domain:personal:dev",
+        "domain:conference:arendalsuka-demo",
+        "domain:device:local-dev"
+      ],
+      "identities": [
+        {
+          "identityRef": "identity:dev-sim:mina:personal",
+          "uuid": "33333333-3333-4333-8333-333333333301",
+          "identityDomain": "domain:personal:dev",
+          "displayName": "Mina Aas personal dev",
+          "publicKeyFingerprint": "sha256:cb1a776e05a4bb0af0ff00d7109c733695b73b314a3ef0687f5db48119fd3cff",
+          "homeVaultReference": "vault://cellscaffold-staging/dev-sim/mina",
+          "keyMaterialPolicy": {
+            "storage": "IdentityVault",
+            "exportAllowed": false,
+            "fixtureContains": "public-descriptor-only"
+          }
+        },
+        {
+          "identityRef": "identity:dev-sim:mina:conference",
+          "uuid": "33333333-3333-4333-8333-333333333302",
+          "identityDomain": "domain:conference:arendalsuka-demo",
+          "displayName": "Mina Aas conference demo",
+          "publicKeyFingerprint": "sha256:3aade4a91263ee51c5ceafb9595c3cd94f83b9d2ad35394bb2a1248dbbe70299",
+          "homeVaultReference": "vault://cellscaffold-staging/dev-sim/mina",
+          "keyMaterialPolicy": {
+            "storage": "IdentityVault",
+            "exportAllowed": false,
+            "fixtureContains": "public-descriptor-only"
+          }
+        },
+        {
+          "identityRef": "identity:dev-sim:mina:device",
+          "uuid": "33333333-3333-4333-8333-333333333303",
+          "identityDomain": "domain:device:local-dev",
+          "displayName": "Mina Aas local device",
+          "publicKeyFingerprint": "sha256:b93a1944553a59574a18659dbb21ee279bf32fe1c06efc31b735c14d36980e7f",
+          "homeVaultReference": "vault://cellscaffold-staging/dev-sim/mina",
+          "keyMaterialPolicy": {
+            "storage": "IdentityVault",
+            "exportAllowed": false,
+            "fixtureContains": "public-descriptor-only"
+          }
+        }
+      ],
+      "entityRepresentation": {
+        "name": "Mina Aas",
+        "types": [],
+        "subTypes": [],
+        "parts": [],
+        "partOf": [],
+        "purposes": [],
+        "interests": [],
+        "entities": [],
+        "states": [],
+        "agreementRefs": []
+      },
+      "entityRepresentationExtensions": {
+        "schema": "haven.entityRepresentation.simulated.v0",
+        "representationPolicy": {
+          "includedRoots": [
+            "entityRepresentation.name",
+            "entityRepresentation.chatInviteProfile",
+            "person.contact.endpoints"
+          ],
+          "omittedRoots": [
+            "private route material",
+            "proof bodies",
+            "relations graph",
+            "chronicle history"
+          ]
+        },
+        "identityRefs": [
+          {
+            "identityRef": "identity:dev-sim:mina:personal",
+            "identityDomain": "domain:personal:dev"
+          },
+          {
+            "identityRef": "identity:dev-sim:mina:conference",
+            "identityDomain": "domain:conference:arendalsuka-demo"
+          },
+          {
+            "identityRef": "identity:dev-sim:mina:device",
+            "identityDomain": "domain:device:local-dev"
+          }
+        ],
+        "contactEndpointRefs": [
+          {
+            "endpointId": "contact-dev-sim-mina-chat",
+            "endpointCell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+            "purposes": [
+              "purpose://personal.chat.invite.receive",
+              "purpose://contact.introduction"
+            ],
+            "acceptedTopics": [
+              "contact.request",
+              "chat.invitation"
+            ],
+            "policy": {
+              "mode": "ownerApprovalRequired",
+              "requireSignature": true,
+              "requireExpiry": true
+            },
+            "routeMaterial": {
+              "storedInside": "ContactEndpointCell",
+              "exposedInFixture": false
+            }
+          }
+        ],
+        "chatInviteProfile": {
+          "lookupTokens": [
+            "mina",
+            "participant",
+            "conference",
+            "policy"
+          ],
+          "contactEndpointRefs": [
+            "contact-dev-sim-mina-chat"
+          ],
+          "purposeRefs": [
+            "purpose://personal.chat.invite.receive"
+          ],
+          "interestRefs": [
+            "invite-only-chat",
+            "contact-endpoint",
+            "event-participant"
+          ]
+        }
+      },
+      "accessPolicy": {
+        "ownerAccess": "ownerProofRequired",
+        "defaultNonOwnerAccess": "denied",
+        "requiresExplicitGrant": true
+      }
+    },
+    {
+      "entityRef": "entity:dev-sim:noor",
+      "displayName": "Noor Haddad",
+      "simulation": {
+        "enabled": true,
+        "kind": "human",
+        "disclosureLabel": "Simulated organization/admin persona"
+      },
+      "identityDomains": [
+        "domain:personal:dev",
+        "domain:team:haven-dev",
+        "domain:device:local-dev"
+      ],
+      "identities": [
+        {
+          "identityRef": "identity:dev-sim:noor:personal",
+          "uuid": "44444444-4444-4444-8444-444444444401",
+          "identityDomain": "domain:personal:dev",
+          "displayName": "Noor Haddad personal dev",
+          "publicKeyFingerprint": "sha256:1ad1fef894a09203a1145b8fb9a5e743b6abb4a51841462d329417022c86a0ca",
+          "homeVaultReference": "vault://cellscaffold-staging/dev-sim/noor",
+          "keyMaterialPolicy": {
+            "storage": "IdentityVault",
+            "exportAllowed": false,
+            "fixtureContains": "public-descriptor-only"
+          }
+        },
+        {
+          "identityRef": "identity:dev-sim:noor:team",
+          "uuid": "44444444-4444-4444-8444-444444444402",
+          "identityDomain": "domain:team:haven-dev",
+          "displayName": "Noor Haddad HAVEN team",
+          "publicKeyFingerprint": "sha256:f9ba2e27674fedde1a91ef42db2726ab14028f931df1b1a6fd281f1f067137bd",
+          "homeVaultReference": "vault://cellscaffold-staging/dev-sim/noor",
+          "keyMaterialPolicy": {
+            "storage": "IdentityVault",
+            "exportAllowed": false,
+            "fixtureContains": "public-descriptor-only"
+          }
+        },
+        {
+          "identityRef": "identity:dev-sim:noor:device",
+          "uuid": "44444444-4444-4444-8444-444444444403",
+          "identityDomain": "domain:device:local-dev",
+          "displayName": "Noor Haddad local device",
+          "publicKeyFingerprint": "sha256:606ac1ffb08ea56fb24b9ae8fdfc7e8928d6953c7642a9eb867a3618fb275e1e",
+          "homeVaultReference": "vault://cellscaffold-staging/dev-sim/noor",
+          "keyMaterialPolicy": {
+            "storage": "IdentityVault",
+            "exportAllowed": false,
+            "fixtureContains": "public-descriptor-only"
+          }
+        }
+      ],
+      "entityRepresentation": {
+        "name": "Noor Haddad",
+        "types": [],
+        "subTypes": [],
+        "parts": [],
+        "partOf": [],
+        "purposes": [],
+        "interests": [],
+        "entities": [],
+        "states": [],
+        "agreementRefs": []
+      },
+      "entityRepresentationExtensions": {
+        "schema": "haven.entityRepresentation.simulated.v0",
+        "representationPolicy": {
+          "includedRoots": [
+            "entityRepresentation.name",
+            "entityRepresentation.chatInviteProfile",
+            "person.contact.endpoints"
+          ],
+          "omittedRoots": [
+            "private route material",
+            "proof bodies",
+            "relations graph",
+            "chronicle history"
+          ]
+        },
+        "identityRefs": [
+          {
+            "identityRef": "identity:dev-sim:noor:personal",
+            "identityDomain": "domain:personal:dev"
+          },
+          {
+            "identityRef": "identity:dev-sim:noor:team",
+            "identityDomain": "domain:team:haven-dev"
+          },
+          {
+            "identityRef": "identity:dev-sim:noor:device",
+            "identityDomain": "domain:device:local-dev"
+          }
+        ],
+        "contactEndpointRefs": [
+          {
+            "endpointId": "contact-dev-sim-noor-chat",
+            "endpointCell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+            "purposes": [
+              "purpose://personal.chat.invite.receive",
+              "purpose://contact.introduction"
+            ],
+            "acceptedTopics": [
+              "contact.request",
+              "chat.invitation"
+            ],
+            "policy": {
+              "mode": "ownerApprovalRequired",
+              "requireSignature": true,
+              "requireExpiry": true
+            },
+            "routeMaterial": {
+              "storedInside": "ContactEndpointCell",
+              "exposedInFixture": false
+            }
+          }
+        ],
+        "chatInviteProfile": {
+          "lookupTokens": [
+            "noor",
+            "admin",
+            "operations",
+            "team"
+          ],
+          "contactEndpointRefs": [
+            "contact-dev-sim-noor-chat"
+          ],
+          "purposeRefs": [
+            "purpose://personal.chat.invite.receive"
+          ],
+          "interestRefs": [
+            "invite-only-chat",
+            "contact-endpoint",
+            "operations"
+          ]
+        }
+      },
+      "accessPolicy": {
+        "ownerAccess": "ownerProofRequired",
+        "defaultNonOwnerAccess": "denied",
+        "requiresExplicitGrant": true
+      }
+    },
+    {
+      "entityRef": "entity:dev-sim:service-agent",
+      "displayName": "HAVEN Staging Service Agent",
+      "simulation": {
+        "enabled": true,
+        "kind": "service",
+        "disclosureLabel": "Simulated service entity"
+      },
+      "identityDomains": [
+        "domain:agent:personal-copilot-dev",
+        "domain:swarm:staging"
+      ],
+      "identities": [
+        {
+          "identityRef": "identity:dev-sim:service:agent",
+          "uuid": "55555555-5555-4555-8555-555555555501",
+          "identityDomain": "domain:agent:personal-copilot-dev",
+          "displayName": "HAVEN staging Co-Pilot service agent",
+          "publicKeyFingerprint": "sha256:1a3f0200eb4250b213999621291a05ad3f3dbb78ef2ec16ebfd3a4ce715c17f1",
+          "homeVaultReference": "vault://cellscaffold-staging/dev-sim/service",
+          "keyMaterialPolicy": {
+            "storage": "IdentityVault",
+            "exportAllowed": false,
+            "fixtureContains": "public-descriptor-only"
+          }
+        },
+        {
+          "identityRef": "identity:dev-sim:service:swarm",
+          "uuid": "55555555-5555-4555-8555-555555555502",
+          "identityDomain": "domain:swarm:staging",
+          "displayName": "HAVEN staging swarm node",
+          "publicKeyFingerprint": "sha256:ef7ca552cb27c04513aadd5e11afe1e3ff512dee5424fca3bcfe3f2ea5f105e4",
+          "homeVaultReference": "vault://cellscaffold-staging/dev-sim/service",
+          "keyMaterialPolicy": {
+            "storage": "IdentityVault",
+            "exportAllowed": false,
+            "fixtureContains": "public-descriptor-only"
+          }
+        }
+      ],
+      "entityRepresentation": {
+        "name": "HAVEN Staging Service Agent",
+        "types": [],
+        "subTypes": [],
+        "parts": [],
+        "partOf": [],
+        "purposes": [],
+        "interests": [],
+        "entities": [],
+        "states": [],
+        "agreementRefs": []
+      },
+      "entityRepresentationExtensions": {
+        "schema": "haven.entityRepresentation.simulated.v0",
+        "representationPolicy": {
+          "includedRoots": [
+            "entityRepresentation.name"
+          ],
+          "omittedRoots": [
+            "private route material",
+            "proof bodies",
+            "relations graph",
+            "chronicle history"
+          ]
+        },
+        "identityRefs": [
+          {
+            "identityRef": "identity:dev-sim:service:agent",
+            "identityDomain": "domain:agent:personal-copilot-dev"
+          },
+          {
+            "identityRef": "identity:dev-sim:service:swarm",
+            "identityDomain": "domain:swarm:staging"
+          }
+        ],
+        "contactEndpointRefs": [],
+        "chatInviteProfile": {
+          "lookupTokens": [
+            "service",
+            "agent",
+            "swarm"
+          ],
+          "contactEndpointRefs": [],
+          "purposeRefs": [],
+          "interestRefs": [
+            "node-agent",
+            "swarm-staging"
+          ]
+        }
+      },
+      "accessPolicy": {
+        "ownerAccess": "ownerProofRequired",
+        "defaultNonOwnerAccess": "denied",
+        "requiresExplicitGrant": true
+      }
+    }
+  ],
+  "explicitGrantExamples": [
+    {
+      "grantId": "grant-dev-sim-eira-jonas-contact-request",
+      "issuerEntityRef": "entity:dev-sim:eira",
+      "subjectIdentityRef": "identity:dev-sim:jonas:personal",
+      "targetCellEndpoint": "cell://staging.haven.digipomps.org/ContactEndpoint",
+      "targetEndpointId": "contact-dev-sim-eira-chat",
+      "capabilities": [
+        "contact.request.submit"
+      ],
+      "conditions": [
+        "purpose == purpose://personal.chat.invite.receive",
+        "request.signature.present == true",
+        "request.expiresAt <= 2026-08-06T00:00:00Z"
+      ],
+      "requiresOwnerApproval": true,
+      "notes": "Lets Jonas submit a signed chat-invite contact request to Eira's endpoint. It does not grant read access to Eira's entity data."
+    },
+    {
+      "grantId": "grant-dev-sim-noor-service-swarm-observer",
+      "issuerEntityRef": "entity:dev-sim:noor",
+      "subjectIdentityRef": "identity:dev-sim:service:swarm",
+      "targetCellEndpoint": "cell://staging.haven.digipomps.org/SwarmIdentityAdmission",
+      "capabilities": [
+        "swarm.identity.observe"
+      ],
+      "conditions": [
+        "purpose == purpose://swarm.identity.admission",
+        "credential.role == observer",
+        "request.signature.present == true"
+      ],
+      "requiresOwnerApproval": true,
+      "notes": "Observer-only swarm admission example. It must not be promoted into admin or owner access."
+    }
+  ]
+}

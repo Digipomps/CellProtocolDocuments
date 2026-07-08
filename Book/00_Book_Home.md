@@ -22,6 +22,8 @@ The goal is one canonical markdown landing page that works across vault, web, Sw
 - [Chapter 28 — RAGPromptTransformerCell](28_RAG_Prompt_Transformer_Cell.md)
 - [Chapter 29 — Claim Argument Model](29_Claim_Argument_Model.md)
 - [Chapter 30 — Panel Task Decomposition Workflow](30_Panel_Task_Decomposition_Workflow.md)
+- [Chapter 31 — Developer Identity Pack](31_Developer_Identity_Pack.md)
+- [Chapter 32 — Cross-Scaffold Entity Enrollment](32_Cross_Scaffold_Entity_Enrollment.md)
 
 ## What We Have Right Now
 
@@ -58,6 +60,8 @@ The goal is one canonical markdown landing page that works across vault, web, Sw
 - [Chapter 03 — Identity Model](03_Identity_Model.md)
 - [Chapter 04 — Agreements and Contracts](04_Agreements_Contracts.md)
 - [Chapter 25 — SecretCredentialCell](25_SecretCredentialCell.md)
+- [Chapter 31 — Developer Identity Pack](31_Developer_Identity_Pack.md)
+- [Chapter 32 — Cross-Scaffold Entity Enrollment](32_Cross_Scaffold_Entity_Enrollment.md)
 
 ### Event Model and Execution
 
@@ -158,3 +162,10 @@ Use these when moving from reading to working:
 - The panel task decomposition chapter defines how advisory panel tasks are
   grounded in declared purposes with Goals and claim structures, with subtasks
   deduced from evaluation gaps until every goal is terminal.
+- The developer identity pack chapter defines a public-descriptor-only staging
+  fixture for simulated entities, per-domain identities, vault references,
+  contact endpoint refs, and explicit owner/grant access boundaries.
+- The cross-scaffold entity enrollment chapter defines the owner-approved path
+  for reaching the same EntityAnchor and EntityRepresentation data from multiple
+  enrolled scaffolds, including home scaffold placement, cost policy, caches,
+  and denial behavior.

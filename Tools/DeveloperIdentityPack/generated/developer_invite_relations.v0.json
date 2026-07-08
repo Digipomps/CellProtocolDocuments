@@ -1,0 +1,1607 @@
+{
+  "schema": "cellprotocol.developerIdentityPack.inviteRelationSeed.v0",
+  "version": 0,
+  "generatedAt": "2026-07-06T00:00:00Z",
+  "sourcePack": {
+    "schema": "cellprotocol.developerIdentityPack.v0",
+    "generatedAt": "2026-07-06T00:00:00Z",
+    "contentHash": "sha256:201e2b9a49dd0e9d955a7b628c11a155a0dbd19757bef308262735a5bad3c51a"
+  },
+  "requesterEntityRef": "entity:dev-sim:eira",
+  "intendedRuntime": {
+    "cellEndpoint": "cell:///EntityAnchor",
+    "ownerLocalKeypaths": [
+      "relations.people",
+      "relations.entities",
+      "relations.identities",
+      "relations.chatInvites",
+      "entityRepresentation.chatInviteProfile"
+    ],
+    "personalCopilotLookupPath": "relations.people",
+    "inviteCommandExamples": [
+      "inviter Jonas",
+      "inviter Mina",
+      "inviter Noor"
+    ]
+  },
+  "access": {
+    "ownerAccess": "ownerProofRequired",
+    "defaultNonOwnerAccess": "denied",
+    "requiresExplicitGrant": true,
+    "notes": [
+      "Names and profile ids are lookup hints inside the owner's EntityAnchor.",
+      "Endpoint ids are routing hints and do not grant access.",
+      "Private keys and private route material stay inside IdentityVault and ContactEndpointCell."
+    ]
+  },
+  "relations": {
+    "people": [
+      {
+        "id": "person-dev-sim-jonas",
+        "profileID": "relation-person-dev-sim-jonas",
+        "ownerUUID": "22222222-2222-4222-8222-222222222201",
+        "identityRefs": [
+          "relations.identities.identity-dev-sim-jonas-personal",
+          "relations.identities.identity-dev-sim-jonas-team",
+          "relations.identities.identity-dev-sim-jonas-conference",
+          "relations.identities.identity-dev-sim-jonas-device"
+        ],
+        "entityRef": "relations.entities.entity-dev-sim-jonas",
+        "displayName": "Jonas Berg",
+        "headline": "Security and backend reviewer",
+        "summary": "Simulated developer relation for security, backend and access-control invite tests.",
+        "sourceEntityRef": "entity:dev-sim:jonas",
+        "relationship": "simulated-security-reviewer",
+        "status": "simulated",
+        "contactEndpointID": "contact-dev-sim-jonas-chat",
+        "contactEndpointCell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+        "contactEndpointPurposes": [
+          "personal.chat.invite.receive",
+          "contact.introduction",
+          "personal.chat.simulation.respond"
+        ],
+        "contactEndpointInterests": [
+          "invite-only-chat",
+          "contact-endpoint",
+          "security-review",
+          "jonas",
+          "security",
+          "backend",
+          "havendev",
+          "simulated-ai-persona"
+        ],
+        "contact": {
+          "endpointStatus": "simulated-endpoint",
+          "endpoints": [
+            {
+              "endpointId": "contact-dev-sim-jonas-chat",
+              "endpointID": "contact-dev-sim-jonas-chat",
+              "endpointCell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+              "cell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+              "registryEndpoint": "cell:///ContactEndpointRegistry",
+              "descriptorSchema": "haven.contact-endpoint.descriptor.v1",
+              "schema": "haven.contact-endpoint.descriptor.v1",
+              "purposes": [
+                "personal.chat.invite.receive",
+                "contact.introduction",
+                "personal.chat.simulation.respond"
+              ],
+              "acceptedTopics": [
+                "contact.request",
+                "chat.invitation"
+              ],
+              "interests": [
+                "invite-only-chat",
+                "contact-endpoint",
+                "security-review",
+                "jonas",
+                "security",
+                "backend",
+                "havendev",
+                "simulated-ai-persona"
+              ],
+              "discoverabilityContext": "developer-identity-pack-invite-seed",
+              "visibility": "owner-private",
+              "policy": {
+                "mode": "ownerApprovalRequired",
+                "requireSignature": true,
+                "requireExpiry": true
+              }
+            }
+          ]
+        },
+        "purposeRefs": [
+          "personal.chat.invite.receive",
+          "personal.chat.assist.invite",
+          "personal.chat.simulation.respond"
+        ],
+        "interests": [
+          "jonas",
+          "security",
+          "backend",
+          "havendev",
+          "invite-only-chat",
+          "contact-endpoint",
+          "security-review",
+          "Jonas Berg",
+          "simulated-security-reviewer",
+          "invite-candidate",
+          "simulated-ai-persona",
+          "private-relation"
+        ],
+        "simulation": {
+          "enabled": true,
+          "agentKind": "ai-persona",
+          "disclosureLabel": "Simulated developer persona",
+          "personaRef": "developerIdentityPack.entities[entity:dev-sim:jonas]",
+          "rolePrompt": "Du er Jonas, en simulert sikkerhets- og backendreviewer. Svar med konkrete tilgangskontroll-observasjoner og hold svaret avgrenset til testen.",
+          "behaviorInstructions": [
+            "Say clearly that you are simulated if asked.",
+            "Keep replies scoped to the active test scenario.",
+            "Do not claim proof-backed identity, external delivery or real-world contact."
+          ],
+          "responsePolicy": {
+            "mode": "test-relevant-short-reply",
+            "language": "nb",
+            "maxSuggestedReplySentences": 2,
+            "topics": [
+              "security",
+              "backend",
+              "havendev"
+            ],
+            "suggestedReplies": [
+              "Invitasjon mottatt. Jeg sjekker at endpoint-referansen bare er et rutinghint og ikke autoritet.",
+              "For denne testen forventer jeg signerte, utlopende kontaktforesporsler og ingen privat rutemateriale i payload."
+            ],
+            "requiresAcceptedInviteBeforeReply": true
+          },
+          "perspectivePurposeRefs": [
+            "personal.chat.simulation.respond",
+            "personal.chat.assist.invite"
+          ],
+          "perspectiveInterestRefs": [
+            "security",
+            "backend",
+            "havendev",
+            "invite-only-chat",
+            "contact-endpoint",
+            "security-review"
+          ],
+          "allowedTooling": [
+            "PerspectiveCell.matchPurpose",
+            "PerspectiveCell.perspective.query.activePurposes",
+            "PerspectiveCell.perspective.query.interestsFromActivePurposes"
+          ],
+          "mustNot": [
+            "impersonate-real-person",
+            "send-external-message",
+            "claim-proof-backed-identity",
+            "read-owner-private-data-without-grant"
+          ]
+        },
+        "createdAt": "2026-07-06T00:00:00Z",
+        "updatedAt": "2026-07-06T00:00:00Z"
+      },
+      {
+        "id": "person-dev-sim-mina",
+        "profileID": "relation-person-dev-sim-mina",
+        "ownerUUID": "33333333-3333-4333-8333-333333333301",
+        "identityRefs": [
+          "relations.identities.identity-dev-sim-mina-personal",
+          "relations.identities.identity-dev-sim-mina-conference",
+          "relations.identities.identity-dev-sim-mina-device"
+        ],
+        "entityRef": "relations.entities.entity-dev-sim-mina",
+        "displayName": "Mina Aas",
+        "headline": "Conference participant and policy tester",
+        "summary": "Simulated conference participant relation for event, policy and participant invite tests.",
+        "sourceEntityRef": "entity:dev-sim:mina",
+        "relationship": "simulated-conference-participant",
+        "status": "simulated",
+        "contactEndpointID": "contact-dev-sim-mina-chat",
+        "contactEndpointCell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+        "contactEndpointPurposes": [
+          "personal.chat.invite.receive",
+          "contact.introduction",
+          "personal.chat.simulation.respond"
+        ],
+        "contactEndpointInterests": [
+          "invite-only-chat",
+          "contact-endpoint",
+          "event-participant",
+          "mina",
+          "participant",
+          "conference",
+          "policy",
+          "simulated-ai-persona"
+        ],
+        "contact": {
+          "endpointStatus": "simulated-endpoint",
+          "endpoints": [
+            {
+              "endpointId": "contact-dev-sim-mina-chat",
+              "endpointID": "contact-dev-sim-mina-chat",
+              "endpointCell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+              "cell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+              "registryEndpoint": "cell:///ContactEndpointRegistry",
+              "descriptorSchema": "haven.contact-endpoint.descriptor.v1",
+              "schema": "haven.contact-endpoint.descriptor.v1",
+              "purposes": [
+                "personal.chat.invite.receive",
+                "contact.introduction",
+                "personal.chat.simulation.respond"
+              ],
+              "acceptedTopics": [
+                "contact.request",
+                "chat.invitation"
+              ],
+              "interests": [
+                "invite-only-chat",
+                "contact-endpoint",
+                "event-participant",
+                "mina",
+                "participant",
+                "conference",
+                "policy",
+                "simulated-ai-persona"
+              ],
+              "discoverabilityContext": "developer-identity-pack-invite-seed",
+              "visibility": "owner-private",
+              "policy": {
+                "mode": "ownerApprovalRequired",
+                "requireSignature": true,
+                "requireExpiry": true
+              }
+            }
+          ]
+        },
+        "purposeRefs": [
+          "personal.chat.invite.receive",
+          "personal.chat.assist.invite",
+          "personal.chat.simulation.respond"
+        ],
+        "interests": [
+          "mina",
+          "participant",
+          "conference",
+          "policy",
+          "invite-only-chat",
+          "contact-endpoint",
+          "event-participant",
+          "Mina Aas",
+          "simulated-conference-participant",
+          "invite-candidate",
+          "simulated-ai-persona",
+          "private-relation"
+        ],
+        "simulation": {
+          "enabled": true,
+          "agentKind": "ai-persona",
+          "disclosureLabel": "Simulated conference persona",
+          "personaRef": "developerIdentityPack.entities[entity:dev-sim:mina]",
+          "rolePrompt": "Du er Mina, en simulert konferansedeltaker. Svar som en deltaker som trenger praktisk kontekst og tydelige samtykkegrenser.",
+          "behaviorInstructions": [
+            "Say clearly that you are simulated if asked.",
+            "Keep replies scoped to the active test scenario.",
+            "Do not claim proof-backed identity, external delivery or real-world contact."
+          ],
+          "responsePolicy": {
+            "mode": "test-relevant-short-reply",
+            "language": "nb",
+            "maxSuggestedReplySentences": 2,
+            "topics": [
+              "participant",
+              "conference",
+              "policy"
+            ],
+            "suggestedReplies": [
+              "Jeg kan svare som simulert deltaker. Si hva invitasjonen gjelder og hvilke data testen trenger.",
+              "I denne testen ser jeg etter tydelig formaal, samtykkegrense og neste steg i invitasjonen."
+            ],
+            "requiresAcceptedInviteBeforeReply": true
+          },
+          "perspectivePurposeRefs": [
+            "personal.chat.simulation.respond",
+            "personal.chat.assist.invite"
+          ],
+          "perspectiveInterestRefs": [
+            "participant",
+            "conference",
+            "policy",
+            "invite-only-chat",
+            "contact-endpoint",
+            "event-participant"
+          ],
+          "allowedTooling": [
+            "PerspectiveCell.matchPurpose",
+            "PerspectiveCell.perspective.query.activePurposes",
+            "PerspectiveCell.perspective.query.interestsFromActivePurposes"
+          ],
+          "mustNot": [
+            "impersonate-real-person",
+            "send-external-message",
+            "claim-proof-backed-identity",
+            "read-owner-private-data-without-grant"
+          ]
+        },
+        "createdAt": "2026-07-06T00:00:00Z",
+        "updatedAt": "2026-07-06T00:00:00Z"
+      },
+      {
+        "id": "person-dev-sim-noor",
+        "profileID": "relation-person-dev-sim-noor",
+        "ownerUUID": "44444444-4444-4444-8444-444444444401",
+        "identityRefs": [
+          "relations.identities.identity-dev-sim-noor-personal",
+          "relations.identities.identity-dev-sim-noor-team",
+          "relations.identities.identity-dev-sim-noor-device"
+        ],
+        "entityRef": "relations.entities.entity-dev-sim-noor",
+        "displayName": "Noor Haddad",
+        "headline": "Operations and team admin tester",
+        "summary": "Simulated operations relation for admin, team and staging-swarm invite tests.",
+        "sourceEntityRef": "entity:dev-sim:noor",
+        "relationship": "simulated-operations-admin",
+        "status": "simulated",
+        "contactEndpointID": "contact-dev-sim-noor-chat",
+        "contactEndpointCell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+        "contactEndpointPurposes": [
+          "personal.chat.invite.receive",
+          "contact.introduction",
+          "personal.chat.simulation.respond"
+        ],
+        "contactEndpointInterests": [
+          "invite-only-chat",
+          "contact-endpoint",
+          "operations",
+          "noor",
+          "admin",
+          "team",
+          "simulated-ai-persona"
+        ],
+        "contact": {
+          "endpointStatus": "simulated-endpoint",
+          "endpoints": [
+            {
+              "endpointId": "contact-dev-sim-noor-chat",
+              "endpointID": "contact-dev-sim-noor-chat",
+              "endpointCell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+              "cell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+              "registryEndpoint": "cell:///ContactEndpointRegistry",
+              "descriptorSchema": "haven.contact-endpoint.descriptor.v1",
+              "schema": "haven.contact-endpoint.descriptor.v1",
+              "purposes": [
+                "personal.chat.invite.receive",
+                "contact.introduction",
+                "personal.chat.simulation.respond"
+              ],
+              "acceptedTopics": [
+                "contact.request",
+                "chat.invitation"
+              ],
+              "interests": [
+                "invite-only-chat",
+                "contact-endpoint",
+                "operations",
+                "noor",
+                "admin",
+                "team",
+                "simulated-ai-persona"
+              ],
+              "discoverabilityContext": "developer-identity-pack-invite-seed",
+              "visibility": "owner-private",
+              "policy": {
+                "mode": "ownerApprovalRequired",
+                "requireSignature": true,
+                "requireExpiry": true
+              }
+            }
+          ]
+        },
+        "purposeRefs": [
+          "personal.chat.invite.receive",
+          "personal.chat.assist.invite",
+          "personal.chat.simulation.respond"
+        ],
+        "interests": [
+          "noor",
+          "admin",
+          "operations",
+          "team",
+          "invite-only-chat",
+          "contact-endpoint",
+          "Noor Haddad",
+          "simulated-operations-admin",
+          "invite-candidate",
+          "simulated-ai-persona",
+          "private-relation"
+        ],
+        "simulation": {
+          "enabled": true,
+          "agentKind": "ai-persona",
+          "disclosureLabel": "Simulated organization/admin persona",
+          "personaRef": "developerIdentityPack.entities[entity:dev-sim:noor]",
+          "rolePrompt": "Du er Noor, en simulert operations/admin-persona. Svar med praktiske driftsjekker og ikke lat som du har reell adminautoritet.",
+          "behaviorInstructions": [
+            "Say clearly that you are simulated if asked.",
+            "Keep replies scoped to the active test scenario.",
+            "Do not claim proof-backed identity, external delivery or real-world contact."
+          ],
+          "responsePolicy": {
+            "mode": "test-relevant-short-reply",
+            "language": "nb",
+            "maxSuggestedReplySentences": 2,
+            "topics": [
+              "admin",
+              "operations",
+              "team"
+            ],
+            "suggestedReplies": [
+              "Invitasjon mottatt. Jeg sjekker at dette holder seg i simulert owner-local testkontekst.",
+              "For testen kan jeg sjekke navngiving, endpoint-beredskap og om handlingen krever eksplisitt eiergodkjenning."
+            ],
+            "requiresAcceptedInviteBeforeReply": true
+          },
+          "perspectivePurposeRefs": [
+            "personal.chat.simulation.respond",
+            "personal.chat.assist.invite"
+          ],
+          "perspectiveInterestRefs": [
+            "admin",
+            "operations",
+            "team",
+            "invite-only-chat",
+            "contact-endpoint"
+          ],
+          "allowedTooling": [
+            "PerspectiveCell.matchPurpose",
+            "PerspectiveCell.perspective.query.activePurposes",
+            "PerspectiveCell.perspective.query.interestsFromActivePurposes"
+          ],
+          "mustNot": [
+            "impersonate-real-person",
+            "send-external-message",
+            "claim-proof-backed-identity",
+            "read-owner-private-data-without-grant"
+          ]
+        },
+        "createdAt": "2026-07-06T00:00:00Z",
+        "updatedAt": "2026-07-06T00:00:00Z"
+      }
+    ],
+    "entities": {
+      "entity-dev-sim-jonas": {
+        "entityKind": "simulated-person-representation",
+        "label": "Jonas Berg",
+        "status": "simulated",
+        "identityRefs": [
+          "relations.identities.identity-dev-sim-jonas-personal",
+          "relations.identities.identity-dev-sim-jonas-team",
+          "relations.identities.identity-dev-sim-jonas-conference",
+          "relations.identities.identity-dev-sim-jonas-device"
+        ],
+        "relationRefs": [
+          "relations.people[id=person-dev-sim-jonas]"
+        ],
+        "contactEndpointRefs": [
+          "relations.people[id=person-dev-sim-jonas].contact.endpoints[endpointId=contact-dev-sim-jonas-chat]"
+        ],
+        "simulationRef": "relations.people[id=person-dev-sim-jonas].simulation",
+        "sourceEntityRef": "entity:dev-sim:jonas"
+      },
+      "entity-dev-sim-mina": {
+        "entityKind": "simulated-person-representation",
+        "label": "Mina Aas",
+        "status": "simulated",
+        "identityRefs": [
+          "relations.identities.identity-dev-sim-mina-personal",
+          "relations.identities.identity-dev-sim-mina-conference",
+          "relations.identities.identity-dev-sim-mina-device"
+        ],
+        "relationRefs": [
+          "relations.people[id=person-dev-sim-mina]"
+        ],
+        "contactEndpointRefs": [
+          "relations.people[id=person-dev-sim-mina].contact.endpoints[endpointId=contact-dev-sim-mina-chat]"
+        ],
+        "simulationRef": "relations.people[id=person-dev-sim-mina].simulation",
+        "sourceEntityRef": "entity:dev-sim:mina"
+      },
+      "entity-dev-sim-noor": {
+        "entityKind": "simulated-person-representation",
+        "label": "Noor Haddad",
+        "status": "simulated",
+        "identityRefs": [
+          "relations.identities.identity-dev-sim-noor-personal",
+          "relations.identities.identity-dev-sim-noor-team",
+          "relations.identities.identity-dev-sim-noor-device"
+        ],
+        "relationRefs": [
+          "relations.people[id=person-dev-sim-noor]"
+        ],
+        "contactEndpointRefs": [
+          "relations.people[id=person-dev-sim-noor].contact.endpoints[endpointId=contact-dev-sim-noor-chat]"
+        ],
+        "simulationRef": "relations.people[id=person-dev-sim-noor].simulation",
+        "sourceEntityRef": "entity:dev-sim:noor"
+      }
+    },
+    "identities": {
+      "identity-dev-sim-jonas-conference": {
+        "identityRef": "identity:dev-sim:jonas:conference",
+        "identityUUID": "22222222-2222-4222-8222-222222222203",
+        "domain": "domain:conference:arendalsuka-demo",
+        "displayName": "Jonas Berg conference demo",
+        "publicKeyFingerprint": "sha256:c3f06bf48c8f7841a7fd971590b0778f00f4a2e166d70e85211ff0cc85b46002",
+        "homeVaultReference": "vault://cellscaffold-staging/dev-sim/jonas",
+        "entityRefs": [
+          "relations.entities.entity-dev-sim-jonas"
+        ],
+        "proofRefs": [],
+        "source": "developerIdentityPack.publicDescriptor",
+        "keyMaterialPolicy": {
+          "storage": "IdentityVault",
+          "exportAllowed": false,
+          "fixtureContains": "public-descriptor-only"
+        }
+      },
+      "identity-dev-sim-jonas-device": {
+        "identityRef": "identity:dev-sim:jonas:device",
+        "identityUUID": "22222222-2222-4222-8222-222222222204",
+        "domain": "domain:device:local-dev",
+        "displayName": "Jonas Berg local device",
+        "publicKeyFingerprint": "sha256:d7cd7ef05fc3a78c8938bf20c4e3f9cf25f9792523775f1185df9c4efe410b8d",
+        "homeVaultReference": "vault://cellscaffold-staging/dev-sim/jonas",
+        "entityRefs": [
+          "relations.entities.entity-dev-sim-jonas"
+        ],
+        "proofRefs": [],
+        "source": "developerIdentityPack.publicDescriptor",
+        "keyMaterialPolicy": {
+          "storage": "IdentityVault",
+          "exportAllowed": false,
+          "fixtureContains": "public-descriptor-only"
+        }
+      },
+      "identity-dev-sim-jonas-personal": {
+        "identityRef": "identity:dev-sim:jonas:personal",
+        "identityUUID": "22222222-2222-4222-8222-222222222201",
+        "domain": "domain:personal:dev",
+        "displayName": "Jonas Berg personal dev",
+        "publicKeyFingerprint": "sha256:85aea4c2cf3913998274c17c8286b633f87e071e18b13820d95a4d7fc94149cf",
+        "homeVaultReference": "vault://cellscaffold-staging/dev-sim/jonas",
+        "entityRefs": [
+          "relations.entities.entity-dev-sim-jonas"
+        ],
+        "proofRefs": [],
+        "source": "developerIdentityPack.publicDescriptor",
+        "keyMaterialPolicy": {
+          "storage": "IdentityVault",
+          "exportAllowed": false,
+          "fixtureContains": "public-descriptor-only"
+        }
+      },
+      "identity-dev-sim-jonas-team": {
+        "identityRef": "identity:dev-sim:jonas:team",
+        "identityUUID": "22222222-2222-4222-8222-222222222202",
+        "domain": "domain:team:haven-dev",
+        "displayName": "Jonas Berg HAVEN team",
+        "publicKeyFingerprint": "sha256:51d81e541926e70a09940058b85c6c46639730e2f66af8ce880126f93b4abfd5",
+        "homeVaultReference": "vault://cellscaffold-staging/dev-sim/jonas",
+        "entityRefs": [
+          "relations.entities.entity-dev-sim-jonas"
+        ],
+        "proofRefs": [],
+        "source": "developerIdentityPack.publicDescriptor",
+        "keyMaterialPolicy": {
+          "storage": "IdentityVault",
+          "exportAllowed": false,
+          "fixtureContains": "public-descriptor-only"
+        }
+      },
+      "identity-dev-sim-mina-conference": {
+        "identityRef": "identity:dev-sim:mina:conference",
+        "identityUUID": "33333333-3333-4333-8333-333333333302",
+        "domain": "domain:conference:arendalsuka-demo",
+        "displayName": "Mina Aas conference demo",
+        "publicKeyFingerprint": "sha256:3aade4a91263ee51c5ceafb9595c3cd94f83b9d2ad35394bb2a1248dbbe70299",
+        "homeVaultReference": "vault://cellscaffold-staging/dev-sim/mina",
+        "entityRefs": [
+          "relations.entities.entity-dev-sim-mina"
+        ],
+        "proofRefs": [],
+        "source": "developerIdentityPack.publicDescriptor",
+        "keyMaterialPolicy": {
+          "storage": "IdentityVault",
+          "exportAllowed": false,
+          "fixtureContains": "public-descriptor-only"
+        }
+      },
+      "identity-dev-sim-mina-device": {
+        "identityRef": "identity:dev-sim:mina:device",
+        "identityUUID": "33333333-3333-4333-8333-333333333303",
+        "domain": "domain:device:local-dev",
+        "displayName": "Mina Aas local device",
+        "publicKeyFingerprint": "sha256:b93a1944553a59574a18659dbb21ee279bf32fe1c06efc31b735c14d36980e7f",
+        "homeVaultReference": "vault://cellscaffold-staging/dev-sim/mina",
+        "entityRefs": [
+          "relations.entities.entity-dev-sim-mina"
+        ],
+        "proofRefs": [],
+        "source": "developerIdentityPack.publicDescriptor",
+        "keyMaterialPolicy": {
+          "storage": "IdentityVault",
+          "exportAllowed": false,
+          "fixtureContains": "public-descriptor-only"
+        }
+      },
+      "identity-dev-sim-mina-personal": {
+        "identityRef": "identity:dev-sim:mina:personal",
+        "identityUUID": "33333333-3333-4333-8333-333333333301",
+        "domain": "domain:personal:dev",
+        "displayName": "Mina Aas personal dev",
+        "publicKeyFingerprint": "sha256:cb1a776e05a4bb0af0ff00d7109c733695b73b314a3ef0687f5db48119fd3cff",
+        "homeVaultReference": "vault://cellscaffold-staging/dev-sim/mina",
+        "entityRefs": [
+          "relations.entities.entity-dev-sim-mina"
+        ],
+        "proofRefs": [],
+        "source": "developerIdentityPack.publicDescriptor",
+        "keyMaterialPolicy": {
+          "storage": "IdentityVault",
+          "exportAllowed": false,
+          "fixtureContains": "public-descriptor-only"
+        }
+      },
+      "identity-dev-sim-noor-device": {
+        "identityRef": "identity:dev-sim:noor:device",
+        "identityUUID": "44444444-4444-4444-8444-444444444403",
+        "domain": "domain:device:local-dev",
+        "displayName": "Noor Haddad local device",
+        "publicKeyFingerprint": "sha256:606ac1ffb08ea56fb24b9ae8fdfc7e8928d6953c7642a9eb867a3618fb275e1e",
+        "homeVaultReference": "vault://cellscaffold-staging/dev-sim/noor",
+        "entityRefs": [
+          "relations.entities.entity-dev-sim-noor"
+        ],
+        "proofRefs": [],
+        "source": "developerIdentityPack.publicDescriptor",
+        "keyMaterialPolicy": {
+          "storage": "IdentityVault",
+          "exportAllowed": false,
+          "fixtureContains": "public-descriptor-only"
+        }
+      },
+      "identity-dev-sim-noor-personal": {
+        "identityRef": "identity:dev-sim:noor:personal",
+        "identityUUID": "44444444-4444-4444-8444-444444444401",
+        "domain": "domain:personal:dev",
+        "displayName": "Noor Haddad personal dev",
+        "publicKeyFingerprint": "sha256:1ad1fef894a09203a1145b8fb9a5e743b6abb4a51841462d329417022c86a0ca",
+        "homeVaultReference": "vault://cellscaffold-staging/dev-sim/noor",
+        "entityRefs": [
+          "relations.entities.entity-dev-sim-noor"
+        ],
+        "proofRefs": [],
+        "source": "developerIdentityPack.publicDescriptor",
+        "keyMaterialPolicy": {
+          "storage": "IdentityVault",
+          "exportAllowed": false,
+          "fixtureContains": "public-descriptor-only"
+        }
+      },
+      "identity-dev-sim-noor-team": {
+        "identityRef": "identity:dev-sim:noor:team",
+        "identityUUID": "44444444-4444-4444-8444-444444444402",
+        "domain": "domain:team:haven-dev",
+        "displayName": "Noor Haddad HAVEN team",
+        "publicKeyFingerprint": "sha256:f9ba2e27674fedde1a91ef42db2726ab14028f931df1b1a6fd281f1f067137bd",
+        "homeVaultReference": "vault://cellscaffold-staging/dev-sim/noor",
+        "entityRefs": [
+          "relations.entities.entity-dev-sim-noor"
+        ],
+        "proofRefs": [],
+        "source": "developerIdentityPack.publicDescriptor",
+        "keyMaterialPolicy": {
+          "storage": "IdentityVault",
+          "exportAllowed": false,
+          "fixtureContains": "public-descriptor-only"
+        }
+      }
+    },
+    "chatInvites": {
+      "pending": [],
+      "history": [],
+      "notes": "Operational chat state lives in PersonalCopilot/Chat cells. This root holds owner-local refs only."
+    }
+  },
+  "entityRepresentation": {
+    "chatInviteProfile": {
+      "purposeRefs": [
+        "personal.chat.assist.invite",
+        "personal.chat.simulation.respond",
+        "personal.chat.invite.receive"
+      ],
+      "interestRefs": [
+        "jonas",
+        "security",
+        "backend",
+        "havendev",
+        "invite-only-chat",
+        "contact-endpoint",
+        "security-review",
+        "Jonas Berg",
+        "simulated-security-reviewer",
+        "invite-candidate",
+        "simulated-ai-persona",
+        "private-relation",
+        "mina",
+        "participant",
+        "conference",
+        "policy",
+        "event-participant",
+        "Mina Aas",
+        "simulated-conference-participant",
+        "noor",
+        "admin",
+        "operations",
+        "team",
+        "Noor Haddad",
+        "simulated-operations-admin"
+      ],
+      "lookupTokens": [
+        "Jonas Berg",
+        "Jonas",
+        "Security and backend reviewer",
+        "simulated-security-reviewer",
+        "security",
+        "backend",
+        "havendev",
+        "invite-only-chat",
+        "contact-endpoint",
+        "security-review",
+        "invite-candidate",
+        "simulated-ai-persona",
+        "private-relation",
+        "Mina Aas",
+        "Mina",
+        "Conference participant and policy tester",
+        "simulated-conference-participant",
+        "participant",
+        "conference",
+        "policy",
+        "event-participant",
+        "Noor Haddad",
+        "Noor",
+        "Operations and team admin tester",
+        "simulated-operations-admin",
+        "admin",
+        "operations",
+        "team"
+      ],
+      "candidateRefs": [
+        "relations.people[id=person-dev-sim-jonas]",
+        "relations.people[id=person-dev-sim-mina]",
+        "relations.people[id=person-dev-sim-noor]"
+      ],
+      "contactEndpointRefs": [
+        "relations.people[id=person-dev-sim-jonas].contact.endpoints[endpointId=contact-dev-sim-jonas-chat]",
+        "relations.people[id=person-dev-sim-mina].contact.endpoints[endpointId=contact-dev-sim-mina-chat]",
+        "relations.people[id=person-dev-sim-noor].contact.endpoints[endpointId=contact-dev-sim-noor-chat]"
+      ],
+      "simulationResponseRefs": [
+        "relations.people[id=person-dev-sim-jonas].simulation.responsePolicy",
+        "relations.people[id=person-dev-sim-mina].simulation.responsePolicy",
+        "relations.people[id=person-dev-sim-noor].simulation.responsePolicy"
+      ],
+      "notes": "Generated owner-local invite candidates. Seed into cell:///EntityAnchor before testing 'inviter <name>'."
+    }
+  },
+  "seedMutations": [
+    {
+      "keypath": "relations.people[+]",
+      "value": {
+        "id": "person-dev-sim-jonas",
+        "profileID": "relation-person-dev-sim-jonas",
+        "ownerUUID": "22222222-2222-4222-8222-222222222201",
+        "identityRefs": [
+          "relations.identities.identity-dev-sim-jonas-personal",
+          "relations.identities.identity-dev-sim-jonas-team",
+          "relations.identities.identity-dev-sim-jonas-conference",
+          "relations.identities.identity-dev-sim-jonas-device"
+        ],
+        "entityRef": "relations.entities.entity-dev-sim-jonas",
+        "displayName": "Jonas Berg",
+        "headline": "Security and backend reviewer",
+        "summary": "Simulated developer relation for security, backend and access-control invite tests.",
+        "sourceEntityRef": "entity:dev-sim:jonas",
+        "relationship": "simulated-security-reviewer",
+        "status": "simulated",
+        "contactEndpointID": "contact-dev-sim-jonas-chat",
+        "contactEndpointCell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+        "contactEndpointPurposes": [
+          "personal.chat.invite.receive",
+          "contact.introduction",
+          "personal.chat.simulation.respond"
+        ],
+        "contactEndpointInterests": [
+          "invite-only-chat",
+          "contact-endpoint",
+          "security-review",
+          "jonas",
+          "security",
+          "backend",
+          "havendev",
+          "simulated-ai-persona"
+        ],
+        "contact": {
+          "endpointStatus": "simulated-endpoint",
+          "endpoints": [
+            {
+              "endpointId": "contact-dev-sim-jonas-chat",
+              "endpointID": "contact-dev-sim-jonas-chat",
+              "endpointCell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+              "cell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+              "registryEndpoint": "cell:///ContactEndpointRegistry",
+              "descriptorSchema": "haven.contact-endpoint.descriptor.v1",
+              "schema": "haven.contact-endpoint.descriptor.v1",
+              "purposes": [
+                "personal.chat.invite.receive",
+                "contact.introduction",
+                "personal.chat.simulation.respond"
+              ],
+              "acceptedTopics": [
+                "contact.request",
+                "chat.invitation"
+              ],
+              "interests": [
+                "invite-only-chat",
+                "contact-endpoint",
+                "security-review",
+                "jonas",
+                "security",
+                "backend",
+                "havendev",
+                "simulated-ai-persona"
+              ],
+              "discoverabilityContext": "developer-identity-pack-invite-seed",
+              "visibility": "owner-private",
+              "policy": {
+                "mode": "ownerApprovalRequired",
+                "requireSignature": true,
+                "requireExpiry": true
+              }
+            }
+          ]
+        },
+        "purposeRefs": [
+          "personal.chat.invite.receive",
+          "personal.chat.assist.invite",
+          "personal.chat.simulation.respond"
+        ],
+        "interests": [
+          "jonas",
+          "security",
+          "backend",
+          "havendev",
+          "invite-only-chat",
+          "contact-endpoint",
+          "security-review",
+          "Jonas Berg",
+          "simulated-security-reviewer",
+          "invite-candidate",
+          "simulated-ai-persona",
+          "private-relation"
+        ],
+        "simulation": {
+          "enabled": true,
+          "agentKind": "ai-persona",
+          "disclosureLabel": "Simulated developer persona",
+          "personaRef": "developerIdentityPack.entities[entity:dev-sim:jonas]",
+          "rolePrompt": "Du er Jonas, en simulert sikkerhets- og backendreviewer. Svar med konkrete tilgangskontroll-observasjoner og hold svaret avgrenset til testen.",
+          "behaviorInstructions": [
+            "Say clearly that you are simulated if asked.",
+            "Keep replies scoped to the active test scenario.",
+            "Do not claim proof-backed identity, external delivery or real-world contact."
+          ],
+          "responsePolicy": {
+            "mode": "test-relevant-short-reply",
+            "language": "nb",
+            "maxSuggestedReplySentences": 2,
+            "topics": [
+              "security",
+              "backend",
+              "havendev"
+            ],
+            "suggestedReplies": [
+              "Invitasjon mottatt. Jeg sjekker at endpoint-referansen bare er et rutinghint og ikke autoritet.",
+              "For denne testen forventer jeg signerte, utlopende kontaktforesporsler og ingen privat rutemateriale i payload."
+            ],
+            "requiresAcceptedInviteBeforeReply": true
+          },
+          "perspectivePurposeRefs": [
+            "personal.chat.simulation.respond",
+            "personal.chat.assist.invite"
+          ],
+          "perspectiveInterestRefs": [
+            "security",
+            "backend",
+            "havendev",
+            "invite-only-chat",
+            "contact-endpoint",
+            "security-review"
+          ],
+          "allowedTooling": [
+            "PerspectiveCell.matchPurpose",
+            "PerspectiveCell.perspective.query.activePurposes",
+            "PerspectiveCell.perspective.query.interestsFromActivePurposes"
+          ],
+          "mustNot": [
+            "impersonate-real-person",
+            "send-external-message",
+            "claim-proof-backed-identity",
+            "read-owner-private-data-without-grant"
+          ]
+        },
+        "createdAt": "2026-07-06T00:00:00Z",
+        "updatedAt": "2026-07-06T00:00:00Z"
+      }
+    },
+    {
+      "keypath": "relations.people[+]",
+      "value": {
+        "id": "person-dev-sim-mina",
+        "profileID": "relation-person-dev-sim-mina",
+        "ownerUUID": "33333333-3333-4333-8333-333333333301",
+        "identityRefs": [
+          "relations.identities.identity-dev-sim-mina-personal",
+          "relations.identities.identity-dev-sim-mina-conference",
+          "relations.identities.identity-dev-sim-mina-device"
+        ],
+        "entityRef": "relations.entities.entity-dev-sim-mina",
+        "displayName": "Mina Aas",
+        "headline": "Conference participant and policy tester",
+        "summary": "Simulated conference participant relation for event, policy and participant invite tests.",
+        "sourceEntityRef": "entity:dev-sim:mina",
+        "relationship": "simulated-conference-participant",
+        "status": "simulated",
+        "contactEndpointID": "contact-dev-sim-mina-chat",
+        "contactEndpointCell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+        "contactEndpointPurposes": [
+          "personal.chat.invite.receive",
+          "contact.introduction",
+          "personal.chat.simulation.respond"
+        ],
+        "contactEndpointInterests": [
+          "invite-only-chat",
+          "contact-endpoint",
+          "event-participant",
+          "mina",
+          "participant",
+          "conference",
+          "policy",
+          "simulated-ai-persona"
+        ],
+        "contact": {
+          "endpointStatus": "simulated-endpoint",
+          "endpoints": [
+            {
+              "endpointId": "contact-dev-sim-mina-chat",
+              "endpointID": "contact-dev-sim-mina-chat",
+              "endpointCell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+              "cell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+              "registryEndpoint": "cell:///ContactEndpointRegistry",
+              "descriptorSchema": "haven.contact-endpoint.descriptor.v1",
+              "schema": "haven.contact-endpoint.descriptor.v1",
+              "purposes": [
+                "personal.chat.invite.receive",
+                "contact.introduction",
+                "personal.chat.simulation.respond"
+              ],
+              "acceptedTopics": [
+                "contact.request",
+                "chat.invitation"
+              ],
+              "interests": [
+                "invite-only-chat",
+                "contact-endpoint",
+                "event-participant",
+                "mina",
+                "participant",
+                "conference",
+                "policy",
+                "simulated-ai-persona"
+              ],
+              "discoverabilityContext": "developer-identity-pack-invite-seed",
+              "visibility": "owner-private",
+              "policy": {
+                "mode": "ownerApprovalRequired",
+                "requireSignature": true,
+                "requireExpiry": true
+              }
+            }
+          ]
+        },
+        "purposeRefs": [
+          "personal.chat.invite.receive",
+          "personal.chat.assist.invite",
+          "personal.chat.simulation.respond"
+        ],
+        "interests": [
+          "mina",
+          "participant",
+          "conference",
+          "policy",
+          "invite-only-chat",
+          "contact-endpoint",
+          "event-participant",
+          "Mina Aas",
+          "simulated-conference-participant",
+          "invite-candidate",
+          "simulated-ai-persona",
+          "private-relation"
+        ],
+        "simulation": {
+          "enabled": true,
+          "agentKind": "ai-persona",
+          "disclosureLabel": "Simulated conference persona",
+          "personaRef": "developerIdentityPack.entities[entity:dev-sim:mina]",
+          "rolePrompt": "Du er Mina, en simulert konferansedeltaker. Svar som en deltaker som trenger praktisk kontekst og tydelige samtykkegrenser.",
+          "behaviorInstructions": [
+            "Say clearly that you are simulated if asked.",
+            "Keep replies scoped to the active test scenario.",
+            "Do not claim proof-backed identity, external delivery or real-world contact."
+          ],
+          "responsePolicy": {
+            "mode": "test-relevant-short-reply",
+            "language": "nb",
+            "maxSuggestedReplySentences": 2,
+            "topics": [
+              "participant",
+              "conference",
+              "policy"
+            ],
+            "suggestedReplies": [
+              "Jeg kan svare som simulert deltaker. Si hva invitasjonen gjelder og hvilke data testen trenger.",
+              "I denne testen ser jeg etter tydelig formaal, samtykkegrense og neste steg i invitasjonen."
+            ],
+            "requiresAcceptedInviteBeforeReply": true
+          },
+          "perspectivePurposeRefs": [
+            "personal.chat.simulation.respond",
+            "personal.chat.assist.invite"
+          ],
+          "perspectiveInterestRefs": [
+            "participant",
+            "conference",
+            "policy",
+            "invite-only-chat",
+            "contact-endpoint",
+            "event-participant"
+          ],
+          "allowedTooling": [
+            "PerspectiveCell.matchPurpose",
+            "PerspectiveCell.perspective.query.activePurposes",
+            "PerspectiveCell.perspective.query.interestsFromActivePurposes"
+          ],
+          "mustNot": [
+            "impersonate-real-person",
+            "send-external-message",
+            "claim-proof-backed-identity",
+            "read-owner-private-data-without-grant"
+          ]
+        },
+        "createdAt": "2026-07-06T00:00:00Z",
+        "updatedAt": "2026-07-06T00:00:00Z"
+      }
+    },
+    {
+      "keypath": "relations.people[+]",
+      "value": {
+        "id": "person-dev-sim-noor",
+        "profileID": "relation-person-dev-sim-noor",
+        "ownerUUID": "44444444-4444-4444-8444-444444444401",
+        "identityRefs": [
+          "relations.identities.identity-dev-sim-noor-personal",
+          "relations.identities.identity-dev-sim-noor-team",
+          "relations.identities.identity-dev-sim-noor-device"
+        ],
+        "entityRef": "relations.entities.entity-dev-sim-noor",
+        "displayName": "Noor Haddad",
+        "headline": "Operations and team admin tester",
+        "summary": "Simulated operations relation for admin, team and staging-swarm invite tests.",
+        "sourceEntityRef": "entity:dev-sim:noor",
+        "relationship": "simulated-operations-admin",
+        "status": "simulated",
+        "contactEndpointID": "contact-dev-sim-noor-chat",
+        "contactEndpointCell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+        "contactEndpointPurposes": [
+          "personal.chat.invite.receive",
+          "contact.introduction",
+          "personal.chat.simulation.respond"
+        ],
+        "contactEndpointInterests": [
+          "invite-only-chat",
+          "contact-endpoint",
+          "operations",
+          "noor",
+          "admin",
+          "team",
+          "simulated-ai-persona"
+        ],
+        "contact": {
+          "endpointStatus": "simulated-endpoint",
+          "endpoints": [
+            {
+              "endpointId": "contact-dev-sim-noor-chat",
+              "endpointID": "contact-dev-sim-noor-chat",
+              "endpointCell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+              "cell": "cell://staging.haven.digipomps.org/ContactEndpoint",
+              "registryEndpoint": "cell:///ContactEndpointRegistry",
+              "descriptorSchema": "haven.contact-endpoint.descriptor.v1",
+              "schema": "haven.contact-endpoint.descriptor.v1",
+              "purposes": [
+                "personal.chat.invite.receive",
+                "contact.introduction",
+                "personal.chat.simulation.respond"
+              ],
+              "acceptedTopics": [
+                "contact.request",
+                "chat.invitation"
+              ],
+              "interests": [
+                "invite-only-chat",
+                "contact-endpoint",
+                "operations",
+                "noor",
+                "admin",
+                "team",
+                "simulated-ai-persona"
+              ],
+              "discoverabilityContext": "developer-identity-pack-invite-seed",
+              "visibility": "owner-private",
+              "policy": {
+                "mode": "ownerApprovalRequired",
+                "requireSignature": true,
+                "requireExpiry": true
+              }
+            }
+          ]
+        },
+        "purposeRefs": [
+          "personal.chat.invite.receive",
+          "personal.chat.assist.invite",
+          "personal.chat.simulation.respond"
+        ],
+        "interests": [
+          "noor",
+          "admin",
+          "operations",
+          "team",
+          "invite-only-chat",
+          "contact-endpoint",
+          "Noor Haddad",
+          "simulated-operations-admin",
+          "invite-candidate",
+          "simulated-ai-persona",
+          "private-relation"
+        ],
+        "simulation": {
+          "enabled": true,
+          "agentKind": "ai-persona",
+          "disclosureLabel": "Simulated organization/admin persona",
+          "personaRef": "developerIdentityPack.entities[entity:dev-sim:noor]",
+          "rolePrompt": "Du er Noor, en simulert operations/admin-persona. Svar med praktiske driftsjekker og ikke lat som du har reell adminautoritet.",
+          "behaviorInstructions": [
+            "Say clearly that you are simulated if asked.",
+            "Keep replies scoped to the active test scenario.",
+            "Do not claim proof-backed identity, external delivery or real-world contact."
+          ],
+          "responsePolicy": {
+            "mode": "test-relevant-short-reply",
+            "language": "nb",
+            "maxSuggestedReplySentences": 2,
+            "topics": [
+              "admin",
+              "operations",
+              "team"
+            ],
+            "suggestedReplies": [
+              "Invitasjon mottatt. Jeg sjekker at dette holder seg i simulert owner-local testkontekst.",
+              "For testen kan jeg sjekke navngiving, endpoint-beredskap og om handlingen krever eksplisitt eiergodkjenning."
+            ],
+            "requiresAcceptedInviteBeforeReply": true
+          },
+          "perspectivePurposeRefs": [
+            "personal.chat.simulation.respond",
+            "personal.chat.assist.invite"
+          ],
+          "perspectiveInterestRefs": [
+            "admin",
+            "operations",
+            "team",
+            "invite-only-chat",
+            "contact-endpoint"
+          ],
+          "allowedTooling": [
+            "PerspectiveCell.matchPurpose",
+            "PerspectiveCell.perspective.query.activePurposes",
+            "PerspectiveCell.perspective.query.interestsFromActivePurposes"
+          ],
+          "mustNot": [
+            "impersonate-real-person",
+            "send-external-message",
+            "claim-proof-backed-identity",
+            "read-owner-private-data-without-grant"
+          ]
+        },
+        "createdAt": "2026-07-06T00:00:00Z",
+        "updatedAt": "2026-07-06T00:00:00Z"
+      }
+    },
+    {
+      "keypath": "relations.entities.entity-dev-sim-jonas",
+      "value": {
+        "entityKind": "simulated-person-representation",
+        "label": "Jonas Berg",
+        "status": "simulated",
+        "identityRefs": [
+          "relations.identities.identity-dev-sim-jonas-personal",
+          "relations.identities.identity-dev-sim-jonas-team",
+          "relations.identities.identity-dev-sim-jonas-conference",
+          "relations.identities.identity-dev-sim-jonas-device"
+        ],
+        "relationRefs": [
+          "relations.people[id=person-dev-sim-jonas]"
+        ],
+        "contactEndpointRefs": [
+          "relations.people[id=person-dev-sim-jonas].contact.endpoints[endpointId=contact-dev-sim-jonas-chat]"
+        ],
+        "simulationRef": "relations.people[id=person-dev-sim-jonas].simulation",
+        "sourceEntityRef": "entity:dev-sim:jonas"
+      }
+    },
+    {
+      "keypath": "relations.entities.entity-dev-sim-mina",
+      "value": {
+        "entityKind": "simulated-person-representation",
+        "label": "Mina Aas",
+        "status": "simulated",
+        "identityRefs": [
+          "relations.identities.identity-dev-sim-mina-personal",
+          "relations.identities.identity-dev-sim-mina-conference",
+          "relations.identities.identity-dev-sim-mina-device"
+        ],
+        "relationRefs": [
+          "relations.people[id=person-dev-sim-mina]"
+        ],
+        "contactEndpointRefs": [
+          "relations.people[id=person-dev-sim-mina].contact.endpoints[endpointId=contact-dev-sim-mina-chat]"
+        ],
+        "simulationRef": "relations.people[id=person-dev-sim-mina].simulation",
+        "sourceEntityRef": "entity:dev-sim:mina"
+      }
+    },
+    {
+      "keypath": "relations.entities.entity-dev-sim-noor",
+      "value": {
+        "entityKind": "simulated-person-representation",
+        "label": "Noor Haddad",
+        "status": "simulated",
+        "identityRefs": [
+          "relations.identities.identity-dev-sim-noor-personal",
+          "relations.identities.identity-dev-sim-noor-team",
+          "relations.identities.identity-dev-sim-noor-device"
+        ],
+        "relationRefs": [
+          "relations.people[id=person-dev-sim-noor]"
+        ],
+        "contactEndpointRefs": [
+          "relations.people[id=person-dev-sim-noor].contact.endpoints[endpointId=contact-dev-sim-noor-chat]"
+        ],
+        "simulationRef": "relations.people[id=person-dev-sim-noor].simulation",
+        "sourceEntityRef": "entity:dev-sim:noor"
+      }
+    },
+    {
+      "keypath": "relations.identities.identity-dev-sim-jonas-conference",
+      "value": {
+        "identityRef": "identity:dev-sim:jonas:conference",
+        "identityUUID": "22222222-2222-4222-8222-222222222203",
+        "domain": "domain:conference:arendalsuka-demo",
+        "displayName": "Jonas Berg conference demo",
+        "publicKeyFingerprint": "sha256:c3f06bf48c8f7841a7fd971590b0778f00f4a2e166d70e85211ff0cc85b46002",
+        "homeVaultReference": "vault://cellscaffold-staging/dev-sim/jonas",
+        "entityRefs": [
+          "relations.entities.entity-dev-sim-jonas"
+        ],
+        "proofRefs": [],
+        "source": "developerIdentityPack.publicDescriptor",
+        "keyMaterialPolicy": {
+          "storage": "IdentityVault",
+          "exportAllowed": false,
+          "fixtureContains": "public-descriptor-only"
+        }
+      }
+    },
+    {
+      "keypath": "relations.identities.identity-dev-sim-jonas-device",
+      "value": {
+        "identityRef": "identity:dev-sim:jonas:device",
+        "identityUUID": "22222222-2222-4222-8222-222222222204",
+        "domain": "domain:device:local-dev",
+        "displayName": "Jonas Berg local device",
+        "publicKeyFingerprint": "sha256:d7cd7ef05fc3a78c8938bf20c4e3f9cf25f9792523775f1185df9c4efe410b8d",
+        "homeVaultReference": "vault://cellscaffold-staging/dev-sim/jonas",
+        "entityRefs": [
+          "relations.entities.entity-dev-sim-jonas"
+        ],
+        "proofRefs": [],
+        "source": "developerIdentityPack.publicDescriptor",
+        "keyMaterialPolicy": {
+          "storage": "IdentityVault",
+          "exportAllowed": false,
+          "fixtureContains": "public-descriptor-only"
+        }
+      }
+    },
+    {
+      "keypath": "relations.identities.identity-dev-sim-jonas-personal",
+      "value": {
+        "identityRef": "identity:dev-sim:jonas:personal",
+        "identityUUID": "22222222-2222-4222-8222-222222222201",
+        "domain": "domain:personal:dev",
+        "displayName": "Jonas Berg personal dev",
+        "publicKeyFingerprint": "sha256:85aea4c2cf3913998274c17c8286b633f87e071e18b13820d95a4d7fc94149cf",
+        "homeVaultReference": "vault://cellscaffold-staging/dev-sim/jonas",
+        "entityRefs": [
+          "relations.entities.entity-dev-sim-jonas"
+        ],
+        "proofRefs": [],
+        "source": "developerIdentityPack.publicDescriptor",
+        "keyMaterialPolicy": {
+          "storage": "IdentityVault",
+          "exportAllowed": false,
+          "fixtureContains": "public-descriptor-only"
+        }
+      }
+    },
+    {
+      "keypath": "relations.identities.identity-dev-sim-jonas-team",
+      "value": {
+        "identityRef": "identity:dev-sim:jonas:team",
+        "identityUUID": "22222222-2222-4222-8222-222222222202",
+        "domain": "domain:team:haven-dev",
+        "displayName": "Jonas Berg HAVEN team",
+        "publicKeyFingerprint": "sha256:51d81e541926e70a09940058b85c6c46639730e2f66af8ce880126f93b4abfd5",
+        "homeVaultReference": "vault://cellscaffold-staging/dev-sim/jonas",
+        "entityRefs": [
+          "relations.entities.entity-dev-sim-jonas"
+        ],
+        "proofRefs": [],
+        "source": "developerIdentityPack.publicDescriptor",
+        "keyMaterialPolicy": {
+          "storage": "IdentityVault",
+          "exportAllowed": false,
+          "fixtureContains": "public-descriptor-only"
+        }
+      }
+    },
+    {
+      "keypath": "relations.identities.identity-dev-sim-mina-conference",
+      "value": {
+        "identityRef": "identity:dev-sim:mina:conference",
+        "identityUUID": "33333333-3333-4333-8333-333333333302",
+        "domain": "domain:conference:arendalsuka-demo",
+        "displayName": "Mina Aas conference demo",
+        "publicKeyFingerprint": "sha256:3aade4a91263ee51c5ceafb9595c3cd94f83b9d2ad35394bb2a1248dbbe70299",
+        "homeVaultReference": "vault://cellscaffold-staging/dev-sim/mina",
+        "entityRefs": [
+          "relations.entities.entity-dev-sim-mina"
+        ],
+        "proofRefs": [],
+        "source": "developerIdentityPack.publicDescriptor",
+        "keyMaterialPolicy": {
+          "storage": "IdentityVault",
+          "exportAllowed": false,
+          "fixtureContains": "public-descriptor-only"
+        }
+      }
+    },
+    {
+      "keypath": "relations.identities.identity-dev-sim-mina-device",
+      "value": {
+        "identityRef": "identity:dev-sim:mina:device",
+        "identityUUID": "33333333-3333-4333-8333-333333333303",
+        "domain": "domain:device:local-dev",
+        "displayName": "Mina Aas local device",
+        "publicKeyFingerprint": "sha256:b93a1944553a59574a18659dbb21ee279bf32fe1c06efc31b735c14d36980e7f",
+        "homeVaultReference": "vault://cellscaffold-staging/dev-sim/mina",
+        "entityRefs": [
+          "relations.entities.entity-dev-sim-mina"
+        ],
+        "proofRefs": [],
+        "source": "developerIdentityPack.publicDescriptor",
+        "keyMaterialPolicy": {
+          "storage": "IdentityVault",
+          "exportAllowed": false,
+          "fixtureContains": "public-descriptor-only"
+        }
+      }
+    },
+    {
+      "keypath": "relations.identities.identity-dev-sim-mina-personal",
+      "value": {
+        "identityRef": "identity:dev-sim:mina:personal",
+        "identityUUID": "33333333-3333-4333-8333-333333333301",
+        "domain": "domain:personal:dev",
+        "displayName": "Mina Aas personal dev",
+        "publicKeyFingerprint": "sha256:cb1a776e05a4bb0af0ff00d7109c733695b73b314a3ef0687f5db48119fd3cff",
+        "homeVaultReference": "vault://cellscaffold-staging/dev-sim/mina",
+        "entityRefs": [
+          "relations.entities.entity-dev-sim-mina"
+        ],
+        "proofRefs": [],
+        "source": "developerIdentityPack.publicDescriptor",
+        "keyMaterialPolicy": {
+          "storage": "IdentityVault",
+          "exportAllowed": false,
+          "fixtureContains": "public-descriptor-only"
+        }
+      }
+    },
+    {
+      "keypath": "relations.identities.identity-dev-sim-noor-device",
+      "value": {
+        "identityRef": "identity:dev-sim:noor:device",
+        "identityUUID": "44444444-4444-4444-8444-444444444403",
+        "domain": "domain:device:local-dev",
+        "displayName": "Noor Haddad local device",
+        "publicKeyFingerprint": "sha256:606ac1ffb08ea56fb24b9ae8fdfc7e8928d6953c7642a9eb867a3618fb275e1e",
+        "homeVaultReference": "vault://cellscaffold-staging/dev-sim/noor",
+        "entityRefs": [
+          "relations.entities.entity-dev-sim-noor"
+        ],
+        "proofRefs": [],
+        "source": "developerIdentityPack.publicDescriptor",
+        "keyMaterialPolicy": {
+          "storage": "IdentityVault",
+          "exportAllowed": false,
+          "fixtureContains": "public-descriptor-only"
+        }
+      }
+    },
+    {
+      "keypath": "relations.identities.identity-dev-sim-noor-personal",
+      "value": {
+        "identityRef": "identity:dev-sim:noor:personal",
+        "identityUUID": "44444444-4444-4444-8444-444444444401",
+        "domain": "domain:personal:dev",
+        "displayName": "Noor Haddad personal dev",
+        "publicKeyFingerprint": "sha256:1ad1fef894a09203a1145b8fb9a5e743b6abb4a51841462d329417022c86a0ca",
+        "homeVaultReference": "vault://cellscaffold-staging/dev-sim/noor",
+        "entityRefs": [
+          "relations.entities.entity-dev-sim-noor"
+        ],
+        "proofRefs": [],
+        "source": "developerIdentityPack.publicDescriptor",
+        "keyMaterialPolicy": {
+          "storage": "IdentityVault",
+          "exportAllowed": false,
+          "fixtureContains": "public-descriptor-only"
+        }
+      }
+    },
+    {
+      "keypath": "relations.identities.identity-dev-sim-noor-team",
+      "value": {
+        "identityRef": "identity:dev-sim:noor:team",
+        "identityUUID": "44444444-4444-4444-8444-444444444402",
+        "domain": "domain:team:haven-dev",
+        "displayName": "Noor Haddad HAVEN team",
+        "publicKeyFingerprint": "sha256:f9ba2e27674fedde1a91ef42db2726ab14028f931df1b1a6fd281f1f067137bd",
+        "homeVaultReference": "vault://cellscaffold-staging/dev-sim/noor",
+        "entityRefs": [
+          "relations.entities.entity-dev-sim-noor"
+        ],
+        "proofRefs": [],
+        "source": "developerIdentityPack.publicDescriptor",
+        "keyMaterialPolicy": {
+          "storage": "IdentityVault",
+          "exportAllowed": false,
+          "fixtureContains": "public-descriptor-only"
+        }
+      }
+    },
+    {
+      "keypath": "relations.chatInvites",
+      "value": {
+        "pending": [],
+        "history": [],
+        "notes": "Operational chat state lives in PersonalCopilot/Chat cells. This root holds owner-local refs only."
+      }
+    },
+    {
+      "keypath": "entityRepresentation.chatInviteProfile",
+      "value": {
+        "purposeRefs": [
+          "personal.chat.assist.invite",
+          "personal.chat.simulation.respond",
+          "personal.chat.invite.receive"
+        ],
+        "interestRefs": [
+          "jonas",
+          "security",
+          "backend",
+          "havendev",
+          "invite-only-chat",
+          "contact-endpoint",
+          "security-review",
+          "Jonas Berg",
+          "simulated-security-reviewer",
+          "invite-candidate",
+          "simulated-ai-persona",
+          "private-relation",
+          "mina",
+          "participant",
+          "conference",
+          "policy",
+          "event-participant",
+          "Mina Aas",
+          "simulated-conference-participant",
+          "noor",
+          "admin",
+          "operations",
+          "team",
+          "Noor Haddad",
+          "simulated-operations-admin"
+        ],
+        "lookupTokens": [
+          "Jonas Berg",
+          "Jonas",
+          "Security and backend reviewer",
+          "simulated-security-reviewer",
+          "security",
+          "backend",
+          "havendev",
+          "invite-only-chat",
+          "contact-endpoint",
+          "security-review",
+          "invite-candidate",
+          "simulated-ai-persona",
+          "private-relation",
+          "Mina Aas",
+          "Mina",
+          "Conference participant and policy tester",
+          "simulated-conference-participant",
+          "participant",
+          "conference",
+          "policy",
+          "event-participant",
+          "Noor Haddad",
+          "Noor",
+          "Operations and team admin tester",
+          "simulated-operations-admin",
+          "admin",
+          "operations",
+          "team"
+        ],
+        "candidateRefs": [
+          "relations.people[id=person-dev-sim-jonas]",
+          "relations.people[id=person-dev-sim-mina]",
+          "relations.people[id=person-dev-sim-noor]"
+        ],
+        "contactEndpointRefs": [
+          "relations.people[id=person-dev-sim-jonas].contact.endpoints[endpointId=contact-dev-sim-jonas-chat]",
+          "relations.people[id=person-dev-sim-mina].contact.endpoints[endpointId=contact-dev-sim-mina-chat]",
+          "relations.people[id=person-dev-sim-noor].contact.endpoints[endpointId=contact-dev-sim-noor-chat]"
+        ],
+        "simulationResponseRefs": [
+          "relations.people[id=person-dev-sim-jonas].simulation.responsePolicy",
+          "relations.people[id=person-dev-sim-mina].simulation.responsePolicy",
+          "relations.people[id=person-dev-sim-noor].simulation.responsePolicy"
+        ],
+        "notes": "Generated owner-local invite candidates. Seed into cell:///EntityAnchor before testing 'inviter <name>'."
+      }
+    }
+  ]
+}

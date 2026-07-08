@@ -1,0 +1,128 @@
+{
+  "version": 0,
+  "status": "draft",
+  "lastUpdated": "2026-07-06",
+  "schema": "cellprotocol.developerIdentityPack.v0",
+  "responsibility": "Provide public descriptors for simulated developer/staging entities with one Identity per identityDomain and vault-bound key material.",
+  "security": {
+    "privateKeyExportAllowed": false,
+    "fixtureContainsPrivateKeyMaterial": false,
+    "identityReuseAcrossDomainsAllowed": false,
+    "defaultNonOwnerAccess": "denied",
+    "nonOwnerAccessRequires": [
+      "resolverAcceptedContract",
+      "exactCapability",
+      "requesterSignature",
+      "freshPurposeBoundProof"
+    ],
+    "forbiddenPublicDescriptorKeys": [
+      "privateKey",
+      "privateSecureKey",
+      "privateKeyBase64URL",
+      "seed",
+      "mnemonic",
+      "routeRefs",
+      "pushToken",
+      "deviceToken",
+      "ownerIdentityUUIDHash",
+      "stableOwnerHash",
+      "rawRoute"
+    ]
+  },
+  "objects": {
+    "DeveloperIdentityPack": {
+      "required": [
+        "schema",
+        "version",
+        "identityDomains",
+        "vaults",
+        "entities",
+        "accessPolicy"
+      ]
+    },
+    "SimulatedEntity": {
+      "required": [
+        "entityRef",
+        "displayName",
+        "simulation",
+        "identityDomains",
+        "identities",
+        "entityRepresentation",
+        "entityRepresentationExtensions",
+        "accessPolicy"
+      ],
+      "rules": [
+        "identities contains exactly one descriptor for each identityDomain listed by the entity",
+        "identity UUIDs are globally unique in the package",
+        "identityDomain values are domain-scoped and not global account ids",
+        "non-owner access is denied unless an explicit grant says otherwise"
+      ]
+    },
+    "IdentityPublicDescriptor": {
+      "required": [
+        "identityRef",
+        "uuid",
+        "identityDomain",
+        "displayName",
+        "publicKeyFingerprint",
+        "homeVaultReference",
+        "keyMaterialPolicy"
+      ],
+      "rules": [
+        "homeVaultReference must point to a vault in this package or a runtime-configured IdentityVault",
+        "keyMaterialPolicy.storage must be IdentityVault",
+        "keyMaterialPolicy.exportAllowed must be false",
+        "the descriptor must not include private key material"
+      ]
+    },
+    "ContactEndpointRef": {
+      "required": [
+        "endpointId",
+        "endpointCell",
+        "purposes",
+        "acceptedTopics",
+        "policy"
+      ],
+      "rules": [
+        "descriptor contains only public-safe contact metadata",
+        "endpoint ids are routing hints, not identity proofs",
+        "requests must be signed and expiring",
+        "owner review is required by default"
+      ]
+    },
+    "InviteRelationSeed": {
+      "schema": "cellprotocol.developerIdentityPack.inviteRelationSeed.v0",
+      "required": [
+        "schema",
+        "version",
+        "requesterEntityRef",
+        "relations",
+        "entityRepresentation",
+        "seedMutations"
+      ],
+      "rules": [
+        "seedMutations must target owner-local EntityAnchor invite keypaths only",
+        "relations.people rows must carry profileID, ownerUUID, contact endpoint descriptor, and simulation metadata",
+        "simulation.responsePolicy may guide test replies but must not claim real identity proof or external delivery",
+        "endpoint descriptors are routing hints and not authority",
+        "private keys, private route material, push tokens, owner hashes, and proof bodies are forbidden"
+      ],
+      "ownerLocalKeypaths": [
+        "relations.people",
+        "relations.entities",
+        "relations.identities",
+        "relations.chatInvites",
+        "entityRepresentation.chatInviteProfile"
+      ]
+    }
+  },
+  "runtimeAnchors": {
+    "identityVaultProtocol": "CellProtocol/Sources/CellBase/Identity/IdentityVaultProtocol.swift",
+    "vaporIdentityVault": "CellProtocol/Sources/CellVapor/VaporIdentityVault.swift",
+    "contactEndpointCell": "CellScaffold/Sources/App/Cells/ContactEndpoint/ContactEndpointCell.swift",
+    "chatInvitationProofUtility": "CellProtocol/Sources/CellBase/Cells/Chat/ChatInvitationProofUtility.swift",
+    "entityScaffoldEnrollment": "CellScaffold/Sources/App/Cells/EntityScaffoldEnrollment/EntityScaffoldEnrollmentCell.swift",
+    "personalCopilotOwnerLocalInviteLookup": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+    "entityStudioInviteSeedAction": "CellScaffold/Sources/App/Cells/EntityStudio/EntityStudioCell.swift"
+  }
+}

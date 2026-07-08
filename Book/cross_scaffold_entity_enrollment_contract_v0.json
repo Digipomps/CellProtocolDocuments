@@ -1,0 +1,218 @@
+{
+  "version": 0,
+  "status": "draft",
+  "lastUpdated": "2026-07-08",
+  "schema": "cellprotocol.crossScaffoldEntityEnrollment.v0",
+  "responsibility": "Let an owner reach the same EntityAnchor and EntityRepresentation data from explicitly enrolled scaffolds without sharing one Identity across domains or exporting private keys.",
+  "security": {
+    "globalIdentityAllowed": false,
+    "privateKeyExportAllowed": false,
+    "cacheIsAuthority": false,
+    "endpointReferenceIsAuthority": false,
+    "defaultNonOwnerAccess": "denied",
+    "authorityRequires": [
+      "activeEnrollmentLink",
+      "requesterSignature",
+      "exactCapability",
+      "matchingPurpose",
+      "resolverAcceptedContract",
+      "freshReplayGuardForMutation"
+    ]
+  },
+  "canonicalCells": {
+    "entityAnchor": "cell:///EntityAnchor",
+    "enrollment": "cell:///EntityScaffoldEnrollment",
+    "optionalCredentialBoundary": "cell:///entity/credentials"
+  },
+  "homePlacementPolicy": {
+    "object": "EntityHomePolicy",
+    "defaultRule": "Choose the highest-availability home scaffold within the owner's cost, sensitivity and hosting policy. If cost is unknown or above cap, require owner confirmation.",
+    "requiredFields": [
+      "policyID",
+      "ownerIdentityUUID",
+      "homeScaffoldRef",
+      "availabilityTier",
+      "estimatedMonthlyCostNOK",
+      "maxMonthlyCostNOK",
+      "dataSensitivity",
+      "transportPolicy",
+      "backupPolicy",
+      "ownerPresenceRequiredForWrites",
+      "updatedAt"
+    ],
+    "availabilityTiers": [
+      "local-only",
+      "lan",
+      "private-cloud",
+      "hosted-staging",
+      "swarm"
+    ],
+    "dataSensitivity": [
+      "synthetic",
+      "public",
+      "private",
+      "sensitive"
+    ]
+  },
+  "capabilities": [
+    "entity.representation.read",
+    "entity.representation.write",
+    "entity.relations.read",
+    "entity.relations.write.ownerApproved",
+    "entity.invite.resolve",
+    "entity.contactEndpoint.request",
+    "entity.cache.read",
+    "entity.cache.refresh",
+    "entity.homePolicy.read",
+    "entity.homePolicy.proposeChange"
+  ],
+  "objects": {
+    "EntityScaffoldEnrollmentRequest": {
+      "required": [
+        "version",
+        "requestID",
+        "purpose",
+        "entityAnchorReference",
+        "scaffoldIdentityUUID",
+        "scaffoldDisplayName",
+        "scaffoldPublicKeyBase64URL",
+        "scaffoldIdentityDomain",
+        "scaffoldKind",
+        "requestedCapabilities",
+        "audience",
+        "origin",
+        "createdAt",
+        "expiresAt",
+        "nonce",
+        "proof"
+      ],
+      "rules": [
+        "proof must verify against scaffoldPublicKeyBase64URL",
+        "expiresAt must be fresh",
+        "requestedCapabilities must not contain wildcards"
+      ]
+    },
+    "EntityScaffoldEnrollmentApproval": {
+      "required": [
+        "version",
+        "approvalID",
+        "purpose",
+        "requestHash",
+        "approvedCapabilities",
+        "issuerIdentityUUID",
+        "issuerPublicKeyBase64URL",
+        "audience",
+        "createdAt",
+        "expiresAt",
+        "jti",
+        "freshAuthRequired",
+        "proof"
+      ],
+      "rules": [
+        "approvedCapabilities must be a subset of requestedCapabilities",
+        "jti must be replay-protected",
+        "issuerIdentityUUID must match the owner requester"
+      ]
+    },
+    "EntityScaffoldActivationProof": {
+      "required": [
+        "version",
+        "requestID",
+        "approvalID",
+        "activationChallenge",
+        "signedAt",
+        "proof"
+      ],
+      "rules": [
+        "proof must verify against the enrolled scaffold identity",
+        "activationChallenge must match the pending approval challenge"
+      ]
+    },
+    "EntityScaffoldLinkRecord": {
+      "required": [
+        "linkID",
+        "requestID",
+        "entityAnchorReference",
+        "scaffoldIdentityUUID",
+        "scaffoldPublicKeyBase64URL",
+        "scaffoldIdentityDomain",
+        "scaffoldKind",
+        "capabilities",
+        "audience",
+        "status",
+        "linkedAt",
+        "approvedByIdentityUUID"
+      ],
+      "statusValues": [
+        "active",
+        "revoked"
+      ]
+    },
+    "EntityRepresentationSyncState": {
+      "required": [
+        "entityAnchorReference",
+        "sourceRevision",
+        "cacheRevision",
+        "cacheExpiresAt",
+        "status"
+      ],
+      "statusValues": [
+        "fresh",
+        "stale-read-only",
+        "pendingOwnerHomeCommit",
+        "conflict",
+        "denied"
+      ]
+    }
+  },
+  "cachePolicy": {
+    "allowed": [
+      "encryptedLocalCache",
+      "readOnlyOfflineSnapshot",
+      "revisionHash",
+      "queuedWriteWithOwnerHomeCommit"
+    ],
+    "forbidden": [
+      "privateKeyMaterial",
+      "copiedOwnerIdentity",
+      "staleCacheAsAuthority",
+      "publicPromptOrLogLeak",
+      "grantPropagationFromCache"
+    ]
+  },
+  "denialReasons": [
+    "missingActiveEnrollmentLink",
+    "linkRevoked",
+    "linkExpired",
+    "missingCapability",
+    "wrongPurpose",
+    "wrongAudience",
+    "invalidSignature",
+    "capabilityEscalation",
+    "replayDetected",
+    "expiredRequest",
+    "cacheNotAuthority",
+    "costPolicyRequiresOwnerConfirmation",
+    "hostingBoundaryNotAllowed"
+  ],
+  "runtimeAnchors": {
+    "identityModel": "CellProtocolDocuments/Book/03_Identity_Model.md",
+    "agreementsContracts": "CellProtocolDocuments/Book/04_Agreements_Contracts.md",
+    "resolver": "CellProtocolDocuments/Book/06_CellResolver.md",
+    "scaffoldRuntime": "CellProtocolDocuments/Book/07_Scaffold_Runtime.md",
+    "developerIdentityPack": "CellProtocolDocuments/Book/31_Developer_Identity_Pack.md",
+    "entityScaffoldEnrollmentImplementation": "CellScaffold/Sources/App/Cells/EntityScaffoldEnrollment/EntityScaffoldEnrollmentCell.swift",
+    "entityScaffoldEnrollmentTests": "CellScaffold/Tests/AppTests/EntityScaffoldEnrollmentCellTests.swift"
+  },
+  "testRequirements": [
+    "Owner can read the same entityRepresentation from two enrolled scaffold identities.",
+    "Non-enrolled scaffold identity is denied.",
+    "Revoked scaffold link is denied.",
+    "Capability outside approved subset is denied.",
+    "Wrong audience is denied.",
+    "Forged scaffold signature is denied.",
+    "Replayed approval jti is denied.",
+    "Hosted home placement is selected only within owner cost and sensitivity policy.",
+    "Stale cache can render read-only but cannot authorize writes."
+  ]
+}
