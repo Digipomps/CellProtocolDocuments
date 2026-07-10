@@ -62,6 +62,12 @@ for extracted claims, and `isInferred` marking for panel-inferred premises.
 Each root claim gets a composition: `allOf` linked premises, `anyOf`
 alternatives, `atLeast` quorum, `countered` with `rebuts`/`undercuts`.
 
+Where a claim leans on a recognizable inference type — expert opinion,
+cause to effect, analogy, practical reasoning, argument from consequences —
+attach an argumentation scheme (Book 29 section 6). Its critical questions
+seed the gap set the skeptic and source auditor work through, so the panel
+does not have to reinvent what a given kind of argument must survive.
+
 ### Phase 3 - Role Mandates
 
 The Chapter 27 adviser roles get artifact responsibilities:
@@ -89,6 +95,8 @@ Next work items are deduced from evaluation artifacts, not invented:
   premise-support subtasks
 - Contradicted root claims → revise proposal or log the drop decision
 - New adviser proposals → new claims (back to Phase 2)
+- Unexamined scheme critical questions (Book 29 section 6) → targeted
+  subtasks; challenged critical questions → undercuts on the claim
 
 Every subtask carries its parent `purposeRef` so all work traces to declared
 intent. The loop repeats until every Goal is terminal (satisfied, missed,

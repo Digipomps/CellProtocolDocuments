@@ -66,6 +66,14 @@ Keep the purpose/claim boundary clean: a purpose declares intent, a claim
 asserts something about the world. Link claims to the Formål they serve via
 `purposeRef`, and make testable claims point at a Goal via `goalID`.
 
+For claims that lean on a recognizable inference type — expert opinion,
+cause to effect, analogy, practical reasoning, argument from consequences —
+attach an argumentation scheme (`haven.claim-scheme.v0`, Book 29 section 6).
+The scheme's critical questions are the specific things that kind of argument
+must survive; unexamined ones become deduced subtasks, challenged ones become
+undercuts. This is how the panel avoids reinventing, per case, what makes a
+given argument weak.
+
 ### 3. Assign panel roles against the structures
 
 Map the Book 27 adviser roles onto concrete artifact responsibilities:
@@ -96,6 +104,8 @@ inventing them:
   subtasks
 - Claim evaluation `missingClaimRefs`/`blockingReason` → source-audit or
   premise-support subtasks
+- Scheme evaluation: unexamined critical questions → targeted subtasks;
+  challenged critical questions → undercuts on the claim
 - `contradicted` root claims → revise the proposal or record the decision to
   drop it
 - New proposals from advisers → back to step 2 as new claims

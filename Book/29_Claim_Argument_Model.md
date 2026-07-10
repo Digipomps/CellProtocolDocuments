@@ -171,7 +171,45 @@ this.
   records produced by third parties; the claim model itself stays
   signature-agnostic and leaves signing/versioning to the identity layer.
 
-## 6. Current Limitations
+## 6. Argumentation Schemes And Critical Questions
+
+Schemes add the reasoning-type layer on top of claims, implemented in
+`CellProtocol/Sources/CellBase/PurposeAndInterest/ClaimScheme.swift` and
+`ClaimSchemeInstance.swift` (`haven.claim-scheme.v0`). A scheme names the
+inferential pattern a claim relies on (Walton) and carries a fixed set of
+critical questions. The point is not to score the argument but to make its
+weak spots inspectable: an unexamined critical question is a gap, a challenged
+one is a defeater.
+
+`ClaimSchemeCatalog` is the normative source of critical questions for ten
+common schemes: expert opinion, analogy, cause to effect, sign, practical
+reasoning, popular opinion, positive/negative consequences, example, and
+verbal classification. Keeping the catalog code-local (not free-form per
+instance) is what lets the panel loop rely on the same gap set every time a
+scheme is used.
+
+A `ClaimSchemeInstance` binds a scheme to a `claimRef` and tracks each
+critical question's status: `unexamined` (the default on instantiation),
+`answered`, `challenged`, or `not-applicable`. `evaluate()` returns a
+`ClaimSchemeEvaluation` with `status` (`well-supported`, `open`,
+`challenged`), a completeness ratio over applicable questions, and the
+`unexaminedCQs`/`challengedCQs` lists.
+
+The two lists are the integration surface:
+
+- `deducedSubtasks()` turns each unexamined critical question into a work item
+  tagged with its claim, feeding the Chapter 30 subtask-deduction loop.
+- `undercutCounters()` turns each challenged critical question into a
+  `ClaimCounter` with role `undercuts` — a challenged question argues the
+  support does not establish the claim, which is exactly Pollock's undercut.
+  `applyingChallenges(to:)` wraps a base composition with those undercuts so
+  scheme analysis flows straight into the section 4 graded evaluation.
+
+This is why schemes improve analysis without adding false precision: they do
+not invent numbers, they enumerate the specific questions a given kind of
+argument must survive, and route the answers into the existing evaluation.
+
+## 7. Current Limitations
 
 - No Cell surface yet: there is no ClaimCell, no Explore contract, and no
   skeleton rendering for claim graphs. The model is CellBase-only.
@@ -186,3 +224,6 @@ this.
   agreements layer when claim artifacts become shareable.
 - `ClaimSupportRecord` production is manual or tool-driven; there is no
   automatic bridge from the Chapter 27 reference tool yet.
+- Scheme instances are authored, not auto-detected: nothing yet infers which
+  scheme a claim uses from its text. The catalog is fixed at ten schemes and
+  extending it is a code change, not runtime configuration.
