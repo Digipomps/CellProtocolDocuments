@@ -209,6 +209,20 @@ This is why schemes improve analysis without adding false precision: they do
 not invent numbers, they enumerate the specific questions a given kind of
 argument must survive, and route the answers into the existing evaluation.
 
+Usage guards, from the panel test of this layer (2026-07-11, see
+`Deliverables/Walton_Scheme_Panel_Test_2026-07-11/`): a capable analyst on a
+well-documented case reproduces nearly all critical questions unaided, so
+instantiate schemes where a question is expected to be challenged or genuinely
+unexamined — not on claims already fully adjudicated — and always triage
+questions to `answered`/`not-applicable` before deriving subtasks, or the loop
+drowns real work in already-answerable items. `completeness` is bookkeeping
+over hand-set statuses, never measured argument quality. Two semantics notes:
+a scheme undercut cannot downgrade a direct contradiction (the section 4
+`countered` evaluation propagates the base's `contradicted` status when the
+effective score is not reduced below it), and the scheme layer's insight value
+is regime-dependent — highest for weaker analysts, unfamiliar argument types,
+and audit/governance settings.
+
 ## 7. Current Limitations
 
 - No Cell surface yet: there is no ClaimCell, no Explore contract, and no

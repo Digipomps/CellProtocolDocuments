@@ -96,7 +96,9 @@ Next work items are deduced from evaluation artifacts, not invented:
 - Contradicted root claims → revise proposal or log the drop decision
 - New adviser proposals → new claims (back to Phase 2)
 - Unexamined scheme critical questions (Book 29 section 6) → targeted
-  subtasks; challenged critical questions → undercuts on the claim
+  subtasks; challenged critical questions → undercuts on the claim. Triage
+  questions to answered/not-applicable first — only genuinely open ones may
+  become subtasks (panel-tested guard, 2026-07-11)
 
 Every subtask carries its parent `purposeRef` so all work traces to declared
 intent. The loop repeats until every Goal is terminal (satisfied, missed,

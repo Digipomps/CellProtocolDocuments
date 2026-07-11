@@ -1,0 +1,114 @@
+{
+  "note": "Walton scheme instances (haven.claim-scheme.v0) built for Jorn Erik's hosted-only proposal, one per premise. Each object is schema-valid against ClaimSchemeInstance (CellProtocol/Sources/CellBase/PurposeAndInterest/ClaimSchemeInstance.swift): fields schema/instanceID/kind/claimRef/slotBindings/criticalQuestions; CriticalQuestionState fields cqID/question/status/addressedByClaimRef?/note?. kind raw values and cqIDs come from ClaimSchemeCatalog. Statuses are grounded ONLY in what the plain baseline analysis in te2/c2/wa/outputs actually established. The full catalog CQ set per scheme is included (no CQ silently dropped). Each instance's computed evaluation is embedded under _evaluation for review; it is derived by hand from evaluate() and is not part of the ClaimSchemeInstance schema.",
+  "instances": [
+    {
+      "schema": "haven.claim-scheme.v0",
+      "instanceID": "scheme.local-too-weak.sign",
+      "kind": "sign",
+      "claimRef": "claim.premise.local-too-weak",
+      "slotBindings": {
+        "sign": "Adjacent-task benchmark scores: Norwegian daily-speech CoPilot (best local Qwen3-8B 79.2%, Gemma4 E4B 75.0%, small locals ~50%) and CoPilot JSON-mode (hosted 73-89%, local lower)",
+        "event": "Local models are too weak for claim-extraction"
+      },
+      "criticalQuestions": [
+        {
+          "cqID": "sign.reliability",
+          "question": "Is the sign a reliable indicator of the claimed event?",
+          "status": "challenged",
+          "addressedByClaimRef": "claim.premise.local-too-weak",
+          "note": "ALREADY-IN-BASELINE. The benchmarks measure an ADJACENT task (daily-speech / JSON-mode), not claim-extraction; text_reliability.py already does deterministic anchoring/extraction so the model only refines; the monotonic-mapping warrant is an explicitly INFERRED, unestablished assumption. Baseline captured this as a counterargument + an isInferred assumption support node. The sign->event link is therefore not established -> undercut. S1 is required to move this to answered."
+        },
+        {
+          "cqID": "sign.alternatives",
+          "question": "Could other events account for the sign equally well?",
+          "status": "unexamined",
+          "addressedByClaimRef": null,
+          "note": "NET-NEW. Baseline said the task is adjacent but never enumerated alternative CAUSES of the low scores themselves: JSON/format sensitivity, difficulty of the Norwegian daily-speech set, tiny-model floor (the ~50% cases were the smallest models), prompt design, small-sample noise. These are confounders that S1's current definition-of-done does not require isolating. Deduces a sharpening of S1."
+        }
+      ],
+      "_evaluation": {
+        "status": "challenged",
+        "applicableCQCount": 2,
+        "answeredCQCount": 0,
+        "completeness": 0.0,
+        "unexaminedCQs": ["sign.alternatives"],
+        "challengedCQs": ["sign.reliability"]
+      }
+    },
+    {
+      "schema": "haven.claim-scheme.v0",
+      "instanceID": "scheme.hosted-cheaper-tco.positive-consequences",
+      "kind": "positive-consequences",
+      "claimRef": "claim.premise.hosted-cheaper-tco",
+      "slotBindings": {
+        "action": "Drop local models and route the advisory panel to hosted APIs only",
+        "consequence": "Lower total cost of ownership once local-model maintenance is counted"
+      },
+      "criticalQuestions": [
+        {
+          "cqID": "positive-consequences.likelihood",
+          "question": "How likely are the cited positive consequences to occur?",
+          "status": "unexamined",
+          "addressedByClaimRef": null,
+          "note": "ALREADY-IN-BASELINE. Likelihood is volume-dependent: hosted cost scales with panel call volume while local marginal cost is ~0 once installed, and break-even is unknown. Baseline counterargument already states this. S2 gathers the number."
+        },
+        {
+          "cqID": "positive-consequences.evidence",
+          "question": "Is there evidence that the consequences will follow from the action?",
+          "status": "unexamined",
+          "addressedByClaimRef": null,
+          "note": "ALREADY-IN-BASELINE. No TCO model exists (leafAuditStatus needs_external_source_audit). This is the identical gap that already deduced S2. Pure restatement."
+        },
+        {
+          "cqID": "positive-consequences.counterbalance",
+          "question": "Are there negative consequences that outweigh them?",
+          "status": "challenged",
+          "addressedByClaimRef": "claim.counter.data-class-boundary-forbids-egress",
+          "note": "PARTLY NET-NEW. The counterbalancing negatives (lost offline/deterministic fallback, lost surface diversity, and data classes hosted-only cannot process at ANY price) exist in the baseline only as ROOT-level counters, not folded into the cost premise. This CQ forces a VALUE-ADJUSTED TCO: hosted-only and hybrid do not deliver the same capability set, so a dollars-to-dollars comparison is ill-posed. S2's definition-of-done (per-call price x volume vs maintenance hours x rate) does not require costing the lost capability -> genuine gap in the subtask spec."
+        }
+      ],
+      "_evaluation": {
+        "status": "challenged",
+        "applicableCQCount": 3,
+        "answeredCQCount": 0,
+        "completeness": 0.0,
+        "unexaminedCQs": ["positive-consequences.likelihood", "positive-consequences.evidence"],
+        "challengedCQs": ["positive-consequences.counterbalance"]
+      }
+    },
+    {
+      "schema": "haven.claim-scheme.v0",
+      "instanceID": "scheme.gdpr-solved-eu-region.verbal-classification",
+      "kind": "verbal-classification",
+      "claimRef": "claim.premise.gdpr-solved-eu-region",
+      "slotBindings": {
+        "entity": "An EU-region-hosted API configuration for the panel",
+        "class": "GDPR-compliant / 'GDPR solved'"
+      },
+      "criticalQuestions": [
+        {
+          "cqID": "verbal-classification.property",
+          "question": "Does the thing actually have the property used to classify it?",
+          "status": "challenged",
+          "addressedByClaimRef": "claim.counter.data-class-boundary-forbids-egress",
+          "note": "ALREADY-IN-BASELINE, and WEAKER than baseline. EU region addresses transfer/residency only; DPA, subprocessor chain, retention (30-day unless ZDR), legal basis and data class all gate egress, so the config lacks the classifying property. RISK: baseline already rated this premise CONTRADICTED, a stronger verdict than a scheme 'undercut'. Letting scheme evaluation drive scoring would DOWNGRADE contradicted -> merely-undercut. The scheme undercut must not override the direct contradiction."
+        },
+        {
+          "cqID": "verbal-classification.definition",
+          "question": "Is the classification based on a precise, non-vague definition?",
+          "status": "challenged",
+          "addressedByClaimRef": "claim.premise.gdpr-solved-eu-region",
+          "note": "ALREADY-IN-BASELINE as substance, NET-NEW as diagnosis. Baseline counterargument #3 lists that 'GDPR' is not one thing (legal basis, DPA, subprocessors, retention, transfer, special-category health). The scheme NAMES the mechanism: the premise equivocates on the vague class term 'GDPR-compliant' and commits a category error - compliance is a property of the whole processing operation and its legal basis, not of a hosting region. Sharper diagnosis, same underlying facts, no new subtask."
+        }
+      ],
+      "_evaluation": {
+        "status": "challenged",
+        "applicableCQCount": 2,
+        "answeredCQCount": 0,
+        "completeness": 0.0,
+        "unexaminedCQs": [],
+        "challengedCQs": ["verbal-classification.property", "verbal-classification.definition"]
+      }
+    }
+  ]
+}

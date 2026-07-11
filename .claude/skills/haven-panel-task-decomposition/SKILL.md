@@ -74,6 +74,16 @@ must survive; unexamined ones become deduced subtasks, challenged ones become
 undercuts. This is how the panel avoids reinventing, per case, what makes a
 given argument weak.
 
+Gate the scheme layer (panel-tested 2026-07-11): a capable analyst on a
+well-documented case reproduces most critical questions unaided, so do not
+instantiate schemes on claims already fully adjudicated — use them where a
+critical question is expected to be challenged or genuinely unexamined, when
+the analyst is a weaker model, when the argument type is unfamiliar, or when
+coverage must be demonstrable (governance/audit). Triage every critical
+question to answered/not-applicable before running subtask deduction, so the
+loop never emits already-answerable work. Treat the completeness ratio as
+bookkeeping, never as measured argument quality.
+
 ### 3. Assign panel roles against the structures
 
 Map the Book 27 adviser roles onto concrete artifact responsibilities:
