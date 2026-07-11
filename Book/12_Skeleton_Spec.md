@@ -537,7 +537,12 @@ Fields:
 - `modifiers` (optional)
 
 Behavior:
-- Executes `get` or `set` on the target cell depending on whether `payload` is set.
+- A non-empty `keypath` executes `get` or `set` on the target cell depending on whether `payload` is set. Existing Cell/resolver semantics remain unchanged even when `url` is also present.
+- An empty `keypath` together with a non-empty `url` is an explicit, user-initiated navigation button. It is not a Cell action and must never navigate before the user activates it.
+- Navigation accepts absolute HTTPS URLs. HTTP is accepted only for loopback development hosts (`localhost`, `*.localhost`, `127.0.0.0/8`, or `::1`). Credentials and arbitrary schemes are rejected.
+- Relative navigation URLs are resolved against a trusted host base and must remain same-origin. Protocol-relative URLs such as `//other.example/path` are rejected.
+- Native hosts resolve relative URLs against `CELL_SCAFFOLD_PUBLIC_BASE_URL`, then `PUBLIC_BASE_URL`. Web hosts use their explicitly configured navigation base or current trusted origin.
+- A rejected navigation target renders as unavailable and must not fall through to Cell action execution.
 
 ### 3.10 Divider
 
@@ -826,6 +831,7 @@ Many elements use `keypath` or `url`:
 
 - `cell://` URLs are resolved through the `CellResolver`.
 - Relative keypaths are often resolved as `cell:///Porthole/<keypath>` in the current UI.
+- `Button` is the exception when `keypath` is empty and `url` is present: the URL follows the safe navigation rules in section 3.9 and is not sent to the resolver.
 
 See:
 
