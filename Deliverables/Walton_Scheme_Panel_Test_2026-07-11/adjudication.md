@@ -64,13 +64,16 @@ ekvivokasjon; feasibility-hard-stop), ingen endret dom.
 
 ## Beslutningslogg
 
-- D1 (ÅPEN — eier: Kjetil): bekreft guards 1–3 som varig policy, eller reverser
-  guidance-endringene. Panelets anbefaling: bekreft.
+- D1 (BESLUTTET — Kjetil, 2026-07-11): guards 1–3 er varig policy. Panelets
+  anbefaling fulgt; guidance-endringene i skill + Book 29/30 står.
 - Avvist av adjudikator: å fjerne skjemalaget (skeptikerens konsesjoner + de
   innsnevrede regimene gir klar netto verdi til lav kost når guardene står).
 
 ## Åpne punkter
 
 - Auto-deteksjon av skjematype fra claim-tekst er fortsatt ugjort (Book 29 §7).
-- Regime-hypotesen («verdien vokser når analytiker-styrken faller») er fortsatt
-  utestet empirisk — krever svak-modell-kjøring, f.eks. via NanoGPT-runneren.
+- Regime-hypotesen ble empirisk testet 2026-07-11 (se `regime_test_results.md`
+  i denne mappen): ikke bekreftet i enkel form — liten positiv delta på alle
+  nivåer, omvendt U (mellomsjiktet tjener mest), og den reelle effekten er
+  per-spørsmål-garanti (definisjonskritikk og konfunder-jakt leveres 3/3 med
+  stillas mot 0–1/3 uten). Sjekkliste-tunnelsyn observert — bekrefter guard 1.
