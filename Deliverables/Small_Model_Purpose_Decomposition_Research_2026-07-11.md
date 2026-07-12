@@ -117,6 +117,43 @@ Fra Apples tech report (arxiv 2507.13575) og 2025-oppdateringen
 - **E1 (shortlist-effekten)**: CoPilot-prompt-matrisen kjørt mot småmodeller i
   to armer — rå tekst→dekomponer vs. pre-parse→velg-blant-K. Prediksjon fra
   §1–§3: stor gevinst; mål mot dagens 50–79 %-bånd.
+
+### E1: KJØRT 2026-07-12 — resultat
+
+Rigg: `Tools/PurposeKnowledge/run_e1_shortlist_experiment.mjs` (NanoGPT), 56
+purpose-caser × 2 modeller × 2 armer = 224 kall, 0 parse-feil, shortlist
+pipeline-recall 100 %. 2×2-design: armene (full taksonomi vs. topp-8-shortlist
+fra deterministisk resolver) × visning (rå modelloutput vs. deterministisk
+post-prosessering: verifiser refs → expandCoverage → utled goals/LCA). Scoret
+med `score_model_outputs.mjs` mot fasit.
+
+| Celle | Rå | Post-prosessert |
+| --- | ---: | ---: |
+| ministral-3b, full taksonomi | 5,4 % | 39,3 % |
+| ministral-3b, shortlist | 14,3 % | **53,6 %** |
+| Qwen3-8B, full taksonomi | 16,1 % | 51,8 % |
+| Qwen3-8B, shortlist | 26,8 % | 51,8 % |
+
+Funn:
+
+1. **Deterministisk post-prosessering er den største enkeltspaken** (+25 til
+   +34 pp i alle celler): modellenes semantiske utvalg er langt bedre enn
+   bokføringen deres (goalRefs, LCA, facet-ekspansjon) — la maskinen bokføre.
+2. **Shortlist-effekten er størst for den svakeste modellen**: +14,3 pp for 3B
+   i post-visning (39,3→53,6), ~0 for 8B — samme omvendte-U/regime-mønster som
+   Walton-testen. Rått dobler shortlisten pass-raten for begge.
+3. **Hele pipelinen løfter 3B fra ubrukelig til bedre enn naiv 8B**: 5,4 % →
+   53,6 % (10×); 8B: 16,1 % → 51,8 % (3,2×). Arkitektur slår modellstørrelse.
+4. **Restfeilene er semantisk under-seleksjon** («smallest sufficient set»
+   tolkes som «færrest mulig»; manglende must-include-refs drar også LCA feil)
+   — nøyaktig det E2/mikro-oppgave-dekomponering (én ja/nei per kandidat) og
+   constrained multi-select predikerer å fikse.
+
+Ærlig kontekst: den deterministiske resolveren alene passerer 100 % på dette
+fikstursettet (de er samutviklet), så på *disse* casene tilfører modellen
+ingenting over deterministikken. E1 måler modellatferden når den først er i
+løkka — det som overføres til input indeksen ikke løser. Rådata:
+`Tools/PurposeKnowledge/results/e1_*_20260712T193912Z.*` + `e1_score_{raw,post}.json`.
 - **E2 (constrained-effekten)**: samme, ± GCD/guided generation. Prediksjon:
   ugyldig-output-raten → ~0, kvalitetsgevinst størst for minste modeller.
 - **E3 (Apple-adapter)**: base ~3B med engelsk mikro-oppgave-innpakning vs.
