@@ -4,7 +4,7 @@ Date: 2026-05-11
 
 Status: CellScaffold MVP implemented; hardening and integration specification.
 
-Last verified against code: 2026-05-13. The `ContactEndpointCell` MVP remains
+Last verified against code: 2026-07-12. The `ContactEndpointCell` MVP remains
 the protocol-facing contact endpoint workstream, and `CellScaffold` now also has
 a first `Co-Pilot Chat` entity-extension probe for testing owner-scoped access
 discovery from the personal chat surface.
@@ -530,8 +530,16 @@ Recommended shape:
   "expiresAt": "2026-05-10T10:17:00Z",
   "requesterIdentity": {
     "uuid": "...",
-    "domain": "domain:conference:example",
     "publicKey": "base64url..."
+  },
+  "requesterDomain": "domain:conference:example",
+  "requesterDomainBinding": {
+    "schema": "cellprotocol.identity.domain-binding.v1",
+    "bindingKind": "vault_context",
+    "domain": "domain:conference:example",
+    "identityUUID": "...",
+    "signingKeyFingerprint": "sha256:...",
+    "grantsAuthority": false
   },
   "topic": "contact.message",
   "purpose": "purpose://contact.introduction",
@@ -555,7 +563,10 @@ Validation:
 - `issuedAt` is inside allowed clock skew
 - nonce has not been seen for this requester/topic
 - signature verifies against `requesterIdentity.publicKey`
-- domain is accepted by endpoint policy
+- when `allowedDomains` or `blockedDomains` is active, a vault-context binding
+  is present inside the signed request and matches the requester UUID, signing
+  key fingerprint, and top-level `requesterDomain`
+- requester domain is accepted by endpoint policy
 - topic and action are allowed
 - purpose is accepted by endpoint policy
 - requester is not blocked by endpoint-context hash and requester domain is not
@@ -564,6 +575,12 @@ Validation:
   request is restricted to agreement/introduction metadata
 - Agreement/Contract grants allow `contact.request.submit`, or the endpoint
   returns a contract requirement instead of delivering the payload
+
+`IdentityDomainBinding` is requester-signed context evidence only. It has
+`grantsAuthority = false` and must never replace a Resolver grant, Agreement,
+Contract, capability, membership credential, or trusted proof-chain role.
+Endpoints without domain allow/block policy may continue to accept legacy
+signed requests that omit the binding.
 
 ### 7.2 Contact Ticket
 
