@@ -1,10 +1,10 @@
 # HAVEN cross-repository robustness audit — 2026-07-13
 
-- Status: seven repository/package repair waves verified; HAVEN-wide goals remain open
+- Status: seven repository/package readiness waves plus runtime-configurable launch and a second Binding readiness repair verified; HAVEN-wide goals remain open
 - Human decision owner: Kjetil
 - Primary checkout: `/Users/kjetil/Build/Digipomps/HAVEN/CellScaffold`
 - First-party scope root: `/Users/kjetil/Build/Digipomps/HAVEN`
-- Audit base: CellScaffold `m0/green-test-suite` at `12e74027024cf230110f13074e74ae6cb8a15cf7`; delivered readiness commit `15e068b1db1cabe397213c09dae8ce0fe95531a8`
+- Audit base: CellScaffold `m0/green-test-suite` at `12e74027024cf230110f13074e74ae6cb8a15cf7`; current delivered audit head `b716d69e7c290c669986df60f65c0e6f50cd50b6`
 - Delivery policy followed: narrow repo-scoped commits and pushes after verification; no deploy, authorization weakening, private-data fallback, or unrelated dirty-tree repair.
 
 ## Executive result
@@ -37,15 +37,29 @@ Current staging was reverified on 2026-07-13 at approximately 08:09Z. `/health/b
 
 No P0 defect was found. Open P1 candidates remain, so the statement “all CellProtocol functionality is robust” is not supported.
 
+### Continuation: runtime-configurable deeplinks and Binding catalog readiness
+
+Kjetil's follow-up requirement that deeplinks remain configurable at runtime is implemented without making the link an authorization channel. CellScaffold now owns one persistent, scaffold-unique `ScaffoldLaunchRegistryCell`. An owner publishes an opaque `surfaceID` mapped to a stable `CellConfiguration` lookup, revision, enabled state, and optional source endpoint. Readers still need an explicit Agreement. The canonical external form is view-only:
+
+`haven://open?schema=haven.surface-launch.v1&surfaceID=<opaque-id>&intent=view`
+
+The link carries no requester, token, action, endpoint, private payload, or capability. Porthole resolves the same owner-published registry before loading the production configuration. Binding searches only registry endpoints derived from its configured catalog origins, performs the existing Agreement-mediated remote resolution, retargets local source endpoints to the selected scaffold host, and then loads the resolved configuration. Routes can therefore be added, revised, disabled, and repointed through persisted Cell state without recompiling the host. The registry Cell type and its bootstrap endpoint are still compiled infrastructure; arbitrary registry discovery is not claimed.
+
+The security adviser also found a separate P1 identity-link parser risk while reviewing the new URL boundary. Duplicate query names could trap during dictionary construction; arbitrary HTTP/S paths containing an identity-link substring were accepted; a new challenge did not clear all derived signing/completion state; completion was not bound to the exact locally signed request; and raw URL material could reach diagnostics. The Binding repair now requires exact custom routes, rejects duplicate/oversized/authority-bearing input, accepts only configured trusted audience/origin values for signing, caps TTL at one hour, clears derived state on challenge replacement, requires the exact request hash for completion, and logs a validated route summary rather than raw input. No universal-link HTTP/S route is accepted until a trusted association policy is implemented.
+
+A second real Binding readiness occurrence was then confirmed in `ConfigurationCatalogCell`: decoded initialization launched grants, intercepts, metadata migration, and default bootstrap from an unawaited `Task`. The first regression failed because readiness reinstallation grew 69 persisted grants to 136. The Cell now inherits the Binding-local waitable runtime-binding boundary, starts no work from decoded initialization, serializes concurrent ensure calls, and normalizes exact `(keypath, permission)` grant contracts. The final production round trip performs twelve concurrent ensures followed by immediate non-empty configuration state and a real `matching.promptText` action with a stable Agreement.
+
+These continuation changes are pushed as CellScaffold `b716d69`, Binding `0a9752e7`, and Binding `b26fe5fb`. No deployment was performed.
+
 ## Purpose tree and Goal evaluation
 
 No new Purpose node was added. Canonical lookup found that the three requested existing nodes are sufficient for routing, ownership, security review, and termination. No unmatched intent justified `purpose://prompt.unknown` or promotion.
 
 | Purpose | Goal | Current status | Evidence | Missing before terminal success |
 |---|---|---|---|---|
-| `purpose://quality` | `goal.haven.cross-repo.runtime-correctness` | **Open / partial** | CellScaffold, SwiftWeb, Binding chat/PersonalCopilot, all nine HavenAgentD Cells, Add2Entity, DiMy, and Spatial direct candidates repaired and tested | Restart/persisted-container and remote/deep-link gates; completion of manual classification for broad CellScaffold/core hit sets; explicit support policy for fatal-decode Cells |
-| `purpose://test.acceptance` | `goal.haven.cross-repo.regression-gates` | **Open / partial** | Real round trips and actions across all seven repaired areas; concurrent/idempotent installation; wrong-key negatives; 118-test HavenAgent package; Workbench/Arendalsuka/Conference/Co-Pilot/Spatial dynamic paths; live Arendalsuka canary; cross-language suites | Shared golden fixture; process-restart gates; missing/stale-proof matrix; tailored conference shared-owner readiness tests; browser artifacts; full negative production-surface gate |
-| `purpose://access.audit.privacy` | `goal.haven.cross-repo.security-preservation` | **Pass for verified changed paths; HAVEN-wide open** | UUID+fingerprint owner matching and same-UUID/different-key negatives in all seven repaired areas; public Arendalsuka Agreement path; live admin issuance rejection | Missing-proof and stale-proof cases for every changed/future host; classification of remaining broad heuristic hits |
+| `purpose://quality` | `goal.haven.cross-repo.runtime-correctness` | **Open / partial** | CellScaffold, SwiftWeb, Binding chat/PersonalCopilot/catalog, all nine HavenAgentD Cells, Add2Entity, DiMy, and Spatial direct candidates repaired and tested; owner-published runtime surface routing works in Porthole and Binding | Process restart/persisted-container gates; deployed remote runtime-launch proof; completion of manual classification for broad CellScaffold/core hit sets; explicit support policy for fatal-decode Cells |
+| `purpose://test.acceptance` | `goal.haven.cross-repo.regression-gates` | **Open / partial** | Real round trips and actions across repaired areas; concurrent/idempotent installation; wrong-key negatives; runtime route publication/Agreement acceptance; strict deeplink negatives; 118-test HavenAgent package; Workbench/Arendalsuka/Conference/Co-Pilot/Spatial dynamic paths; live Arendalsuka canary; cross-language suites | Shared golden fixture; process-restart gates; missing/stale-proof matrix; tailored conference shared-owner readiness tests; browser artifacts; AppKit test-host isolation; full negative production-surface gate |
+| `purpose://access.audit.privacy` | `goal.haven.cross-repo.security-preservation` | **Pass for verified changed paths; HAVEN-wide open** | UUID+fingerprint owner matching; same-UUID/different-key negatives; owner-published registry read through explicit Agreement; opaque view-only launch references; strict identity-link intake/completion binding; public Arendalsuka Agreement path; live admin issuance rejection | Missing-proof and stale-proof cases for every changed/future host; deployed wrong-identity runtime-launch proof; classification of remaining broad heuristic hits |
 
 `purpose://gui.quality.functional-accessible` and `purpose://skeleton.owner-entity-access` remain useful facets for later GUI and owner-access waves, but no new taxonomy was necessary in this wave.
 
@@ -66,11 +80,11 @@ Dirty counts are the final verification snapshot. Existing and concurrently arri
 
 | Repository | Role / dependency | Branch / HEAD | Dirty | Risk and evidence |
 |---|---|---|---:|---|
-| Binding | Native SwiftUI host, renderer, remote/deep-link and identity surface; includes HavenAgentD | `main` / `953e190d9101` | 15 | **Tier 1, locally repaired for audited families.** Five workbench Cells, twelve PersonalCopilot subclasses, and nine HavenAgentD Cells now have requester-aware readiness. Chat/workbench 45, catalog 1, and HavenAgentD 118 pass. Remote/deep-link and separate-process restart remain open. |
+| Binding | Native SwiftUI host, renderer, remote/deep-link and identity surface; includes HavenAgentD | `main` / `b26fe5fb9328` | 6 | **Tier 1, repaired for audited families.** Five workbench Cells, twelve PersonalCopilot subclasses, nine HavenAgentD Cells, and `ConfigurationCatalogCell` now have requester-aware readiness. Runtime surface launches resolve owner-published routes; strict URL/identity-link gates pass 8/8; decoded catalog readiness passes. Separate-process restart, deployed remote launch, and AppKit suite isolation remain open. |
 | Binding/CellProtocolDocuments | Nested docs duplicate | `main` / `e138166d1cb8` | 0 | Excluded from canonical docs edits; primary docs checkout owns delivery. |
 | CellProtocol | Swift reference contracts, resolver, persistence, identity | `main` / `8e96499ee216` | 16 | **Tier 1, open policy and active overlap.** 23 heuristic decode/Task files. Forty-six focused lifecycle/persistence/identity/contract tests passed on the earlier stable snapshot; later concurrent identity/permission/weighted-graph/docs edits were preserved. A temporary missing `return` blocked a dependent build, but its owner restored compilation before final DiMy/Spatial verification. No audit edit was made in core. |
-| CellProtocolDocuments | Canonical Book, security, Purpose, deliverables | `main` / `ccc11559f7c5` | 21 | **Tier 2.** Nineteen unrelated dirty paths preserved; this report and its staging-evidence JSON are the two audit artifacts. |
-| CellScaffold | Porthole/web host, catalog, skeleton runtime, products | `m0/green-test-suite` / `12e74027024c` | 30 | **Tier 1.** Seven audit files repair the confirmed catalog defect; 23 unrelated concurrent paths remain untouched. Sixteen locally constructible ensuring Cells have generic concurrency/idempotency coverage. Two specialized conference shared-owner Cells still need tailored coverage. |
+| CellProtocolDocuments | Canonical Book, security, Purpose, deliverables | `main` / `aeb8677e13c1` before this report update | 23 | **Tier 2.** Unrelated Book, Purpose-eval, RWXS, research, and deliverable work is preserved; only this canonical audit report is changed in the continuation. |
+| CellScaffold | Porthole/web host, catalog, skeleton runtime, products | `m0/green-test-suite` / `b716d69e7c29` | 29 | **Tier 1.** The catalog readiness defect and the owner-published runtime launch registry are repaired and pushed. Sixteen locally constructible ensuring Cells plus the registry have generic concurrency/idempotency coverage. Two specialized conference shared-owner Cells still need tailored coverage; unrelated Butterpop/Music/ArtistSales work remains untouched. |
 | CellScaffold/CellProtocolDocuments | Nested docs duplicate | `main` / `a08f72f369fa` | 0 | Excluded from canonical docs edits. |
 | CellUtility | Xcode utility and EventEmitter sample | `main` / `cae2cadd9422` | 0 | **Tier 3.** `EventEmitterCell.init(from:)` is `fatalError`, not a race. Three unit tests passed; UI test target was skipped by Xcode. Persistence support remains absent. |
 | DiMy Source Editor Extension | Source editor extension | `main` / `fecf9746c7b8` | 0 | **Tier 3.** No Swift decode/async-setup hit in the bounded scan; not built in this wave. |
@@ -213,6 +227,67 @@ Status: repaired and tested locally
 
 The three Task hits in `SpatialCells.swift` were not rewritten: each stores `deferredSetupTask`, and its overridden `get`/`set` awaits that task before access. They remain classified safe by construction, not ignored false positives.
 
+### D14 — Compiled deeplink destinations prevented runtime surface publication
+
+Severity: P1 configurability/correctness and access-boundary risk
+
+Status: repaired and tested locally
+
+The prior startup and URL flows could select compiled configuration names or carry more routing detail in the external link. That couples launch behavior to host code and makes it tempting to put endpoints, identities, or authorization hints in a URL. `ScaffoldLaunchRegistryCell` now owns the mutable mapping from opaque `surfaceID` to a stable configuration lookup. Publication is owner-only and revision-checked; reads require an explicit Agreement; disabled and endpoint-only entries fail closed. Porthole resolves the registry before configuration load, and Binding derives the registry endpoint only from configured catalog origins before using the existing remote Agreement flow.
+
+The production acceptance test publishes a route at runtime, grants a separate authenticated identity read access, follows `/porthole?surfaceID=...` through browserhead/bootstrap, and asserts the resulting real production configuration. The registry also has create/read, flow, encode/decode, concurrent readiness, wrong-identity/wrong-key, optimistic-concurrency, and malformed-entry tests. `Explore` static audit reports zero errors and zero warnings for this Cell.
+
+### D15 — Binding identity-link intake accepted ambiguous or stale security state
+
+Severity: P1 security/correctness
+
+Status: repaired and focused gates green
+
+Exact route matching replaces substring matching; arbitrary HTTP/S links are rejected pending a trusted universal-link association; query names must be unique; URLs, payloads, and lists are bounded; raw link material is not logged. A replacement challenge clears signed and completion-derived state. Signing requires a trusted HAVEN audience/origin and a maximum one-hour TTL. Completion requires the exact hash of the locally signed enrollment request. These changes preserve the existing Identity/Agreement path and add no cookie, admin, renderer, or transport authorization.
+
+### D16 — Binding ConfigurationCatalog repeated the decoded readiness race
+
+Severity: P1 correctness/security
+
+Status: repaired, red-before-green, and pushed
+
+Binding's separate `ConfigurationCatalogCell` used an unawaited decoded `Task` for metadata migration, grants, intercepts, and default bootstrap. The first real production round-trip regression proved the Cell could reinstall duplicated contracts: 69 persisted grants became 136. The final implementation inherits `BindingRuntimeBindingCell`, routes fresh and decoded setup through one installer, starts no decoded work, and normalizes exact grant contracts. Twelve concurrent first callers share the install, then immediately read the non-empty production configuration list and execute the `matching.promptText` action. The final grant contract set is identical to the persisted set.
+
+### Advisory-panel evaluation for the continuation
+
+Three independent roles were used before implementation:
+
+- The consumer-path reviewer found no generic runtime surface deeplink and identified compiled startup reset behavior as the lock-in point. It required a shared launch reference and view-only negative tests.
+- The architecture reviewer rejected overloading `ConfigurationCatalogCell` as a global route table and recommended a scaffold-unique persistent launch registry with revisioned `surfaceID -> configurationLookup` entries. That is the implemented ownership boundary.
+- The security reviewer found the identity-link P1 issues above and required opaque route IDs, exact parsing, no authority in links, fail-closed stale state, and resolver/Agreement enforcement after resolution.
+
+Counterargument retained: a compiled registry Cell type and bootstrap endpoint still exist, and Porthole publication has a compiled supported-endpoint boundary. The repair makes route content runtime-configurable; it does not claim arbitrary executable endpoint discovery. No new Purpose node was needed because the existing quality, acceptance, and access-audit nodes routed and terminated the work adequately.
+
+## Continuation changed files
+
+CellScaffold runtime launch (`b716d69`):
+
+- `Sources/App/Cells/ScaffoldLaunch/ScaffoldLaunchRegistryCell.swift`
+- `Sources/App/Controllers/PortholeWebSessionSupport.swift`
+- `Sources/App/configure.swift` (two registry bootstrap lines only)
+- `Sources/App/routes.swift`
+- `Tests/AppTests/ConferenceSurfaceRoutesTests.swift`
+- `Tests/AppTests/PortholeRuntimeBindingEnsuringTests.swift` (one registry coverage hunk only)
+- `Tests/AppTests/ScaffoldLaunchRegistryCellTests.swift`
+
+Binding runtime launch and identity-link hardening (`0a9752e7`):
+
+- `Binding/BootstrapView.swift`
+- `Binding/ContentView.swift`
+- `Binding/PortableSurfaceSupport.swift`
+- `BindingTests/BindingTests.swift`
+- `BindingTests/CellConfigurationVerifierXCTest.swift`
+
+Binding catalog readiness (`b26fe5fb`):
+
+- `Cells/ConfigurationCatalogCell.swift` (four lifecycle/idempotency hunks only; Personal Butler hunks excluded)
+- `BindingTests/ConfigurationCatalogReadinessTests.swift`
+
 ## Changed files in CellScaffold
 
 - `Sources/App/Cells/ConfigurationCatalog/ConfigurationCatalogCell.swift`
@@ -293,6 +368,10 @@ The focused diff is 205 insertions and 10 deletions across three files. `git dif
 | `scripts/run_tests_isolated.sh --filter ProductionSkeletonBindingIntegrityTests` | 4 passed | Production Workbench and Arendalsuka configurations/payloads keep resolvable keypaths, Agreement-backed atlas reads, non-empty rows, and detail/tab actions. |
 | `scripts/run_tests_isolated.sh --filter ConferenceSurfaceRoutesTests/testAuthenticatedPortholeConferenceDemoFlowSupportsCanonicalPersonaLockedSequence` | 1 passed | Authenticated local HTTP/Porthole Conference sequence with canonical personas. No real browser screenshot. |
 | `scripts/run_tests_isolated.sh --filter PersonalCopilotV1Tests/testChatPromptSubmitRoutesPortholeCommandsBeforeActiveHelper` | 1 passed | Co-Pilot routes Porthole commands before an active helper without unintended helper action. |
+| `swift test --filter ScaffoldLaunchRegistryCellTests` | 5 passed | Owner publication/resolution and flow; encode/decode plus concurrent readiness; exact-grant stability; wrong identity and same UUID/wrong key denial; optimistic concurrency; malformed and endpoint-only route rejection. |
+| `swift test --filter ConferenceSurfaceRoutesTests/testAuthenticatedPortholeResolvesOwnerPublishedRuntimeSurfaceIDThroughAgreement` | 1 passed | Publishes a route at runtime, grants a separate authenticated identity read access, resolves through Porthole/browserhead/bootstrap, and loads the real production configuration. |
+| `swift test --filter PortholeRuntimeBindingEnsuringTests/testCommonRuntimeBindingCoordinatorKeepsGrantsStableUnderConcurrentEnsureCalls` | 1 passed | The new launch registry participates in the common concurrent/idempotent readiness gate. |
+| `python3 Tools/Explore/explore_contract_audit.py --repo-root CellScaffold --json-output /tmp/scaffold-launch-explore.json` | 0 errors, 0 warnings | Static Explore coverage for the new production registry; not a runtime authorization test. |
 | `git diff --check` | passed | Patch whitespace integrity only. |
 
 The first unprivileged rerun of the production-skeleton suite failed because SwiftPM's internal `sandbox-exec` could not apply its sandbox. The same isolated command was rerun outside that sandbox and passed. This was an execution-environment failure, not a product test failure.
@@ -304,6 +383,9 @@ The first unprivileged rerun of the production-skeleton suite failed because Swi
 | CellProtocol: `swift test --filter 'GeneralCellInterfaceTests|PersistenceTests|CellLifecycleTests|ContractProbeCellTests|IdentityDomainBindingTests'` | 46 passed | No universal decode-readiness contract. |
 | Binding: `Scripts/test_binding.sh CODE_SIGNING_ALLOWED=NO -only-testing:BindingTests/ChatWorkbenchParityTests` | 45 passed | Workbench plus the production PersonalIdentity decoded path; immediate/concurrent state/action; stable grants; wrong-key rejection and retry. No separate-process restart. Latest artifact: `/Users/kjetil/Library/Developer/Xcode/DerivedData/Binding-erntjstdfcrbeachccbemadrrbon/Logs/Test/Test-HAVEN-2026.07.13_11-01-33-+0200.xcresult`. |
 | Binding: `Scripts/test_binding.sh CODE_SIGNING_ALLOWED=NO -only-testing:BindingTests/CatalogAbsorbXCTest` | 1 passed | Native Porthole catalog resolution and attached state remain green against the current shared core. Artifact: `/Users/kjetil/Library/Developer/Xcode/DerivedData/Binding-erntjstdfcrbeachccbemadrrbon/Logs/Test/Test-HAVEN-2026.07.13_11-13-07-+0200.xcresult`. A direct non-script workspace run hit stale persistent app-container owner proof and was rejected; no bypass was added. |
+| Binding: `xcodebuild test ...` with eight explicit `BindingTests` identity-link/runtime-surface `-only-testing` selectors | 8 passed | Exact route/duplicate/size/authority negatives, challenge reset/expiry, opaque view-only launch parsing, owner-published lookup resolution, remote source retargeting, and disabled/endpoint-only rejection. Current artifact: `/Users/kjetil/Library/Developer/Xcode/DerivedData/Binding-erntjstdfcrbeachccbemadrrbon/Logs/Test/Test-HAVEN-2026.07.13_12-34-02-+0200.xcresult`. |
+| Binding: `xcodebuild test ... -only-testing:BindingTests/CellConfigurationVerifierXCTest/testConferenceIdentityLinkCompletionFlowWritesEntityAnchorRecord` | 1 passed | Real completion flow signs the exact trusted challenge/request and accepts only the matching completion package. |
+| Binding: `xcodebuild test ... '-only-testing:BindingTests/ConfigurationCatalogReadinessTests/decodedCatalogIsReadyForImmediateConcurrentStateAndAction()'` | failed first, then 1 passed | Red run exposed grant growth from 69 to 136. Green run proves encode/decode, 12 concurrent ensures, immediate non-empty production configurations, real action, and stable exact grant contracts. Artifact: `/Users/kjetil/Library/Developer/Xcode/DerivedData/Binding-erntjstdfcrbeachccbemadrrbon/Logs/Test/Test-HAVEN-2026.07.13_12-31-04-+0200.xcresult`. |
 | HavenAgentD: `swift test --no-parallel` | 118 passed | All nine decoded Cells, identity/signature, credential, bridge 401, lifecycle and scheduler paths. No process restart. |
 | GoCellProtocol: `go test ./...` | passed | No shared Swift readiness fixture. |
 | RustCellProtocol: `cargo test` | 23 passed | No shared Swift readiness fixture. |
@@ -315,6 +397,8 @@ The first unprivileged rerun of the production-skeleton suite failed because Swi
 | Add2Entity: `swift test` | 16 passed | Includes two decoded capture Cell tests: 40-way readiness, immediate state/preview, grant stability, wrong-key rejection and requester-proof retry. |
 
 Build warnings remain: Swift 6 Sendable warnings in CellProtocol consumers, two unhandled Conference markdown files in CellScaffold, and expected first-run missing-file/optional-cell diagnostics in isolated runtime logs. They did not fail these focused gates and are not treated as resolved.
+
+A broad Binding target run executed 359 tests: 335 passed, 20 skipped, and 4 were reported failed. One was the runtime-source retarget assertion, which was corrected and then passed in the focused 8-test rerun. The other three reports belonged to one concurrent AppKit `SIGSEGV` incident in `_NSWindowTransformAnimation` deallocation while three tests were active. The mixed follow-up also demonstrated that suites marked `.serialized` still run concurrently with other suites and can overwrite shared `CellBase.defaultIdentityVault/defaultCellResolver` state; one PersonalChatHub test failed `ownerProofUnavailable`, and Xcode then blocked while saving a crashed test record. The affected readiness tests pass individually. These are unresolved test-host/isolation defects, not accepted evidence of production correctness, and the full 359-test target was not rerun green after the focused fix. Broad artifact: `/Users/kjetil/Library/Developer/Xcode/DerivedData/Binding-erntjstdfcrbeachccbemadrrbon/Logs/Test/Test-HAVEN-2026.07.13_12-16-34-+0200.xcresult`.
 
 The first executing Binding regression run failed only the new decoded chat test with `notFound` while 41 existing tests passed; artifact: `/Users/kjetil/Library/Developer/Xcode/DerivedData/Binding-erntjstdfcrbeachccbemadrrbon/Logs/Test/Test-HAVEN-2026.07.13_10-32-46-+0200.xcresult`. The first serialized-install version then failed the new grant-stability assertions because 496 persisted grants became 990; artifact: `/Users/kjetil/Library/Developer/Xcode/DerivedData/Binding-erntjstdfcrbeachccbemadrrbon/Logs/Test/Test-HAVEN-2026.07.13_10-39-25-+0200.xcresult`. HavenAgentD's first supervisor decode regression likewise failed with `notFound`. These are preserved as red-before-green evidence.
 
@@ -348,11 +432,11 @@ No mutating Workbench staging canary, deploy, or browser journey was run. The pe
 
 | Claim | Support | Counterargument / undercut | Evaluation | Deduced work |
 |---|---|---|---|---|
-| C1: readiness race is a general latent class across multiple hosted Cells | Confirmed in CellScaffold, SwiftWeb, Binding workbench/PersonalCopilot, nine HavenAgentD Cells, Add2Entity, DiMy, and Spatial direct candidates; 23 core and 110 CellScaffold heuristic file hits | Many hits are already gated, false positives, specialized, or never published; Go/Rust/Python are synchronous locally; fatal decode is a different failure | **Strongly supported as a multi-repo latent Swift failure class; scope not fully enumerated as defects** | Retain and complete a per-published-Cell matrix |
+| C1: readiness race is a general latent class across multiple hosted Cells | Confirmed in CellScaffold, SwiftWeb, Binding workbench/PersonalCopilot/catalog, nine HavenAgentD Cells, Add2Entity, DiMy, and Spatial direct candidates; 23 core and 110 CellScaffold heuristic file hits | Many hits are already gated, false positives, specialized, or never published; Go/Rust/Python are synchronous locally; fatal decode is a different failure | **Strongly supported as a multi-repo latent Swift failure class; scope not fully enumerated as defects** | Retain and complete a per-published-Cell matrix |
 | C2: detached decoded setup can cause empty/broken GUI | CellScaffold needed explicit ensuring; Binding's real decoded chat read failed with `notFound` while 41 existing tests passed | Empty GUI can also come from source failure, access denial, bad skeleton keypath, or all-or-nothing preview fallback | **Strongly supported, not exclusive as a cause** | Keep diagnostics able to distinguish not-ready, denied, not-found, and empty-source states |
-| C3: host must await readiness before state/action | Porthole and SwiftWeb host adapters plus Binding, Add2, DiMy, and Spatial Cell boundaries fixed confirmed paths without changing core semantics | Cells with synchronous setup or an awaited retained task need no additional wait; a universal core rule still needs cancellation/error/timeout/wire design; `keys()` is not open for subclass interception | **Accepted:** every asynchronously restored supported Cell must be awaited at its narrowest host/Cell adapter; universal core promotion remains a separate compatibility decision | Apply the local adapter pattern to future confirmed candidates; propose core change only if a required host surface cannot be safely intercepted |
-| C4: coverage is insufficient if known data can render empty while tests pass | Binding had 41 green parity tests beside a new real decoded `notFound`; HavenAgentD and the three later repos also needed real decode gates; Add2 grew from 14 to 16 tests | Existing tests remain valuable for other contracts | **Accepted** | Add restart and negative empty-data canaries |
-| C5: reliability fixes must not bypass identity/capability | UUID+fingerprint hardening and wrong-key negatives in all seven repaired areas; requester-bound HavenAgent proof prevents mutable-default-vault races; Agreement-backed Arendalsuka and live 401/405 | Missing/stale cases are not exhaustive | **Accepted and preserved in verified changed paths; full matrix open** | Add missing/stale/public cases alongside remaining classification and restart work |
+| C3: host must await readiness before state/action | Porthole and SwiftWeb host adapters plus Binding, Add2, DiMy, and Spatial Cell boundaries fixed confirmed paths without changing core semantics; Porthole awaits registry readiness before resolving a runtime route | Cells with synchronous setup or an awaited retained task need no additional wait; a universal core rule still needs cancellation/error/timeout/wire design; `keys()` is not open for subclass interception | **Accepted:** every asynchronously restored supported Cell must be awaited at its narrowest host/Cell adapter; universal core promotion remains a separate compatibility decision | Apply the local adapter pattern to future confirmed candidates; propose core change only if a required host surface cannot be safely intercepted |
+| C4: coverage is insufficient if known data can render empty while tests pass | Binding had 41 green parity tests beside a new real decoded `notFound`; its catalog readiness test later exposed 69 -> 136 grants; HavenAgentD and the three later repos also needed real decode gates; Add2 grew from 14 to 16 tests | Existing tests remain valuable for other contracts | **Accepted** | Add restart and negative empty-data canaries; isolate global Binding test defaults so broad runs are trustworthy |
+| C5: reliability fixes must not bypass identity/capability | UUID+fingerprint hardening and wrong-key negatives in all repaired areas; requester-bound HavenAgent proof prevents mutable-default-vault races; runtime links carry only opaque view intent and require owner publication plus Agreement; identity-link completion binds exact request hash; Agreement-backed Arendalsuka and live 401/405 | Missing/stale and deployed wrong-identity cases are not exhaustive | **Accepted and preserved in verified changed paths; full matrix open** | Add missing/stale/public cases alongside remaining classification, deployed runtime-launch, and restart work |
 | C6: shared wire fixtures can primarily guard cross-runtime parity | Go/Rust/Python suites cover wire, bridge ready, identity, replay, and configuration semantics; runtime-specific smokes fit above | No single Swift-exported readiness/persistence golden fixture is consumed by all ports | **Partially supported** | Define one versioned Swift fixture set for encode/decode/state/action/error and consume it in Go/Rust/Python; retain host-specific functional smokes |
 
 Adviser voting was not used. Evaluation follows source, executable tests, live responses, and explicit gaps.
@@ -365,6 +449,9 @@ Adviser voting was not used. Evaluation follows source, executable tests, live r
 | Unauthenticated privileged import | Live POST returns 401 | Pass for this endpoint |
 | Wrong method on privileged import | Live GET returns 405 | Pass |
 | Public read through owner Agreement | Arendalsuka production skeleton Agreement test | Pass for this path |
+| Runtime surface route read through owner Agreement | Real Porthole acceptance publishes as owner and grants a distinct authenticated identity read access | Local pass |
+| Deeplink as authority | Runtime link parser rejects requester, token, action, unknown/duplicate fields, non-view intent, oversized input, disabled routes, and endpoint-only entries | Local pass; deployed remote negative matrix open |
+| Identity-link stale/cross-request completion | New challenge clears derived state; completion hash must equal the locally signed enrollment request | Local pass |
 | Missing proof | Not executed for every changed/candidate path | Open |
 | Stale proof | Not executed for every changed/candidate path | Open |
 | Cookie/admin convenience bypass | No such bypass added; authenticated Conference test retained canonical persona/identity bootstrap | No known bypass in changed path |
@@ -377,7 +464,7 @@ Adviser voting was not used. Evaluation follows source, executable tests, live r
 | Arendalsuka Participant/Event Atlas | Production configurations/fixtures locally plus current live data/security canary | This report contains exact live observations | Local and read-only live pass on pre-repair staging revision |
 | Conference | Authenticated Porthole HTTP sequence with canonical personas | Test log only | Local pass; no real browser screenshot or Binding parity replay |
 | Co-Pilot routing/chat | Real `PersonalCopilotV1` Cell action path asserts routing order | Test log only | Local pass for selected route; not an exhaustive chat journey |
-| Binding | Native production chat/PersonalIdentity Cells, all nine HavenAgentD Cells, plus catalog absorb | Red-before-green and final `.xcresult`/Swift package results above | Audited families pass locally; per-PersonalCopilot-subclass actions, remote/deep-link replay, and restart remain open |
+| Binding | Native production chat/PersonalIdentity/catalog Cells, all nine HavenAgentD Cells, catalog absorb, runtime surface lookup, and strict identity-link flow | Red-before-green and final `.xcresult`/Swift package results above | Audited families and local runtime launch pass; deployed remote launch, per-PersonalCopilot-subclass actions, restart, and full-target AppKit isolation remain open |
 | SwiftWebScaffold | Real decoded Cell plus HTTP routes | Test log only | Local pass; no deployment or separate-process restart |
 | Add2Entity | Real decoded capture Cell and production preview payload | Test log only | Local pass; preview remains side-effect-free; no native extension/restart journey |
 | DiMy | Real decoded access/pricing/wallet tests | Test log only | Focused 2/2 and package 12/12 pass; no external payment rail or restart journey |
@@ -401,6 +488,10 @@ Screenshot-only evidence was not used. Conversely, this wave does not claim brow
 12. Preserved every unrelated dirty workstream. Did not repair the temporary concurrent CellProtocol weighted-graph syntax error (its owner restored it before final tests) or the unrelated CellScaffold `asInt` error.
 13. After Kjetil explicitly requested delivery, committed and pushed the seven narrow repo packages recorded below. No deploy was performed; live staging therefore remains on the base HEAD without the local repairs.
 14. Did not run mutating staging canaries without explicit effectful authorization.
+15. Chose a scaffold-unique persistent launch registry rather than extending the general configuration catalog with global routing semantics. Route content is runtime state; registry bootstrap remains compiled infrastructure.
+16. Defined runtime links as opaque, view-only references. Resolution never supplies identity, Agreement, proof, capability, endpoint authority, or an action from the link.
+17. Treated the advisory security review as a blocking implementation input and repaired the adjacent Binding identity-link P1 issues in the same URL-boundary wave.
+18. Reused Binding's established local readiness base for its catalog instead of changing CellProtocol core; the red grant-growth regression required exact semantic idempotency.
 
 ## Post-audit delivery
 
@@ -414,19 +505,24 @@ Kjetil explicitly requested commit and push after the local repair audit. Each c
 | SafariExtentions/Add2Entity | `main` | `038f33918ff959e08ddbc4c5d4fed98bff6d25c8` | `origin/main`, verified equal |
 | DiMyMicropayments | `main` | `065f75e85b835a055a3be5aac26f3f15595da314` | `origin/main`, verified equal |
 | SpatialRegistryScaffold | `main` | `f5fda30fa96d5f8c66a6663a0b8a036ccfcda9b0` | `origin/main`, verified equal |
+| CellScaffold runtime launch continuation | `m0/green-test-suite` | `b716d69e7c290c669986df60f65c0e6f50cd50b6` | `origin/m0/green-test-suite`, verified equal |
+| Binding runtime launch + identity-link hardening | `main` | `0a9752e7` | `origin/main`, later superseded by and ancestor of `b26fe5fb` |
+| Binding catalog readiness continuation | `main` | `b26fe5fb93289aab17ac72ed571709f4595d08a2` | `origin/main`, verified equal |
 
 ## Residual-risk ledger and owners
 
 | Priority | Residual risk | Owner / blocker | Required terminal evidence |
 |---|---|---|---|
-| P1 | Binding audited families lack separate-process restart and remote/deep-link replay; eleven PersonalCopilot subclasses lack individual action coverage | Binding/HavenAgentD owner | Per-subclass critical action sampling, native remote/deep-link replay, restart, missing/stale proof |
+| P1 | Binding audited families lack separate-process restart and deployed remote runtime-launch proof; eleven PersonalCopilot subclasses lack individual action coverage | Binding/HavenAgentD owner | Per-subclass critical action sampling, deployed owner-published launch with wrong/missing/stale-proof negatives, restart |
 | P1 | CellProtocol's 23 and CellScaffold's 110 heuristic hits are not fully manually adjudicated | Cross-repo audit owner; volume and specialized ownership | Per-type vulnerable/safe/tested/unknown matrix tied to actual publication/host path |
+| P1 | Binding's broad test target is not a trustworthy green gate: one AppKit crash incident was reported against three active tests, and parallel suites overwrite shared `CellBase` defaults despite per-suite serialization | Binding test owner | Project-wide isolation/serial trait or dependency injection for globals; repeat full target without AppKit crash or cross-suite proof failure |
 | P2 | Two conference shared-owner ensuring Cells are not in generic constructor coverage | CellScaffold owner | Tailored ownership-aware concurrency and decode test |
 | P2 | No shared Swift-origin golden readiness/persistence fixture across Go/Rust/Python | Cross-language contract owner | Versioned fixture plus runtime consumer tests and error parity |
 | P2 | Process restart/persisted-container reload is not proven for all Tier-1 Cells | Each host owner | Separate-process or durable-container restart gate with immediate reads/actions |
 | P2 | Partial source-preview recovery is not comprehensively tested; all-or-nothing fallback may still hide healthy sections | Porthole/source-preview owner | Production source with one failing and one healthy section; healthy content remains visible with explicit diagnostic |
 | P2 | Missing/stale-proof negatives are incomplete | Identity/security owner | Resolver-enforced matrix for all changed Tier-1 paths |
 | P2 | Browser-visible Porthole/Binding parity and “Something went wrong”/unexpected empty-state gates are incomplete | GUI verification owner | Same production configuration/payload in web and Binding, DOM/native assertions, screenshots/traces, no forbidden states |
+| P2 | Runtime route entries are dynamic, but registry Cell bootstrap and Porthole supported-endpoint publication remain compiled infrastructure | Scaffold/transport owner | Decide whether one well-known registry is the stable contract or add authorized registry discovery with negative transport/resolver tests |
 | P3 | CellUtility/HAVEN_MVP decode `fatalError` paths can crash if treated as persisted Cells | Respective product owners | Implement and test decode, or prevent persisted registration with a deterministic error |
 | P3 | Skipped PostGIS smoke and unbuilt lower-risk product repos leave service-specific uncertainty | Respective repo owners and environment availability | Non-destructive test environment or explicitly approved service smokes |
 
@@ -441,6 +537,10 @@ Proven in this wave:
 - Add2Entity capture readiness is repaired locally and all 16 package tests pass.
 - DiMy's three candidates are repaired with the same guarded pattern; focused tests pass 2/2 and the full package passes 12/12.
 - Spatial's three direct scaffold/contact candidates are repaired; the package executes 10 tests with 9 passed, the explicitly destructive PostGIS gate skipped, and 0 failures.
+- CellScaffold can resolve an owner-published, revisioned runtime `surfaceID` through explicit Agreement and load the real production configuration without compiling the route into host code.
+- Binding accepts only an opaque view-only runtime launch contract, resolves routes only from configured scaffold catalog origins, and preserves resolver/Agreement authorization.
+- Binding identity-link input and completion are exact-route, bounded, duplicate-safe, trusted-origin/audience, reset-on-replacement, and exact-request-hash bound in the focused tests.
+- Binding `ConfigurationCatalogCell` is repaired at the same requester-aware readiness boundary; its red-before-green regression proves stable grants plus immediate production state/action after decode.
 - The repairs are serialized/idempotent under concurrent ensuring for the covered Cells.
 - Same UUID with different signing key is rejected for runtime owner hydration in all seven repaired areas.
 - Selected production Workbench, Arendalsuka, Conference, and Co-Pilot local paths pass dynamic assertions.
@@ -453,8 +553,10 @@ Not proven:
 - Binding, HavenAgentD, Spatial, DiMy, Add2Entity, CellUtility, or HAVEN_MVP are safe for every persisted/decoded Cell; repaired paths still lack comprehensive separate-process restart/deployment proof.
 - The local repair is deployed.
 - Full web/native renderer and action parity.
+- Deployment proof for the new runtime registry and native Binding launch path.
+- A full green Binding test-target run after the runtime launch repair; AppKit test-host crashing and cross-suite shared-global isolation remain unresolved.
 - Complete unauthorized/wrong-identity/missing-proof/stale-proof/public-read matrices.
 - Cross-runtime parity from a single shared fixture.
 - Absence of every P0/P1 defect outside the investigated failure class and selected Purpose-driven paths.
 
-Therefore `goal.haven.cross-repo.runtime-correctness` and `goal.haven.cross-repo.regression-gates` remain non-terminal. `goal.haven.cross-repo.security-preservation` is satisfied for the changed paths but remains open for unclassified candidates and incomplete missing/stale-proof coverage. The evidence supports continuing with narrow repository-local adapters; Kjetil remains the decision owner only if a later finding justifies a deliberately versioned CellProtocol-core contract proposal.
+Therefore `goal.haven.cross-repo.runtime-correctness` and `goal.haven.cross-repo.regression-gates` remain non-terminal. `goal.haven.cross-repo.security-preservation` is satisfied for the changed paths but remains open for unclassified candidates, deployed runtime-launch negatives, and incomplete missing/stale-proof coverage. The evidence supports continuing with narrow repository-local adapters and one owner-published runtime registry; Kjetil remains the decision owner if a later finding justifies either arbitrary registry discovery or a deliberately versioned CellProtocol-core readiness contract.
