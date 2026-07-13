@@ -1,10 +1,10 @@
 # HAVEN cross-repository robustness audit — 2026-07-13
 
-- Status: nine repository/package readiness waves plus runtime-configurable launch and a second Binding readiness repair verified; HAVEN-wide goals remain open
+- Status: ten repository/package/application readiness waves plus runtime-configurable launch and a second Binding readiness repair verified; HAVEN-wide goals remain open
 - Human decision owner: Kjetil
 - Primary checkout: `/Users/kjetil/Build/Digipomps/HAVEN/CellScaffold`
 - First-party scope root: `/Users/kjetil/Build/Digipomps/HAVEN`
-- Audit base: CellScaffold `m0/green-test-suite` at `12e74027024cf230110f13074e74ae6cb8a15cf7`; current delivered audit head `029a590c3c199bbb7b669efb25f96e1a3a8adcd6`
+- Audit base: CellScaffold `m0/green-test-suite` at `12e74027024cf230110f13074e74ae6cb8a15cf7`; current delivered audit head `e7faabcce225405704e1c0925af6724c500f7285`
 - Delivery policy followed: narrow repo-scoped commits and pushes after verification; no deploy, authorization weakening, private-data fallback, or unrelated dirty-tree repair.
 
 ## Executive result
@@ -53,9 +53,11 @@ Two further CellScaffold production paths were then repaired. `AccessRequirement
 
 `ArendalsukaEventAtlasCell` was the next adviser-ranked production defect: it is persistent, catalog-published, and read immediately by the participant source-preview path, while decoded initialization previously returned before `state`/`export`/action intercepts existed. The Cell now owns serialized readiness; Participant Program awaits it before requesting an owner-published read Agreement or reading export. The regression uses an encoded non-empty Atlas registered in the real resolver with journals disabled, and proves the participant preview sees all three known sessions from that same decoded Atlas instead of falling through to a new journal-backed instance. Owner state/export/action, 40-way idempotency, and wrong-signing-key read/write negatives pass.
 
+`ConferenceAgendaCell` was the next source-proven application candidate. Its decoded initializer returned before agenda state and action intercepts were installed, while `ConferenceParticipantShellCell` resolved and immediately delegated agenda reads/actions. Agenda now uses the same serialized, retryable, exact-grant runtime binding contract and the shell awaits it before returning the dependency. Two decoded regressions prove persisted selection state, a real track-selection action, 40 concurrent ensures, stable grants, and same-UUID/different-signing-key read/write denial followed by an unchanged owner retry. Two real Participant Shell delegation/action tests also pass.
+
 The current shared `CellProtocol` checkout contains a separate uncommitted security refactor owned by another workstream. Its new `GeneralCell.addAgreement` requires an authorization-enforcing template condition while the same refactor removes the default `GrantCondition`; the existing Arendalsuka owner-published public-read Agreement test therefore currently fails (empty preview, no final read grant). This audit did not weaken that policy or insert an admin/public bypass. The readiness commit is isolated; the Agreement policy integration is a P1 overlap that must be resolved by the core security owner.
 
-These continuation changes are pushed as CellScaffold `b716d69`, `af9f24d`, and `029a590`; Binding `0a9752e7` and `b26fe5fb`. No deployment was performed.
+These continuation changes are pushed as CellScaffold `b716d69`, `af9f24d`, `029a590`, and `e7faabc`; Binding `0a9752e7` and `b26fe5fb`. No deployment was performed.
 
 ## Purpose tree and Goal evaluation
 
@@ -63,7 +65,7 @@ No new Purpose node was added. Canonical lookup found that the three requested e
 
 | Purpose | Goal | Current status | Evidence | Missing before terminal success |
 |---|---|---|---|---|
-| `purpose://quality` | `goal.haven.cross-repo.runtime-correctness` | **Open / partial** | CellScaffold catalog, Access Requirement Prompt, Arendalsuka Participant/Atlas, SwiftWeb, Binding chat/PersonalCopilot/catalog, all nine HavenAgentD Cells, Add2Entity, DiMy, and Spatial direct candidates repaired and tested; owner-published runtime surface routing works in Porthole and Binding | Process restart/persisted-container gates; deployed remote runtime-launch proof; completion of manual classification for the adviser-ranked shared-core/CellScaffold matrices; explicit support policy for fatal-decode Cells |
+| `purpose://quality` | `goal.haven.cross-repo.runtime-correctness` | **Open / partial** | CellScaffold catalog, Access Requirement Prompt, Arendalsuka Participant/Atlas, Conference Agenda/Shell, SwiftWeb, Binding chat/PersonalCopilot/catalog, all nine HavenAgentD Cells, Add2Entity, DiMy, and Spatial direct candidates repaired and tested; owner-published runtime surface routing works in Porthole and Binding | Process restart/persisted-container gates; deployed remote runtime-launch proof; completion of manual classification for the adviser-ranked shared-core/CellScaffold matrices; explicit support policy for fatal-decode Cells |
 | `purpose://test.acceptance` | `goal.haven.cross-repo.regression-gates` | **Open / partial** | Real round trips and actions across repaired areas; concurrent/idempotent installation; wrong-key read/write negatives; decoded non-empty source preview without fallback; runtime route publication/Agreement acceptance; strict deeplink negatives; 118-test HavenAgent package; Workbench/Arendalsuka/Conference/Co-Pilot/Spatial dynamic paths; live Arendalsuka canary; cross-language suites | Shared golden fixture; process-restart gates; current public-read Agreement policy regression; missing/stale-proof matrix; browser artifacts; AppKit test-host isolation; full negative production-surface gate |
 | `purpose://access.audit.privacy` | `goal.haven.cross-repo.security-preservation` | **Pass for committed changed paths; HAVEN-wide open / core overlap** | UUID+fingerprint owner matching; same-UUID/different-key read/write negatives; owner-published registry read through explicit Agreement; opaque view-only launch references; strict identity-link intake/completion binding; no fallback/public bypass added to Arendalsuka; live admin issuance rejection | Resolve the current core Agreement-template policy overlap; missing-proof and stale-proof cases for every changed/future host; deployed wrong-identity runtime-launch proof; classification of remaining broad heuristic hits |
 
@@ -90,7 +92,7 @@ Dirty counts are the final verification snapshot. Existing and concurrently arri
 | Binding/CellProtocolDocuments | Nested docs duplicate | `main` / `e138166d1cb8` | 0 | Excluded from canonical docs edits; primary docs checkout owns delivery. |
 | CellProtocol | Swift reference contracts, resolver, persistence, identity | `main` / `8e96499ee216` | 20+ | **Tier 1, open policy and active overlap.** Adviser audit source-proved vulnerable shared `ChatCell`, Apple/Vapor Orchestrator/EntityAnchor, Calendar, Vault, GraphIndex, TrustPacket, TrustedIssuer, and Commons families; the existing Chat round-trip sleeps 20 ms after decode and masks readiness. Current unrelated security work also makes the Arendalsuka public Agreement gate fail. No audit edit was made in core. |
 | CellProtocolDocuments | Canonical Book, security, Purpose, deliverables | `main` / `aeb8677e13c1` before this report update | 23 | **Tier 2.** Unrelated Book, Purpose-eval, RWXS, research, and deliverable work is preserved; only this canonical audit report is changed in the continuation. |
-| CellScaffold | Porthole/web host, catalog, skeleton runtime, products | `m0/green-test-suite` / `029a590c3c19` | 20+ | **Tier 1.** Catalog, Access Requirement Prompt, Participant Program, and Event Atlas readiness plus the owner-published runtime launch registry are repaired and pushed. The decoded non-empty Atlas source-preview path is tested without fallback. Adviser inventory still finds roughly fifty catalog-published endpoint types with detached setup needing candidate-by-candidate adjudication; Conference Agenda is the next high-confidence app candidate. Unrelated Butterpop/Music/ArtistSales work remains untouched. |
+| CellScaffold | Porthole/web host, catalog, skeleton runtime, products | `m0/green-test-suite` / `e7faabcce225` | 20+ | **Tier 1.** Catalog, Access Requirement Prompt, Participant Program/Event Atlas, and Conference Agenda/Shell readiness plus the owner-published runtime launch registry are repaired and pushed. The decoded non-empty Atlas source-preview path is tested without fallback. Adviser inventory still leaves roughly forty-nine catalog-published endpoint types with detached setup needing candidate-by-candidate adjudication. Unrelated Butterpop/Music/ArtistSales work remains untouched. |
 | CellScaffold/CellProtocolDocuments | Nested docs duplicate | `main` / `a08f72f369fa` | 0 | Excluded from canonical docs edits. |
 | CellUtility | Xcode utility and EventEmitter sample | `main` / `cae2cadd9422` | 0 | **Tier 3.** `EventEmitterCell.init(from:)` is `fatalError`, not a race. Three unit tests passed; UI test target was skipped by Xcode. Persistence support remains absent. |
 | DiMy Source Editor Extension | Source editor extension | `main` / `fecf9746c7b8` | 0 | **Tier 3.** No Swift decode/async-setup hit in the bounded scan; not built in this wave. |
@@ -291,6 +293,14 @@ Status: source-diagnosed; repair blocked by current core compile overlap
 
 Swift Testing's `.serialized` trait does not serialize unrelated peer suites. Six Binding suites mutate process-wide `CellBase` defaults, with 247 assignments in the target; a lock around individual reads/writes is not a lease across `save -> install -> await -> restore`. The narrow repair is one outer serialized suite containing only global-mutating suites. Separately, the app-hosted tests start runtime warmup and key-window animations while a renderer test creates and closes its own key `NSWindow`, matching the `_NSWindowTransformAnimation` crash. The advised repair is an offscreen `NSHostingView` test plus an `XCTestConfigurationFilePath` host guard, not sleeps, retries, animation disabling, or relaxed proof checks. Execution is currently blocked because the dirty shared core fails Binding compilation at `BridgeBase.swift:1278` (`identitiesReferenceSame` missing).
 
+### D21 — Conference Participant Shell could use a decoded Agenda before bindings existed
+
+Severity: P1 application correctness and access boundary
+
+Status: repaired, focused gates green, and pushed
+
+`ConferenceAgendaCell.init(from:)` launched permission and key/action setup in an unawaited `Task`; `ConferenceParticipantShellCell` returned the resolved dependency without a readiness await. Agenda now starts no decoded work, installs exact grants and runtime handlers through one serialized, retryable gate, and the shell awaits that gate. The decoded tests cover 40 concurrent callers, persisted session selection, a real `selectTrack` action, stable grant contracts, wrong-signing-key read/write denial, and unchanged owner state after retry. Two production Participant Shell tests cover domain-slice delegation and agenda-action state propagation.
+
 ### Advisory-panel evaluation for the continuation
 
 Three independent roles were used before implementation:
@@ -345,6 +355,13 @@ CellScaffold Arendalsuka Event Atlas readiness (`029a590`):
 - `Sources/App/Cells/Arendalsuka/ArendalsukaParticipantProgramCell.swift` (one source-read readiness line)
 - `Tests/AppTests/ArendalsukaEventAtlasCellTests.swift`
 - `Tests/AppTests/PortholeRuntimeBindingEnsuringTests.swift` (one Event Atlas hunk only)
+
+CellScaffold Conference Agenda readiness (`e7faabc`):
+
+- `Sources/App/Cells/ConferenceMVP/Cells/ConferenceAgendaCell.swift`
+- `Sources/App/Cells/ConferenceMVP/Cells/ConferenceParticipantShellCell.swift` (one dependency readiness line)
+- `Tests/AppTests/ConferenceAgendaCellTests.swift`
+- `Tests/AppTests/PortholeRuntimeBindingEnsuringTests.swift` (one Conference Agenda hunk only)
 
 ## Changed files in CellScaffold
 
@@ -421,19 +438,21 @@ The focused diff is 205 insertions and 10 deletions across three files. `git dif
 
 | Command | Result | What it proves / does not prove |
 |---|---|---|
-| `scripts/run_tests_isolated.sh --filter PortholeRuntimeBindingEnsuringTests` | 3 passed | Real decoded catalog, same-UUID/different-key rejection, and concurrent/idempotent ensuring for 16 locally constructible Cells. Specialized conference shared-owner Cells remain outside this generic constructor. |
+| `scripts/run_tests_isolated.sh --filter PortholeRuntimeBindingEnsuringTests` | 3 passed | Real decoded catalog, same-UUID/different-key rejection, and concurrent/idempotent ensuring for 16 locally constructible Cells including Conference Agenda. Other specialized conference shared-owner Cells remain outside this generic constructor. |
 | `scripts/run_tests_isolated.sh --filter ConfigurationCatalogClientTests` | 4 passed | Client invokes readiness before immediate action/read and keeps decode behavior. |
 | `scripts/run_tests_isolated.sh --filter ProductionSkeletonBindingIntegrityTests` | 4 passed | Production Workbench and Arendalsuka configurations/payloads keep resolvable keypaths, Agreement-backed atlas reads, non-empty rows, and detail/tab actions. |
 | `scripts/run_tests_isolated.sh --filter ConferenceSurfaceRoutesTests/testAuthenticatedPortholeConferenceDemoFlowSupportsCanonicalPersonaLockedSequence` | 1 passed | Authenticated local HTTP/Porthole Conference sequence with canonical personas. No real browser screenshot. |
 | `scripts/run_tests_isolated.sh --filter PersonalCopilotV1Tests/testChatPromptSubmitRoutesPortholeCommandsBeforeActiveHelper` | 1 passed | Co-Pilot routes Porthole commands before an active helper without unintended helper action. |
 | `swift test --filter ScaffoldLaunchRegistryCellTests` | 5 passed | Owner publication/resolution and flow; encode/decode plus concurrent readiness; exact-grant stability; wrong identity and same UUID/wrong key denial; optimistic concurrency; malformed and endpoint-only route rejection. |
 | `swift test --filter ConferenceSurfaceRoutesTests/testAuthenticatedPortholeResolvesOwnerPublishedRuntimeSurfaceIDThroughAgreement` | 1 passed | Publishes a route at runtime, grants a separate authenticated identity read access, resolves through Porthole/browserhead/bootstrap, and loads the real production configuration. |
-| `swift test --filter PortholeRuntimeBindingEnsuringTests/testCommonRuntimeBindingCoordinatorKeepsGrantsStableUnderConcurrentEnsureCalls` | 1 passed after each continuation | Launch Registry, Access Requirement Prompt, and Event Atlas participate in the common concurrent/idempotent readiness gate; unrelated worktree additions in the same test were not staged by this audit. |
+| `swift test --filter PortholeRuntimeBindingEnsuringTests/testCommonRuntimeBindingCoordinatorKeepsGrantsStableUnderConcurrentEnsureCalls` | 1 passed after each continuation | Launch Registry, Access Requirement Prompt, Event Atlas, and Conference Agenda participate in the common concurrent/idempotent readiness gate; unrelated worktree additions in the same test were not staged by this audit. |
 | `swift test --filter 'AccessRequirementPromptCellTests/testDecodedPrompt'` | 2 passed | Decoded immediate state/action, 40 concurrent ensures, stable exact grants, wrong-key read/write denial, unchanged state, and real-owner retry. |
 | `swift test --filter PortholeConfigurationLoadingTests/testBootstrapAddsAccessRequirementOverlayAndPrefillsPromptForBlockedReference` | 1 passed | Real Porthole bootstrap resolves and prefills the protected-reference prompt through the readiness-aware helper. |
 | `swift test --filter 'ArendalsukaEventAtlasCellTests/testDecodedEventAtlas'` | 2 passed | Decoded owner state/export/search with three known sessions; 40-way readiness and stable grants; same-UUID/wrong-key read/write denial and owner retry. |
 | `swift test --filter ArendalsukaEventAtlasCellTests/testParticipantPreviewReadsDecodedRegisteredAtlasWithoutJournalFallback` | 1 passed | Real resolver returns the encoded non-empty Atlas; Participant source-backed preview reads all three sessions with journals disabled and preserves the decoded Atlas UUID. |
 | `swift test --filter ArendalsukaEventAtlasCellTests/testParticipantProgramGetsPublishedAtlasReadAgreementForPublicProgram` | failed: 3 assertions | Current unrelated core Agreement-template hardening rejects the owner-published public-read Agreement. No bypass added; core security integration remains P1. |
+| `swift test --filter 'ConferenceAgendaCellTests/testDecodedAgenda'` | 2 passed | Decoded persisted selection and real track action; 40 concurrent ensures; stable grants; same-UUID/wrong-key read/write denial; unchanged state after owner retry. |
+| `swift test --filter 'ConferenceShellCellsTests/(testParticipantShellDelegatesToDomainBackedSlices|testParticipantShellAgendaActionReturnsUpdatedProgramState)'` | 2 passed | Real Participant Shell dependency delegation waits for Agenda and propagates the agenda action result. No process restart or browser artifact. |
 | `python3 Tools/Explore/explore_contract_audit.py --repo-root CellScaffold --json-output /tmp/scaffold-launch-explore.json` | 0 errors, 0 warnings | Static Explore coverage for the new production registry; not a runtime authorization test. |
 | `git diff --check` | passed | Patch whitespace integrity only. |
 
@@ -497,7 +516,7 @@ No mutating Workbench staging canary, deploy, or browser journey was run. The pe
 
 | Claim | Support | Counterargument / undercut | Evaluation | Deduced work |
 |---|---|---|---|---|
-| C1: readiness race is a general latent class across multiple hosted Cells | Confirmed in CellScaffold including Access Prompt and decoded Event Atlas source preview, SwiftWeb, Binding workbench/PersonalCopilot/catalog, nine HavenAgentD Cells, Add2Entity, DiMy, and Spatial; shared `ChatCell` plus nine further core families are source-proven and the Chat test sleeps 20 ms after decode | Many hits are already gated, false positives, specialized, or never published; Go/Rust/Python are synchronous locally; fatal decode is a different failure | **Strongly supported as a multi-repo latent Swift failure class; scope not fully enumerated as defects** | Retain and complete a per-published-Cell matrix, beginning with shared Chat and app Conference Agenda |
+| C1: readiness race is a general latent class across multiple hosted Cells | Confirmed in CellScaffold including Access Prompt, decoded Event Atlas source preview, and Conference Agenda/Shell, SwiftWeb, Binding workbench/PersonalCopilot/catalog, nine HavenAgentD Cells, Add2Entity, DiMy, and Spatial; shared `ChatCell` plus nine further core families are source-proven and the Chat test sleeps 20 ms after decode | Many hits are already gated, false positives, specialized, or never published; Go/Rust/Python are synchronous locally; fatal decode is a different failure | **Strongly supported as a multi-repo latent Swift failure class; scope not fully enumerated as defects** | Retain and complete a per-published-Cell matrix, beginning with shared Chat and the next ranked CellScaffold candidate |
 | C2: detached decoded setup can cause empty/broken GUI | Binding's real decoded chat read failed with `notFound` while 41 existing tests passed; decoded Event Atlas could make a known-three-session Participant preview empty and enter fallback | Empty GUI can also come from source failure, Agreement denial, bad skeleton keypath, or legitimate no-data state; partial preview recovery is already OR-based in Participant Program | **Strongly supported, not exclusive as a cause** | Keep diagnostics able to distinguish not-ready, denied, not-found, empty-source, and fallback states |
 | C3: host must await readiness before state/action | Porthole direct Access Prompt lookup and Participant Program Atlas source read now await their Cells; existing Porthole/SwiftWeb/Binding/Add2/DiMy/Spatial boundaries do likewise without universal resolver change | Synchronous Cells and the two self-awaiting CellScaffold Cells need no extra gate; a universal core rule still needs cancellation/error/timeout/wire design | **Accepted:** every asynchronously restored supported Cell must expose and be awaited through the narrowest shared integration contract; the adviser recommends a generic optional Cell runtime-activation contract before any resolver-wide change | Repair shared Chat with compatibility tests, then decide whether multiple hosts justify promoting the contract from app adapters |
 | C4: coverage is insufficient if known data can render empty while tests pass | Binding had 41 green parity tests beside decoded `notFound`; catalog exposed 69 -> 136 grants; Atlas needed a real encoded three-row resolver/preview gate; broad Binding tests themselves are corrupted by global/AppKit isolation | Existing tests remain valuable for their declared contracts | **Accepted** | Add restart/empty-state canaries; repair Binding global/AppKit test isolation; require real persisted source payloads for each critical surface |
@@ -510,7 +529,7 @@ Adviser voting was not used. Evaluation follows source, executable tests, live r
 
 | Case | Evidence in this wave | Status |
 |---|---|---|
-| Same UUID, wrong signing key | New decoded CellScaffold catalog/Access Prompt/Event Atlas, SwiftWeb, Binding, HavenAgentD, Add2Entity, DiMy, and Spatial negative tests | Pass in every focused repaired path; Atlas and Access Prompt deny both read and write |
+| Same UUID, wrong signing key | New decoded CellScaffold catalog/Access Prompt/Event Atlas/Conference Agenda, SwiftWeb, Binding, HavenAgentD, Add2Entity, DiMy, and Spatial negative tests | Pass in every focused repaired path; Atlas, Access Prompt, and Conference Agenda deny both read and write |
 | Unauthenticated privileged import | Live POST returns 401 | Pass for this endpoint |
 | Wrong method on privileged import | Live GET returns 405 | Pass |
 | Public read through owner Agreement | Existing Arendalsuka positive test rerun against the current dirty shared core | **Fail / blocked:** core Agreement-template hardening rejects publication; no fallback or bypass added |
@@ -580,6 +599,7 @@ Kjetil explicitly requested commit and push after the local repair audit. Each c
 | Binding catalog readiness continuation | `main` | `b26fe5fb93289aab17ac72ed571709f4595d08a2` | `origin/main`, verified equal |
 | CellScaffold Access Requirement Prompt readiness | `m0/green-test-suite` | `af9f24d98f1e1c9dac9e7212b1a6753b72981c7f` | `origin/m0/green-test-suite`, verified equal |
 | CellScaffold Arendalsuka Event Atlas readiness | `m0/green-test-suite` | `029a590c3c199bbb7b669efb25f96e1a3a8adcd6` | `origin/m0/green-test-suite`, verified equal |
+| CellScaffold Conference Agenda readiness | `m0/green-test-suite` | `e7faabcce225405704e1c0925af6724c500f7285` | `origin/m0/green-test-suite`, verified equal |
 
 ## Residual-risk ledger and owners
 
@@ -590,7 +610,7 @@ Kjetil explicitly requested commit and push after the local repair audit. Each c
 | P1 | Binding's broad test target is not a trustworthy green gate: one AppKit crash incident was reported against three active tests, and parallel suites overwrite shared `CellBase` defaults despite per-suite serialization | Binding test owner | Project-wide isolation/serial trait or dependency injection for globals; repeat full target without AppKit crash or cross-suite proof failure |
 | P1 | Current uncommitted CellProtocol Agreement hardening rejects the established owner-published Arendalsuka public-read Agreement | CellProtocol identity/security workstream owner; overlapping dirty core | Define the explicit owner-publication condition, then pass public read plus wrong identity, missing proof, stale proof, and non-released negatives without app/renderer bypass |
 | P1 | Shared `ChatCell` and adviser-ranked Orchestrator, EntityAnchor, Calendar, Vault, GraphIndex, TrustPacket, TrustedIssuer, Commons, and Apple Intelligence families return before decoded bindings are ready | CellProtocol/CellApple owners | Generic optional activation contract, per-Cell single-flight setup, immediate concurrent state/action and stable-grant tests, multi-host compatibility |
-| P1 | Roughly fifty remaining catalog-published CellScaffold endpoint types still have detached decoded setup; Conference Agenda is the next source-proven production candidate | CellScaffold owners | Candidate-by-candidate publication/host audit, then persisted known-data decode/immediate-read/action gates for each real vulnerable type |
+| P1 | Roughly forty-nine remaining catalog-published CellScaffold endpoint types still have detached decoded setup after closing the adviser-ranked Event Atlas and Conference Agenda candidates | CellScaffold owners | Candidate-by-candidate publication/host audit, then persisted known-data decode/immediate-read/action gates for each real vulnerable type |
 | P2 | Two conference shared-owner ensuring Cells are not in generic constructor coverage | CellScaffold owner | Tailored ownership-aware concurrency and decode test |
 | P2 | No shared Swift-origin golden readiness/persistence fixture across Go/Rust/Python | Cross-language contract owner | Versioned fixture plus runtime consumer tests and error parity |
 | P2 | Process restart/persisted-container reload is not proven for all Tier-1 Cells | Each host owner | Separate-process or durable-container restart gate with immediate reads/actions |
@@ -618,6 +638,7 @@ Proven in this wave:
 - Binding `ConfigurationCatalogCell` is repaired at the same requester-aware readiness boundary; its red-before-green regression proves stable grants plus immediate production state/action after decode.
 - Access Requirement Prompt is readiness-safe at direct Porthole lookup/recovery; decoded state/action and wrong-key read/write negatives pass without granting or approving access.
 - A decoded, registered, non-empty Event Atlas now feeds Participant source-backed preview before any fallback; all three known sessions survive immediate resolution, and wrong-key reads/writes remain denied.
+- Conference Participant Shell now awaits a decoded Agenda before delegation; persisted state, real agenda actions, concurrent idempotency, stable grants, and wrong-key read/write denial pass.
 - The repairs are serialized/idempotent under concurrent ensuring for the covered Cells.
 - Same UUID with different signing key is rejected for runtime owner hydration in every focused repaired path recorded above.
 - Selected production Workbench, Arendalsuka, Conference, and Co-Pilot local paths pass dynamic assertions.
