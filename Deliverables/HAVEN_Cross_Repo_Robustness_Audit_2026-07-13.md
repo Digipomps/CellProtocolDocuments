@@ -1,10 +1,10 @@
 # HAVEN cross-repository robustness audit — 2026-07-13
 
-- Status: eleven repository/package/application readiness waves plus runtime-configurable launch and a second Binding readiness repair verified; HAVEN-wide goals remain open
+- Status: fifteen repository/package/application readiness waves plus runtime-configurable launch and a second Binding readiness repair verified; HAVEN-wide goals remain open
 - Human decision owner: Kjetil
 - Primary checkout: `/Users/kjetil/Build/Digipomps/HAVEN/CellScaffold`
 - First-party scope root: `/Users/kjetil/Build/Digipomps/HAVEN`
-- Audit base: CellScaffold `m0/green-test-suite` at `12e74027024cf230110f13074e74ae6cb8a15cf7`; current delivered audit head `682dd18070de5468478210e0ff4638c234cf800c`
+- Audit base: CellScaffold `m0/green-test-suite` at `12e74027024cf230110f13074e74ae6cb8a15cf7`; current delivered audit head `aa0149fc545fc4df22f2349b3c8ca17278fa6af5`
 - Delivery policy followed: narrow repo-scoped commits and pushes after verification; no deploy, authorization weakening, private-data fallback, or unrelated dirty-tree repair.
 
 ## Executive result
@@ -37,13 +37,19 @@ Current staging was reverified on 2026-07-13 at approximately 08:09Z. `/health/b
 
 No P0 defect was found. Open P1 candidates remain, so the statement “all CellProtocol functionality is robust” is not supported.
 
+Three additional production waves were completed after the earlier report snapshot. `ConferencePublicShellCell` and `DeviceRegistrationCell` were moved onto the same waitable, requester-proof runtime-binding contract. The notification path `ConferenceBroadcastStudio -> NotificationPolicy -> NotificationOutbox -> DeviceCallbackBridge` now restores decoded behavior without detached setup; a persisted pipeline test exercises the actual dependency chain after round-trip, and the direct Porthole, Personlog, Contact, Sales, Agent, and Vapor consumers await readiness.
+
+The adjacent audit then confirmed four more real occurrences. `ContactEndpointCell` and `AgentConversationInboxCell` are production-persistent P1 paths; `PersonlogQuestionInboxCell` and `PersonlogJobProjectionCell` are currently P2 latent because no production registration was found. All four now start no decoded work, serialize runtime installation, and have real encode/decode/immediate-use coverage. Contact preserves and retires a known endpoint; Agent preserves and clears a known prompt; Personlog executes its real refresh/resync actions; 40 concurrent callers do not grow grants. A same-UUID/different-signing-key Contact requester can neither read private state nor retire the endpoint, and the owner subsequently observes unchanged state.
+
+The same security review found a separate exposed P1 in the device HTTP ingress. All three staging POST routes are live, unauthenticated input is replaced with the trusted Scaffold identity, registration can overwrite caller-selected participant/device records, and callback ticket lookup is not bound to an enrolled device signing key. A signature alone is insufficient because the current Contact-style envelope verifies against the identity embedded by the caller. The correct repair needs owner-approved device enrollment that binds participant/device, signing-key fingerprint, audience, exact actions, expiry, revocation, and replay state. This audit did not introduce a shared secret, cookie/admin bypass, push-token authority, or auto-bless legacy registrations.
+
 ### Continuation: runtime-configurable deeplinks and Binding catalog readiness
 
 Kjetil's follow-up requirement that deeplinks remain configurable at runtime is implemented without making the link an authorization channel. CellScaffold now owns one persistent, scaffold-unique `ScaffoldLaunchRegistryCell`. An owner publishes an opaque `surfaceID` mapped to a stable `CellConfiguration` lookup, revision, enabled state, and optional source endpoint. Readers still need an explicit Agreement. The canonical external form is view-only:
 
 `haven://open?schema=haven.surface-launch.v1&surfaceID=<opaque-id>&intent=view`
 
-The link carries no requester, token, action, endpoint, private payload, or capability. Porthole resolves the same owner-published registry before loading the production configuration. Binding searches only registry endpoints derived from its configured catalog origins, performs the existing Agreement-mediated remote resolution, retargets local source endpoints to the selected scaffold host, and then loads the resolved configuration. Routes can therefore be added, revised, disabled, and repointed through persisted Cell state without recompiling the host. The registry Cell type and its bootstrap endpoint are still compiled infrastructure; arbitrary registry discovery is not claimed.
+The link carries no requester, token, action, endpoint, private payload, or capability. Porthole resolves the same owner-published registry before loading the production configuration. Binding searches only registry endpoints derived from its configured catalog origins, performs the existing Agreement-mediated remote resolution, retargets local source endpoints to the selected scaffold host, and then loads the resolved configuration. Routes can therefore be added, revised, disabled, and repointed through persisted Cell state without recompiling the host. The registry Cell type and its bootstrap endpoint are still compiled infrastructure; arbitrary registry discovery is not claimed. The default public factory still contains direct compiled `configurationLookup` fallbacks for standard buttons. Full decompilation of those defaults requires deterministic runtime seeding/reconciliation of stable `surfaceID` values; the audit did not edit the concurrently dirty startup factory merely to claim completion.
 
 The security adviser also found a separate P1 identity-link parser risk while reviewing the new URL boundary. Duplicate query names could trap during dictionary construction; arbitrary HTTP/S paths containing an identity-link substring were accepted; a new challenge did not clear all derived signing/completion state; completion was not bound to the exact locally signed request; and raw URL material could reach diagnostics. The Binding repair now requires exact custom routes, rejects duplicate/oversized/authority-bearing input, accepts only configured trusted audience/origin values for signing, caps TTL at one hour, clears derived state on challenge replacement, requires the exact request hash for completion, and logs a validated route summary rather than raw input. No universal-link HTTP/S route is accepted until a trusted association policy is implemented.
 
@@ -59,7 +65,7 @@ The next clean application candidate was CellScaffold's own `ChatCell`, not the 
 
 The current shared `CellProtocol` checkout contains a separate uncommitted security refactor owned by another workstream. Its new `GeneralCell.addAgreement` requires an authorization-enforcing template condition while the same refactor removes the default `GrantCondition`; the existing Arendalsuka owner-published public-read Agreement test therefore currently fails (empty preview, no final read grant). This audit did not weaken that policy or insert an admin/public bypass. The readiness commit is isolated; the Agreement policy integration is a P1 overlap that must be resolved by the core security owner.
 
-These continuation changes are pushed as CellScaffold `b716d69`, `af9f24d`, `029a590`, `e7faabc`, and `682dd18`; Binding `0a9752e7` and `b26fe5fb`. No deployment was performed.
+These continuation changes are pushed as CellScaffold `b716d69`, `af9f24d`, `029a590`, `e7faabc`, `682dd18`, `bff5fea`, `16089c1`, `d451ccd`, `448fdcf`, and `aa0149f`; Binding `0a9752e7` and `b26fe5fb`. No deployment was performed.
 
 ## Purpose tree and Goal evaluation
 
@@ -67,9 +73,9 @@ No new Purpose node was added. Canonical lookup found that the three requested e
 
 | Purpose | Goal | Current status | Evidence | Missing before terminal success |
 |---|---|---|---|---|
-| `purpose://quality` | `goal.haven.cross-repo.runtime-correctness` | **Open / partial** | CellScaffold catalog, Access Requirement Prompt, Arendalsuka Participant/Atlas, Conference Agenda/Shell, app Chat/HTTP/Conference host, SwiftWeb, Binding chat/PersonalCopilot/catalog, all nine HavenAgentD Cells, Add2Entity, DiMy, and Spatial direct candidates repaired and tested; owner-published runtime surface routing works in Porthole and Binding | Process restart/persisted-container gates; deployed remote runtime-launch proof; completion of manual classification for the adviser-ranked shared-core/CellScaffold matrices; explicit support policy for fatal-decode Cells |
-| `purpose://test.acceptance` | `goal.haven.cross-repo.regression-gates` | **Open / partial** | Real round trips and actions across repaired areas; concurrent/idempotent installation; wrong-key read/write negatives; decoded non-empty source preview without fallback; runtime route publication/Agreement acceptance; strict deeplink negatives; 118-test HavenAgent package; Workbench/Arendalsuka/Conference/Co-Pilot/Spatial dynamic paths; live Arendalsuka canary; cross-language suites | Shared golden fixture; process-restart gates; current public-read Agreement policy regression; missing/stale-proof matrix; browser artifacts; AppKit test-host isolation; full negative production-surface gate |
-| `purpose://access.audit.privacy` | `goal.haven.cross-repo.security-preservation` | **Pass for committed changed paths; HAVEN-wide open / core overlap** | UUID+fingerprint owner matching; same-UUID/different-key read/write negatives; owner-published registry read through explicit Agreement; opaque view-only launch references; strict identity-link intake/completion binding; no fallback/public bypass added to Arendalsuka; live admin issuance rejection | Resolve the current core Agreement-template policy overlap; missing-proof and stale-proof cases for every changed/future host; deployed wrong-identity runtime-launch proof; classification of remaining broad heuristic hits |
+| `purpose://quality` | `goal.haven.cross-repo.runtime-correctness` | **Open / partial** | CellScaffold catalog, Access Requirement Prompt, Arendalsuka Participant/Atlas, Conference Agenda/Shell, app Chat/HTTP/Conference host, Public Shell, Device Registration, notification pipeline, Contact/Agent/Personlog hosts, SwiftWeb, Binding chat/PersonalCopilot/catalog, all nine HavenAgentD Cells, Add2Entity, DiMy, and Spatial direct candidates repaired and tested; owner-published runtime surface routing works in Porthole and Binding | Remaining published-Cell classification; deployed remote runtime-launch proof; full standard-button `surfaceID` seeding; explicit support policy for fatal-decode Cells |
+| `purpose://test.acceptance` | `goal.haven.cross-repo.regression-gates` | **Open / partial** | Real round trips/actions across repaired areas; concurrent/idempotent installation; wrong-key read/write negatives; decoded non-empty source preview; one persisted notification dependency-chain reload; runtime route publication/Agreement acceptance; strict deeplink negatives; 118-test HavenAgent package; Workbench/Arendalsuka/Conference/Co-Pilot/Spatial dynamic paths; live Arendalsuka and route-presence probes; cross-language suites | Shared golden fixture; comprehensive separate-process restart gates; current public-read Agreement policy regression; device enrollment/proof negatives; browser artifacts; AppKit test-host isolation; full negative production-surface gate |
+| `purpose://access.audit.privacy` | `goal.haven.cross-repo.security-preservation` | **Pass for committed readiness/deeplink changes; HAVEN-wide open / exposed device P1** | UUID+fingerprint owner matching; same-UUID/different-key read/write negatives; owner-published registry read through explicit Agreement; opaque view-only launch references; no fallback/public bypass added | Replace unauthenticated Scaffold-elevated device ingress with owner-approved enrolled-device capability/proof; resolve core Agreement-template overlap; missing/stale-proof cases; deployed wrong-identity runtime-launch proof |
 
 `purpose://gui.quality.functional-accessible` and `purpose://skeleton.owner-entity-access` remain useful facets for later GUI and owner-access waves, but no new taxonomy was necessary in this wave.
 
@@ -94,7 +100,7 @@ Dirty counts are the final verification snapshot. Existing and concurrently arri
 | Binding/CellProtocolDocuments | Nested docs duplicate | `main` / `e138166d1cb8` | 0 | Excluded from canonical docs edits; primary docs checkout owns delivery. |
 | CellProtocol | Swift reference contracts, resolver, persistence, identity | `main` / `8e96499ee216` | 20+ | **Tier 1, open policy and active overlap.** Adviser audit source-proved vulnerable shared `ChatCell`, Apple/Vapor Orchestrator/EntityAnchor, Calendar, Vault, GraphIndex, TrustPacket, TrustedIssuer, and Commons families; the existing Chat round-trip sleeps 20 ms after decode and masks readiness. Current unrelated security work also makes the Arendalsuka public Agreement gate fail. No audit edit was made in core. |
 | CellProtocolDocuments | Canonical Book, security, Purpose, deliverables | `main` / `4c5443ef` before this report update | 20+ | **Tier 2.** Unrelated Book, Purpose-eval, RWXS, research, and deliverable work is preserved; only this canonical audit report is changed in the continuation. |
-| CellScaffold | Porthole/web host, catalog, skeleton runtime, products | `m0/green-test-suite` / `682dd18070de` | 20+ | **Tier 1.** Catalog, Access Requirement Prompt, Participant Program/Event Atlas, Conference Agenda/Shell, and app Chat/HTTP/Conference-host readiness plus the owner-published runtime launch registry are repaired and pushed. The decoded non-empty Atlas source-preview path is tested without fallback. Adviser inventory still leaves roughly forty-eight catalog-published endpoint types with detached setup needing candidate-by-candidate adjudication. Unrelated Butterpop/Music/ArtistSales work remains untouched. |
+| CellScaffold | Porthole/web host, catalog, skeleton runtime, products | `m0/green-test-suite` / `aa0149fc545f` | 20+ | **Tier 1.** Prior repaired paths plus Public Shell, Device Registration, the notification dependency chain, ContactEndpoint, Agent Conversation Inbox, and latent Personlog projections are pushed. Runtime surface mapping is persisted and owner-published, but default compiled button fallbacks remain. The public device POST ingress is an exposed P1 pending owner-approved enrollment/proof. Unrelated Butterpop/Music/ArtistSales/Agreement work remains untouched. |
 | CellScaffold/CellProtocolDocuments | Nested docs duplicate | `main` / `a08f72f369fa` | 0 | Excluded from canonical docs edits. |
 | CellUtility | Xcode utility and EventEmitter sample | `main` / `cae2cadd9422` | 0 | **Tier 3.** `EventEmitterCell.init(from:)` is `fatalError`, not a race. Three unit tests passed; UI test target was skipped by Xcode. Persistence support remains absent. |
 | DiMy Source Editor Extension | Source editor extension | `main` / `fecf9746c7b8` | 0 | **Tier 3.** No Swift decode/async-setup hit in the bounded scan; not built in this wave. |
@@ -311,6 +317,44 @@ Status: repaired, focused gates green, and pushed
 
 `App.ChatCell.init(from:)` launched permission and runtime-key setup in an unawaited `Task`, including a global-vault fallback that could search or create a substitute identity. `VaporChatMVP` and `ConferenceChatLaunchCell` then returned the resolved Chat immediately. Decoded initialization now restores persisted state only. A serialized, retryable requester-proof activation installs runtime handlers without recreating or broadening persisted Agreement grants, and both production hosts await it after their existing authentication/payment or conversation resolution. A combined same-process run passes five focused tests: decoded known state and real action, wrong-signing-key denial, paid/authenticated HTTP state/action/state, decoded Conference backend, and the common idempotency gate. One broader pre-existing read-only Agreement test remains red under the dirty shared-core policy refactor and is recorded as an external blocker rather than bypassed.
 
+### D23 — Public Shell and Device Registration repeated the decoded readiness race
+
+Severity: P1 application correctness and access boundary
+
+Status: repaired, focused gates green, and pushed
+
+The public Conference shell and device-registration Cell were both persisted/hosted paths whose decoded initialization could return before supported state and actions existed. Each now uses the established requester-aware serialized installer, starts no detached decoded work, and is awaited by its immediate host. These repairs change lifecycle only; they do not turn a public shell into implicit public authority or make possession of a device identifier or push token an authorization proof.
+
+### D24 — Notification and adjacent Contact/Agent/Personlog Cells could be consumed before decoded bindings existed
+
+Severity: P1 for the production notification, Contact, and Agent paths; P2 latent for unregistered Personlog projections
+
+Status: repaired, focused gates green, and pushed
+
+`ConferenceBroadcastStudioCell`, `NotificationPolicyCell`, `NotificationOutboxCell`, `DeviceCallbackBridgeCell`, `ContactEndpointCell`, `AgentConversationInboxCell`, `PersonlogQuestionInboxCell`, and `PersonlogJobProjectionCell` all had required decoded initialization that could return before handlers were installed. Direct consumers included Porthole notification summary, Personlog projections, Contact/Sales/Agent workspaces, Vapor callbacks/replies, simulation publication, and the internal Studio -> Policy -> Outbox -> Callback chain. The Cells now decode state only and install runtime behavior through one idempotent readiness gate; every identified immediate production consumer awaits it.
+
+The exact notification dependency pipeline has a persisted reload gate. A second regression covers all four adjacent Cells with 40 concurrent ensures and real immediate operations. The Contact and Agent fixtures preserve non-empty state through round-trip before a real mutation. The same-UUID/different-signing-key Contact negative proves private read and retirement denial with no mutation. Forty-three of forty-four selected consumer tests pass; the lone existing `ConferenceDemoStoryCell` decode-restore test fails `notFound` both with and without the new readiness hunk, so it is recorded separately rather than attributed to this wave.
+
+### D25 — Public device callbacks elevate unauthenticated input to Scaffold authority
+
+Severity: P1 security; promote to P0 only if current high-value traffic/exploitation evidence is established
+
+Status: exposed in staging, not repaired; owner/multi-repo decision required
+
+`VaporDeviceCallback` mounts register, resolve, and submit POST routes without authentication, decodes caller-selected participant/device/ticket/routing fields, and then replaces the external caller with the trusted Scaffold identity. Registration records are keyed by the supplied participant/device pair; callback validation does not prove control of an enrolled signing key; ticket lookup is not bound to device identity; caller routing hints can select downstream Contact or Agent behavior. Binding currently sends unsigned JSON.
+
+Live, non-mutating malformed-body probes return HTTP 400 on all three exact POST paths, proving the routes are mounted on staging revision `12e7402`; HEAD returns 404 because only POST is registered. Current real traffic was not proven, so P0 is not asserted.
+
+The smallest correct permanent repair is coordinated: an owner-issued enrollment Agreement/capability binds exact participant/device, subject identity and signing-key fingerprint, allowed registration/resolve/submit actions, audience, expiry, revocation, and one-time enrollment ID. Every request then signs a canonical action/method/path/query/body-hash envelope with bounded time and persisted nonce; Cells enforce signer binding, ticket scope, replay, expiry, and state transition. Legacy records must be unverified until owner-approved re-enrollment. Cookie/admin/shared-secret/push-token authority and public dual mode are rejected.
+
+### D26 — Runtime launch exists, but default button targets are not fully decompiled
+
+Severity: P2 configurability/completeness
+
+Status: partial by design; no security boundary removed
+
+The owner-published `surfaceID` registry, Porthole resolver, Binding parser/resolver, and runtime remapping tests prove the configurable route contract. The standard public configuration factory still emits some direct compiled `configurationLookup` targets as a fallback. Removing those safely requires deterministic seeding and reconciliation of stable registry IDs during startup while preserving the compiled Porthole endpoint allowlist as a security boundary. This audit records that residual explicitly instead of describing all deeplinks as runtime-owned.
+
 ### Advisory-panel evaluation for the continuation
 
 Three independent roles were used before implementation:
@@ -329,6 +373,9 @@ The next adviser wave was also read-only and adversarial:
 - The application-candidate reviewer ranked CellScaffold app `ChatCell` as the next clean executable occurrence because it is persistent, Porthole/HTTP-published, and also used by Conference chat. Agreement Workbench was source-relevant but overlapped an unrelated dirty RWXS workstream; Personal Page Publisher remained the next clean lower-ranked candidate.
 - The Conference counter-auditor ranked `ConferencePublicShellCell`, then Device Registration and the Onboarding fan-out, as the next direct-host checks. It also identified synchronous restore helpers that are only conditionally safe because their five-second timeout is ignored by callers.
 - The core feasibility reviewer rejected using the app-Chat repair as evidence for changing shared `CellBase.ChatCell`: a correct core repair needs an optional activation contract, resolver/host compatibility proof, and the active Agreement/identity refactor resolved first. Persisted Agreement authority must remain authoritative; decoded activation must not silently recreate compiled grants.
+- The adjacent-host reviewer independently classified ContactEndpoint and Agent Conversation Inbox as production-persistent P1s and both Personlog projections as P2 latent. It located every immediate consumer and warned that Contact's self-contained signature verification is a cryptographic primitive, not a registered-key authority proof.
+- The device-security reviewer traced an end-to-end unauthenticated overwrite/ticket/routing chain, rejected merely signing caller-selected identities, and required owner-approved device enrollment plus Cell-owned replay and action policy. Its recommendation to fail closed on public staging conflicts with compatibility for current unsigned Binding builds and is therefore a Kjetil-owned coordinated rollout decision, not an app-local convenience patch.
+- The runtime-link counter-review accepted the persistent owner-published registry but found default direct targets and malformed/dead target validation as residuals. It explicitly retained the compiled supported-endpoint allowlist as an access boundary.
 
 ## Continuation changed files
 
@@ -385,6 +432,24 @@ CellScaffold app Chat readiness (`682dd18`):
 - `Tests/AppTests/ChatMVPRoutesTests.swift`
 - `Tests/AppTests/ConferenceEntityDiscoveryCellTests.swift` (one decoded-backend production-path setup)
 - `Tests/AppTests/PortholeRuntimeBindingEnsuringTests.swift` (local test vault and one Chat hunk only; four unrelated worktree additions excluded)
+
+CellScaffold public shell/device/runtime-launch continuation (`bff5fea`, `16089c1`, `d451ccd`):
+
+- public Conference shell readiness and direct host await
+- device-registration readiness and direct host await
+- owner-published runtime `surfaceID` navigation, public configuration policy, route handling, and focused tests
+
+CellScaffold notification dependency chain (`448fdcf`):
+
+- `ConferenceBroadcastStudioCell`, `NotificationPolicyCell`, `NotificationOutboxCell`, and `DeviceCallbackBridgeCell`
+- every identified direct notification/Personlog/Contact/Sales/Agent/Vapor consumer
+- concurrent/idempotent readiness and persisted dependency-pipeline reload tests
+
+CellScaffold adjacent hosted Cells (`aa0149f`):
+
+- `ContactEndpointCell`, `AgentConversationInboxCell`, `PersonlogQuestionInboxCell`, and `PersonlogJobProjectionCell`
+- Device Callback, Agent reply, Conference simulation, and Demo Story direct-host awaits
+- four decoded immediate-use regressions plus Contact wrong-signing-key/no-mutation coverage
 
 ## Changed files in CellScaffold
 
@@ -477,6 +542,10 @@ The focused diff is 205 insertions and 10 deletions across three files. `git dif
 | `swift test --filter 'ConferenceAgendaCellTests/testDecodedAgenda'` | 2 passed | Decoded persisted selection and real track action; 40 concurrent ensures; stable grants; same-UUID/wrong-key read/write denial; unchanged state after owner retry. |
 | `swift test --filter 'ConferenceShellCellsTests/(testParticipantShellDelegatesToDomainBackedSlices|testParticipantShellAgendaActionReturnsUpdatedProgramState)'` | 2 passed | Real Participant Shell dependency delegation waits for Agenda and propagates the agenda action result. No process restart or browser artifact. |
 | `swift test --filter 'ChatCellTests/testDecodedChat|ChatMVPRoutesTests/testPaidStateAndMessageRoutesAwaitDecodedChatReadiness|ConferenceEntityDiscoveryCellTests/testChatLaunchCellCanStartConversationAndProjectMessageFeedback|PortholeRuntimeBindingEnsuringTests/testCommonRuntimeBindingCoordinatorKeepsGrantsStableUnderConcurrentEnsureCalls'` | 5 passed, 0 failures | One process covers 40-way decoded Chat activation, persisted message/draft, real action, wrong-signing-key denial, paid/authenticated HTTP state/action/state, decoded Conference backend, and common idempotency. No deployment or process restart. |
+| `swift test --filter NotificationRuntimeReadinessTests` | 4 passed, 0 failures | Notification chain plus Contact/Agent/Personlog encode/decode, 40 concurrent ensures, stable grants, persisted non-empty Contact/Agent state, immediate real actions, and same-UUID/wrong-key Contact no-mutation. |
+| `swift test --filter 'NotificationPushProviderTests|ConferenceBroadcastStudioCellTests|PersonlogProjectionCellTests|SalesWorkspaceCellTests'` | 37 passed, 0 failures | Existing production notification, callback, projection, sales, and persisted Studio -> Policy -> Outbox -> Callback behavior remains green after the notification repair. |
+| `swift test --filter 'ContactEndpointCellTests|AgentConversationInboxCellTests|PersonlogProjectionCellTests|ConferenceDemoStoryCellTests|ConferenceSimulationPopulationCellTests|NotificationPushProviderTests'` | 44 executed: 43 passed, 1 failed | All directly affected Contact/Agent/Personlog/callback/reply/simulation paths pass. The existing Demo Story decode-restore test fails `notFound`; an A/B run without the new readiness hunk fails identically, so it is not counted as a regression or a green gate. |
+| `swift test --filter ConferenceDemoStoryCellTests/testDecodedStoryCellRestoresActionsBeforePortholeClick` with and without the new readiness hunk | failed both times: `KeyValueErrors.notFound` | Proves an independent decoded-action restoration defect remains in Demo Story. It does not undercut the adjacent readiness tests, and it was not hidden or weakened. |
 | `swift test --skip-build --filter 'ChatCellTests|ChatMVPRoutesTests'` | HTTP 8/8 passed; Chat 9/10 passed | Broad app-Chat coverage remains useful, but `testChatCellEditableConfigurationRejectsReadOnlyRequesterApply` fails under the current shared-core Agreement-template refactor. The focused readiness paths remain green and no authorization bypass was added. |
 | `python3 Tools/Explore/explore_contract_audit.py --repo-root CellScaffold --json-output /tmp/scaffold-launch-explore.json` | 0 errors, 0 warnings | Static Explore coverage for the new production registry; not a runtime authorization test. |
 | `git diff --check` | passed | Patch whitespace integrity only. |
@@ -521,6 +590,7 @@ Commands:
 curl -fsS https://staging.haven.digipomps.org/health/build
 curl -i -sS https://staging.haven.digipomps.org/health/ready
 npm run arendalsuka:data-health -- --base-url https://staging.haven.digipomps.org --min-sessions 2000 --min-local-actors 50 --min-map-features 50
+curl -sS -o /dev/null -w '%{http_code}\n' -X POST -H 'content-type: application/json' --data '{}' https://staging.haven.digipomps.org/conference-mvp/api/device/{register,callback/resolve,callback/submit}
 ```
 
 Observed:
@@ -534,18 +604,19 @@ Machine-readable artifact: `Deliverables/HAVEN_Cross_Repo_Robustness_Audit_2026-
 | Arendalsuka | 2,218 sessions; 268 local actors; 468 map features; 80 visible sessions |
 | Journals/config | both journals loaded; `Arendalsuka Participant Program` skeleton present; landing redirects to its Porthole deep link |
 | Security canaries | import issuance GET 405; unauthenticated POST 401 |
+| Device route presence | malformed, non-mutating `{}` POST returns 400 on register, callback/resolve, and callback/submit; routes are mounted without an authentication middleware in source |
 
-No mutating Workbench staging canary, deploy, or browser journey was run. The persistence/shared-access canaries create identities and state, so they were not inferred from permission to perform a read-only audit and local repair.
+No valid device request, mutating Workbench staging canary, deploy, or browser journey was run. The malformed device payload fails decoding before Cell resolution or mutation. The persistence/shared-access canaries create identities and state, so they were not inferred from permission to perform a read-only audit and local repair.
 
 ## Claim adjudication
 
 | Claim | Support | Counterargument / undercut | Evaluation | Deduced work |
 |---|---|---|---|---|
-| C1: readiness race is a general latent class across multiple hosted Cells | Confirmed in CellScaffold including Access Prompt, decoded Event Atlas source preview, Conference Agenda/Shell, and app Chat/HTTP/Conference host, SwiftWeb, Binding workbench/PersonalCopilot/catalog, nine HavenAgentD Cells, Add2Entity, DiMy, and Spatial; shared core `ChatCell` plus nine further core families are source-proven and the core Chat test sleeps 20 ms after decode | Many hits are already gated, false positives, specialized, or never published; app Chat and core Chat are distinct types; Go/Rust/Python are synchronous locally; fatal decode is a different failure | **Strongly supported as a multi-repo latent Swift failure class; scope not fully enumerated as defects** | Retain and complete a per-published-Cell matrix, next Conference Public Shell; defer shared core Chat until activation/Agreement compatibility can be proven |
-| C2: detached decoded setup can cause empty/broken GUI | Binding's real decoded chat read failed with `notFound` while 41 existing tests passed; decoded Event Atlas could make a known-three-session Participant preview empty and enter fallback | Empty GUI can also come from source failure, Agreement denial, bad skeleton keypath, or legitimate no-data state; partial preview recovery is already OR-based in Participant Program | **Strongly supported, not exclusive as a cause** | Keep diagnostics able to distinguish not-ready, denied, not-found, empty-source, and fallback states |
-| C3: host must await readiness before state/action | Porthole direct Access Prompt lookup, Participant Program Atlas source read, Participant Shell Agenda, paid Chat HTTP, and Conference chat backend now await their Cells; existing Porthole/SwiftWeb/Binding/Add2/DiMy/Spatial boundaries do likewise without universal resolver change | Synchronous Cells and the two self-awaiting CellScaffold Cells need no extra gate; a universal core rule still needs cancellation/error/timeout/wire design | **Accepted:** every asynchronously restored supported Cell must expose and be awaited through the narrowest shared integration contract; the adviser recommends a generic optional Cell runtime-activation contract before any resolver-wide change | Continue app-host repairs; design shared Chat compatibility tests only after the core security overlap is clean |
+| C1: readiness race is a general latent class across multiple hosted Cells | Confirmed in CellScaffold including Access Prompt, Event Atlas, Conference Agenda/Public Shell, app Chat, Device Registration, the four-Cell notification chain, ContactEndpoint, Agent Inbox, and both Personlog projections; also SwiftWeb, Binding, HavenAgentD, Add2Entity, DiMy, and Spatial; shared core families remain source-proven | Many hits are already gated, false positives, specialized, or never published; the Personlog pair is currently latent/test-only; Go/Rust/Python are synchronous locally; fatal decode is a different failure | **Strongly supported as a multi-repo latent Swift failure class; scope not fully enumerated as defects** | Retain a per-published-Cell matrix; defer shared core changes until activation/Agreement compatibility can be proven |
+| C2: detached decoded setup can cause empty/broken GUI | Binding's real decoded chat read failed with `notFound` while 41 existing tests passed; decoded Event Atlas could make a known-three-session Participant preview empty; notification/Contact/Agent hosts had the same immediate-use structure | Empty GUI can also come from source failure, Agreement denial, bad skeleton keypath, legitimate no-data state, or independent decode restoration such as current Demo Story | **Strongly supported, not exclusive as a cause** | Keep diagnostics able to distinguish not-ready, denied, not-found, empty-source, and fallback states |
+| C3: host must await readiness before state/action | Direct Porthole, Participant, Chat, Public Shell, notification, Contact, Agent, Personlog, simulation, Vapor, SwiftWeb, Binding, Add2, DiMy, and Spatial consumers now await asynchronously restored Cells | Synchronous Cells and self-awaiting Cells need no extra gate; a universal core rule still needs cancellation/error/timeout/wire design | **Accepted:** every asynchronously restored supported Cell must expose and be awaited through the narrowest shared integration contract | Continue app-host repairs; design shared core compatibility only after the security overlap is clean |
 | C4: coverage is insufficient if known data can render empty while tests pass | Binding had 41 green parity tests beside decoded `notFound`; catalog exposed 69 -> 136 grants; Atlas needed a real encoded three-row resolver/preview gate; broad Binding tests themselves are corrupted by global/AppKit isolation | Existing tests remain valuable for their declared contracts | **Accepted** | Add restart/empty-state canaries; repair Binding global/AppKit test isolation; require real persisted source payloads for each critical surface |
-| C5: reliability fixes must not bypass identity/capability | UUID+fingerprint hardening and wrong-key read/write negatives; runtime links carry opaque view intent only; identity-link completion binds exact request hash; Atlas readiness adds no authority or fallback | The current uncommitted core Agreement policy breaks the existing positive public-read path; missing/stale and deployed wrong-identity cases remain incomplete | **Accepted and preserved in committed changed paths; current core public-policy integration is open** | Core security owner must define an explicit owner-publication condition and restore positive public read plus wrong/missing/stale-proof negatives; do not insert admin/public shortcuts |
+| C5: reliability fixes must not bypass identity/capability | UUID+fingerprint hardening and wrong-key read/write negatives; runtime links carry opaque view intent only; readiness changes add no authority | The current core Agreement overlap breaks public read, and the separate live device ingress already elevates unauthenticated callers to Scaffold authority | **Accepted and preserved in committed readiness/deeplink paths; HAVEN-wide security goal remains open** | Define explicit public publication; replace device ingress with owner-approved enrollment/proof; add wrong/missing/stale/replay negatives; do not insert admin/public/shared-secret shortcuts |
 | C6: shared wire fixtures can primarily guard cross-runtime parity | Go/Rust/Python suites cover wire, bridge ready, identity, replay, and configuration semantics; runtime-specific smokes fit above | No single Swift-exported readiness/persistence golden fixture is consumed by all ports | **Partially supported** | Define one versioned Swift fixture set for encode/decode/state/action/error and consume it in Go/Rust/Python; retain host-specific functional smokes |
 
 Adviser voting was not used. Evaluation follows source, executable tests, live responses, and explicit gaps.
@@ -561,6 +632,8 @@ Adviser voting was not used. Evaluation follows source, executable tests, live r
 | Runtime surface route read through owner Agreement | Real Porthole acceptance publishes as owner and grants a distinct authenticated identity read access | Local pass |
 | Deeplink as authority | Runtime link parser rejects requester, token, action, unknown/duplicate fields, non-view intent, oversized input, disabled routes, and endpoint-only entries | Local pass; deployed remote negative matrix open |
 | Identity-link stale/cross-request completion | New challenge clears derived state; completion hash must equal the locally signed enrollment request | Local pass |
+| Public device register/callback | Source audit plus live malformed-body route probes | **Fail / P1:** external caller is not authenticated and is replaced with Scaffold authority; no enrolled signing-key/capability binding |
+| Device callback replay/cross-device ticket | No correct enrollment proof exists yet | **Open / blocked:** require persisted nonce, exact ticket/device/fingerprint binding, expiry, revocation, and state-transition negatives |
 | Missing proof | Not executed for every changed/candidate path | Open |
 | Stale proof | Not executed for every changed/candidate path | Open |
 | Cookie/admin convenience bypass | No such bypass added; authenticated Conference test retained canonical persona/identity bootstrap | No known bypass in changed path |
@@ -573,6 +646,7 @@ Adviser voting was not used. Evaluation follows source, executable tests, live r
 | Arendalsuka Participant/Event Atlas | Production configurations/fixtures locally plus current live data/security canary | This report contains exact live observations | Local and read-only live pass on pre-repair staging revision |
 | Conference | Authenticated Porthole HTTP sequence with canonical personas plus decoded Agenda and decoded Chat backend delegation/actions | Test log only | Local pass; no real browser screenshot or Binding parity replay |
 | App Chat | Real persisted message/draft, paid/authenticated HTTP state/action/state, and Conference chat backend | Test log only | Focused local pass; one broader read-only Agreement test remains red under shared-core policy overlap; no deployment/restart artifact |
+| Notification / phone callback | Persisted Studio -> Policy -> Outbox -> Callback local chain plus real Contact/Agent/Personlog consumer suites; live route presence only | Test logs and exact HTTP status probes | Readiness paths pass locally; public ingress authorization fails audit and no valid staging callback was sent |
 | Co-Pilot routing/chat | Real `PersonalCopilotV1` Cell action path asserts routing order | Test log only | Local pass for selected route; not an exhaustive chat journey |
 | Binding | Native production chat/PersonalIdentity/catalog Cells, all nine HavenAgentD Cells, catalog absorb, runtime surface lookup, and strict identity-link flow | Red-before-green and final `.xcresult`/Swift package results above | Audited families and local runtime launch pass; deployed remote launch, per-PersonalCopilot-subclass actions, restart, and full-target AppKit isolation remain open |
 | SwiftWebScaffold | Real decoded Cell plus HTTP routes | Test log only | Local pass; no deployment or separate-process restart |
@@ -610,6 +684,10 @@ Screenshot-only evidence was not used. Conversely, this wave does not claim brow
 24. Repaired CellScaffold app Chat locally instead of conflating it with the shared core Chat type. Decoded activation installs behavior but does not recreate persisted Agreement authority; both real hosts own the readiness await after their existing access/payment gates.
 25. Made the shared readiness regression use its own ephemeral identity vault after a combined run exposed test-order dependence on mutable process-wide defaults. Staged only the local-vault and Chat hunks; four concurrent additions in the same file remain untouched.
 26. Deferred shared core Chat despite source proof because the correct activation contract overlaps the active resolver/identity/Agreement workstream and needs multi-host compatibility evidence. The next app audit target is Conference Public Shell.
+27. Repaired Public Shell, Device Registration, the notification dependency chain, ContactEndpoint, Agent Inbox, and both latent Personlog projections at Cell ownership plus every identified immediate host; no core lifecycle semantics changed.
+28. Treated runtime surface mapping as configurable but did not claim every factory button is decompiled. Retained the compiled endpoint allowlist and recorded stable `surfaceID` seeding/reconciliation as remaining work.
+29. Classified the mounted device ingress as an exposed P1. Rejected a self-selected signing identity, cookie, admin status, shared token, push token, or legacy auto-blessing as authority. A breaking fail-closed rollout versus coordinated Binding enrollment remains Kjetil's decision.
+30. A/B-tested the red Demo Story decode-restore gate with and without the new readiness hunk. Because both fail identically, preserved it as an independent open defect rather than weakening the test or folding it into the adjacent commit.
 
 ## Post-audit delivery
 
@@ -630,6 +708,11 @@ Kjetil explicitly requested commit and push after the local repair audit. Each c
 | CellScaffold Arendalsuka Event Atlas readiness | `m0/green-test-suite` | `029a590c3c199bbb7b669efb25f96e1a3a8adcd6` | `origin/m0/green-test-suite`, verified equal |
 | CellScaffold Conference Agenda readiness | `m0/green-test-suite` | `e7faabcce225405704e1c0925af6724c500f7285` | `origin/m0/green-test-suite`, verified equal |
 | CellScaffold app Chat readiness | `m0/green-test-suite` | `682dd18070de5468478210e0ff4638c234cf800c` | `origin/m0/green-test-suite`, verified equal |
+| CellScaffold public shell readiness | `m0/green-test-suite` | `bff5fea` | `origin/m0/green-test-suite`, pushed in this continuation chain |
+| CellScaffold device registration readiness | `m0/green-test-suite` | `16089c1` | `origin/m0/green-test-suite`, pushed in this continuation chain |
+| CellScaffold runtime public surface navigation | `m0/green-test-suite` | `d451ccdf1e5403b77920e682057bcf4474a59eaf` | `origin/m0/green-test-suite`, pushed and later verified as ancestor of current head |
+| CellScaffold notification pipeline readiness | `m0/green-test-suite` | `448fdcf38f55c2962957cd500a9e558a33e09b85` | `origin/m0/green-test-suite`, pushed and later verified as ancestor of current head |
+| CellScaffold adjacent hosted Cells | `m0/green-test-suite` | `aa0149fc545fc4df22f2349b3c8ca17278fa6af5` | `origin/m0/green-test-suite`, verified equal |
 
 ## Residual-risk ledger and owners
 
@@ -639,15 +722,18 @@ Kjetil explicitly requested commit and push after the local repair audit. Each c
 | P1 | CellProtocol's 23 and CellScaffold's 110 heuristic hits are not fully manually adjudicated | Cross-repo audit owner; volume and specialized ownership | Per-type vulnerable/safe/tested/unknown matrix tied to actual publication/host path |
 | P1 | Binding's broad test target is not a trustworthy green gate: one AppKit crash incident was reported against three active tests, and parallel suites overwrite shared `CellBase` defaults despite per-suite serialization | Binding test owner | Project-wide isolation/serial trait or dependency injection for globals; repeat full target without AppKit crash or cross-suite proof failure |
 | P1 | Current uncommitted CellProtocol Agreement hardening rejects the established owner-published Arendalsuka public-read Agreement | CellProtocol identity/security workstream owner; overlapping dirty core | Define the explicit owner-publication condition, then pass public read plus wrong identity, missing proof, stale proof, and non-released negatives without app/renderer bypass |
+| P1 | Staging device register/resolve/submit routes accept unauthenticated input and elevate it to Scaffold authority; participant/device/ticket is not bound to an owner-enrolled signing key | Kjetil plus CellScaffold/Binding identity-security owners; breaking coordinated migration | Owner-approved enrollment Agreement/capability, canonical signed requests, exact device/ticket/action/audience binding, persisted replay and revocation, legacy re-enrollment, full negative matrix, staged coordinated rollout |
+| P1 | `VaporAgentConversationReplies` uses a shared relay bearer token and reads private inbox records directly instead of the Cell's explicit reader-grant path | Agent relay/identity owner | Decide the intended service identity/capability; prove wrong token, wrong identity/key, missing/stale proof, record filtering, and revocation without transport-owned policy |
 | P1 | Shared `ChatCell` and adviser-ranked Orchestrator, EntityAnchor, Calendar, Vault, GraphIndex, TrustPacket, TrustedIssuer, Commons, and Apple Intelligence families return before decoded bindings are ready | CellProtocol/CellApple owners | Generic optional activation contract, per-Cell single-flight setup, immediate concurrent state/action and stable-grant tests, multi-host compatibility |
-| P1 | Roughly forty-eight remaining catalog-published CellScaffold endpoint types still have detached decoded setup after closing Event Atlas, Conference Agenda, and app Chat; Conference Public Shell, Device Registration, and Onboarding are the next adviser-ranked direct-host checks | CellScaffold owners | Candidate-by-candidate publication/host audit, then persisted known-data decode/immediate-read/action gates for each real vulnerable type; classify ignored restore timeouts explicitly |
+| P1 | Remaining catalog-published CellScaffold endpoint types are not fully adjudicated after closing Event Atlas, Agenda, Chat, Public Shell, Device Registration, notification, Contact, and Agent paths; Onboarding fan-out and ignored synchronous-restore timeouts remain prominent | CellScaffold owners | Candidate-by-candidate publication/host audit, persisted known-data decode/immediate-read/action gates for each real vulnerable type, and explicit timeout classification |
+| P1 | `ConferenceDemoStoryCell` decoded state/actions remain absent in its existing exact restore gate (`notFound`) independent of the new endpoint-readiness hunk | Conference application owner; current dirty shared-core/restore overlap | Repair through the same waitable/idempotent activation pattern or prove synchronous restoration, then pass decoded state, activate, and next-step actions |
 | P2 | Two conference shared-owner ensuring Cells are not in generic constructor coverage | CellScaffold owner | Tailored ownership-aware concurrency and decode test |
 | P2 | No shared Swift-origin golden readiness/persistence fixture across Go/Rust/Python | Cross-language contract owner | Versioned fixture plus runtime consumer tests and error parity |
 | P2 | Process restart/persisted-container reload is not proven for all Tier-1 Cells | Each host owner | Separate-process or durable-container restart gate with immediate reads/actions |
 | P2 | Partial source-preview recovery is not comprehensively tested; all-or-nothing fallback may still hide healthy sections | Porthole/source-preview owner | Production source with one failing and one healthy section; healthy content remains visible with explicit diagnostic |
 | P2 | Missing/stale-proof negatives are incomplete | Identity/security owner | Resolver-enforced matrix for all changed Tier-1 paths |
 | P2 | Browser-visible Porthole/Binding parity and “Something went wrong”/unexpected empty-state gates are incomplete | GUI verification owner | Same production configuration/payload in web and Binding, DOM/native assertions, screenshots/traces, no forbidden states |
-| P2 | Runtime route entries are dynamic, but registry Cell bootstrap and Porthole supported-endpoint publication remain compiled infrastructure | Scaffold/transport owner | Decide whether one well-known registry is the stable contract or add authorized registry discovery with negative transport/resolver tests |
+| P2 | Runtime route entries are dynamic, but default factory buttons still have compiled direct targets; registry bootstrap and Porthole supported-endpoint publication remain compiled infrastructure | Scaffold/transport owner | Seed/reconcile stable `surfaceID` defaults through owner-published runtime state; retain or deliberately version the endpoint allowlist; add dead/malformed target and web/Binding parity gates |
 | P3 | CellUtility/HAVEN_MVP decode `fatalError` paths can crash if treated as persisted Cells | Respective product owners | Implement and test decode, or prevent persisted registration with a deterministic error |
 | P3 | Skipped PostGIS smoke and unbuilt lower-risk product repos leave service-specific uncertainty | Respective repo owners and environment availability | Non-destructive test environment or explicitly approved service smokes |
 
@@ -670,6 +756,9 @@ Proven in this wave:
 - A decoded, registered, non-empty Event Atlas now feeds Participant source-backed preview before any fallback; all three known sessions survive immediate resolution, and wrong-key reads/writes remain denied.
 - Conference Participant Shell now awaits a decoded Agenda before delegation; persisted state, real agenda actions, concurrent idempotency, stable grants, and wrong-key read/write denial pass.
 - CellScaffold app Chat no longer launches decoded setup or searches/creates substitute global identities. Paid/authenticated HTTP and Conference chat hosts await it; known persisted state, real actions, concurrency, stable grants, and wrong-key read/write denial pass in one combined run.
+- Conference Public Shell, Device Registration, the four-Cell notification dependency chain, ContactEndpoint, Agent Conversation Inbox, and both Personlog projections no longer launch detached decoded binding setup; every identified immediate host awaits readiness.
+- The notification chain has a real persisted dependency reload gate. Contact and Agent have known-nonempty round trips followed by real mutations; Personlog has immediate real refresh/resync actions; concurrent grant stability and Contact wrong-key/no-mutation pass.
+- Runtime `surfaceID` publication and remapping work without recompiling the host route mapping, while the external link remains opaque and view-only.
 - The repairs are serialized/idempotent under concurrent ensuring for the covered Cells.
 - Same UUID with different signing key is rejected for runtime owner hydration in every focused repaired path recorded above.
 - Selected production Workbench, Arendalsuka, Conference, and Co-Pilot local paths pass dynamic assertions.
@@ -681,6 +770,9 @@ Not proven:
 - All CellProtocol functionality, all first-party products, all published Cells, or all persistence/restart paths are robust.
 - Binding, HavenAgentD, Spatial, DiMy, Add2Entity, CellUtility, or HAVEN_MVP are safe for every persisted/decoded Cell; repaired paths still lack comprehensive separate-process restart/deployment proof.
 - The local repair is deployed.
+- Public device registration/callback authorization is safe; the live routes currently elevate unauthenticated input to Scaffold authority and require coordinated owner-approved device enrollment/proof.
+- Every standard public button target is runtime-owned; direct compiled factory fallbacks remain until stable registry seeding/reconciliation is implemented.
+- The existing Demo Story decoded restore path; its exact state/action test currently fails `notFound` independently of the adjacent readiness hunk.
 - Full web/native renderer and action parity.
 - Deployment proof for the new runtime registry and native Binding launch path.
 - A full green Binding test-target run after the runtime launch repair; AppKit test-host crashing and cross-suite shared-global isolation remain unresolved.
@@ -690,4 +782,4 @@ Not proven:
 - Cross-runtime parity from a single shared fixture.
 - Absence of every P0/P1 defect outside the investigated failure class and selected Purpose-driven paths.
 
-Therefore all three Goals remain non-terminal. The committed readiness and deeplink paths preserve their access boundaries, but `goal.haven.cross-repo.security-preservation` cannot be called terminal while the overlapping shared-core Agreement policy breaks the existing explicit public-read path. The evidence supports continuing with narrow repository-local adapters and one owner-published runtime registry while designing a generic optional shared activation contract for the proven multi-host core families; Kjetil remains the decision owner for that versioned CellProtocol-core change.
+Therefore all three Goals remain non-terminal. The committed readiness and runtime-link paths preserve their intended access boundaries, but `goal.haven.cross-repo.security-preservation` cannot be terminal while the device ingress elevates unauthenticated callers and the overlapping shared-core Agreement policy breaks the existing explicit public-read path. The evidence supports continuing with narrow repository-local adapters and one owner-published runtime registry while coordinating an enrolled-device capability migration and designing a generic optional shared activation contract for proven multi-host core families. Kjetil remains the decision owner for the breaking device rollout and any versioned CellProtocol-core change.
