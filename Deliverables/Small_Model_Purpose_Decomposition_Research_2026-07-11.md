@@ -233,6 +233,42 @@ deterministisk/kalibrerings-lag. Rådata:
 `Tools/PurposeKnowledge/results/e2b_*_20260713T134155Z.*`, `e2b_threshold_report.json`.
 - **E3 (Apple-adapter)**: base ~3B med engelsk mikro-oppgave-innpakning vs.
   LoRA-adapter trent på norske dekomponerings-par. Måles på purpose-casene.
+
+### E3: KJØRT 2026-07-13 — Apple on-device 3B, guided generation, norsk input
+
+Ekte on-device-kjøring: macOS 26.5.1, Apple Silicon, FoundationModels-rammeverket,
+`SystemLanguageModel.default` = available. Rigg: `e3_apple_microtask.swift`
+(+ `gen_e3_input.mjs`, `assemble_e3_answers.mjs`). Samme mikro-oppgave som E2
+(per-kandidat verdict), men med **`@Generable enum {yes,no,unsure}`** =
+constrained decoding, og **norsk prompt mot engelske kandidatbeskrivelser**
+(taksonomien er engelsk; norsk er IKKE blant Apples 15 støttede språk — dette
+tester mitigering (a)). 153 kandidater, 46 s (3,3/s), fersk session per kandidat.
+
+Funn:
+
+1. **Null formatfeil.** Guided generation garanterer gyldig enum — ingen
+   parse-feil mulig, mot API-modellenes behov for robust JSON-ekstraksjon.
+   Dette er guided generations kjerneverdi, levert som plattformfunksjon.
+2. **Norsk fungerer for klassifisering-over-engelske-kandidater.**
+   Seleksjon-kun-score (ignorer avledet LCA) = **96 %** — nær-perfekt
+   formålsutvalg på offisielt ustøttet språk. Mitigeringen (norsk brukertekst +
+   engelske kandidater + constrained output) holder.
+3. **Overselekterer mest av alle** (87 % JA, 133/20/0) — norsk gjør 3B-modellen
+   ekstra permissiv — så naiv strict er 52 % (test 60 %).
+4. **Deterministisk resolver-score-gate er kraftig.** Med gate valgt på train
+   (score ≥ 8) er **holdt-ut test 85 %** (naiv 60 %). Single-shot Apple har ikke
+   self-consistency-signal, så resolver-scoren er kalibreringsspaken — og den er
+   svært effektiv fordi shortlist-ranken allerede bærer mye signal.
+
+Konsolidert, holdt-ut der relevant: **Apple 3B i full pipeline = 85 %**, over
+ministral 58 % (E2b) og Qwen 57 % (E2). Den minste, gratis, offline modellen
+vinner når arkitekturen bærer den — hovedtesen bekreftet, og guided generation
+fjerner formatproblemet helt. Rådata:
+`Tools/PurposeKnowledge/results/e3_*`.
+
+Neste (E4): kalibrert kaskade-terskel — la den deterministiske gaten + modell-
+usikkerhet avgjøre hvilke caser som eskaleres til sterkere lane. Ikke kjørt.
+Ekte LoRA-adapter (norske par) gjenstår som separat E3b.
 - **E4 (kaskade-terskel)**: kalibrér konfidens på valideringssett; mål
   eskaleringsrate og totalkvalitet mot hosted-alene.
 - Rigg: NanoGPT-runneren for API-modeller; HavenAgentD/MLX for lokale;
