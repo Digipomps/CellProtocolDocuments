@@ -156,6 +156,47 @@ løkka — det som overføres til input indeksen ikke løser. Rådata:
 `Tools/PurposeKnowledge/results/e1_*_20260712T193912Z.*` + `e1_score_{raw,post}.json`.
 - **E2 (constrained-effekten)**: samme, ± GCD/guided generation. Prediksjon:
   ugyldig-output-raten → ~0, kvalitetsgevinst størst for minste modeller.
+
+### E2: KJØRT 2026-07-13 — mikro-oppgave-dekomponering
+
+Rigg: `Tools/PurposeKnowledge/run_e2_microtask_experiment.mjs`. I stedet for ett
+multi-valg-kall får modellen **ett JA/NEI/USIKKER-spørsmål per shortlist-kandidat**
+(«krever brukerens forespørsel dette formålet?»), og settet settes sammen
+deterministisk. 306 mikro-kall, 0 uparsede. To sammensettingspolicyer scoret fra
+samme kall (strict = kun JA; lenient = JA+USIKKER); begge gjennom samme
+post-prosessering som E1.
+
+| Konfig | ministral-3b | Qwen3-8B |
+| --- | ---: | ---: |
+| E1 shortlist (multi-valg) | 48 % | 46 % |
+| E2 mikro, naiv LCA | 38 % | 48 % |
+| **E2 mikro + deterministisk LCA-kjerne** | **54 %** | **57 %** |
+| E2 mikro, KUN seleksjon (ignorer LCA) | **100 %** | 90 % |
+
+Funn (samme 50 caser der begge har data):
+
+1. **Mikro-oppgaver LØSER underseleksjonen fra E1 — fullstendig.** Scorer man
+   kun purpose-utvalget (ignorer det avledede LCA-feltet), går ministral fra
+   56 % (E1) til **100 %**, Qwen fra 60 % til 90 %. Alle 31 ministral-feilene i
+   full scoring var *ren* LCA — utvalget var korrekt i hver eneste feilende case.
+   E1-prediksjonen bekreftet på seleksjonsnivå.
+2. **Men naiv per-kandidat-JA overselekterer.** JA-rate 81 %; snitt valgt 2,92
+   (ministral) mot fasit 1,84 og E1s 1,28. I isolasjon ser nesten hver kandidat
+   «påkrevd» ut. Overseleksjonen skader *bare* det avledede
+   nearestSharedPurposeRef (LCA trekkes grunt når kryss-gren-refs blir med), så
+   naiv strict-score faller for den svake modellen (48→38).
+3. **Feilen er i kode-laget, ikke modellen.** Å utlede LCA fra den *sikre
+   kjernen* (topp-2 JA-refs etter deterministisk resolver-score, mens hele
+   JA-settet beholdes som purpose-sett via expandCoverage) løfter til 54 %/57 %
+   — over E1 for begge modeller (+6 pp / +11 pp). Rescore:
+   `Tools/PurposeKnowledge/rescore_e2_lca_core.mjs`, ingen nye kall.
+4. **Vinnende pipeline: shortlist → per-kandidat mikro-valg → deterministisk
+   sammensetting med LCA på sikker kjerne.** Modellen er ikke lenger
+   seleksjons-flaskehalsen; restfeilen er JA-kalibrering + LCA-derivasjon, begge
+   deterministiske. USIKKER var sjelden (9/306), så strict≈lenient.
+
+Rådata: `Tools/PurposeKnowledge/results/e2_*_20260713T055001Z.*`,
+`e2_score.json`, `e2_score_lcafix.json`.
 - **E3 (Apple-adapter)**: base ~3B med engelsk mikro-oppgave-innpakning vs.
   LoRA-adapter trent på norske dekomponerings-par. Måles på purpose-casene.
 - **E4 (kaskade-terskel)**: kalibrér konfidens på valideringssett; mål
