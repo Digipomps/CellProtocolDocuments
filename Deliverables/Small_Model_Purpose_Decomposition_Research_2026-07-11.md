@@ -271,6 +271,47 @@ usikkerhet avgjøre hvilke caser som eskaleres til sterkere lane. Ikke kjørt.
 Ekte LoRA-adapter (norske par) gjenstår som separat E3b.
 - **E4 (kaskade-terskel)**: kalibrér konfidens på valideringssett; mål
   eskaleringsrate og totalkvalitet mot hosted-alene.
+
+### E4: KJØRT 2026-07-13 — kalibrert kaskade betaler seg ikke
+
+Rigg: `run_e4_cascade.mjs`. To kaskader på strict-metrikk (recall-komplett +
+LCA-kjerne-match, den metrikken der overseleksjon straffes), holdt-ut test-
+splitt som E3, terskel valgt på train. Tier-2 kjørt både som Qwen3-8B og som
+ekte frontier-lane **gpt-5.5** (153 nye mikro-kall; gpt-5.5 JA-rate 55 % vs
+Apple 87 %/ministral 81 % — langt mindre overselekterende).
+
+| Kaskade | tier1 alene | tier2 alene | kaskade (test) | oracle |
+| --- | ---: | ---: | ---: | ---: |
+| A: Apple(gratis)→Qwen | 60 % | 55 % | 70 % @ 60 % esk. | 70 % |
+| A: Apple(gratis)→**gpt-5.5** | 60 % | 60 % | 70 % @ **75 %** esk. | 75 % |
+| B: ministral(billig)→Qwen | 65 % | 55 % | 65 % @ 0 % (degenerert) | 70 % |
+| B: ministral(billig)→**gpt-5.5** | 65 % | 60 % | 65 % @ 5 % esk. | 75 % |
+
+Funn:
+
+1. **Det finnes ingen sterkere lane å eskalere til.** Frontier-modellen
+   gpt-5.5 scorer **60 %** strict — likt Apple, *under* ministral (65 %).
+   gpt-5.5 bytter bare overseleksjon mot underseleksjon (55 % JA → mister
+   påkrevde formål). Modellkapasitet er ikke flaskehalsen.
+2. **Kaskaden degenererer eller koster for mye.** B er en no-op (billig lane
+   slår tier-2, terskel holder alt på tier-1). A når oracle, men bare ved å
+   eskalere 60–75 % av casene — som eliminerer kostnadsgevinsten kaskaden
+   fantes for.
+3. **Restgapet er ikke modell, men deterministisk LCA-derivasjon under over-/
+   underseleksjon.** Oracle 75 % viser reell komplementaritet, men ingen lane
+   (gratis, billig eller frontier) passerer 65 % alene. Spaken er å fikse
+   seleksjon→LCA ved kilden (constrained multi-select, bedre LCA-utledning),
+   ikke å betale for en sterkere modell.
+
+Dette lukker serien: **E1 viste arkitektur > modellstørrelse; E4 viser at selv en
+frontier-modell ikke slår den gratis on-device-pipelinen.** Produktkonsekvens:
+kjør alt på Apples on-device 3B i pipelinen; ikke bygg kaskade for denne
+oppgaven; invester i det deterministiske seleksjon/LCA-leddet. Rådata:
+`Tools/PurposeKnowledge/results/e4_cascade_report_*.json`.
+
+Gjenstår: E3b (norsk LoRA-adapter) er delegert til Codex
+(`Deliverables/Codex_Handoff_E3b_Norwegian_LoRA_Adapter_2026-07-13.md`) — kan
+lukke deler av restgapet ved å dempe overseleksjon i modell-leddet.
 - Rigg: NanoGPT-runneren for API-modeller; HavenAgentD/MLX for lokale;
   gullsett = purpose-casene + regime-test-metodikken (sitat-forankret scoring).
 
