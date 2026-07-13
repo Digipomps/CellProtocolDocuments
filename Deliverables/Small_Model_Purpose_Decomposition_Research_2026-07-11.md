@@ -197,6 +197,40 @@ Funn (samme 50 caser der begge har data):
 
 Rådata: `Tools/PurposeKnowledge/results/e2_*_20260713T055001Z.*`,
 `e2_score.json`, `e2_score_lcafix.json`.
+
+### E2b: KJØRT 2026-07-13 — kalibrer JA-terskelen
+
+Mål: kutte overseleksjonen fra E2 ved å akseptere JA kun over en
+konfidensterskel. NanoGPT eksponerer **ikke** token-logprobs, så konfidens
+estimeres provider-agnostisk med **self-consistency**: hvert kandidat-spørsmål
+samples 5× ved temp 0,8, P(JES) = JA-andel. Terskel sweepet 0→0,90 på 60 %
+train-splitt, rapportert på holdt-ut 40 % test.
+Rigg: `run_e2b_yes_calibration.mjs` + `score_e2b_threshold.mjs`. 1530 samples,
+0 feil.
+
+| Modell | t\* | Test naiv | Test kalibrert | Alle naiv | Alle kalibrert |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| ministral-3b | 0,65 | 55 % | **60 %** | 54 % | 58 % |
+| Qwen3-8B | 0,00 | 55 % | 55 % | 54 % | 54 % |
+
+Funn:
+
+1. **Kalibrering gir modest, reell gevinst for den svake modellen** (+5 pp
+   holdt-ut, +4 pp totalt) ved å kutte de ~13 sub-enstemmige JA-ene. Platået er
+   robust: train flat 53,3 % opp til t=0,60, så flat 56,7 % fra 0,65–0,90.
+2. **No-op for den sterke modellen.** t\*=0 for Qwen: JA-fordelingen er bimodal
+   (51 rene NEI, 102 rene JA), ingenting å terskle.
+3. **Metodens tak: konsistent-men-feil overseleksjon.** ministral ga
+   *enstemmig* JA på 135/153 kandidater — self-consistency kan ikke fange en
+   modell som er trygt overinkluderende. Å gå lenger krever et bedre
+   konfidenssignal (logprobs/ekstern verifiser) eller constrained decoding som
+   demper JA-biasen ved kilden — begge peker mot E3 (Apple guided generation).
+
+Konsolidert beste konfig per modell:
+ministral 48 % (E1) → 54 % (E2) → **58 %** (E2b); Qwen 46 % → **57 %** (E2, uendret
+av kalibrering). Regime-mønsteret holder: jo svakere modell, jo mer hjelper hvert
+deterministisk/kalibrerings-lag. Rådata:
+`Tools/PurposeKnowledge/results/e2b_*_20260713T134155Z.*`, `e2b_threshold_report.json`.
 - **E3 (Apple-adapter)**: base ~3B med engelsk mikro-oppgave-innpakning vs.
   LoRA-adapter trent på norske dekomponerings-par. Måles på purpose-casene.
 - **E4 (kaskade-terskel)**: kalibrér konfidens på valideringssett; mål
