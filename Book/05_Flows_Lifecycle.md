@@ -1,124 +1,198 @@
-
 # Chapter 05 — Flows and Stream Lifecycle
 
-Flows are the primary communication mechanism in HAVEN. Every Cell exposes a
-single outbound event stream via the Emit interface. Flows define all observable
-behavior and must be deterministic, ordered, and replayable.
+Last verified against CellProtocol:
+`bfc176ffecd4f718cd47e4a9db6183a2b0378def` (2026-07-14)
 
-## 1. FlowElements
+Status: implemented and contract-tested for the local Swift `GeneralCell`
+subscription lifecycle described below. Durable replay, universal per-event
+signatures, and live remote teardown acknowledgement are not generic guarantees
+of the current implementation.
 
-A FlowElement contains:
+Flows are the outbound event mechanism exposed through `Emit`. A `GeneralCell`
+can attach labelled emitters, start and stop subscriptions, transform incoming
+events through an intercept, and forward accepted events to its own feed.
 
-- sequence number  
-- type identifier  
-- payload  
-- producer identity  
-- timestamp or logical clock  
-- metadata  
+## 1. Current `FlowElement` wire shape
 
-Properties:
+The Swift runtime currently encodes these fields:
 
-- immutable  
-- strictly ordered  
-- cryptographically signed  
-- domain-scoped  
+- `id`
+- `title`
+- `topic`
+- `content`
+- optional `properties`
+- optional `origin`
 
-FlowElements form the full history of how a Cell behaves over time.
+`properties` can describe the element type, content type, and MIME type.
 
-## 2. Stream Lifecycle
+The generic `FlowElement` wire type does **not** currently contain a mandatory
+sequence number, timestamp, producer signature, causation identifier, or
+logical clock. Particular Cells and higher-level contracts may add such data to
+their payloads, but callers must not infer those guarantees from `FlowElement`
+itself.
 
-A subscription to a Cell’s flow follows this lifecycle:
+## 2. Access boundary
 
-### 2.1 Discovery  
-The subscriber inspects metadata via Explore to understand available actions and
-flow schemas.
+Attaching an emitter and starting or mutating a labelled subscription are
+Cell-specific write operations. `GeneralCell` validates `-w--` access at the
+label before performing the supported mutation.
 
-### 2.2 Negotiation  
-The subscriber sends an Agreement through Absorb, requesting access.
+The owner is not replaced by a renderer, transport, cookie, or admin fallback.
+Non-owner access must come from the normal Agreement/Contract capability path.
+An unauthorized requester must not attach, start, pause, drop, or detach the
+owner's flow.
 
-### 2.3 Attachment  
-Resolver validates the Agreement, evaluates Conditions, and issues a Contract.
-If successful, the subscriber becomes attached to the Emit stream.
+## 3. Local subscription lifecycle
 
-### 2.4 Streaming  
-The subscriber receives FlowElements in strict sequence order.
+### 3.1 Attach
 
-### 2.5 Supervision  
-Resolver monitors the flow for:
+`attach(emitter:label:requester:)` associates an emitter object with a label
+after authorization. Connection identity is object identity, not only the
+emitter UUID. Replacing an emitter with a different object invalidates the old
+subscription even when both objects carry the same UUID.
 
-- signature validity  
-- sequence gaps  
-- domain mismatches  
-- contract expiration  
-- transport inconsistencies  
+### 3.2 Start
 
-### 2.6 Termination  
-A subscription ends when:
+`absorbFlow(label:requester:)` starts forwarding the attached emitter's flow.
+If the emitter conforms to `CellRuntimeReady`, its runtime readiness is awaited
+before the upstream flow is read.
 
-- the subscriber disconnects  
-- a contract is revoked  
-- conditions fail  
-- errors require shutdown  
+Start is single-flight per label:
 
-## 3. Replay
+- concurrent callers share one pending setup result;
+- only one upstream subscription is installed for that generation;
+- all pending callers observe the same success or terminal failure;
+- detach or replacement invalidates a late setup result before installation.
 
-Replay is a first-class property.
+### 3.3 Forward
 
-Every stream can be replayed deterministically for:
+Each installed subscription has one serial event processor. Values are handled
+in upstream order for that subscription:
 
-- recovery  
-- debugging  
-- auditing  
-- offline synchronization  
-- simulation and testing  
+1. load and run the optional async feed intercept;
+2. re-check overflow/generation validity;
+3. reserve an in-flight forwarding lease;
+4. synchronously send the transformed value to the Cell feed;
+5. release the forwarding lease.
 
-Replay always produces the exact same sequence as the original run.
+A missing label fails only that start request. It does not terminate unrelated
+subscribers to the Cell's shared feed.
 
-Replay ensures full transparency and makes distributed systems easier to reason
-about.
+### 3.4 Complete
 
-## 4. Transport Independence
+Upstream completion is serialized after already accepted values. Completion
+clears the active subscription generation while leaving the emitter connected,
+so a later authorized `absorbFlow` can subscribe again.
 
-Flows must behave identically across any transport:
+### 3.5 Drop and detach
 
-- WebSocket  
-- QUIC  
-- WebRTC  
-- IPC  
-- offline bundles  
+The waitable mutation APIs are:
 
-Transport must not influence:
+- `dropFlowAndWait(label:requester:)`: stop the active subscription but keep the
+  emitter connected;
+- `detachAndWait(label:requester:)`: stop the active subscription and remove the
+  emitter association.
 
-- ordering  
-- delivery semantics  
-- signature validation  
-- identity behavior  
+The older `dropFlow` and `detach` entry points remain asynchronous convenience
+wrappers. A host that must read status or replace a source immediately after a
+mutation must use the waitable form.
 
-Envelopes guarantee that FlowElements remain intact across all transports.
+Teardown removes the pending/active generation from actor state and invalidates
+its forwarding leases before the first suspension. Upstream cancellation and
+the drain of already-started downstream delivery run concurrently. Cleanup of
+an old generation owns only its captured resources and cannot clear a newer
+generation created through cancellation re-entry.
 
-## 5. Flow Graphs
+## 4. Bounded buffering and failure behavior
 
-Cells can be combined into graphs:
+The local `GeneralCell` subscription processor uses a bounded buffer of 256
+events. It does not silently accept unbounded memory growth.
 
-- linear pipelines  
-- branching trees  
-- DAGs  
-- meshes  
-- hybrid topologies  
+If the buffer overflows, including when completion cannot be inserted at exact
+capacity, the generation fails closed:
 
-The Scaffold runtime coordinates execution across these graphs.
+- the overflow state is marked once;
+- queued forwarding becomes invalid;
+- the event processor and upstream subscription are cancelled;
+- pending callers receive the same overflow failure;
+- status becomes inactive;
+- a later explicit `absorbFlow` can create a fresh generation.
 
-Flows enable rich, composable distributed systems without requiring shared state.
+Overflow recovery reloads the currently connected emitter after awaited cleanup.
+This prevents a stale emitter object from being selected if another object with
+the same UUID is connected during cancellation.
 
-## 6. Summary
+The buffer bound is an implementation property of this local forwarding path.
+It is not a universal transport-level backpressure guarantee.
 
-Flows provide:
+## 5. Resource lifetime and cancellation
 
-- a deterministic event backbone  
-- replayable behavior  
-- strict ordering  
-- transparent auditing  
-- transport independence  
+Subscription resources own the upstream cancellable, event processor,
+continuation, and overflow/forwarding state.
 
-They form the observable history and functional output of every Cell, making
-HAVEN predictable, inspectable, and resilient.
+The verified lifetime rules are:
+
+- releasing a subscribed `GeneralCell` cancels the upstream subscription even
+  without an explicit detach;
+- suspension inside an async intercept does not keep the Cell alive;
+- a synchronously blocked downstream subscriber does not keep the Cell's
+  auditor/resource chain alive;
+- explicit waitable teardown waits for an already-started forwarding lease;
+- external cancellation callbacks are not executed while the auditor actor is
+  holding its state transition.
+
+An already-entered downstream callback is ordinary synchronous subscriber code
+and may return later. Teardown prevents a new stale delivery; it cannot force
+arbitrary subscriber code to return.
+
+## 6. Status and graph traversal
+
+Connected labels and attached status arrays use canonical sorted label order.
+Status reports whether a label is connected and whether its current generation
+is active.
+
+Nested attached-status traversal is cycle-safe for self-cycles and multi-Cell
+cycles. The traversal guard is path-scoped so sibling aliases that point to the
+same Cell are still represented.
+
+## 7. What the current contract does not prove
+
+The current implementation and tests do **not** establish that:
+
+- every FlowElement is signed, timestamped, or globally sequenced;
+- every Cell has durable event storage or deterministic replay;
+- replay always reproduces an exact historical stream;
+- all transports have identical buffering, ordering, or teardown-ack behavior;
+- a local waitable detach is acknowledged by a live remote peer;
+- contradictory lifecycle calls are one globally serialized transaction;
+- application-specific decoded bindings are ready unless the Cell exposes and
+  the host awaits `CellRuntimeReady`;
+- every first-party Cell or cross-language runtime uses this Swift
+  `GeneralCell` lifecycle.
+
+Generation identifiers make overlapping local cleanup safe: a new generation
+may start while old external cancellation finishes, but the old cleanup cannot
+install, forward through, or remove the new generation. This is generation
+isolation, not global transaction serialization.
+
+## 8. Required regression gates
+
+Changes to this lifecycle should retain tests for:
+
+- unauthorized attach/start/drop/detach;
+- concurrent start single-flight and shared failure;
+- detach or replacement during suspended setup;
+- replacement by a distinct object with the same UUID;
+- serialized async intercept/value/completion order;
+- exact-capacity completion overflow and post-overflow fail-closed behavior;
+- waitable teardown during in-flight downstream delivery;
+- cancellation re-entry on the same label;
+- Cell release during normal delivery, suspended intercept, and blocked
+  downstream delivery;
+- canonical status order and cycle-safe traversal;
+- restart/resubscribe after completion or overflow.
+
+At the verified revision, `IntegrationTests` executes 35 such integration tests
+and the complete Swift package executes 705 tests with zero failures. Those
+counts prove the tested revision and paths only; they are not evidence that all
+HAVEN flow behavior, deployments, or cross-runtime implementations are robust.
