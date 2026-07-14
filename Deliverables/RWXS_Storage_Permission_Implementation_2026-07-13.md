@@ -1,0 +1,147 @@
+# RWXS Storage Permission Implementation — 2026-07-13
+
+Status: implemented and verified locally.
+
+Task owner and human decision-maker: Kjetil.
+
+## Formål and Goals
+
+### `purpose://access.audit.privacy`
+
+Intent: make persistent-retention authority explicit, identity-bound, auditable,
+and distinguishable from read access and forwarding authority.
+
+Goal `goal.rwxs.runtime-contract.2026-07-13` (`haven.goal-definition.v1`):
+
+- metric: canonical permission parsing/matching and identity-bound allow/deny proof
+- baseline: the runtime emitted three positions and accepted a fourth only as `-`
+- target: canonical `rwxs`, additive Storage bit, legacy decode without implicit
+  Storage, and passing positive/rejection tests
+- timeframe: 2026-07-13
+- evidence: `Permission.swift`, `AgreementCodingTests.swift`,
+  `GeneralCellInterfaceTests.swift`, full `swift test`
+- status: satisfied
+
+Goal `goal.rwxs.knowledge-retrieval.2026-07-13` (`haven.goal-definition.v1`):
+
+- metric: canonical documentation and retrieval from both local Docs MCP and
+  `dimy_docs`
+- baseline: Storage semantics were absent and RAG could not retrieve them
+- target: Book documents define RWXS, limitations, lifecycle distinction, and
+  forwarding boundary; both retrieval paths return those sections
+- timeframe: 2026-07-13
+- evidence: Book chapters 01, 04, 06, 07, and 22; `Gap_Analysis.md`; Docs MCP
+  test/search output; `dimy_docs` sync and retrieval output
+- status: satisfied
+
+Goal `goal.rwxs.scaffold-authoring.2026-07-13` (`haven.goal-definition.v1`):
+
+- metric: Agreement Workbench preserves and explains the fourth permission
+  position
+- baseline: its normalizer truncated permission input to three characters and
+  would therefore erase `S`
+- target: canonical four-character output, explicit Storage choices and
+  explanation, legacy three-character input without implicit Storage, and a
+  passing focused integration suite
+- timeframe: 2026-07-13
+- evidence: `AgreementWorkbenchCell.swift` and
+  `AgreementWorkbenchCellTests.swift` in CellScaffold
+- status: satisfied
+
+## Claim ledger and adjudication
+
+### `claim.rwxs.storage-authority`
+
+- type: normative
+- strength: assertive
+- source: task-owner definition
+- statement: the compact permission contract consists of Read, Write, Execute,
+  and Storage; Storage authorizes persistent retention and serves as evidence of
+  that authority
+- adjudication: supported as the task owner's normative protocol decision and
+  implemented in code and documentation
+
+### `claim.rwxs.not-copy-prevention`
+
+- type: factual
+- strength: assertive
+- statement: an `S` Grant cannot technically prevent a non-compliant recipient
+  from copying already revealed output
+- support: the permission model controls resolver/Contract decisions; it does
+  not control an external recipient's storage system
+- adjudication: supported, with the limitation stated in Chapters 04 and 06
+
+### `claim.rwxs.not-forwarding`
+
+- type: normative
+- strength: assertive
+- statement: Storage authority does not imply disclosure, redistribution,
+  publication, or forwarding authority
+- counter checked: readers could otherwise mistake retained possession for a
+  transferable right
+- adjudication: supported; forwarding remains a separate, not-yet-defined
+  authorization path rather than an invented capability name
+
+### `claim.rwxs.compatibility`
+
+- type: project_capability
+- strength: assertive
+- statement: Storage can be added without reinterpreting persisted `r/w/x` bits
+- support: the existing bits remain `4/2/1`, Storage uses bit `8`, integer JSON
+  round-trip tests pass, and legacy three-/six-character strings never infer `S`
+- adjudication: supported by contract tests and the full Swift suite
+
+No argumentation scheme was instantiated: the critical questions were directly
+answered by the task-owner decision, current source, and deterministic tests.
+
+## Decision log
+
+1. Canonical emitted permission strings are four lowercase positions: `rwxs`.
+2. Storage is additive bit `8`; existing persisted `r/w/x` integer meanings do
+   not change.
+3. Three- and six-character input remains decode-compatible and always implies
+   no Storage authority. Canonical group/other input is eight characters.
+4. Production literals were normalized to four characters; legacy width is
+   retained only in explicit compatibility tests.
+5. `S`, the Scaffold storage engine, and `ColdStorageCondition` are separate
+   concepts.
+6. No forwarding capability name was invented in this change.
+7. Agreement Workbench now emits four-character permissions, exposes `---s`
+   and `r--s`, and warns that Storage does not authorize forwarding.
+
+## Verification
+
+- `swift test --filter AgreementCodingTests`: 10 passed
+- `swift test --filter 'AgreementCodingTests|IdentityAgreementTests|GeneralCellInterfaceTests'`:
+  40 passed before the additional resolver-level Storage test
+- `swift test --filter GeneralCellInterfaceTests/testStoragePermissionRequiresExplicitIdentityBoundSGrant`:
+  1 passed
+- full `swift test`: 592 passed, 0 failed
+- isolated CellScaffold `AgreementWorkbenchCellTests`: 16 passed, 0 failed,
+  built against a clean temporary CellProtocol copy containing the RWXS source
+  changes
+- `python3 -m unittest discover Tools/HavenDocsMCP/tests`: 7 passed
+- Docs MCP lexical search for `Storage permission forwarding`: Chapter 04 is
+  the top result and Chapters 06/07 are also returned
+- `dimy_docs` admin sync: 40 mirror files scanned, 1 document created,
+  8 updated, 31 unchanged, 0 deleted, no errors
+- `dimy_docs` retrieval for RWXS/Storage/forwarding: returned the new Chapter 04
+  RWXS definition and forwarding boundary, Chapter 06 resolver limitation,
+  Chapter 01 core statement, and Chapter 07 storage-engine distinction
+
+## Residual assumptions and open items
+
+- The runtime can enforce `S` only when a Cell or consumer path explicitly asks
+  for `---s`; it cannot infer external persistence after output disclosure.
+- Future features that persist another Cell's output must add explicit Storage
+  requests and both allowed/denied tests.
+- Forwarding/disclosure authorization still needs a separately approved
+  capability/Contract design before implementation.
+- Cross-language CellProtocol ports must preserve the same four-position wire
+  semantics when their permission parsers are updated.
+- The current CellProtocol worktree later acquired an unrelated
+  `WeightedGraphRuntime.swift` compile error (a missing `return`). It was left
+  untouched; the clean temporary dependency isolated the Workbench proof from
+  that concurrent change.
+
+Final human inspection/sign-off remains with Kjetil.
