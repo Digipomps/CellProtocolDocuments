@@ -1,6 +1,6 @@
 # Chapter 22 - Explore Contracts for Skeleton and Cell Authoring
 
-Last verified against code: 2026-05-28
+Last verified against code: 2026-07-14
 
 Status: Phase 1 started. The current runtime has the necessary foundation in
 `ExploreContract`, `ExploreContractCatalog`, `ExploreManifest`, and
@@ -42,27 +42,36 @@ Current guarantees:
 
 - `Explore.keys(requester:)` returns advertised keys.
 - `Explore.typeForKey(key:requester:)` returns a `ValueType`.
-- `GeneralCell` stores contracts in `schemaDict`.
+- `GeneralCell` retains the legacy per-key `schemaDict` view and stores explicit
+  method-aware operation contracts in a `(key, method)` sidecar.
+- Strict handler registration requires a complete contract for the exact key
+  and method. A GET contract does not authorize SET registration, or vice
+  versa.
 - `ExploreContract.keyContract(...)` can encode a structured operation contract.
-- `ExploreContractCatalogBuilder` can export operation records for docs and RAG.
+- `ExploreContractCatalogBuilder` exports distinct GET and SET records for a
+  dual-method key while retaining stable legacy IDs where possible.
 - `ExploreManifestBuilder` can combine operation contracts with discovery intent.
 
 Current limits:
 
 - `schemaDescriptionForKey(...)` exists on `GeneralCell`, but is not part of the
   formal `Explore` protocol.
-- Some cells still rely on implicit default contracts with `unknown` input or
-  return schemas.
-- One `schemaDict` entry is stored per key today. A key used for both `get` and
-  `set` can therefore overwrite or compress method-specific detail unless the
-  implementation chooses separate keys such as `.current` for readback.
-- Bridge-level `keys` and `typeForKey` must be implemented before Explore can
-  be treated as complete across remote transports.
+- Some cells and computed-key registrations still require manual contract
+  review; a zero-error source audit is not a runtime schema proof.
+- The formal `Explore` protocol and remote Bridge
+  `typeForKey(key:requester:)` still expose one legacy value per key. Local
+  strict dispatch and catalogs are method-aware, but remote discovery of both
+  methods for one key needs a deliberately versioned wire contract and
+  cross-runtime fixtures.
+- Legacy methodless schemas remain readable in permissive/warn modes for
+  compatibility. Strict mode rejects handler installation until an exact
+  method contract exists.
 
 ## Normative Operation Contract
 
-Each public key must advertise one operation contract. In Phase 1, the contract
-is carried through the existing `typeForKey(...)` return value.
+Each public operation must advertise one contract identified by `(key,
+method)`. Local catalogs can expose more than one operation for a key. The
+legacy remote `typeForKey(...)` view cannot by itself prove both operations.
 
 Required fields:
 
@@ -242,11 +251,36 @@ The audit scans Swift source for:
 - `registerGet`
 - `registerSet`
 
-It reports intercepts that are not covered by an explicit contract and contracts
-that still have missing or unknown input/return shapes.
+The auditor applies these source-level rules:
 
-This is a static source scan. It is intentionally conservative and may mark
-dynamic key construction for manual review.
+- metadata-free `registerGet`/`registerSet` and raw intercept calls are handler
+  registrations, not weak contracts;
+- typed `registerGet`/`registerSet` calls cover their own handler, while
+  `registerExploreContract`/`registerExploreSchema` are separate contract
+  publications;
+- a separate contract covers a handler only in the same nominal Cell scope
+  (or the same file when no Cell type is recoverable), for the exact key and
+  method, and only when it is reached earlier in the same function or through
+  an earlier direct same-Cell helper call;
+- literal string and tuple loops are expanded into their statically knowable
+  operations;
+- computed key expressions and computed loops remain manual-review warnings;
+- framework registration declarations and known forwarders are excluded from
+  production-handler counts.
+
+This remains a regex-based static source scan, not a Swift compiler or runtime
+probe. It does not prove conditional dominance, early-return behavior,
+registration launched in a deferred `Task`, overloaded-helper resolution,
+runtime schema conformance, permission alignment, or flow-effect correctness.
+Interpret `0 errors` as “no uncovered literal operation under this audit
+model,” never as complete Explore or remote-wire proof.
+
+Auditor regressions, including an optional live Chat golden, run with:
+
+```bash
+CELLPROTOCOL_REPO=../CellProtocol \
+  python3 -m unittest discover -s Tools/Explore/tests -v
+```
 
 ### Skeleton Explore validator
 
@@ -347,7 +381,8 @@ When a desired UI cannot be validated:
 
 - Add complete explicit contracts to production cells used by current
   CellConfigurations.
-- Implement real bridge `keys` and `typeForKey` forwarding.
+- Design versioned operation-aware bridge discovery while preserving legacy
+  `keys` and `typeForKey` consumers.
 - Add manifest exports to normal scaffold diagnostics.
 
 ### Phase 3

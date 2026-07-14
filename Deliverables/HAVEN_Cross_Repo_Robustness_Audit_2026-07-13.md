@@ -44,22 +44,22 @@ No Purpose node was added. The existing canonical tree was sufficient:
 
 | Goal | Current evaluation | Evidence closed | Why the HAVEN-wide target is not satisfied |
 |---|---|---|---|
-| `goal.haven.cross-repo.runtime-correctness` | **At risk / NOT PROVEN** | Shared decoded readiness, persisted cold-key restore, waitable connection mutation, runtime deep-link discovery, TrustedIssuer and Apple Intelligence hardening, explicit EntityScanner actions, deterministic Lobby publication, and RelationalLearning's versioned journal with immediate decoded reads/actions, deterministic generated IDs, atomic replay rejection, and bounded in-process concurrency gates | No clean full suite was run here on the exact current graph CellScaffold `8fb2c059…` + CellProtocol `d9d9514…`; broad live-service, separate-process, crash, and power-loss coverage is incomplete |
-| `goal.haven.cross-repo.regression-gates` | **At risk / NOT PROVEN** | CellProtocol **737/737**, including RelationalLearning **14/14** and decoded-readiness **15/15**; Binding 398 planned (378 passed, 20 explicit skips) plus the runtime-surface gates; CellUtility 13/13 through both entry points; Python 35/35; shared Swift/Python/Rust wire fixtures and focused negative/parity/port suites | CellUtility UI runner is not runnable, fixture consumption is not CI-enforced across every runtime, comprehensive separate-process restart is absent, and top live user journeys were not all rerun on final SHAs |
+| `goal.haven.cross-repo.runtime-correctness` | **At risk / NOT PROVEN** | Shared decoded readiness, persisted cold-key restore, waitable connection mutation, runtime deep-link discovery, TrustedIssuer and Apple Intelligence hardening, explicit EntityScanner actions, deterministic Lobby publication, RelationalLearning's versioned journal, method-aware local Explore operations, proof-bound Chat actions, and strict contract-before-handler publication in nine raw-intercept Cells | No clean full suite was run here on the exact current graph CellScaffold `8fb2c059…` + CellProtocol `8e21964…`; remote method-aware Explore/wire parity, broad live-service, separate-process, crash, and power-loss coverage are incomplete |
+| `goal.haven.cross-repo.regression-gates` | **At risk / NOT PROVEN** | CellProtocol **755/755**, including RelationalLearning **14/14**, decoded-readiness **16/16**, and affected contract/readiness suites **59/59**; Explore regex/source audit **0 errors, 19 manual-review warnings**; Explore auditor **11/11**; Binding 398 planned (378 passed, 20 explicit skips) plus runtime-surface gates; CellUtility 13/13; Python 35/35; shared Swift/Python/Rust fixtures | CellUtility UI runner is not runnable, fixture consumption is not CI-enforced across every runtime, comprehensive separate-process restart is absent, and top live user journeys were not all rerun on final SHAs |
 | `goal.haven.cross-repo.security-preservation` | **Pass for changed paths; HAVEN-wide NOT PROVEN** | Wrong identity/key, proof-bearing admission, fail-closed restore/source behavior, outsider disconnect denial, atomic authorization decisions, exact RelationalLearning `-w--` action and `r---` read grants, no feed-injection grant, and draft-only Agreement editing | Full public proof issuance/session flows and live owner-published public-read paths remain incomplete in several runtimes; no audit may infer authorization from renderer, cookie, or private/admin fallback |
 
 ### Current repository publication and verification map
 
 | Repository | Current audit SHA / state | Verification | Honest boundary |
 |---|---|---|---|
-| CellProtocol | `d9d95145fc67910d2b4242c78af0ccc30cdabd6d`, published `origin/main` and `ls-remote` verified | `swift test`: **737 passed, 0 failed**; RelationalLearning **14/14**; decoded-readiness **15/15**; focused Purpose/Interest Explore audit **0 errors, 0 warnings**; repo-wide Explore audit **0 errors, 58 warnings**; final RelationalLearning adviser verdict `SHIP` | Of the 58 warnings, 54 are real weak explicit-contract shapes in production `ChatCell.swift` registrations and four are auditor helper/declaration false positives. Local package proof is not deployment, every service, separate-process/crash restore, cross-runtime Relational parity, pre-decode allocation bounds, saturation/compaction, or arbitrary replay-versus-incoming concurrency |
+| CellProtocol | `8e2196478fd9a4b8f5de2b53ff9e707d8ea3d2c7`, published `origin/main` and `ls-remote` verified | `swift test`: **755 passed, 0 failed**; affected suites **59/59**; strict contract-order regression **1/1**; Chat **56 handlers / 56 complete operation contracts / 0 findings**; repo Explore regex/source audit **0 errors, 19 manual-review warnings**; auditor tests **11/11**; final advisers found no concrete P0/P1 in the changed Chat/GeneralCell scope | The former 54 Chat warnings were scanner false positives, not weak production contracts. Nineteen current warnings are conservative computed-key findings in Apple Intelligence. Local package proof is not deployment, remote method-aware Explore/wire parity, every service, separate-process/crash restore, pre-decode bounds, saturation/compaction, or arbitrary replay-versus-incoming concurrency |
 | Binding, including HavenAgentD | `2c295d8ce2ddf78562cc7541aa8f93132a77b8a7`, published `origin/main` and `ls-remote` verified | Binding full target: **398 planned, 378 passed, 20 explicit skips, 0 failed**; runtime-surface/scene slice passed; generic iOS Simulator `build-for-testing`: exit **0**; production EntityScanner uses the contracted boolean start payload and the suite is serialized against shared runtime state | Runtime mappings and catalog sources are configurable; scene-local dispatch is covered in-process. Remote-only cases, deployed owner-published launch, and a real Finder/browser cold launch remain bounded as recorded below |
 | GoCellProtocol | `60476377f5f6efdeddde21c9f3b006fcc6756b41`, published `origin/main` | `go test ./...` passed | Owner-approved Agreement path is fail-closed; full proof/session and Swift parity remain **NOT PROVEN** |
 | RustCellProtocol | `e5ea7e56d1f697c94660706786da9a6c76d015a2`, published `origin/main` | `cargo test` passed its unit and 27 integration tests; missing configuration UUID decode and the shared fixture mirror are covered | Automatic proof-bearing admission, CI-enforced checkout of the authoritative Swift fixture, and durable production parity remain **NOT PROVEN** |
 | PyCellProtocol | `4ed979ccac685962246105e995de19ce0d1b6805`, published `origin/main` | `pytest`: **35 passed**; `pip check` clean; final adviser found no P0/P1 | Swift-origin wire roundtrip is covered, but live network, multiprocess, power-loss, protected remote sessions, and full parity are **NOT PROVEN** |
 | SwiftWebScaffold | `89f6681ca0248a99114d462401b02557fe116b10`, published `origin/main` | Focused decoded-readiness/access suite passed | Public proof mint/session is not implemented; protected POST remains fail-closed, not silently public |
 | CellUtility | local commit `b25841d31c50c763ba3f33914a46740c09187785` | Workspace and project entry points each ran **13 passed, 0 failed** against exact CellProtocol `7bb9e414…`; final adviser found no P0/P1 | Push is **BLOCKED**: `origin` is archived read-only `Digipomps/CellUtility-history-20260506`; remote `main` remains `cae2cadd9422388ba6866e577037f14117f0d03c` |
-| CellScaffold | `origin/main` and `origin/m0/green-test-suite` were both `8fb2c05921bb548f9753779ec269e41645d77232` at this audit observation | This task made no CellScaffold write. Saved earlier dependency-snapshot suites each executed **1,358 tests, 9 skipped, 0 failed** | Those suites do not prove the exact current CellScaffold + CellProtocol `d9d9514…` graph or deployed user journeys. The separate release task owns the branch snapshot and final clean-graph verdict. Current HAVEN-wide robustness remains **NOT PROVEN** |
+| CellScaffold | `origin/main` and `origin/m0/green-test-suite` were both `8fb2c05921bb548f9753779ec269e41645d77232` at this audit observation | This task made no CellScaffold write. Saved earlier dependency-snapshot suites each executed **1,358 tests, 9 skipped, 0 failed** | Those suites do not prove the exact current CellScaffold + CellProtocol `8e21964…` graph or deployed user journeys. The separate release task owns the branch snapshot and final clean-graph verdict. Current HAVEN-wide robustness remains **NOT PROVEN** |
 
 The remaining first-party inventory, including SpatialRegistryScaffold,
 GUI/Chat, DiMy repositories, Add2Entity, HAVEN_MVP, sprout, WatchPong,
@@ -145,6 +145,26 @@ The current core sequence after the earlier release snapshot is:
   without partial mutation, derives deterministic SHA-based weight-event IDs,
   serializes action/journal/flow order, and separates authorized action
   execution from feed-injection authority.
+- `74d89b49a0fc991415f507d5b0c0063f9e65ffc4`: local Explore publication and
+  strict enforcement become operation-aware by `(key, method)` without
+  removing legacy methodless schemas. This closes the four real Chat
+  GET/SET single-slot collisions at `audience.mode`, `crypto.persistenceMode`,
+  `compose.body`, and `compose.contentType`; adds canonical SET operations for
+  `start` and `stop`; and preserves the deprecated mutating GET aliases as an
+  explicit compatibility residual. Chat now publishes 56 complete operations
+  over 50 keys, including six dual-method keys. The same repair prevents an
+  exact child grant from reaching a legacy root handler, binds envelope opening
+  to the live requester's proof/signing identity/Agreement, rejects bulk target
+  payloads atomically when any target is invalid, and emits flows through
+  Cell-owned authority. It does not claim a new remote wire protocol.
+- `8e2196478fd9a4b8f5de2b53ff9e707d8ea3d2c7`: a corrected source auditor
+  exposed 60 real strict-order errors across nine raw-intercept Cells:
+  Perspective, CommonsResolver, CommonsTaxonomy, EntityAtlasInspector,
+  FileCrypto, ContractProbe, GraphIndex, Vault, and Identities. Each now
+  publishes its complete contracts before installing handlers. A production
+  strict-mode regression instantiates all nine and proves one representative
+  expected key per Cell remains installed; the source audit, not that runtime
+  test, accounts for all 60 repaired handler operations.
 
 Closing evidence for this core checkpoint:
 
@@ -153,26 +173,33 @@ swift test --filter RelationalLearning
 # 14 tests, 0 failures
 
 swift test --filter CellRuntimeReadinessContractTests
-# 15 tests, 0 failures
+# 16 tests, 0 failures, including the Vapor-named matching suite
+
+swift test --filter \
+  'CellRuntimeReadinessContractTests|RealCellContractTests|ContractProbeCellTests|FileCryptoCellTests|GraphIndexCellTests|VaultCellTests|IdentitiesCellContractTests|CommonsCellsTests|EntityAtlasInspectorCellTests'
+# 59 tests, 0 failures
 
 swift test
-# 737 tests, 0 failures
+# 755 tests, 0 failures
 
 python3 .../explore_contract_audit.py \
-  --repo-root /private/tmp/haven-robustness-cellprotocol \
-  --source-dir Sources/CellApple/PurposeAndInterest/Cells --fail-on-error
-# 0 errors, 0 warnings
+  --repo-root .../cellprotocol-chat-hardening \
+  --source-dir Sources/CellBase/Cells/Chat --fail-on-error
+# 56 handlers, 56 complete contracts, 0 errors, 0 warnings
 
 python3 .../explore_contract_audit.py \
-  --repo-root /private/tmp/haven-robustness-cellprotocol \
-  --source-dir Sources --fail-on-error
-# 0 errors, 58 warnings
+  --repo-root .../cellprotocol-chat-hardening --fail-on-error
+# 277 handlers, 273 complete contracts, 0 errors, 19 manual-review warnings
+
+CELLPROTOCOL_REPO=.../cellprotocol-chat-hardening \
+  python3 -m unittest discover -s Tools/Explore/tests -v
+# 11 tests, 0 failures
 
 git diff --check
 # clean
 
 git ls-remote origin refs/heads/main
-# d9d95145fc67910d2b4242c78af0ccc30cdabd6d
+# 8e2196478fd9a4b8f5de2b53ff9e707d8ea3d2c7
 ```
 
 The red-before-green regressions prove more than happy-path status:
@@ -383,6 +410,17 @@ full run planned all 398 tests with 378 passes, 20 explicit skips, and no
 failure. This demonstrates why a green result without count and contract
 inspection was insufficient evidence.
 
+The final Explore adviser independently reran the corrected tool on exact
+CellProtocol `8e219647…`: auditor tests were 11/11, Chat was 56 handlers / 56
+complete contracts / 0 findings, and the repository was 277 handlers / 273
+explicit-shape contracts / 0 errors / 19 computed-key warnings. Running the
+same auditor on parent `74d89b49…` reproduced exactly 60 strict-order errors.
+The adviser found no code blocker in the nine ordering moves, but required the
+runtime claim to stay at one representative key per Cell and required the Book
+to document that the auditor is regex/static: it cannot prove conditional
+dominance, early-return or deferred-Task behavior, overloaded helpers, runtime
+schema validity, permission alignment, or flow-effect correctness.
+
 ### Current C1–C6 adjudication
 
 | Claim | Current evaluation | Support and counterargument |
@@ -390,8 +428,8 @@ inspection was insufficient evidence.
 | C1 | **Supported across multiple hosted Swift Cells; not universal** | Real core/Scaffold/Binding/host cases establish the class. Synchronous constructors and Cells with no decoded runtime bindings are counterexamples. |
 | C2 | **Supported, not exclusive** | Detached decoded setup and non-waitable disconnects produced immediate-read/action/status failures. Authorization denial, source outage, bad keypaths, and legitimate empty datasets remain alternate causes. |
 | C3 | **Accepted for supported host access and mutation boundaries** | Hosts await optional readiness and waitable mutations; RelationalLearning restores its own journal/contracts behind that boundary while app semantics remain in the Cell. This is not a mandate to push application semantics into protocol core. |
-| C4 | **Accepted** | Old green tests coexisted with empty/broken production behavior and later permitted RelationalLearning state loss, weak contracts, nondeterministic IDs, and unsafe replay. Real payload, cold reload, nested mutation, negative access, and known-data tests caught failures. |
-| C5 | **Accepted and preserved in changed paths** | No admin/cookie/private fallback was added. RelationalLearning action grants do not grant feed injection; outsider, wrong-key, proof, Agreement, and fail-closed source cases remain enforced. |
+| C4 | **Accepted** | Old green tests coexisted with empty/broken production behavior and later permitted RelationalLearning state loss, method-blind Explore collisions, late strict contract publication, nondeterministic IDs, and unsafe replay. Real payload, cold reload, exact `(key, method)`, registration-order, negative access, and known-data tests caught failures. The former 54 Chat warnings were separately adjudicated as scanner false positives rather than promoted to defects. |
+| C5 | **Accepted and preserved in changed paths** | No admin/cookie/private fallback was added. RelationalLearning action grants do not grant feed injection; Chat decrypt binds live proof, signing identity, and Agreement; exact child grants cannot reach legacy root handlers; outsider, wrong-key, proof, Agreement, and fail-closed source cases remain enforced. |
 | C6 | **Partially supported as a testing strategy, not proven as full capability** | Shared Swift/Python/Rust wire fixtures plus runtime-specific tests catch schema drift, but Relational journal/ID parity and authoritative fixture checkout are not CI-enforced across all runtimes; lifecycle, resolver security, persistence durability, renderer parity, and live transport remain outside fixture proof. |
 
 ### Precise current **NOT PROVEN** statement
@@ -401,7 +439,7 @@ This audit does **not** prove:
 - that all CellProtocol functionality or every first-party HAVEN repository is
   robust;
 - that current CellScaffold `8fb2c059…` is green on the exact current
-  CellProtocol `d9d9514…` dependency graph; two earlier dependency snapshots
+  CellProtocol `8e21964…` dependency graph; two earlier dependency snapshots
   have clean 1,358-case suites, but they are not silently promoted to final-graph proof;
 - a real process restart for every persisted Tier-1 Cell, crash/power-loss
   durability, or simultaneous multi-process access;
@@ -418,9 +456,17 @@ This audit does **not** prove:
   Apple Intelligence user journey, or a production host that drains the
   owner-only outbox through its explicit dequeue contract;
 - that every CellProtocol Explore contract is complete or schema-aligned; the
-  repo-wide source audit emits **0 errors and 58 warnings**, of which 54 are
-  real weak explicit-contract shapes in `ChatCell.swift` and four are current
-  helper/declaration false positives;
+  corrected repo-wide source audit emits **0 errors and 19 warnings** under its
+  regex/static model, all for
+  computed Apple Intelligence key expressions that the conservative scanner
+  leaves for manual review;
+- remote Bridge `Explore.typeForKey(key:)` or any cross-runtime wire consumer
+  can discover both methods for a dual-method key. Method-aware strict dispatch
+  and catalogs are proven locally, but remote operation-aware Explore/wire v2 is
+  **NOT PROVEN** and was not invented in this repair;
+- that every mutating operation is SET-only: Chat's canonical `start` and
+  `stop` operations are SET, but their mutating GET aliases remain deprecated
+  compatibility behavior;
 - a RelationalLearning restore in a separate executable/process, durable
   container, crash, power-loss, or simultaneous multi-process access;
 - bounded hostile allocation before `JSONDecoder` materializes a persisted
@@ -1440,6 +1486,17 @@ Screenshot-only evidence was not used. Conversely, this wave does not claim brow
 31. Versioned the default runtime route bootstrap and made both web and native hosts consume only the published projection. Missing publication metadata is private by default.
 32. Rejected direct source fallback in Binding after registry resolution: the mapped configuration must exist in the explicitly admitted catalog corpus, with remote endpoints tried before local fallback.
 33. Treated adviser findings as pre-commit gates. A first pass caught a missing `published: true` fixture; a second caught process-global multi-window navigation and missing real-button execution. Both were repaired before delivery.
+34. Reopened the earlier core-Chat deferral only after a clean CellProtocol
+    worktree and method-aware compatibility design were available. Kept legacy
+    methodless schemas and deprecated GET lifecycle aliases, but made local
+    strict enforcement and catalogs operation-aware. Did not silently redefine
+    Bridge or cross-runtime wire semantics.
+35. Rejected the report's earlier interpretation of 54 Chat warnings after the
+    adviser mapped all 56 current handlers to 56 complete contracts. Repaired
+    the source auditor instead of annotating production code to satisfy a bad
+    heuristic. The corrected order-aware audit then found 60 different, real
+    strict-order errors across nine Cells; those were fixed at Cell ownership
+    and guarded by a strict production-type regression.
 
 ## Post-audit delivery
 
@@ -1480,6 +1537,8 @@ Kjetil explicitly requested commit and push after the local repair audit. Each c
 | CellProtocol explicit EntityScanner actions | `main` | `f845db97e12aee0a2a2f2b3e1e44c834f7073f97` | `origin/main`; production configuration/payload action tests |
 | CellProtocol deterministic Lobby publication | `main` | `080bb934bf4457ac59a1fe7679d598b2beaf4bc7` | `origin/main`; signed public-read Agreement and wrong-key negatives |
 | CellProtocol RelationalLearning persistence/concurrency | `main` | `d9d95145fc67910d2b4242c78af0ccc30cdabd6d` | `origin/main`, `ls-remote` verified equal; full package 737/737; RelationalLearning 14/14; readiness 15/15; focused Explore 0/0; repo Explore 0 errors/58 warnings; adviser verdict `SHIP` |
+| CellProtocol method-aware Explore and Chat authorization | `main` | `74d89b49a0fc991415f507d5b0c0063f9e65ffc4` | `origin/main`; full package 754/754; GeneralCell 45/45; Chat 43/43; TrustedIssuer 12/12; readiness 15/15; final advisers found no concrete P0/P1 in changed scope |
+| CellProtocol strict raw-handler contract ordering | `main` | `8e2196478fd9a4b8f5de2b53ff9e707d8ea3d2c7` | `origin/main`, `ls-remote` verified equal; full package 755/755; affected suites 59/59; strict nine-Cell regression 1/1; corrected Explore audit 0 errors/19 manual-review warnings |
 | Binding scanner/runtime isolation follow-up | `main` | `2c295d8ce2ddf78562cc7541aa8f93132a77b8a7` | `origin/main`; full target 398 planned, 378 passed, 20 explicit skips, 0 failures |
 | Rust missing-UUID/shared-fixture parity | `main` | `e5ea7e56d1f697c94660706786da9a6c76d015a2` | `origin/main`; unit plus 27 integration tests passed |
 
@@ -1495,7 +1554,7 @@ Kjetil explicitly requested commit and push after the local repair audit. Each c
 | P1 | `VaporAgentConversationReplies` uses a shared relay bearer token and reads private inbox records directly instead of the Cell's explicit reader-grant path | Agent relay/identity owner | Decide the intended service identity/capability; prove wrong token, wrong identity/key, missing/stale proof, record filtering, and revocation without transport-owned policy |
 | P2 | Shared optional activation and the local GeneralCell flow lifecycle are published, but adviser-ranked Chat/Orchestrator/EntityAnchor/Calendar/Vault/GraphIndex/TrustPacket/Commons/Apple Intelligence families do not all have real per-family persisted immediate state/action, restart, and multi-host gates | CellProtocol/CellApple owners | Per-family production-contract tests, separate-process reload where state is durable, stable-grant checks, and multi-host compatibility evidence |
 | P2 | Apple Intelligence retained state and owner-only dequeue are locally proven, but hostile pre-decode allocation, live Foundation Models output, separate-process restore, and a production generic-host drain are not | CellApple/host owners | Size-bounded envelope or streaming decode before allocation; separate-process restore; real available/unavailable model gates; host integration that dequeues and publishes without broadening owner authority |
-| P2 | The CellProtocol repo-wide Explore audit emits 0 errors and 58 warnings: 54 real weak explicit-contract registrations in production `ChatCell.swift`, plus four helper/declaration false positives in `ExploreContract.swift:446`, `GeneralCell+InterceptRegistration.swift:32/43`, and `GeneralCell.swift:244` | CellProtocol contract and auditor owners | Backfill exact Chat input/return/flow shapes, filter the four false positives without hiding production registrations, and retain a repo-wide zero-error gate before claiming complete contract coverage |
+| P2 | The corrected CellProtocol Explore regex/source audit emits 0 errors and 19 manual-review warnings for computed Apple Intelligence key expressions. Chat is exactly 56 handlers / 56 complete contracts / 0 findings under that model. Local strict/catalog lookup is method-aware, but remote Bridge `Explore.typeForKey(key:)` and cross-runtime wire consumers remain legacy single-key discovery | CellProtocol contract, transport, and port owners | Manually adjudicate or statically resolve the 19 computed keys; design a versioned operation-aware remote Explore contract before changing wire behavior; add shared fixtures and Swift/Go/Rust/Python consumer gates without breaking legacy methodless lookup |
 | P2 | RelationalLearning is proven only through in-process round-trip/concurrency tests; separate-process/crash restore, pre-decode bounds, saturation/compaction, arbitrary replay-versus-incoming concurrency, legacy direct-engine journaling, and cross-runtime journal/ID fixtures remain open | CellProtocol persistence, concurrency, and port owners | Separate-process durable-container gate, bounded envelope/streaming decode, explicit saturation policy, adversarial concurrency test, transaction-only or documented legacy API boundary, and shared cross-runtime golden fixtures |
 | P2 | TrustedIssuer retained state is normalized to 512 valid records, but JSON decoding materializes complete persisted maps/arrays before normalization; local history is a churnable cache, not signed durable audit evidence | CellProtocol identity/security and persistence owners | Bounded streaming/envelope decode before allocation, hostile-size negative, separate-process reload, signed append-only audit design and verification |
 | P1 | Remaining catalog-published CellScaffold endpoint types are not fully adjudicated after closing Event Atlas, Agenda, Chat, Public Shell, Device Registration, notification, Contact, and Agent paths; Onboarding fan-out and ignored synchronous-restore timeouts remain prominent | CellScaffold owners | Candidate-by-candidate publication/host audit, persisted known-data decode/immediate-read/action gates for each real vulnerable type, and explicit timeout classification |
@@ -1549,10 +1608,22 @@ Proven in this wave:
   flow order, rejects malformed and relation-shape-invalid events atomically,
   derives deterministic generated IDs, and denies action members arbitrary
   feed/emitter-factory authority. Its focused tests pass 14/14 and the complete
-  CellProtocol package passes 737/737.
-- All errors currently emitted by the Explore source audit are fixed. The
-  current repo-wide result is 0 errors and 58 warnings; this does not prove
-  complete contracts or absence of broader runtime/service defects.
+  CellProtocol package passes 755/755.
+- Local GeneralCell Explore dispatch, strict enforcement, and catalog records
+  distinguish GET from SET for the same key. Chat's 56 operations have 56
+  complete contracts; exact child grants cannot fall through to legacy root
+  handlers; decrypt is bound to live requester proof/signing identity/Agreement;
+  invalid bulk targets fail atomically; and flows use Cell-owned authority.
+- Perspective, CommonsResolver, CommonsTaxonomy, EntityAtlasInspector,
+  FileCrypto, ContractProbe, GraphIndex, Vault, and Identities publish complete
+  contracts before raw handlers. All nine expose their expected production key
+  under strict enforcement in the regression gate.
+- All errors currently emitted by the Explore regex/source audit are fixed
+  under that model. The
+  current repo-wide result is 0 errors and 19 conservative computed-key
+  warnings; Chat is 56 handlers / 56 complete contracts / 0 findings. This
+  does not prove complete remote/cross-runtime contracts or absence of broader
+  runtime/service defects.
 
 Not proven:
 
@@ -1577,9 +1648,10 @@ Not proven:
   draining its owner-only outbox; local persistence, contracts, access, action,
   concurrency, and wire roundtrip are proven, but those broader paths are not.
 - Complete Explore contract coverage: the repo-wide source audit is now 0
-  errors and 58 warnings, but 54 production Chat registrations still need exact
-  shape backfill/manual classification and four auditor false positives need
-  filtering before a global schema claim.
+  errors and 19 computed-key manual-review warnings. Local Chat operation
+  coverage is complete for its 56 handlers, but remote method-aware
+  `typeForKey`, cross-runtime wire fixtures, and transport consumers are not
+  proven.
 - RelationalLearning separate-process/crash/power-loss restore, hostile
   pre-decode allocation bounds, journal saturation/compaction, arbitrary
   replay-versus-incoming concurrency, legacy direct-engine journaling, and

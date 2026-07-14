@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Audit Swift cells for missing or weak Explore contracts.
+"""Audit Swift Cells for missing or weak Explore operation contracts.
 
-This is a source-level scanner. It does not try to compile Swift or prove
-behavior. Its job is to make implicit contracts visible so humans can decide
-what to backfill next.
+This is deliberately a conservative source audit, not a Swift compiler. It
+distinguishes handler registration from contract publication, follows direct
+same-Cell helper calls that execute before a handler, and expands only literal
+``for`` loops whose keys are statically knowable. Anything computed remains a
+manual-review finding rather than being guessed green.
 """
 
 from __future__ import annotations
@@ -11,7 +13,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Iterable
 
@@ -22,6 +24,40 @@ DEFAULT_SOURCE_DIRS = [
     "Sources/CellVapor",
 ]
 
+REGISTRATION_NAMES = {
+    "addInterceptForGet",
+    "addInterceptForSet",
+    "registerExploreContract",
+    "registerExploreSchema",
+    "registerGet",
+    "registerSet",
+}
+HANDLER_NAMES = {
+    "addInterceptForGet",
+    "addInterceptForSet",
+    "registerGet",
+    "registerSet",
+}
+CONTRACT_NAMES = {
+    "registerExploreContract",
+    "registerExploreSchema",
+    "registerGet",
+    "registerSet",
+}
+FRAMEWORK_FORWARDER_FUNCTIONS = REGISTRATION_NAMES | {"registerIntercept"}
+
+
+@dataclass(frozen=True)
+class FunctionScope:
+    name: str
+    file: str
+    module: str
+    cell_type: str | None
+    scope: str
+    start: int
+    body_start: int
+    end: int
+
 
 @dataclass
 class Call:
@@ -29,10 +65,21 @@ class Call:
     file: str
     line: int
     cell_type: str | None
+    scope: str
+    function: str
+    offset: int
     key: str | None
     raw_key: str | None
     method: str | None
     text: str
+
+
+@dataclass(frozen=True)
+class HelperCall:
+    scope: str
+    function: str
+    helper: str
+    offset: int
 
 
 @dataclass
@@ -47,6 +94,13 @@ class Finding:
     method: str | None
 
 
+@dataclass
+class Analysis:
+    calls: list[Call]
+    helpers: list[HelperCall]
+    functions: dict[tuple[str, str], list[FunctionScope]]
+
+
 def iter_swift_files(root: Path, source_dirs: list[str]) -> Iterable[Path]:
     for source_dir in source_dirs:
         candidate = root / source_dir
@@ -59,41 +113,54 @@ def line_number(text: str, index: int) -> int:
     return text.count("\n", 0, index) + 1
 
 
-def nearest_type_name(text: str, index: int) -> str | None:
-    prefix = text[:index]
-    # Prefer the nearest class/actor. Many Cell files contain helper structs near
-    # registration code, and reporting those as the owning Cell makes the audit
-    # harder to act on.
-    matches = list(re.finditer(r"\b(?:open|public|internal|private|final)?\s*(?:actor|class)\s+([A-Za-z_][A-Za-z0-9_]*)", prefix))
-    if not matches:
-        matches = list(
-            re.finditer(
-                r"\b(?:open|public|internal|private|final)?\s*struct\s+([A-Za-z_][A-Za-z0-9_]*)",
-                prefix,
-            )
-        )
-    if not matches:
-        return None
-    return matches[-1].group(1)
+def mask_comments(text: str) -> str:
+    """Replace comment contents with spaces while preserving positions."""
+    chars = list(text)
+    i = 0
+    in_string = False
+    escaped = False
+    block_depth = 0
+    while i < len(chars):
+        if block_depth:
+            if i + 1 < len(chars) and text[i : i + 2] == "/*":
+                chars[i] = chars[i + 1] = " "
+                block_depth += 1
+                i += 2
+            elif i + 1 < len(chars) and text[i : i + 2] == "*/":
+                chars[i] = chars[i + 1] = " "
+                block_depth -= 1
+                i += 2
+            else:
+                if chars[i] != "\n":
+                    chars[i] = " "
+                i += 1
+            continue
+        if in_string:
+            if escaped:
+                escaped = False
+            elif chars[i] == "\\":
+                escaped = True
+            elif chars[i] == '"':
+                in_string = False
+            i += 1
+            continue
+        if chars[i] == '"':
+            in_string = True
+            i += 1
+        elif i + 1 < len(chars) and text[i : i + 2] == "//":
+            while i < len(chars) and chars[i] != "\n":
+                chars[i] = " "
+                i += 1
+        elif i + 1 < len(chars) and text[i : i + 2] == "/*":
+            chars[i] = chars[i + 1] = " "
+            block_depth = 1
+            i += 2
+        else:
+            i += 1
+    return "".join(chars)
 
 
-def find_calls(text: str, names: Iterable[str]) -> list[tuple[str, int, int, str]]:
-    results: list[tuple[str, int, int, str]] = []
-    for name in names:
-        pattern = re.compile(r"\b" + re.escape(name) + r"\s*\(")
-        for match in pattern.finditer(text):
-            open_paren = text.find("(", match.start())
-            if open_paren == -1:
-                continue
-            end = find_matching_paren(text, open_paren)
-            if end is None:
-                continue
-            results.append((name, match.start(), end + 1, text[match.start() : end + 1]))
-    results.sort(key=lambda item: item[1])
-    return results
-
-
-def find_matching_paren(text: str, open_index: int) -> int | None:
+def find_matching_delimiter(text: str, open_index: int, opening: str, closing: str) -> int | None:
     depth = 0
     in_string = False
     escaped = False
@@ -110,14 +177,106 @@ def find_matching_paren(text: str, open_index: int) -> int | None:
         else:
             if char == '"':
                 in_string = True
-            elif char == "(":
+            elif char == opening:
                 depth += 1
-            elif char == ")":
+            elif char == closing:
                 depth -= 1
                 if depth == 0:
                     return i
         i += 1
     return None
+
+
+def find_matching_paren(text: str, open_index: int) -> int | None:
+    return find_matching_delimiter(text, open_index, "(", ")")
+
+
+def module_name(relative_file: Path) -> str:
+    parts = relative_file.parts
+    if len(parts) >= 2 and parts[0] == "Sources":
+        return parts[1]
+    return parts[0] if parts else "unknown"
+
+
+def find_type_spans(text: str) -> list[tuple[int, int, str]]:
+    masked = mask_comments(text)
+    pattern = re.compile(
+        r"\b(?:(?:open|public|package|internal|private|fileprivate|final)\s+)*"
+        r"(?:actor|class|struct|extension)\s+([A-Za-z_][A-Za-z0-9_]*)[^\{]*\{"
+    )
+    spans: list[tuple[int, int, str]] = []
+    for match in pattern.finditer(masked):
+        open_brace = masked.rfind("{", match.start(), match.end())
+        end = find_matching_delimiter(masked, open_brace, "{", "}")
+        if end is not None:
+            spans.append((match.start(), end, match.group(1)))
+    return spans
+
+
+def owning_type(type_spans: list[tuple[int, int, str]], index: int) -> str | None:
+    containing = [span for span in type_spans if span[0] <= index <= span[1]]
+    if not containing:
+        return None
+    return min(containing, key=lambda span: span[1] - span[0])[2]
+
+
+def find_functions(path: Path, repo_root: Path, text: str) -> list[FunctionScope]:
+    relative = path.relative_to(repo_root)
+    file_name = str(relative)
+    module = module_name(relative)
+    masked = mask_comments(text)
+    types = find_type_spans(text)
+    functions: list[FunctionScope] = []
+    for match in re.finditer(r"\bfunc\s+([A-Za-z_][A-Za-z0-9_]*)\s*(?:<[^\{\n]*>)?\s*\(", masked):
+        open_paren = masked.find("(", match.start(), match.end())
+        close_paren = find_matching_paren(masked, open_paren)
+        if close_paren is None:
+            continue
+        open_brace = masked.find("{", close_paren + 1)
+        next_func = masked.find("func ", close_paren + 1)
+        if open_brace < 0 or (next_func >= 0 and next_func < open_brace):
+            continue
+        end = find_matching_delimiter(masked, open_brace, "{", "}")
+        if end is None:
+            continue
+        cell_type = owning_type(types, match.start())
+        scope = f"{module}:{cell_type}" if cell_type else f"file:{file_name}"
+        functions.append(
+            FunctionScope(
+                name=match.group(1),
+                file=file_name,
+                module=module,
+                cell_type=cell_type,
+                scope=scope,
+                start=match.start(),
+                body_start=open_brace + 1,
+                end=end,
+            )
+        )
+    return functions
+
+
+def find_calls(
+    source: str,
+    scan_text: str,
+    names: Iterable[str],
+    start: int,
+    end: int,
+) -> list[tuple[str, int, int, str]]:
+    results: list[tuple[str, int, int, str]] = []
+    window = scan_text[start:end]
+    for name in names:
+        pattern = re.compile(r"\b" + re.escape(name) + r"\s*\(")
+        for match in pattern.finditer(window):
+            absolute = start + match.start()
+            open_paren = scan_text.find("(", absolute, end)
+            if open_paren == -1:
+                continue
+            close_paren = find_matching_paren(scan_text, open_paren)
+            if close_paren is None or close_paren >= end:
+                continue
+            results.append((name, absolute, close_paren + 1, source[absolute : close_paren + 1]))
+    return sorted(results, key=lambda item: item[1])
 
 
 def extract_argument(call_text: str, label: str) -> str | None:
@@ -177,37 +336,87 @@ def extract_method(name: str, call_text: str) -> str | None:
     return None
 
 
-def parse_calls(path: Path, repo_root: Path) -> list[Call]:
-    text = path.read_text(encoding="utf-8")
-    names = [
-        "addInterceptForGet",
-        "addInterceptForSet",
-        "registerExploreContract",
-        "registerExploreSchema",
-        "registerGet",
-        "registerSet",
-    ]
-    parsed: list[Call] = []
-    for name, start, _end, call_text in find_calls(text, names):
-        raw_key_arg = extract_argument(call_text, "key")
-        key, raw_key = normalize_key(raw_key_arg)
-        parsed.append(
-            Call(
-                name=name,
-                file=str(path.relative_to(repo_root)),
-                line=line_number(text, start),
-                cell_type=nearest_type_name(text, start),
-                key=key,
-                raw_key=raw_key,
-                method=extract_method(name, call_text),
-                text=call_text,
-            )
-        )
-    return parsed
+def split_top_level(text: str, delimiter: str = ",") -> list[str]:
+    pieces: list[str] = []
+    start = 0
+    depth = 0
+    in_string = False
+    escaped = False
+    for index, char in enumerate(text):
+        if in_string:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                in_string = False
+        elif char == '"':
+            in_string = True
+        elif char in "([{" :
+            depth += 1
+        elif char in ")]}" and depth:
+            depth -= 1
+        elif char == delimiter and depth == 0:
+            pieces.append(text[start:index].strip())
+            start = index + 1
+    pieces.append(text[start:].strip())
+    return [piece for piece in pieces if piece]
 
 
-def contract_identity(call: Call) -> tuple[str | None, str | None, str | None]:
-    return (call.key, call.raw_key, call.method)
+def literal_loop_values(source: str, function: FunctionScope, position: int, variable: str) -> list[str] | None:
+    """Return literal string values for the innermost loop binding variable."""
+    body = source[function.body_start : function.end]
+    masked = mask_comments(body)
+    candidates: list[tuple[int, int, list[str] | None]] = []
+    loop_pattern = re.compile(r"\bfor\s+(\([^\n\{]+\)|[A-Za-z_][A-Za-z0-9_]*)\s+in\s+")
+    for match in loop_pattern.finditer(masked):
+        open_brace = masked.find("{", match.end())
+        if open_brace < 0:
+            continue
+        relative_end = find_matching_delimiter(masked, open_brace, "{", "}")
+        if relative_end is None:
+            continue
+        absolute_open = function.body_start + open_brace
+        absolute_end = function.body_start + relative_end
+        if not (absolute_open < position < absolute_end):
+            continue
+        iterable = source[function.body_start + match.end() : absolute_open].strip()
+        pattern_text = match.group(1).strip()
+        variables = [item.strip() for item in pattern_text.strip("()").split(",")]
+        if variable not in variables:
+            continue
+        if not (iterable.startswith("[") and iterable.endswith("]")):
+            candidates.append((absolute_open, absolute_end, None))
+            continue
+        entries = split_top_level(iterable[1:-1])
+        value_index = variables.index(variable)
+        values: list[str] = []
+        valid = True
+        for entry in entries:
+            components = split_top_level(entry.strip().strip("()")) if len(variables) > 1 else [entry]
+            if value_index >= len(components):
+                valid = False
+                break
+            value, _raw = normalize_key(components[value_index])
+            if value is None:
+                valid = False
+                break
+            values.append(value)
+        candidates.append((absolute_open, absolute_end, values if valid else None))
+    if not candidates:
+        return None
+    return max(candidates, key=lambda item: item[0])[2]
+
+
+def expand_call_keys(source: str, function: FunctionScope, position: int, raw_key: str | None) -> list[tuple[str | None, str | None]]:
+    key, normalized_raw = normalize_key(raw_key)
+    if key is not None:
+        return [(key, normalized_raw)]
+    if normalized_raw and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", normalized_raw):
+        values = literal_loop_values(source, function, position, normalized_raw)
+        if values is not None:
+            return [(value, f'"{value}"') for value in values]
+    return [(None, normalized_raw)]
 
 
 def has_explicit_shape(call: Call) -> bool:
@@ -226,73 +435,175 @@ def has_explicit_shape(call: Call) -> bool:
     return False
 
 
-def build_findings(calls: list[Call]) -> list[Finding]:
-    explicit: set[tuple[str | None, str | None, str | None]] = set()
-    weak_explicit: list[Call] = []
-    intercepts: list[Call] = []
+def parse_file(path: Path, repo_root: Path) -> tuple[list[Call], list[HelperCall], list[FunctionScope]]:
+    source = path.read_text(encoding="utf-8")
+    scan_text = mask_comments(source)
+    functions = find_functions(path, repo_root, source)
+    calls: list[Call] = []
+    helpers: list[HelperCall] = []
+    function_names_by_scope: dict[str, set[str]] = {}
+    for function in functions:
+        function_names_by_scope.setdefault(function.scope, set()).add(function.name)
 
-    for call in calls:
-        if call.name in {"registerExploreContract", "registerExploreSchema", "registerGet", "registerSet"}:
-            if has_explicit_shape(call):
-                explicit.add(contract_identity(call))
-            else:
-                weak_explicit.append(call)
-        if call.name in {"addInterceptForGet", "addInterceptForSet"}:
-            intercepts.append(call)
+    for function in functions:
+        # Calls in the implementation of the registration API itself are
+        # framework forwarders, not contracts published by a concrete Cell.
+        if function.name in FRAMEWORK_FORWARDER_FUNCTIONS:
+            continue
+        for name, start, _end, call_text in find_calls(
+            source, scan_text, REGISTRATION_NAMES, function.body_start, function.end
+        ):
+            raw_key = extract_argument(call_text, "key")
+            for key, expanded_raw in expand_call_keys(source, function, start, raw_key):
+                calls.append(
+                    Call(
+                        name=name,
+                        file=function.file,
+                        line=line_number(source, start),
+                        cell_type=function.cell_type,
+                        scope=function.scope,
+                        function=function.name,
+                        offset=start,
+                        key=key,
+                        raw_key=expanded_raw,
+                        method=extract_method(name, call_text),
+                        text=call_text,
+                    )
+                )
+        helper_names = function_names_by_scope.get(function.scope, set()) - REGISTRATION_NAMES
+        for helper, start, _end, _call_text in find_calls(
+            source, scan_text, helper_names, function.body_start, function.end
+        ):
+            if helper != function.name:
+                helpers.append(
+                    HelperCall(
+                        scope=function.scope,
+                        function=function.name,
+                        helper=helper,
+                        offset=start,
+                    )
+                )
+    return calls, helpers, functions
 
+
+def analyze_repo(repo_root: Path, source_dirs: list[str]) -> Analysis:
+    calls: list[Call] = []
+    helpers: list[HelperCall] = []
+    functions: dict[tuple[str, str], list[FunctionScope]] = {}
+    for swift_file in iter_swift_files(repo_root, source_dirs):
+        file_calls, file_helpers, file_functions = parse_file(swift_file, repo_root)
+        calls.extend(file_calls)
+        helpers.extend(file_helpers)
+        for function in file_functions:
+            functions.setdefault((function.scope, function.name), []).append(function)
+    return Analysis(calls=calls, helpers=helpers, functions=functions)
+
+
+def contract_identity(call: Call) -> tuple[str, str, str]:
+    return (call.scope, call.key or "", call.method or "")
+
+
+def reachable_contracts(analysis: Analysis, handler: Call) -> set[tuple[str, str, str]]:
+    calls_by_function: dict[tuple[str, str], list[Call]] = {}
+    helpers_by_function: dict[tuple[str, str], list[HelperCall]] = {}
+    for call in analysis.calls:
+        calls_by_function.setdefault((call.scope, call.function), []).append(call)
+    for helper in analysis.helpers:
+        helpers_by_function.setdefault((helper.scope, helper.function), []).append(helper)
+
+    def collect(scope: str, function_name: str, cutoff: int | None, visiting: set[tuple[str, str]]) -> set[tuple[str, str, str]]:
+        identity = (scope, function_name)
+        if identity in visiting:
+            return set()
+        visiting = visiting | {identity}
+        found: set[tuple[str, str, str]] = set()
+        for call in calls_by_function.get(identity, []):
+            if cutoff is not None and call.offset >= cutoff:
+                continue
+            if call.name in CONTRACT_NAMES and has_explicit_shape(call) and call.key and call.method:
+                found.add(contract_identity(call))
+        for helper in helpers_by_function.get(identity, []):
+            if cutoff is not None and helper.offset >= cutoff:
+                continue
+            targets = analysis.functions.get((scope, helper.helper), [])
+            # Overloaded helpers are not guessed. This keeps the audit
+            # conservative until a Swift-aware resolver is introduced.
+            if len(targets) == 1:
+                found.update(collect(scope, helper.helper, None, visiting))
+        return found
+
+    return collect(handler.scope, handler.function, handler.offset, set())
+
+
+def build_findings(analysis: Analysis) -> list[Finding]:
     findings: list[Finding] = []
 
-    for call in weak_explicit:
-        findings.append(
-            Finding(
-                severity="warn",
-                code="weak_explicit_contract",
-                message=f"{call.name} advertises {call.method or 'unknown'} key without complete input/returns shape.",
-                file=call.file,
-                line=call.line,
-                cell_type=call.cell_type,
-                key=call.key or call.raw_key,
-                method=call.method,
+    for call in analysis.calls:
+        if call.name in {"registerExploreContract", "registerExploreSchema"} and not has_explicit_shape(call):
+            findings.append(
+                Finding(
+                    severity="warn",
+                    code="weak_explicit_contract",
+                    message=f"{call.name} advertises {call.method or 'unknown'} key without complete input/returns shape.",
+                    file=call.file,
+                    line=call.line,
+                    cell_type=call.cell_type,
+                    key=call.key or call.raw_key,
+                    method=call.method,
+                )
             )
-        )
 
-    for call in intercepts:
-        identity = contract_identity(call)
-        if identity in explicit:
+    for handler in [call for call in analysis.calls if call.name in HANDLER_NAMES]:
+        # Typed registerGet/registerSet publish their complete contract before
+        # installing the closure inside the wrapper, so the call is atomic from
+        # the Cell author's perspective and covers itself.
+        if has_explicit_shape(handler):
             continue
-        key_matches = [
-            item
-            for item in explicit
-            if item[2] == call.method and (item[0] == call.key or item[1] == call.raw_key)
-        ]
-        if key_matches:
+        if not handler.key or not handler.method:
+            findings.append(
+                Finding(
+                    severity="warn",
+                    code="dynamic_key_needs_manual_review",
+                    message="Handler key or method is computed and cannot be proven by this source audit.",
+                    file=handler.file,
+                    line=handler.line,
+                    cell_type=handler.cell_type,
+                    key=handler.key or handler.raw_key,
+                    method=handler.method,
+                )
+            )
             continue
-        severity = "error" if call.key else "warn"
-        code = "implicit_intercept_contract" if call.key else "dynamic_key_needs_manual_review"
+        if contract_identity(handler) in reachable_contracts(analysis, handler):
+            continue
         findings.append(
             Finding(
-                severity=severity,
-                code=code,
+                severity="error",
+                code="implicit_handler_contract",
                 message=(
-                    "Intercept registers a key before an explicit Explore contract. "
-                    "It will fall back to default/unknown metadata unless strict mode rejects it."
+                    "Handler is not preceded by a complete same-scope Explore contract for this exact key and method. "
+                    "Strict mode may reject it; permissive mode may publish unknown metadata."
                 ),
-                file=call.file,
-                line=call.line,
-                cell_type=call.cell_type,
-                key=call.key or call.raw_key,
-                method=call.method,
+                file=handler.file,
+                line=handler.line,
+                cell_type=handler.cell_type,
+                key=handler.key,
+                method=handler.method,
             )
         )
 
-    return sorted(findings, key=lambda item: (item.file, item.line, item.code))
+    unique: dict[tuple[str, str, int, str, str | None, str | None], Finding] = {}
+    for finding in findings:
+        key = (finding.code, finding.file, finding.line, finding.severity, finding.key, finding.method)
+        unique[key] = finding
+    return sorted(unique.values(), key=lambda item: (item.file, item.line, item.code))
 
 
-def render_markdown(repo_root: Path, calls: list[Call], findings: list[Finding]) -> str:
+def render_markdown(repo_root: Path, analysis: Analysis, findings: list[Finding]) -> str:
     counts: dict[str, int] = {}
     for finding in findings:
         counts[finding.severity] = counts.get(finding.severity, 0) + 1
-
+    handler_count = sum(call.name in HANDLER_NAMES for call in analysis.calls)
+    contract_count = sum(call.name in CONTRACT_NAMES and has_explicit_shape(call) for call in analysis.calls)
     lines = [
         "# Explore Contract Audit",
         "",
@@ -300,7 +611,9 @@ def render_markdown(repo_root: Path, calls: list[Call], findings: list[Finding])
         "",
         "## Summary",
         "",
-        f"- Calls inspected: {len(calls)}",
+        f"- Registration calls inspected after literal expansion: {len(analysis.calls)}",
+        f"- Handler operations: {handler_count}",
+        f"- Complete contract operations: {contract_count}",
         f"- Findings: {len(findings)}",
         f"- Errors: {counts.get('error', 0)}",
         f"- Warnings: {counts.get('warn', 0)}",
@@ -311,20 +624,15 @@ def render_markdown(repo_root: Path, calls: list[Call], findings: list[Finding])
     if not findings:
         lines.append("No findings.")
         return "\n".join(lines) + "\n"
-
     for finding in findings:
-        location = f"{finding.file}:{finding.line}"
-        key = finding.key or "(unknown key)"
-        method = finding.method or "unknown"
-        cell_type = finding.cell_type or "unknown type"
         lines.extend(
             [
                 f"### {finding.severity.upper()} {finding.code}",
                 "",
-                f"- Location: `{location}`",
-                f"- Cell/type: `{cell_type}`",
-                f"- Key: `{key}`",
-                f"- Method: `{method}`",
+                f"- Location: `{finding.file}:{finding.line}`",
+                f"- Cell/type: `{finding.cell_type or 'unknown type'}`",
+                f"- Key: `{finding.key or '(unknown key)'}`",
+                f"- Method: `{finding.method or 'unknown'}`",
                 f"- Message: {finding.message}",
                 "",
             ]
@@ -353,29 +661,28 @@ def main() -> int:
 
     repo_root = args.repo_root.resolve()
     source_dirs = args.source_dir or DEFAULT_SOURCE_DIRS
-    calls: list[Call] = []
-    for swift_file in iter_swift_files(repo_root, source_dirs):
-        calls.extend(parse_calls(swift_file, repo_root))
-
-    findings = build_findings(calls)
+    analysis = analyze_repo(repo_root, source_dirs)
+    findings = build_findings(analysis)
+    handler_count = sum(call.name in HANDLER_NAMES for call in analysis.calls)
+    contract_count = sum(call.name in CONTRACT_NAMES and has_explicit_shape(call) for call in analysis.calls)
     report = {
         "repoRoot": str(repo_root),
         "sourceDirs": source_dirs,
-        "callsInspected": len(calls),
+        "callsInspected": len(analysis.calls),
         "findings": [asdict(finding) for finding in findings],
         "summary": {
-            "errors": sum(1 for finding in findings if finding.severity == "error"),
-            "warnings": sum(1 for finding in findings if finding.severity == "warn"),
+            "completeContracts": contract_count,
+            "errors": sum(finding.severity == "error" for finding in findings),
+            "handlerOperations": handler_count,
+            "warnings": sum(finding.severity == "warn" for finding in findings),
         },
     }
-
     if args.json_output:
         args.json_output.parent.mkdir(parents=True, exist_ok=True)
         args.json_output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     if args.markdown_output:
         args.markdown_output.parent.mkdir(parents=True, exist_ok=True)
-        args.markdown_output.write_text(render_markdown(repo_root, calls, findings), encoding="utf-8")
-
+        args.markdown_output.write_text(render_markdown(repo_root, analysis, findings), encoding="utf-8")
     print(json.dumps(report["summary"], indent=2, sort_keys=True))
     if args.fail_on_error and report["summary"]["errors"] > 0:
         return 1
