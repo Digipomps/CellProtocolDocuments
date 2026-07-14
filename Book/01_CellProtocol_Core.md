@@ -1,5 +1,7 @@
 # Chapter 01 — CellProtocol Core
 
+Last verified against code: 2026-07-13.
+
 This chapter describes the conceptual foundations of CellProtocol: the problem it addresses, the guarantees it provides, and the boundaries it sets. Concrete interfaces (how to program against the protocol) are covered in the next chapter.
 
 ## What CellProtocol is
@@ -27,7 +29,7 @@ CellProtocol addresses this by:
 ## Core principles
 1. Minimal surface: as small as possible, sufficiently expressive.
 2. Determinism: same input + same history ⇒ same outcome.
-3. Capability security: no authority without explicit capability.
+3. Capability security: no authority, including persistent retention, without explicit capability.
 4. Domain-scoped identity: no cross-domain tracking.
 5. Transport independence: semantics do not change with networking.
 6. Replay first: all behavior is reproducible and auditable.
@@ -35,7 +37,7 @@ CellProtocol addresses this by:
 
 ## What CellProtocol guarantees
 - Predictability: you can rely on the same situation yielding the same result.
-- Explicitness: all access, mutation, and publishing is explicit.
+- Explicitness: all access, mutation, execution, persistent retention, and publishing is explicit.
 - Verifiability: the entire history can be replayed and audited.
 - Privacy: no global identifiers or hidden data sharing.
 - Portability: same semantics locally, offline, and over networks.
@@ -57,6 +59,9 @@ CellProtocol addresses this by:
 ## Identity, contracts, and trust
 - Identity is cryptographic and domain-scoped. An identity applies within a domain, not across domains.
 - Access is granted through explicit contracts and capabilities (grants). No contract ⇒ no access.
+- Compact grants use the canonical four-position `rwxs` form: read, write,
+  execute, and storage/retention. Storage permission is evidence of authority
+  to retain output; it is not technical copy prevention or permission to forward it.
 - Trust can be anchored in Purpose and Interests, and extended with evidence/attestations when relevant.
 
 ## Replay and audit

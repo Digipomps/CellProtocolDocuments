@@ -1,6 +1,8 @@
 
 # Chapter 06 — CellResolver
 
+Last verified against code: 2026-07-13.
+
 The CellResolver is the enforcement and coordination authority within the HAVEN
 runtime. It ensures that all interaction with a Cell follows CellProtocol
 correctly, safely, and deterministically.
@@ -50,6 +52,24 @@ If any check fails, the call is rejected.
 This guarantees that all state changes and data access happen only with proper
 authorization.
 
+### 3.1 Storage authorization boundary
+
+The canonical Grant permission has four positions: `r`, `w`, `x`, and `s`.
+When a Cell or runtime path requests persistent retention, the Resolver's normal
+Grant matching must require `s` at the protected keypath. `r` alone must not
+match that request.
+
+The current Swift implementation provides the `s` bit, canonical parsing, and
+matching. The caller must still make the Storage request explicit; the Resolver
+cannot infer that a downstream process has written output to a file, log,
+backup, dataset, or other external store.
+
+The Resolver can therefore deny declared Storage requests and preserve the
+identity-bound Contract as audit evidence, but it cannot technically stop an
+untrusted recipient from copying output that has already been revealed.
+Forwarding and redistribution are separate actions and require separate
+authorization; `s` never grants them implicitly.
+
 ## 4. Flow Supervision
 
 The Resolver monitors every FlowElement:
@@ -97,6 +117,10 @@ Resolver cooperates with the storage engine to:
 - support deterministic reloading  
 
 The storage layer must preserve ordering and atomicity.
+
+This runtime persistence is not the same as a subject's `s` permission.
+Runtime storage preserves Cell state and replay history; `s` is evidence that
+a Contract subject may retain received output.
 
 ## 7. Error Handling and Supervisors
 

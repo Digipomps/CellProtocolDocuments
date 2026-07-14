@@ -1,6 +1,6 @@
 # Chapter 22 - Explore Contracts for Skeleton and Cell Authoring
 
-Last verified against code: 2026-05-28
+Last verified against code: 2026-07-13
 
 Status: Phase 1 started. The current runtime has the necessary foundation in
 `ExploreContract`, `ExploreContractCatalog`, `ExploreManifest`, and
@@ -107,6 +107,10 @@ Required semantics:
 - `returns` must be explicit for every key unless the return is intentionally
   `null`.
 - `permissions` must name the effective access expectation.
+  Permission strings are canonical four-character `rwxs` values as defined in
+  [Chapter 04](04_Agreements_Contracts.md#21-canonical-rwxs-permission-form).
+  Read permission does not imply Storage permission, and Storage permission
+  does not imply forwarding authority.
 - `flowEffects` must list observable flow topics caused by this operation.
 - `summary` is human-facing, but should remain concise enough for RAG snippets.
 
