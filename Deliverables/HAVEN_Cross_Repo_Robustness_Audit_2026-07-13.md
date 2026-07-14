@@ -1,13 +1,13 @@
 # HAVEN cross-repository robustness audit — 2026-07-13
 
-- Status: current verified checkpoint for the published core, Binding, Go, Rust, Python, and SwiftWeb repair waves; CellUtility is verified and committed locally but its archived origin rejected push; HAVEN-wide goals remain open wherever this report says **NOT PROVEN**
+- Status: current verified checkpoint for the published core, Binding runtime/trust-boundary, Go, Rust, Python, and SwiftWeb repair waves; CellUtility is verified and committed locally but its archived origin rejected push; HAVEN-wide goals remain open wherever this report says **NOT PROVEN**
 - Human decision owner: Kjetil
 - Primary checkout: `/Users/kjetil/Build/Digipomps/HAVEN/CellScaffold`
 - First-party scope root: `/Users/kjetil/Build/Digipomps/HAVEN`
 - Audit base: CellScaffold `m0/green-test-suite` at `12e74027024cf230110f13074e74ae6cb8a15cf7`; latest audit-owned delivered commit `71854ceb6672671d25b434e91de300268f6ffdbb`. After that push, an independent security workstream advanced the checkout to local `14b50a51fbfd` and upstream `e3d4049fbcdc`; both contain the audit commit.
 - Delivery policy followed: narrow repo-scoped commits and pushes after verification; no deploy, authorization weakening, private-data fallback, or unrelated dirty-tree repair.
 
-> Current-truth note, 2026-07-14: the audit chronology below is retained as
+> Current-truth note, 2026-07-15: the audit chronology below is retained as
 > red-before-green evidence. This release-continuation section supersedes older
 > statements that CellProtocol core had no readiness contract, that the Binding
 > full target was still red, or that the strict Agreement/TrustedIssuer
@@ -16,7 +16,7 @@
 > limitations. Historical failures remain documented because they explain why
 > the later gates are necessary.
 
-## Current authoritative checkpoint — 2026-07-14
+## Current authoritative checkpoint — 2026-07-15
 
 This section is the authoritative current checkpoint of the audit. It
 supersedes every conflicting repository SHA, test count, defect status, or capability statement
@@ -44,16 +44,16 @@ No Purpose node was added. The existing canonical tree was sufficient:
 
 | Goal | Current evaluation | Evidence closed | Why the HAVEN-wide target is not satisfied |
 |---|---|---|---|
-| `goal.haven.cross-repo.runtime-correctness` | **At risk / NOT PROVEN** | Shared decoded readiness, persisted cold-key restore, waitable connection mutation, runtime deep-link discovery, TrustedIssuer and Apple Intelligence hardening, explicit EntityScanner actions, deterministic Lobby publication, RelationalLearning's versioned journal, method-aware local Explore operations, proof-bound Chat actions, strict contract-before-handler publication in nine raw-intercept Cells, and strict Apple Intelligence 24-operation round-trip publication plus representative 8-of-24 decoded dispatch | No clean full suite was run here on the exact current graph CellScaffold `8fb2c059…` + CellProtocol `e180626…`; remote method-aware Explore/wire parity, all-operation dispatch, broad live-service, separate-process, crash, and power-loss coverage are incomplete |
-| `goal.haven.cross-repo.regression-gates` | **At risk / NOT PROVEN** | CellProtocol **757/757**, including Apple Intelligence **11/11**, RelationalLearning **14/14**, decoded-readiness **16/16**, and affected contract/readiness suites **59/59**; Explore regex/source audit **0 errors, 19 manually adjudicated false-positive warnings**; Explore auditor **11/11**; Binding 398 planned (378 passed, 20 explicit skips) plus runtime-surface gates; CellUtility 13/13; Python 35/35; shared Swift/Python/Rust fixtures | CellUtility UI runner is not runnable, fixture consumption is not CI-enforced across every runtime, comprehensive separate-process restart is absent, and top live user journeys were not all rerun on final SHAs |
-| `goal.haven.cross-repo.security-preservation` | **Pass for changed paths; HAVEN-wide NOT PROVEN** | Wrong identity/key, proof-bearing admission, fail-closed restore/source behavior, outsider disconnect denial, atomic authorization decisions, exact RelationalLearning `-w--` action and `r---` read grants, no feed-injection grant, and draft-only Agreement editing | Full public proof issuance/session flows and live owner-published public-read paths remain incomplete in several runtimes; no audit may infer authorization from renderer, cookie, or private/admin fallback |
+| `goal.haven.cross-repo.runtime-correctness` | **At risk / NOT PROVEN** | Shared decoded readiness, persisted cold-key restore, waitable connection mutation, runtime deep-link discovery, TrustedIssuer and Apple Intelligence hardening, explicit EntityScanner actions, deterministic Lobby publication, RelationalLearning's versioned journal, method-aware local Explore operations, proof-bound Chat actions, strict contract-before-handler publication in nine raw-intercept Cells, strict Apple Intelligence 24-operation round-trip publication plus representative 8-of-24 decoded dispatch, and Binding's scene-targeted runtime catalog launch with serialized readiness and explicit provenance | Binding is green on exact CellProtocol `e180626…`, but no clean full suite was run here on the exact current CellScaffold graph; remote method-aware Explore/wire parity, all-operation dispatch, broad live-service, separate-process, crash, and power-loss coverage are incomplete |
+| `goal.haven.cross-repo.regression-gates` | **At risk / NOT PROVEN** | CellProtocol **757/757**, including Apple Intelligence **11/11**, RelationalLearning **14/14**, decoded-readiness **16/16**, and affected contract/readiness suites **59/59**; Explore regex/source audit **0 errors, 19 manually adjudicated false-positive warnings**; Explore auditor **11/11**; Binding exact final plan **416 total / 396 passed / 20 explicit UI-target skips / 0 failed**, plus targeted vault-rebind, Porthole, cancellation, provenance, credential-redaction, and runtime-surface gates; CellUtility 13/13; Python 35/35; shared Swift/Python/Rust fixtures | Binding UI tests, CellUtility UI runner, live biometric flow, and final live user journeys were not executed; fixture consumption is not CI-enforced across every runtime, and comprehensive separate-process restart is absent |
+| `goal.haven.cross-repo.security-preservation` | **Pass for changed paths; HAVEN-wide NOT PROVEN** | Wrong identity/key, proof-bearing admission, fail-closed restore/source behavior, outsider disconnect denial, atomic authorization decisions, exact RelationalLearning `-w--` action and `r---` read grants, no feed-injection grant, draft-only Agreement editing, and Binding's explicit host/remote/imported provenance, local-control-plane rejection, side-effect-free external views, credential-safe persistence/export/diagnostics, and compiled-factory reconstruction | Full public proof issuance/session flows and live owner-published public-read paths remain incomplete in several runtimes; no audit may infer authorization from renderer, cookie, persisted `UserDefaults`, or private/admin fallback |
 
 ### Current repository publication and verification map
 
 | Repository | Current audit SHA / state | Verification | Honest boundary |
 |---|---|---|---|
 | CellProtocol | `e180626c6339a11c90766dc99c22ba9d077e4de5`, published `origin/main` and `ls-remote` verified | `swift test`: **757 passed, 0 failed**; Apple Intelligence **11/11** with strict 24-operation fresh/decoded deep equality, exact 10 read / 11 delegated-write / 3 owner-only permission classes, and representative strict decoded dispatch of 8/24 operations; malformed persisted outbox envelopes are filtered while string/base64 FlowElements survive; affected suites **59/59**; Chat **56/56/0**; repo Explore audit **0 errors, 19 adjudicated false-positive warnings**; advisers returned `SHIP` | The 19 Apple computed-key warnings are exact-mapped false positives, but the scanner stays conservative. Local proof is not deployment, dispatch of all 24 handlers, every operation's semantic/negative matrix, remote method-aware Explore/wire parity, every service, hostile pre-decode allocation bounds, or separate-process/crash restore |
-| Binding, including HavenAgentD | `2c295d8ce2ddf78562cc7541aa8f93132a77b8a7`, published `origin/main` and `ls-remote` verified | Binding full target: **398 planned, 378 passed, 20 explicit skips, 0 failed**; runtime-surface/scene slice passed; generic iOS Simulator `build-for-testing`: exit **0**; production EntityScanner uses the contracted boolean start payload and the suite is serialized against shared runtime state | Runtime mappings and catalog sources are configurable; scene-local dispatch is covered in-process. Remote-only cases, deployed owner-published launch, and a real Finder/browser cold launch remain bounded as recorded below |
+| Binding, including HavenAgentD | `1a1e6c462033158850ea568f1bdeac7cf8a35664`, published `origin/main` and `ls-remote` verified against CellProtocol `e180626c6339a11c90766dc99c22ba9d077e4de5` | Exact final macOS plan: **416 total, 396 passed, 20 explicit BindingUITests skips, 0 failed**; 9/9 contaminated-order/isolation gate; 6/6 vault-rebind/Porthole/cancellation gate; 1/1 final structural trust-fingerprint gate; build-for-testing exit 0; three independent advisers found no commit blocker | Catalog endpoints and opaque surface mappings are runtime-configurable, and scene-local dispatch/provenance/trust boundaries are covered in-process. Live reload of catalog-source settings, deployed owner-published launch, real multi-window acknowledgement, UI/biometric paths, remote-only hydration, and a real Finder/browser cold launch remain **NOT PROVEN** |
 | GoCellProtocol | `60476377f5f6efdeddde21c9f3b006fcc6756b41`, published `origin/main` | `go test ./...` passed | Owner-approved Agreement path is fail-closed; full proof/session and Swift parity remain **NOT PROVEN** |
 | RustCellProtocol | `e5ea7e56d1f697c94660706786da9a6c76d015a2`, published `origin/main` | `cargo test` passed its unit and 27 integration tests; missing configuration UUID decode and the shared fixture mirror are covered | Automatic proof-bearing admission, CI-enforced checkout of the authoritative Swift fixture, and durable production parity remain **NOT PROVEN** |
 | PyCellProtocol | `4ed979ccac685962246105e995de19ce0d1b6805`, published `origin/main` | `pytest`: **35 passed**; `pip check` clean; final adviser found no P0/P1 | Swift-origin wire roundtrip is covered, but live network, multiprocess, power-loss, protected remote sessions, and full parity are **NOT PROVEN** |
@@ -348,60 +348,183 @@ archived so it is read-only.` Selecting or creating a replacement repository,
 or unarchiving this one, is an external ownership decision for Kjetil and was
 not guessed by the audit.
 
-### Runtime-configurable deep-link decision
+### Final Binding runtime-configurable deep-link and trust-boundary wave
 
-The published Binding design remains the accepted implementation. External
-links carry a stable schema, opaque `surfaceID`, and view intent. Runtime
-catalog sources resolve the ID; compiled code does not define the mutable
-surface mapping. Source configuration is controlled by
-`BINDING_REMOTE_CATALOG_ENDPOINTS`,
-`BINDING_INCLUDE_DEFAULT_REMOTE_CATALOG`, and
-`BINDING_DEFAULT_REMOTE_CATALOG_ENDPOINT`. Ambiguity and protected-source
-failures fail closed. The route is not identity, proof, capability, or
-authorization. Binding `c0054360a364599cd472ab2094282a739baa5698`
-additionally binds every adapted runtime-surface button to the originating
-scene UUID, recursively covers presented containers plus delegated
-List/Reference row templates, and preserves the adapter
-endpoint/keypath/payload after row resolution. A hostile row therefore cannot
-replace the scene token or turn a view-only route into another action. The host
-hook is local Environment state, not wire schema or authority. A full
-Finder/browser cold launch into a fresh Binding process and a deployed
-owner-published catalog journey are still **NOT PROVEN**.
-
-Exact final Binding evidence against published CellProtocol
-`306b51aac7d168af473f25634c46d423a729212a`:
+Published Binding commit:
 
 ```text
-xcodebuild build-for-testing -quiet -project Binding.xcodeproj -scheme HAVEN \
-  -destination 'platform=macOS,arch=arm64' \
-  -derivedDataPath /private/tmp/BindingSceneLocalDerivedData \
-  -parallel-testing-enabled NO
-
-xcodebuild test-without-building -project Binding.xcodeproj -scheme HAVEN \
-  -destination 'platform=macOS,arch=arm64' \
-  -derivedDataPath /private/tmp/BindingSceneLocalDerivedData \
-  -parallel-testing-enabled NO -only-testing:BindingTests
-# /private/tmp/BindingSceneLocalFull2-20260714T0554.xcresult
-# 398 total: 378 passed, 20 skipped, 0 failed
-
-xcodebuild test-without-building ... <eight exact runtime-surface selectors>
-# /private/tmp/BindingSceneLocalTargeted3-20260714T0555.xcresult
-# 8 passed, 0 failed
-
-xcodebuild build-for-testing -quiet -project Binding.xcodeproj -scheme HAVEN \
-  -destination 'generic/platform=iOS Simulator' \
-  -derivedDataPath /private/tmp/BindingSceneLocalIOSDerivedData \
-  -parallel-testing-enabled NO
-# exit 0
-
-git ls-remote --heads origin main
-# c0054360a364599cd472ab2094282a739baa5698
+1a1e6c462033158850ea568f1bdeac7cf8a35664
+Harden runtime surface loading and trust boundaries
 ```
 
-The repeated Xcode messages about a passcode-protected physical device were
-unrelated to the explicit macOS and generic iOS Simulator destinations. The
-terminal command and `.xcresult` outcomes above, rather than those warnings,
-determine the gate.
+The exact dependency used by the final build and tests was published
+CellProtocol `e180626c6339a11c90766dc99c22ba9d077e4de5`. Both repository tips
+were verified with `git ls-remote origin refs/heads/main` after publication.
+No uncommitted CellProtocol change was required by this Binding wave.
+
+The runtime-deep-link decision remains:
+
+- External links contain a stable launch schema, opaque `surfaceID`, and view
+  intent. They do not contain a compiled configuration, authorization, proof,
+  capability, owner identity, or local action target.
+- `BINDING_REMOTE_CATALOG_ENDPOINTS`,
+  `BINDING_INCLUDE_DEFAULT_REMOTE_CATALOG`, and
+  `BINDING_DEFAULT_REMOTE_CATALOG_ENDPOINT` select catalog sources at runtime.
+  The selected registry and catalog resolve the current `surfaceID` mapping;
+  compiled code does not own that mutable mapping.
+- Missing, denied, unavailable, duplicate, or ambiguous publication fails
+  closed. Remote sources are ordered ahead of an explicitly opted-in local
+  source; the local menu catalog is not silently authoritative for an external
+  link.
+- The scene/window identifier is host-local delivery context. Adapted buttons
+  preserve the static adapter endpoint, keypath, surface request, and host scene
+  after row resolution; dynamic List/Reference payload may fill the intended
+  request but cannot replace the host route or scene.
+- A successful adapter response is `submitted`, not a false claim that the
+  target view already rendered or acknowledged delivery.
+
+Concrete Binding failures found and repaired in this wave:
+
+1. **Host-route replacement after row resolution.** Dynamic row data could
+   replace keypath, URL, payload, or scene after a portable button was adapted.
+   The transform now treats the host route and scene as static authority and
+   accepts only the intended dynamic launch payload. Malformed delegated
+   List/Reference payloads route to a fail-closed adapter result.
+2. **Stale or cross-scene URL delivery.** Pending deep links could outlive a
+   useful delivery window or produce untargeted error state. Pending items now
+   have age limits, scene-specific leases, scene/window-specific failures, and
+   targeted discard. A route timeout invalidates late commits and cancels the
+   active operation without blocking following work.
+3. **Serialized configuration loads did not mean completed loads.** The
+   coordinator now serializes the actual async operation and returns a task
+   whose value covers completion. Replaced loads are cancelled, route code
+   awaits the real load, and tests prove no overlap and latest-request wins.
+4. **Suite-state masked Porthole owner failures.** Four full-order tests reused
+   live resolver/Porthole state after vault changes and failed with
+   `ownerAuthorityUnavailable` even though they passed alone. Their test-only
+   setup now cancels and awaits AppInitializer tasks, performs the complete
+   CellResolver reset, installs the test vault/resolver, rebuilds the baseline,
+   and then resolves the owner. The production vault-rebind test remains a
+   separate positive gate; no authorization bypass was introduced.
+5. **Persisted configuration was being treated as provenance.** Runtime loads
+   now carry explicit `localTrusted`, `remoteOwnerPublished`, `imported`, or
+   host-prepared external-view provenance. `UserDefaults` is never an authority
+   store. A persisted host entry is accepted only when its canonical wire
+   fingerprint matches one of the small compiled host factories, and the
+   returned value is a newly rebuilt compiled configuration rather than the
+   serialized object. Persisted catalog values return as imported and must be
+   resolved again to regain publisher provenance.
+6. **Random renderer IDs broke legitimate reconstruction.** Independent
+   factory calls generate different `CellConfiguration.uuid` and
+   `SkeletonTabs.id` values. The fingerprint ignores only the top-level
+   configuration instance UUID and `id` in an actual structurally traversed
+   `SkeletonElement.Tabs` body rooted at `configuration.skeleton`. It retains
+   every other ID, keypath, action, panel, payload, reference, initializer
+   write, discovery field, and modifier. A `Tabs/id`-shaped Button payload is
+   deliberately not normalized.
+7. **Remote/imported configuration could reach local control surfaces.**
+   Remote owner publication, untrusted import, and external view now have
+   separate fail-closed checks. Hostless/local `cell`, `ws`, and `wss`
+   endpoints; loopback literals including alternate IPv4 encodings and mapped
+   IPv6; local agent-control endpoints; initializer writes; and other
+   side-effect-bearing configuration are rejected at the host boundary. This
+   is defense in depth, not DNS-rebinding proof.
+8. **Credentials could survive outside the runtime boundary.** Configuration
+   persistence, drag/export, Full Library presentation, validation issues, and
+   diagnostics recursively sanitize every string, not only recognized Cell
+   URLs. URL userinfo, token/access/api query values, bearer/basic text, and
+   JSON-shaped credential fields are removed or redacted. The diagnostics sink
+   also sanitizes messages before forwarding to the prior CellBase handler.
+9. **Registration and privacy-audit evidence could be misleading.** Critical
+   local registration now validates exact endpoint type and owner/readiness
+   state instead of accepting duplicate/wrong-type success. Personal privacy
+   audit updates use locked state and atomic, canonical persistence; concurrent
+   append/round-trip gates exercise the production cell.
+
+The final changed Binding paths were:
+
+- `Binding/BindingAppNotifications.swift`
+- `Binding/BootstrapView.swift`
+- `Binding/CellConfigurationEndpointRetargeting.swift`
+- `Binding/ContentView.swift`
+- `Binding/Debug/BindingRuntimeDiagnostics.swift`
+- `Binding/FullLibraryView.swift`
+- `Binding/PortableSurfaceSupport.swift`
+- `Binding/RootView.swift`
+- `Binding/SkeletonPresentationOverlayView.swift`
+- `BindingTests/BindingTests.swift`
+- `BindingTests/DeepLinkDeliveryTests.swift`
+
+Exact final evidence:
+
+```text
+xcodebuild build-for-testing -quiet \
+  -project Binding.xcodeproj -scheme HAVEN \
+  -destination 'platform=macOS,arch=arm64' \
+  -derivedDataPath /private/tmp/BindingE180DerivedData \
+  CODE_SIGNING_ALLOWED=NO
+# exit 0
+
+env BINDING_VERIFIER_IDENTITY_MODE=startup \
+  xcodebuild test-without-building -quiet \
+  -project Binding.xcodeproj -scheme HAVEN \
+  -destination 'platform=macOS,arch=arm64' \
+  -derivedDataPath /private/tmp/BindingE180DerivedData \
+  -parallel-testing-enabled NO -skip-testing:BindingUITests
+# /private/tmp/BindingE180DerivedData/Logs/Test/
+#   Test-HAVEN-2026.07.15_00-11-54-+0200.xcresult
+# 416 total: 396 passed, 20 explicit BindingUITests skips, 0 failed
+
+# Contaminated-order/isolation, Porthole, cancellation, and trust selectors
+# used Swift Testing's required trailing `()` selector syntax.
+# 9 passed, 0 failed
+
+# Vault rebind + four Porthole owner/readiness cases + cancellation
+# 6 passed, 0 failed
+
+# Final structural Tabs fingerprint negative matrix
+# 1 passed, 0 failed
+
+git diff --check
+# clean
+
+git ls-remote origin refs/heads/main  # Binding
+# 1a1e6c462033158850ea568f1bdeac7cf8a35664
+
+git ls-remote origin refs/heads/main  # CellProtocol dependency
+# e180626c6339a11c90766dc99c22ba9d077e4de5
+```
+
+An earlier attempt used `-only-testing` names that omitted Swift Testing's
+trailing `()`. Xcode exited successfully but executed zero selected tests. That
+result is explicitly rejected as evidence. The corrected selectors reported
+non-zero counts in `.xcresult`. The first corrected full run then reported 416
+total, 391 passed, 20 skipped, and five real failures: four full-order
+`ownerAuthorityUnavailable` errors plus one scheduler-sensitive cancellation
+expectation. The repairs above made the 9/9 order gate, 6/6 focused gate, and
+two exact 416-case full runs green. A separate `No space left on device` during
+Xcode log-archive collection was a host-artifact failure; only generated
+DerivedData logs, index, and module cache were removed before rerunning.
+
+Three independent read-only advisers reviewed the final snapshot:
+
+- parity: no source blocker; static route/surface/scene behavior and delegated
+  payload handling are consistent with the renderer boundary;
+- readiness: no source blocker; test-only resolver isolation and bounded
+  cancellation observation do not mask production authorization;
+- security: no source blocker; provenance, compiled reconstruction, structural
+  Tabs normalization, local-control rejection, side-effect-free external view,
+  and recursive credential redaction remain fail closed.
+
+This closes the concrete Binding defects found by this wave. It does **not**
+prove live catalog-setting reload after process launch, a deployed
+owner-published URL → registry → catalog → hydration → Porthole → render/click
+journey, a real Finder/browser cold launch, actual multi-window consumer
+acknowledgement, a cancellation-ignoring production Orchestrator load, DNS
+rebinding resistance, a real biometric IdentityVault path, every
+PersonalCopilot subtype after separate-process restart, transport-library URL
+logging, or current CellScaffold/web versus Binding/native parity. Those remain
+explicit **NOT PROVEN** items.
 
 ### Final adviser findings and closure decisions
 
@@ -467,6 +590,18 @@ string/base64 FlowElement survival. This still is not Porthole/transport/catalog
 publication proof, execution of the remaining 16 handlers, exhaustive negative
 fixtures for every `ValueType`, or semantic correctness of every contract field.
 
+The final Binding counter-review was split across parity, readiness, and
+security advisers. The parity adviser approved the host-owned adapter route,
+dynamic row payload handling, malformed fail-closed behavior, scene rebinding,
+and truthful `submitted` result. The readiness adviser approved the four-test
+runtime reset sequence and bounded eventual-cancellation assertion while
+requiring the full non-parallel plan, not focused tests alone. The security
+adviser rejected a proposed generic recursive `Tabs.id` normalizer because an
+attacker-shaped action payload could share those keys; the final structural
+Skeleton walker and negative payload/action tests closed that issue. All three
+returned no source-level commit blocker for exact Binding `1a1e6c46…`. Their
+residuals are retained below instead of being promoted to inferred passes.
+
 ### Current C1–C6 adjudication
 
 | Claim | Current evaluation | Support and counterargument |
@@ -474,8 +609,8 @@ fixtures for every `ValueType`, or semantic correctness of every contract field.
 | C1 | **Supported across multiple hosted Swift Cells; not universal** | Real core/Scaffold/Binding/host cases establish the class. Synchronous constructors and Cells with no decoded runtime bindings are counterexamples. |
 | C2 | **Supported, not exclusive** | Detached decoded setup and non-waitable disconnects produced immediate-read/action/status failures. Authorization denial, source outage, bad keypaths, and legitimate empty datasets remain alternate causes. |
 | C3 | **Accepted for supported host access and mutation boundaries** | Hosts await optional readiness and waitable mutations; RelationalLearning restores its own journal/contracts behind that boundary while app semantics remain in the Cell. This is not a mandate to push application semantics into protocol core. |
-| C4 | **Accepted** | Old green tests coexisted with empty/broken production behavior and later permitted RelationalLearning state loss, method-blind Explore collisions, late strict contract publication, nondeterministic IDs, and unsafe replay. Real payload, cold reload, exact `(key, method)`, registration-order, negative access, and known-data tests caught failures. The former 54 Chat warnings were separately adjudicated as scanner false positives rather than promoted to defects. |
-| C5 | **Accepted and preserved in changed paths** | No admin/cookie/private fallback was added. RelationalLearning action grants do not grant feed injection; Chat decrypt binds live proof, signing identity, and Agreement; exact child grants cannot reach legacy root handlers; outsider, wrong-key, proof, Agreement, and fail-closed source cases remain enforced. |
+| C4 | **Accepted** | Old green tests coexisted with empty/broken production behavior and later permitted RelationalLearning state loss, method-blind Explore collisions, late strict contract publication, nondeterministic IDs, and unsafe replay. Binding also produced successful zero-test focused exits until selectors were count-checked, and four Porthole owner failures appeared only in the 416-case order. Real payload, cold reload, exact `(key, method)`, registration-order, negative access, known-data, non-zero selector, contaminated-order, and full-count tests caught failures. The former 54 Chat warnings were separately adjudicated as scanner false positives rather than promoted to defects. |
+| C5 | **Accepted and preserved in changed paths** | No admin/cookie/private fallback was added. RelationalLearning action grants do not grant feed injection; Chat decrypt binds live proof, signing identity, and Agreement; exact child grants cannot reach legacy root handlers; outsider, wrong-key, proof, Agreement, and fail-closed source cases remain enforced. Binding treats host, remote owner, imported, persisted, and external-view provenance separately; serialized configuration cannot mint authority, remote/imported configuration cannot select the local control plane, and credential redaction occurs at persistence/export/display/diagnostic sinks. |
 | C6 | **Partially supported as a testing strategy, not proven as full capability** | Shared Swift/Python/Rust wire fixtures plus runtime-specific tests catch schema drift, but Relational journal/ID parity and authoritative fixture checkout are not CI-enforced across all runtimes; lifecycle, resolver security, persistence durability, renderer parity, and live transport remain outside fixture proof. |
 
 ### Precise current **NOT PROVEN** statement
@@ -526,9 +661,26 @@ This audit does **not** prove:
 - a precise Explore declaration of conditional lifecycle-generated
   `weightUpdate` flow effects; the current schema cannot express an optional
   effect with minimum count zero;
-- a full OS cold-launch deep link, deployed owner-published runtime launch,
-  every Binding remote-only path, or current web/native renderer parity on
-  deployed production payloads;
+- live reload of Binding catalog-source configuration after process launch;
+  environment-controlled catalog sources prove runtime selection without
+  recompilation, but not persisted/watch-driven live reconfiguration;
+- a full OS cold-launch deep link or a deployed owner-published URL → registry
+  → catalog → configuration hydration → Porthole → render/click journey;
+- real multi-window/scene consumer acknowledgement; the in-process queue and
+  targeting gates prove submission/lease isolation, not that an actual second
+  window rendered the surface;
+- a production Orchestrator/configuration load that ignores cancellation, DNS
+  rebinding protection, every Binding remote-only path, every
+  PersonalCopilot subtype after a separate-process restart, or current
+  CellScaffold/web versus Binding/native renderer/action parity on the same
+  deployed payload;
+- Binding's real biometric `IdentityVault` path or the 20 skipped
+  `BindingUITests`; the deterministic non-UI gate deliberately uses
+  `BINDING_VERIFIER_IDENTITY_MODE=startup` to avoid treating an interactive
+  LocalAuthentication dialog as automated evidence;
+- complete transport-library log redaction for every URL representation; the
+  changed Binding sinks are covered, but third-party transport logging was not
+  exhaustively audited;
 - CellUtility UI behavior, production runtime boot, or remote publication;
 - public proof minting/session establishment and full Agreement/capability
   parity across Go, Rust, Python, and SwiftWeb;
@@ -1601,15 +1753,16 @@ Kjetil explicitly requested commit and push after the local repair audit. Each c
 | CellProtocol Apple Intelligence operation publication | `main` | `090169231d160e7efd723b3f8b8aa1958c6c816e` | `origin/main`, `ls-remote` verified equal; full package 756/756; Apple 10/10; fresh strict 24-operation/20-key publication matrix; adviser found no blocker |
 | CellProtocol Apple Intelligence decoded contract/access hardening | `main` | `e180626c6339a11c90766dc99c22ba9d077e4de5` | `origin/main`, `ls-remote` verified equal; full package 757/757; Apple 11/11; strict 24/24 round-trip contract equality; representative decoded dispatch 8/24; canonical persisted FlowElement and access-order negatives; advisers returned `SHIP` |
 | Binding scanner/runtime isolation follow-up | `main` | `2c295d8ce2ddf78562cc7541aa8f93132a77b8a7` | `origin/main`; full target 398 planned, 378 passed, 20 explicit skips, 0 failures |
+| Binding runtime surface/trust-boundary hardening | `main` | `1a1e6c462033158850ea568f1bdeac7cf8a35664` | `origin/main`, `ls-remote` verified equal against CellProtocol `e180626…`; exact final plan 416 total / 396 passed / 20 explicit BindingUITests skips / 0 failed; 9/9 order gate; 6/6 vault/Porthole/cancellation gate; 1/1 final fingerprint gate; parity/readiness/security advisers approved |
 | Rust missing-UUID/shared-fixture parity | `main` | `e5ea7e56d1f697c94660706786da9a6c76d015a2` | `origin/main`; unit plus 27 integration tests passed |
 
 ## Residual-risk ledger and owners
 
 | Priority | Residual risk | Owner / blocker | Required terminal evidence |
 |---|---|---|---|
-| P1 | Binding audited families lack separate-process restart and deployed remote runtime-launch proof; eleven PersonalCopilot subclasses lack individual action coverage; a real OS cold launch and deployed cross-process scene delivery have not been exercised | Binding/HavenAgentD owner | Per-subclass critical action sampling, deployed owner-published launch with wrong/missing/stale-proof negatives, OS cold launch into the intended scene, restart |
+| P1 | Binding audited families lack separate-process restart and deployed remote runtime-launch proof; PersonalCopilot subtypes do not all have individual restart/action coverage; real OS cold launch, remote hydration, actual multi-window acknowledgement, and deployed cross-process scene delivery have not been exercised | Binding/HavenAgentD owner | Per-subclass critical action/restart sampling, deployed owner-published launch with wrong/missing/stale-proof negatives, OS cold launch into the intended scene, real window acknowledgement, restart |
 | P1 | CellProtocol's 23 and CellScaffold's 110 heuristic hits are not fully manually adjudicated | Cross-repo audit owner; volume and specialized ownership | Per-type vulnerable/safe/tested/unknown matrix tied to actual publication/host path |
-| P2 | Binding's final broad target is green with all 398 cases planned (378 passed, 20 explicit skips), but a preceding run falsely planned only 347 cases; parallel suites still share mutable `CellBase` defaults and an earlier AppKit crash incident shows the gate needs repeatability evidence | Binding test owner | Add an expected-test-count/discovery gate plus project-wide isolation/serial trait or dependency injection for globals; repeat the full target on the final dependency graph without underdiscovery, AppKit crash, or cross-suite proof failure |
+| P2 | Binding's exact final broad target is green with 416 total / 396 passed / 20 explicitly skipped UI tests / 0 failed, and the four order-sensitive Porthole tests now reset the complete runtime. This is still a deterministic non-UI gate using the startup verifier vault; it does not prove the biometric vault, UI target, live reload of catalog-source settings, or universal dependency injection for mutable `CellBase` globals | Binding test/runtime owner | Add an expected test-count gate, run BindingUITests in a configured host, execute a real biometric path separately, add live/persisted catalog-source reload evidence, and continue project-wide global-state isolation |
 | P1 | Swift strict Agreement and proof-bearing TrustedIssuer admission are published, but safe owner-authorized public issuance/session use is not proven across every live route or across Go/Rust/Python/SwiftWeb | CellProtocol identity/security and port owners | Pass owner-published public read plus wrong identity, missing proof, stale proof, non-released, concurrent-idempotency, and actual-use expiry negatives without app/renderer bypass in each supported runtime |
 | P1 | Staging device register/resolve/submit routes accept unauthenticated input and elevate it to Scaffold authority; participant/device/ticket is not bound to an owner-enrolled signing key | Kjetil plus CellScaffold/Binding identity-security owners; breaking coordinated migration | Owner-approved enrollment Agreement/capability, canonical signed requests, exact device/ticket/action/audience binding, persisted replay and revocation, legacy re-enrollment, full negative matrix, staged coordinated rollout |
 | P1 | `VaporAgentConversationReplies` uses a shared relay bearer token and reads private inbox records directly instead of the Cell's explicit reader-grant path | Agent relay/identity owner | Decide the intended service identity/capability; prove wrong token, wrong identity/key, missing/stale proof, record filtering, and revocation without transport-owned policy |
@@ -1643,7 +1796,10 @@ Proven in this wave:
 - Spatial's three direct scaffold/contact candidates are repaired; the package executes 10 tests with 9 passed, the explicitly destructive PostGIS gate skipped, and 0 failures.
 - CellScaffold can persist, version-seed, remap, remove, re-instantiate through encode/decode, and project only explicitly published runtime `surfaceID` routes; safe opaque IDs survive login without forwarding authority-bearing material.
 - Binding accepts only an opaque view-only runtime launch contract, routes the real production Skeleton button through its registered local adapter with the exact requester, resolves published routes remote-first from configured scaffold catalog origins, admits only configurations from that same catalog corpus, and fails visibly on malformed launch payloads.
-- The native launch bridge carries the originating scene UUID from the runtime-rendered button and only the matching scene handles it. AppKit window-number routing remains a fail-closed fallback for events without a scene token; the complete 398-case macOS target and focused eight-test runtime slice pass, and the iOS Simulator build exits 0.
+- The native launch bridge carries the originating scene UUID from the runtime-rendered button and only the matching scene handles it. AppKit window-number routing remains a fail-closed fallback for events without a scene token. The latest host transform prevents dynamic row data from replacing the adapter route, surface request, or scene; pending URL leases expire and failures target only the hosting scene/window.
+- Binding now carries explicit local-trusted, remote-owner-published, imported, persisted, and host-prepared external-view provenance. Serialized `UserDefaults` content cannot mint publisher or host authority; legitimate compiled host entries reconstruct from a narrow structural fingerprint, and remote/imported external views reject local control-plane and initializer-write paths.
+- Binding persistence, drag/export, Full Library, validation, and diagnostic sinks recursively remove or redact credential-bearing URL and text forms. Configuration loads are serialized through actual completion; late timed-out route commits are invalidated; full-order Porthole tests reset resolver/AppInitializer state rather than inheriting a stale owner.
+- The exact final Binding macOS plan executes 416 tests: 396 pass, 20 BindingUITests are explicitly skipped, and 0 fail against published CellProtocol `e180626…`. The 9/9 contaminated-order gate, 6/6 vault-rebind/Porthole/cancellation gate, and final 1/1 structural fingerprint matrix pass. This replaces the older 398-case Binding checkpoint.
 - Binding identity-link input and completion are exact-route, bounded, duplicate-safe, trusted-origin/audience, reset-on-replacement, and exact-request-hash bound in the focused tests.
 - Binding `ConfigurationCatalogCell` is repaired at the same requester-aware readiness boundary; its red-before-green regression proves stable grants plus immediate production state/action after decode.
 - Access Requirement Prompt is readiness-safe at direct Porthole lookup/recovery; decoded state/action and wrong-key read/write negatives pass without granting or approving access.
@@ -1703,8 +1859,8 @@ Not proven:
   published dependency graph; an earlier focused positive was red because
   legacy two-argument Agreement issuance was rejected, and this audit did not
   rerun the full live owner-publication journey after the later security fixes.
-- A real OS cold-launch/deployed multi-scene journey; in-process targeting and iOS compilation are proven, but Finder/browser delivery into a newly created scene is not.
-- Binding test-discovery repeatability and cross-suite shared-global isolation; the final full target is green, but one preceding false-green run omitted 51 planned cases and the older AppKit crash remains relevant infrastructure history.
+- A real OS cold-launch/deployed multi-scene journey; in-process targeting and compilation are proven, but Finder/browser delivery into a newly created scene and actual consumer acknowledgement are not.
+- Binding's interactive biometric identity path, BindingUITests, live catalog-source setting reload, a cancellation-ignoring production Orchestrator load, DNS rebinding protection, and complete transport-library log redaction. The final 416-case deterministic non-UI target is green, and the four observed shared-runtime owner leaks are repaired, but those broader paths remain outside its evidence.
 - Owner-published Arendalsuka public read on the final release dependency graph; the historical positive failed before the strict-policy/TrustedIssuer integration repairs, and this task did not rerun that live owner-publication journey.
 - Complete per-family persisted immediate state/action and separate-process restart proof for shared core Chat/Orchestrator/EntityAnchor/Calendar/Vault/GraphIndex/TrustPacket/TrustedIssuer/Commons; the shared activation boundary and local flow lifecycle are published, but those family-specific gates remain incomplete.
 - Apple Intelligence hostile pre-decode allocation bounds, live Foundation
