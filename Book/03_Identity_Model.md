@@ -1,22 +1,33 @@
 
 # Chapter 03 — Identity Model
 
-Identity in HAVEN is domain scoped, cryptographically anchored and privacy preserving.
+Identity in HAVEN is designed to be domain scoped, cryptographically anchored,
+and privacy preserving. Those properties depend on the selected vault, proof,
+policy, and deployment path; a UUID or domain label alone grants no authority.
 The core principles are:
 
-- Entities (people, organisations, devices) are never exposed directly.
+- Protocol authorization uses operational Identities rather than treating a
+  real-world Entity as authority.
 - Identities are operational handles tied to a specific domain.
 - There is no global identifier and no automatic cross-domain linkage.
-- Identity is always explicit and always cryptographic.
+- Protected interactions require explicit cryptographic identity control or
+  another explicitly implemented policy proof.
+
+The dated positive/negative evidence and remaining cross-runtime gaps are
+tracked in the
+[HAVEN cross-repository robustness audit](../Deliverables/HAVEN_Cross_Repo_Robustness_Audit_2026-07-13.md).
 
 ## 1. Entity vs Identity
 
 **Entity**  
 A conceptual real-world actor (person, organisation, device).  
-Entities are *never transmitted* and are *never stored* in Cells.
+The protocol does not use an Entity object as a bearer credential. Applications
+may still store or transmit entity-related records, so their schemas and access
+policies require an ordinary privacy review.
 
 **Identity**  
-A digital, domain-scoped operational representation used in all protocol interactions.  
+A digital operational representation used in protected protocol interactions;
+its domain/context binding comes from the vault and signed request evidence.
 An Identity contains:
 
 - UUIDv4
@@ -30,14 +41,16 @@ different domains.
 
 ## 2. Domain Scoping
 
-Identity is always scoped to a single domain, such as:
+Vault-created identities should be scoped to one context/domain, such as:
 
 - domain:personal:notes
 - domain:team:projectX
 - domain:community:aid
 - domain:device:local
 
-This prevents cross-context tracking and removes the idea of a global account.
+This reduces cross-context tracking when applications use distinct identities.
+Reusing a UUID, signing key, or correlatable metadata across domains can still
+create linkage; the type system cannot prevent that deployment choice.
 
 Cells may restrict access to specific domains and treat others as foreign.
 
@@ -72,7 +85,7 @@ endpoint without domain policy remains backward compatible.
 
 ## 3. Identity Vault
 
-Private keys never leave the vault.  
+Conforming production vaults must not expose private keys.
 The vault is responsible for:
 
 - creating new key pairs  
@@ -87,24 +100,27 @@ Security requirement:
 - non-cryptographic generators (for example `String.random` / `Int.random`) must
   never be used for keys, IVs, nonces, or seed material.
 
-Cells and Resolvers only see public keys and signatures, never private keys.
+Cells and Resolvers should receive public identity material and signatures, not
+private keys. Legacy or test storage that embeds key material is not evidence
+of this production invariant and should be migrated or rejected.
 
 ## 4. Identity in Absorb and Meddle
 
-Every Absorb and Meddle call includes:
+Protected Absorb and Meddle requests carry a requester Identity and, where the
+selected policy requires it, signed proof and contextual evidence such as:
 
 - identity UUID  
 - identity public key  
-- signature for the call  
+- signature/proof for the call
 - optional vault-context domain binding when required by policy
 - optional purpose  
 - optional evidence
 
-Resolver checks:
+The supported resolver/Cell access path checks the subset required by policy:
 
 - signature validity  
 - domain-binding consistency and endpoint domain policy, when active
-- contract existence  
+- owner proof, Contract/Grant, or an explicit cell-specific policy path
 - capability permissions  
 - required conditions  
 
@@ -131,20 +147,21 @@ Issuer does *not* need to be central or governmental.
 
 ## 6. Privacy Properties
 
-The identity model ensures:
+The identity model supports:
 
-- no global identifier  
-- domain isolation  
+- avoiding a required global identifier
+- domain isolation when distinct identities and policies are used
 - minimal metadata  
-- no automatic linking across domains  
-- no behavioural inference  
-- no scoring or reputation  
+- no protocol-required automatic linking across domains
+- avoiding behavioural inference, scoring, or reputation in the identity
+  mechanism itself; applications can still violate these goals and must be
+  audited separately
 
 Identity exists to support correct capability checking, not to identify people.
 
 ## 7. Summary
 
-Identity in HAVEN is:
+Identity in HAVEN is intended to be:
 
 - cryptographic  
 - explicit  
@@ -152,4 +169,7 @@ Identity in HAVEN is:
 - privacy preserving  
 - minimal and stable  
 
-This model provides a safe foundation for capabilities, trust, and decentralised cooperation.
+When the vault, proof, authorization, domain-separation, and metadata policies
+are correctly implemented and tested, this model can provide a privacy-aware
+foundation for capabilities and decentralized cooperation. The Identity type
+alone does not prove those properties.

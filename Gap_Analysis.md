@@ -4,9 +4,10 @@ This report compares the existing conceptual documentation in `CellProtocolDocum
 
 ## 1) Coverage Summary (Updated)
 
-The conceptual book is strong and consistent:
+The conceptual book covers the major areas and now distinguishes design intent
+from implementation evidence:
 
-- Protocol intent, guarantees, and boundaries are documented.
+- Protocol intent, conditional invariants, and evidence boundaries are documented.
 - Core interfaces, identity, agreements, flows, resolver, scaffold, transport, and purpose are explained.
 
 Previously missing **implementation-level guidance** and **agent instructions** have now been added. The docs now connect concepts to Swift APIs, runtime defaults, and serialization formats, and include a runnable Quickstart and Skeleton spec.
@@ -58,6 +59,13 @@ The core concepts are covered, but still missing:
   still need backfilled explicit `registerExploreContract(...)` entries.
 - Integration patterns between `CellApple` and `CellVapor` (mobile vs server scaffolds).
 - A consolidated runtime lifecycle diagram (init → resolve → usage → persistence).
+- A machine-readable support matrix showing which concrete Cells/runtimes
+  implement and test deterministic execution, durable ordered history, exact
+  replay, process restart, remote acknowledgement, and fault containment.
+- A resolver-boundary map that distinguishes protected resolver/`GeneralCell`
+  entry points from internal direct calls and records the accepted authority
+  path (owner proof, Contract/Grant, or cell-specific policy) for each public
+  surface.
 
 ## 5) Specific Correctness/Interoperability Issues (Status)
 

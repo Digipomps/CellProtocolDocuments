@@ -3,18 +3,22 @@
 
 The Scaffold is the execution environment that hosts Cells, Resolvers, storage,
 identity vaults, and transport bridges. It functions like a minimal operating
-system designed specifically for deterministic, privacy-first distributed
-applications within HAVEN.
+system designed to host privacy-first distributed applications and make
+deterministic behavior possible where Cells and runtime services satisfy a
+declared contract.
+
+For dated implementation evidence rather than architectural intent, see the
+[HAVEN cross-repository robustness audit](../Deliverables/HAVEN_Cross_Repo_Robustness_Audit_2026-07-13.md).
 
 ## 1. Goals of the Scaffold
 
 The Scaffold runtime aims to provide:
 
-- **deterministic execution** across all devices and environments  
+- **deterministic execution** for explicitly bounded, tested inputs and state
 - **isolation** between Cells to ensure safety  
 - **structured concurrency** with supervision  
 - **local-first operation**, with optional networking  
-- **full replayability** for debugging and audit  
+- **replay support** where ordered durable history and replay semantics exist
 - **modular extensibility** without affecting the protocol core  
 
 The Scaffold is intentionally small, stable, and predictable.
@@ -88,36 +92,37 @@ Runtime hardening rule:
 - deterministic or convenience random APIs are not valid entropy sources for
   cryptographic material
 
-### 2.4 Replay Engine  
-Ensures state and events can always be reconstructed.
+### 2.4 Replay support
+May reconstruct declared state when the runtime has a complete compatible
+history and the Cell implements deterministic replay semantics.
 
 ### 2.5 Transport Bridges  
-Provide network connectivity without altering semantics.
+Provide network connectivity without owning Cell semantics.
 
-Supported transports include:
+Current first-party implementation evidence in this audit covers WebSocket and
+local/in-process routing paths. QUIC, WebRTC, IPC, and offline bundles are
+architectural targets or experiments until an owning implementation and
+contract tests are identified; they must not be advertised as generally
+supported transports.
 
-- WebSocket  
-- QUIC  
-- WebRTC  
-- IPC  
-- offline bundles  
-
-### 2.6 Scheduler  
-Coordinates when Cells run, ensuring predictable order and deterministic state
-changes.
+### 2.6 Scheduling and concurrency
+Coordinates tasks and Cell work. Swift actors, tasks, transports, and external
+services do not provide a universal total order; any ordering or single-flight
+claim must be explicit in the owning component.
 
 ### 2.7 Supervisors  
 Monitor Cells, Bridges, and subscriptions for errors and anomalies.
 
 ## 3. Execution Model
 
-The Scaffold enforces:
+Supported Scaffold paths should preserve these boundaries:
 
-- all outward behavior goes through Emit  
-- all state changes go through Meddle  
-- all access is mediated by the Resolver  
-- all flows are recorded for replay  
-- all Cells operate independently unless explicitly connected  
+- outbound streams use Emit/FlowElement contracts
+- externally callable state changes use explicit Meddle/action contracts
+- protected external access uses Resolver/Cell authorization
+- flows are recorded only when the configured runtime declares durable replay
+- Cells should not share application state implicitly; explicit connections and
+  process-global runtime services remain reviewable coupling points
 
 ### Deterministic Scheduling  
 Given the same:
@@ -126,12 +131,15 @@ Given the same:
 - state  
 - flow history  
 
-… the Scaffold guarantees the same outcome.
+… a deterministic Cell and runtime path should produce the same declared
+outcome. The claim excludes wall-clock input, randomness, external services,
+unordered concurrency, missing history, and version drift unless those are
+captured by the contract.
 
 ## 4. Storage, Snapshots, and Replay
 
 ### 4.1 Storage  
-The storage layer ensures:
+Storage backends that claim durable restart/replay must provide:
 
 - atomic writes  
 - ordered FlowElement persistence  
@@ -152,19 +160,23 @@ Replay is triggered for:
 - offline sync  
 - evidence generation  
 
-Replay must produce identical results.
+A path may claim exact replay only when the same compatible inputs, state,
+ordering, and deterministic handlers reproduce the declared result in a
+regression gate.
 
 ## 5. Transport Integration
 
-Transport bridges:
+Transport bridges may:
 
 - serialize and wrap FlowElements into envelopes  
-- maintain ordering  
-- verify signatures  
+- preserve declared ordering metadata
+- carry or verify signatures when required by the wire policy
 - reconnect automatically when possible  
 - handle multi-hop relaying  
 
-Transport never introduces semantic meaning.
+Transport must not own Cell authorization or application semantics. Current
+bridges still need parity, ordering, denial, reconnect, and remote-
+acknowledgement tests; moving bytes alone does not prove semantic equivalence.
 
 ## 6. Local-First Operation
 
@@ -179,24 +191,26 @@ The Scaffold is optimized for these environments.
 
 ## 7. Supervision and Fault Management
 
-The Scaffold isolates failures:
+The Scaffold should isolate failures with explicit bounds and supervision:
 
-- faulty Cells cannot crash others  
-- failing Bridges are restarted  
-- invalid flows cause safe termination  
-- contract violations revoke capabilities  
+- a faulty Cell should not take down unrelated services
+- bridge restart/backoff must be bounded and observable
+- invalid flows should fail closed for the affected path
+- contract violations must be denied; revocation propagation needs its own
+  implementation and tests
 
-Errors escalate deterministically, not chaotically.
+Errors should produce typed, observable outcomes. Universal fault containment
+or deterministic escalation is not currently proven.
 
 ## 8. Summary
 
-The Scaffold provides:
+The Scaffold aims to provide:
 
 - a safe runtime for Cells  
-- deterministic execution  
+- contract-bounded deterministic execution
 - modular transport support  
 - secure identity and contract enforcement  
-- full replay and auditability  
+- replay and auditability where the required history is captured
 - local-first, privacy-preserving operation  
 
 It is the foundation for running HAVEN applications across desktops, servers,

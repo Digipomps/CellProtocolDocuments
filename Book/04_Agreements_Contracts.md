@@ -3,7 +3,14 @@
 
 Agreements and Contracts define HAVEN’s explicit capability-based authorization
 model. Nothing in HAVEN is implicit: all authority must be granted through a
-Contract, and every Contract must be justified and verifiable.
+verified authorization path. A Contract/Grant is the ordinary delegated path;
+verified owner proof and deliberately narrow cell-specific policy are also
+implemented paths. None may be inferred from a cookie, renderer, transport, or
+unverified identity label.
+
+Current strict-admission, TrustedIssuer, and remaining public-publication
+evidence is recorded in the
+[HAVEN cross-repository robustness audit](../Deliverables/HAVEN_Cross_Repo_Robustness_Audit_2026-07-13.md).
 
 ## 1. Agreements
 
@@ -18,7 +25,8 @@ It contains:
 
 Agreements express intent but *do not* grant access by themselves.
 
-They are always evaluated by the Resolver.
+Supported `GeneralCell`/Resolver admission evaluates them before issuing or
+using a Contract. Constructing an Agreement value alone performs no evaluation.
 
 ## 2. Contracts
 
@@ -40,7 +48,9 @@ Examples of capabilities:
 - `action.invoke:addItem`  
 - `purpose.execute:moderation`
 
-Capabilities are never broad or implicit. They always map to concrete actions.
+Capabilities should be as narrow and concrete as the supported keypath/action
+contract permits. Root or wildcard-like grants are broader and require explicit
+review; a capability name alone does not prove least privilege.
 
 ## 3. Conditions
 
@@ -78,7 +88,9 @@ Issuers may be:
 - peers  
 - individuals trusted in that domain  
 
-Evidence is local and contextual — *never global*.
+Evidence should be scoped to the relevant context. Reusing an issuer,
+identifier, or credential across contexts can create global correlation and is
+not prevented by the evidence type alone.
 
 ## 5. ConnectState
 
@@ -88,39 +100,47 @@ During Absorb, Agreements are resolved into a ConnectState:
 - **signContract(...)** — Contract exists but caller must approve it  
 - **denied(reason)** — Contract cannot be issued  
 
-ConnectState ensures clients always know exactly what is required.
+ConnectState communicates the implemented admission result. Clients still need
+typed diagnostics and retry/expiry handling; it is not proof that every policy
+can be automatically resolved.
 
 ## 6. Enforcement
 
-Resolver enforces all Contracts:
+The supported Resolver/Cell access path enforces Contracts by:
 
-- checks identity validity  
-- checks capability permissions for Meddle and Absorb  
-- verifies Conditions  
-- rejects calls lacking permission  
-- handles automatic revocation  
+- checking identity/proof validity
+- checking capability permissions for Meddle and Absorb
+- verifying implemented Conditions
+- rejecting calls lacking permission
+- rejecting expired or otherwise invalid authorization at use time
 
-Automatic revocation occurs if:
+Authorization must be denied when the implemented use-time checks establish
+that:
 
 - conditions fail  
 - identity is revoked  
 - contract expires  
 - required group approvals are withdrawn  
 
-## 7. Security Properties
+## 7. Security properties and proof boundary
 
-The system guarantees:
+For a supported and tested access path:
 
-- no authority without explicit Contract  
-- all permission logic is transparent and auditable  
-- contracts are identity-bound and domain-scoped  
-- behavior is deterministic and replayable  
+- no authority is accepted without verified owner proof, a valid
+  Contract/Grant, or an explicit cell-specific decision
+- the authorization decision records its path and reason
+- signed Contracts bind the declared identity/proof material and scope
+- replay/determinism are separate lifecycle and storage properties, not
+  automatic consequences of having a Contract
 
 ## 8. Summary
 
 Agreements express what an identity *wants*.  
 Contracts define what the Cell *allows*.  
 Conditions and evidence determine *when* a Contract is valid.  
-Resolver enforces everything deterministically.
+Supported resolver/Cell boundaries enforce the implemented policy. Conditions,
+expiry, proof freshness, revocation, and concurrent admission each require
+their own regression evidence.
 
-This results in a safe, decentralized, privacy-preserving permission model.
+This is intended to provide a decentralized, privacy-preserving permission
+model; each concrete access path still needs positive and negative proof.
