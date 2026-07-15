@@ -1,10 +1,10 @@
 # HAVEN cross-repository robustness audit — 2026-07-13
 
-- Status: current verified checkpoint for the published core, Binding runtime/trust-boundary, Go, Rust, Python, and SwiftWeb repair waves; CellUtility is verified and committed locally but its archived origin rejected push; HAVEN-wide goals remain open wherever this report says **NOT PROVEN**
+- Status: current verified checkpoint for the published core, CellScaffold, Binding runtime/trust-boundary, Go, Rust, Python, and SwiftWeb repair waves; CellUtility is verified and committed locally but its archived origin rejected push; HAVEN-wide goals remain open wherever this report says **NOT PROVEN**
 - Human decision owner: Kjetil
 - Primary checkout: `/Users/kjetil/Build/Digipomps/HAVEN/CellScaffold`
 - First-party scope root: `/Users/kjetil/Build/Digipomps/HAVEN`
-- Audit base: CellScaffold `m0/green-test-suite` at `12e74027024cf230110f13074e74ae6cb8a15cf7`; latest audit-owned delivered commit `71854ceb6672671d25b434e91de300268f6ffdbb`. After that push, an independent security workstream advanced the checkout to local `14b50a51fbfd` and upstream `e3d4049fbcdc`; both contain the audit commit.
+- Chronological audit base: CellScaffold `m0/green-test-suite` at `12e74027024cf230110f13074e74ae6cb8a15cf7`. Current published CellScaffold checkpoint: `e932fb682ada2098c3d51d25abef773784b9a63a` on `origin/main`, built against exact CellProtocol `7cc6205a248497e974fa56a9871485ae42657eab`.
 - Delivery policy followed: narrow repo-scoped commits and pushes after verification; no deploy, authorization weakening, private-data fallback, or unrelated dirty-tree repair.
 
 > Current-truth note, 2026-07-15: the audit chronology below is retained as
@@ -13,8 +13,10 @@
 > full target was still red, or that the strict Agreement/TrustedIssuer
 > integration existed only as uncommitted overlap. It also supersedes the
 > earlier `7bb9e414…` core tip and the older list of open local flow-lifecycle
-> limitations. Historical failures remain documented because they explain why
-> the later gates are necessary.
+> limitations. It further supersedes the earlier statement that the separate
+> release task still owned an unverified CellScaffold full-suite verdict.
+> Historical failures remain documented because they explain why the later
+> gates are necessary.
 
 ## Current authoritative checkpoint — 2026-07-15
 
@@ -44,28 +46,131 @@ No Purpose node was added. The existing canonical tree was sufficient:
 
 | Goal | Current evaluation | Evidence closed | Why the HAVEN-wide target is not satisfied |
 |---|---|---|---|
-| `goal.haven.cross-repo.runtime-correctness` | **At risk / NOT PROVEN** | Shared decoded readiness, persisted cold-key restore, waitable connection mutation, runtime deep-link discovery, TrustedIssuer and Apple Intelligence hardening, explicit EntityScanner actions, deterministic Lobby publication, RelationalLearning's versioned journal, method-aware local Explore operations, proof-bound Chat actions, strict contract-before-handler publication in nine raw-intercept Cells, strict Apple Intelligence 24-operation round-trip publication plus representative 8-of-24 decoded dispatch, and Binding's scene-targeted runtime catalog launch with serialized readiness and explicit provenance | Binding is green on exact CellProtocol `e180626…`, but no clean full suite was run here on the exact current CellScaffold graph; remote method-aware Explore/wire parity, all-operation dispatch, broad live-service, separate-process, crash, and power-loss coverage are incomplete |
-| `goal.haven.cross-repo.regression-gates` | **At risk / NOT PROVEN** | CellProtocol **757/757**, including Apple Intelligence **11/11**, RelationalLearning **14/14**, decoded-readiness **16/16**, and affected contract/readiness suites **59/59**; Explore regex/source audit **0 errors, 19 manually adjudicated false-positive warnings**; Explore auditor **11/11**; Binding exact final plan **416 total / 396 passed / 20 explicit UI-target skips / 0 failed**, plus targeted vault-rebind, Porthole, cancellation, provenance, credential-redaction, and runtime-surface gates; CellUtility 13/13; Python 35/35; shared Swift/Python/Rust fixtures | Binding UI tests, CellUtility UI runner, live biometric flow, and final live user journeys were not executed; fixture consumption is not CI-enforced across every runtime, and comprehensive separate-process restart is absent |
-| `goal.haven.cross-repo.security-preservation` | **Pass for changed paths; HAVEN-wide NOT PROVEN** | Wrong identity/key, proof-bearing admission, fail-closed restore/source behavior, outsider disconnect denial, atomic authorization decisions, exact RelationalLearning `-w--` action and `r---` read grants, no feed-injection grant, draft-only Agreement editing, and Binding's explicit host/remote/imported provenance, local-control-plane rejection, side-effect-free external views, credential-safe persistence/export/diagnostics, and compiled-factory reconstruction | Full public proof issuance/session flows and live owner-published public-read paths remain incomplete in several runtimes; no audit may infer authorization from renderer, cookie, persisted `UserDefaults`, or private/admin fallback |
+| `goal.haven.cross-repo.runtime-correctness` | **At risk / NOT PROVEN** | Shared decoded readiness, persisted cold-key restore, waitable connection mutation, runtime deep-link discovery, TrustedIssuer and Apple Intelligence hardening, explicit EntityScanner actions, deterministic Lobby publication, RelationalLearning's versioned journal, method-aware local Explore operations, proof-bound Chat actions, strict contract-before-handler publication in nine raw-intercept Cells, strict Apple Intelligence 24-operation round-trip publication plus representative 8-of-24 decoded dispatch, Binding's scene-targeted runtime catalog launch, and CellScaffold's callback, payment-store lifecycle, object-storage, identity-restore, and seven access-sensitive Cell repairs | CellScaffold is now green on exact CellProtocol `7cc6205…`, but remote method-aware Explore/wire parity, all-operation dispatch, broad live-service, separate-process, crash, power-loss, real object-store, and deployed user-path coverage are incomplete |
+| `goal.haven.cross-repo.regression-gates` | **At risk / NOT PROVEN** | CellProtocol current tip **761/761**, including tip-focused readiness **1/1** and resolver/security **47/47**; Explore regex/source audit **0 errors, 19 manually adjudicated false-positive warnings**; Explore auditor **11/11**; CellScaffold exact isolated plan **1,405 total / 1,396 passed / 9 skipped / 0 failed**; Binding exact final plan **416 total / 396 passed / 20 explicit UI-target skips / 0 failed**; CellUtility 13/13; Python 35/35; shared Swift/Python/Rust fixtures | Binding UI tests, CellUtility UI runner, live biometric flow, actual container/process restart, staging, and final live user journeys were not executed; fixture consumption is not CI-enforced across every runtime |
+| `goal.haven.cross-repo.security-preservation` | **Pass for changed paths; HAVEN-wide NOT PROVEN** | Wrong identity/key, proof-bearing admission, fail-closed restore/source behavior, outsider disconnect denial, atomic authorization decisions, exact RelationalLearning grants, no feed-injection grant, Binding provenance/local-control rejection/credential redaction, CellScaffold auth-before-decode callback ingress, exact ticket/device correlation, proof-gated identity mapping recovery, and private-state/object-storage isolation | The callback gateway token is broad service authentication, not owner-enrolled per-device cryptographic capability; full public proof issuance/session flows and live owner-published public-read paths remain incomplete; no audit may infer authorization from renderer, cookie, persisted `UserDefaults`, or private/admin fallback |
 
 ### Current repository publication and verification map
 
 | Repository | Current audit SHA / state | Verification | Honest boundary |
 |---|---|---|---|
-| CellProtocol | `e180626c6339a11c90766dc99c22ba9d077e4de5`, published `origin/main` and `ls-remote` verified | `swift test`: **757 passed, 0 failed**; Apple Intelligence **11/11** with strict 24-operation fresh/decoded deep equality, exact 10 read / 11 delegated-write / 3 owner-only permission classes, and representative strict decoded dispatch of 8/24 operations; malformed persisted outbox envelopes are filtered while string/base64 FlowElements survive; affected suites **59/59**; Chat **56/56/0**; repo Explore audit **0 errors, 19 adjudicated false-positive warnings**; advisers returned `SHIP` | The 19 Apple computed-key warnings are exact-mapped false positives, but the scanner stays conservative. Local proof is not deployment, dispatch of all 24 handlers, every operation's semantic/negative matrix, remote method-aware Explore/wire parity, every service, hostile pre-decode allocation bounds, or separate-process/crash restore |
+| CellProtocol | `7cc6205a248497e974fa56a9871485ae42657eab`, published `origin/main` and `ls-remote` verified | Current tip `swift test -q`: **761 passed, 0 failed** in 24.131 s; unsigned-Cell runtime binding **1/1** and resolver/identity/security filters **47/47**. The final audit-reviewed commits permit proof-independent binding installation without granting access, make Chat no-mutation snapshots deterministic, and gate restored identity mappings on owner proof | A green package suite does not prove deployment, every operation's semantics, remote method-aware Explore/wire parity, hostile pre-decode bounds, or separate-process/crash restore. The legacy public `setIdentityNamedCells` SPI and per-restored-owner cryptographic binding of the trusted recovery SPI remain unaudited residuals |
 | Binding, including HavenAgentD | `1a1e6c462033158850ea568f1bdeac7cf8a35664`, published `origin/main` and `ls-remote` verified against CellProtocol `e180626c6339a11c90766dc99c22ba9d077e4de5` | Exact final macOS plan: **416 total, 396 passed, 20 explicit BindingUITests skips, 0 failed**; 9/9 contaminated-order/isolation gate; 6/6 vault-rebind/Porthole/cancellation gate; 1/1 final structural trust-fingerprint gate; build-for-testing exit 0; three independent advisers found no commit blocker | Catalog endpoints and opaque surface mappings are runtime-configurable, and scene-local dispatch/provenance/trust boundaries are covered in-process. Live reload of catalog-source settings, deployed owner-published launch, real multi-window acknowledgement, UI/biometric paths, remote-only hydration, and a real Finder/browser cold launch remain **NOT PROVEN** |
 | GoCellProtocol | `60476377f5f6efdeddde21c9f3b006fcc6756b41`, published `origin/main` | `go test ./...` passed | Owner-approved Agreement path is fail-closed; full proof/session and Swift parity remain **NOT PROVEN** |
 | RustCellProtocol | `e5ea7e56d1f697c94660706786da9a6c76d015a2`, published `origin/main` | `cargo test` passed its unit and 27 integration tests; missing configuration UUID decode and the shared fixture mirror are covered | Automatic proof-bearing admission, CI-enforced checkout of the authoritative Swift fixture, and durable production parity remain **NOT PROVEN** |
 | PyCellProtocol | `4ed979ccac685962246105e995de19ce0d1b6805`, published `origin/main` | `pytest`: **35 passed**; `pip check` clean; final adviser found no P0/P1 | Swift-origin wire roundtrip is covered, but live network, multiprocess, power-loss, protected remote sessions, and full parity are **NOT PROVEN** |
 | SwiftWebScaffold | `89f6681ca0248a99114d462401b02557fe116b10`, published `origin/main` | Focused decoded-readiness/access suite passed | Public proof mint/session is not implemented; protected POST remains fail-closed, not silently public |
 | CellUtility | local commit `b25841d31c50c763ba3f33914a46740c09187785` | Workspace and project entry points each ran **13 passed, 0 failed** against exact CellProtocol `7bb9e414…`; final adviser found no P0/P1 | Push is **BLOCKED**: `origin` is archived read-only `Digipomps/CellUtility-history-20260506`; remote `main` remains `cae2cadd9422388ba6866e577037f14117f0d03c` |
-| CellScaffold | `origin/main` and `origin/m0/green-test-suite` were both `8fb2c05921bb548f9753779ec269e41645d77232` at this audit observation | This task made no CellScaffold write. Saved earlier dependency-snapshot suites each executed **1,358 tests, 9 skipped, 0 failed** | Those suites do not prove the exact current CellScaffold + CellProtocol `e180626…` graph or deployed user journeys. The separate release task owns the branch snapshot and final clean-graph verdict. Current HAVEN-wide robustness remains **NOT PROVEN** |
+| CellScaffold | `e932fb682ada2098c3d51d25abef773784b9a63a`, published `origin/main` and `ls-remote` verified; exact CellProtocol pin `7cc6205a248497e974fa56a9871485ae42657eab` | Canonical isolated full suite: **1,405 tests, 9 skipped, 0 failures** in 688.505 s. Focused ArtistSales, MusicPublishing, and payment-store lifecycle gates were green after a red full-order reproduction. `git diff --check` was clean; three independent advisers found no P0/P1 blocker in the final snapshot | No deploy or staging run; no actual container/process restart, crash/power-loss, MinIO/S3/presign, owner-enrolled per-device proof, key rotation/revocation, complete public-read proof flow, or final Workbench/Arendalsuka/Conference/Co-Pilot browser journey. Static unawaited-decoder candidates outside repaired paths remain an audit queue, not inferred passes |
 
 The remaining first-party inventory, including SpatialRegistryScaffold,
 GUI/Chat, DiMy repositories, Add2Entity, HAVEN_MVP, sprout, WatchPong,
 UniverseSimulation, documentation checkouts, archives, clones, and generated
 dependencies, is recorded in the detailed inventory below. A repository being
 inventoried is not equivalent to its user journeys being proven.
+
+### Final CellScaffold repair and release wave
+
+Published CellScaffold commit:
+
+```text
+e932fb682ada2098c3d51d25abef773784b9a63a
+Harden persisted runtime and callback security
+```
+
+It is based directly on `f8cbde8cf443a52e35d8f716c80ea2797f02da4c`
+and pins CellProtocol `7cc6205a248497e974fa56a9871485ae42657eab`.
+The work was built, tested, committed, and pushed from an isolated worktree;
+the primary dirty CellScaffold checkout was not modified. No deployment was
+performed.
+
+Concrete failures repaired in this wave:
+
+1. Device callback register/resolve/submit routes now authenticate before body
+   decode, resolver access, or owner-authority dispatch. Production requires a
+   `DEVICE_CALLBACK_INGRESS_TOKEN` of at least 32 UTF-8 bytes and compares it
+   in constant time. Stored authoritative correlation binds participant,
+   device, ticket, callback, and agent acknowledgement; caller source/routing
+   hints no longer authorize or select the target. Status progression is
+   monotonic, prepare/finalize is two-phase, delivery leases are bounded, and
+   idempotent replay cannot overwrite a terminal result.
+2. Payment credential audit/consumption stores use generation tokens, one live
+   app binding, fail-closed production detach, durable result recording, stale
+   generation fencing, and concurrent JTI replay classification. The test-only
+   in-memory downgrade is available only to an exact Vapor `.testing`
+   lifecycle after the current token has been detached; stale tokens cannot
+   downgrade a newer database binding.
+3. Object storage no longer pretends that MinIO/S3 is a local implementation.
+   Local filesystem/local Cell storage verifies SHA-256 and size, namespaces
+   owner plus Cell, performs verified legacy copy-forward, uses 0700
+   directories/0600 files, and bytewise uppercase-hex path components to avoid
+   case-folding and Unicode-normalization collisions. Unsupported remote modes
+   fail explicitly.
+4. Display Name access, Payment Proof Door, Age Proof Door, Entity Scaffold
+   Enrollment, Swarm Identity Admission, Admin Role Enrollment, and Object
+   Storage Adapter now restore state synchronously and install exact runtime
+   grants/handlers behind requester-proof-aware, idempotent readiness. Stored
+   cryptographic ownership stays authoritative; no default-vault, admin-cookie,
+   private-state, or renderer fallback was added.
+5. Scaffold identity-named mapping recovery fills gaps instead of replacing
+   live mappings and requires proof of the owning identity. The shared core SPI
+   is intentionally narrower than application authorization and remains in the
+   residual ledger below.
+
+Red-before-green full-order evidence:
+
+- The first complete run executed 1,400 tests and exposed three failing cases:
+  ArtistSales delivery plus two MusicPublishing credential-consumption cases.
+  Each passed alone. The cause was process-global payment stores remaining in
+  production fail-closed mode after a `.testing` Application detached.
+- A second attempt exhausted disk and was rejected as invalid evidence; only
+  generated test runtime and build-cache artifacts from this workstream were
+  removed.
+- The narrow lifecycle repair above made
+  `ArtistSalesChannelCellTests|MusicPublishingCellsTests|PaymentAccessCredentialStoreLifecycleTests`
+  pass together, including the three formerly failing cases.
+- The canonical runner then completed **1,405 tests, 9 skipped, 0 failures** in
+  **688.505 seconds**. The log contains no failed XCTest case, failed assertion,
+  caught-error marker, or `No space left on device` marker.
+
+The exact canonical command was:
+
+```text
+zsh Scripts/run_tests_isolated.sh --skip-build -q
+# Executed 1,405 tests, with 9 tests skipped and 0 failures
+```
+
+The final parity, readiness, and security advisers all found the snapshot
+commit-safe with no P0/P1 blocker. Their approval was deliberately scoped to
+the reviewed source and tests; it was not treated as deployment or universal
+CellProtocol proof.
+
+Static evidence also proves why the top-level result remains **NOT PROVEN**:
+the bounded source scan counted 136 `Task` occurrences in required decoders
+across 120 App source files. Only 18 of those files mention the established
+Porthole readiness contract; 102 do not. This is a conservative candidate
+queue, not proof that all 102 files are vulnerable: some are synchronous by
+construction, never persisted/published, explicitly unsupported, or await a
+different owned task. Each candidate still requires publication, persistence,
+host-consumer, and immediate-operation adjudication before it can be called a
+defect or a pass.
+
+Current CellScaffold residuals:
+
+- callback ingress now has authenticated service-gateway protection, but not
+  owner-issued per-device Agreement/capability, per-device signing-key proof,
+  provisioning, rotation, revocation, or live proxy/staging evidence;
+- payment audit and consumption are individually fenced, but cross-store
+  atomicity and immutable proof contract honesty remain incomplete;
+- real MinIO/S3/presign, actual container restart, backup restore, pre-existing
+  symlink/root hardening, and legacy cleanup are not proven;
+- Admin Role Enrollment still permits its existing non-owner admission policy;
+  this wave did not prove that product policy is the intended final policy;
+- the recovery SPI is trusted in-process machinery rather than a
+  per-restored-owner capability, and the legacy public identity-mapping setter
+  was not fully audited;
+- source-backed preview retry/partial-failure behavior, live public Agreement
+  issuance, staging, and final user journeys remain unproven.
 
 ### Current CellProtocol repair wave
 
@@ -186,8 +291,21 @@ The current core sequence after the earlier release snapshot is:
   still perform representative delegated writes, while owner-only outbox/tool
   reads and dequeue remain denied before payload validation on both fresh and
   decoded Cells.
+- `7da6ffe` and `b7cef19`: the intervening identity-anchor work resolves the
+  anchor on mutation and restores identity mappings atomically.
+- `71090c2`: runtime binding installation no longer requires a Cell to have a
+  signing identity merely to install its local handlers. This does not grant
+  read, write, execute, or flow access; the normal access path still evaluates
+  proof, Agreement, and Cell policy.
+- `f41fb38`: Chat's no-mutation snapshots are deterministic, so a rejected or
+  read-only path cannot create order-dependent state artifacts.
+- `7cc6205`: identity-named recovery fills missing mappings only after owner
+  proof and preserves a newer live mapping. The recovery SPI remains trusted
+  in-process machinery; it is not claimed as a remotely transferable
+  capability.
 
-Closing evidence for this core checkpoint:
+Closing evidence for the `e180626…` full-suite checkpoint and the later
+targeted tip repairs:
 
 ```text
 swift test --filter RelationalLearning
@@ -204,8 +322,14 @@ swift test --filter AppleIntelligenceCellContractTests
 # 11 tests, 0 failures; includes strict 24-operation round-trip publication,
 # representative decoded dispatch, persistence-shape, and access gates
 
-swift test
-# 757 tests, 0 failures
+swift test -q
+# 761 tests, 0 failures at 7cc6205…
+
+swift test --filter CellRuntimeReadinessContractTests/testRuntimeBindingPrivilegeInstallsUnsignedFreshOwnerHandlersOnlyInsideTokenScope
+# 1 test, 0 failures at the current tip
+
+swift test --filter ResolverTests
+# 47 tests, 0 failures at the current tip
 
 python3 .../explore_contract_audit.py \
   --repo-root .../cellprotocol-chat-hardening \
@@ -609,8 +733,8 @@ residuals are retained below instead of being promoted to inferred passes.
 | C1 | **Supported across multiple hosted Swift Cells; not universal** | Real core/Scaffold/Binding/host cases establish the class. Synchronous constructors and Cells with no decoded runtime bindings are counterexamples. |
 | C2 | **Supported, not exclusive** | Detached decoded setup and non-waitable disconnects produced immediate-read/action/status failures. Authorization denial, source outage, bad keypaths, and legitimate empty datasets remain alternate causes. |
 | C3 | **Accepted for supported host access and mutation boundaries** | Hosts await optional readiness and waitable mutations; RelationalLearning restores its own journal/contracts behind that boundary while app semantics remain in the Cell. This is not a mandate to push application semantics into protocol core. |
-| C4 | **Accepted** | Old green tests coexisted with empty/broken production behavior and later permitted RelationalLearning state loss, method-blind Explore collisions, late strict contract publication, nondeterministic IDs, and unsafe replay. Binding also produced successful zero-test focused exits until selectors were count-checked, and four Porthole owner failures appeared only in the 416-case order. Real payload, cold reload, exact `(key, method)`, registration-order, negative access, known-data, non-zero selector, contaminated-order, and full-count tests caught failures. The former 54 Chat warnings were separately adjudicated as scanner false positives rather than promoted to defects. |
-| C5 | **Accepted and preserved in changed paths** | No admin/cookie/private fallback was added. RelationalLearning action grants do not grant feed injection; Chat decrypt binds live proof, signing identity, and Agreement; exact child grants cannot reach legacy root handlers; outsider, wrong-key, proof, Agreement, and fail-closed source cases remain enforced. Binding treats host, remote owner, imported, persisted, and external-view provenance separately; serialized configuration cannot mint authority, remote/imported configuration cannot select the local control plane, and credential redaction occurs at persistence/export/display/diagnostic sinks. |
+| C4 | **Accepted** | Old green tests coexisted with empty/broken production behavior and later permitted RelationalLearning state loss, method-blind Explore collisions, late strict contract publication, nondeterministic IDs, and unsafe replay. Binding produced successful zero-test focused exits until selectors were count-checked, and four Porthole owner failures appeared only in the 416-case order. CellScaffold's first 1,400-case full-order run exposed three payment-store contamination failures that all passed alone; the repaired canonical 1,405-case run is green. Real payload, cold reload, exact `(key, method)`, registration-order, negative access, known-data, non-zero selector, contaminated-order, and full-count tests caught failures. Static warnings remain candidates until source/runtime evidence adjudicates them. |
+| C5 | **Accepted and preserved in changed paths** | No admin/cookie/private fallback was added. RelationalLearning action grants do not grant feed injection; Chat decrypt binds live proof, signing identity, and Agreement; exact child grants cannot reach legacy root handlers; outsider, wrong-key, proof, Agreement, and fail-closed source cases remain enforced. Binding treats host, remote owner, imported, persisted, and external-view provenance separately. CellScaffold callbacks now authenticate before decode and use stored ticket/device correlation; identity recovery requires owner proof; object storage remains owner/Cell namespaced. The shared callback token is explicitly not claimed as per-device capability proof. |
 | C6 | **Partially supported as a testing strategy, not proven as full capability** | Shared Swift/Python/Rust wire fixtures plus runtime-specific tests catch schema drift, but Relational journal/ID parity and authoritative fixture checkout are not CI-enforced across all runtimes; lifecycle, resolver security, persistence durability, renderer parity, and live transport remain outside fixture proof. |
 
 ### Precise current **NOT PROVEN** statement
@@ -619,9 +743,14 @@ This audit does **not** prove:
 
 - that all CellProtocol functionality or every first-party HAVEN repository is
   robust;
-- that current CellScaffold `8fb2c059…` is green on the exact current
-  CellProtocol `e180626…` dependency graph; two earlier dependency snapshots
-  have clean 1,358-case suites, but they are not silently promoted to final-graph proof;
+- deployment, staging, browser/user-path, actual process/container restart,
+  crash/power-loss, MinIO/S3, or owner-enrolled per-device capability proof for
+  current CellScaffold `e932fb6…`; its exact local CellProtocol `7cc6205…`
+  graph is green for 1,405 tests, but a local full suite is not those broader
+  forms of evidence;
+- that all 102 static required-decoder files lacking the established Porthole
+  readiness marker are safe or vulnerable. The scan is a candidate queue and
+  requires per-Cell persistence/publication/host adjudication;
 - a real process restart for every persisted Tier-1 Cell, crash/power-loss
   durability, or simultaneous multi-process access;
 - a complete live bridge/WebSocket detach/drop roundtrip with remote denial;
@@ -690,8 +819,10 @@ This audit does **not** prove:
 
 These are explicit evidence or ownership gaps, not inferred passes. The three
 Goals therefore remain non-terminal at HAVEN-wide scope. Kjetil owns the
-CellUtility repository decision and the separate CellScaffold release task owns
-the final clean full-suite verdict.
+CellUtility repository decision, the per-device capability/provisioning policy,
+and any deployment authorization. The final CellScaffold clean full-suite
+verdict itself is now green and published; the remaining gaps above are not
+silently converted into release proof.
 
 ## Earlier release continuation and audit chronology — 2026-07-14
 
@@ -1708,6 +1839,28 @@ Screenshot-only evidence was not used. Conversely, this wave does not claim brow
     authorization ordering without broadening or silently revoking those grants.
     Promoted only the evidence actually earned: 24/24 local contract equality
     after decode and representative decoded strict dispatch of exactly 8/24.
+38. Accepted a shared CellProtocol runtime-binding token only for installing a
+    Cell's own local handlers, never as access authority. Added the unsigned
+    owner regression and retained normal proof/Agreement/policy enforcement for
+    state and actions.
+39. Replaced unauthenticated CellScaffold callback source ingress with
+    auth-before-decode service-gateway protection and exact stored correlation.
+    Did not call the shared gateway token a per-device identity, Agreement,
+    capability, or enrollment proof; that remains Kjetil-owned rollout work.
+40. Kept production payment-store detach fail closed. Allowed in-memory reuse
+    only after the current generation is detached by an exact Vapor `.testing`
+    application, and added symmetric stale-token negatives for audit and
+    consumption stores.
+41. Made unsupported MinIO/S3 object-storage modes fail explicitly rather than
+    claiming fake local transport success. Hardened only the implemented local
+    filesystem/local Cell path and kept real remote storage in the residual
+    ledger.
+42. Preserved the primary dirty CellScaffold checkout and performed the final
+    wave in an isolated worktree based directly on `f8cbde8`. Staged the entire
+    isolated 39-file wave only after targeted and canonical full-suite proof.
+43. Rejected a disk-exhausted full run as evidence. Accepted the final
+    CellScaffold result only after the canonical runner completed 1,405 tests
+    with 9 skips and 0 failures, and reran CellProtocol `origin/main` for 761/761.
 
 ## Post-audit delivery
 
@@ -1752,6 +1905,8 @@ Kjetil explicitly requested commit and push after the local repair audit. Each c
 | CellProtocol strict raw-handler contract ordering | `main` | `8e2196478fd9a4b8f5de2b53ff9e707d8ea3d2c7` | `origin/main`, `ls-remote` verified equal; full package 755/755; affected suites 59/59; strict nine-Cell regression 1/1; corrected Explore audit 0 errors/19 manual-review warnings |
 | CellProtocol Apple Intelligence operation publication | `main` | `090169231d160e7efd723b3f8b8aa1958c6c816e` | `origin/main`, `ls-remote` verified equal; full package 756/756; Apple 10/10; fresh strict 24-operation/20-key publication matrix; adviser found no blocker |
 | CellProtocol Apple Intelligence decoded contract/access hardening | `main` | `e180626c6339a11c90766dc99c22ba9d077e4de5` | `origin/main`, `ls-remote` verified equal; full package 757/757; Apple 11/11; strict 24/24 round-trip contract equality; representative decoded dispatch 8/24; canonical persisted FlowElement and access-order negatives; advisers returned `SHIP` |
+| CellProtocol runtime-binding and identity-recovery tip | `main` | `71090c2`, `f41fb38`, `7cc6205a248497e974fa56a9871485ae42657eab` | `origin/main`, `ls-remote` verified at `7cc6205…`; current full package 761/761; unsigned runtime binding 1/1; ResolverTests 47/47; repo clean |
+| CellScaffold persisted runtime and callback hardening | `main` | `e932fb682ada2098c3d51d25abef773784b9a63a` | `origin/main`, `ls-remote` verified; exact CellProtocol `7cc6205…`; canonical isolated suite 1,405 executed / 9 skipped / 0 failed; no deploy |
 | Binding scanner/runtime isolation follow-up | `main` | `2c295d8ce2ddf78562cc7541aa8f93132a77b8a7` | `origin/main`; full target 398 planned, 378 passed, 20 explicit skips, 0 failures |
 | Binding runtime surface/trust-boundary hardening | `main` | `1a1e6c462033158850ea568f1bdeac7cf8a35664` | `origin/main`, `ls-remote` verified equal against CellProtocol `e180626…`; exact final plan 416 total / 396 passed / 20 explicit BindingUITests skips / 0 failed; 9/9 order gate; 6/6 vault/Porthole/cancellation gate; 1/1 final fingerprint gate; parity/readiness/security advisers approved |
 | Rust missing-UUID/shared-fixture parity | `main` | `e5ea7e56d1f697c94660706786da9a6c76d015a2` | `origin/main`; unit plus 27 integration tests passed |
@@ -1761,10 +1916,13 @@ Kjetil explicitly requested commit and push after the local repair audit. Each c
 | Priority | Residual risk | Owner / blocker | Required terminal evidence |
 |---|---|---|---|
 | P1 | Binding audited families lack separate-process restart and deployed remote runtime-launch proof; PersonalCopilot subtypes do not all have individual restart/action coverage; real OS cold launch, remote hydration, actual multi-window acknowledgement, and deployed cross-process scene delivery have not been exercised | Binding/HavenAgentD owner | Per-subclass critical action/restart sampling, deployed owner-published launch with wrong/missing/stale-proof negatives, OS cold launch into the intended scene, real window acknowledgement, restart |
-| P1 | CellProtocol's 23 and CellScaffold's 110 heuristic hits are not fully manually adjudicated | Cross-repo audit owner; volume and specialized ownership | Per-type vulnerable/safe/tested/unknown matrix tied to actual publication/host path |
+| P1 | The latest bounded CellScaffold scan found 136 `Task` occurrences in required decoders across 120 App source files; 102 files do not mention the established Porthole readiness marker. These are not fully manually adjudicated and are not asserted defects | Cross-repo audit owner; volume and specialized ownership | Per-type vulnerable/safe/tested/unknown matrix tied to actual persistence, publication, and immediate host path |
 | P2 | Binding's exact final broad target is green with 416 total / 396 passed / 20 explicitly skipped UI tests / 0 failed, and the four order-sensitive Porthole tests now reset the complete runtime. This is still a deterministic non-UI gate using the startup verifier vault; it does not prove the biometric vault, UI target, live reload of catalog-source settings, or universal dependency injection for mutable `CellBase` globals | Binding test/runtime owner | Add an expected test-count gate, run BindingUITests in a configured host, execute a real biometric path separately, add live/persisted catalog-source reload evidence, and continue project-wide global-state isolation |
 | P1 | Swift strict Agreement and proof-bearing TrustedIssuer admission are published, but safe owner-authorized public issuance/session use is not proven across every live route or across Go/Rust/Python/SwiftWeb | CellProtocol identity/security and port owners | Pass owner-published public read plus wrong identity, missing proof, stale proof, non-released, concurrent-idempotency, and actual-use expiry negatives without app/renderer bypass in each supported runtime |
-| P1 | Staging device register/resolve/submit routes accept unauthenticated input and elevate it to Scaffold authority; participant/device/ticket is not bound to an owner-enrolled signing key | Kjetil plus CellScaffold/Binding identity-security owners; breaking coordinated migration | Owner-approved enrollment Agreement/capability, canonical signed requests, exact device/ticket/action/audience binding, persisted replay and revocation, legacy re-enrollment, full negative matrix, staged coordinated rollout |
+| P1 | Published CellScaffold source now authenticates callback ingress before decode and binds stored participant/device/ticket correlation, but uses one broad service-gateway token rather than owner-enrolled per-device signing proof. No deployment was performed, so current staging protection is **NOT PROVEN** and the last historical staging observation remains unauthenticated | Kjetil plus CellScaffold/Binding identity-security owners; coordinated migration and deploy | Owner-approved enrollment Agreement/capability, canonical per-device signed requests, exact action/audience binding, provisioning/rotation/revocation, full negative matrix, staged coordinated rollout and live verification |
+| P1 | Payment audit and consumption stores are individually generation-fenced and the 1,405-case suite is green, but cross-store atomicity and the advertised mutability of immutable proof keypaths remain unresolved contract questions | CellScaffold payment/security owner | Transactional cross-store failure/recovery gate and an honest read-only versus write contract with negative dispatch tests |
+| P2 | Local object storage is integrity-, permission-, and namespace-hardened, while real MinIO/S3/presign, container restart, backup restore, pre-existing symlink/root handling, and legacy cleanup are unproven | CellScaffold storage/deployment owner | Real service integration, process/container restart and backup-restore canaries, filesystem-adversary matrix, and migration cleanup policy |
+| P2 | Identity mapping recovery requires owner proof and fills gaps, but the recovery authorization object is trusted in-process machinery rather than a per-restored-owner cryptographic capability; the legacy public setter remains unaudited | CellProtocol resolver/identity owner | Narrow or retire the legacy setter, bind restored-owner mappings to explicit proof/capability, and add wrong-owner/replay/concurrency tests |
 | P1 | `VaporAgentConversationReplies` uses a shared relay bearer token and reads private inbox records directly instead of the Cell's explicit reader-grant path | Agent relay/identity owner | Decide the intended service identity/capability; prove wrong token, wrong identity/key, missing/stale proof, record filtering, and revocation without transport-owned policy |
 | P2 | Shared optional activation and the local GeneralCell flow lifecycle are published, but adviser-ranked Chat/Orchestrator/EntityAnchor/Calendar/Vault/GraphIndex/TrustPacket/Commons/Apple Intelligence families do not all have real per-family persisted immediate state/action, restart, and multi-host gates | CellProtocol/CellApple owners | Per-family production-contract tests, separate-process reload where state is durable, stable-grant checks, and multi-host compatibility evidence |
 | P2 | Apple Intelligence retained state and owner-only dequeue are locally proven, but hostile pre-decode allocation, live Foundation Models output, separate-process restore, and a production generic-host drain are not | CellApple/host owners | Size-bounded envelope or streaming decode before allocation; separate-process restore; real available/unavailable model gates; host integration that dequeues and publishes without broadening owner authority |
