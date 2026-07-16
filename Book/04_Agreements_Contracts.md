@@ -201,7 +201,102 @@ For a supported and tested access path:
 - replay/determinism are separate lifecycle and storage properties, not
   automatic consequences of having a Contract
 
-## 8. Summary
+## 8. Signature and time semantics
+
+The production owner-archive path uses `Contract.ownerSignedSnapshot(...)`.
+This is deliberately an **issuer-signed, subject-bound** snapshot:
+
+- the Contract issuer signs the exact Agreement bytes;
+- the Contract subject and storage domain are bound into the signature;
+- the current owner-archive path requires issuer, subject, EntityAnchor owner,
+  and signing-key control to resolve to the same owner;
+- a descriptive `counterparty` is not a counterparty signature.
+
+The UI and APIs must not describe this as bilateral or multiparty signing.
+Those semantics require a different contract format with explicit signatures
+from every required party.
+
+Cryptographic authenticity and current authorization are separate questions:
+
+- `verifyCryptographicSignature` and `verifyHistoricalBinding` establish that
+  an immutable historical Contract was signed and remains bound to the
+  expected issuer, subject, and domain;
+- `verifySignature` and `verifyAuthorizationBinding` additionally require the
+  Contract to be temporally active now;
+- `temporalStatus` reports `active`, `not_yet_valid`, `expired`, or
+  `structurally_invalid`.
+
+An expired authentic Contract therefore remains visible in history, but it
+must not authorize current access.
+
+## 9. Signed Agreement Entity commit
+
+`signedAgreementEntity.commit` is the production admission boundary for an
+owner-signed Contract in `EntityAnchorCell` (Apple and Vapor runtimes). It:
+
+1. verifies owner/key control and the active owner/subject/domain binding;
+2. verifies every required TrustedIssuer evaluation receipt;
+3. computes the Contract hash and immutable record-content hash;
+4. rejects conflicting content for an existing Contract UUID;
+5. writes the immutable record and signed persistence receipt together using
+   a serialized, atomic file replacement;
+6. reloads the entity file from disk and verifies record and receipt hashes
+   before returning `persisted`.
+
+The persistence receipt binds the EntityAnchor owner, record ID, entity
+keypath, Contract hash, record hash, timestamp, and persistence semantics. A
+successful generic `set`, a renderer status string, or a local Workbench save
+is not equivalent to this receipt.
+
+## 10. Verifiable Credential evaluation receipts
+
+A `ProvedClaimCondition` is only a requirement declaration. It is not evidence
+that a Verifiable Credential has been validated.
+
+`trustedIssuers.evaluateSigned` returns a short-lived signed receipt only after
+the concrete `cell:///TrustedIssuers` authority evaluates the credential. The
+receipt binds:
+
+- credential hash;
+- issuer-policy hash and context;
+- exact Agreement-condition hash;
+- required credential type and subject-claim path;
+- requester/subject binding result;
+- revocation/status result;
+- verifier endpoint, verifier signing identity, evaluation time, and expiry.
+
+Consumers must pin the verifier to the owner of the resolved
+`cell:///TrustedIssuers` cell. They must reject an otherwise valid receipt from
+an attacker-selected verifier and must not reuse a receipt for another
+condition. Raw credential JSON is write-only input in Agreement Workbench and
+is not returned in state, persisted in the Workbench snapshot, or copied into
+the signed record; the signed receipt is the durable evidence projection.
+
+## 11. Agreement Workbench provenance contract
+
+Agreement Workbench and Entity Studio expose three distinct layers:
+
+| Layer | Mutability | Authority |
+| --- | --- | --- |
+| Agreement template | Immutable start point | No access authority |
+| Draft/local snapshot | Editable or restorable as a new draft | No signature or entity-persistence claim |
+| Verified signed entity record | Immutable, read-only projection from EntityAnchor | Backed by Contract verification and a signed read-after-write receipt |
+
+Restoring history always creates a new draft. Entity Studio never trusts
+editable `recordState`, `signatureValidationState`, or
+`isCryptographicallySigned` values; only records re-read and verified from
+EntityAnchor may appear in the verified projection.
+
+The full surface, compact helper component, and Co-Pilot chat helper read the
+same Agreement Workbench state. Chat may prefill the AI prompt, but generation,
+VC evaluation, signing, and storage remain separate explicit user actions.
+
+Production CellConfigurations reference `AgreementWorkbench`, `EntityStudio`,
+`TrustedIssuers`, and `EntityAnchor` explicitly. Their published GET/SET
+keypaths have typed Explore contracts so strict-mode renderers and agents can
+verify the operation boundary before invocation.
+
+## 12. Summary
 
 Agreements express what an identity *wants*.  
 Contracts define what the Cell *allows*.  
