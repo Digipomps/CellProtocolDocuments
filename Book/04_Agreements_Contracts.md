@@ -52,6 +52,72 @@ Capabilities should be as narrow and concrete as the supported keypath/action
 contract permits. Root or wildcard-like grants are broader and require explicit
 review; a capability name alone does not prove least privilege.
 
+### 2.1 Canonical `RWXS` permission form
+
+A compact Grant permission is written as exactly four ordered positions:
+
+| Position | Meaning | Authority granted |
+| --- | --- | --- |
+| `r` | Read | Read or receive the value/output at the granted keypath. |
+| `w` | Write | Write or change the value/state at the granted keypath. |
+| `x` | Execute | Invoke the granted operation. |
+| `s` | Storage | Persist or retain received output beyond the active operation. |
+
+A dash means that authority is absent. Examples:
+
+- `r---`: read only; no persistent retention authority
+- `r--s`: read and retain
+- `---s`: retain output already received through a separate authorized path
+- `rwxs`: all four permissions
+- `----`: no permission and therefore never a successful request
+
+The canonical form uses lowercase wire characters. `R`, `W`, `X`, and `S` may
+be used as prose names, but are not accepted as permission-string characters.
+
+### 2.2 What Storage permission proves
+
+`S` is authorization evidence, not digital-rights-management technology. A
+signed, identity-bound Contract containing an `S` Grant can prove that the
+subject was allowed to retain the specified output under the Contract's
+keypath, domain, conditions, purpose, and duration. The bare string `---s`
+without that proof path is not evidence by itself.
+
+A compliant consumer without `S` may perform the volatile processing needed
+to complete the authorized operation, but must not keep a persistent copy.
+Persistent copies include files, databases, durable caches, logs, backups,
+training datasets, and equivalent retained representations. A Contract may
+narrow this boundary further through Conditions.
+
+CellProtocol cannot prevent a non-compliant or malicious recipient from
+copying output after it has been revealed. The value of `S` is that authorized
+retention is explicit and auditable, and unauthorized retention can be shown
+as a Contract violation with consequences outside the copy mechanism itself.
+
+### 2.3 Storage is not forwarding
+
+`S` does not authorize disclosure, redistribution, publication, or forwarding.
+Those actions need a separately defined capability and Contract path. Before
+forwarding retained material, the sender must be able to show both:
+
+1. authority to retain the source material; and
+2. authority to disclose it to the intended recipient.
+
+The recipient then needs its own applicable authority. A forwarded copy does
+not inherit the sender's Contract automatically.
+
+### 2.4 Compatibility and implementation boundary
+
+New code and generated Explore contracts must emit four-character permissions.
+The Swift runtime still decodes legacy three-character forms (`rwx`) and
+legacy six-character group/other forms without granting Storage. Canonical
+group/other input uses two four-character segments (eight characters total).
+The persisted integer representation remains compatible: the existing
+read/write/execute bits are unchanged and Storage is additive.
+
+`S` is also distinct from `ColdStorageCondition`. `S` governs whether a
+Contract subject may retain output. `ColdStorageCondition` governs how the
+runtime may persist an inactive Cell as part of lifecycle policy.
+
 ## 3. Conditions
 
 Conditions restrict when a Contract is valid. Examples:
@@ -130,6 +196,8 @@ For a supported and tested access path:
   Contract/Grant, or an explicit cell-specific decision
 - the authorization decision records its path and reason
 - signed Contracts bind the declared identity/proof material and scope
+- persistent retention requires `S`; it is never inferred from read access
+- Storage authority never implies forwarding or redistribution authority
 - replay/determinism are separate lifecycle and storage properties, not
   automatic consequences of having a Contract
 

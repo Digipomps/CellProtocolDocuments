@@ -79,6 +79,14 @@ The core concepts are covered, but still missing:
 
 - **README references docs not present in the code repo** — Addressed by updated README that points to `CellProtocolDocuments`.
 
+- **Permission strings exposed four positions but implemented only `rwx`** —
+  Resolved 2026-07-13. `Permission` now implements canonical `rwxs`, preserves
+  the existing integer bits for legacy persisted data, adds Storage as an
+  independent bit, emits four-character strings, and decodes legacy three- and
+  six-character input without inferring Storage. Chapter 04 documents that
+  Storage is retention evidence rather than copy prevention or forwarding
+  authority.
+
 ## 6) Delivered Additions
 
 The gaps were closed with these additions:

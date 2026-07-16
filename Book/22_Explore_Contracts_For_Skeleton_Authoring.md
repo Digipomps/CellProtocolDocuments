@@ -116,6 +116,10 @@ Required semantics:
 - `returns` must be explicit for every key unless the return is intentionally
   `null`.
 - `permissions` must name the effective access expectation.
+  Permission strings are canonical four-character `rwxs` values as defined in
+  [Chapter 04](04_Agreements_Contracts.md#21-canonical-rwxs-permission-form).
+  Read permission does not imply Storage permission, and Storage permission
+  does not imply forwarding authority.
 - `flowEffects` must list observable flow topics caused by this operation.
 - `summary` is human-facing, but should remain concise enough for RAG snippets.
 

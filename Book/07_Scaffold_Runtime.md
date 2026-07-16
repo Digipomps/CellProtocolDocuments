@@ -145,6 +145,18 @@ Storage backends that claim durable restart/replay must provide:
 - ordered FlowElement persistence  
 - safe startup and shutdown  
 
+This section describes the Scaffold's own persistence duties. It is distinct
+from the `s` position in a subject's `rwxs` Grant. `s` authorizes that subject
+to retain received output; it does not configure the storage engine.
+`ColdStorageCondition` is a third, separate concept that governs lifecycle
+policy for persisting an inactive Cell.
+
+Agreement Workbench follows the same boundary when authoring Grants. It emits
+canonical four-character permissions, accepts legacy three-character input
+without inferring Storage, and exposes `---s` and `r--s` as explicit retention
+choices. Its user-facing guidance states that `S` permits persistent retention
+of received output but does not authorize forwarding.
+
 ### 4.2 Snapshots  
 Snapshots allow:
 

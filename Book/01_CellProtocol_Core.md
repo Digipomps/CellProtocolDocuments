@@ -40,7 +40,8 @@ CellProtocol addresses this by:
 ## Core design principles
 1. Minimal surface: as small as possible, sufficiently expressive.
 2. Determinism: same input + same history ⇒ same outcome.
-3. Capability security: no authority without explicit capability.
+3. Capability security: no authority, including persistent retention, without
+   explicit capability.
 4. Domain-scoped identity: no cross-domain tracking.
 5. Transport independence: semantics do not change with networking.
 6. Replay first: behavior that claims replay support must record enough ordered
@@ -84,6 +85,10 @@ CellProtocol addresses this by:
 - Protected access is granted through verified owner proof, explicit
   Contracts/Grants, or a deliberately narrow cell-specific policy. Absence of
   every accepted path means denial.
+- Compact Grants use the canonical four-position `rwxs` form: read, write,
+  execute, and Storage/retention. Storage permission is evidence of authority
+  to retain output; it is not technical copy prevention or permission to
+  forward it.
 - Trust can be anchored in Purpose and Interests, and extended with evidence/attestations when relevant.
 
 ## Replay and audit
