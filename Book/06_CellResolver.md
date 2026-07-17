@@ -1,6 +1,8 @@
 
 # Chapter 06 — CellResolver
 
+Last verified against code: 2026-07-13.
+
 The CellResolver is a principal routing, enforcement, and coordination boundary
 within the HAVEN runtime. It can resolve Cells and bridges and apply the
 implemented identity, Agreement, Grant, proof, lifecycle, and transport checks

@@ -1,5 +1,7 @@
 # Chapter 01 — CellProtocol Core
 
+Last verified against code: 2026-07-13.
+
 This chapter describes the conceptual foundations of CellProtocol: the problem
 it addresses, its design invariants, and its boundaries. Concrete interfaces
 (how to program against the protocol) are covered in the next chapter.

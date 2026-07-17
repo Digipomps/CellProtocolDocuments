@@ -1,6 +1,8 @@
 
 # Chapter 04 — Agreements and Contracts
 
+Last verified against code: 2026-07-13.
+
 Agreements and Contracts define HAVEN’s explicit capability-based authorization
 model. Nothing in HAVEN is implicit: all authority must be granted through a
 verified authorization path. A Contract/Grant is the ordinary delegated path;

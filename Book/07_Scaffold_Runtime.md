@@ -1,6 +1,8 @@
 
 # Chapter 07 — Scaffold and Runtime Model
 
+Last verified against code: 2026-07-13.
+
 The Scaffold is the execution environment that hosts Cells, Resolvers, storage,
 identity vaults, and transport bridges. It functions like a minimal operating
 system designed to host privacy-first distributed applications and make
