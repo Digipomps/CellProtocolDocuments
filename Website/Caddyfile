@@ -1,0 +1,44 @@
+(haven_static) {
+  root * /srv
+  encode zstd gzip
+
+  @assets path /assets/*
+  header @assets Cache-Control "public, max-age=86400"
+
+  header {
+    Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; base-uri 'none'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests"
+    Permissions-Policy "camera=(), microphone=(), geolocation=(), browsing-topics=()"
+    Referrer-Policy "strict-origin-when-cross-origin"
+    Strict-Transport-Security "max-age=31536000"
+    X-Content-Type-Options "nosniff"
+    X-Frame-Options "DENY"
+  }
+
+  handle_errors {
+    rewrite * /404.html
+    file_server
+  }
+
+  file_server
+}
+
+new.haven.digipomps.org {
+  header X-Robots-Tag "noindex, nofollow, noarchive"
+  import haven_static
+}
+
+digipomps.org, www.digipomps.org {
+  @www host www.digipomps.org
+  redir @www https://digipomps.org{uri} permanent
+
+  redir /tjenester/ / permanent
+  redir /plattform/ / permanent
+  redir /vanlige-sporsmal/ /artikler/ permanent
+  redir /cellprotocol-explained/ "/artikler/#hva-er-en-cell" permanent
+  redir /purpose-framework-explainer/ "/artikler/#formal-for-produkt" permanent
+  redir /om-oss/ "/#kontakt" permanent
+  redir /en/services/ / permanent
+  redir /en/cellprotocol-explained/ "/artikler/#hva-er-en-cell" permanent
+
+  import haven_static
+}
