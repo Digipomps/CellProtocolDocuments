@@ -209,5 +209,9 @@ answered by the task-owner decision, current source, and deterministic tests.
   desynchronization are release blockers for a general end-user experience.
 - The UX findings were recorded, not fixed, because this follow-up requested a
   quality assessment and safe publication rather than a broader redesign.
+- The current CellProtocol worktree later acquired an unrelated
+  `WeightedGraphRuntime.swift` compile error (a missing `return`). It was left
+  untouched; the clean temporary dependency isolated the Workbench proof from
+  that concurrent change.
 
 Final human inspection/sign-off remains with Kjetil.
