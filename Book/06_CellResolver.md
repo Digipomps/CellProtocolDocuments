@@ -45,6 +45,24 @@ CellProtocol does not promise that every transition is durably logged or
 replayable; callers that need completion must use the waitable APIs and test
 the relevant host/transport path.
 
+### 2.1 Explicit persistent snapshots
+
+`CellResolver.persistCellSnapshot(_:)` lets a host request that the current
+state of an already resolved Cell be written without waiting for lifecycle
+eviction. The request is accepted only when the Cell declares
+`persistancy == .persistant`; transient Cells return `false` and are not
+written. A `true` result means that the selected resolver storage path completed
+the write it was asked to perform. It is not, by itself, a distributed commit,
+an fsync or power-loss guarantee, or proof that a remote replica acknowledged
+the snapshot.
+
+The operation remains inside the Resolver persistence boundary: it uses the
+registered type name, readiness checks, configured storage backend, and normal
+Cell encoding/encryption path. It does not grant an owner, requester, or
+capability, and it must not be exposed as an authorization bypass. A protected
+external action that can trigger a snapshot still needs its own owner/Grant and
+purpose policy before calling this runtime API.
+
 ## 3. Identity and Contract Enforcement
 
 For supported resolver-mediated protected actions, authorization may validate:

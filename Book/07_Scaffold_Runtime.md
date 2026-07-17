@@ -164,6 +164,13 @@ Snapshots allow:
 - checkpointing for long-running systems  
 - offline packaging for bundle sync  
 
+A Scaffold may call `CellResolver.persistCellSnapshot(_:)` when a persistent
+Cell reaches an application-defined checkpoint and waiting for eviction would
+risk losing acknowledged application state. The call refuses non-persistent
+Cells and reports whether the Resolver completed its selected local storage
+write. The Scaffold must still authorize the triggering action and must not
+interpret success as a remote replication, quorum, or crash-durability receipt.
+
 ### 4.3 Replay  
 Replay is triggered for:
 
