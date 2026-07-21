@@ -2,6 +2,7 @@
 
 Dato: 2026-07-20
 Status: **blokkert og køklar**; implementasjon skal ikke starte før `ADMIN-GO`
+Sist synkronisert: 2026-07-21 — `ADMIN-NO-GO` beholdes
 Beslutningseier: Kjetil
 Koordinerende oppgave: Codex-oppgaven «Evaluer admin-tjenesten» (`019f5bc3-a21e-7502-855d-6f1f3bd567e7`)
 Tekniske eiere: må tildeles per repo ved oppstart
@@ -28,6 +29,31 @@ Providerpanel, egen API-nøkkel og mer avansert onboarding kommer etter første 
 - CellScaffold draft-PR #36: `codex/development-status-snapshot-producer-20260720`, head `76883c364ab1502ea8aaa3c55d595b1143e37790`
 
 Adminstatusen er tidsfølsom. Adminoppgaven skal lese status på nytt før `ADMIN-GO`; denne planen er ikke autoritet for senere PR-, CI-, staging- eller incidentstatus.
+
+## Admin-synkroniseringslogg
+
+### 2026-07-21 — `ADMIN-NO-GO`
+
+Kilde: delegert status fra «Evaluer admin-tjenesten», Codex-oppgave
+`019f5bc3-a21e-7502-855d-6f1f3bd567e7`.
+
+Adminoppgaven beholder `ADMIN-NO-GO` for Developer Workbench M0 og oppgir fire
+aktive blokkere:
+
+1. identitets-/recovery-hendelsen er ikke terminal;
+2. diskgaten er kritisk, rapportert til 98 % brukt;
+3. PR #44, release-provideren og Linux-child er ikke testet og operativt
+   grønne;
+4. deployvinduet er ikke åpnet.
+
+Operativ konsekvens: ingen start, ny worktree, gren, filreservasjon eller annen
+implementeringshandling for Developer Workbench. Neste sikre handling er kun at
+adminoppgaven re-evaluerer alle `ADMIN-GO`-portene når blokkernes tilstand har
+endret seg.
+
+Statusen er autoritativ som koordineringsbeslutning. De underliggende disk-,
+PR-, release- og runtimefakta er ikke re-auditert i denne dokumentoppdateringen
+og skal kontrolleres av adminoppgaven før en senere statusendring.
 
 ## Formål og mål frem til pilot
 
