@@ -55,6 +55,15 @@ Statusen er autoritativ som koordineringsbeslutning. De underliggende disk-,
 PR-, release- og runtimefakta er ikke re-auditert i denne dokumentoppdateringen
 og skal kontrolleres av adminoppgaven før en senere statusendring.
 
+#### Remediation-lead til blokker #2 (disk) — uavhengig modellinnspill (Claude), 2026-07-21
+
+Ikke-autoritativ, verifisert observasjon levert til adminoppgaven for
+kontroll — ingen handling utført. `df -h` 2026-07-21 bekrefter blokker #2:
+`/System/Volumes/Data` på 98 % (~23 GiB ledig). Største enkeltmål for
+gjenvinning funnet på maskinen: `~/.codex` = 41 GB (Codex-logger/state;
+`logs_2.sqlite` ~1,14 GB pluss WAL-er). Adminoppgaven eier verifisering og
+eventuell opprydding; dette er kun et konkret lead. `ADMIN-NO-GO` uendret.
+
 ## Formål og mål frem til pilot
 
 Planen arver formålene fra rådgiverleveransen og oppretter ingen nye `purpose://`-referanser.

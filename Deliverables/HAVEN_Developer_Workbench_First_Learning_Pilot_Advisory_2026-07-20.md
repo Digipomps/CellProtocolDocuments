@@ -231,3 +231,53 @@ Eksterne primærkilder, kontrollert 2026-07-20:
 - [Phaser documentation](https://docs.phaser.io/)
 - [Godot stable command-line tutorial](https://docs.godotengine.org/en/stable/tutorials/editor/command_line_tutorial.html)
 - [Godot stable web export](https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_web.html)
+
+## Uavhengig modellinnspill (Claude) — 2026-07-21
+
+Denne seksjonen er tilføyd av en uavhengig modell (Claude) og er additiv:
+den endrer ikke dommene over. Bakgrunn: den planlagte seksmodellrunden via
+Nano-GPT.com ble stoppet av sikkerhetsporten, så panelet ble kjørt som
+rollebasert enkeltmodell (Codex). Claude opererer innenfor tillitsgrensen uten
+dataeksponering og leverer derfor den uavhengige stemmen porten blokkerte.
+Rådgivende og side-effekt-fritt. Kjetil beslutter. `ADMIN-NO-GO` står — ingen
+implementasjon foreslås startet.
+
+**Samstemmighet (enkeltmodell → korroborert).** Uavhengig modell er enig i
+kjernekonklusjonene: smal læringssløyfe, ikke en Claude/Codex-klon; ingen
+spillmotor lenket inn i Binding (0 bytes); begge providerveier ender lokalt;
+`SecretCredentialCell` lokal custody; C6 Phaser-først med Godot som senere
+lokal ressurs. Dommene C2 «Motsagt» og C5 «Åpen» vurderes som riktige.
+
+**Tre skjerpinger (der uavhengig modell skyver videre):**
+
+1. **G1 måler feil ting (pedagogikk, sterkeste punkt).** Målet sentrerer
+   «kjørende artefakt + gjenopprettbart snapshot». Eierens faktiske mål er at
+   pilotbrukeren *lærer å styre AI til å kode*. En rask agent kan produsere et
+   kjørende spill på 60 minutter der brukeren ikke lærte noe. Anbefaling: gjør
+   G1s terminale suksesskriterium at pilotbrukeren *selv* lykkes med å dirigere
+   minst én agent-endring og kjøre på nytt (raden 52–57), ikke bare at
+   artefaktet kjører. «Hjelp logges som nivå» er godt — bind «teller»-regelen
+   til brukerens egen-authored endring, ikke til at artefaktet finnes.
+   Samstemmer med C4-hybriden, men skjerper målingen.
+
+2. **Hold `codex app-server` ute av kritisk sti til første kjøring
+   (red-team/arkitektur).** app-server er offisielt eksperimentell; OpenAI kan
+   endre wire-formatet. Å bygge pilot #1s *første* suksess på den er skjørt.
+   Risikoen er allerede flagget, men adapteren ligger i M-scope på veien mot
+   M6. Anbefaling: pilot #1s første kjørende resultat bruker «åpne i
+   Codex»-fallback + demo/simulert provider (raden 23–30) som *primær* vei;
+   utsett app-server-adapteren til etter første suksess. De-risker G1 og korter
+   kritisk sti M0→M6. Ikke bare «pin + kontrakttest» — helt av kritisk sti for
+   pilot #1.
+
+3. **n=1 sosialt lag / dag-3 og dag-30-retensjon (pedagogikk, åpent punkt).**
+   Opprinnelsesrapporten slo fast at det sosiale er avgjørende. For én
+   tenåringspilot finnes ingen peer-kohort; den sosiale motivatoren kollapser
+   til «vis familie/venner». Advisoryen dekker minutt 0–60 godt, men er tynn på
+   come-back-løkken. Åpent punkt (ikke overbygg): definer dag-3/dag-30
+   retur-trigger og minst én mottaker for arbeidet utover eieren
+   (familie-showcase-lenke, eller en venn som andre pilot). Flagg, ikke
+   implementer.
+
+Et disk-remediation-lead til implementeringsplanens admin-blokker #2 er ført inn
+i planens Admin-synkroniseringslogg samme dato.
