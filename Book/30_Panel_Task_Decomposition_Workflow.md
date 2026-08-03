@@ -2,7 +2,7 @@
 
 Status: draft workflow contract, v0.
 
-Last updated: 2026-07-04.
+Last updated: 2026-08-02.
 
 This chapter defines how a task given to the AI advisory panel is decomposed
 with the two structures HAVEN already has: declared purposes with measurable
@@ -20,6 +20,8 @@ Related sources:
 - `Deliverables/AI_Agent_Advisory_Panel_Report_Jorn_Erik_2026-06-15.md` —
   the panel as a working method
 - `Prompts/Advisory_Panel_Task_Decomposition.md` — fill-in launch template
+- `Deliverables/Panel_Brief_Integrity_Finding_2026-08-02.md` — brief-integrity
+  finding and its falsification test
 - Skill: `.claude/skills/haven-panel-task-decomposition/SKILL.md`
 
 ## 1. Why Both Structures
@@ -45,6 +47,32 @@ the Formål they serve through `purposeRef`; testable claims link to a
 GoalDefinition through `goalID`.
 
 ## 2. Workflow Contract
+
+### Phase 0 - Brief Integrity
+
+The shared brief is a load-bearing artifact, not neutral packaging. Its facts
+are premises for every claim in the ledger, so a defect there reaches the
+whole panel simultaneously rather than one adviser at a time.
+
+Every factual assertion in the brief carries an audit status on the same
+scale claims use: `retrieved`, `recalled`, `unavailable`, `contradicted`.
+Time-sensitive assertions carry timestamps. Known source conflicts are
+declared inside the brief rather than silently resolved.
+
+The brief binds the panel to *rules* — fairness constraints, scope limits,
+no-strawman requirements — and never to *facts*. Declaring the supplied facts
+authoritative measurably suppresses objections advisers would otherwise raise
+(panel-tested guard, 2026-08-02; standing policy D2, decided 2026-08-02).
+
+Each panelist returns a brief audit before its role output: either a
+considered "no objections" or an enumerated list of suspected defects with
+what would settle each. A finding about the brief outranks a finding about
+the subject matter.
+
+Both controls are required and neither suffices. The audit mandate catches
+internal inconsistency, undated or unsourced assertions, and conflated
+concepts. It does not catch internally coherent factual error; only retrieval
+does, and responsibility for that stays with whoever wrote the brief.
 
 ### Phase 1 - Formål
 
@@ -86,6 +114,13 @@ implementation, Claude long-horizon critique, local models for deterministic
 checks, and so on). The panel is not a voting machine; disagreement between
 roles is signal.
 
+Adjudication runs with two adjudicators, and the second receives the first's
+hardest verdict restated as an explicit challenge with its counter-argument,
+requiring a ruling. A panel configured to critique drifts toward convicting
+its object: the pressure-generating roles have no counterweight when the
+object is a third party rather than the commissioner. The challenge is what
+makes that drift visible (panel-tested guard, 2026-08-02).
+
 ### Phase 4 - Subtask Deduction Loop
 
 Next work items are deduced from evaluation artifacts, not invented:
@@ -99,6 +134,12 @@ Next work items are deduced from evaluation artifacts, not invented:
   subtasks; challenged critical questions → undercuts on the claim. Triage
   questions to answered/not-applicable first — only genuinely open ones may
   become subtasks (panel-tested guard, 2026-07-11)
+- A brief fact overturned by retrieval → a correction round, not a patch.
+  Adjudicators receive the corrected facts, all prior-round output, and a
+  mandate to discard or invert their own findings that rested on the error,
+  naming which adviser and which finding falls, stands, or flips. Editing the
+  brief without re-adjudicating leaves contaminated conclusions in the ledger
+  (panel-tested guard, 2026-08-02)
 
 Every subtask carries its parent `purposeRef` so all work traces to declared
 intent. The loop repeats until every Goal is terminal (satisfied, missed,
