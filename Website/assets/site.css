@@ -147,7 +147,10 @@ a:hover {
 
 .site-nav {
   display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: 1.35rem;
 }
 
@@ -201,9 +204,9 @@ a:hover {
 
 .hero-shell {
   display: grid;
-  align-items: center;
-  gap: clamp(2rem, 5vw, 5rem);
-  grid-template-columns: minmax(0, 0.85fr) minmax(25rem, 1.15fr);
+  align-items: start;
+  gap: clamp(2rem, 4vw, 4rem);
+  grid-template-columns: minmax(0, 1.04fr) minmax(24rem, 0.96fr);
 }
 
 .hero h1,
@@ -219,8 +222,9 @@ a:hover {
 }
 
 .hero h1 {
-  max-width: 12ch;
-  font-size: clamp(3.05rem, 6.1vw, 5.95rem);
+  max-width: 16ch;
+  font-size: clamp(2.8rem, 5.1vw, 5rem);
+  overflow-wrap: anywhere;
 }
 
 .hero-lede {
@@ -230,6 +234,29 @@ a:hover {
   font-family: var(--sans);
   font-size: clamp(1.25rem, 2.1vw, 1.6rem);
   line-height: 1.45;
+}
+
+.hero-example {
+  max-width: 38rem;
+  margin: 1rem 0 0;
+  padding-left: 1rem;
+  border-left: 0.25rem solid var(--clay);
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.hero-caveat {
+  max-width: 38rem;
+  margin: 1rem 0 0;
+  color: var(--muted);
+  font-size: 0.94rem;
+}
+
+.hero-source {
+  max-width: 38rem;
+  margin: 0.55rem 0 0;
+  font-size: 0.88rem;
+  font-weight: 750;
 }
 
 .hero-actions {
@@ -343,7 +370,84 @@ a:hover {
   font-size: 1.12rem;
 }
 
+.wide-heading {
+  max-width: 58rem;
+}
+
+.wide-heading h2 {
+  max-width: 22ch;
+}
+
+.wide-heading p {
+  max-width: 54rem;
+}
+
+.control-figure {
+  overflow: hidden;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.control-figure img {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+.control-figure figcaption {
+  padding: 0.9rem 1.2rem 1rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.control-steps {
+  display: grid;
+  padding: 0;
+  margin: 1.25rem 0 0;
+  gap: 0.75rem;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  list-style: none;
+}
+
+.control-steps li {
+  min-width: 0;
+  padding: 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.55rem;
+  background: rgb(255 255 255 / 82%);
+  overflow-wrap: anywhere;
+}
+
+.control-steps li > span {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  color: var(--clay);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.control-steps h3 {
+  margin: 0.9rem 0 0.35rem;
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.control-steps p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 .path-grid,
+.problem-grid,
 .principle-grid,
 .article-grid,
 .status-grid,
@@ -356,14 +460,74 @@ a:hover {
   grid-template-columns: repeat(3, 1fr);
 }
 
+.problem-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.problem-card {
+  display: flex;
+  min-width: 0;
+  min-height: 20rem;
+  flex-direction: column;
+  padding: clamp(1.4rem, 3vw, 2rem);
+  border: 1px solid var(--line);
+  border-top: 0.35rem solid var(--clay);
+  border-radius: 0.65rem;
+  background: var(--paper);
+  overflow-wrap: anywhere;
+}
+
+.problem-card .stat-number {
+  margin: 0 0 1.2rem;
+  color: var(--clay);
+  font-family: var(--serif);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.problem-card h3 {
+  margin: 0 0 0.65rem;
+  font-size: 1.45rem;
+  line-height: 1.2;
+}
+
+.problem-card p:not(.stat-number) {
+  margin: 0;
+  color: var(--muted);
+}
+
+.problem-card a {
+  margin-top: auto;
+  padding-top: 1.25rem;
+  font-weight: 800;
+}
+
+.section-bridge {
+  max-width: 52rem;
+  margin: 2rem 0 0;
+  padding-left: 1rem;
+  border-left: 0.25rem solid var(--clay);
+  font-size: 1.15rem;
+  font-weight: 750;
+}
+
+.problem-figure {
+  margin-top: 1.25rem;
+}
+
 .path-card,
 .article-card,
 .principle-card,
 .status-card,
 .source-card {
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 0.65rem;
   background: var(--paper);
+  hyphens: auto;
+  overflow-wrap: anywhere;
 }
 
 .path-card {
@@ -379,6 +543,15 @@ a:hover {
 .path-card:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow);
+}
+
+.static-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.static-card .path-link {
+  display: inline-flex;
 }
 
 .path-number {
@@ -425,6 +598,10 @@ a:hover {
 .principle-grid,
 .status-grid {
   grid-template-columns: repeat(3, 1fr);
+}
+
+.support-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .principle-card,
@@ -512,6 +689,36 @@ a:hover {
   font-weight: 800;
 }
 
+.featured-card {
+  border-top: 0.35rem solid var(--clay);
+}
+
+.governance-card {
+  align-self: center;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.cooperation-note {
+  max-width: 54rem;
+  margin-top: 1.25rem;
+}
+
+.cooperation-note p {
+  margin: 0;
+}
+
+.direction-panel {
+  margin-top: 0;
+}
+
+.possibility-grid {
+  margin-top: 1.25rem;
+}
+
+.possibility-grid .card-kicker {
+  margin-bottom: 0.55rem;
+}
+
 .status-card[data-status="built"] {
   border-top: 0.35rem solid var(--green);
 }
@@ -534,6 +741,39 @@ a:hover {
 
 .status-card[data-status="pilot"] .status-label {
   color: #6f4b00;
+}
+
+.democracy-pointer {
+  display: grid;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 1.25rem;
+  padding: clamp(1.2rem, 3vw, 1.8rem);
+  border: 1px solid var(--line);
+  border-left: 0.3rem solid var(--clay);
+  border-radius: 0.65rem;
+  background: var(--ochre);
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.democracy-pointer p:not(.hypothesis-label) {
+  max-width: 48rem;
+  margin: 0;
+  color: #403d36;
+  font-size: 1.04rem;
+}
+
+.democracy-pointer > a {
+  font-weight: 800;
+}
+
+.hypothesis-label {
+  margin: 0 0 0.75rem;
+  color: #7b2d1f;
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .callout {
@@ -625,6 +865,159 @@ a:hover {
   gap: 2rem;
   max-width: var(--reading);
   margin-inline: auto;
+}
+
+.article-list.article-index {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: var(--measure);
+}
+
+.article-index-card {
+  min-height: 18rem;
+}
+
+.article-index-card h2 {
+  margin: 0;
+  font-size: clamp(1.55rem, 2.5vw, 2.15rem);
+  letter-spacing: -0.025em;
+  line-height: 1.12;
+}
+
+.article-index-card p {
+  margin-bottom: 1rem;
+}
+
+.article-page-section {
+  padding-top: clamp(2rem, 5vw, 4rem);
+}
+
+.article-page-shell {
+  max-width: var(--reading);
+}
+
+.article-page-card h1 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(2.4rem, 5vw, 4.4rem);
+  font-weight: 650;
+  letter-spacing: -0.045em;
+  line-height: 1.02;
+}
+
+.article-date {
+  margin: -0.35rem 0 1.4rem;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.article-back {
+  margin-top: 1.5rem;
+}
+
+.comparison-table {
+  overflow-x: auto;
+  margin-top: 1.5rem;
+}
+
+.proof-hero .section-shell {
+  max-width: 54rem;
+}
+
+.proof-flow {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.proof-step {
+  position: relative;
+  min-height: 15rem;
+  padding: 1.4rem;
+  border: 1px solid var(--line);
+  border-top: 0.35rem solid var(--ink);
+  border-radius: 0.65rem;
+  background: var(--paper);
+}
+
+.proof-step[data-proof="denied"] {
+  border-top-color: var(--clay);
+}
+
+.proof-step[data-proof="allowed"],
+.proof-step[data-proof="bounded"] {
+  border-top-color: var(--green);
+}
+
+.proof-step h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.45rem;
+  line-height: 1.2;
+}
+
+.proof-number {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin: 0 0 1.5rem;
+  place-items: center;
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+  font-weight: 800;
+}
+
+.proof-outcome {
+  margin-top: 1.5rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.proof-layout {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.8fr);
+}
+
+.proof-layout h2 {
+  font-size: clamp(2rem, 3.5vw, 3.2rem);
+  line-height: 1.08;
+}
+
+.evidence-panel {
+  align-self: start;
+  padding: 1.5rem;
+  border: 1px solid var(--line);
+  border-top: 0.35rem solid var(--green);
+  border-radius: 0.65rem;
+  background: var(--paper);
+}
+
+.evidence-panel h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.evidence-panel code {
+  overflow-wrap: anywhere;
+}
+
+.command-details pre {
+  overflow-x: auto;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+  background: var(--ink);
+  color: white;
+  font-size: 0.82rem;
 }
 
 .article {
@@ -730,10 +1123,11 @@ summary {
 }
 
 .source-grid {
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .source-card {
+  min-width: 0;
   padding: 1.4rem;
 }
 
@@ -747,6 +1141,10 @@ summary {
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.source-card code {
+  overflow-wrap: anywhere;
 }
 
 .method-table {
@@ -814,6 +1212,9 @@ summary {
 }
 
 .footer-links a {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
   font-size: 0.92rem;
   font-weight: 700;
 }
@@ -837,14 +1238,40 @@ summary {
   }
 
   .path-grid,
+  .problem-grid,
   .principle-grid,
   .article-grid,
   .status-grid {
     grid-template-columns: 1fr 1fr;
   }
 
+  .control-steps {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .democracy-pointer {
+    align-items: start;
+    grid-template-columns: 1fr;
+  }
+
   .site-nav {
     gap: 0.9rem;
+  }
+
+  .no-js .nav-toggle {
+    display: none;
+  }
+
+  .no-js .site-nav {
+    position: static;
+    display: flex;
+    width: 100%;
+    border-top: 1px solid var(--line);
+  }
+
+  .no-js .nav-shell {
+    flex-wrap: wrap;
+    padding-block: 0.75rem;
   }
 }
 
@@ -890,11 +1317,25 @@ summary {
   }
 
   .path-grid,
+  .problem-grid,
   .principle-grid,
   .article-grid,
   .status-grid,
   .source-grid,
   .footer-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .control-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .proof-flow,
+  .proof-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .article-list.article-index {
     grid-template-columns: 1fr;
   }
 
