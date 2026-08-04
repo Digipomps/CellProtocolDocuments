@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="nb" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ett konkret testbevis – HAVEN</title>
+  <meta name="description" content="Se hvordan en Cell avviser lesing uten Contract, godtar en riktig signert Contract og hindrer at en forespørsel utvider sin egen autoritet.">
+  <meta name="theme-color" content="#f4f3ee">
+  <meta property="og:title" content="Ett konkret testbevis – HAVEN">
+  <meta property="og:description" content="Fra menneskelig forklaring til offentlig testkode på ett minutt.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="/assets/haven-human-workshop.webp">
+  <link rel="canonical" href="https://digipomps.org/bevis/tilgangskontroll/">
+  <link rel="icon" href="/assets/favicon.svg?v=20260801b" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/site.css?v=20260801c">
+  <script src="/assets/site.js?v=20260801b" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#innhold">Hopp til innhold</a>
+  <header class="site-header">
+    <div class="nav-shell">
+      <a class="brand" href="/" aria-label="HAVEN – forsiden"><img class="brand-logo" src="/assets/haven-logo.png" width="1006" height="478" alt=""><span class="brand-byline">et arbeid fra Digipomps</span></a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="hovedmeny" data-nav-toggle>Meny</button>
+      <nav class="site-nav" id="hovedmeny" aria-label="Hovedmeny" data-site-nav data-open="false"><a href="/">Start her</a><a href="/artikler/">Artikler</a><a href="/kilder/">Kilder</a><a href="/om/">Om</a><a class="nav-cta" href="mailto:kjetil@digipomps.org?subject=Spørsmål%20om%20HAVEN-beviset">Spør om testen</a></nav>
+    </div>
+  </header>
+
+  <main id="innhold">
+    <header class="page-hero proof-hero">
+      <div class="section-shell">
+        <p class="eyebrow">Implementert · avgrenset test</p>
+        <h1>Ett bevis du kan kontrollere.</h1>
+        <p>En beskyttet Cell skal avvise en fremmed uten Contract, slippe gjennom riktig signert autoritet og hindre at en forespørsel utvider fullmakten sin selv.</p>
+      </div>
+    </header>
+
+    <section class="site-section compact">
+      <div class="section-shell">
+        <div class="proof-flow" aria-label="Tre testede autorisasjonsutfall">
+          <article class="proof-step" data-proof="denied"><p class="proof-number">1</p><h2>Uten Contract</h2><p>En ikke-eier ber om å lese beskyttet tilstand.</p><p class="proof-outcome">Avvist</p></article>
+          <article class="proof-step" data-proof="allowed"><p class="proof-number">2</p><h2>Med riktig Contract</h2><p>Samme identitet får en signert, avgrenset lesetillatelse.</p><p class="proof-outcome">Tillatt</p></article>
+          <article class="proof-step" data-proof="bounded"><p class="proof-number">3</p><h2>Forsøk på utvidelse</h2><p>Forespørselen ber om mer autoritet enn Cellens mal tilbyr.</p><p class="proof-outcome">Ikke utvidet</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="site-section paper">
+      <div class="section-shell proof-layout">
+        <article>
+          <p class="eyebrow">Hva testen viser</p>
+          <h2>Forespørsel og tillatelse er ikke samme ting.</h2>
+          <p>Testene oppretter konkrete identiteter og en beskyttet Cell. De kontrollerer både negativ og positiv bane: fravær av autoritet skal gi avslag, mens en korrekt signert Contract med riktig Grant skal gi akkurat den tilgangen den beskriver.</p>
+          <p>En tredje test ber om mer enn Cellens publiserte Agreement-mal tillater. Resultatet skal ikke bli en bredere Contract. En egen test krever dessuten uttrykkelig, identitetsbundet <code>s</code>-Grant før vedvarende lagring kan autoriseres.</p>
+        </article>
+        <aside class="evidence-panel">
+          <p class="card-kicker">Reprodusert</p>
+          <h2>Offentlig commit</h2>
+          <p><code>79740304167aa4f4daadd148c5a369e919d25a6a</code></p>
+          <p>Fire avgrensede tester kjørt 1. august 2026. Testresultatet og kommandoen inngår i den daterte <a href="/rettelser/">revisjonsloggen</a>.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="site-section">
+      <div class="section-shell">
+        <header class="section-heading"><p class="eyebrow">Kontroller selv</p><h2>Gå fra forklaring til kilde.</h2></header>
+        <div class="source-grid">
+          <article class="source-card"><p class="source-type">Avslag og tillatelse</p><h3><a href="https://github.com/Digipomps/CellProtocol/blob/79740304167aa4f4daadd148c5a369e919d25a6a/Tests/CellBaseTests/GeneralCellInterfaceTests.swift#L145-L218">Se testene i GitHub</a></h3><p><code>testNonOwnerDeniedWithoutContract</code>, <code>testNonOwnerAllowedWithSignedContract</code> og testen som hindrer at forespørselen eskalerer utover malen.</p></article>
+          <article class="source-card"><p class="source-type">Lagring</p><h3><a href="https://github.com/Digipomps/CellProtocol/blob/79740304167aa4f4daadd148c5a369e919d25a6a/Tests/CellBaseTests/GeneralCellInterfaceTests.swift#L575-L657">Se Storage-testen</a></h3><p>Lesetilgang alene skal ikke autorisere varig lagring. Det krever en egen <code>s</code>-tillatelse på riktig nøkkelsti.</p></article>
+        </div>
+        <details class="command-details"><summary>Kjør de samme testene</summary><pre><code>git clone https://github.com/Digipomps/CellProtocol.git
+cd CellProtocol
+git checkout 79740304167aa4f4daadd148c5a369e919d25a6a
+swift test --filter 'GeneralCellInterfaceTests/(testNonOwnerDeniedWithoutContract|testNonOwnerAllowedWithSignedContract|testRequesterCannotEscalateAgreementBeyondCellTemplate|testStoragePermissionRequiresExplicitIdentityBoundSGrant)'</code></pre></details>
+        <div class="boundary-box"><h2>Hva dette ikke beviser</h2><p>Dette er et komponentbevis fra Swift-implementasjonen. Det beviser ikke at en hel app ruter alle handlinger gjennom samme grense, at en AI-agent kan delegeres trygt gjennom flere ledd, at driften er sikker, eller at en bruker forstår tillatelsen. Slike påstander krever egne ende-til-ende-tester og brukerpiloter.</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div class="footer-shell"><div><a class="brand" href="/"><img class="brand-logo" src="/assets/haven-logo.png" width="1006" height="478" alt="HAVEN"><span class="brand-byline">fra Stiftelsen Digipomps</span></a><p>Et lite bevis, med en synlig grense.</p></div><nav class="footer-links" aria-label="Bunnmeny"><a href="/artikler/">Artikler</a><a href="/kilder/">Kilder</a><a href="/om/">Om</a><a href="/personvern/">Personvern</a><a href="/rettelser/">Rettelser</a><a href="mailto:kjetil@digipomps.org">Kontakt</a></nav></div></footer>
+</body>
+</html>

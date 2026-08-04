@@ -1,3 +1,5 @@
+document.documentElement.classList.remove("no-js");
+
 const navToggle = document.querySelector("[data-nav-toggle]");
 const siteNav = document.querySelector("[data-site-nav]");
 
@@ -14,6 +16,15 @@ if (navToggle && siteNav) {
       siteNav.dataset.open = "false";
       navToggle.setAttribute("aria-expanded", "false");
       navToggle.textContent = "Meny";
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && siteNav.dataset.open === "true") {
+      siteNav.dataset.open = "false";
+      navToggle.setAttribute("aria-expanded", "false");
+      navToggle.textContent = "Meny";
+      navToggle.focus();
     }
   });
 }
@@ -46,4 +57,12 @@ for (const button of filterButtons) {
 
 if (filterButtons.length && articles.length) {
   applyArticleFilter("all");
+}
+
+const requestedArticle = location.hash
+  ? document.getElementById(location.hash.slice(1))
+  : null;
+
+if (requestedArticle && requestedArticle.dataset.articleRoute) {
+  location.replace(requestedArticle.dataset.articleRoute);
 }

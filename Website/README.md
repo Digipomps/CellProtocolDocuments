@@ -5,9 +5,10 @@ Static, self-hosted first version of the public HAVEN/Digipomps site.
 ## What is included
 
 - Norwegian-first landing page with three reading paths
-- 14 short articles spanning introductory, concrete and technical levels
-- explicit status labels for implemented, tested, pilot and research claims
-- source and method page
+- 18 short articles, each with its own URL, spanning introductory, concrete and technical levels
+- explicit status labels for implemented, tested, prototype, pilot and research claims
+- source and method page, a reproducible component proof, and organization,
+  privacy and corrections pages
 - accessible, responsive HTML/CSS with no analytics or third-party assets
 - the official HAVEN logo, with a restrained black, white and warm-accent design system
 - Caddy container with automatic HTTPS and redirects from important WordPress paths
@@ -29,6 +30,60 @@ Open `http://localhost:4173/`.
 
 The local preview does not exercise the production redirects or security
 headers in `Caddyfile`.
+
+## App entry release gate
+
+The public app entry is deliberately `blocked` as of 2026-08-03. No canonical
+production app origin or working installation page has been documented.
+Staging, local addresses and the review host must never be substituted.
+
+The only activation point is the marked hero block between
+`HAVEN_APP_ENTRY_START` and `HAVEN_APP_ENTRY_END` in `index.html`. While
+blocked it contains exactly two ordinary links:
+
+1. `Forstå HAVEN`
+2. `Se et konkret testbevis`
+
+Run the static release guard from the repository root:
+
+```sh
+python3 Website/tools/verify_app_entry.py
+python3 -m unittest Website/tests/test_verify_app_entry.py
+```
+
+With the local preview running, the workspace Playwright installation can also
+verify the no-JavaScript journey, keyboard focus, 200 % text and mobile layout:
+
+```sh
+node Website/tests/app_entry_browser_smoke.js http://127.0.0.1:4173
+```
+
+When the app owner has supplied a verified production origin and installation
+page, change the same block to exactly two static links:
+
+| `data-app-entry-state` | Primary link text | Secondary link |
+| --- | --- | --- |
+| `public-app` | `Installer HAVEN` | `Forstå HAVEN` |
+| `public-demo` | `Åpne HAVEN-demoen` | `Forstå HAVEN` |
+| `homescreen-demo` | `Legg HAVEN-demoen på hjemskjermen` | `Forstå HAVEN` |
+
+The primary link must be an absolute HTTPS URL to the app's own installation
+page. It must not use `target`; mobile stays in the same tab. The test-proof
+entry remains in the next section instead of becoming a third hero button.
+
+Before release, make the approved origin explicit and follow redirects during
+the live check:
+
+```sh
+python3 Website/tools/verify_app_entry.py \
+  --allow-origin https://VERIFIED-APP-ORIGIN \
+  --check-live
+```
+
+The guard checks the information site's static contract. It does not prove
+app maturity. Activation still requires dated evidence for the final URL,
+manifest, icons, platform flow, and physical Android and iOS tests. Publish the
+HTML and updated deployment/corrections status atomically in one release.
 
 ## Self-host with Docker Compose
 
@@ -75,7 +130,8 @@ https://new.haven.digipomps.org
 ```
 
 It uses the existing HAVEN VPS at `89.167.90.101`, Nginx, the static docroot
-symlink `/var/www/haven-public-new`, and Certbot. The tracked
+symlink `/var/www/haven-public-review`, and Certbot. Production continues to
+use the separate `/var/www/haven-public-new` symlink. The tracked
 `nginx-new-haven.conf` mirrors the active TLS configuration. The review host
 adds `X-Robots-Tag: noindex, nofollow, noarchive`; the canonical links continue
 to point at the intended production domain.
@@ -102,7 +158,8 @@ The current live deployment state is recorded in
 
 After future content, Nginx or DNS changes, verify:
 
-- `/`, `/artikler/`, `/kilder/` and `/404.html`
+- `/`, `/artikler/`, `/bevis/tilgangskontroll/`, `/kilder/`, `/om/`,
+  `/personvern/`, `/rettelser/` and `/404.html`
 - mobile and keyboard navigation
 - legacy redirects in `Caddyfile`
 - mail and GitHub links
