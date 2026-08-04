@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:haven:purpose-bound-action-intent:v1",
+  "title": "PurposeBoundActionIntent",
+  "description": "Normative planned wire contract. It is an intent and never authority by itself.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "intentId",
+    "status",
+    "primaryPurposeRef",
+    "primaryPurposeSelection",
+    "facetsAreNonAuthorizing",
+    "effect",
+    "bindings",
+    "createdAt"
+  ],
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "purposeRef": {
+      "type": "string",
+      "pattern": "^purpose://[a-z0-9][a-z0-9._/-]*$"
+    },
+    "opaqueRef": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9+.-]*://[^\\s]+$"
+    }
+  },
+  "properties": {
+    "schema": {
+      "const": "haven.purpose-bound-action-intent.v1"
+    },
+    "intentId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "status": {
+      "enum": [
+        "proposed",
+        "review_required",
+        "blocked"
+      ]
+    },
+    "primaryPurposeRef": {
+      "$ref": "#/$defs/purposeRef"
+    },
+    "primaryPurposeSelection": {
+      "enum": [
+        "owner_confirmed",
+        "deterministic_resolution",
+        "unknown"
+      ]
+    },
+    "primaryPurposeEvidenceRefs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "facetRefs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/purposeRef"
+      },
+      "uniqueItems": true
+    },
+    "facetsAreNonAuthorizing": {
+      "const": true
+    },
+    "effect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "effectId",
+        "effectKind",
+        "actionRef",
+        "executionMode",
+        "destination",
+        "data"
+      ],
+      "properties": {
+        "effectId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "effectKind": {
+          "enum": [
+            "external_disclosure",
+            "provider_invocation",
+            "external_write",
+            "external_publish",
+            "subprocess_execution"
+          ]
+        },
+        "actionRef": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "executionMode": {
+          "enum": [
+            "execute",
+            "propose_only",
+            "not_requested"
+          ]
+        },
+        "destination": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "destinationRef",
+            "destinationClass"
+          ],
+          "properties": {
+            "destinationRef": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "destinationClass": {
+              "enum": [
+                "admitted_recipient",
+                "approved_provider",
+                "owner_controlled_store",
+                "approved_subprocess"
+              ]
+            }
+          }
+        },
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "dataClassRefs",
+            "fieldManifestDigest",
+            "minimizationDeclared"
+          ],
+          "properties": {
+            "dataClassRefs": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            },
+            "fieldManifestDigest": {
+              "$ref": "#/$defs/digest"
+            },
+            "minimizationDeclared": {
+              "const": true
+            }
+          }
+        }
+      }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "purposeDigest",
+        "actionDigest",
+        "destinationDigest",
+        "dataManifestDigest",
+        "planDigest",
+        "configDigest",
+        "policyDigest",
+        "taxonomyDigest",
+        "payloadDigest"
+      ],
+      "properties": {
+        "purposeDigest": { "$ref": "#/$defs/digest" },
+        "actionDigest": { "$ref": "#/$defs/digest" },
+        "destinationDigest": { "$ref": "#/$defs/digest" },
+        "dataManifestDigest": { "$ref": "#/$defs/digest" },
+        "planDigest": { "$ref": "#/$defs/digest" },
+        "configDigest": { "$ref": "#/$defs/digest" },
+        "policyDigest": { "$ref": "#/$defs/digest" },
+        "taxonomyDigest": { "$ref": "#/$defs/digest" },
+        "payloadDigest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "primaryPurposeRef": {
+            "const": "purpose://prompt.unknown"
+          }
+        },
+        "required": ["primaryPurposeRef"]
+      },
+      "then": {
+        "properties": {
+          "status": { "const": "blocked" },
+          "primaryPurposeSelection": { "const": "unknown" },
+          "effect": {
+            "properties": {
+              "executionMode": { "const": "not_requested" }
+            },
+            "required": ["executionMode"]
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "schema": "haven.cell-execution-policy.v1",
+  "policyId": "policy-example-selected-update-v1",
+  "status": "normative_draft",
+  "configPolicyIsCeilingNotGrant": true,
+  "parentPurposeImpliesChild": false,
+  "facetsAreNonAuthorizing": true,
+  "ownerPathMayBypassExternalActionCeiling": false,
+  "bindings": {
+    "configDigest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+    "policyDigest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+    "taxonomyDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+  },
+  "policyProvenance": {
+    "policyVersion": "1.0.0-normative-draft",
+    "issuerRef": "identity://example/policy-maintainer",
+    "publicationRef": "policy-publication://example/selected-update-v1",
+    "signatureRef": "signature://example/policy-selected-update-v1",
+    "issuedAt": "2026-08-03T12:00:00Z"
+  },
+  "defaultDecision": "denied",
+  "effectCeilings": [
+    {
+      "ceilingId": "ceiling-example-share-selected-update-001",
+      "oneConcreteEffectOnly": true,
+      "effectKind": "external_disclosure",
+      "actionRef": "action://example/send-selected-project-update",
+      "primaryPurposeRef": "purpose://project-work.share-selected-intent",
+      "purposeMatch": "exact_only",
+      "permittedFacetRefs": ["purpose://access.audit.privacy"],
+      "allowedDestinationRefs": ["destination://example/admitted-project-room"],
+      "allowedDataClassRefs": ["data-class://example/internal-non-sensitive"],
+      "planDigest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+      "requiredPermissions": { "execute": true, "storage": false, "disclosure": true },
+      "storageDisclosure": {
+        "storageRequiresSeparateSPermission": true,
+        "disclosureRequiresSeparateCapability": true,
+        "storageDoesNotAuthorizeDisclosure": true
+      }
+    }
+  ]
+}

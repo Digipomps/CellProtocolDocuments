@@ -1,0 +1,294 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:haven:purpose-authorization-context:v1",
+  "title": "PurposeAuthorizationContext",
+  "description": "Normative planned authorization input. A trust package is evidence in this context and never a source of authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "contextId",
+    "intentRef",
+    "authorizationStatus",
+    "identity",
+    "authority",
+    "trustPackageEvidence",
+    "checks",
+    "bindings"
+  ],
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "opaqueRef": { "type": "string", "pattern": "^[a-z][a-z0-9+.-]*://[^\\s]+$" }
+  },
+  "properties": {
+    "schema": { "const": "haven.purpose-authorization-context.v1" },
+    "contextId": { "type": "string", "minLength": 1 },
+    "intentRef": { "$ref": "#/$defs/opaqueRef" },
+    "authorizationStatus": {
+      "enum": ["eligible", "denied", "requires_human_approval", "expired"]
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identityRef", "domain", "proofRef"],
+      "properties": {
+        "identityRef": { "$ref": "#/$defs/opaqueRef" },
+        "domain": { "type": "string", "minLength": 1 },
+        "proofRef": { "$ref": "#/$defs/opaqueRef" }
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authorityPath",
+        "ownerPath",
+        "authorityCurrent"
+      ],
+      "properties": {
+        "authorityPath": { "enum": ["contract_grant", "owner_path", "cell_specific", "none"] },
+        "agreementRef": { "$ref": "#/$defs/opaqueRef" },
+        "contractRef": { "$ref": "#/$defs/opaqueRef" },
+        "grantRef": { "$ref": "#/$defs/opaqueRef" },
+        "cellAuthorityRef": { "$ref": "#/$defs/opaqueRef" },
+        "ownerPath": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["present", "mayBypassExternalActionCeiling"],
+          "properties": {
+            "present": { "type": "boolean" },
+            "mayBypassExternalActionCeiling": { "const": false }
+          }
+        },
+        "authorityCurrent": { "type": "boolean" }
+      }
+    },
+    "trustPackageEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "confersAuthority"],
+      "properties": {
+        "evidenceRef": { "$ref": "#/$defs/opaqueRef" },
+        "status": { "enum": ["current", "unavailable", "expired", "not_required"] },
+        "confersAuthority": { "const": false }
+      }
+    },
+    "checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "oneConcreteEffect",
+        "exactPrimaryPurposeMatch",
+        "parentMatchOnly",
+        "facetMatchOnly",
+        "unknownPurpose",
+        "externalActionCeilingSatisfied",
+        "destinationAllowed",
+        "dataAllowed",
+        "planAllowed",
+        "storagePermissionSatisfied",
+        "disclosureCapabilitySatisfied",
+        "bindingDigestsMatch"
+      ],
+      "properties": {
+        "oneConcreteEffect": { "type": "boolean" },
+        "exactPrimaryPurposeMatch": { "type": "boolean" },
+        "parentMatchOnly": { "type": "boolean" },
+        "facetMatchOnly": { "type": "boolean" },
+        "unknownPurpose": { "type": "boolean" },
+        "externalActionCeilingSatisfied": { "type": "boolean" },
+        "destinationAllowed": { "type": "boolean" },
+        "dataAllowed": { "type": "boolean" },
+        "planAllowed": { "type": "boolean" },
+        "storagePermissionSatisfied": { "type": "boolean" },
+        "disclosureCapabilitySatisfied": { "type": "boolean" },
+        "bindingDigestsMatch": { "type": "boolean" }
+      }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "purposeDigest",
+        "actionDigest",
+        "destinationDigest",
+        "dataManifestDigest",
+        "planDigest",
+        "configDigest",
+        "policyDigest",
+        "taxonomyDigest",
+        "payloadDigest"
+      ],
+      "properties": {
+        "purposeDigest": { "$ref": "#/$defs/digest" },
+        "actionDigest": { "$ref": "#/$defs/digest" },
+        "destinationDigest": { "$ref": "#/$defs/digest" },
+        "dataManifestDigest": { "$ref": "#/$defs/digest" },
+        "planDigest": { "$ref": "#/$defs/digest" },
+        "configDigest": { "$ref": "#/$defs/digest" },
+        "policyDigest": { "$ref": "#/$defs/digest" },
+        "taxonomyDigest": { "$ref": "#/$defs/digest" },
+        "payloadDigest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "denialReasons": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "authority": {
+            "properties": { "authorityPath": { "const": "none" } },
+            "required": ["authorityPath"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "authority": {
+            "not": {
+              "anyOf": [
+                { "required": ["agreementRef"] },
+                { "required": ["contractRef"] },
+                { "required": ["grantRef"] },
+                { "required": ["cellAuthorityRef"] }
+              ]
+            },
+            "properties": {
+              "authorityCurrent": { "const": false },
+              "ownerPath": { "properties": { "present": { "const": false } } }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "authority": {
+            "properties": { "authorityPath": { "const": "contract_grant" } },
+            "required": ["authorityPath"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "authority": {
+            "required": ["agreementRef", "contractRef", "grantRef"],
+            "not": { "required": ["cellAuthorityRef"] },
+            "properties": {
+              "ownerPath": { "properties": { "present": { "const": false } } }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "authority": {
+            "properties": { "authorityPath": { "const": "owner_path" } },
+            "required": ["authorityPath"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "authority": {
+            "not": {
+              "anyOf": [
+                { "required": ["agreementRef"] },
+                { "required": ["contractRef"] },
+                { "required": ["grantRef"] },
+                { "required": ["cellAuthorityRef"] }
+              ]
+            },
+            "properties": {
+              "ownerPath": { "properties": { "present": { "const": true } } }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "authority": {
+            "properties": { "authorityPath": { "const": "cell_specific" } },
+            "required": ["authorityPath"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "authority": {
+            "required": ["cellAuthorityRef"],
+            "not": {
+              "anyOf": [
+                { "required": ["agreementRef"] },
+                { "required": ["contractRef"] },
+                { "required": ["grantRef"] }
+              ]
+            },
+            "properties": {
+              "ownerPath": { "properties": { "present": { "const": false } } }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "trustPackageEvidence": {
+            "properties": { "status": { "enum": ["current", "expired"] } },
+            "required": ["status"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "trustPackageEvidence": { "required": ["evidenceRef"] }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "authorizationStatus": { "const": "eligible" } } },
+      "then": {
+        "properties": {
+          "authority": {
+            "properties": {
+              "authorityCurrent": { "const": true },
+              "authorityPath": { "enum": ["contract_grant", "owner_path", "cell_specific"] }
+            }
+          },
+          "trustPackageEvidence": { "properties": { "status": { "enum": ["current", "not_required"] } } },
+          "checks": {
+            "properties": {
+              "oneConcreteEffect": { "const": true },
+              "exactPrimaryPurposeMatch": { "const": true },
+              "parentMatchOnly": { "const": false },
+              "facetMatchOnly": { "const": false },
+              "unknownPurpose": { "const": false },
+              "externalActionCeilingSatisfied": { "const": true },
+              "destinationAllowed": { "const": true },
+              "dataAllowed": { "const": true },
+              "planAllowed": { "const": true },
+              "storagePermissionSatisfied": { "const": true },
+              "disclosureCapabilitySatisfied": { "const": true },
+              "bindingDigestsMatch": { "const": true }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "authorizationStatus": { "const": "denied" } } },
+      "then": { "required": ["denialReasons"] }
+    }
+  ]
+}
