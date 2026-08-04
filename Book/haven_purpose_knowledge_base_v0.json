@@ -1878,6 +1878,339 @@
           "candidate"
         ]
       }
+    },
+    {
+      "purposeRef": "purpose://self-determination.data",
+      "parentRef": "purpose://root",
+      "title": "Data self-determination",
+      "summary": "The owner decides the purpose, extent, place, manner, recipients and duration of any use of their own and derived data, and can verify that the decision was honoured.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.self-determination.data",
+        "lifecycle": "continuous",
+        "outcome": "Every use of a person's data runs under an agreement the person can read, change and withdraw, and leaves verifiable evidence.",
+        "successSignals": [
+          "No use exists without an identifiable agreement stating purpose, extent, recipient and duration.",
+          "The owner can list every ongoing use of their data in one view.",
+          "Withdrawal stops further use at every recipient the agreement reached, and returns confirmation or discrepancy to the owner.",
+          "Control does not require trusting the operator: each compliance claim is checkable against evidence or shown as uncheckable."
+        ],
+        "verifier": "Agreement lifecycle contract and resolver tests, audit assertions on share/export, and dimension coverage review (purpose, extent, place, manner, recipient, duration)."
+      },
+      "interests": [
+        "self-determination",
+        "autonomy",
+        "revocability",
+        "accountability"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "data self-determination",
+          "user control over own data",
+          "selvbestemmelse over egne data",
+          "bestemme over egne data",
+          "datasuverenitet"
+        ],
+        "tokens": [
+          "self-determination",
+          "control",
+          "owner-decides",
+          "withdraw",
+          "selvbestemmelse",
+          "datasuverenitet"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://self-determination.data.use-purpose",
+      "parentRef": "purpose://self-determination.data",
+      "title": "Purpose binding for data use",
+      "summary": "Data is used only for a declared purpose the owner accepted; a new purpose requires a new acceptance.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.self-determination.data.use-purpose",
+        "lifecycle": "continuous",
+        "outcome": "Every use traces back to a declared purpose the owner accepted.",
+        "successSignals": [
+          "Processing without a purpose reference is denied by the resolver.",
+          "Purpose extension triggers a new acceptance instead of silent reuse.",
+          "The declared purpose is stated so it can be refused without losing base functionality."
+        ],
+        "verifier": "Resolver policy tests (missing purpose implies deny) plus a purpose-extension test matrix."
+      },
+      "interests": [
+        "purpose-limitation",
+        "declared-purpose"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "purpose binding",
+          "purpose limitation",
+          "formaalsbinding"
+        ],
+        "tokens": [
+          "purpose-binding",
+          "purpose-limitation",
+          "declared-purpose",
+          "formaalsbinding"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://self-determination.data.scope",
+      "parentRef": "purpose://self-determination.data",
+      "title": "Extent of data made available",
+      "summary": "The owner decides which fields, and at what precision, are made available, including the degree of identifiability.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.self-determination.data.scope",
+        "lifecycle": "continuous",
+        "outcome": "A recipient receives the smallest field set that solves the agreed task, at a precision the owner chose.",
+        "successSignals": [
+          "Agreements name fields explicitly; a wildcard agreement cannot be entered into.",
+          "The owner can pick a coarser representation such as interval, region or pseudonym and still receive the service where feasible.",
+          "Linkage that raises identifiability beyond the agreed level is denied or surfaced."
+        ],
+        "verifier": "Field-level contract tests plus a re-identification assessment per agreement template (see the open uncertainty-relation question)."
+      },
+      "interests": [
+        "minimisation",
+        "identifiability"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "data minimisation",
+          "degree of identifiability",
+          "dataminimering"
+        ],
+        "tokens": [
+          "minimisation",
+          "identifiability",
+          "pseudonym",
+          "precision",
+          "dataminimering"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://self-determination.data.locality",
+      "parentRef": "purpose://self-determination.data",
+      "title": "Place and jurisdiction of data use",
+      "summary": "The owner decides where data is stored and processed, and how many copies exist.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.self-determination.data.locality",
+        "lifecycle": "continuous",
+        "outcome": "Every copy and processing site is known to the owner and inside the owner's chosen limit.",
+        "successSignals": [
+          "The owner can see a complete list of known copies and processing sites.",
+          "Processing outside the chosen site or jurisdiction is blocked, not merely logged.",
+          "A conflict between the owner's locality choice and a service availability promise is shown to the owner as a choice, not hidden."
+        ],
+        "verifier": "Transport and bridge policy tests on locality plus a per-owner copy inventory report."
+      },
+      "interests": [
+        "locality",
+        "jurisdiction",
+        "copies"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "data residency",
+          "data locality",
+          "jurisdiksjon"
+        ],
+        "tokens": [
+          "residency",
+          "locality",
+          "jurisdiction",
+          "copies",
+          "jurisdiksjon"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://self-determination.data.manner",
+      "parentRef": "purpose://self-determination.data",
+      "title": "Manner of processing and derived data",
+      "summary": "Whether data may be linked, profiled, used for model training or otherwise derived from, and who controls the derived result.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.self-determination.data.manner",
+        "lifecycle": "continuous",
+        "outcome": "Linkage, profiling, model training and other derivation happen only where the owner accepted that specific manner of processing, and derived data inherits the owner's control.",
+        "successSignals": [
+          "The agreement separates read and display from linkage, profiling and training.",
+          "Derived artefacts such as profiles, embeddings and model contributions carry provenance and fall under the same withdrawal.",
+          "No hidden scoring or ranking of people can enter service without a declared manner of processing."
+        ],
+        "verifier": "Contract tests per processing category, provenance marking along the derivation chain, and review of model training paths."
+      },
+      "interests": [
+        "derived-data",
+        "model-training",
+        "linkage"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "manner of processing",
+          "derived data control",
+          "model training consent"
+        ],
+        "tokens": [
+          "derived",
+          "training",
+          "linkage",
+          "embeddings",
+          "provenance"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://self-determination.data.recipients",
+      "parentRef": "purpose://self-determination.data",
+      "title": "Recipients and delegation",
+      "summary": "Named recipients, onward delegation the owner can see, and default deny for everyone else. New dimension: the sketch had no recipient axis.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.self-determination.data.recipients",
+        "lifecycle": "continuous",
+        "outcome": "Every party holding access is named in an agreement or derived from a delegation the owner can inspect and revoke.",
+        "successSignals": [
+          "Default is deny; reach exists only as an explicit capability.",
+          "Onward delegation is visible to the owner with a chain back to the originating grant.",
+          "The owner can revoke one recipient without tearing down the rest of the agreement."
+        ],
+        "verifier": "Resolver policy tests for default deny and capability scope, plus delegation chain tests."
+      },
+      "interests": [
+        "delegation",
+        "least-privilege",
+        "default-deny"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "recipient control",
+          "onward delegation",
+          "default deny"
+        ],
+        "tokens": [
+          "recipient",
+          "delegation",
+          "least-privilege",
+          "default-deny",
+          "revoke-recipient"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://self-determination.data.duration",
+      "parentRef": "purpose://self-determination.data",
+      "title": "Duration, withdrawal and deletion",
+      "summary": "How long use may last, and the right to change one's mind with downstream effect. New dimension: absent from the sketch.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.self-determination.data.duration",
+        "lifecycle": "continuous",
+        "outcome": "Control survives data leaving the owner: every use has an end date, and withdrawal propagates and leaves evidence.",
+        "successSignals": [
+          "An agreement without a duration or renewal point cannot be entered into.",
+          "Withdrawal returns a receipt per recipient: stopped, or not confirmed with a stated reason.",
+          "Export and deletion of one's own data set are available without asking the operator for help."
+        ],
+        "verifier": "Agreement lifecycle tests for expiry, renewal and withdrawal, plus export and deletion contract tests."
+      },
+      "interests": [
+        "revocability",
+        "retention",
+        "portability"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "withdrawal and deletion",
+          "retention limit",
+          "data portability"
+        ],
+        "tokens": [
+          "withdrawal",
+          "retention",
+          "expiry",
+          "deletion",
+          "portability"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://self-determination.data.verifiability",
+      "parentRef": "purpose://self-determination.data",
+      "title": "Verifiability instead of trust",
+      "summary": "The owner can check that the rules were followed without having to trust the operator. Replaces the sketch's trust-in-organisation requirement.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.self-determination.data.verifiability",
+        "lifecycle": "continuous",
+        "outcome": "Every compliance claim is either checkable by the owner or explicitly marked as uncheckable.",
+        "successSignals": [
+          "Sharing, export and purpose changes leave readable history the owner can retrieve.",
+          "The system visibly distinguishes verified from promised and from unknown.",
+          "The amount of trust the operator requires is documented and shrinks over time rather than growing."
+        ],
+        "verifier": "Audit and flow assertions plus a per-capability review of trust assumptions."
+      },
+      "interests": [
+        "verifiability",
+        "evidence"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "verifiability instead of trust",
+          "checkable compliance",
+          "etterproevbarhet"
+        ],
+        "tokens": [
+          "verifiability",
+          "checkable",
+          "evidence",
+          "trust-assumption",
+          "etterproevbarhet"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://self-determination.data.exercisability",
+      "parentRef": "purpose://self-determination.data",
+      "title": "Control that can actually be exercised",
+      "summary": "Control that demands expertise, time or money distributes power unevenly. Raises the sketch's ease-of-use wish to a criterion.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.self-determination.data.exercisability",
+        "lifecycle": "continuous",
+        "outcome": "A person without expert knowledge can see, understand and change the use of their data within minutes, at no cost.",
+        "successSignals": [
+          "The default setting is the protective one, not the disclosing one.",
+          "The number of decisions required for an ordinary purpose stays low enough that acceptance does not become routine clicking.",
+          "Refusing is as easy as accepting and does not remove base functionality."
+        ],
+        "verifier": "User path tests (haven-functional-service-verification) plus a count of required decisions per purpose."
+      },
+      "interests": [
+        "exercisability",
+        "equal-opportunity",
+        "protective-default"
+      ],
+      "matchingHints": {
+        "aliases": [
+          "exercisable control",
+          "protective default",
+          "decision fatigue"
+        ],
+        "tokens": [
+          "exercisable",
+          "protective-default",
+          "fatigue",
+          "no-expertise"
+        ]
+      }
     }
   ],
   "facets": [
@@ -1916,6 +2249,18 @@
         "laws",
         "product-recommendations",
         "model-runtime-facts"
+      ]
+    },
+    {
+      "purposeRef": "purpose://self-determination.data",
+      "appliesTo": [
+        "personal-data",
+        "derived-data",
+        "read",
+        "write",
+        "share",
+        "export",
+        "model-training"
       ]
     }
   ],
@@ -2052,6 +2397,18 @@
         "dialogue-level-hallucination",
         "faithfulness",
         "rationale-and-localization"
+      ]
+    },
+    {
+      "id": "local:UserControlCriteriaToPurpose",
+      "path": "Deliverables/Brukerkontroll_Kriterier_Til_Formaal_2026-08-04.md",
+      "status": "checked",
+      "checkedAt": "2026-08-04",
+      "appliesTo": [
+        "self-determination",
+        "user-control",
+        "personal-data",
+        "criteria-review"
       ]
     }
   ]
