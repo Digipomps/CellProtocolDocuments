@@ -1,0 +1,20 @@
+{
+  "schema": "haven.purpose-bound-action-fixture-manifest.v1",
+  "version": 1,
+  "fixtures": [
+    { "id": "positive-intent", "path": "positive/purpose-bound-action-intent.json", "wireSchema": "haven.purpose-bound-action-intent.v1", "expected": "accept" },
+    { "id": "positive-policy", "path": "positive/cell-execution-policy.json", "wireSchema": "haven.cell-execution-policy.v1", "expected": "accept" },
+    { "id": "positive-context", "path": "positive/purpose-authorization-context.json", "wireSchema": "haven.purpose-authorization-context.v1", "expected": "accept" },
+    { "id": "positive-receipt", "path": "positive/action-decision-receipt.json", "wireSchema": "haven.action-decision-receipt.v1", "expected": "accept" },
+    { "id": "negative-unknown-purpose", "path": "negative/unknown-purpose-intent.json", "wireSchema": "haven.purpose-bound-action-intent.v1", "expected": "accept_blocked" },
+    { "id": "negative-parent-only", "path": "negative/parent-match-only-context.json", "wireSchema": "haven.purpose-authorization-context.v1", "expected": "accept_denied" },
+    { "id": "negative-facet-only", "path": "negative/facet-match-only-context.json", "wireSchema": "haven.purpose-authorization-context.v1", "expected": "accept_denied" },
+    { "id": "negative-binding-mismatch", "path": "negative/binding-digest-mismatch-context.json", "wireSchema": "haven.purpose-authorization-context.v1", "expected": "accept_denied" },
+    { "id": "negative-storage-disclosure", "path": "negative/storage-without-disclosure-receipt.json", "wireSchema": "haven.action-decision-receipt.v1", "expected": "accept_denied" },
+    { "id": "negative-owner-ceiling", "path": "negative/owner-path-without-ceiling-context.json", "wireSchema": "haven.purpose-authorization-context.v1", "expected": "accept_denied" },
+    { "id": "negative-no-authority", "path": "negative/no-authority-context.json", "wireSchema": "haven.purpose-authorization-context.v1", "expected": "accept_denied" },
+    { "id": "reject-owner-contract-refs", "path": "negative/owner-path-with-contract-refs.json", "wireSchema": "haven.purpose-authorization-context.v1", "expected": "reject_schema" },
+    { "id": "reject-cell-specific-missing-ref", "path": "negative/cell-specific-without-cell-authority-ref.json", "wireSchema": "haven.purpose-authorization-context.v1", "expected": "reject_schema" },
+    { "id": "reject-current-evidence-missing-ref", "path": "negative/current-evidence-without-evidence-ref.json", "wireSchema": "haven.purpose-authorization-context.v1", "expected": "reject_schema" }
+  ]
+}

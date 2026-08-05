@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:haven:cell-execution-policy:v1",
+  "title": "CellExecutionPolicy",
+  "description": "Normative planned policy ceiling. It is not a Contract, Grant, capability or authority-bearing object.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "policyId",
+    "status",
+    "configPolicyIsCeilingNotGrant",
+    "parentPurposeImpliesChild",
+    "facetsAreNonAuthorizing",
+    "ownerPathMayBypassExternalActionCeiling",
+    "bindings",
+    "policyProvenance",
+    "defaultDecision",
+    "effectCeilings"
+  ],
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "purposeRef": {
+      "type": "string",
+      "pattern": "^purpose://[a-z0-9][a-z0-9._/-]*$"
+    },
+    "opaqueRef": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9+.-]*://[^\\s]+$"
+    }
+  },
+  "properties": {
+    "schema": {
+      "const": "haven.cell-execution-policy.v1"
+    },
+    "policyId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "const": "normative_draft"
+    },
+    "configPolicyIsCeilingNotGrant": {
+      "const": true
+    },
+    "parentPurposeImpliesChild": {
+      "const": false
+    },
+    "facetsAreNonAuthorizing": {
+      "const": true
+    },
+    "ownerPathMayBypassExternalActionCeiling": {
+      "const": false
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["configDigest", "policyDigest", "taxonomyDigest"],
+      "properties": {
+        "configDigest": { "$ref": "#/$defs/digest" },
+        "policyDigest": { "$ref": "#/$defs/digest" },
+        "taxonomyDigest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "policyProvenance": {
+      "description": "Identifies the reviewed policy publication. Provenance lets A4 verify a ceiling; it is never a Contract, Grant or authority source.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policyVersion", "issuerRef", "publicationRef", "signatureRef", "issuedAt"],
+      "properties": {
+        "policyVersion": { "type": "string", "minLength": 1 },
+        "issuerRef": { "$ref": "#/$defs/opaqueRef" },
+        "publicationRef": { "$ref": "#/$defs/opaqueRef" },
+        "signatureRef": { "$ref": "#/$defs/opaqueRef" },
+        "issuedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "defaultDecision": {
+      "const": "denied"
+    },
+    "effectCeilings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ceilingId",
+          "oneConcreteEffectOnly",
+          "effectKind",
+          "actionRef",
+          "primaryPurposeRef",
+          "purposeMatch",
+          "allowedDestinationRefs",
+          "allowedDataClassRefs",
+          "planDigest",
+          "requiredPermissions",
+          "storageDisclosure"
+        ],
+        "properties": {
+          "ceilingId": { "type": "string", "minLength": 1 },
+          "oneConcreteEffectOnly": { "const": true },
+          "effectKind": {
+            "enum": [
+              "external_disclosure",
+              "provider_invocation",
+              "external_write",
+              "external_publish",
+              "subprocess_execution"
+            ]
+          },
+          "actionRef": { "$ref": "#/$defs/opaqueRef" },
+          "primaryPurposeRef": { "$ref": "#/$defs/purposeRef" },
+          "purposeMatch": { "const": "exact_only" },
+          "permittedFacetRefs": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/purposeRef" },
+            "uniqueItems": true
+          },
+          "allowedDestinationRefs": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#/$defs/opaqueRef" },
+            "uniqueItems": true
+          },
+          "allowedDataClassRefs": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "planDigest": { "$ref": "#/$defs/digest" },
+          "requiredPermissions": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["execute"],
+            "properties": {
+              "execute": { "const": true },
+              "storage": { "type": "boolean" },
+              "disclosure": { "type": "boolean" }
+            }
+          },
+          "storageDisclosure": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "storageRequiresSeparateSPermission",
+              "disclosureRequiresSeparateCapability",
+              "storageDoesNotAuthorizeDisclosure"
+            ],
+            "properties": {
+              "storageRequiresSeparateSPermission": { "const": true },
+              "disclosureRequiresSeparateCapability": { "const": true },
+              "storageDoesNotAuthorizeDisclosure": { "const": true }
+            }
+          }
+        }
+      }
+    }
+  }
+}

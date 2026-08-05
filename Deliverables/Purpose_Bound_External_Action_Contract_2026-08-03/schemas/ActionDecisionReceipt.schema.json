@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:haven:action-decision-receipt:v1",
+  "title": "ActionDecisionReceipt",
+  "description": "Normative planned receipt. An allowed decision does not itself prove that the external effect completed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "receiptId",
+    "intentRef",
+    "contextRef",
+    "decisionStatus",
+    "executionStatus",
+    "authorityPath",
+    "checks",
+    "bindings",
+    "containsSecrets",
+    "createdAt"
+  ],
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "opaqueRef": { "type": "string", "pattern": "^[a-z][a-z0-9+.-]*://[^\\s]+$" }
+  },
+  "properties": {
+    "schema": { "const": "haven.action-decision-receipt.v1" },
+    "receiptId": { "type": "string", "minLength": 1 },
+    "intentRef": { "$ref": "#/$defs/opaqueRef" },
+    "contextRef": { "$ref": "#/$defs/opaqueRef" },
+    "decisionStatus": { "enum": ["allowed", "denied", "requires_human_approval", "expired"] },
+    "executionStatus": { "enum": ["not_executed", "started", "completed", "failed", "not_attempted"] },
+    "authorityPath": { "enum": ["contract_grant", "owner_path", "cell_specific", "none"] },
+    "checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exactPrimaryPurposeMatch",
+        "externalActionCeilingSatisfied",
+        "storageDoesNotAuthorizeDisclosure",
+        "trustPackageDidNotAuthorize",
+        "ownerPathDidNotBypassCeiling",
+        "bindingDigestsMatch"
+      ],
+      "properties": {
+        "exactPrimaryPurposeMatch": { "type": "boolean" },
+        "externalActionCeilingSatisfied": { "type": "boolean" },
+        "storageDoesNotAuthorizeDisclosure": { "const": true },
+        "trustPackageDidNotAuthorize": { "const": true },
+        "ownerPathDidNotBypassCeiling": { "const": true },
+        "bindingDigestsMatch": { "type": "boolean" }
+      }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "purposeDigest",
+        "actionDigest",
+        "destinationDigest",
+        "dataManifestDigest",
+        "planDigest",
+        "configDigest",
+        "policyDigest",
+        "taxonomyDigest",
+        "payloadDigest"
+      ],
+      "properties": {
+        "purposeDigest": { "$ref": "#/$defs/digest" },
+        "actionDigest": { "$ref": "#/$defs/digest" },
+        "destinationDigest": { "$ref": "#/$defs/digest" },
+        "dataManifestDigest": { "$ref": "#/$defs/digest" },
+        "planDigest": { "$ref": "#/$defs/digest" },
+        "configDigest": { "$ref": "#/$defs/digest" },
+        "policyDigest": { "$ref": "#/$defs/digest" },
+        "taxonomyDigest": { "$ref": "#/$defs/digest" },
+        "payloadDigest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "reasonCodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "containsSecrets": { "const": false },
+    "createdAt": { "type": "string", "format": "date-time" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "decisionStatus": { "const": "allowed" } } },
+      "then": {
+        "properties": {
+          "authorityPath": { "enum": ["contract_grant", "owner_path", "cell_specific"] },
+          "checks": {
+            "properties": {
+              "exactPrimaryPurposeMatch": { "const": true },
+              "externalActionCeilingSatisfied": { "const": true },
+              "bindingDigestsMatch": { "const": true }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "decisionStatus": { "const": "denied" } } },
+      "then": { "required": ["reasonCodes"] }
+    }
+  ]
+}
