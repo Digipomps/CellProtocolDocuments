@@ -1,6 +1,6 @@
 # HAVEN public website deployment status
 
-Last updated: 2026-08-04 06:50 Europe/Oslo
+Last updated: 2026-08-06 14:55 Europe/Oslo
 
 ## HAVEN app entry
 
@@ -36,9 +36,29 @@ Last updated: 2026-08-04 06:50 Europe/Oslo
 - active Nginx site: `/etc/nginx/sites-enabled/haven_public.conf`
 - tracked source config: `Website/nginx-digipomps.conf`
 - docroot symlink: `/var/www/haven-public-new`
-- release: `/var/www/haven-public-new-releases/20260804T051327Z`
-  (concern-first forside promoted from the verified review release on
-  2026-08-04; previous release `20260801T095935Z` retained for rollback)
+- release: `/var/www/haven-public-new-releases/20260806T124500Z`
+  (persona-historie, ny seksjonsrekkefølge, film øverst i problemseksjonen,
+  navngitt styre og finansieringslinje; promotert fra den verifiserte
+  review-releasen 2026-08-06. Tidligere releaser `20260804T051327Z` og
+  `20260801T095935Z` beholdt for tilbakerulling)
+
+### Production verification 2026-08-06
+
+Produksjon er en byte-identisk kopi av review-release `20260806T124500Z`.
+
+- `index.html` sjekksum, lokalt, på review, på produksjon og live:
+  `17387fd5090a2aeba101aa5f409f41bf968389f044faf20ef8fbc93d2b545e3f`
+- `nginx -t`: bestått
+- HTTPS 200 for `/`, `/om/`, `/rettelser/`, `/artikler/`,
+  `/artikler/verktoy-som-samarbeider/`, `/kilder/`,
+  `/bevis/tilgangskontroll/`, `/personvern/` og filmen; ukjent sti 404
+- `www` og `http` gir 301 til apex; `/cellprotocol-explained/` gir 301 til
+  `/artikler/hva-er-en-cell/`
+- filmen svarer HTTP 206 på Range-forespørsler, så spoling virker
+- produksjon beholder CSP og ettårs HSTS, sender ingen `X-Robots-Tag`
+- `app_entry_browser_smoke.js` bestått mot live `https://digipomps.org`
+
+### Tidligere produksjonsrelease (20260804T051327Z)
 
 ### Production verification 2026-08-04
 
@@ -113,7 +133,23 @@ cutover window.
 
 - VPS: `89.167.90.101`
 - web server: Nginx 1.24.0
-- release: `/var/www/haven-public-review-releases/20260804T051327Z`
+- release: `/var/www/haven-public-review-releases/20260806T120500Z`
+  (som `20260806T113801Z`, men filmen går ikke i sløyfe og stopper på siste
+  bilde, Arendalsuka-datoene 10.–14. august 2026 er oppgitt på forsiden og
+  `/om/`, og finansieringslinjen «ingen ekstern finansiering, egeninnsats» er
+  publisert sammen med en oppfordring om deltakelse, praktisk hjelp, sponsing
+  eller interesse. Verifisert live 2026-08-06: browser-smoke grønn, video 200
+  med 2,0 MB, produksjon uendret)
+- forrige release: `/var/www/haven-public-review-releases/20260806T113801Z`
+  (persona-historien «Marte skal bestille en time», ny rekkefølge på tolv
+  seksjoner, egen «Forskningsspor»-seksjon, de fem spørsmålene, navngitt styre
+  på `/om/`, generelt kontaktpunkt `digipomp@digipomps.org`, og filmen
+  `haven-hva-sa-du-ja-til-20260806.mp4` med plakat i problemseksjonen.
+  Verifisert 2026-08-06: alle nøkkelsider 200, ukjent sti 404, video svarer
+  `video/mp4` 2,0 MB med HTTP 206 på Range, produksjon uendret på
+  `20260804T051327Z`, og browser-smoken passerer mot live review-host.
+  Forrige review-release beholdt for tilbakerulling)
+- forrige release: `/var/www/haven-public-review-releases/20260804T051327Z`
   (concern-first forside, 18 artikler inkl. `verktoy-som-samarbeider`,
   kildetabell `#forside-statistikk`; hero-kildesetningen forenklet til
   «Kilde: Datatilsynets personvernundersøkelse 2024.» — lenke i heroen er

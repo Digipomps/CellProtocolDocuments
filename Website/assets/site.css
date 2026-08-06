@@ -1411,3 +1411,106 @@ summary {
     border-color: #999;
   }
 }
+
+/* Persona-historien og fem-spørsmål-prøven (5. august 2026) */
+
+.story-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 1.75rem;
+}
+
+.story-beat {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: clamp(1.4rem, 3vw, 2rem);
+  border: 1px solid var(--line);
+  border-top: 0.35rem solid var(--line);
+  border-radius: 0.65rem;
+  background: var(--paper);
+  overflow-wrap: anywhere;
+}
+
+.story-beat-goal {
+  border-top-color: var(--clay);
+  background: var(--clay-light);
+}
+
+.story-beat h3 {
+  margin: 0.35rem 0 0.85rem;
+  font-size: clamp(1.15rem, 2.4vw, 1.4rem);
+  line-height: 1.3;
+}
+
+.story-beat p:not(.card-kicker) {
+  margin: 0 0 0.85rem;
+  color: var(--muted);
+}
+
+.story-beat-goal p:not(.card-kicker) {
+  color: var(--ink);
+}
+
+.story-beat p:last-child {
+  margin-bottom: 0;
+}
+
+.question-list {
+  display: grid;
+  max-width: var(--reading);
+  margin: 0 0 1.5rem;
+  padding: 0;
+  gap: 0.6rem;
+  counter-reset: question;
+  list-style: none;
+}
+
+.question-list li {
+  display: flex;
+  align-items: baseline;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--line);
+  border-left: 0.3rem solid var(--clay);
+  border-radius: 0.5rem;
+  background: var(--paper);
+  counter-increment: question;
+  font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+}
+
+.question-list li::before {
+  min-width: 1.9rem;
+  color: var(--clay);
+  content: counter(question) ".";
+  font-weight: 700;
+}
+
+@media (max-width: 60rem) {
+  .story-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Filmen på forsiden (6. august 2026) */
+
+.film-figure {
+  max-width: 52rem;
+  margin: 0 auto 2rem;
+}
+
+.film-figure video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: var(--ink);
+}
+
+.film-figure figcaption {
+  margin-top: 0.75rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+  text-align: center;
+}

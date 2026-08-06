@@ -69,6 +69,17 @@ async function verifyStaticJourney(browser, javaScriptEnabled) {
     "Hva sa du egentlig ja til?",
   );
   assert.equal(await page.locator("#kjenner-du-deg-igjen .problem-card").count(), 3);
+  const film = page.locator("#kjenner-du-deg-igjen .film-figure video");
+  assert.equal(await film.count(), 1);
+  assert.equal(await film.getAttribute("poster"), "/assets/haven-film-poster-20260806.webp");
+  assert.equal(
+    await page.locator("#kjenner-du-deg-igjen .film-figure source").getAttribute("src"),
+    "/assets/haven-hva-sa-du-ja-til-20260806.mp4",
+  );
+  assert.equal(await film.evaluate((node) => node.controls), true);
+  assert.equal(await film.evaluate((node) => node.autoplay), false);
+  // Filmen skal stoppe på siste bilde, ikke gå i sløyfe.
+  assert.equal(await film.evaluate((node) => node.loop), false);
   assert.deepEqual(await page.locator("#kjenner-du-deg-igjen .stat-number").allTextContents(), [
     "244 timer",
     "50 prosent",
