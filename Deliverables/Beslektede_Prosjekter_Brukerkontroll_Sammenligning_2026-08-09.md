@@ -34,13 +34,16 @@ Skala under: `+` dekket og håndhevet, `~` delvis, ved grensen eller kun juridis
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Solid / Inrupt | – | ~ | + | – | ~ | ~ | ~ | – |
 | AT Protocol / Bluesky | – | – | ~ | – | – | – | ~ | ~ |
-| Nostr | – | – | ~ | – | – | – | ~ | – |
+| Nostr | – | – | ~ | – | – | ~ | ~ | – |
 | MyData / DGA-intermediærer | ~ | ~ | ~ | ~ | ~ | ~ | – | ~ |
 | IDS / Gaia-X dataspaces | + | ~ | + | + | + | + | ~ | – |
 | EUDI-lommebok / VC+DID | ~ | + | + | – | ~ | – | ~ | + |
-| MCP / agent-stacken | – | – | – | – | – | – | – | ~ |
-| HAVEN (design) | + | + | + | + | + | + | + | + |
-| HAVEN (implementert) | + | ~ | ~ | ~ | + | ~ | ~ | ~ |
+| MCP / agent-stacken | – | ~ | – | – | ~ | – | – | ~ |
+
+HAVEN er med vilje ikke poengsatt i tabellen. De åtte dimensjonene er egne
+designmål, men `+` betyr her både dekning og håndheving. Dagens implementasjon
+har avgrensede mekanismer og tester, ikke evidens for at alle åtte håndheves i
+en sammenhengende brukerreise eller hos en ekstern mottaker.
 
 ### Solid / Inrupt
 
@@ -65,32 +68,34 @@ forbrukerlommeboken ikke fant fotfeste.
 
 ### AT Protocol / Bluesky
 
-Kontroll her betyr *exit*: portabel DID-identitet og et repo som kan flyttes til
-en annen PDS. Alt annet er bevisst gitt opp — repoet er offentlig, firehosen er
-åpen, og indeksering er poenget. Det gir null på formål, omfang, måte, mottakere
-og varighet, og det er et designvalg, ikke en mangel.
+Kontroll her betyr først og fremst *exit*: portabel DID-identitet og et repo som
+kan flyttes til en annen PDS. Repo-innholdet er offentlig og synkroniseres til
+andre tjenester. Protokollen forventer at sletting og kontostatus respekteres,
+men statuspropageringen er leddvis, ikke en autentisert kommando til vilkårlige
+kopier. Det gir lite dekning for formål, måte, varighet hos mottaker og
+etterfølgende bruksstyring; det er i stor grad et designvalg, ikke en mangel.
 
-Verdt å merke seg: dette er det klart mest produktive økosystemet blant
-kontrollprosjektene (over 1 000 aktive tredjepartsapper ukentlig, ~20 mrd
-offentlige records, 43,5 mill. brukere per april 2026) — og det er oppnådd ved å
-levere den svakeste formen for kontroll. Samtidig kjører en forsvinnende liten
-andel egen PDS (observatører anslo ~10 000 av 25 mill. brukere i 2025), så exit
-er en rett som nesten ingen utøver.
+Bluesky viser at portabilitet kan kombineres med et stort offentlig sosialt
+økosystem. Denne analysen bruker ikke tidsfølsomme bruker-, app- eller
+selvhostingstall som evidens for hvor mye kontroll som faktisk utøves.
 
 ### Nostr
 
-Identitet er en nøkkel, publisering går til relays. Radikal sensurresistens, men
-kontroll i vår forstand finnes ikke: ingen tilbaketrekking, ingen mottakerstyring,
-ingen recovery. Utøvbarhet er dimensjonen det bryter hardest på — mister du
-nøkkelen, mister du personen. Brukertall er små og omstridte; tall fra
-enkeltrelay-statistikk bør ikke brukes som globale tall.
+Identitet bygger på en signeringsnøkkel, og publisering går til relays. Det kan
+gjøre ensidig utestenging vanskeligere, men kontrollen i vår forstand er svak:
+sletting er en forespørsel som relays kan håndtere ulikt, og grunnprotokollen
+gir ingen mottakerstyring. NIP-er beskriver blant annet slettingsforespørsel,
+utløpstid, kryptert nøkkellagring og fjernsignering, men støtte og faktisk
+gjenoppretting avhenger av klient, relay og brukerens oppsett. Brukertall er
+omstridte; tall fra enkeltrelay-statistikk bør ikke brukes som globale tall.
 
 ### MyData / DGA-intermediærer (digi.me, Meeco, polypoly, datanyttebedrifter)
 
-Institusjonell løsning: en nøytral mellommann som ikke får utnytte dataene
-kommersielt, med samtykkeforvaltning som produkt. Kriteriene dekkes juridisk,
-ikke maskinhåndhevet — og settet vårt forkaster nettopp «tillit til
-organisasjon» som kriterium, så `.verifiability` faller.
+Institusjonell løsning: en nøytral mellommann som kan ta betalt for
+formidlingstjenesten, men ikke bruke de formidlede dataene direkte for egen
+økonomisk gevinst. Kriteriene dekkes juridisk og organisatorisk, ikke automatisk
+maskinhåndhevet. Etterprøvbarhet avhenger derfor fortsatt av tilsyn, avtaler og
+den konkrete implementasjonen.
 
 Den viktigste empirien i hele oversikten ligger her: digi.me klarte å få folk til
 å laste opp data, men ikke å skaffe etterspørselssiden. I et dokumentert forsøk
@@ -115,32 +120,33 @@ ikke en person: `.exercisability` er ikke i mandatet.
 ### EUDI-lommebok / verifiserbare legitimasjoner
 
 Sterkest på `.scope`: selektiv utlevering gir en reell gradering av
-identifiserbarhet, bedre enn noe annet i tabellen. Sterk på `.exercisability` av
-en grunn ingen andre kan kopiere — statlig distribusjon. Alle 27 medlemsstater
-skal tilby en lommebok innen 24. desember 2026, privat sektor skal akseptere den
-fra desember 2027, og EØS-land inkludert Norge har ett års utsettelse.
+identifiserbarhet. Sterk på `.exercisability` gjennom offentlig distribusjon.
+EU-kommisjonen oppgir at hver medlemsstat skal tilby minst én lommebok innen
+utgangen av 2026.
 
-Men modellen er attributt-formet, ikke dataflyt-formet: når en attest er vist, er
-den kopiert. `.duration` og `.manner` finnes ikke. Kontrollen slutter i det
-øyeblikket verifikasjonen lykkes.
+Men modellen er attributt-formet, ikke en generell kontrakt for videre
+dataflyt. Lommeboken styrer hva som presenteres, mens den ikke alene kan slette
+en kopi hos mottakeren eller bestemme videre lagring og bruk. Legitimasjoner kan
+ha status og tilbakekalling, men det er ikke det samme som å trekke tilbake
+opplysninger som allerede er utlevert.
 
 ### MCP / agent-stacken
 
-Ikke et brukerkontrollprosjekt, og tas med fordi det er den faktiske
-konkurrenten om produktivitetsargumentet. Over 10 000 aktive offentlige servere,
-overdratt til Agentic AI Foundation under Linux Foundation i desember 2025, og
-undersøkelser som viser rundt 41 % av spurte utviklingsorganisasjoner i
-produksjon i 2026. Kriteriedekning: null, bortsett fra en engangs
-brukergodkjenning uten formål, varighet eller etterprøvbarhet.
+Ikke et brukerkontrollprosjekt, og tas med fordi det er et relevant alternativ
+for integrasjon mellom modeller, verktøy og data. MCPs HTTP-autorisasjon støtter
+ressursbinding, OAuth-scope, minste tilgang og trinnvis utvidelse av scope.
+Dette gir delvis dekning for omfang og navngitt ressurs, men spesifikasjonen
+definerer ikke i seg selv ende-til-ende-formål, lagringstid eller en kvittering
+for hva mottakeren faktisk gjorde.
 
-MCP løser nøyaktig den friksjonen silomodellen påfører — og gjør det uten å gi
-brukeren noe.
+MCP kan redusere integrasjonsfriksjon uten å kreve hele kontrollmodellen. De
+øvrige spørsmålene må løses av tjenesten, domenekontrakten eller et annet lag.
 
 ### HAVEN
 
-Eneste i tabellen som har alle åtte dimensjonene som eksplisitte, testbare mål.
-Det er en reell forskjell, men den er per i dag en forskjell i *kriteriesett*, og
-kriteriesettet er ennå en `candidate`-gren i kunnskapsbasen.
+HAVEN har alle åtte dimensjonene som eksplisitte, testbare mål. Det er en reell
+forskjell i *kriteriesett*, men kriteriesettet er ennå en `candidate`-gren i
+kunnskapsbasen og er derfor ikke poengsatt som om målene allerede var håndhevet.
 
 Implementert side: avtalelivsløp med RWXS-form, betingelser, evidence,
 enforcement og VC-evalueringskvitteringer (Book 04), resolver med default deny
@@ -235,10 +241,10 @@ tilstrekkelig, som er den feilen MCP-eksempelet gjør synlig.
    steder taper man den.
 
 **Det avgjørende, og ubehagelige, forbeholdet:** selv om P1 er sann, er den ikke
-en strategi, fordi *produktivitet ikke trenger kontroll*. MCP demonstrerer at
-integrasjonsgevinsten kan hentes ut uten å gi brukeren en eneste av de åtte
-dimensjonene — raskere, billigere og med færre parter å overtale. En generell
-produktivitetsfordel selekterer altså ikke for HAVEN.
+en strategi, fordi *produktivitet ikke trenger hele kontrollmodellen*. MCP
+demonstrerer at integrasjonsgevinst kan hentes ut mens de fleste av de åtte
+dimensjonene overlates til implementasjonen. En generell produktivitetsfordel
+selekterer altså ikke for HAVEN.
 
 ### Reformulering
 
@@ -252,16 +258,18 @@ P1.
 
 Kandidatmarginer der produktiviteten er *avledet av* kontrollen:
 
-- **Sammenstillinger som ellers er ulovlige.** Helse × arbeid × utdanning kan
-  ofte bare kobles hos eieren. Der er eierens runtime den eneste lovlige
-  koblingspunktet — Athumi-porteføljen peker i den retningen.
+- **Sammenstillinger som ellers er vanskelige eller rettslig risikable.** Helse,
+  arbeid og utdanning kan i enkelte avgrensede tilfeller kobles tryggere hos
+  eieren enn i en sentral kopi. Om det faktisk er nødvendig og lovlig, må
+  vurderes per formål og behandlingsgrunnlag.
 - **Lavere risikokostnad på etterspørselssiden.** Formålsbundet tilgang med
   kvittering gjør bruk billigere å forsvare enn samme bruk uten. Dette er DGA- og
   dataspace-tesen, og den er testbar mot faktisk betalingsvilje.
-- **Agenter som får lov.** Den bindende skranken for agenter i produksjon er
-  sjelden modellkvalitet; det er at ingen kan bevise hva agenten hadde lov til.
-  Beviselig formålsbundet fullmakt er en produktivitetsegenskap som ikke kan
-  kopieres av MCP uten å bygge det HAVEN allerede har.
+- **Agenter som får lov.** Produksjonsoperatører trenger å kunne dokumentere
+  hvilken fullmakt en agent handlet på. Beviselig formålsbundet fullmakt kan
+  være en produktivitetsegenskap, men vi har ennå ikke målt hvor ofte den er
+  avgjørende nok til å påvirke valg eller betalingsvilje. MCP-scope alene gir
+  ikke denne ende-til-ende-dokumentasjonen.
 
 ### Selvkontroll av denne analysen
 
@@ -286,6 +294,7 @@ at P1 er innfridd.
 ## Kilder
 
 - <https://solidproject.org/about>
+- <https://solidproject.org/TR/acp>
 - <https://www.inrupt.com/case-study/flanders-strengthens-trusted-data-economy>
 - <https://www.inrupt.com/blog/athumi-inrupt-cronos-groep-extend-partnership>
 - <https://athumi.be/en/technologies/solid>
@@ -294,17 +303,24 @@ at P1 er innfridd.
 - <https://arxiv.org/pdf/2210.08270>
 - <https://backlinko.com/bluesky-statistics>
 - <https://dustycloud.org/blog/how-decentralized-is-bluesky/>
+- <https://atproto.com/specs/account>
+- <https://atproto.com/specs/repository>
 - <https://www.eff.org/deeplinks/2024/12/what-you-should-know-when-joining-bluesky>
 - <https://bitcoinmagazine.com/technical/solving-nostr-key-management-issues>
+- <https://github.com/nostr-protocol/nips>
 - <https://eike-global.medium.com/how-can-we-make-mydata-principles-a-reality-72bd9c2ab087>
+- <https://digital-strategy.ec.europa.eu/en/policies/data-governance-act-explained>
 - <https://www.sciencedirect.com/science/article/pii/S0267364923000407>
 - <https://petsymposium.org/popets/2021/popets-2021-0051.pdf>
 - <https://arxiv.org/pdf/2309.11289>
 - <https://ceur-ws.org/Vol-3606/paper41.pdf>
 - <https://internationaldataspaces.org/idsa-data-space-connector-report/>
+- <https://docs.gaia-x.eu/technical-committee/data-exchange/latest/policies/>
 - <https://www.signicat.com/blog/eudi-wallets-only-one-year-to-launch>
+- <https://digital-strategy.ec.europa.eu/en/factpages/european-digital-identity-wallet>
 - <https://www.namirial.com/en/blog/stories/status-check-eudi-wallet/>
 - <https://www.openbanking.org.uk/insights/2-billion-api-calls-and-15-million-users-a-landmark-month-for-open-banking-in-the-uk/>
 - <https://thepaymentsassociation.org/article/the-state-of-open-banking-payments-in-the-uk-in-2026/>
 - <https://blog.modelcontextprotocol.io/posts/2026-07-28/>
+- <https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization>
 - <https://www.digitalapplied.com/blog/mcp-adoption-statistics-2026-model-context-protocol>
