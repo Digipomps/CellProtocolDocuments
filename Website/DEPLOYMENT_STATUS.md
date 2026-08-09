@@ -1,6 +1,6 @@
 # HAVEN public website deployment status
 
-Last updated: 2026-08-06 14:55 Europe/Oslo
+Last updated: 2026-08-09 10:40 Europe/Oslo
 
 ## HAVEN app entry
 
@@ -36,11 +36,55 @@ Last updated: 2026-08-06 14:55 Europe/Oslo
 - active Nginx site: `/etc/nginx/sites-enabled/haven_public.conf`
 - tracked source config: `Website/nginx-digipomps.conf`
 - docroot symlink: `/var/www/haven-public-new`
-- release: `/var/www/haven-public-new-releases/20260806T124500Z`
-  (persona-historie, ny seksjonsrekkefølge, film øverst i problemseksjonen,
-  navngitt styre og finansieringslinje; promotert fra den verifiserte
-  review-releasen 2026-08-06. Tidligere releaser `20260804T051327Z` og
-  `20260801T095935Z` beholdt for tilbakerulling)
+- release: `/var/www/haven-public-new-releases/20260809T083528Z`
+  (ny artikkel «Hvor kontrollen slutter» med oppdatert artikkeloversikt og
+  sitemap; bygget som en kopi av `20260807T132725Z` med bare de tre filene
+  endret. Tidligere releaser `20260807T132725Z`, `20260806T124500Z` og
+  `20260804T051327Z` beholdt for tilbakerulling)
+
+### Production verification 2026-08-09
+
+Releasen ble laget ved å kopiere den kjørende produksjonsreleasen og bytte
+ut nøyaktig tre filer. Alt annet er byte-identisk med det som allerede lå ute,
+inkludert forsiden.
+
+- endringen mot forrige release, kontrollert med `diff -rq`: bare
+  `artikler/hvor-kontrollen-slutter/` (ny), `artikler/index.html` og
+  `sitemap.xml`
+- lokale og utrullede sjekksummer er like:
+  - `artikler/hvor-kontrollen-slutter/index.html`:
+    `944e05ab27fd366365c5dff141936b7e939018c9b2c09cfa618adef9aa5c82e7`
+  - `artikler/index.html`:
+    `0d9d40a2f1ba0dba36434128deb2bdff1c6d7c2b5ce88932550beadc4342ee05`
+  - `sitemap.xml`:
+    `93dd200bd109120e9415d6645a54cbe02aa5e3337393922ba966601209ce3169`
+- forsiden er uendret før og etter byttet:
+  `a2442fbf54573288f9294009861773fd5e256779577e5a0d05339e37f6237d84`
+- releasen ble verifisert isolert over loopback før symlenken ble byttet:
+  alle nøkkelsider 200, ukjent sti 404, `19 artikler` i oversikten og artikkelen
+  i sitemap
+- `nginx -t`: bestått; Nginx aktiv etter reload
+- live HTTPS 200 for `/`, `/artikler/`, `/artikler/hvor-kontrollen-slutter/`,
+  `/artikler/haven-og-standardene/`, `/bevis/tilgangskontroll/`, `/kilder/`,
+  `/om/`, `/personvern/`, `/rettelser/` og `/sitemap.xml`; ukjent sti 404
+- `www` og `http` gir fortsatt 301 til apex
+- artikkelen beholder CSP, ettårs HSTS og nosniff, og sender ingen
+  `X-Robots-Tag`
+- `app_entry_browser_smoke.js` bestått mot live `https://digipomps.org`
+- lokalt før utrulling: `verify_app_entry.py` bestått, app-entry-unittester 8/8,
+  TextReliability `rhetorical_pressure: low`, og lokal nettleserkontroll på
+  desktop og 375 px uten horisontal overflow
+
+Merknad: produksjon sto på `20260807T132725Z` da dette arbeidet startet. Den
+releasen (hero-film `haven-hero-film-20260807`) var ikke ført opp her, og
+kildefilene for den ligger fortsatt ukommittert i arbeidstreet. Det er ikke
+rørt; den nye releasen viderefører den uendret.
+
+### Tidligere produksjonsrelease (20260806T124500Z)
+
+Persona-historie, ny seksjonsrekkefølge, film øverst i problemseksjonen,
+navngitt styre og finansieringslinje; promotert fra den verifiserte
+review-releasen 2026-08-06.
 
 ### Production verification 2026-08-06
 
