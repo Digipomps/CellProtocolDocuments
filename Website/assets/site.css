@@ -205,8 +205,9 @@ a:hover {
 .hero-shell {
   display: grid;
   align-items: start;
+  justify-content: center;
   gap: clamp(2rem, 4vw, 4rem);
-  grid-template-columns: minmax(0, 1.04fr) minmax(24rem, 0.96fr);
+  grid-template-columns: minmax(0, 38rem);
 }
 
 .hero h1,
@@ -293,10 +294,16 @@ a:hover {
   color: var(--green-dark);
 }
 
+/* Filmen har samme format som i produksjon: 52rem bred og sentrert på siden.
+   Den er bredere enn tekstkolonnen, så den sentreres om kolonnens akse. */
 .hero-figure {
   position: relative;
-  margin: 0;
+  left: 50%;
+  width: min(52rem, 100% + 14rem, 100vw - 2rem);
+  max-width: none;
+  margin: 1.6rem 0 0;
   padding-block: clamp(1rem, 2.4vw, 1.8rem);
+  transform: translateX(-50%);
   isolation: isolate;
 }
 
@@ -322,6 +329,33 @@ a:hover {
   border-radius: 0.65rem;
   box-shadow: var(--shadow);
   object-fit: cover;
+}
+
+.hero-figure video {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border: 1px solid rgb(24 23 22 / 22%);
+  border-radius: 0.65rem;
+  box-shadow: var(--shadow);
+  background: var(--ink);
+}
+
+.hero-figure .hero-still {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-figure video {
+    display: none;
+  }
+
+  .hero-figure .hero-still {
+    display: block;
+  }
 }
 
 .truth-strip {
@@ -1224,17 +1258,12 @@ summary {
 }
 
 @media (max-width: 900px) {
-  .hero-shell,
   .trust-layout {
     grid-template-columns: 1fr;
   }
 
   .hero h1 {
     max-width: 14ch;
-  }
-
-  .hero-figure {
-    max-width: 46rem;
   }
 
   .path-grid,
