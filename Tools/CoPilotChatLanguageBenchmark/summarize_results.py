@@ -8,6 +8,7 @@ import json
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
+from statistics import mean, median
 from typing import Any
 
 
@@ -30,6 +31,8 @@ def summarize(path: Path) -> dict[str, Any]:
     max_by_dimension: Counter[str] = Counter()
     by_category: dict[str, Counter[str]] = defaultdict(Counter)
     worst: list[tuple[int, str, str]] = []
+    latencies = [float(row["elapsedSeconds"]) for row in rows if row.get("elapsedSeconds") is not None]
+    citation_checks: list[bool] = []
 
     dimensions = [
         "intent",
@@ -48,6 +51,12 @@ def summarize(path: Path) -> dict[str, Any]:
         by_category[category]["total"] += scores["total"]
         by_category[category]["max"] += scores["max"]
         worst.append((scores["total"], row["id"], row["utterance"]))
+        exact_citation = row.get("expected", {}).get("exactCitation")
+        if exact_citation is not None:
+            parsed = row.get("parsed") or {}
+            slots = parsed.get("slots") if isinstance(parsed, dict) else {}
+            citation = slots.get("citation") if isinstance(slots, dict) else None
+            citation_checks.append(citation == exact_citation)
 
     return {
         "path": str(path),
@@ -56,6 +65,18 @@ def summarize(path: Path) -> dict[str, Any]:
         "max": maximum,
         "percent": round((total / maximum * 100) if maximum else 0.0, 1),
         "parseErrors": parse_errors,
+        "latencySeconds": {
+            "count": len(latencies),
+            "mean": round(mean(latencies), 3) if latencies else None,
+            "median": round(median(latencies), 3) if latencies else None,
+        },
+        "citationFidelity": {
+            "exact": sum(citation_checks),
+            "eligible": len(citation_checks),
+            "percent": round((sum(citation_checks) / len(citation_checks) * 100), 1)
+            if citation_checks
+            else None,
+        },
         "dimensions": {
             key: {
                 "score": by_dimension[key],
@@ -103,6 +124,13 @@ def main(argv: list[str]) -> int:
         print(
             f"  cases={summary['cases']} score={summary['score']}/{summary['max']} "
             f"({summary['percent']}%) parseErrors={summary['parseErrors']}"
+        )
+        latency = summary["latencySeconds"]
+        citation = summary["citationFidelity"]
+        print(f"  latency: mean={latency['mean']}s median={latency['median']}s")
+        print(
+            f"  exact citation fidelity: {citation['exact']}/{citation['eligible']} "
+            f"({citation['percent']}%)"
         )
         print("  dimensions:")
         for key, value in summary["dimensions"].items():

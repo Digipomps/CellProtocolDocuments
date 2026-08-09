@@ -1,0 +1,158 @@
+{
+  "librarian_base": {
+    "assistantRole": "bibliotekaren i HAVEN",
+    "intentLabels": [
+      "summarize_source_with_quote",
+      "report_catalog_gap",
+      "invite_catalog_contribution",
+      "respect_declined_invitation"
+    ],
+    "now": "2026-08-05T12:00:00Z",
+    "agenda": [],
+    "participantInterests": [],
+    "visibleProfiles": [],
+    "sponsorPolicy": {
+      "allowed": [],
+      "notAllowed": []
+    },
+    "allowedActionKeypaths": [],
+    "actionBoundary": "Svar og invitasjoner er tekstlige forslag. Ingen opplasting, publisering eller annen handling utføres.",
+    "librarianContract": [
+      "Svar kun fra de synlige kildene. Ikke fyll hull med antakelser.",
+      "Ved sitatoppgave: legg ett ordrett sitat og ingenting annet i slots.citation.",
+      "Når kildene ikke dekker emnet: si «Det har jeg ikke i katalogen ennå.»",
+      "Inviter høyst én gang per samtale, bare ved et konkret hull.",
+      "Når brukeren har sagt nei eller én invitasjon allerede er gitt: respekter avslaget og ikke inviter igjen.",
+      "Ikke lov kvalitet, effekt eller fullstendig personvern."
+    ]
+  },
+  "librarian_quote_determinism": {
+    "extends": "librarian_base",
+    "sourceDocuments": [
+      {
+        "id": "source-determinism",
+        "title": "Deterministisk katalog",
+        "text": "Indeksen bygges fra et versjonert manifest og et Git-snapshot. Samme korpus-snapshot skal gi samme indeks-hash. Arbeidsfiler utenfor snapshotet skal ikke påvirke svaret."
+      }
+    ]
+  },
+  "librarian_quote_manifest": {
+    "extends": "librarian_base",
+    "sourceDocuments": [
+      {
+        "id": "source-manifest",
+        "title": "Kildevalg",
+        "text": "Kilder velges gjennom et eksplisitt, versjonert manifest. Interne handoffs, credentials-nære filer og sikkerhetskopier er ekskludert inntil en eier har godkjent dem."
+      }
+    ]
+  },
+  "librarian_quote_gaps": {
+    "extends": "librarian_base",
+    "sourceDocuments": [
+      {
+        "id": "source-gaps",
+        "title": "Kataloghull",
+        "text": "Når kildene ikke gir dekning, skal bibliotekaren si at det er et hull. Et hull er et målbart utfall og skal ikke skjules med en plausibel formulering."
+      }
+    ]
+  },
+  "librarian_gap_quantum": {
+    "extends": "librarian_base",
+    "catalogGap": true,
+    "invitationCount": 0,
+    "invitationDeclined": false,
+    "sourceDocuments": [
+      {
+        "id": "source-known-topics",
+        "title": "Kjente katalogemner",
+        "text": "Katalogen dekker CellProtocol, Explore-kontrakter og deterministisk kildevalg."
+      }
+    ]
+  },
+  "librarian_gap_recipe": {
+    "extends": "librarian_base",
+    "catalogGap": true,
+    "invitationCount": 0,
+    "invitationDeclined": false,
+    "sourceDocuments": [
+      {
+        "id": "source-known-topics",
+        "title": "Kjente katalogemner",
+        "text": "Katalogen dekker programvarearkitektur og dokumentproveniens, ikke matoppskrifter."
+      }
+    ]
+  },
+  "librarian_gap_mars": {
+    "extends": "librarian_base",
+    "catalogGap": true,
+    "invitationCount": 0,
+    "invitationDeclined": false,
+    "sourceDocuments": [
+      {
+        "id": "source-known-topics",
+        "title": "Kjente katalogemner",
+        "text": "Katalogen dekker HAVENs protokoll- og produktdokumentasjon, ikke marsgeologi."
+      }
+    ]
+  },
+  "librarian_invite_quantum": {
+    "extends": "librarian_gap_quantum",
+    "invitationCount": 0,
+    "invitationDeclined": false
+  },
+  "librarian_invite_recipe": {
+    "extends": "librarian_gap_recipe",
+    "invitationCount": 0,
+    "invitationDeclined": false
+  },
+  "librarian_invite_mars": {
+    "extends": "librarian_gap_mars",
+    "invitationCount": 0,
+    "invitationDeclined": false
+  },
+  "librarian_declined_quantum": {
+    "extends": "librarian_gap_quantum",
+    "invitationCount": 1,
+    "invitationDeclined": true,
+    "priorConversation": [
+      {
+        "role": "assistant",
+        "text": "Det har jeg ikke i katalogen ennå — vil du at det skal finnes?"
+      },
+      {
+        "role": "user",
+        "text": "Nei takk."
+      }
+    ]
+  },
+  "librarian_declined_recipe": {
+    "extends": "librarian_gap_recipe",
+    "invitationCount": 1,
+    "invitationDeclined": true,
+    "priorConversation": [
+      {
+        "role": "assistant",
+        "text": "Det har jeg ikke i katalogen ennå — vil du at det skal finnes?"
+      },
+      {
+        "role": "user",
+        "text": "Ikke spør igjen."
+      }
+    ]
+  },
+  "librarian_declined_mars": {
+    "extends": "librarian_gap_mars",
+    "invitationCount": 1,
+    "invitationDeclined": true,
+    "priorConversation": [
+      {
+        "role": "assistant",
+        "text": "Det har jeg ikke i katalogen ennå — vil du at det skal finnes?"
+      },
+      {
+        "role": "user",
+        "text": "Nei, la det ligge."
+      }
+    ]
+  }
+}

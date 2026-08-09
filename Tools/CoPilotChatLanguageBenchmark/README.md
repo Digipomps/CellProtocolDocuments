@@ -19,6 +19,10 @@ This benchmark is intentionally product-shaped. It tests:
 - `cases.no.jsonl`: Norwegian daily-speech test cases with expected intent,
   action, slots and safety behavior.
 - `conference_contexts.v1.json`: shared conference context used by the cases.
+- `librarian_cases.no.jsonl`: 12 Kallimachos/library cases covering exact
+  quotation, honest gaps, one-time invitations and respect for refusals.
+- `librarian_contexts.v1.json`: synthetic, public source excerpts and
+  conversation state for the librarian cases.
 - `rubric.md`: scoring model and pass thresholds.
 - `run_llama_cli_cases.py`: simple local runner for GGUF models through
   `llama-cli`.
@@ -228,3 +232,22 @@ phrases over benchmark language:
 - "Den der med datalekkasjer"
 
 Every new case must say what the assistant should do and what it must not do.
+
+## Kallimachos Librarian Round
+
+The librarian round deliberately reuses the six-point automatic scoring
+contract above. Exact quotation fidelity is an additional reported measure;
+it does not change the six-point total. A quote is exact only when
+`parsed.slots.citation` equals `expected.exactCitation` byte-for-byte as a
+decoded JSON string.
+
+Run the same 12 fixtures against Qwen GGUF and Gemma MLX/VLM by passing:
+
+```bash
+--cases Tools/CoPilotChatLanguageBenchmark/librarian_cases.no.jsonl \
+--contexts Tools/CoPilotChatLanguageBenchmark/librarian_contexts.v1.json
+```
+
+`run_llama_cli_cases.py` and `run_mlx_vlm_cases.py` both record
+`elapsedSeconds`. `summarize_results.py` reports mean/median latency and exact
+citation fidelity in addition to the existing totals and dimensions.

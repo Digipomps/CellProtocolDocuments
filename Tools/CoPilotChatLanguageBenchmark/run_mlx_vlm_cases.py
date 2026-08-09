@@ -34,7 +34,10 @@ ROOT = Path(__file__).resolve().parent
 DEFAULT_OUT = ROOT / "results" / "mlx_vlm_run.jsonl"
 
 
-def build_system_prompt() -> str:
+def build_system_prompt(
+    assistant_role: str = "Co-pilot chat for HAVEN konferanseløsningen",
+    extra_intent_labels: list[str] | None = None,
+) -> str:
     schema = (
         "Returner kun ett gyldig JSON-objekt med feltene: "
         "intent, actionKeypath, needsClarification, safetyDecision, slots, "
@@ -44,14 +47,14 @@ def build_system_prompt() -> str:
     label_instructions = "\n".join(
         [
             "Velg intent nøyaktig fra denne listen:",
-            ", ".join(INTENT_LABELS),
+            ", ".join(INTENT_LABELS + (extra_intent_labels or [])),
             "Velg safetyDecision nøyaktig fra denne listen:",
             ", ".join(SAFETY_LABELS),
         ]
     )
     return "\n".join(
         [
-            "Du er Co-pilot chat for HAVEN konferanseløsningen.",
+            f"Du er {assistant_role}.",
             "Du skal forstå normal norsk dagligtale, korte meldinger, dialektpreg og små skrivefeil.",
             "Ikke finn opp personer, rom, e-post, telefonnummer, private notater eller skjulte data.",
             "Ikke si at noe er sendt, åpnet, slettet, flyttet eller publisert. Du kan bare foreslå eller lage utkast.",
@@ -143,7 +146,6 @@ def main(argv: list[str]) -> int:
 
     cases = filter_cases(load_jsonl(args.cases), args)
     contexts = load_contexts(args.contexts)
-    system_prompt = build_system_prompt()
     args.out.parent.mkdir(parents=True, exist_ok=True)
 
     total = 0
@@ -154,6 +156,10 @@ def main(argv: list[str]) -> int:
     with args.out.open("w", encoding="utf-8") as out_handle:
         for case in cases:
             context = resolve_context(contexts, case["contextRef"])
+            system_prompt = build_system_prompt(
+                context.get("assistantRole", "Co-pilot chat for HAVEN konferanseløsningen"),
+                context.get("intentLabels", []),
+            )
             user_prompt = build_user_prompt(case, context)
             result, elapsed = run_mlx_vlm(
                 args.python,
