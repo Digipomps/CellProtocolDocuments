@@ -69,15 +69,33 @@ async function verifyStaticJourney(browser, javaScriptEnabled) {
     "Hva sa du egentlig ja til?",
   );
   assert.equal(await page.locator("#kjenner-du-deg-igjen .problem-card").count(), 3);
-  const film = page.locator("#kjenner-du-deg-igjen .film-figure video");
+  // Filmen ligger i heroen, ikke i problemseksjonen, og skal finnes bare én gang.
+  const film = page.locator("section.hero .hero-figure video");
   assert.equal(await film.count(), 1);
-  assert.equal(await film.getAttribute("poster"), "/assets/haven-film-poster-20260806.webp");
+  assert.equal(await page.locator("video").count(), 1);
+  assert.equal(await film.getAttribute("poster"), "/assets/haven-hero-film-poster-20260807.webp");
   assert.equal(
-    await page.locator("#kjenner-du-deg-igjen .film-figure source").getAttribute("src"),
-    "/assets/haven-hva-sa-du-ja-til-20260806.mp4",
+    await page.locator("section.hero .hero-figure source").getAttribute("src"),
+    "/assets/haven-hero-film-20260807.mp4",
   );
+  // Filmen skal ha samme format som i produksjon: maks 52rem og sentrert på siden.
+  const filmBoks = await film.evaluate((node) => {
+    const rect = node.getBoundingClientRect();
+    return { left: rect.left, right: rect.right, width: rect.width, viewport: window.innerWidth };
+  });
+  assert.ok(
+    filmBoks.width <= 52 * 16 + 1,
+    `filmen er bredere enn 52rem: ${Math.round(filmBoks.width)}px`,
+  );
+  const filmSenter = (filmBoks.left + filmBoks.right) / 2;
+  assert.ok(
+    Math.abs(filmSenter - filmBoks.viewport / 2) <= 1,
+    `filmen er ikke sentrert: senter ${Math.round(filmSenter)} mot side ${filmBoks.viewport / 2}`,
+  );
+  // Autoavspilling er stum og har kontroller, slik at bevegelsen kan stoppes (WCAG 2.2.2).
   assert.equal(await film.evaluate((node) => node.controls), true);
-  assert.equal(await film.evaluate((node) => node.autoplay), false);
+  assert.equal(await film.evaluate((node) => node.autoplay), true);
+  assert.equal(await film.evaluate((node) => node.muted), true);
   // Filmen skal stoppe på siste bilde, ikke gå i sløyfe.
   assert.equal(await film.evaluate((node) => node.loop), false);
   assert.deepEqual(await page.locator("#kjenner-du-deg-igjen .stat-number").allTextContents(), [
@@ -165,13 +183,53 @@ async function verifyMobile(browser) {
   await context.close();
 }
 
+// Med redusert bevegelse skal filmen byttes ut med sluttkortet, uten layouthopp.
+async function verifyReducedMotion(browser) {
+  const context = await browser.newContext({
+    viewport: { width: 1440, height: 900 },
+    reducedMotion: "reduce",
+  });
+  const page = await context.newPage();
+  await page.goto(`${baseURL}/`, { waitUntil: "load" });
+  const state = await page.evaluate(() => {
+    const video = document.querySelector(".hero-figure video");
+    const still = document.querySelector(".hero-figure .hero-still");
+    const box = (el) => {
+      const rect = el.getBoundingClientRect();
+      return { width: Math.round(rect.width), height: Math.round(rect.height) };
+    };
+    return {
+      videoHidden: getComputedStyle(video).display === "none",
+      stillShown: getComputedStyle(still).display !== "none",
+      stillLoaded: still.complete && still.naturalWidth > 0,
+      stillSrc: still.currentSrc,
+      stillBox: box(still),
+    };
+  });
+  assert.equal(state.videoHidden, true);
+  assert.equal(state.stillShown, true);
+  assert.equal(state.stillLoaded, true);
+  // Stillbildet viser menneskene, ikke sluttkortet – filmen ender allerede på kortet,
+  // og da ville de to flatene vist det samme motivet.
+  assert.ok(
+    state.stillSrc.includes("haven-human-agency-20260803.webp"),
+    `stillbildet skal vise menneskene, ikke sluttkortet: ${state.stillSrc}`,
+  );
+  assert.ok(
+    !state.stillSrc.includes("sluttkort"),
+    `stillbildet duplikerer filmens sluttbilde: ${state.stillSrc}`,
+  );
+  await context.close();
+}
+
 (async () => {
   const browser = await chromium.launch({ headless: true });
   try {
     await verifyStaticJourney(browser, true);
     await verifyStaticJourney(browser, false);
     await verifyMobile(browser);
-    console.log("OK: new concern-first variant, blocked app entry, copy order, sources, images, no-JS, AX, keyboard focus, 200% text and mobile layout passed.");
+    await verifyReducedMotion(browser);
+    console.log("OK: new concern-first variant, blocked app entry, copy order, sources, images, no-JS, AX, keyboard focus, mobile layout and reduced-motion fallback passed.");
   } finally {
     await browser.close();
   }
