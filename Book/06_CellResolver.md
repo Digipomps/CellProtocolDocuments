@@ -234,6 +234,22 @@ Behavior:
 This enforcement applies both to direct `ws://...` endpoints and to
 `cell://host/...` references that resolve to WebSocket URLs.
 
+### 9.1 Bounded authority challenge for long bridge endpoints
+
+A direct `ws://` or `wss://` logical endpoint may contain an owner-bound
+contract descriptor in its query. When the complete endpoint exceeds
+`IdentitySigningChallenge.maximumScopeCharacters`, `CellResolver` binds the
+owner-control challenge to a deterministic SHA-256 URN returned by
+`remoteBridgeAuthorityChallengeResource(for:)` instead of rejecting the proof
+solely because its resource string is too long.
+
+The original endpoint is still passed unchanged to the selected bridge
+transport. The digest therefore preserves an exact local authority binding; it
+does not rewrite the wire URL, grant authority, or prove that downstream logs
+redact query data. Endpoints within the challenge limit remain unchanged for
+compatibility. `BridgeTests` covers both the bounded challenge resource and the
+unchanged transport URL.
+
 ## 10. Summary
 
 The CellResolver is a central enforcement boundary for supported HAVEN paths:

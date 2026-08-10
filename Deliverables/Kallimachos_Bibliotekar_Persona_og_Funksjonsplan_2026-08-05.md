@@ -175,7 +175,7 @@ sende bibliotekaren «tilbake på magasinet» når som helst.
 | K1 | Rollenavn + diskret egennavn gir personlighet uten å virke påklistret. | predictive, speculative | Åpen hypotese; testes i gjestevisning (spør folk hva de husker om «bibliotekaren»). |
 | K2 | Gap-drevet invitasjon (F4) konverterer bedre enn generell oppfordring, og lukker anledningsgapet i vekstløkka. | causal, speculative | Måles via intake-forslag per avdekket hull; motargument: kan oppleves som salg — avbøtes av én-per-samtale-regelen og avslagshukommelse. |
 | K3 | Palazzo-konvolutten er tilstrekkelig for bibliotekarsvar. | project capability, moderated | Supported: samme felter dekker kilder, ferskhet og verifisering; utvidelse krever egen review. |
-| K4 | Selvfinansiering kan uttrykkes som ledger + forslagsrett uten pengeliknende mekanikk. | regulatory/design, assertive | Holder så lenge kreditter ikke kan veksles ut; guardrails-skillen porter enhver konkretisering. |
+| K4 | Selvfinansiering kan uttrykkes som ledger + forslagsrett uten pengeliknende mekanikk. | regulatory/design, aspirational | Ikke juridisk klassifisert. Enhver konkret kreditt-, verdi- eller betalingsvariant må gjennom betalings-/regulatoriske guardrails og offisielle kilder før pilot eller offentlig påstand. |
 | K5 | Formålsrutet overlevering butler→bibliotekar er riktig tilstedeværelsesmodell. | design, moderated | Konsistent med at butleren eier relasjonen; alternativ (bibliotekaren alltid direkte tilgjengelig) beholdes som eksplisitt kall, så modellene konkurrerer ikke. |
 
 ## Beslutninger (Kjetil, 2026-08-05)

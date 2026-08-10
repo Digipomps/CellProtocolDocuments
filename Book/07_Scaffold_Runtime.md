@@ -185,6 +185,34 @@ A path may claim exact replay only when the same compatible inputs, state,
 ordering, and deterministic handlers reproduce the declared result in a
 regression gate.
 
+### 4.4 Validated owner-private contact persistence
+
+`EntityAnchorCell` has an additive, fail-closed contact persistence gate for
+Apple and Vapor runtimes:
+
+- reserved keypath family: `relations.validatedContacts.<relationID>`
+- batch schema: `haven.entity-validated-contact-batch.v1`
+- record schema: `haven.entity-validated-contact-record.v1`
+- owner-signed `entity.batchPersist` authority commit is mandatory
+- commit purpose is `purpose://access.audit.privacy`
+- storage authorization is explicit and disclosure authorization must be false
+- e-mail and E.164 telephone values, provenance, purpose refs, relation binding,
+  size limits, and the closed record shape are validated before persistence
+- generic direct writes and legacy batch schemas are denied for the reserved
+  keypath family
+- `entityContactSchema` exposes value-free schema metadata to the owner
+
+The gate returns the normal signed Entity authority receipt and supports
+read-after-write plus storage reload verification in the CellScaffold helper
+path. The current receipt still declares `local_authority_only`; it is not proof
+of distributed quorum or remote replication.
+
+This does not make the rest of legacy `EntityAnchorData` strictly validated,
+does not authorize contact disclosure or message delivery, and does not yet
+provide selective erasure of personal values from already committed authority
+journal history. Do not claim complete Entity storage validation or deletion
+support from this bounded gate.
+
 ## 5. Transport Integration
 
 Transport bridges may:
