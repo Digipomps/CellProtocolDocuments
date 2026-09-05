@@ -1,0 +1,746 @@
+{
+  "schema": "haven.purpose-package-set.v0",
+  "status": "draft-canonical-source",
+  "createdAt": "2026-09-03",
+  "description": "Gjenbrukbare formålspakker for formålsdrevet utvikling i HAVEN. En pakke er et sett formålsnoder (samme nodeform som haven.purpose-knowledge-base.v0) med avledede tester, påkrevde artefakter og lærdommer som festes automatisk på en oppgave når pakkens triggere matcher. Pakker er ikke rettigheter og gir ingen autorisasjon (jf. Purpose_Bound_External_Action_Contract).",
+  "packageDefaults": {
+    "attachmentRule": "En pakke festes når minst én av triggers.surfaces eller triggers.tags matcher oppgavens deklarerte surfaces/tags, eller når pakken er listet i alwaysAttach.",
+    "testRule": "Hver derivedTest må kunne kjøres eller inspiseres av et menneske og gi pass/fail/blocked. En test uten kommando eller inspeksjonsprosedyre er en intensjon, ikke en test.",
+    "artifactRule": "requiredArtifacts må finnes som filer i oppgavemappen før porten de tilhører kan settes til godkjent.",
+    "lessonRule": "lessonRefs peker inn i haven_lessons_register_v0.json. Ved dekomponering skal lærdommene vises for Kjetil, ikke bare lenkes."
+  },
+  "alwaysAttach": [
+    "pkg.std.everything-works"
+  ],
+  "packages": [
+    {
+      "packageRef": "pkg.std.everything-works",
+      "title": "Alt skal virke (standard kvalitetsport)",
+      "summary": "Ingen leveranse er ferdig før den bygger, eksisterende tester er grønne, dokumentasjon er oppdatert i samme endring og arbeidet er synlig i en ledgerpost.",
+      "status": "active",
+      "triggers": {
+        "surfaces": [
+          "*"
+        ],
+        "tags": [
+          "*"
+        ]
+      },
+      "purposes": [
+        {
+          "purposeRef": "purpose://quality.build-and-regression",
+          "parentRef": "purpose://quality",
+          "title": "Bygger og bryter ingenting",
+          "summary": "Endringen kompilerer i alle berørte mål og hele den eksisterende testmengden er fortsatt grønn.",
+          "status": "candidate",
+          "goal": {
+            "goalRef": "goal.quality.build-and-regression",
+            "lifecycle": "event",
+            "outcome": "Alle berørte mål bygger og eksisterende tester passerer uten at tester er fjernet eller svekket.",
+            "successSignals": [
+              "Byggkommando returnerer 0.",
+              "Testkommando returnerer 0 med minst like mange tester som før.",
+              "Ingen test er markert skip/disabled i endringen uten begrunnelse i PLAN.md."
+            ],
+            "verifier": "Bygg- og testkommando kjørt av Codex/Xcode; utdata limt inn i TESTRESULT.md."
+          },
+          "derivedTests": [
+            {
+              "testRef": "test.build",
+              "kind": "command",
+              "description": "Bygg alle berørte mål.",
+              "how": "Prosjektets byggkommando (xcodebuild / swift build / pytest) — angis i PLAN.md.",
+              "evidence": "TESTRESULT.md#build"
+            },
+            {
+              "testRef": "test.regression",
+              "kind": "command",
+              "description": "Kjør hele eksisterende testmengde.",
+              "how": "Prosjektets testkommando; sammenlign antall tester før/etter.",
+              "evidence": "TESTRESULT.md#regression"
+            }
+          ],
+          "matchingHints": {
+            "aliases": [
+              "skal bygge",
+              "ikke ødelegg",
+              "regresjon"
+            ],
+            "tokens": [
+              "build",
+              "regression",
+              "tests",
+              "green"
+            ]
+          }
+        },
+        {
+          "purposeRef": "purpose://quality.docs-in-same-change",
+          "parentRef": "purpose://quality",
+          "title": "Dokumentasjon følger endringen",
+          "summary": "Kontrakter, Book-kapitler og kataloger oppdateres i samme endring som koden, og planlagt oppførsel dokumenteres aldri som implementert.",
+          "status": "candidate",
+          "goal": {
+            "goalRef": "goal.quality.docs-in-same-change",
+            "lifecycle": "event",
+            "outcome": "Alle dokumenter som beskriver endret oppførsel er oppdatert og datert 'Last verified against code'.",
+            "successSignals": [
+              "Diff inneholder doc-endringer for hver endret kontrakt.",
+              "Ingen setning beskriver uimplementert oppførsel i presens."
+            ],
+            "verifier": "Manuell inspeksjon av diff + cellprotocol-docs-and-rag-maintenance-sjekkliste."
+          },
+          "derivedTests": [
+            {
+              "testRef": "test.docs-updated",
+              "kind": "inspection",
+              "description": "Hver endret kontrakt/atferd har tilsvarende doc-diff.",
+              "how": "Les diff; kryss av i ACCEPT.md.",
+              "evidence": "ACCEPT.md#docs"
+            }
+          ],
+          "matchingHints": {
+            "aliases": [
+              "oppdater docs",
+              "Book-kapittel"
+            ],
+            "tokens": [
+              "docs",
+              "book",
+              "contract",
+              "catalog"
+            ]
+          }
+        },
+        {
+          "purposeRef": "purpose://quality.work-is-visible",
+          "parentRef": "purpose://quality",
+          "title": "Arbeidet er synlig",
+          "summary": "Planbytter og utført arbeid skrives ned der neste leser ser etter, slik at produktive dager ikke ser tomme ut.",
+          "status": "candidate",
+          "goal": {
+            "goalRef": "goal.quality.work-is-visible",
+            "lifecycle": "event",
+            "outcome": "Oppgavemappen har oppdatert STATUS.md med gate-tilstand, og et eventuelt planbytte er datert og begrunnet.",
+            "successSignals": [
+              "STATUS.md nevner alle porter med dato.",
+              "Planbytte har egen linje med 'hvorfor'."
+            ],
+            "verifier": "Inspeksjon av STATUS.md ved G3."
+          },
+          "derivedTests": [
+            {
+              "testRef": "test.status-current",
+              "kind": "inspection",
+              "description": "STATUS.md speiler faktisk tilstand.",
+              "how": "Sammenlign STATUS.md med filene i mappen.",
+              "evidence": "ACCEPT.md#status"
+            }
+          ],
+          "matchingHints": {
+            "aliases": [
+              "ledger",
+              "SISTE_OPPDATERING",
+              "status"
+            ],
+            "tokens": [
+              "status",
+              "ledger",
+              "visible"
+            ]
+          }
+        }
+      ],
+      "requiredArtifacts": [
+        {
+          "artifactRef": "art.spec",
+          "path": "FORMAALSSPEC.md",
+          "gate": "G1",
+          "description": "Godkjent formålsspesifikasjon."
+        },
+        {
+          "artifactRef": "art.plan",
+          "path": "PLAN.md",
+          "gate": "G2",
+          "description": "Arbeidspakker 1:1 mot bladformål."
+        },
+        {
+          "artifactRef": "art.testresult",
+          "path": "TESTRESULT.md",
+          "gate": "G3",
+          "description": "Utdata fra alle avledede tester."
+        },
+        {
+          "artifactRef": "art.accept",
+          "path": "ACCEPT.md",
+          "gate": "G3",
+          "description": "Forventning mot faktisk, per leveranse."
+        },
+        {
+          "artifactRef": "art.status",
+          "path": "STATUS.md",
+          "gate": "G3",
+          "description": "Gate-tilstand og planbytter."
+        }
+      ],
+      "lessonRefs": [
+        "lesson.plan-instead-of-delivery",
+        "lesson.undocumented-plan-switch",
+        "lesson.planned-documented-as-implemented"
+      ]
+    },
+    {
+      "packageRef": "pkg.std.gui-surface",
+      "title": "GUI-flate (bilde før kode)",
+      "summary": "For alt Kjetil skal se: et rendret bilde godkjennes før implementering, bildet blir akseptansereferanse, og flaten må laste, virke og være tilgjengelig.",
+      "status": "active",
+      "triggers": {
+        "surfaces": [
+          "gui",
+          "skeleton",
+          "porthole",
+          "binding",
+          "web"
+        ],
+        "tags": [
+          "gui",
+          "skeleton",
+          "layout",
+          "flate",
+          "design",
+          "mockup"
+        ]
+      },
+      "purposes": [
+        {
+          "purposeRef": "purpose://gui.expectation-agreed-before-build",
+          "parentRef": "purpose://gui.quality.functional-accessible",
+          "title": "Forventningen er avstemt før bygging",
+          "summary": "Kjetil har sett og godkjent et rendret bilde av flaten før noen implementering starter; tekstlig beskrivelse teller ikke.",
+          "status": "candidate",
+          "goal": {
+            "goalRef": "goal.gui.expectation-agreed",
+            "lifecycle": "event",
+            "outcome": "Et rendret bilde per flate/tilstand er godkjent av Kjetil og lagret som referanse i oppgavemappen.",
+            "successSignals": [
+              "images/<flate>-v<n>.png finnes og er nevnt som 'godkjent' i FORMAALSSPEC.md §3.",
+              "Bildet er laget med Porthole-preview av skeleton-JSON når formatet tillater det, ellers HTML-mockup/design-canvas med eksplisitt merknad om hva som ikke kan rendres i dagens skeleton."
+            ],
+            "verifier": "Port G1-GUI i STATUS.md kan bare settes til godkjent når bildefilen finnes."
+          },
+          "derivedTests": [
+            {
+              "testRef": "test.gui.reference-image-exists",
+              "kind": "artifact",
+              "description": "Godkjent referansebilde finnes for hver flate og hver viktig tilstand (tom, fylt, feil).",
+              "how": "purpose_dev.py validate sjekker images/ mot FORMAALSSPEC.md §3.",
+              "evidence": "images/"
+            }
+          ],
+          "matchingHints": {
+            "aliases": [
+              "vis meg først",
+              "mockup",
+              "forventet noe annet"
+            ],
+            "tokens": [
+              "image",
+              "mockup",
+              "preview",
+              "expectation"
+            ]
+          }
+        },
+        {
+          "purposeRef": "purpose://gui.parity-with-approved-image",
+          "parentRef": "purpose://gui.quality.functional-accessible",
+          "title": "Resultatet ligner det godkjente bildet",
+          "summary": "Den implementerte flaten avviker ikke synlig fra det godkjente referansebildet på like stor flate; avvik er listet og godkjent eksplisitt.",
+          "status": "candidate",
+          "goal": {
+            "goalRef": "goal.gui.parity",
+            "lifecycle": "event",
+            "outcome": "Screenshot av faktisk flate ligger side om side med referansebildet i ACCEPT.md, og alle avvik er enten rettet eller godkjent av Kjetil med begrunnelse.",
+            "successSignals": [
+              "ACCEPT.md har par (referanse, faktisk) per flate.",
+              "Avvikslisten er tom eller hvert avvik har 'godkjent av Kjetil <dato>'."
+            ],
+            "verifier": "Manuell side-om-side-inspeksjon; pikseldiff når begge bildene har samme størrelse."
+          },
+          "derivedTests": [
+            {
+              "testRef": "test.gui.parity",
+              "kind": "inspection",
+              "description": "Side-om-side referanse/faktisk per flate.",
+              "how": "Screenshot fra Porthole/Binding i samme viewport som referansen; lim inn i ACCEPT.md.",
+              "evidence": "ACCEPT.md#parity"
+            }
+          ],
+          "matchingHints": {
+            "aliases": [
+              "pixel-lik",
+              "ser ikke likt ut",
+              "avvik fra design"
+            ],
+            "tokens": [
+              "parity",
+              "screenshot",
+              "pixel",
+              "diff"
+            ]
+          }
+        },
+        {
+          "purposeRef": "purpose://gui.surface-loads-in-time",
+          "parentRef": "purpose://gui.quality.functional-accessible",
+          "title": "Flaten laster uten timeout",
+          "summary": "Flaten vises innen en avtalt terskel og treffer konfigurasjonen ved første oppslag (ingen alias-bom som gir 45 s timeout).",
+          "status": "candidate",
+          "goal": {
+            "goalRef": "goal.gui.loads-in-time",
+            "lifecycle": "event",
+            "outcome": "Flaten er synlig innen terskelen angitt i FORMAALSSPEC.md (standard 5 s) på det avtalte miljøet.",
+            "successSignals": [
+              "Målt lastetid ≤ terskel i tre påfølgende forsøk.",
+              "resolveCellConfiguration treffer på første oppslag (ingen navne-/aliasbom i logg)."
+            ],
+            "verifier": "Tidsmåling i Porthole/Binding + logginspeksjon."
+          },
+          "derivedTests": [
+            {
+              "testRef": "test.gui.load-time",
+              "kind": "measurement",
+              "description": "Lastetid ≤ terskel, tre forsøk.",
+              "how": "Stoppeklokke/logg-tidsstempel; noter alle tre tider.",
+              "evidence": "TESTRESULT.md#load-time"
+            }
+          ],
+          "matchingHints": {
+            "aliases": [
+              "timeout",
+              "laster ikke",
+              "treg flate"
+            ],
+            "tokens": [
+              "timeout",
+              "load",
+              "latency",
+              "alias"
+            ]
+          }
+        },
+        {
+          "purposeRef": "purpose://gui.ways-in-are-reachable",
+          "parentRef": "purpose://gui.quality.functional-accessible",
+          "title": "Flaten skjuler ikke sine egne veier inn",
+          "summary": "Hvert element flaten trenger for aa oppfylle formaalet kan faktisk sees, og hver handling formaalet navngir kan faktisk naas.",
+          "status": "candidate",
+          "goal": {
+            "goalRef": "goal.gui.ways-in-reachable",
+            "lifecycle": "event",
+            "outcome": "SkeletonReachabilityAudit rapporterer ingen elementer som aldri kan sees, og handlingene FORMAALSSPEC §3 navngir finnes i reachableActionKeypaths.",
+            "successSignals": [
+              "test.skeleton.no-unreachable-elements er gronn for hver flate i det utsendte korpuset.",
+              "Hver handling forventningskontrakten navngir staar i reachableActionKeypaths for flaten."
+            ],
+            "verifier": "SkeletonReachabilityAudit.audit + reachableActionKeypaths, kjort over menykonfigurasjoner og navigasjonsdestinasjoner - ikke bare over verifiseringshjelperens liste."
+          },
+          "derivedTests": [
+            {
+              "testRef": "test.skeleton.no-unreachable-elements",
+              "kind": "command",
+              "description": "Ingen flate har elementer som aldri kan sees; funn navngir handlingene som gaar tapt.",
+              "how": "xcodebuild -only-testing:BindingTests/CellConfigurationVerifierXCTest/testNoLocalSurfaceHidesItsOwnWaysIn",
+              "evidence": "TESTRESULT.md#reachability"
+            },
+            {
+              "testRef": "test.skeleton.purpose-actions-reachable",
+              "kind": "inspection",
+              "description": "Hver handling forventningskontrakten (§3) navngir finnes i flatens reachableActionKeypaths.",
+              "how": "Sammenlign §3-radene mot SkeletonReachabilityAudit.reachableActionKeypaths(skeleton).",
+              "evidence": "ACCEPT.md#ways-in"
+            }
+          ],
+          "matchingHints": {
+            "aliases": [
+              "ingen knapper",
+              "tom flate",
+              "ikke brukelig til noe",
+              "ingen vei inn"
+            ],
+            "tokens": [
+              "reachable",
+              "visibility",
+              "condition",
+              "hidden",
+              "skeleton"
+            ]
+          }
+        }
+      ],
+      "inheritedPurposeRefs": [
+        "purpose://gui.quality.functional-accessible",
+        "purpose://skeleton.owner-entity-access"
+      ],
+      "requiredArtifacts": [
+        {
+          "artifactRef": "art.reference-images",
+          "path": "images/",
+          "gate": "G1-GUI",
+          "description": "Godkjente referansebilder, ett per flate og tilstand."
+        },
+        {
+          "artifactRef": "art.skeleton-json",
+          "path": "skeleton/",
+          "gate": "G1-GUI",
+          "description": "CellConfiguration/skeleton-JSON som bildet er rendret fra (når Porthole-preview er brukt)."
+        }
+      ],
+      "lessonRefs": [
+        "lesson.text-ux-is-not-design",
+        "lesson.surface-load-alias-miss",
+        "lesson.parity-was-correctness-not-decoration",
+        "lesson.unresolvable-condition-is-invisible",
+        "lesson.test-corpus-is-not-shipped-corpus"
+      ]
+    },
+    {
+      "packageRef": "pkg.std.cell-contract",
+      "title": "Cellekontrakt",
+      "summary": "En ny eller endret celle har eksplisitt kontrakt, positive og negative fixtures, autorisasjon som faktisk sjekker nøkkelstien, og ingen tomme stubber.",
+      "status": "active",
+      "triggers": {
+        "surfaces": [
+          "cell",
+          "cellprotocol",
+          "scaffold",
+          "python"
+        ],
+        "tags": [
+          "celle",
+          "cell",
+          "kontrakt",
+          "contract",
+          "endpoint",
+          "keypath",
+          "autorisasjon"
+        ]
+      },
+      "purposes": [
+        {
+          "purposeRef": "purpose://cell.contract-explicit",
+          "parentRef": "purpose://validation",
+          "title": "Kontrakten er eksplisitt og testet",
+          "summary": "Cellens endepunkter, keypaths, events og grants står i en kontrakt-JSON med positive og negative fixtures som valideres.",
+          "status": "candidate",
+          "goal": {
+            "goalRef": "goal.cell.contract-explicit",
+            "lifecycle": "event",
+            "outcome": "Book/<celle>_contract_v<n>.json finnes, og en validator kjører grønt på alle fixtures.",
+            "successSignals": [
+              "Minst én negativ fixture per beskyttet operasjon.",
+              "Validator returnerer 0."
+            ],
+            "verifier": "Kontraktvalidator (mønster: Purpose_Bound_External_Action_Contract/checks/validate_contract.py)."
+          },
+          "derivedTests": [
+            {
+              "testRef": "test.cell.contract-fixtures",
+              "kind": "command",
+              "description": "Kjør kontraktvalidator mot positive/negative fixtures.",
+              "how": "python3 checks/validate_contract.py",
+              "evidence": "TESTRESULT.md#contract"
+            }
+          ],
+          "matchingHints": {
+            "aliases": [
+              "kontrakt",
+              "fixtures"
+            ],
+            "tokens": [
+              "contract",
+              "fixture",
+              "schema"
+            ]
+          }
+        },
+        {
+          "purposeRef": "purpose://cell.authorization-honours-keypath",
+          "parentRef": "purpose://access.audit.privacy",
+          "title": "Autorisasjon respekterer nøkkelstien",
+          "summary": "Autorisasjon sjekker target-celle, source-celle, requester og keypath — ikke bare eierskap — og feiler lukket på ukjent formål.",
+          "status": "candidate",
+          "goal": {
+            "goalRef": "goal.cell.authorization-keypath",
+            "lifecycle": "event",
+            "outcome": "Negative tester viser at feil requester, feil keypath og purpose://prompt.unknown alle avvises.",
+            "successSignals": [
+              "Tre negative tester finnes og passerer.",
+              "Ingen kodevei kaster keypath før sjekk."
+            ],
+            "verifier": "Enhetstester + kodegjennomgang av autorisasjonsstien."
+          },
+          "derivedTests": [
+            {
+              "testRef": "test.cell.auth-negative",
+              "kind": "command",
+              "description": "Feil requester / feil keypath / ukjent formål avvises.",
+              "how": "Tre enhetstester navngitt etter tilfellet.",
+              "evidence": "TESTRESULT.md#auth"
+            }
+          ],
+          "matchingHints": {
+            "aliases": [
+              "autorisasjon",
+              "grant",
+              "keypath"
+            ],
+            "tokens": [
+              "authorization",
+              "grant",
+              "keypath",
+              "requester"
+            ]
+          }
+        },
+        {
+          "purposeRef": "purpose://cell.no-empty-stubs",
+          "parentRef": "purpose://quality",
+          "title": "Ingen tomme stubber leveres som ferdig",
+          "summary": "Endepunkter som ikke er implementert er merket som slikt i kontrakten og kaster/rapporterer eksplisitt, i stedet for å returnere tom suksess.",
+          "status": "candidate",
+          "goal": {
+            "goalRef": "goal.cell.no-empty-stubs",
+            "lifecycle": "event",
+            "outcome": "Ingen endepunkt i kontrakten er implementert som no-op uten status 'not-implemented'.",
+            "successSignals": [
+              "grep etter tomme handlere gir null treff, eller hvert treff er listet i Gap_Analysis.md."
+            ],
+            "verifier": "Kodegjennomgang + Gap_Analysis-oppføring."
+          },
+          "derivedTests": [
+            {
+              "testRef": "test.cell.stub-scan",
+              "kind": "inspection",
+              "description": "Liste alle no-op-handlere og avstem mot Gap_Analysis.md.",
+              "how": "Søk i berørte filer; skriv listen i ACCEPT.md.",
+              "evidence": "ACCEPT.md#stubs"
+            }
+          ],
+          "matchingHints": {
+            "aliases": [
+              "stub",
+              "tom implementasjon"
+            ],
+            "tokens": [
+              "stub",
+              "noop",
+              "not-implemented"
+            ]
+          }
+        }
+      ],
+      "inheritedPurposeRefs": [
+        "purpose://access.audit.privacy",
+        "purpose://test.acceptance"
+      ],
+      "requiredArtifacts": [
+        {
+          "artifactRef": "art.contract",
+          "path": "contract/",
+          "gate": "G2",
+          "description": "Kontrakt-JSON + fixtures (kan være lenke til Book/)."
+        }
+      ],
+      "lessonRefs": [
+        "lesson.cellscaffold-two-holes",
+        "lesson.purpose-never-grants-rights"
+      ]
+    },
+    {
+      "packageRef": "pkg.std.cell-combination",
+      "title": "Cellekombinasjon og dataflyt",
+      "summary": "Når flere celler kobles: dataflyt og events er tegnet, kapabiliteter er erklært som formål med avgrensning, og ingen egenskap ved arkitekturen er sluttet fra én observert bruk.",
+      "status": "active",
+      "triggers": {
+        "surfaces": [
+          "cell",
+          "scaffold",
+          "bridge"
+        ],
+        "tags": [
+          "kombinasjon",
+          "dataflyt",
+          "bridge",
+          "events",
+          "integrasjon",
+          "flere celler"
+        ]
+      },
+      "purposes": [
+        {
+          "purposeRef": "purpose://cells.dataflow-declared",
+          "parentRef": "purpose://digital-work.coordinate",
+          "title": "Dataflyten er tegnet og navngitt",
+          "summary": "Hvilke celler som snakker, over hvilke endepunkter og events, står i et diagram og en tabell før implementering.",
+          "status": "candidate",
+          "goal": {
+            "goalRef": "goal.cells.dataflow-declared",
+            "lifecycle": "event",
+            "outcome": "dataflow.md (eller .graffle/.json) finnes med alle kanter navngitt med endepunkt/event.",
+            "successSignals": [
+              "Hver kant i diagrammet gjenfinnes i en kontrakt.",
+              "Ingen kant uten navngitt event/keypath."
+            ],
+            "verifier": "Kryssjekk diagram mot kontrakter ved G2."
+          },
+          "derivedTests": [
+            {
+              "testRef": "test.cells.dataflow-matches-contracts",
+              "kind": "inspection",
+              "description": "Hver kant i dataflow finnes i en kontrakt.",
+              "how": "Tabell kant→kontrakt i PLAN.md.",
+              "evidence": "PLAN.md#dataflow"
+            }
+          ],
+          "matchingHints": {
+            "aliases": [
+              "dataflyt",
+              "hvem snakker med hvem"
+            ],
+            "tokens": [
+              "dataflow",
+              "event",
+              "edge",
+              "diagram"
+            ]
+          }
+        },
+        {
+          "purposeRef": "purpose://cells.capabilities-declared-with-boundary",
+          "parentRef": "purpose://grounding",
+          "title": "Kapabiliteter er erklært, med avgrensning",
+          "summary": "Hver kapabilitet oppgaven bygger på er skrevet som eget formål med kilde og eksplisitt 'Avgrensning', slik at ingen slutter fra én bruksmåte til en arkitekturegenskap.",
+          "status": "candidate",
+          "goal": {
+            "goalRef": "goal.cells.capabilities-declared",
+            "lifecycle": "event",
+            "outcome": "FORMAALSSPEC.md §2 lister hver antatt kapabilitet med kildefil og hva den ikke dekker.",
+            "successSignals": [
+              "Ingen 'antar at' uten kilde.",
+              "Hver kapabilitet har Avgrensning-linje."
+            ],
+            "verifier": "Brief-audit ved G1 (retrieved/recalled/unavailable/contradicted)."
+          },
+          "derivedTests": [
+            {
+              "testRef": "test.cells.capability-audit",
+              "kind": "inspection",
+              "description": "Alle kapabilitetspåstander har audit-status retrieved.",
+              "how": "Tabell i FORMAALSSPEC.md §0.",
+              "evidence": "FORMAALSSPEC.md#audit"
+            }
+          ],
+          "matchingHints": {
+            "aliases": [
+              "kapabilitet",
+              "kan bridge",
+              "støtter"
+            ],
+            "tokens": [
+              "capability",
+              "boundary",
+              "assumption"
+            ]
+          }
+        }
+      ],
+      "requiredArtifacts": [
+        {
+          "artifactRef": "art.dataflow",
+          "path": "dataflow.md",
+          "gate": "G2",
+          "description": "Diagram + kant-tabell."
+        }
+      ],
+      "lessonRefs": [
+        "lesson.bridge-inferred-architecture-from-one-use",
+        "lesson.free-text-is-not-a-declaration"
+      ]
+    },
+    {
+      "packageRef": "pkg.std.codex-handoff",
+      "title": "Overlevering til Codex/terminal",
+      "summary": "Arbeid som skal kjøres av Codex eller i Kjetils terminal leveres som idempotente skript med tørrkjøring, uten git via mount og uten kommentarer bak kommandoer.",
+      "status": "active",
+      "triggers": {
+        "surfaces": [
+          "codex",
+          "terminal",
+          "xcode"
+        ],
+        "tags": [
+          "codex",
+          "handoff",
+          "skript",
+          "terminal",
+          "bygg"
+        ]
+      },
+      "purposes": [
+        {
+          "purposeRef": "purpose://handoff.runnable-without-guessing",
+          "parentRef": "purpose://digital-work.coordinate",
+          "title": "Overleveringen kan kjøres uten gjetting",
+          "summary": "Mottakeren (Codex/Kjetil) får én README med rekkefølge, hver kommando på egen linje uten forklaring bak, og skript som tørrkjører som standard.",
+          "status": "candidate",
+          "goal": {
+            "goalRef": "goal.handoff.runnable",
+            "lifecycle": "event",
+            "outcome": "README.md i _handoff-mappen har rekkefølge, forventet utfall per steg, og alle skript støtter --dry-run/--go.",
+            "successSignals": [
+              "Ingen linje har '#' bak en kommando.",
+              "Ingen git-kommando kjøres fra device_bash.",
+              "Skript avbryter i preflight før første endring."
+            ],
+            "verifier": "Inspeksjon + testkjøring av tørrkjøring."
+          },
+          "derivedTests": [
+            {
+              "testRef": "test.handoff.dry-run",
+              "kind": "command",
+              "description": "Tørrkjøring gir 0 og lister hva som ville skjedd.",
+              "how": "./<skript>.sh (uten --go)",
+              "evidence": "TESTRESULT.md#dry-run"
+            }
+          ],
+          "matchingHints": {
+            "aliases": [
+              "handoff",
+              "gi til Codex"
+            ],
+            "tokens": [
+              "handoff",
+              "codex",
+              "script",
+              "dry-run"
+            ]
+          }
+        }
+      ],
+      "requiredArtifacts": [
+        {
+          "artifactRef": "art.handoff-readme",
+          "path": "handoff/README.md",
+          "gate": "G2",
+          "description": "Rekkefølge og kommandoer."
+        }
+      ],
+      "lessonRefs": [
+        "lesson.zsh-no-inline-comments",
+        "lesson.mount-is-not-git",
+        "lesson.codex-mcp-60s"
+      ]
+    }
+  ]
+}

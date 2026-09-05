@@ -1,0 +1,381 @@
+{
+  "schema": "haven.lessons-register.v0",
+  "status": "draft-canonical-source",
+  "createdAt": "2026-09-03",
+  "description": "Register over erfarte feil og mangler i HAVEN-utviklingen, knyttet til formål og triggere slik at de hentes fram automatisk ved dekomponering av nye oppgaver. Hver lærdom skal være en observasjon med kilde, ikke en mening. Nye lærdommer legges til i P6 (Lær) i hver oppgave.",
+  "entryRules": {
+    "required": [
+      "lessonRef",
+      "date",
+      "symptom",
+      "cause",
+      "prevention",
+      "purposeRefs",
+      "tags",
+      "source"
+    ],
+    "symptomRule": "Hva som faktisk ble observert, i én setning.",
+    "causeRule": "Den forklaringen som er dokumentert — skriv 'ukjent' heller enn å gjette.",
+    "preventionRule": "Konkret handling eller test som ville fanget det, formulert så den kan bli en derivedTest.",
+    "severity": [
+      "blocker",
+      "major",
+      "minor"
+    ]
+  },
+  "lessons": [
+    {
+      "lessonRef": "lesson.text-ux-is-not-design",
+      "date": "2026-05-06",
+      "severity": "major",
+      "symptom": "Kjetil forventet en helt annen flate enn den som ble vist; den tekstlige UX-beskrivelsen var godkjent, bildet var det ikke.",
+      "cause": "En tekstlig beskrivelse av en flate er ikke et grafisk designforslag; to lesere ser to ulike bilder.",
+      "prevention": "Rendret bilde (Porthole-preview eller mockup) godkjennes før implementering; bildet er akseptansereferanse.",
+      "purposeRefs": [
+        "purpose://gui.expectation-agreed-before-build",
+        "purpose://gui.quality.functional-accessible"
+      ],
+      "tags": [
+        "gui",
+        "skeleton",
+        "design",
+        "mockup",
+        "forventning"
+      ],
+      "source": "Deliverables/Claude_Visual_Design_References_2026-05-06 og Porthole_Binding_GUI_Parity_Audit_2026-05-06.md"
+    },
+    {
+      "lessonRef": "lesson.parity-was-correctness-not-decoration",
+      "date": "2026-05-06",
+      "severity": "major",
+      "symptom": "Parity-audit mellom Porthole og Binding viste at problemet ikke var manglende dekorasjon, men produktkorrekthet (feil oppførsel).",
+      "cause": "Visuell likhet ble vurdert før funksjonell likhet.",
+      "prevention": "Akseptanse sammenligner både bilde og oppførsel (knapper trigger keypaths, felt tar input) — begge i ACCEPT.md.",
+      "purposeRefs": [
+        "purpose://gui.parity-with-approved-image",
+        "purpose://gui.quality.functional-accessible"
+      ],
+      "tags": [
+        "gui",
+        "porthole",
+        "binding",
+        "parity"
+      ],
+      "source": "Deliverables/Porthole_Binding_GUI_Parity_Audit_2026-05-06.md"
+    },
+    {
+      "lessonRef": "lesson.surface-load-alias-miss",
+      "date": "2026-08-24",
+      "severity": "blocker",
+      "symptom": "Flatelasting tok 46 541 ms (klientens 45 s-timeout) ved bom, 5 000 ms ved treff; målingen 10.08 målte en mislykket lasting.",
+      "cause": "resolveCellConfiguration matcher kun på uuid eller eksakt navn; 'Butler Chat' er bare et klientalias for 'Co-Pilot Chat'.",
+      "prevention": "Mål lastetid tre ganger og sjekk logg for navnebom før en flate erklæres ferdig; aliaser må løses server-side eller ikke brukes.",
+      "purposeRefs": [
+        "purpose://gui.surface-loads-in-time"
+      ],
+      "tags": [
+        "gui",
+        "porthole",
+        "binding",
+        "timeout",
+        "alias",
+        "flate"
+      ],
+      "source": "CellScaffold/Documentation/ProjectControl/Samlet_Oversikt_2026-08-24.md (via prosjektminne haven_status_2026-08-24)"
+    },
+    {
+      "lessonRef": "lesson.plan-instead-of-delivery",
+      "date": "2026-08-21",
+      "severity": "major",
+      "symptom": "Kjetil ba om en leveranse flere ganger og fikk planer/dokumenter om leveransen i stedet.",
+      "cause": "Arbeidsflyten manglet en port som skiller 'formålet er avklart' fra 'leveransen er levert'; planlegging ble oppfattet som fremdrift.",
+      "prevention": "G1 godkjenner formål, ikke arbeid; etter G2 telles bare artefakter listet i §3 'Det du kommer til å se' som fremdrift. Et dokument om leveransen teller aldri som leveransen.",
+      "purposeRefs": [
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "prosess",
+        "leveranse",
+        "plan"
+      ],
+      "source": "Brukerminne /preferences.md (stated) og haven_status_2026-08-24"
+    },
+    {
+      "lessonRef": "lesson.undocumented-plan-switch",
+      "date": "2026-08-24",
+      "severity": "major",
+      "symptom": "Tre produktive døgn (22.–24.08) så tomme ut i alle statusdokumenter fordi planbyttet fra bølge 1–3 til deploy-seremonien aldri ble skrevet ned.",
+      "cause": "Arbeidet foregikk utenfor kanalene oversikten leser fra.",
+      "prevention": "STATUS.md i oppgavemappen oppdateres ved hvert planbytte med dato og hvorfor; sjekkes i test.status-current.",
+      "purposeRefs": [
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "prosess",
+        "status",
+        "ledger"
+      ],
+      "source": "Prosjektminne haven_status_2026-08-24"
+    },
+    {
+      "lessonRef": "lesson.planned-documented-as-implemented",
+      "date": "2026-08-24",
+      "severity": "major",
+      "symptom": "Book/05_Flows_Lifecycle.md beskrev sekvensnummer, signatur og replay som ikke finnes i structen.",
+      "cause": "Planlagt oppførsel ble dokumentert i presens.",
+      "prevention": "Docs-diff i samme endring, med 'Last verified against code'-dato; planlagt oppførsel merkes eksplisitt.",
+      "purposeRefs": [
+        "purpose://quality.docs-in-same-change"
+      ],
+      "tags": [
+        "docs",
+        "book"
+      ],
+      "source": "Prosjektminne haven_status_2026-08-24; DEVELOPERS.md"
+    },
+    {
+      "lessonRef": "lesson.bridge-inferred-architecture-from-one-use",
+      "date": "2026-08-09",
+      "severity": "major",
+      "symptom": "En kodeassistent sluttet fra én observert bruksmåte av bridge til en egenskap ved arkitekturen og konkluderte feil.",
+      "cause": "Kapabiliteten var uuttalt; feilen var ikke slurv og gjentar seg så lenge kapabiliteten ikke er erklært.",
+      "prevention": "Erklær hver kapabilitet oppgaven bygger på som eget formål med kilde og Avgrensning (pkg.std.cell-combination).",
+      "purposeRefs": [
+        "purpose://cells.capabilities-declared-with-boundary",
+        "purpose://grounding"
+      ],
+      "tags": [
+        "bridge",
+        "kapabilitet",
+        "kombinasjon",
+        "antakelse"
+      ],
+      "source": "Deliverables/Bridge_Kapabiliteter_Som_Formaal_2026-08-09.md"
+    },
+    {
+      "lessonRef": "lesson.free-text-is-not-a-declaration",
+      "date": "2026-08-18",
+      "severity": "major",
+      "symptom": "Leksikalsk avledning fra fri formålstekst ga F1 0,060; strukturerte erklæringer ga 0,686 og 0,909 med ruting til menneske.",
+      "cause": "Eksplisitt for et menneske er ikke eksplisitt for en regel; fri tekst er ikke en erklæring.",
+      "prevention": "Formålsnoder skal ha strukturerte felt (goal, verifier, avgrensning, surfaces) — ikke bare summary; usikre noder rutes til Kjetil med confidence.",
+      "purposeRefs": [
+        "purpose://grounding",
+        "purpose://purpose-taxonomy.capture-and-place"
+      ],
+      "tags": [
+        "formål",
+        "dekomponering",
+        "struktur"
+      ],
+      "source": "Prosjektminne eu_ai_act_purpose_decomposition; Deliverables/EU_AI_Act_Formaalsavledning_Forsok_2026-08-18"
+    },
+    {
+      "lessonRef": "lesson.decomposition-is-classification",
+      "date": "2026-07-11",
+      "severity": "major",
+      "symptom": "Modeller som genererte purpose://-refs fritt hallusinerte referanser.",
+      "cause": "Formålsdekomponering ble behandlet som generering i stedet for klassifisering over et kjent sett.",
+      "prevention": "Dekomponering velger fra Book 23 + pakker først; nye noder merkes 'candidate' og navngis av Claude, aldri implisitt av en modell.",
+      "purposeRefs": [
+        "purpose://grounding.local-model-assisted-decomposition",
+        "purpose://test.acceptance.hallucination-evaluation"
+      ],
+      "tags": [
+        "formål",
+        "dekomponering",
+        "modell"
+      ],
+      "source": "Deliverables/Small_Model_Purpose_Decomposition_Research_2026-07-11.md"
+    },
+    {
+      "lessonRef": "lesson.cellscaffold-two-holes",
+      "date": "2026-09-01",
+      "severity": "blocker",
+      "symptom": "CellScaffold har tomme booking-/concierge-stubber og autorisasjon som kaster nøkkelstien og bare sjekker eierskap.",
+      "cause": "Stubber og forenklet autorisasjon ble levert som ferdig uten negative tester.",
+      "prevention": "Ikke porter celler fra CellScaffold til PalazzoScaffold uten å lukke begge hullene; test.cell.auth-negative og test.cell.stub-scan må være grønne.",
+      "purposeRefs": [
+        "purpose://cell.authorization-honours-keypath",
+        "purpose://cell.no-empty-stubs"
+      ],
+      "tags": [
+        "celle",
+        "palazzo",
+        "scaffold",
+        "autorisasjon",
+        "stub"
+      ],
+      "source": "Brukerminne /areas/haven.md (stated, sept. 2026)"
+    },
+    {
+      "lessonRef": "lesson.purpose-never-grants-rights",
+      "date": "2026-08-03",
+      "severity": "blocker",
+      "symptom": "Risiko for at formålsmatch tolkes som tilgang.",
+      "cause": "Formål og rettighet ble blandet.",
+      "prevention": "Et formål kan innsnevre en rettighet, aldri opprette, utvide eller arve en; exact match; purpose://prompt.unknown feiler lukket.",
+      "purposeRefs": [
+        "purpose://cell.authorization-honours-keypath",
+        "purpose://access.audit.privacy"
+      ],
+      "tags": [
+        "celle",
+        "autorisasjon",
+        "formål"
+      ],
+      "source": "Deliverables/Purpose_Bound_External_Action_Contract_2026-08-03"
+    },
+    {
+      "lessonRef": "lesson.zsh-no-inline-comments",
+      "date": "2026-08-25",
+      "severity": "minor",
+      "symptom": "Begge kommandolinjene feilet med 'ukjent argument: #' og ingenting kjørte.",
+      "cause": "Kjetils skall er zsh uten INTERACTIVE_COMMENTS; '#' bak en kommando sendes som argument.",
+      "prevention": "Aldri forklaring på samme linje som en kommando; skript har '\"#\"*) break ;;' i argumentparseren.",
+      "purposeRefs": [
+        "purpose://handoff.runnable-without-guessing"
+      ],
+      "tags": [
+        "codex",
+        "terminal",
+        "handoff",
+        "zsh"
+      ],
+      "source": "Prosjektminne haven_mcp_tool_notes"
+    },
+    {
+      "lessonRef": "lesson.mount-is-not-git",
+      "date": "2026-08-25",
+      "severity": "major",
+      "symptom": "Hver git-kommando fra device_bash etterlot en index.lock som ikke kunne fjernes og blokkerte Kjetils commits; seks repoer låst 24.08.",
+      "cause": "Mounten kan opprette men ikke unlink låsefiler; ingen DNS; ingen git-identitet.",
+      "prevention": "Aldri git mot $HOME/mnt fra device_bash; les .git/refs som filer; all git kjøres av Kjetil eller codex exec.",
+      "purposeRefs": [
+        "purpose://handoff.runnable-without-guessing"
+      ],
+      "tags": [
+        "codex",
+        "terminal",
+        "handoff",
+        "git",
+        "device_bash"
+      ],
+      "source": "Prosjektminne haven_mcp_tool_notes"
+    },
+    {
+      "lessonRef": "lesson.codex-mcp-60s",
+      "date": "2026-08-18",
+      "severity": "major",
+      "symptom": "Codex-MCP-kall kuttes etter ~60 s; registerlesning og Swift-bygg sprengte taket.",
+      "cause": "Broen har fast tidstak.",
+      "prevention": "Bygg/test/lange jobber går via terminal codex exec eller filbasert overlevering, aldri via Codex-MCP.",
+      "purposeRefs": [
+        "purpose://handoff.runnable-without-guessing"
+      ],
+      "tags": [
+        "codex",
+        "mcp",
+        "bygg",
+        "handoff"
+      ],
+      "source": "Prosjektminne haven_mcp_tool_notes; eu_ai_act_purpose_decomposition"
+    },
+    {
+      "lessonRef": "lesson.corr-approval-surfaces-timed-out",
+      "date": "2026-08-30",
+      "severity": "major",
+      "symptom": "Corr-godkjenningen (Vegar) er utestet fordi flater/godkjenninger timet ut før testing rakk å skje.",
+      "cause": "Testen forutsatte at alt den avhenger av (CellProtocol, CellScaffold, flater uten timeout) virket, uten at det var verifisert først.",
+      "prevention": "FORMAALSSPEC.md §2 lister avhengigheter som egne formål med verifier; pkg.std.everything-works og gui.surface-loads-in-time må være grønne før den egentlige testen kjøres.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression",
+        "purpose://gui.surface-loads-in-time"
+      ],
+      "tags": [
+        "correspondence",
+        "test",
+        "avhengighet",
+        "timeout"
+      ],
+      "source": "Brukerminne /areas/haven.md (stated, aug. 2026)"
+    },
+    {
+      "lessonRef": "lesson.unresolvable-condition-is-invisible",
+      "date": "2026-09-05",
+      "severity": "blocker",
+      "symptom": "Relasjoner-flaten viste tittel og ingen vei inn: ingen filopplasting, ingen knapper. Alle tester gronne.",
+      "cause": "Sju seksjoner var portet paa visible(when:) med rot-scope mot celletilstand. Rendereren gir userInfoValue = nil paa rotnivaa (BindingSkeletonView(element:)), saa resolve() gir nil, og evaluate() returnerer false for uoppslaabar keypath - samme svar som for en betingelse som er usann. Flaten var tom ved konstruksjon, ikke ved en tilstand.",
+      "prevention": "SkeletonReachabilityAudit kjores over hver flate; test.skeleton.no-unreachable-elements feiler med elementene som aldri kan sees og handlingene som gaar tapt med dem. Betingelser hoerer hjemme inne i List/Grid/Reference-rader, der radens verdi sendes videre; ellers skal cellen avgjore og innhold bindes.",
+      "purposeRefs": [
+        "purpose://gui.quality.functional-accessible",
+        "purpose://gui.parity-with-approved-image"
+      ],
+      "tags": [
+        "skeleton",
+        "gui",
+        "visibility",
+        "condition",
+        "binding",
+        "flate"
+      ],
+      "source": "Binding/Documentation/HAVEN_Hvorfor_Valideringen_Var_Gronn_2026-09-05.md; CellProtocol 83de326; Binding a76fa7db"
+    },
+    {
+      "lessonRef": "lesson.test-corpus-is-not-shipped-corpus",
+      "date": "2026-09-05",
+      "severity": "major",
+      "symptom": "Rot-probe-testen, lastetidstesten og finnbarhetsauditen var gronne i to uker mens Relasjoner-flaten var tom.",
+      "cause": "Alle tre itererer offeredCatalogConfigurationsForVerification(), som mapper scaffold-formaalsmalene. Flatene eieren aapner kommer fra personalCopilotV1MenuConfigurations() og sidemeny-enumen - en annen liste. Relasjoner var bare i den andre.",
+      "prevention": "Enhver flate-test skal bygge korpuset fra det som faktisk sendes ut (menykonfigurasjoner + navigasjonsdestinasjoner + verifiseringshjelperen), dedupliseres, og feile hvis korpuset er mindre enn appens egen meny.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "test",
+        "korpus",
+        "flate",
+        "regresjon",
+        "dekning"
+      ],
+      "source": "Binding a76fa7db; Binding/BindingTests/CellConfigurationVerifierXCTest.swift"
+    },
+    {
+      "lessonRef": "lesson.tested-a-different-path-than-production",
+      "date": "2026-09-05",
+      "severity": "major",
+      "symptom": "Rot-probene leste relations.state.* gjennom porthole.get og var gronne, mens rendereren aldri fikk de samme dataene.",
+      "cause": "Testen naadde dataene via porthole.get(keypath:); rendereren avgjor synlighet via userInfoValue. To ulike veier til samme data, bare den ene brukes av skjermen.",
+      "prevention": "Naar en test skal si noe om hva brukeren ser, maa den bruke produksjonens egen kodevei - helst produksjonens egen funksjon med produksjonens egne inndata (SkeletonReachabilityAudit kaller condition.evaluate(root: nil, ...) nettopp derfor).",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression",
+        "purpose://gui.quality.functional-accessible"
+      ],
+      "tags": [
+        "test",
+        "renderer",
+        "kodevei",
+        "falsk-gronn"
+      ],
+      "source": "Binding/Documentation/HAVEN_Hvorfor_Valideringen_Var_Gronn_2026-09-05.md"
+    },
+    {
+      "lessonRef": "lesson.findability-is-not-usability",
+      "date": "2026-09-05",
+      "severity": "major",
+      "symptom": "Flatene ble kalt validert fordi de bestod en beskrivelsesaudit; de var samtidig ubrukelige.",
+      "cause": "HavenSurfaceRelevance.audit sjekker at en flate er beskrevet godt nok til aa bli funnet. Det er en egenskap ved beskrivelsen, ikke ved flaten. Presisjonen fikk det til aa foles som dekning.",
+      "prevention": "En formaalssjekk maa navngi handlingene eieren skal kunne utfore, og testes mot SkeletonReachabilityAudit.reachableActionKeypaths - ikke mot hvor godt formaalet er formulert.",
+      "purposeRefs": [
+        "purpose://gui.expectation-agreed-before-build"
+      ],
+      "tags": [
+        "formaal",
+        "audit",
+        "beskrivelse",
+        "flate"
+      ],
+      "source": "Binding d48a5c93; Binding/Cells/HavenSurfaceRelevance.swift"
+    }
+  ]
+}
