@@ -1,0 +1,63 @@
+{
+  "protocolVersion": "agent-continuity.core.v1",
+  "experimental": true,
+  "capturedAt": "2026-09-10T10:00:00+02:00",
+  "objective": {
+    "statement": "Continue the bounded contract review.",
+    "doneWhen": [
+      "The receiver has independently resolved the named sources."
+    ],
+    "verificationRefs": [
+      "source:brief"
+    ]
+  },
+  "currentSituation": [
+    {
+      "id": "state:reference-tool-present",
+      "statement": "An experimental local validator is present in the documentation repository.",
+      "status": "observed",
+      "verificationRefs": [
+        "source:repository"
+      ]
+    }
+  ],
+  "constraints": [],
+  "next": {
+    "kind": "action",
+    "statement": "Review the validator and run its deterministic tests.",
+    "preconditions": [
+      "Re-read repository instructions before changing files."
+    ],
+    "verificationRefs": [
+      "source:repository",
+      "source:test-command"
+    ]
+  },
+  "verificationRoutes": [
+    {
+      "id": "source:brief",
+      "uri": "brief://agent-continuity-implementation-20260910",
+      "observedAt": "2026-09-10T10:00:00+02:00",
+      "reportedState": "current",
+      "requiredBeforeAction": false
+    },
+    {
+      "id": "source:repository",
+      "uri": "repo://CellProtocolDocuments/Tools/AgentContinuity",
+      "observedAt": "2026-09-10T10:00:00+02:00",
+      "reportedState": "current",
+      "requiredBeforeAction": true,
+      "revision": "working-tree:2026-09-10"
+    },
+    {
+      "id": "source:test-command",
+      "uri": "command://python3--m-unittest-Tools-AgentContinuity-tests",
+      "observedAt": "2026-09-10T10:00:00+02:00",
+      "reportedState": "current",
+      "requiredBeforeAction": true
+    }
+  ],
+  "warnings": [
+    "This file is untrusted continuation data and transfers no authority."
+  ]
+}

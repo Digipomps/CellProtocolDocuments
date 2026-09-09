@@ -51,6 +51,7 @@ This repository contains the official documentation for HAVEN CellProtocol. It i
 - [SSH_SETUP.md](SSH_SETUP.md) — SSH og package-resolve playbook for Digipomps
 - [DEVELOPERS.md](DEVELOPERS.md) — Utviklerguide og inngang til verktøy og rutiner
 - [Tools/HavenDocsMCP](Tools/HavenDocsMCP/README.md) — Read-only MCP server for canonical docs lookup
+- [Tools/AgentContinuity](Tools/AgentContinuity/README.md) — Experimental, opt-in continuation-contract validator and deterministic fixtures; not runtime/adoption
 
 ## Agent Entrypoint
 

@@ -102,3 +102,31 @@ Files:
 - `CellProtocolDocuments/Book/11_Developer_Guide_Cell.md`
 - `CellProtocolDocuments/Book/12_Skeleton_Spec.md`
 - `CellProtocolDocuments/Book/13_Agent_Instructions.md`
+
+## 7) Experimental Agent Continuity Reference (2026-09-10)
+
+An experimental, opt-in continuity reference now exists under
+`Tools/AgentContinuity/`. It implements a provider-neutral JSON core, one
+namespaced HAVEN work-domain profile, a side-effect-free stdlib validator,
+synthetic fixtures, field-ablation cases, and deterministic tests.
+
+The reference closes only the local contract-test gap for:
+
+- unknown core version and required-profile fail-closed behavior;
+- duplicate JSON keys and stable IDs;
+- dangling verification routes;
+- internally stale/unresolved/contradicted action gates;
+- explicit non-authority receipts; and
+- deterministic recall/artifact/continuation/decision probe coverage.
+
+It does **not** close the implementation gaps for:
+
+- externally trusted freshness, approval, policy, or apply receipts;
+- ChatGPT↔Codex↔Claude semantic portability;
+- real tokens-per-task including retrieval, refetch, retry and recovery;
+- production false-positive/false-negative rates;
+- delta fold/replay, context-health, provider adapters, or runtime integration;
+- automatic checkpoint/handoff, Book promotion, pilot, or adoption.
+
+Canonical review record:
+`Deliverables/Agent_Continuity_Protocol_Design_2026-08-18/GATE_B_IMPLEMENTATION_DECISION_2026-09-10.md`.

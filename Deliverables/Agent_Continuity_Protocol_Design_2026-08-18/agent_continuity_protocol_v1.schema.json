@@ -1,0 +1,343 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://haven.example/schemas/agent-continuity-contract-v1.schema.json",
+  "title": "HAVEN Agent Continuity Contract v1 (experimental draft)",
+  "description": "Vendor-neutral, non-authoritative continuation contract. A receiver MUST resolve and freshness-check canonical references before acting.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocolVersion",
+    "contractID",
+    "kind",
+    "experimental",
+    "createdAt",
+    "producer",
+    "scope",
+    "base",
+    "continuation",
+    "evidence",
+    "health",
+    "integrity"
+  ],
+  "properties": {
+    "protocolVersion": { "const": "haven.agent-continuity.v1-draft" },
+    "contractID": { "$ref": "#/$defs/stableID" },
+    "kind": { "enum": ["checkpoint", "handoff"] },
+    "experimental": { "const": true },
+    "createdAt": { "$ref": "#/$defs/timestamp" },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adapter", "actorRef"],
+      "properties": {
+        "adapter": { "enum": ["chatgpt", "codex", "claude", "haven", "unknown"] },
+        "actorRef": { "type": "string", "minLength": 1 },
+        "model": { "type": "string", "minLength": 1 },
+        "runRef": { "type": "string", "minLength": 1 },
+        "threadRef": { "type": "string", "minLength": 1 }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["projectRef", "purposeRefs", "goalRef", "repositories"],
+      "properties": {
+        "projectRef": { "type": "string", "minLength": 1 },
+        "purposeRefs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^purpose://" }
+        },
+        "goalRef": { "type": "string", "minLength": 1 },
+        "taskRef": { "type": "string", "minLength": 1 },
+        "repositories": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/repositoryContext" }
+        }
+      }
+    },
+    "base": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonicalRevision"],
+      "properties": {
+        "canonicalRevision": { "type": "string", "minLength": 1 },
+        "previousContractID": { "$ref": "#/$defs/stableID" },
+        "previousDigest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "continuation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "project",
+        "currentGoal",
+        "currentState",
+        "decisions",
+        "constraints",
+        "openWork",
+        "evidenceRefs",
+        "risksOpenQuestions",
+        "nextAction",
+        "canonicalRefs"
+      ],
+      "properties": {
+        "project": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "purpose"],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "purpose": { "type": "string", "minLength": 1 }
+          }
+        },
+        "currentGoal": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["statement", "acceptanceCriteria"],
+          "properties": {
+            "statement": { "type": "string", "minLength": 1 },
+            "acceptanceCriteria": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "currentState": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/stateItem" }
+        },
+        "decisions": { "type": "array", "items": { "$ref": "#/$defs/decision" } },
+        "constraints": { "type": "array", "items": { "$ref": "#/$defs/constraint" } },
+        "openWork": { "type": "array", "items": { "$ref": "#/$defs/workItem" } },
+        "evidenceRefs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/stableID" }
+        },
+        "risksOpenQuestions": { "type": "array", "items": { "$ref": "#/$defs/risk" } },
+        "nextAction": { "$ref": "#/$defs/action" },
+        "canonicalRefs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/canonicalRef" }
+        },
+        "elisions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["category", "reason", "retrievalHint"],
+            "properties": {
+              "category": { "type": "string", "minLength": 1 },
+              "reason": { "type": "string", "minLength": 1 },
+              "retrievalHint": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "delta": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/deltaOperation" }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/evidence" }
+    },
+    "health": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recommendation", "confidence", "signals", "capabilities"],
+      "properties": {
+        "recommendation": { "enum": ["continue", "checkpoint", "handoff", "stop"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "signals": { "type": "array", "items": { "$ref": "#/$defs/healthSignal" } },
+        "capabilities": {
+          "type": "object",
+          "additionalProperties": { "enum": ["available", "unavailable", "unknown"] }
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["validationStatus", "warnings", "redactions"],
+      "properties": {
+        "contentDigest": { "$ref": "#/$defs/digest" },
+        "validationStatus": { "enum": ["draft", "schema-valid", "verified"] },
+        "warnings": { "type": "array", "items": { "type": "string" } },
+        "redactions": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "$defs": {
+    "stableID": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{2,255}$" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "digest": { "type": "string", "pattern": "^(sha256:)?[A-Fa-f0-9]{64}$" },
+    "repositoryContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repoRef", "revision", "dirtyState"],
+      "properties": {
+        "repoRef": { "type": "string", "minLength": 1 },
+        "revision": { "type": "string", "minLength": 1 },
+        "dirtyState": { "enum": ["clean", "dirty", "unknown"] },
+        "dirtyStateDigest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "stateItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "revision", "category", "statement", "status", "observedAt", "auditStatus", "sourceRefs"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableID" },
+        "revision": { "type": "integer", "minimum": 0 },
+        "category": { "type": "string", "minLength": 1 },
+        "statement": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["current", "stale", "contradicted", "unknown"] },
+        "observedAt": { "$ref": "#/$defs/timestamp" },
+        "validUntil": { "$ref": "#/$defs/timestamp" },
+        "auditStatus": { "$ref": "#/$defs/auditStatus" },
+        "sourceRefs": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/stableID" } }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "revision", "statement", "status", "decidedBy", "sourceRefs"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableID" },
+        "revision": { "type": "integer", "minimum": 0 },
+        "statement": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["proposed", "approved", "superseded", "rejected"] },
+        "decidedBy": { "type": "string", "minLength": 1 },
+        "decidedAt": { "$ref": "#/$defs/timestamp" },
+        "sourceRefs": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/stableID" } }
+      }
+    },
+    "constraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "statement", "authority", "sourceRefs"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableID" },
+        "statement": { "type": "string", "minLength": 1 },
+        "authority": { "enum": ["human", "policy", "repository", "system", "unknown"] },
+        "sourceRefs": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/stableID" } }
+      }
+    },
+    "workItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "revision", "state", "summary", "doneWhen", "sourceRefs"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableID" },
+        "revision": { "type": "integer", "minimum": 0 },
+        "state": { "enum": ["open", "in-progress", "blocked", "done"] },
+        "summary": { "type": "string", "minLength": 1 },
+        "doneWhen": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "dependsOn": { "type": "array", "items": { "$ref": "#/$defs/stableID" } },
+        "sourceRefs": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/stableID" } }
+      }
+    },
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "statement", "disposition", "sourceRefs"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableID" },
+        "kind": { "enum": ["risk", "open-question"] },
+        "statement": { "type": "string", "minLength": 1 },
+        "disposition": { "type": "string", "minLength": 1 },
+        "sourceRefs": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/stableID" } }
+      }
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["statement", "owner", "preconditions", "successEvidence"],
+      "properties": {
+        "statement": { "type": "string", "minLength": 1 },
+        "owner": { "type": "string", "minLength": 1 },
+        "preconditions": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "successEvidence": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "canonicalRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uri", "revision", "observedAt", "requiredFreshnessCheck"],
+      "properties": {
+        "uri": { "type": "string", "minLength": 1 },
+        "revision": { "type": "string", "minLength": 1 },
+        "observedAt": { "$ref": "#/$defs/timestamp" },
+        "requiredFreshnessCheck": { "type": "boolean" }
+      }
+    },
+    "deltaOperation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operationID", "operation", "targetID", "baseRevision", "producedAt", "producerRef", "sourceRefs"],
+      "properties": {
+        "operationID": { "$ref": "#/$defs/stableID" },
+        "operation": { "enum": ["upsert", "supersede", "retract", "resolve"] },
+        "targetID": { "$ref": "#/$defs/stableID" },
+        "baseRevision": { "type": "integer", "minimum": 0 },
+        "value": {},
+        "producedAt": { "$ref": "#/$defs/timestamp" },
+        "producerRef": { "type": "string", "minLength": 1 },
+        "sourceRefs": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/stableID" } },
+        "approvalRef": { "type": "string", "minLength": 1 }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "uri", "kind", "observedAt", "auditStatus"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableID" },
+        "uri": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["repository", "official-doc", "command", "human-brief", "runtime-observation", "other"] },
+        "observedAt": { "$ref": "#/$defs/timestamp" },
+        "revision": { "type": "string", "minLength": 1 },
+        "digest": { "$ref": "#/$defs/digest" },
+        "auditStatus": { "$ref": "#/$defs/auditStatus" },
+        "note": { "type": "string" }
+      }
+    },
+    "auditStatus": {
+      "enum": ["retrieved-verified", "repo-observed", "user-proposed", "inferred", "contradicted", "unavailable"]
+    },
+    "healthSignal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "availability", "severity", "confidence", "observation"],
+      "properties": {
+        "name": {
+          "enum": [
+            "context-pressure",
+            "topic-fragmentation",
+            "stale-canonical-state",
+            "unresolved-reference",
+            "recap-duplication",
+            "contradiction-risk",
+            "repeat-question",
+            "constraint-loss",
+            "goal-loss",
+            "old-status-reuse"
+          ]
+        },
+        "availability": { "enum": ["available", "unavailable", "unknown"] },
+        "severity": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "observation": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "protocolVersion": "agent-continuity.core.v1",
+  "experimental": true,
+  "capturedAt": "2026-09-10T10:00:00+02:00",
+  "objective": {
+    "statement": "Resume only when the canonical artifact is available.",
+    "verificationRefs": [
+      "source:missing-artifact"
+    ]
+  },
+  "currentSituation": [
+    {
+      "id": "state:artifact-unavailable",
+      "statement": "The named canonical artifact is unavailable to this receiver.",
+      "status": "unavailable",
+      "verificationRefs": [
+        "source:missing-artifact"
+      ]
+    }
+  ],
+  "constraints": [],
+  "next": {
+    "kind": "blocked",
+    "statement": "Stop and ask for access to the canonical artifact.",
+    "preconditions": [],
+    "verificationRefs": [
+      "source:missing-artifact"
+    ]
+  },
+  "verificationRoutes": [
+    {
+      "id": "source:missing-artifact",
+      "uri": "repo://example/missing-artifact",
+      "observedAt": "2026-09-10T10:00:00+02:00",
+      "reportedState": "unavailable",
+      "requiredBeforeAction": true
+    }
+  ]
+}

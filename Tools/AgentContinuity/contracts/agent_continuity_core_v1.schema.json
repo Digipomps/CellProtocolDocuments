@@ -1,0 +1,506 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cellprotocol.org/experimental/agent-continuity/core-v1.schema.json",
+  "title": "Agent Continuity Core v1 (experimental JSON carrier)",
+  "description": "A provider-neutral, non-authoritative continuation contract. Schema validity never establishes freshness, approval, permission, or canonical truth.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocolVersion",
+    "experimental",
+    "capturedAt",
+    "objective",
+    "currentSituation",
+    "constraints",
+    "next",
+    "verificationRoutes"
+  ],
+  "properties": {
+    "protocolVersion": {
+      "const": "agent-continuity.core.v1"
+    },
+    "experimental": {
+      "const": true
+    },
+    "capturedAt": {
+      "$ref": "#/$defs/timestamp"
+    },
+    "objective": {
+      "$ref": "#/$defs/objective"
+    },
+    "currentSituation": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/situation"
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/constraint"
+      }
+    },
+    "next": {
+      "$ref": "#/$defs/next"
+    },
+    "verificationRoutes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/verificationRoute"
+      }
+    },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/profile"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/nonEmptyString"
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 16384,
+      "pattern": ".*\\S.*"
+    },
+    "stableID": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{2,255}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "verificationRefs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/stableID"
+      }
+    },
+    "objective": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "statement",
+        "verificationRefs"
+      ],
+      "properties": {
+        "statement": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "doneWhen": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        },
+        "verificationRefs": {
+          "$ref": "#/$defs/verificationRefs"
+        }
+      }
+    },
+    "situation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "statement",
+        "status",
+        "verificationRefs"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableID"
+        },
+        "statement": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "status": {
+          "enum": [
+            "observed",
+            "proposed",
+            "inferred",
+            "contradicted",
+            "unknown",
+            "unavailable"
+          ]
+        },
+        "verificationRefs": {
+          "$ref": "#/$defs/verificationRefs"
+        }
+      }
+    },
+    "constraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "statement",
+        "verificationRefs"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableID"
+        },
+        "statement": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "verificationRefs": {
+          "$ref": "#/$defs/verificationRefs"
+        }
+      }
+    },
+    "next": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "statement",
+        "preconditions",
+        "verificationRefs"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "action",
+            "blocked",
+            "decision-needed"
+          ]
+        },
+        "statement": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "preconditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        },
+        "verificationRefs": {
+          "$ref": "#/$defs/verificationRefs"
+        }
+      }
+    },
+    "verificationRoute": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "uri",
+        "observedAt",
+        "reportedState",
+        "requiredBeforeAction"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableID"
+        },
+        "uri": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "observedAt": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "reportedState": {
+          "enum": [
+            "current",
+            "stale",
+            "unresolved",
+            "unavailable",
+            "contradicted"
+          ],
+          "description": "Untrusted sender report. A receiver must resolve the route independently before acting."
+        },
+        "requiredBeforeAction": {
+          "type": "boolean"
+        },
+        "revision": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "profile": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/havenWorkProfile"
+        },
+        {
+          "$ref": "#/$defs/unknownProfile"
+        }
+      ]
+    },
+    "profileBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profileID",
+        "version",
+        "requiredForContinuation",
+        "data"
+      ],
+      "properties": {
+        "profileID": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9]+(?:[.-][A-Za-z0-9]+)+$"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*\\.[0-9]+$"
+        },
+        "requiredForContinuation": {
+          "type": "boolean"
+        },
+        "data": {
+          "type": "object"
+        }
+      }
+    },
+    "unknownProfile": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/profileBase"
+        },
+        {
+          "properties": {
+            "profileID": {
+              "not": {
+                "const": "org.cellprotocol.haven.work-domain"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "havenWorkProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profileID",
+        "version",
+        "requiredForContinuation",
+        "data"
+      ],
+      "properties": {
+        "profileID": {
+          "const": "org.cellprotocol.haven.work-domain"
+        },
+        "version": {
+          "const": "1.0"
+        },
+        "requiredForContinuation": {
+          "type": "boolean"
+        },
+        "data": {
+          "$ref": "#/$defs/havenWorkData"
+        }
+      }
+    },
+    "havenWorkData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "project",
+        "goal",
+        "decisions",
+        "openWork",
+        "risksOpenQuestions"
+      ],
+      "properties": {
+        "project": {
+          "$ref": "#/$defs/project"
+        },
+        "goal": {
+          "$ref": "#/$defs/goal"
+        },
+        "decisions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decision"
+          }
+        },
+        "openWork": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/workItem"
+          }
+        },
+        "risksOpenQuestions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/risk"
+          }
+        }
+      }
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "purposeRefs",
+        "verificationRefs"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableID"
+        },
+        "name": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "purposeRefs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^purpose://"
+          }
+        },
+        "verificationRefs": {
+          "$ref": "#/$defs/verificationRefs"
+        }
+      }
+    },
+    "goal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "statement",
+        "acceptanceCriteria",
+        "verificationRefs"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableID"
+        },
+        "statement": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "acceptanceCriteria": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        },
+        "verificationRefs": {
+          "$ref": "#/$defs/verificationRefs"
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "statement",
+        "status",
+        "verificationRefs"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableID"
+        },
+        "statement": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "status": {
+          "enum": [
+            "reported",
+            "proposed",
+            "superseded",
+            "contradicted"
+          ],
+          "description": "Reported status only; approval must be resolved outside the imported contract."
+        },
+        "verificationRefs": {
+          "$ref": "#/$defs/verificationRefs"
+        }
+      }
+    },
+    "workItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "status",
+        "summary",
+        "doneWhen",
+        "verificationRefs"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableID"
+        },
+        "status": {
+          "enum": [
+            "open",
+            "in-progress",
+            "blocked",
+            "done"
+          ]
+        },
+        "summary": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "doneWhen": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        },
+        "verificationRefs": {
+          "$ref": "#/$defs/verificationRefs"
+        }
+      }
+    },
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "statement",
+        "disposition",
+        "verificationRefs"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableID"
+        },
+        "kind": {
+          "enum": [
+            "risk",
+            "open-question"
+          ]
+        },
+        "statement": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "disposition": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "verificationRefs": {
+          "$ref": "#/$defs/verificationRefs"
+        }
+      }
+    }
+  }
+}
