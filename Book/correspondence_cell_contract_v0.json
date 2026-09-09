@@ -1,0 +1,231 @@
+{
+  "version": 0,
+  "status": "draft",
+  "lastUpdated": "2026-09-02",
+  "chapter": "33_Correspondence_First_Class.md",
+  "cell": {
+    "name": "CorrespondenceCell",
+    "endpoint": "cell:///correspondence/<opaque-cell-id>",
+    "instancing": "one cell per relationship; opaque globally unique id; never a scaffold-local sequence",
+    "flowTopic": "haven.correspondence",
+    "reuses": "ChatCell machinery: ChatMessage value, ContentCryptoSuite envelopes, invitation artifacts and ledger, membership fingerprint and rekey, flow emission",
+    "responsibility": "Relationship-scoped enveloped message exchange between domain-scoped identities, operator-blind for identity and content."
+  },
+  "security": {
+    "plaintextHistory": false,
+    "persistenceMode": "envelopeOnly (fixed, not a grant)",
+    "audienceMode": "invitedIdentities (fixed)",
+    "umbrellaGrantFallback": false,
+    "umbrellaGrantNote": "ChatCell.canRead/canWrite fall back to the 'chat' keypath. CorrespondenceCell never consults an umbrella keypath; every action is checked at its own keypath only.",
+    "keysOnScaffold": "none that open content; envelopes are prepared and opened in the requester's IdentityVault",
+    "memberIdentityScope": "correspondence-domain Identity per participant (Chapter 03 §2); mapping to person is never stored on the hosting scaffold",
+    "operatorVisibility": {
+      "canSee": [
+        "opaque cell id",
+        "member identity UUIDs (domain-scoped)",
+        "outer envelope fields",
+        "envelope timing and size",
+        "receipt-exists bit (pilot)"
+      ],
+      "cannotSee": [
+        "content",
+        "subject",
+        "clientMessageID",
+        "delegation reference",
+        "any link from identity UUID to a person"
+      ],
+      "notClaimed": "traffic pattern (volume, timing, size) is not hidden; no package text may imply unobservability"
+    }
+  },
+  "externalAgreementTemplate": {
+    "note": "Exactly these grants for any external surface (MCP, HTTP adapter). Nothing else is ever issued to an external surface.",
+    "grants": [
+      {
+        "keypath": "inbox",
+        "permission": "r---",
+        "returns": "outer envelope metadata for messages addressed to requester: messageID, sequence, senderIdentityUUID, purposeRef, createdAt, expiresAt, ciphertextSize, receiptState",
+        "neverReturns": [
+          "content",
+          "subject"
+        ]
+      },
+      {
+        "keypath": "readMessage",
+        "permission": "-w--",
+        "kind": "action",
+        "input": {
+          "messageID": "string"
+        },
+        "returns": "one envelope (outer + inner ciphertext)",
+        "emits": "message.read scoped to requester",
+        "why_action": "reading is a recorded deliberate act; an r--- grant on history would make it silent"
+      },
+      {
+        "keypath": "sendMessage",
+        "permission": "-w--",
+        "kind": "action",
+        "input": {
+          "envelope": "prepared ciphertext to current membershipFingerprint",
+          "purposeRef": "one of allowed set",
+          "retentionSeconds": "optional, within cell policy"
+        },
+        "rejects": [
+          "plaintext content",
+          "envelope whose membershipFingerprint != current",
+          "purposeRef outside cell policy",
+          "retention outside policy"
+        ]
+      },
+      {
+        "keypath": "ackMessage",
+        "permission": "-w--",
+        "kind": "action",
+        "input": {
+          "messageID": "string",
+          "receipt": "recipient-signed statement encrypted to sender (target); pilot may accept bare ack"
+        }
+      }
+    ],
+    "neverGranted": [
+      "chat",
+      "audience.*",
+      "members",
+      "participants",
+      "crypto.policy",
+      "crypto.persistenceMode",
+      "crypto.requestRekey",
+      "audience.inviteIdentities",
+      "audience.generateInvitationArtifacts",
+      "audience.acceptInvitationArtifact",
+      "start",
+      "stop",
+      "lifecycle.*"
+    ]
+  },
+  "ownerAgreement": {
+    "note": "Owner identity of a relationship holds membership and lifecycle; issued separately from the external template and never to an MCP process.",
+    "grants": [
+      "audience.inviteIdentities",
+      "audience.generateInvitationArtifacts",
+      "audience.acceptInvitationArtifact",
+      "audience.revokeInvites",
+      "crypto.requestRekey",
+      "lifecycle.retentionPolicy",
+      "lifecycle.close"
+    ]
+  },
+  "envelope": {
+    "outer": {
+      "purposeRef": "purpose://correspondence.envelope",
+      "fields": [
+        "messageID",
+        "sequence",
+        "cellID",
+        "senderIdentityUUID",
+        "purposeRef",
+        "createdAt",
+        "expiresAt",
+        "membershipFingerprint",
+        "ciphertextSize"
+      ],
+      "retention": "none of its own; deleted together with inner at expiresAt"
+    },
+    "inner": {
+      "encryptedTo": "current membershipFingerprint via ContentCryptoSuite",
+      "fields": [
+        "subject",
+        "contentType",
+        "content",
+        "clientMessageID",
+        "owner",
+        "delegation",
+        "senderSignature"
+      ],
+      "signature": "sender Identity signs inner before encryption"
+    }
+  },
+  "retention": {
+    "rule": "follows purposeRef (Chapter 21 §2.8); owner-configurable per relationship",
+    "senderMay": "shorten within policy; lengthen only up to cell maximum",
+    "defaults": {
+      "purpose://contact.communication": "long (owner sets; not one day)",
+      "purpose://digital-work.coordinate": "owner sets"
+    },
+    "expiryDeletes": "outer and inner together; never body-only"
+  },
+  "delegatedEntity": {
+    "definition": "Chapter 32 §1: capability-bearing runtime identity the owner approved for a bounded purpose",
+    "model": "delegated, not free",
+    "requires": [
+      "own correspondence-domain Identity and key",
+      "enrollment record linking to delegating owner Identity with purpose, expiry, revocationRef",
+      "delegation reference carried in inner envelope",
+      "recipient verifies sender signature AND delegation"
+    ],
+    "revocation": "withdraws delegation; preserves Identity and history",
+    "notClaimed": "continuity of experience"
+  },
+  "mcpAdapter": {
+    "isClientOf": "one CorrespondenceCell per relationship",
+    "holds": "externalAgreementTemplate only",
+    "tools": {
+      "correspondence_list_inbox": "inbox",
+      "correspondence_read_message": "readMessage",
+      "correspondence_send_message": "sendMessage",
+      "correspondence_ack_message": "ackMessage"
+    },
+    "rules": [
+      "invokes cell actions; never defines semantic success",
+      "Resolver performs all identity/Agreement/domain/lifecycle checks",
+      "envelopes prepared and opened locally against IdentityVault",
+      "MCP config grants nothing; Agreement is the authority",
+      "message content never authorizes local code or machine action",
+      "doctor must not call inbox"
+    ]
+  },
+  "hosting": {
+    "pilot": "shared staging scaffold; operator blind for identity and content per security.operatorVisibility",
+    "target": "participant-hosted home scaffold (Chapter 32 §3) with cross-scaffold Resolver routing; no shared operator",
+    "constraint": "no outer field may assume both parties on one scaffold"
+  },
+  "migration": [
+    "AssistantCorrespondence* contracts remain only as HTTP adapter wire format where an adapter persists; they stop being the storage model",
+    "AssistantCorrespondenceGrant replaced by Agreement from externalAgreementTemplate; allowedPeerIDs -> membership, allowedOperations -> four grants, allowedPurposeRefs -> cell purpose policy",
+    "existing plaintext messages are not migrated; retained under current policy until expiry",
+    "haven-correspondence-mcp doctor stops calling inbox.list"
+  ],
+  "denialReasons": [
+    "plaintextRejected",
+    "membershipFingerprintMismatch",
+    "purposeNotAllowed",
+    "retentionOutOfPolicy",
+    "grantNotHeld",
+    "delegationRevoked",
+    "cellClosed",
+    "messageExpired"
+  ],
+  "flowEvents": [
+    "message.stored",
+    "message.read",
+    "message.receipt",
+    "message.expired",
+    "membership.changed",
+    "cell.closed"
+  ],
+  "testRequirements": [
+    "scaffold-side dump of a cell shows no plaintext content or subject",
+    "Resolver refuses audience.inviteIdentities under the external Agreement",
+    "scaffold state for a cell holds member identity UUIDs and no displayName, principal label, or entityRef",
+    "expiry removes outer row and inner ciphertext together",
+    "delegated assistant sends; recipient verifies signature and delegation reference",
+    "signed client notarized, stapled, Gatekeeper pass"
+  ],
+  "openQuestions": [
+    "delegation reference also in Agreement signed commit so Resolver refuses revoked delegation pre-storage (implementation reports)"
+  ],
+  "decisions": {
+    "envelopePurpose": "distinct purpose://correspondence.envelope",
+    "twoMemberMembershipChange": "close cell, emit cell.closed; new relationship = new cell",
+    "perCounterpartyProfiles": "superseded by one delegated identity with many peers; not renamed"
+  }
+}
