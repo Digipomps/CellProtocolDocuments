@@ -242,6 +242,18 @@ within one batch. This preserves the address format without silently overwriting
 colliding hyphen-separated ID pairs. It does not make the local summary fold
 `applying` a deduplicating distributed merge operation.
 
+Ordinary owner history keeps its existing `chronicle[+]` object format,
+including legacy objects without an ID. The compatibility correction at
+[CellProtocol `d9aebaa`](https://github.com/Digipomps/CellProtocol/blob/d9aebaa32103cf84a33ce80630469dbaaa703e32/Docs/ChronicleAppendCompatibility-2026-09-10.md)
+checks both the address and payload: ordinary appends cannot supply a reserved
+`relation-event-` ID or declare a relation-interaction-event schema. An exact
+ordinary `chronicle[id=...]` selector cannot carry a different ID in its value.
+Multiple ordinary appends preserve batch order beside protected events; they
+do not participate in the reserved event collision map. Root/index/descendant
+replacement remains denied. No stored history is migrated. The final consumer
+gate exposed the original overly broad append rejection; the correction and
+subsequent consumer pin changes require their own passing test receipts.
+
 Capture defaults to metadata. `off` admits no event; full content requires the
 already stored owner policy `person.relations.interactionPolicy = "full"`.
 Malformed settings disable capture. An event cannot authorize its own content,
