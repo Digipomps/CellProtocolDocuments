@@ -213,6 +213,52 @@ provide selective erasure of personal values from already committed authority
 journal history. Do not claim complete Entity storage validation or deletion
 support from this bounded gate.
 
+### 4.5 Owner-private relation records and interaction events
+
+Implemented in the security integration at CellProtocol `c85754c` (2026-09-10),
+with equivalent Apple and Vapor EntityAnchor admission:
+
+- `relations.records.<relationID>` stores `haven.entity-relation-record.v1`;
+- `haven.entity-relation-batch.v1` uses the existing `entity.batchPersist`
+  operation and owner-proof boundary; signed commit requests retain their
+  journal/receipt contract, while unsigned legacy batches remain local writes;
+- direct writes, whole-family replacement, selector aliases, unknown JSON
+  fields, mismatched IDs and partial-record deletion are rejected;
+- a null at exactly one relation ID deletes that record, not retained journal
+  history or historical backups;
+- `entityRelationSchema` is an owner-only, value-free metadata surface.
+
+New interaction events use **`haven.relation-interaction-event.v2`**. Their
+stored `id` matches `chronicle[id=relation-event-<relationID>-<eventID>]`, while
+`eventID` retains the short logical ID exposed by Swift `event.id`. The former
+feature-branch v1 shape put the short ID into the selector field, so subsequent
+reads could miss the entry and append duplicates. V1 values remain readable and
+re-encodable; new admission requires v2. There is no automatic migration of
+existing feature-branch chronicle data.
+
+An identical stored event may be retried. Different content or a different
+relation/event binding at an occupied v1-style address is rejected, including
+within one batch. This preserves the address format without silently overwriting
+colliding hyphen-separated ID pairs. It does not make the local summary fold
+`applying` a deduplicating distributed merge operation.
+
+Capture defaults to metadata. `off` admits no event; full content requires the
+already stored owner policy `person.relations.interactionPolicy = "full"`.
+Malformed settings disable capture. An event cannot authorize its own content,
+and a simultaneous policy change does not grant authority to that same batch.
+An owner setting does not establish third-party consent. Standing and evidence
+references likewise do not themselves verify a credential or grant capability.
+
+Relation records remain private data. The channel validator excludes obvious
+raw addresses; it is not a universal scrubber for names, notes or other declared
+fields. A reach plan proposes an action and does not authorize or send a message.
+
+The shared [v2 JSON fixture](https://github.com/Digipomps/CellProtocol/blob/c85754c/Tests/CellBaseTests/Fixtures/EntityRelationEventV2.json)
+and [integration/migration notes](https://github.com/Digipomps/CellProtocol/blob/c5c9a4c/Docs/EntityRelationSecurityParity-2026-09-10.md)
+record the tested wire shape and current boundaries. Full local regression at
+this source revision: 1082 tests, zero failures; final integration/CI evidence
+is tracked in the source repository.
+
 ## 5. Transport Integration
 
 Transport bridges may:
