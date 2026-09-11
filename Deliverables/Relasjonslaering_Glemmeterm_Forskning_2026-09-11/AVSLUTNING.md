@@ -25,7 +25,7 @@ Utført 2026-09-12, Europe/Oslo. Arbeidseier: HD-0050 / CellProtocolDocuments. A
 - `hd validate`: 602 records, 0 problemer etter registrering. `hd status --write` gjennomført.
 - HD-0050 står teknisk PREPARING fordi køen mangler ferdig-status for forskning (HD-0045). Note er leveransebevis; ingen COMMITTED_VERIFIED/deploy-påstand er brukt.
 - Eksisterende leveransegap målt ved oppstart: 2 ubesluttede pakker; uvedkommende for denne studiens faglige resultat.
-- Losen-hendelsesloggen oppdateres under 12. september 2026 i den eksisterende filen.
+- Losen-hendelsesloggen er oppdatert under 12. september 2026 i den eksisterende filen.
 
 ## Repo og publiseringsomfang
 
@@ -33,4 +33,4 @@ Ingen CellProtocol-produksjonsfiler eller opprinnelige tester er endret. Bare fo
 
 Dette er ingen UniverseSimulation-fysikkrunde: ingen v-serie, offentlig universarkiv eller UniverseSimulation-RAG oppdateres med interne CellProtocol-studier. Ingen offentlig nettside, server eller RAG-korpus er endret, og ingen melding til Vegar er sendt. De fem spørsmålene er kun levert i rapporten.
 
-Gitkvittering for den isolerte dokumentasjonsleveransen legges i separat GIT_KVITTERING.md etter eventuell commit/push. Det dokumentet skal bare oppgi målte handlinger, aldri likestille en commit med deploy eller produksjonsendring.
+Artefaktcommit 220c60eab2685ee310eea44293364f86e73f277f er pushet på codex/relational-forgetting-research-20260912. Se [GIT_KVITTERING.md](GIT_KVITTERING.md). Dette er ikke deploy eller produksjonsendring.
