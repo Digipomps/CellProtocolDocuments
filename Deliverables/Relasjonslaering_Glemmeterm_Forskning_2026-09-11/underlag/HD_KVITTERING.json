@@ -1,0 +1,233 @@
+[
+  {
+    "arguments": [
+      "event",
+      "emit",
+      "--task",
+      "HD-0050",
+      "--kind",
+      "note",
+      "--phase",
+      "PREPARING",
+      "--status",
+      "OK",
+      "--message",
+      "Målt forskningsleveranse 2026-09-12: 144 syntetiske logger, 1152 kandidatkjøringer, 1063 bitlike Swift/Python-tall, originale 7 motortester uten feil. Anbefaling AVVIST som produksjonsregel nå: hybrid gir reelle driftgevinster, men også raw-rangeringstap og uavklarte preferanse-/legacy-semantikker. S1-S8 og fem usendte Vegar-spørsmål i rapporten. Ingen produksjonskode endret. Ikke deploy-status; HD-0045 hindrer korrekt ferdig-status.",
+      "--evidence",
+      "/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/Relasjonslaering_Glemmeterm_Forskning_2026-09-11/RAPPORT.md"
+    ],
+    "returncode": 0,
+    "stdout": "ev_5de7318eea480071\n",
+    "stderr": ""
+  },
+  {
+    "arguments": [
+      "event",
+      "emit",
+      "--task",
+      "HD-0051",
+      "--kind",
+      "note",
+      "--phase",
+      "PREPARING",
+      "--status",
+      "OK",
+      "--message",
+      "S6-avgjørelse: FIKS anbefales, ikke implementert. Sorter scorePurposes på rawScore og purposeId ved eksakt raw-tie; vis raw/(1+raw), skåringsversjon og konsumenttest av terskler. Faktisk Swift: seks aktive kanter etter én suksess raw=1.032 score=1. Norm1 gir fortsatt raw opptil sqrt(n). Soft kan også få flyttallsties, derfor raw-sortering.",
+      "--evidence",
+      "/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/Relasjonslaering_Glemmeterm_Forskning_2026-09-11/RAPPORT.md"
+    ],
+    "returncode": 0,
+    "stdout": "ev_a99a0c6f1be28aec\n",
+    "stderr": ""
+  },
+  {
+    "arguments": [
+      "task",
+      "new",
+      "--title",
+      "Læringsreplay mangler versjonert konfigurasjon og avklart legacy-policy",
+      "--purpose",
+      "Gamle relasjonslogger skal beholde historisk læringssemantikk når nye parametre innføres. Måles ved: golden tests av gammel lifecycle-, weight-only- og mixed-logg er uendret etter config-endring; v2-cutover og eksakte preferanser har eksplisitt godkjent kontrakt. HD-0050 målte alphaSuccess .08 til .2: .172 til .28 i gamle lifecycle/mixed-logger.",
+      "--owner",
+      "codex",
+      "--repo",
+      "CellProtocol",
+      "--mutation",
+      "code",
+      "--need",
+      "approval:Kjetil godkjenner formål og legacy-/preferansekontrakt før eventuell lærings-v2",
+      "--origin",
+      "losen"
+    ],
+    "returncode": 0,
+    "stdout": "HD-0058\n",
+    "stderr": ""
+  },
+  {
+    "arguments": [
+      "task",
+      "new",
+      "--title",
+      "Ankomst og sortert replay gir ulik tilstand ved like lifecycle-tidspunkt",
+      "--purpose",
+      "Replaykontrakten skal eksplisitt avklare årsaksrekkefølge ved tidslikhet. Måles ved: dokumentert valgt kontrakt og måltest for start z-start og slutt a-end med samme timestamp; journal restore bevarer ankomstsekvens mens replayTransaction sorterer på ID. Ingen endring før semantikken er valgt.",
+      "--owner",
+      "codex",
+      "--repo",
+      "CellProtocol",
+      "--mutation",
+      "code",
+      "--need",
+      "approval:Kjetil velger kontrakt for ankomstrekkefølge mot kanonisk replay",
+      "--origin",
+      "losen"
+    ],
+    "returncode": 0,
+    "stdout": "HD-0059\n",
+    "stderr": ""
+  },
+  {
+    "arguments": [
+      "lesson",
+      "new",
+      "--slug",
+      "relational-float-parity",
+      "--task",
+      "HD-0050",
+      "--symptom",
+      "Python-regnestykket og første Noa-port var ikke bitlike med Swift.",
+      "--root-cause",
+      "Kompensert sum i Python3.13 og endret rekkefølge for multiplikasjon/divisjon gir ulike Double-resultater.",
+      "--fix",
+      "Bruk sortert eksplisitt venstrefold og samme mellomresultater; verifisert med 1063 binært like tall. Numerisk runtime-test, ikke statisk deployregel.",
+      "--source",
+      "/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/Relasjonslaering_Glemmeterm_Forskning_2026-09-11/RAPPORT.md"
+    ],
+    "returncode": 0,
+    "stdout": "L-2026-09-11-relational-float-parity (ev_f4272cecc47ba1ee)\n",
+    "stderr": ""
+  },
+  {
+    "arguments": [
+      "lesson",
+      "new",
+      "--slug",
+      "relational-metric-set-order",
+      "--task",
+      "HD-0050",
+      "--symptom",
+      "Kanttilstanden var replaybar mens en endringsmetrikk kunne variere mellom prosesser.",
+      "--root-cause",
+      "L2-metrikken summerte over en usortert mengde; Python hash-randomisering påvirket summeringsrekkefølgen.",
+      "--fix",
+      "Sorter nøklene og kontroller artefakter i en ny prosess med annen hashseed; kildehash før/etter kjøring. Bare dokumentert her; forskningsharness utenfor deploypreflight.",
+      "--source",
+      "/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/Relasjonslaering_Glemmeterm_Forskning_2026-09-11/RAPPORT.md"
+    ],
+    "returncode": 0,
+    "stdout": "L-2026-09-11-relational-metric-set-order (ev_35d32feb96ba00df)\n",
+    "stderr": ""
+  },
+  {
+    "arguments": [
+      "lesson",
+      "new",
+      "--slug",
+      "relational-sandbox-swift-test",
+      "--task",
+      "HD-0050",
+      "--symptom",
+      "Midlertidig SwiftPM-suite startet ikke under nested sandbox-exec.",
+      "--root-cause",
+      "sandbox_apply Operation not permitted i dette verktøymiljøet.",
+      "--fix",
+      "Direkte swiftc/XCTest i midlertidig mappe kjørte originale7 tester. Rapporter støtteklassene og at fullpakke/CellApple ikke er testet; miljøspesifikt, ingen generell regel.",
+      "--source",
+      "/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/Relasjonslaering_Glemmeterm_Forskning_2026-09-11/RAPPORT.md"
+    ],
+    "returncode": 0,
+    "stdout": "L-2026-09-11-relational-sandbox-swift-test (ev_0e769252a1cc0966)\n",
+    "stderr": ""
+  },
+  {
+    "arguments": [
+      "lesson",
+      "new",
+      "--slug",
+      "relational-primary-source-fallback",
+      "--task",
+      "HD-0050",
+      "--symptom",
+      "Sanger-utgiver/PDF-henting og lokal Oja-kopi feilet; pdftotext manglet.",
+      "--root-cause",
+      "403/timeout/DNS og manglende lokalt verktøy ved primærkildehenting.",
+      "--fix",
+      "CMU-Sanger via curl med SHA; Oja via web-fulltekst; bundlet pypdf/pdfplumber. Bevar faktisk kilde-/tilgjengelighetsstatus. Flere observerte miljøårsaker, ingen antatt universell rotårsak.",
+      "--source",
+      "/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/Relasjonslaering_Glemmeterm_Forskning_2026-09-11/RAPPORT.md"
+    ],
+    "returncode": 0,
+    "stdout": "L-2026-09-11-relational-primary-source-fallback (ev_04579dc58d06f737)\n",
+    "stderr": ""
+  },
+  {
+    "arguments": [
+      "lesson",
+      "new",
+      "--slug",
+      "relational-norm-not-ranking",
+      "--task",
+      "HD-0050",
+      "--symptom",
+      "Lav norm eller høy rangeringstabilitet ble vurdert som mulige mål på bedre læring.",
+      "--root-cause",
+      "Enhetsnorm tillater raw=sqrt(n), og clamp kan gi stabil alfabetisk feilrangering med tau1. Hybrid er ikke klassisk Oja.",
+      "--fix",
+      "Mål raw-parvise tegn og syntetisk toppvalg ved siden av norm/tau. Behold moteksempler, null-/positivreferanser og alle forhåndsvalgte rater. Bare dokumentert, krever faktisk måling.",
+      "--source",
+      "/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/Relasjonslaering_Glemmeterm_Forskning_2026-09-11/RAPPORT.md"
+    ],
+    "returncode": 0,
+    "stdout": "L-2026-09-11-relational-norm-not-ranking (ev_3e2c3493e4f9c1e6)\n",
+    "stderr": ""
+  },
+  {
+    "arguments": [
+      "lesson",
+      "new",
+      "--slug",
+      "relational-metric-candidate-domain",
+      "--task",
+      "HD-0050",
+      "--symptom",
+      "Første sondering inkluderte formål uten lagrede kanter i primære mål.",
+      "--root-cause",
+      "Nullfylling for en fast sammenligningskohort ble blandet med motorens faktiske kandidatdomene.",
+      "--fix",
+      "Metning og toppmål beregnes nå på lagrede kandidater; nullfylling er bare tydelig merket diagnostikk. Egen fixture kontrollerer fraværende kanter.",
+      "--source",
+      "/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/Relasjonslaering_Glemmeterm_Forskning_2026-09-11/RAPPORT.md"
+    ],
+    "returncode": 0,
+    "stdout": "L-2026-09-11-relational-metric-candidate-domain (ev_a9281415bb6dbd3c)\n",
+    "stderr": ""
+  },
+  {
+    "arguments": [
+      "validate"
+    ],
+    "returncode": 0,
+    "stdout": "validated 602 records, 0 problem(s)\n",
+    "stderr": ""
+  },
+  {
+    "arguments": [
+      "status",
+      "--write"
+    ],
+    "returncode": 0,
+    "stdout": "wrote /Users/kjetil/Build/Digipomps/HAVEN/HAVEN-Deploy/index/status.json\n",
+    "stderr": ""
+  }
+]
