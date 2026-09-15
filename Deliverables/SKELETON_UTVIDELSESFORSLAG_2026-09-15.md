@@ -69,8 +69,11 @@ Tre ting følger av de ti linjene:
 3. **Med `flexible`/`adaptive` og rad-som-element får man ingen felles kolonnebredde.** Bredden må
    være kjent på forhånd, altså `fixed`, altså punkter valgt av den som skriver konfigurasjonen.
 
-Det finnes en vei til trykkbare rader: `List` med `flowElementSkeleton`. Den gir radidentitet, trykk
-og `.item`-scope på `visible(when:)` — men ingen kolonner.
+Det finnes en vei til trykkbare rader: `SkeletonList`
+(`Sources/CellBase/Skeleton/SkeletonDescription.swift:1407`). Den har `flowElementSkeleton` for
+radinnholdet (`:1421`) og hele interaksjonsmaskineriet allerede på plass — `selectionMode`,
+`selectionActionKeypath`, `activationActionKeypath`, `allowsEmptySelection` (`:1413`–`:1419`).
+Det den ikke har er kolonner.
 
 ### Det presise hullet
 
@@ -90,7 +93,8 @@ formålet med skjermbildet. Alternativet holder til å *vise* importen, ikke til
 to-grid-problemet og innfører ingen nye begreper. Dette er den billigste endringen i dokumentet, og
 den er nyttig uansett hva som skjer med F1b.
 
-**F1b — `rowSkeleton: SkeletonElement?` på `SkeletonGrid`.** Når den er satt, blir hvert element i
+**F1b — rader med felles kolonnemåling.** To formuleringer, samme resultat. Først den på `Grid`-siden:
+`rowSkeleton: SkeletonElement?` på `SkeletonGrid`. Når den er satt, blir hvert element i
 `keypath` én *rad*, og radelementets direkte barn blir cellene i raden. Rendereren bytter da fra
 `LazyVGrid` til SwiftUI-ens egen `Grid`/`GridRow`, som måler kolonnene på tvers av radene selv.
 `itemSkeleton` er urørt; gammel konfigurasjon oppfører seg nøyaktig som før.
@@ -101,21 +105,34 @@ Det gir: felles kolonnebredde uten at noen gjetter punkter, radidentitet, trykk 
 Plattformkrav: `Grid`/`GridRow` er iOS 16 / macOS 13. `Package.swift:12` er allerede
 `.macOS(.v13), .iOS(.v16)`. Ingen ny plattformbunn.
 
-**Alternativ formulering av F1b, hvis tråden heller vil gå motsatt vei:** gi `List` et `columns`-felt
-i stedet. Samme resultat, samme kostnad. Jeg foreslår `Grid`-siden fordi `columns` allerede bor der,
-men dette er en smakssak som den som eier formatet bør avgjøre, ikke jeg.
+**F1b-alternativ, og etter gjennomgangen tror jeg dette er det riktige:** gi `SkeletonList` et
+`columns: [SkeletonGridColumn]?` i stedet, og la rendereren bytte fra `List` til `Grid`/`GridRow`
+når det er satt.
+
+Grunnen til at jeg snudde: valget er ikke symmetrisk. `List` har allerede radvalg, radaktivering og
+tomt-valg-policy (`:1413`–`:1419`); `Grid` har ingenting av det. Legger vi radidentitet på `Grid`,
+må alle de fire feltene finnes opp på nytt der — og da har vi to elementer som begge kan gjøre rader,
+med hver sin halvferdige interaksjonsmodell. Legger vi kolonner på `List`, gjenbruker vi ett felt
+(`SkeletonGridColumn`) og får ingen nye begreper.
+
+Kostnaden er at `columns` da bor to steder. Det er en billigere pris enn duplisert interaksjon.
+Den som eier formatet bør likevel ta valget selv — begge veier er forsvarlige, og jeg har byttet
+mening én gang allerede mens jeg leste.
 
 ### Bloat-risiko
 
 F1a: ingen — det fjerner en begrensning uten å legge til noe.
-F1b: ett valgfritt felt, og en `if let` i rendereren. Risikoen er ikke feltet, men at `Grid` da har
-tre måter å fylles på (`elements`, `itemSkeleton`, `rowSkeleton`). Det bør stå i spesifikasjonen hvilken
-som vinner hvis flere er satt, og reachability-revisjonen bør si fra hvis noen setter to.
+F1b: ett valgfritt felt, og en `if let` i rendereren. Gjøres det på `Grid`-siden har `Grid` deretter
+tre måter å fylles på (`elements`, `itemSkeleton`, `rowSkeleton`), og spesifikasjonen må si hvilken
+som vinner når flere er satt. Gjøres det på `List`-siden er det to måter å tegne én liste på, og
+spesifikasjonen må si at `columns` bare betyr noe sammen med `flowElementSkeleton`. Uansett vei bør
+reachability-revisjonen si fra når en konfigurasjon setter to som utelukker hverandre.
 
 ### Anbefaling
 
 Gjør F1a uansett. Gjør F1b hvis svaret på «skal man kunne trykke på en rad i en tabell» er ja — og for
-importflaten er det ja. Ikke lag et `Table`-element: det ville være et fjerde container-begrep med sin
+importflaten er det ja. Av de to formuleringene heller jeg mot `columns` på `List`, fordi
+interaksjonen allerede er der. Ikke lag et `Table`-element: det ville være et fjerde container-begrep med sin
 egen livssyklus, og alt det trenger finnes allerede i `Grid`.
 
 ### Test som må følge med
