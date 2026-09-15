@@ -5,7 +5,7 @@
 
 ## Porter
 - G1: godkjent 2026-09-15    (formålsspesifikasjon godkjent av Kjetil, iterasjon 3)
-- G1-GUI: venter        (rendret bilde godkjent — bare for GUI-oppgaver)
+- G1-GUI: godkjent 2026-09-15    (seks rendrede tilstander godkjent av Kjetil)
 - G2: venter        (plan godkjent; arbeidspakker 1:1 mot bladformål)
 - G3: venter        (akseptanse: forventning mot faktisk, alle avledede tester grønne)
 
@@ -22,3 +22,6 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
   entitydata; betaling via Palazzos egen PSP kommer senere og avhenger av at DiMyMint og
   DiMyMicropayments hentes inn. Konsekvens: §6.1 og §6.2 bortfaller — importen og genesis er samme flyt,
   ikke to runder. Neste port er G1-GUI.
+- 2026-09-15: G1-GUI godkjent. Kjetil ba samtidig om at manglene i images/README.md legges fram
+  som vurderbare utvidelsesforslag for skjelettet (SKELETON_UTVIDELSER_2026-09-15.md), og om at
+  invitasjonsopplevelsen tas opp som egen formalsoppgave.
