@@ -1,7 +1,11 @@
 
 # Chapter 04 — Agreements and Contracts
 
-Last verified against code: 2026-07-13.
+Last verified against code: 2026-09-09.
+
+The scaffold-administrator verification below applies to section 13 on
+CellScaffold branch `pdd/scaffold-admin-delegering`, worktree
+`CellScaffold/_wt-sad-20260909`; it is not a staging deployment claim.
 
 Agreements and Contracts define HAVEN’s explicit capability-based authorization
 model. Nothing in HAVEN is implicit: all authority must be granted through a
@@ -231,6 +235,25 @@ Cryptographic authenticity and current authorization are separate questions:
 An expired authentic Contract therefore remains visible in history, but it
 must not authorize current access.
 
+<!-- purposeRef: purpose://candidate.tillitspakke-agentflaate.signert-kvittering -->
+`ActionDecisionReceipt` and the `EffectReceipt` model
+(`haven.effect-receipt.v0`) support optional `ReceiptSignature` metadata:
+`signerRef`, `algorithm`, base64 `value`, and `signedAt`. Their `signed(by:)`
+methods use the existing `Identity.sign` vault path over compact, sorted JSON
+with UTC timestamps and the signature field omitted. `verify(against:)` uses
+the caller-pinned public Identity and returns `valid`, `invalid`, or `unsigned`;
+legacy decision JSON without a signature still decodes. Supported algorithms
+are P256-ECDSA-SHA256 and Ed25519, selected from the identity's public key.
+`signedAt` must equal the signed receipt's canonical `createdAt`: it is a
+declared issuance time, not an independently witnessed signing time. Changed
+binding digests invalidate verification. An authentic receipt grants no rights.
+
+`EffectReceipt` contains host-only destination metadata, method, received byte
+count, actual credential-use flag, decision/execution status, optional reason
+code, and ceiling/package digest bindings. It has no URL, headers, credential
+alias or response-body field; its codec rejects paths and queries in the host.
+WebFetch and PurposeBoundAIGateway now issue signed receipts with owner-only append-only stores; see [Chapter 36](36_Agent_Trust_Package.md) for bindings, fleet audit, and implementation limits.
+
 ## 9. Signed Agreement Entity commit
 
 `signedAgreementEntity.commit` is the production admission boundary for an
@@ -309,3 +332,94 @@ their own regression evidence.
 
 This is intended to provide a decentralized, privacy-preserving permission
 model; each concrete access path still needs positive and negative proof.
+
+## 13. Scaffold administrator and single-hop mandates
+
+Last verified against code: 2026-09-09 — CellScaffold branch
+`pdd/scaffold-admin-delegering`, worktree `CellScaffold/_wt-sad-20260909`.
+Evidence: [PDD test results](../Deliverables/PDD_scaffold-admin-delegering_2026-09-08/TESTRESULT.md#auth)
+and [acceptance boundaries](../Deliverables/PDD_scaffold-admin-delegering_2026-09-08/ACCEPT.md).
+WP9 inspected source and existing results; it ran no new builds or tests.
+
+`cell:///ScaffoldAdministratorRegistry` records one organization Entity reference
+as administrator **per scaffold**. The scaffold owner registers it with verified
+owner proof. Changing it requires the separate, audited
+`administrator.transfer` action. Registration is an organizational attribution;
+the Entity name is not a signing Identity and grants no Cell access. Public
+`administrator.state` names the organization without a person's identity.
+See [Chapter 07](07_Scaffold_Runtime.md#scaffold-administrator) for storage and
+startup policy and [the registry contract](scaffold-administrator_v1.json).
+
+For delegation through this model, the **mandate is the only authority-bearing
+delegation artifact**. It uses the existing signed Agreement/Contract mechanism,
+issued on the registered organization's behalf and bound to its recipient's
+Identity and key. Existing verified owner-proof and Cell-specific Contract paths
+remain separate authorization grounds. The five mandatory scope/lifetime fields
+are:
+
+| Field | Required meaning |
+| --- | --- |
+| `resourceRefs` | Explicit resources; use also checks the resolved Cell UUID. |
+| `actionKeypaths` | Exact permitted actions; no wildcard expansion. |
+| `purposeRef` | Exact purpose; `purpose://prompt.unknown` fails closed. |
+| `validUntil` | Expiry; expired or excessive lifetime is rejected. |
+| `revocationRef` | Reference bound to the retained central mandate record. |
+
+Omitting any field is rejected; scope and lifetime are not filled with defaults.
+The [mandate contract](scaffold-mandate_v1.json) also requires issuer, scaffold,
+recipient, timestamps, signatures and explicit nullable `orgLinkRef`.
+
+The chain is **one hop**. Issuance requires a separate scaffold-owner-signed
+representative Contract bound to the organization, scaffold and current
+registration/transfer receipt. A mandate is never accepted as that representative
+proof. A `use` mandate requesting scaffold mandate issuance, orgLink issuance or
+administrator actions is rejected. An `administrate` fixture may name
+`mandate.issue` and support scaffold mandate inspection; this does not grant
+onward issuance authority. Being scaffold owner alone also does not establish
+authority to sign on the organization's behalf.
+
+The required number of distinct verified signatures for `kind=administrate` is
+read from registered `administrator.thresholdPolicy`. Its initial value is **1**,
+with reason **«utviklingsfase, styreleder alene»**, dated
+`2026-09-09T00:00:00Z`. It can be raised to 2 through the policy action without a
+code change. Two signatures from the same Identity count once; `kind=use`
+requires one verified representative signature. While the policy is below 2,
+`runtimeAdvisories` includes `scaffold_administrator_threshold_below_two`, naming
+the scaffold and reason. This is verified development policy, not evidence of
+staging provisioning or a legal assessment of the signer's position.
+
+Role labels `admin.observer`, `admin.operator`, `admin.nodeAgent` and
+`admin.security` still grant **zero Cell authority** in this model.
+`ScaffoldRoleIsNotAuthorityTests` protects that boundary: four role tests deny
+`mandate.issue`, `administrator.register`, `administrator.transfer` and
+`administrator.thresholdPolicy.set` with `agreement_or_proof_required`, just as
+for an unrelated Identity. A fifth test guards increases above 48 matching
+`requireAdminUser` lines and 33 `AdminRoleProfile` lines. The behavioral denials
+are the authority proof; the counts are an additional review tripwire.
+
+Mandate use checks the recipient's proof copy, signature, current administrator,
+resource, action, purpose, expiry and revocation. `mandate.revoke` retains the
+record and reason. `orgLink.issue` represents organizational affiliation as a
+role Agreement with start, optional end and revocation; the role Agreement
+alone grants no access. Revoking it invalidates dependent mandates while
+retaining Entity data. Owners can inspect active mandates for their own Cells
+via `mandate.list`; an unrelated requester is denied. Issuance and recorded use
+retain `mandateID`, `issuerEntityRef`, `actingIdentityUUID`, reason and time in
+private audit state. Public state and Flow receipts do not expose this identity
+pair. See [revocation and audit evidence](../Deliverables/PDD_scaffold-admin-delegering_2026-09-08/TESTRESULT.md#revoke).
+
+**Verified integration and remaining limits.** The green target-Cell test uses
+`ArendalsukaConfigurationPublisher.resetEditableCellConfiguration` before and
+after revocation. Source also connects `applyEditableCellConfiguration` to the
+mandate check, but this evidence does not prove a completed publication through
+that action. `publisherAccess.issue` is **not-implemented on this branch**;
+fixture issuance for that key does not execute it. Other target-Cell integrations
+are planned. Reading `administrator.history` with only an administrate mandate
+is also **not-implemented**; the verified path requires owner proof or an
+owner-authorized Agreement for that exact key. See
+[Gap Analysis](../Gap_Analysis.md#scaffold-admin-delegering).
+
+**Planned, not deployed:** WP10 staging provisioning, actual Digipomps/DiMy
+entities and representative signing setup, and restoration of Vegar's publishing
+access. No part of this PDD is running on staging yet. Organizational affiliation
+has not been assessed by a lawyer. These tests establish the software form only.

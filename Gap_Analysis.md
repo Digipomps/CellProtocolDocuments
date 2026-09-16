@@ -102,3 +102,40 @@ Files:
 - `CellProtocolDocuments/Book/11_Developer_Guide_Cell.md`
 - `CellProtocolDocuments/Book/12_Skeleton_Spec.md`
 - `CellProtocolDocuments/Book/13_Agent_Instructions.md`
+
+## 7) Scaffold administrator and delegation — bounded status <a id="scaffold-admin-delegering"></a>
+
+Last verified against code: 2026-09-09 — CellScaffold branch
+`pdd/scaffold-admin-delegering`, worktree `CellScaffold/_wt-sad-20260909`.
+Sources: `Sources/App/Cells/Admin/ScaffoldAdministratorRegistryCell.swift`,
+`ScaffoldMandateCell.swift`, `ScaffoldMandateProofSupport.swift` and
+`Sources/App/Cells/Arendalsuka/ArendalsukaConfigurationPublisherCell.swift`
+within that worktree. This is source inspection reconciled with existing
+[test evidence](Deliverables/PDD_scaffold-admin-delegering_2026-09-08/TESTRESULT.md#auth),
+not a new test or staging run.
+
+All 13 declared base operations (registry 3 GET + 3 SET; mandate 3 GET + 4 SET)
+have real implementations. No operation is an unconditional empty handler.
+The complete branch/no-op inventory is in
+[ACCEPT.md#stubs](Deliverables/PDD_scaffold-admin-delegering_2026-09-08/ACCEPT.md#stubs).
+The following limitations remain explicit:
+
+| ID | Status | Boundary and missing work |
+| --- | --- | --- |
+| SAD-01 | `not-implemented` | `publisherAccess.issue` has no handler on this branch. A positive issuance fixture naming that key proves mandate shape/signing, not target execution. The green target action is `resetEditableCellConfiguration`; other target integrations are planned. Source wiring for `applyEditableCellConfiguration` is not an end-to-end publication result. |
+| SAD-02 | `not-implemented` | Registry history does not recognize an administrate mandate by itself. `administrator.history` works through owner proof or the existing owner-authorized exact-key Agreement path. The broader mandate-only reader in the G2 draft remains planned. |
+| SAD-03 | `not-implemented` | Explicit failure when a registry handler loses its weak `self` is missing: `administrator.state` and `administrator.thresholdPolicy` fall back to `.null`, `administrator.history` to `[]`, and all three SET handlers share `guard let self else { return .null }`. These are conditional no-op/fallback paths, not missing normal operations. No lifecycle test proving these paths unreachable or requiring a typed error is recorded. `ScaffoldMandateCell` throws `persistenceUnavailable` on lost `self`. |
+| SAD-04 | planned / not executed | WP10, staging organization creation and representative provisioning are pending. Neither `entity:digipomps` nor `entity:dimy` is created there; Vegar's publishing access is not restored. No lawyer has assessed the organizational affiliation. |
+| SAD-05 | verification limit | Several mandate Explore return schemas are generic object/list descriptions; prior computed-key source-audit warnings required manual review. This is not a complete remote schema/parity or generated-UI proof. |
+
+Intentional idempotence is separate from SAD-03: registering the same organization,
+revoking an already revoked mandate and revoking an already revoked orgLink return
+the retained result without another mutation. The first two have explicit green
+test assertions; the orgLink retry branch is source-inspected only. Namespace
+GETs `mandate`, `orgLink` and bare `mandate.read` deny invalid/incomplete reads;
+denial is not an empty success stub.
+
+Acceptance measures **zero new failures**, not an all-green CellScaffold suite:
+the existing report records 2150 tests, 90 failures and 29 unique failing tests,
+against 2129 tests / 346–347 failures / 59 unique on main `e1f3e22f`.
+No reduction in old failures is attributed to this PDD because environments differ.

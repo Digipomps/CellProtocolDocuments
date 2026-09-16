@@ -259,6 +259,8 @@ The accumulator should report:
 - candidate Goals that lack verifiers
 - consent or privacy-sensitive branches needing explicit approval
 
+`purpose://candidate.tillitspakke-agentflaate.*` is used in the delivered WP1–WP10 of the [agent fleet trust package PDD](../Deliverables/PDD_tillitspakke-agentflaate_2026-09-08/TESTRESULT.md) (see [Chapter 36](36_Agent_Trust_Package.md)); these nodes remain candidates and require Kjetil's approval before promotion to canonical taxonomy.
+
 ## 9. Current Runtime Bridge
 
 `CellScaffold/Sources/App/Support/PurposeKnowledgeBase.swift` contains the first

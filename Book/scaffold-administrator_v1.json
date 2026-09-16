@@ -1,0 +1,118 @@
+{
+  "schema": "haven.scaffold-administrator.contract.v1",
+  "status": "implemented-with-limitations — WP1–WP8 verifisert i worktree; G3 venter; ikke deployet",
+  "cell": {
+    "name": "ScaffoldAdministratorRegistry",
+    "endpoint": "cell:///ScaffoldAdministratorRegistry",
+    "scope": "ett scaffold per registrering; registeret er per scaffold, aldri globalt",
+    "persistency": "persistert i scaffoldets datarot"
+  },
+  "principles": [
+    "En rolleetikett (admin.observer/operator/nodeAgent/security) gir null myndighet her. Myndighet kommer fra eierbevis eller et signert mandat, aldri fra en rolle.",
+    "Registreringen skal kunne leses uten å kjenne noen persons identitet: den navngir en organisasjonsentitet, ikke et menneske.",
+    "Et formål kan innsnevre en rettighet, aldri opprette eller utvide en (lesson.purpose-never-grants-rights).",
+    "Mangler registreringen ved oppstart, skal det si fra høyt. Stille tap av myndighet er feilen fra 2026-08-19."
+  ],
+  "get": {
+    "administrator.state": {
+      "returns": "{ scaffoldRef, administratorEntityRef, registeredAt, registeredBy, thresholdPolicy }",
+      "grant": "r---",
+      "requester": "enhver identitet; svaret inneholder ingen personidentitet",
+      "note": "registeredBy og thresholdPolicy.setBy er null; handlende identitet lagres i privat revisjonsspor."
+    },
+    "administrator.history": {
+      "returns": "[{ fromEntityRef, toEntityRef, changedAt, reason, receiptID }]",
+      "grant": "r---",
+      "requester": "eier med eierbevis eller innehaver av separat eiergodkjent Agreement for administrator.history",
+      "plannedAccess": {
+        "status": "not-implemented",
+        "requester": "innehaver av administratormandat alene",
+        "note": "G2-utkastets bredere tilgang er ikke koblet til denne cellens historikklesing; SAD-02."
+      }
+    },
+    "administrator.thresholdPolicy": {
+      "returns": "{ requiredSignatures, reason, setAt, setBy }",
+      "grant": "r---",
+      "requester": "enhver identitet",
+      "note": "Verdien er registrert policy, ikke en konstant i koden. Nåværende verdi 1."
+    }
+  },
+  "set": {
+    "administrator.register": {
+      "payload": {
+        "scaffoldRef": "string",
+        "administratorEntityRef": "string",
+        "reason": "string (8..512)"
+      },
+      "grant": "-w-s",
+      "requester": "scaffoldets eier med eierbevis",
+      "effect": "Registrerer organisasjonsentitet som administrator for dette scaffoldet. Idempotent på samme entitet."
+    },
+    "administrator.transfer": {
+      "payload": {
+        "scaffoldRef": "string",
+        "toEntityRef": "string",
+        "reason": "string (8..512)"
+      },
+      "grant": "-w-s",
+      "requester": "scaffoldets eier med eierbevis",
+      "effect": "Bytter administrator. Egen handling med eget revisjonsspor; aldri en stille overskriving av administrator.register.",
+      "note": "Trengs fordi Arendalsuka/konferanser skal flytte fra Digipomps til DiMy når de får eget scaffold."
+    },
+    "administrator.thresholdPolicy.set": {
+      "payload": {
+        "scaffoldRef": "string",
+        "requiredSignatures": "integer 1..5",
+        "reason": "string (8..512)"
+      },
+      "grant": "-w-s",
+      "requester": "scaffoldets eier med eierbevis",
+      "effect": "Setter påkrevd antall signaturer for administratormandat. Heving skal kunne skje uten kodeendring.",
+      "denies": [
+        "requiredSignatures < 1",
+        "requiredSignatures uten reason"
+      ]
+    }
+  },
+  "advisories": {
+    "scaffold_administrator_not_provisioned": "Legges i runtimeAdvisories når scaffoldet starter uten administrator-registrering. Dette er vakten mot datarot-bytte.",
+    "scaffold_administrator_threshold_below_two": "Legges i runtimeAdvisories så lenge requiredSignatures < 2. Skal navngi scaffoldet og begrunnelsen, slik at unntaket er synlig og ikke glemmes."
+  },
+  "denials": {
+    "agreement_or_proof_required": "Requester har verken eierbevis eller gyldig mandat.",
+    "role_label_is_not_authority": "Fixture-/formålsetikett, ikke egen wire-feilkode. Faktisk rolleavslag er agreement_or_proof_required."
+  },
+  "lastVerifiedAgainstCode": "2026-09-09",
+  "implementation": {
+    "repo": "CellScaffold",
+    "worktree": "_wt-sad-20260909",
+    "branch": "pdd/scaffold-admin-delegering",
+    "verification": "Tidligere grønne WP1/WP2/WP4-kjøringer i TESTRESULT.md; WP9 er kilde-/dokumentinspeksjon uten nye bygg/tester.",
+    "evidence": "Deliverables/PDD_scaffold-admin-delegering_2026-09-08/TESTRESULT.md#auth",
+    "acceptance": "Deliverables/PDD_scaffold-admin-delegering_2026-09-08/ACCEPT.md",
+    "canonicalSource": "Deliverables/PDD_scaffold-admin-delegering_2026-09-08/contract/scaffold-administrator_v1.json",
+    "bookMirror": "Book/scaffold-administrator_v1.json",
+    "deploymentStatus": "not-deployed; ingen staging-organisasjoner eller representanter provisjonert",
+    "noOpInventory": "Deliverables/PDD_scaffold-admin-delegering_2026-09-08/ACCEPT.md#stubs",
+    "gaps": "Gap_Analysis.md#scaffold-admin-delegering",
+    "sourceFiles": [
+      "Sources/App/Cells/Admin/ScaffoldAdministratorRegistryCell.swift",
+      "Sources/App/Support/ScaffoldAdministratorRuntimeSupport.swift",
+      "Sources/App/configure.swift"
+    ],
+    "initialThresholdPolicy": {
+      "requiredSignatures": 1,
+      "reason": "utviklingsfase, styreleder alene",
+      "setAt": "2026-09-09T00:00:00Z",
+      "setBy": null
+    },
+    "invalidPolicyErrors": [
+      "RegistryError.invalidThreshold",
+      "RegistryError.invalidReason"
+    ],
+    "lifecycleFallback": {
+      "status": "not-implemented",
+      "missing": "Eksplisitt feil når registry-handlerens weak self mangler; nå null/tom liste, også null uten mutasjon fra de tre SET-handlerne. Se SAD-03."
+    }
+  }
+}

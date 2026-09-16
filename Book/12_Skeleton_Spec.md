@@ -857,3 +857,49 @@ These are real, repo-confirmed limits as of March 2026:
 2. Skeleton still lacks first-class `Badge` / `Chip` and `Gauge` / `Progress` primitives, so metadata-heavy dashboards still rely on styled `Text` and custom cells.
 3. Collection grids are now data-bindable, `Picker` now exists as a first-class single-selection primitive, and `Visualization(kind: "map")` exists for portable map surfaces. Domain contracts still need to expose honest option lists, state snapshots, and spatial privacy rules; a renderer primitive alone does not create an honest workflow.
 4. `Visualization(kind: "map")` supports marker/vector/image-map fallback today. AR camera overlays, provider-specific offline maps, and native device permission prompts remain host capabilities outside the v1 skeleton contract.
+
+
+## 7. Localization metadata (initial implementation, September 2026)
+
+Localization is additive presentation metadata. Existing string fields remain literal fallbacks; identifiers, reference labels, action keypaths, payloads and editable values retain their existing meaning. A raw string is never looked up as a catalog key.
+
+`CellConfiguration.localization` accepts `version: 1`, optional `sourceLocale` and `supportedLocales`, `catalogs: [{namespace, revision}]` and embedded `resources`. A resource has `schema: "haven.localization-catalog.v1"`, `namespace`, `revision`, `source_locale` and a `messages` dictionary. Each message specifies `format` (`literal` or `icu-mf1`), optional typed `arguments`, context/source metadata, and `translations` keyed by canonical BCP-47 tags. Only translations with `state: "approved"` are displayed. If a message has `source_hash`, approved entries must carry that hash. External references do not grant a client permission to fetch a catalog; the host must supply authorized resources.
+
+Declare a text binding in `modifiers.localization`:
+
+```json
+{"Text":{"text":"Spor","modifiers":{"localization":{"text":{
+  "namespace":"demo","key":"count",
+  "arguments":{"count":{"scope":"root","keypath":"demo.trackCount"}}
+}}}}}
+```
+
+Supported slots in the first implementation:
+
+| Skeleton element | Slot | Behavior |
+| --- | --- | --- |
+| `Text` | `text` | Display plain localized text, including list item text. |
+| `Button` | `label` | Change visible/accessibility label without changing action identity or payload. |
+| `TextField` | `placeholder` | Change placeholder without replacing its editable value. |
+| `TextArea` | `placeholder` | Change plain/rich editor placeholder without translating the document. |
+
+These slots are implemented in the shared web renderer and CellApple SwiftUI renderer used by Binding. Picker options, tabs, Toggle, navigation-bar item labels, uploads, renderer-generated feedback and generic accessibility modifiers are **not localized by this increment**. Authoring validation rejects unsupported slots. This table does not claim that the entire Binding shell or Porthole editor is translated.
+
+A catalog argument is either `{ "value": <string|number|boolean> }` or `{ "keypath": "...", "scope": "root|item|context" }`; omitted scope means root. Declared argument types are `string`, `number`, `integer`, `boolean`, and `date`. Date values are Unix epoch milliseconds; the host supplies the timezone. Root paths for automatic loading should use existing reference-relative paths such as `demo.trackCount`. Item/context values come from the current renderer context. They are never promoted to root network reads.
+
+A localized data label uses an explicit descriptor such as `{ "valueKeypath": "localizedLabel", "scope": "item" }`. The data shape is `{ "values": { "nb-NO": "Musikk", "en-US": "Music" }, "fallbackLocale": "nb-NO" }`. Catalog references and data descriptors are mutually exclusive. This permits language-independent item IDs, but does **not** migrate the existing Interest/Purpose storage model.
+
+The shared locale resolver orders entity preference/language tags, explicit surface choice, browser/OS language, then `nb-NO` (or the first supported locale when necessary). Entity preference storage/loading and a user-facing language selector are still follow-up work. Porthole accepts an optional host-provided `localizationContext`; native hosts expose `setLocalizationLocale`. Per-value results report `requested_locale`, `ui_locale`, `resolved_locale`, `fallback_used`, `fallback_reason` and `catalog_revision`. Literal reserves have unknown (`null`) resolved locale. Translation fallback considers locale variants, catalog source/data fallback, then Norwegian and English.
+
+Both renderers use the same bundled FormatJS code; Apple hosts it through public JavaScriptCore. Locale updates reuse formatter caches and change existing text bindings without rebuilding the skeleton. The native host loads distinct root arguments on configuration/local mutation; arbitrary incoming remote Flow updates are not yet wired to refresh this snapshot. Linux ICU is a feasibility probe only: exact corpus parity has a known narrow-space difference for English time formatting.
+
+Source and verification:
+
+- `CellProtocol/Sources/CellBase/Skeleton/SkeletonLocalization.swift`
+- `CellProtocol/Tools/Localization/{runtime.mjs,validate.mjs,THIRD_PARTY_NOTICES.md}`
+- `CellProtocol/fixtures/localization/{messages.json,skeleton.json}`
+- `CellProtocol/Sources/CellApple/SkeletonLocalizationRuntime.swift`
+- `CellProtocol/Tests/CellBaseTests/SkeletonLocalizationTests.swift`
+- `CellScaffold/playwright/{skeleton-localization,porthole-skeleton-localization}.spec.js`
+
+Run the localization authoring validator as well as Explore validation before promoting a localized configuration. The editor publication/round-trip path still needs dedicated localization preservation coverage.

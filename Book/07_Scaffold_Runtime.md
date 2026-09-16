@@ -1,7 +1,9 @@
 
 # Chapter 07 — Scaffold and Runtime Model
 
-Last verified against code: 2026-07-13.
+Last verified against code: 2026-09-09 for section 9, CellScaffold branch
+`pdd/scaffold-admin-delegering`, worktree `CellScaffold/_wt-sad-20260909`.
+Other sections retain their earlier evidence scope, including the 2026-07-13 audit.
 
 The Scaffold is the execution environment that hosts Cells, Resolvers, storage,
 identity vaults, and transport bridges. It functions like a minimal operating
@@ -264,3 +266,72 @@ The Scaffold aims to provide:
 
 It is the foundation for running HAVEN applications across desktops, servers,
 mobile devices, and constrained environments.
+
+## 9. Registered administrator per scaffold <a id="scaffold-administrator"></a>
+
+Last verified against code: 2026-09-09 — CellScaffold branch
+`pdd/scaffold-admin-delegering`. This is verified worktree behavior, not deployed
+staging state. The authorization model is described in
+[Chapter 04](04_Agreements_Contracts.md#13-scaffold-administrator-and-single-hop-mandates).
+
+`ScaffoldAdministratorRegistryCell` and `ScaffoldMandateCell` use the existing
+resolver's `.scaffoldUnique` scope and `.persistant` storage in the scaffold's
+own data root. There is no global administrator registry. On first creation,
+`CELL_SCAFFOLD_REF` supplies the public deployment label, defaulting to
+`scaffold:cellscaffold`; changing the environment later does not overwrite the
+persisted label. This label confers no authority.
+
+The scaffold owner explicitly calls `administrator.register` with an
+organization `entity:` reference and a reason. Repeating the same registration
+is idempotent. A different organization requires `administrator.transfer`, with
+its own receipt and retained audit of old organization, new organization,
+acting Identity and reason. The new registration receipt invalidates the old
+representative authority domain and mandates. Public `administrator.state`
+contains no person identity: `registeredBy` and policy `setBy` are `null`, while
+the acting Identity is retained in private audit state. The reference's format
+is validated; an organization name is not proof of legal status or signing power.
+
+`administrator.thresholdPolicy` is persisted policy, not a hard-coded ongoing
+signature requirement. Its initial `requiredSignatures` is **1**, reason
+**«utviklingsfase, styreleder alene»**, date `2026-09-09T00:00:00Z`.
+`administrator.thresholdPolicy.set` accepts 1–5 and a reason; raising it to 2
+requires no code change. Distinct signer counting is enforced by the mandate
+Cell. Registry mutations require owner proof; admin role labels authorize none
+of them.
+
+The existing `/health/ready` response reports:
+
+| Condition | `runtimeAdvisories` entry |
+| --- | --- |
+| No administrator registration | `scaffold_administrator_not_provisioned` |
+| Registered signature threshold below 2 | `scaffold_administrator_threshold_below_two`, with scaffold, reason and policy date |
+
+A different data root does not inherit administrator authority. Startup says
+when registration is missing; it does not create an organization or restore
+lost mandates. An unavailable/corrupt registry also reports
+`scaffold_administrator_registry_unavailable` through existing readiness
+diagnostics.
+
+Registration factories are reconciled after the orchestrator restores its
+named mappings. Require-existing mode must preserve a fresh root without
+creating these Cells. Provision-only mode excludes both from the canonical
+bootstrap inventory. Normal provision-if-missing may create an empty registry,
+but never silently register an organization. Successful mutations persist a
+snapshot and read it back before acknowledgement; this is local storage evidence,
+not distributed replication or a crash-durability guarantee.
+
+Evidence: [register and transfer](../Deliverables/PDD_scaffold-admin-delegering_2026-09-08/TESTRESULT.md#registry),
+[threshold policy](../Deliverables/PDD_scaffold-admin-delegering_2026-09-08/TESTRESULT.md#threshold),
+[fresh-root advisories](../Deliverables/PDD_scaffold-admin-delegering_2026-09-08/TESTRESULT.md#advisory)
+and [bootstrap regression repairs](../Deliverables/PDD_scaffold-admin-delegering_2026-09-08/TESTRESULT.md#regression).
+The later full regression recorded under
+[authorization](../Deliverables/PDD_scaffold-admin-delegering_2026-09-08/TESTRESULT.md#auth)
+is 2150 tests, 90 failures, 29 unique failing tests, **zero new failures** against
+the main `e1f3e22f` baseline; the whole suite is not green.
+
+**Planned operations:** WP10 deployment and provisioning are not executed.
+`entity:digipomps` and `entity:dimy` have not been created on staging. Digipomps
+is the planned administrator for CellScaffold staging; DiMy is planned for
+Palazzo and later the moved conference scaffolds. Production has its own data
+root and ceremony after staging verification. Publishing-access restoration
+and legal assessment of organizational affiliation remain separate work.
