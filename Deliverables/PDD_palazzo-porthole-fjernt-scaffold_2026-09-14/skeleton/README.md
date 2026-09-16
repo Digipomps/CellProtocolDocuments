@@ -1,0 +1,1 @@
+Skeleton-JSON arvet fra `PDD_palazzo-sicilia-artikler_2026-09-07/skeleton/` — de samme tre flatene som skal lastes over bro. De eksporterte kjøre-konfigurasjonene (fra XCTVapor 2026-09-07) ligger i `PalazzoScaffold::docs/sicilia-gui-evidence/inputs/*.cellconfiguration.json` og er sannheten for test.reference-rewrite.

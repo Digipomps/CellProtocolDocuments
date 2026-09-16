@@ -1,0 +1,1 @@
+Flaten er en web-leaf (HTML/JS/CSS), ikke et skeleton. Kilden som porteres: `CellScaffold::Resources/Views/palazzo_communale.leaf`, `CellScaffold::Public/js/palazzo-communale.js`, `CellScaffold::Public/css/palazzo-communale.css`. Referansebilde: `../images/palazzo-leaf-prod-v1.jpg`.

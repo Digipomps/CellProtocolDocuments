@@ -1,0 +1,93 @@
+{
+  "schema": "haven.bridge.session-handshake.contract.v1",
+  "status": "draft-for-G2",
+  "date": "2026-09-04",
+  "builds_on": "SproutPortholeAccessContract (CellScaffold/Sources/App/Services/SproutResolverCompatibility.swift:839) — resolver-signert, issuer-sjekket, endpoint-bundet, med expiry. Denne kontrakten gjelder sesjonsruten native-porthole/<pubId>/session og kanalåpninger over den.",
+  "decisions": {
+    "scopeModel": "Eget scope-felt; kontrakt uten scope når aldri /session (fail-closed, bare legacy-ruter). Besluttet av Kjetil 2026-09-04.",
+    "channelCapDefault": 64,
+    "socketLoss": "Klienten bygger broene på nytt; resumeFromSequence fjernes. Besluttet 2026-09-04.",
+    "cellProofFields": "Reservert som versjonerte, valgfrie felter; bevisene implementeres ikke i fase 2. Besluttet 2026-09-04."
+  },
+  "session": {
+    "description": "Valideres i shouldUpgrade før socketen aksepteres, med nøyaktig samme kjede som dagens per-celle-rute (signatur, expiry, issuer, bridge_endpoint, publisher-allowlist) pluss scope.",
+    "required": [
+      "contract_id",
+      "schema_version",
+      "issued_by",
+      "identity_public_key",
+      "client_kind",
+      "porthole_protocol",
+      "bridge_endpoint",
+      "issued_at",
+      "expires_at",
+      "scope"
+    ],
+    "fields": {
+      "schema_version": "haven.bridge.session-handshake.v1",
+      "issued_by": "resolverens public key (issuer-sjekk som i dag)",
+      "identity_public_key": "subjektets Ed25519-nøkkel; requester-identiteten kanalene knyttes til",
+      "bridge_endpoint": "eksakt .../native-porthole/<pubId>/session — binding som i dag",
+      "scope": {
+        "type": "object",
+        "required": ["channels"],
+        "channels": "liste av eksakte publiserte cellenavn sesjonen kan åpne kanal mot; tom liste = ingen kanaler kan åpnes",
+        "channelCap": "valgfri int; effektivt tak = min(scope.channelCap, vertens konfig). Vertens default: 64",
+        "note": "Kontrakt UTEN scope-felt avvises på /session med sessionScopeMissing. Wildcard finnes ikke i v1."
+      }
+    }
+  },
+  "channelOpen": {
+    "description": "Autorisasjonspunktet per logisk kanal (channelFactory). Kjøres for hver openChannel.",
+    "required": ["targetEndpoint"],
+    "validation": [
+      "publishedCellName(targetEndpoint) må være medlem av session.scope.channels (eksakt match)",
+      "aktive kanaler + 1 <= effektivt kanaltak",
+      "avslag er typed (channelRejected med kode) og lar øvrige kanaler på sesjonen leve"
+    ],
+    "reserved_optional_fields": {
+      "actorCell": {
+        "version": 1,
+        "status": "reservert — ikke implementert i fase 2",
+        "fields": {
+          "uuid": "kallende celles instans-UUID",
+          "typeName": "registrert typenavn",
+          "configDigest": "SHA-256 av CellConfiguration",
+          "signingKeyFingerprint": "fingerprint av cellens signeringsnøkkel",
+          "proof": "signatur over kanaltranskript + nonce (definert i v2)"
+        },
+        "semantics": "Erklærer hvilken celle som handler på requester-identitetens vegne. Gir ALDRI autoritet alene (jf. Celle_Autentisitet_Vurdering_2026-09-04.md §3: binding, ikke signatur, gjør jobben)."
+      }
+    }
+  },
+  "hostProof": {
+    "version": 1,
+    "status": "reservert — ikke implementert i fase 2",
+    "description": "Vertens svar på kanalåpning kan bære bevis for at målcellen er den forventede.",
+    "fields": {
+      "cellSigningKeyFingerprint": "målcellens nøkkel-fingerprint (pinnes hos klienten via Agreement/CellConfiguration)",
+      "transcriptSignature": "signatur over handshake-transkriptet, kanalbundet",
+      "nonce": "klientens nonce fra openChannel, mot replay"
+    }
+  },
+  "policy": {
+    "requireActorCellProof": false,
+    "requireHostCellProof": false,
+    "unknownOptionalFields": "ignoreres (fremoverkompatibilitet)",
+    "unknownSchemaVersion": "avvises typed",
+    "requiredFieldMissing": "avvises typed, fail-closed",
+    "note": "Når en policy setter require*=true uten at feltet finnes i kanalåpningen/svaret, avvises kanalen — feltreservasjonen er det som gjør dette mulig uten re-utstedelse av alle kontrakter (jf. A4 1.0.0→1.1.0)."
+  },
+  "typed_rejections": [
+    "sessionScopeMissing",
+    "sessionContractExpired",
+    "sessionIssuerMismatch",
+    "sessionEndpointMismatch",
+    "sessionSignatureInvalid",
+    "channelOutsideScope",
+    "channelCapExceeded",
+    "channelActorProofRequired",
+    "hostProofRequired",
+    "schemaVersionUnknown"
+  ]
+}
