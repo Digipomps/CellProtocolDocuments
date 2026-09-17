@@ -9,18 +9,63 @@ Oppgavemappe: `PDD_invitasjon-tillit_2026-09-15` · Opprettet 2026-09-15 · Iter
 
 > Vi må også ta opp igjen selve brukeropplevelsen av invite — finn gjerne ut om det finnes forskning på dette. Vi må lage - helst generelle konsepter - som for brukeren er tilitsvekkende, enkelt å bruke, forståelig, med en god hjelpechat, og skal kunne invitere både personer vi vet har en representasjon i HAVEN og dem som ikke har det.
 
-### 0.1 Den ene setningen som styrer resten
+### 0.1 Rettelse fra Kjetil 2026-09-17: det finnes en tredje vei
 
-«Personer **vi vet** har en representasjon i HAVEN» er den dyre delen av briefen, og den er dyr på en
-måte som ikke er åpenbar. For å vite det, må noen spørre — og et system som svarer på «finnes denne
-personen hos dere?» er en katalog. Forskningen under sier at en slik katalog ikke lar seg beskytte
-med hashing, og at den i praksis blir tømt. For en plattform hvis hele poeng er datasuverenitet er
-det en selvmotsigelse å drive den.
+Iterasjon 1 satte opp et valg mellom «katalog som lekker» og «ingen oppdagelse». Det var en falsk
+motsetning, og Kjetil har rettet den. Den avgjørende forskjellen er ikke *om* det finnes noe å slå
+opp i, men **hvem som la det ut**.
 
-Forslaget i dette dokumentet er derfor å snu spørsmålet: **medlemskap opplyses av mottakeren, ikke av
-plattformen.** Det gir samme resultat for brukeren i de tilfellene som betyr noe, og fjerner
-angrepet. Prisen er en vekstfunksjon vi da gir fra oss, og den prisen er §6.1 — et spørsmål til deg,
-ikke et valg jeg har tatt.
+«Personer vi vet har en representasjon i HAVEN» er dermed tre ting, ikke ett:
+
+1. **Folk du allerede har i egne entitetsdata.** Ingen spørsmål stilles til noen.
+2. **Folk som selv har lagt seg ut.** Brukeren publiserer matchingsmetadata i delte celler, og
+   eventuelt en referanse til en kontaktcelle der man kan sende en invitasjonsforespørsel — eller
+   chatte, om forespørselen godtas. Det annonseres i registre; DiMy kan være vert for slike registre,
+   og det er et av DiMys forretningsområder.
+3. **Folk en felles relasjon kan introdusere.** A vil nå B, men har ikke B. A og C er i en felles
+   relasjon i HAVEN, og C er i samme relasjon med B. Da kan A be C om metadata eller en
+   cellereferanse — **hvis alle i relasjonen er enige om at relasjonen brukes slik.**
+
+Det løser oppramsingsproblemet fra §0.3, men på en annen måte enn jeg foreslo. Angrepet mot hashet
+kontaktoppdagelse virker fordi tjenesten svarer på spørsmål om mennesker som aldri har sagt noe. Et
+register bygget av folk som la seg ut selv svarer bare på det de selv har lagt ut. Verste utfall er
+at noen finner det du valgte å gjøre finnbart.
+
+Til dette hører to prinsipper som gjelder hele oppgaven, og som er Kjetils ord:
+
+> Man skal aldri be om mer data enn det man trenger for å oppfylle ett formål, og man skal aldri gi
+> fra seg mer data enn det som trengs.
+
+og
+
+> Det fine med å få tilgang er at man ikke trenger å ta vare på alle disse dataene selv — men kan
+> bare spørre når man trenger det. Og man kan få synkronisert metadata med kilden så det er så
+> oppdatert som mulig.
+
+**Konsekvens: §6.1 i iterasjon 1 bortfaller.** Spørsmålet var om vi skulle gi fra oss «tolv av
+kontaktene dine er allerede her». Svaret er at vi beholder funksjonen for alle som har lagt seg ut,
+og aldri har den for dem som ikke har. Det er ikke et kompromiss — det er den riktige linjen, og den
+går mellom *publisert* og *ikke publisert*, ikke mellom *oppslag* og *ingen oppslag*.
+
+### 0.1b De tre tingene rettelsen ikke løser av seg selv
+
+Modellen er bedre enn min. Den fjerner ikke disse tre, og oppgaven må svare på dem.
+
+**Et register kan tømmes selv om alle i det er frivillige.** Å legge seg ut betyr å være *finnbar*,
+ikke å være *høstbar i bulk*. Et register som svarer «ja» på et endepunkt av gangen kan fortsatt
+itereres. Det som beskytter her er hva som publiseres og hvor fort det kan spørres — altså
+registerets egen politikk, ikke frivilligheten. Formål A1 og A2.
+
+**Venn-av-venn forteller noe om C og B, ikke bare om A.** Når A spør C om B, lærer C at A leter
+etter B. Svarer C, lærer A at C kjenner B. Kjetils vilkår — at alle i relasjonen må være enige — er
+nøyaktig riktig sted å håndtere det, og det gjør enigheten testbar: introduksjon er mulig bare
+innenfor en relasjon hvis avtale sier det, og bare for medlemmer av den. Formål A3.
+
+**«Spør når du trenger det» flytter lekkasjen, den fjerner den ikke.** Å slippe å lagre er en klar
+gevinst på oppbevaring. Prisen er at kilden ser hver gang du ser. En lokal kopi lekker lite om når du
+kikker og mye om hva du har liggende; et levende oppslag er motsatt. Det er en reell avveining, ikke
+en detalj — og den blir skarpere når verten er DiMy, altså vår egen kommersielle part. Formål A4, og
+§6.6.
 
 ### 0.2 Brief-audit
 
@@ -70,17 +115,24 @@ grunn at brukerne ikke hadde samtykket til påminnelsene ved registrering.
 
 ### 0.4 De generelle konseptene som følger
 
-Fire setninger. Resten av dokumentet er dem, gjort testbare.
+Fem setninger. Resten av dokumentet er dem, gjort testbare.
 
-1. **Ingen katalog å slå opp i.** Du får vite at noen er i HAVEN på tre måter: de har gitt deg en
-   peker, de svarer deg, eller noen dere begge kjenner introduserer dere. Ingen av dem er et spørsmål
-   til en server om et menneske.
-2. **Én invitasjon, to leveranser.** Det samme signerte objektet uansett hvem som mottar det.
+1. **Du kan bare finne det noen har lagt ut om seg selv.** Egne entitetsdata, selvpubliserte
+   registre, eller en introduksjon en felles relasjon har blitt enig om. Aldri et spørsmål til en
+   tjeneste om et menneske som ikke har sagt noe.
+2. **Spør heller enn å lagre.** Hent metadata når du trenger dem, synkronisert mot kilden, i stedet
+   for å bygge ditt eget arkiv om andre.
+3. **Minst mulig begge veier.** Aldri be om mer enn ett formål trenger. Aldri gi fra deg mer enn det
+   som trengs.
+4. **Én invitasjon, to leveranser.** Det samme signerte objektet uansett hvem som mottar det.
    Mottakerens medlemskap endrer *leveransen*, ikke *modellen*.
-3. **En invitasjon er en påstand om en annen.** Den bærer med seg hva jeg holder om dem, hvor det kom
-   fra, og en forpliktelse jeg ikke kan skru av.
-4. **Å si nei skal være like lett som å si ja.** Uten å registrere seg, og med virkning hos
+5. **Å si nei skal være like lett som å si ja.** Uten å registrere seg, og med virkning hos
    avsenderen.
+
+Konsept 3 fortjener en merknad: den er den eneste som ikke kan oppfylles av en flate alene. «Aldri be
+om mer enn formålet trenger» krever at forespørselen *bærer* formålet, og at den som svarer kan
+avvise et formål den ikke godtar. Det er `purpose://`-referansen som allerede finnes i
+tilgangsmodellen, brukt på oppslag.
 
 ## 1. Formålstre
 
@@ -88,7 +140,11 @@ Fire setninger. Resten av dokumentet er dem, gjort testbare.
 |---|---|---|---|---|---|
 | `purpose://contact.communication` | Contact and communication | — | Eksisterende rot: «kan kommunisere eller bli introdusert uten å eksponere private kontaktdata utenfor samtykke» | — | active (gjenbruk) |
 | `purpose://contact.introduction` | Contact introduction | `contact.communication` | Eksisterende: introduksjon forberedes/leveres uten å lekke privat kontaktinfo | — | active (gjenbruk) |
-| **A** `purpose://candidate.invite.no-directory-lookup` | Oppdagelse uten katalog | `contact.communication` | Ingen kan få vite om et menneske finnes i HAVEN ved å spørre systemet. Medlemskap opplyses av mottakeren selv, ved å svare. | Det finnes ingen kall som svarer på medlemskap for et endepunkt; oppramsingsforsøk avvises og logges. | candidate |
+| **A1** `purpose://candidate.invite.only-the-published-is-findable` | Bare det selvpubliserte er finnbart | `contact.communication` | Et oppslag kan aldri avsløre noe om et menneske som ikke selv har lagt det ut. Ingen kilde svarer på medlemskap for et endepunkt som ikke er publisert. | Negativ test: oppslag på et endepunkt som ingen har publisert gir samme svar som et som ikke finnes. | candidate |
+| **A2** `purpose://candidate.invite.register-is-a-host-not-an-owner` | Registeret er vert, ikke eier | `self-determination.data.recipients` | Den som er vert for et register — DiMy eller andre — lærer minst mulig av at oppslag skjer, kan ikke utlede sosiale grafer, og eier ingen av oppføringene. Bulkuthenting er begrenset og synlig. | Inspeksjon av hva verten kan se; ratetest som viser at iterasjon av registeret stanses. | candidate |
+| **A3** `purpose://candidate.invite.introduction-inside-an-agreed-relation` | Introduksjon bare der relasjonen er enig | `contact.introduction` | A kan be C om en vei til B bare når A, B og C er i samme relasjon, og relasjonens avtale sier at den kan brukes til introduksjon. C kan alltid la være å svare, uten at A får vite hvorfor. | Negativ test: samme forespørsel utenfor relasjonen, og i en relasjon uten introduksjonsavtale, avvises begge. | candidate |
+| **A4** `purpose://candidate.invite.ask-instead-of-keep` | Spør heller enn å lagre | `self-determination.data.duration` | Metadata om andre hentes ved behov og synkroniseres mot kilden, i stedet for å kopieres inn i egne entitetsdata. Det som likevel må lagres har en utløpsdato. | Test: en relasjon uten lokal kopi virker; en lokal kopi har utløp og hentes på nytt. | candidate |
+| **A5** `purpose://candidate.invite.minimum-both-ways` | Minst mulig begge veier | `self-determination.data.scope` | Hver forespørsel bærer ett formål og navngir feltene den trenger. Svaret inneholder bare de feltene. En forespørsel uten formål besvares ikke. | Negativ test: forespørsel uten `purpose://`, og forespørsel om felt utenfor formålet, avvises begge. Svaret telles felt for felt. | candidate |
 | **B** `purpose://candidate.invite.one-object-two-deliveries` | Én invitasjon, to leveranser | `contact.introduction` | Samme signerte invitasjon, enten mottakeren har entitet eller ikke. Bare transport og landingsflate skiller. | Samme invitasjons-id ender i samme aksept-/avslagstilstand gjennom begge veier. | candidate |
 | **C** `purpose://candidate.invite.claim-about-another` | Invitasjonen er en påstand om en annen | `self-determination.data` | Kontaktdata jeg holder om en ikke-medlem er merket som min uverifiserte påstand, med opphav, og kan kreves, rettes eller slettes av personen når de får egen entitet. | Importert post har `unconfirmed` + opphav; en kravflyt retter eller sletter den og etterlater spor. | candidate |
 | **D** `purpose://candidate.invite.minimum-for-the-send` | Minste datamengde invitasjonen trenger | `self-determination.data.scope` | Import for invitasjon persisterer bare det invitasjonen faktisk sendes til. Resten av adresseboken forlater aldri enheten. | Negativ test: fil med mange kolonner gir bare de feltene invitasjonen bruker i entitydata. | candidate |
@@ -285,13 +341,9 @@ listen er en del av det du godkjenner.
 
 Disse endrer treet. Jeg har skrevet hva jeg ville valgt, men ingen av dem er mine å avgjøre.
 
-**6.1 Gir vi fra oss «tolv av kontaktene dine er allerede her»?**
-Det er den mest effektive vekstfunksjonen som finnes, og den er uforenlig med formål A. Forskningen
-sier at hashing ikke redder den. Et mellomstandpunkt finnes: *gjensidig* oppdagelse — vis bare
-treff der begge har hverandre i adresseboken, noe Hagen m.fl. lister som en av mitigasjonene. Den
-lekker mindre, men den er fortsatt et oppslag, og den krever at vi holder noe om folk som ikke er
-her. **Min anbefaling: gi den fra oss, og si tydelig hvorfor i produktet — det er en av de få
-gangene et fravær kan bygge tillit.** Men dette er et produktvalg med en reell pris.
+**6.1 — bortfalt 2026-09-17.** Spørsmålet forutsatte at oppdagelse måtte være enten lekk eller
+fraværende. Kjetils modell i §0.1 gjør det til et spørsmål om hvem som la dataene ut, og da er svaret
+gitt. Erstattet av §6.6.
 
 **6.2 Hvilken identitet sender invitasjonen?**
 Kapittel 33 sier at domenebundne identiteter er pseudonymene. En invitasjon til en adressebokkontakt
@@ -314,7 +366,31 @@ Et avslag som er synlig for avsenderen røper at endepunktet er i bruk og at noe
 er usynlig gjør at avsenderen purrer. Jeg heller mot at avsenderen ser «besvart — ikke nå», uten
 skille mellom «avslått» og «aldri mer», og at gravsteinen virker i det stille.
 
+**6.6 Hva skal registerverten kunne se?**
+Dette er det viktigste nye spørsmålet, og det er skarpt fordi DiMy skal tjene penger på å være vert.
+Et register som besvarer oppslag ser hvem som spør om hva. Gjør den det over tid, har den den sosiale
+grafen — altså akkurat det HAVEN finnes for at ingen skal ha. Det finnes flere veier: verten ser
+bare at *noen med gyldig avtale* spurte og ikke hvem; oppslaget logges symmetrisk så den oppslåtte
+ser det like godt som verten; eller matchingen gjøres slik at verten ikke ser klartekst i det hele
+tatt. De koster ulikt, og det er et produkt- og forretningsvalg like mye som et teknisk. Jeg vil ikke
+foreslå én løsning før du har sagt hva verten skal ha lov til å vite.
+
+**6.7 Hva publiserer man egentlig om seg selv i et register?**
+E-postadressen i klartekst gjør deg finnbar for alle som gjetter den. En stabil, avledet verdi gjør
+deg finnbar bare for den som allerede har adressen. Et pseudonym per register gjør registrene
+ukoblbare fra hverandre. De tre gir helt ulik personvernprofil, og valget bør tas én gang og gjelde
+alle registre.
+
+**6.8 Hva ser C når A spør om B?**
+Kjetils vilkår sier at relasjonen må være enig. Men selve spørsmålet er også informasjon: at A leter
+etter B. Skal C se hvem som spør, eller bare at noen i relasjonen ber om en introduksjon? Og skal B
+få vite at A lette — enten straks, eller når en invitasjon faktisk kommer?
+
 ## 7. Revisjonslogg
 
 - 2026-09-15, iterasjon 0: opprettet av `purpose_dev.py new`.
 - 2026-09-15, iterasjon 1: formålstre, forskningsgrunnlag og åpne spørsmål skrevet. Venter på G1.
+- 2026-09-17, iterasjon 2: Kjetil rettet oppdagelsesmodellen. Formål A erstattet av A1–A5: bare det
+  selvpubliserte er finnbart; registeret er vert og ikke eier; introduksjon bare innenfor en relasjon
+  som er enig; spør heller enn å lagre; minst mulig begge veier. §6.1 bortfaller, tre nye åpne
+  spørsmål (6.6–6.8) om hva verten får se, hva man publiserer, og hva C ser. Venter fortsatt på G1.

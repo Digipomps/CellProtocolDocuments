@@ -22,3 +22,7 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
   påstand om en annen; nei skal være like lett som ja. Elleve formål (A–J + gjenbruk), fjorten
   avledede tester, fem åpne spørsmål. Avhenger av PDD_entitetsdata-egen-kontroll (filimport,
   genesis, signering) — den er forutsetning, ikke leveranse her. Venter på G1.
+- 2026-09-17: iterasjon 2. Kjetil rettet oppdagelsesmodellen: det finnes en tredje vei mellom
+  «katalog som lekker» og «ingen oppdagelse», og skillet går mellom publisert og ikke publisert.
+  Formål A erstattet av A1–A5. §6.1 bortfaller; tre nye åpne spørsmål om registerverten (DiMy),
+  hva man publiserer om seg selv, og hva C ser når A spør om B. Venter fortsatt på G1.
