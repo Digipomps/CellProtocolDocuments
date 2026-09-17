@@ -179,14 +179,16 @@ HTTP-grense faktisk skal dokumenteres for noen utenfor HAVEN.
 Kjetil gikk gjennom alle 253 elementene i `EntityData.review.schema.json` og besvarte hvert
 enkelt. Dette er beslutningene som endrer strukturen. **Ingen av dem er implementert i kode.**
 
-Beslutningene er ført inn i et eget skjema og eksempel, så det finnes en form å bygge mot:
+Beslutningene er ført inn i et eget skjema og eksempel, så det finnes en form å bygge mot.
+Alle filene ligger i `CellProtocol/Docs/EntityData-Review-2026-09-11/`:
 
-- `CellProtocol/Docs/EntityData-Review-2026-09-11/EntityData.v2.schema.json` — den besluttede
-  formen, JSON Schema Draft 2020-12
-- `CellProtocol/Docs/EntityData-Review-2026-09-11/EntityData.v2.example.json` — eksempel som
-  validerer mot den
-- `CellProtocol/Docs/EntityData-Review-2026-09-11/V2-BESLUTTET-FORM.md` — hva som endret seg
-  og hvorfor
+- `EntityData.v2.schema.json` — den besluttede formen, JSON Schema Draft 2020-12
+- `EntityData.v2.example.json` — eksempel som validerer mot den
+- `EntityRepresentation.v2.schema.json` — grafskjemaet for Perspective-nodene
+- `OPPDATERT-ETTER-GJENNOMGANG-2026-09-16.md` — hva som endret seg og hvorfor
+- `review-decisions-2026-09-16.json` — alle 45 kommentarene med status
+- `apply_decisions_2026_09_16.py` — bygger skjemaet reproduserbart fra v1-skjemaet og gjennomgangen
+- `validate_decisions_2026_09_16.py` / `TARGET-VALIDATION-2026-09-17.json` — kontrollene og resultatet
 
 v1-filene er beholdt ved siden av og beskriver fortsatt **dagens** lagring, altså det koden
 faktisk skriver. Fullt referat av beslutningene:
@@ -194,7 +196,7 @@ faktisk skriver. Fullt referat av beslutningene:
 
 | Område | Beslutning |
 |---|---|
-| Kontaktopplysninger | Enkeltfeltene `person.contact.email` og `person.contact.phone` utgår. **Endpoints** blir formen for alt: telefon, e-post, SoMe-nick, URL, cellereferanse. For flere av samme type brukes label (`primary`). |
+| Kontaktopplysninger | Skalarfeltene `person.contact.email` og `person.contact.phone` utgår. **Endpoints** er retningen for alt: telefon, e-post, SoMe-nick, URL, cellereferanse. De strukturerte `emails[]` og `phones[]` blir stående inntil forholdet deres til endpoints er avklart; `phones[].label = primary` viser foretrukket telefon. |
 | Relasjonenes kontakt | `relations.people[].contact.*` skal ha **samme struktur som person** — endpoints, ikke egne felter. |
 | `endpointCell` | Vurderes omdøpt til `cellReference`. |
 | Foretrukket kanal | `person.contact.preferredChannel` beholdes; dubletten i `person.preferences.communication.preferredChannel` utgår. |
@@ -211,7 +213,7 @@ faktisk skriver. Fullt referat av beslutningene:
 | `EntityRelationEvidence` | Erstattes av `proofs` med keypaths, som for egne bevis. |
 | `signedAgreementEntity.records` | Forblir en **liste**. Dictionary-formen ble vurdert og forkastet: et JSON-objekt har ingen rekkefølge, og posten er en revisjonskjede der «hva skjedde først» må bevares. |
 | `chronicle` | Legacy-initialiseringen med tomt objekt ryddes. |
-| `scaffoldPresence.staging` | For spesifikk for utviklingsmiljøet; erstattes av en generell form. |
+| `scaffoldPresence.staging` | For spesifikk for utviklingsmiljøet; tatt ut. Målskjemaet foreslår `scaffoldPresence.mounts` som generell form — et **forslag**, ikke en avgjort detaljkontrakt. |
 
 Dette står igjen som **ikke avgjort**:
 
