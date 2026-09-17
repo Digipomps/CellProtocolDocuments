@@ -1,6 +1,6 @@
 # Chapter 37 — EntityData
 
-Last verified against code: 2026-09-16
+Last verified against code: 2026-09-16 (v2-skjema lagt til 2026-09-17)
 
 Status: Struktur og nodemodell er kildebekreftet. Beslutningene i §7 er tatt av Kjetil
 16.09.2026, men er **ikke implementert** — de står her fordi et kapittel som beskriver
@@ -178,7 +178,19 @@ HTTP-grense faktisk skal dokumenteres for noen utenfor HAVEN.
 
 Kjetil gikk gjennom alle 253 elementene i `EntityData.review.schema.json` og besvarte hvert
 enkelt. Dette er beslutningene som endrer strukturen. **Ingen av dem er implementert i kode.**
-Fullt referat: `CellProtocol/Docs/EntityData-Review-2026-09-11/GJENNOMGANG_KJETIL_2026-09-16.md`.
+
+Beslutningene er ført inn i et eget skjema og eksempel, så det finnes en form å bygge mot:
+
+- `CellProtocol/Docs/EntityData-Review-2026-09-11/EntityData.v2.schema.json` — den besluttede
+  formen, JSON Schema Draft 2020-12
+- `CellProtocol/Docs/EntityData-Review-2026-09-11/EntityData.v2.example.json` — eksempel som
+  validerer mot den
+- `CellProtocol/Docs/EntityData-Review-2026-09-11/V2-BESLUTTET-FORM.md` — hva som endret seg
+  og hvorfor
+
+v1-filene er beholdt ved siden av og beskriver fortsatt **dagens** lagring, altså det koden
+faktisk skriver. Fullt referat av beslutningene:
+`CellProtocol/Docs/EntityData-Review-2026-09-11/GJENNOMGANG_KJETIL_2026-09-16.md`.
 
 | Område | Beslutning |
 |---|---|
