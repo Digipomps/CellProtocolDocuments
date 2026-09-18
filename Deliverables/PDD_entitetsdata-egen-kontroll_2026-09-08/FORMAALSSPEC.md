@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — entitetsdata egen kontroll
 
-Oppgavemappe: `PDD_entitetsdata-egen-kontroll_2026-09-08` · Opprettet 2026-09-08 · Iterasjon 4 · **G1 godkjent 2026-09-15** · venter på G1-GUI
+Oppgavemappe: `PDD_entitetsdata-egen-kontroll_2026-09-08` · Opprettet 2026-09-08 · Iterasjon 5 · **G1 godkjent 2026-09-15** · **G1-GUI godkjent 2026-09-15** · to nye blader venter på G1-delta
 
 > Regel: ingen plan før G1 er godkjent av Kjetil. For GUI: ingen implementering før G1-GUI (rendret bilde) er godkjent.
 > Et dokument om leveransen teller aldri som leveransen.
@@ -76,6 +76,8 @@ Rot for oppgaven er en eksisterende Book 23-node: **`purpose://self-determinatio
 | `purpose://candidate.entitetsdata.authorization-resolves-entity` | Autorisasjonen kjenner entiteten, ikke bare identiteten | `purpose://self-determination.data.recipients` | En mutasjon slippes gjennom når den forespurte Identiteten er en representant for den *Entiteten* som eier cellen — bevist med en lenkepost Entiteten har signert, innenfor godkjent identityDomain — og avvises ellers. I dag finnes entitetsmodellen i dataene og ikke i tilgangskontrollen. | `test.entitet.linked-identity-accepted`, `test.entitet.foreign-entity-refused` | candidate |
 | `purpose://candidate.entitetsdata.no-write-without-owner-proof` | Ingen andre kan endre mine entitetsdata | `purpose://self-determination.data.verifiability` | Feil identitet, usignert forslag, revokert modell, ukjent formål og direkte skriving utenom batch-veien blir alle avvist — bevist med negative tester, ikke med en policy-tekst. | `test.entitet.auth-negative` | candidate |
 | `purpose://candidate.entitetsdata.change-leaves-a-trace` | Hver endring etterlater spor | `purpose://self-determination.data.verifiability` | Hver akseptert endring ligger i chronicle med hvem som signerte, hva som ble endret, og hvilken modell som eventuelt foreslo det. | `test.entitet.trace` | candidate |
+| `purpose://candidate.entitetsdata.owner-brings-their-own-model` | Eieren kobler på sin egen modell | `purpose://self-determination.data.recipients` | Brukeren kan knytte eget abonnement eller egen API-nøkkel til gatewayen i appen. Nøkkelen ligger eier-scopet innenfor entiteten, brukes bare til ruter eieren har erklært, og kan fjernes uten at noe annet mister tilgang. | `test.entitet.own-key-scoped`, `test.entitet.key-removal-is-complete` | **ny, venter G1-delta** |
+| `purpose://candidate.entitetsdata.every-model-path-is-declared` | Hver modellvei er erklært, også Apples | `purpose://self-determination.data.locality` | Ingen modell nås utenom gatewayen. Apple Intelligence erklæres som egne ruter — på enheten, Private Cloud Compute, og tredjepart gjennom Apple — hver med sin egen påstand om hvor data havner. Ingen stille eskalering mellom dem. | `test.entitet.no-model-outside-gateway`, `test.entitet.no-silent-escalation` | **ny, venter G1-delta** |
 | `purpose://candidate.entitetsdata.surface-offers-three-ways` | Flaten tilbyr faktisk de tre veiene | `purpose://skeleton.owner-entity-access` | Filopplasting, AI-forslag og direkte redigering er alle synlige og nåbare på flaten — ikke bare implementert. | `test.skeleton.purpose-actions-reachable` | candidate |
 
 Nye noder er navngitt her, ikke av en modell (`lesson.decomposition-is-classification`). Seks av ni foreldre er eksisterende Book 23-noder.
@@ -97,6 +99,112 @@ Hva dette IKKE er:
 | `SkeletonFileUpload` med `supportsDrop` | `AttachmentSurface.swift:292` | Rendereren sender kortlivet payload; mål-cellen må validere type/størrelse selv. | Ja — for formål A |
 | Flatereachability | `SkeletonReachabilityAudit` | Finner elementer som aldri kan sees. Sier ikke om handlingen gjør riktig ting. | Ja — for formål H |
 | **Entiteten som eierenhet i autorisasjonen** | `IdentityLinkingModels.swift`; `EntityAnchorCell`; `GeneralCell.validateIdentityUniqueOwner` | **Åpent hull.** Modellen finnes i dataene, ikke i tilgangskontrollen. Uten den leser autorisasjonen en annen Identitet av samme Entitet som en fremmed — derfor kan «umulig for andre» i dag også bety «umulig for meg selv fra en annen identitet». | Ja — `test.entitet.linked-identity-accepted` |
+
+## 2A. Rettelser og avklaringer 2026-09-18
+
+Tre ting fra Kjetil. Den første retter noe jeg skrev feil, den andre lukker et hull jeg meldte åpent,
+den tredje legger til to blader — og bare de to trenger en ny nikk (§6.4).
+
+### 2A.1 Rettelse: et scaffold er ikke én entitet
+
+I iterasjon 2 skrev jeg at «alt på et scaffold tilhører én Entitet inntil Entiteten gir en annen
+Entitets Identitet tilgang». **Det var en misforståelse.** Den faktiske modellen, med Kjetils ord:
+
+> Scaffolds som HAVEN app er personlige enheter hvor eieren av enheten sannsynligvis er eier av
+> cellene som kjører der — men selv her er det mulig å invitere andre inn og la dem instansiere
+> celler de kan eie. I et scaffold kjørt som en skytjeneste er det viktig at en entitet tar
+> admin-rettigheter når scaffoldet blir startet førstegang slik at noen i det hele tatt kan få
+> tilgang til admin-cellene og gi andre tilgang. Men den entiteten har ikke mulighet til å gå inn i
+> celler eid av identiteter i andre entiteter.
+
+Tre ting følger, og de er ikke nyanser:
+
+1. **Et scaffold er et sted flere entiteter kan ha celler.** «Sannsynligvis én eier» er en statistisk
+   observasjon om personlige enheter, ikke en invariant. Å invitere noen inn og la dem instansiere en
+   celle de eier er normal bruk, ikke et unntak for midlertidige vertsceller slik jeg skrev.
+2. **Admin er en rolle på scaffoldet, ikke eierskap til innholdet.** En skytjeneste trenger at noen
+   tar admin ved første oppstart, ellers kommer ingen inn i admin-cellene. Det gir makt over
+   scaffoldet — hvem som slipper til — og ingen makt over cellene andre eier der.
+3. **Grensen går ved cellen, ikke ved scaffoldet.** Admin kan ikke gå inn i en celle eid av en
+   identitet i en annen entitet. Det er den samme grensen som `no-write-without-owner-proof`
+   beskriver, og den gjelder også mot den som eier maskinen.
+
+Punkt 3 er skarpere enn det høres ut: det betyr at «jeg eier serveren» aldri er en tilgangsgrunn, og
+at admin-rollen må kunne vises frem som *begrenset* — ellers er skyscaffoldet bare en vanlig
+skytjeneste med finere ord. Det fortjener sin egen negative test, og den er lagt inn i §5 som
+`test.entitet.admin-cannot-enter-foreign-cell`.
+
+### 2A.2 Hullet lukkes: IdentityLink er beviset
+
+Iterasjon 2 meldte `authorization-resolves-entity` som et åpent hull — «modellen finnes i dataene,
+ikke i tilgangskontrollen». Kjetil peker på mekanismen: **IdentityLink kan brukes som bevis, for
+eksempel i en Agreement.**
+
+Den finnes allerede, og den har akkurat de feltene som trengs
+(`CellProtocol/Sources/CellBase/Identity/IdentityLinkingModels.swift:290`):
+
+| Felt | Hva det gjør for oss |
+|---|---|
+| `linkedIdentity` (offentlig nøkkel) | Hvem som faktisk signerte |
+| `entityBinding` (`localEntityAnchor` / `pairwise` / `blinded`) | Hvilken Entitet identiteten hører til |
+| `approvedDomains`, `approvedIdentityContexts` | Om denne identiteten får opptre i denne sammenhengen |
+| `approvedScopes` | Hva den får gjøre |
+| `issuerIdentityUUID`, `issuerType` | Hvem i entiteten som utstedte lenken |
+| `status`, `revokedAt`, `revocationReference` | Om lenken fortsatt gjelder |
+
+En avtale kan da navngi en `linkID` i stedet for en naken identitets-UUID, og motparten avgjør i fire
+skritt: signaturen stammer fra `linkedIdentity.publicKey`; lenken er `.active` og ikke revokert;
+handlingen ligger i `approvedScopes` og domenet i `approvedDomains`; og `entityBinding` løser til den
+Entiteten avtalen faktisk er med. Da er oppstartsidentiteten og Face ID-identiteten to representanter
+for samme Entitet også *i tilgangskontrollen*, ikke bare i dataene.
+
+`EntityAnchorCell` holder allerede `identityLinks` med `approveEnrollment`, `completeEnrollment` og
+`revoke` (`CellScaffold`-siden, `EntityAnchorCell.swift:292-301`). Det som mangler er at
+autorisasjonsveien *slår opp i den*. Formålet står uendret; det er ikke lenger uten mekanisme.
+
+`pairwise` og `blinded` er verdt å merke seg utover denne oppgaven: de lar en identitet bevise
+entitetstilhørighet uten å avsløre hvilken entitet det er generelt. Det er nøyaktig det
+invitasjonsoppgavens §6.7 leter etter for registre.
+
+### 2A.3 AIGateway i appen, egne nøkler, og Apple Intelligence
+
+Kjetil: gatewayen må være til stede i appen også, og det må være brukerens eget valg å koble på egne
+AI-abonnementer eller API-nøkler.
+
+Hva som finnes i dag:
+
+- `AIGatewayCell` er bygget og omfattende, men bare i **CellScaffold**
+  (`Sources/App/Cells/AI/AIGatewayCell.swift`, 3462 linjer). Den har allerede rutemodell med
+  `providerID`, `model`, `baseURL` og `apiKeyAlias`, en `OwnerScopedCredentialStore` for
+  eier-scopede nøkler, en egress-policy med hvitelistede endepunkter, og `localLoopback` som egen
+  transport for lokale modeller. **Nøkkelmekanismen Kjetil ber om finnes altså allerede** — den bor
+  bare på feil side.
+- I **Binding** finnes `AIGateway` bare som tekst i konfigurasjonsbeskrivelser. Det er ingen celle.
+  `ConferenceAIAssistantGatewayProxyCell` peker på en `cell:///AIGateway` som ikke er registrert
+  lokalt, og faller tilbake til staging-serveren.
+- `AppleIntelligenceCell` finnes i **CellApple** (1464 linjer) og går **utenom gatewayen** helt.
+
+Det siste er svaret på spørsmålet ditt, og jeg mener ja — men ikke av symmetrihensyn.
+
+**Hvorfor ja:** en modellvei som ikke går gjennom gatewayen har ingen tillitserklæring i
+`trustedModels`, ingen formålsbinding, ingen plass i chronicle, og går ikke gjennom foreslå-så-signer.
+Det er et unntak av nøyaktig den formen som senere blir hullet. Er den erklært, kan påstanden
+«kjører på enheten, forlater ikke entiteten» *stå skrevet* og revideres, i stedet for å være noe alle
+antar.
+
+**Hvorfor det ikke er triviell symmetri:** gatewayens egress-policy kan ikke se Apple Intelligence i
+det hele tatt. `AIGatewayEndpointTransport` har to verdier, `localLoopback` og `remoteTLS`
+(`AIGatewaySupport.swift:668`), og begge er kall *vi* gjør og dermed kan kontrollere. Apple
+Intelligence er et rammeverkskall i prosessen, og det er Apple — ikke vi — som avgjør om det blir
+liggende på enheten eller går videre til Private Cloud Compute. Legger vi til en tredje transport
+uten å si dette, later vi som vi har en kontroll vi ikke har.
+
+Derfor: én rute per *vei*, ikke én per leverandør. Apple Intelligence er tre forskjellige
+personvernpåstander — modell på enheten, Private Cloud Compute, og en tredjepartsmodell nådd gjennom
+Apple — og de skal erklæres hver for seg. Og gatewayen skal aldri falle stille tilbake fra en vei til
+en annen; en eskalering fra enhet til sky er en annen erklæring, og krever eierens ja.
+
+Det gir to nye blader i §1, og de to er det eneste i denne iterasjonen som trenger en ny nikk.
 
 ## 3. Forventningskontrakt — «Det du kommer til å se»
 
@@ -126,6 +234,11 @@ Hva dette IKKE er:
 | `test.entitet.untrusted-model-refused` | command | Modell utenfor `trustedModels`, og revokert modell, avvises begge. | Negativ XCTest. | `TESTRESULT.md#auth` |
 | `test.entitet.gateway-owned` | inspection | `AIGateway` er `identityUnique`, eid av privat identitet, og nøkler ligger ikke utenfor entiteten. | Registreringssjekk + kildeinspeksjon. | `ACCEPT.md#gateway` |
 | `test.entitet.auth-negative` | command | Feil requester, feil keypath, `purpose://prompt.unknown`, direkte skriving utenom batch — alle avvist. | `pkg.std.cell-contract`. | `TESTRESULT.md#auth` |
+| `test.entitet.admin-cannot-enter-foreign-cell` | command | En entitet med admin på scaffoldet kommer ikke inn i en celle eid av en identitet i en annen entitet — verken lesing eller skriving. | Negativ XCTest mot et scaffold med to entiteter. | `TESTRESULT.md#auth` |
+| `test.entitet.own-key-scoped` | command | Eierens egen nøkkel brukes bare til ruter eieren har erklært, og er ikke lesbar for andre celler. | Negativ/positiv XCTest mot gatewayen i Binding. | `TESTRESULT.md#gateway` |
+| `test.entitet.key-removal-is-complete` | command | Fjernet nøkkel etterlater ingen brukbar rest; neste kall feiler med manglende hemmelighet. | XCTest. | `TESTRESULT.md#gateway` |
+| `test.entitet.no-model-outside-gateway` | inspection | Ingen kodesti når en modell utenom gatewayen — `AppleIntelligenceCell` inkludert. | Kildeinspeksjon + registreringssjekk. | `ACCEPT.md#gateway` |
+| `test.entitet.no-silent-escalation` | command | En rute erklært «på enheten» eskalerer ikke til sky uten eierens ja; forsøket avvises og logges. | Negativ XCTest. | `TESTRESULT.md#negative` |
 | `test.entitet.trace` | command | Hver akseptert endring finnes i chronicle med signatur og modellreferanse. | XCTest. | `TESTRESULT.md#trace` |
 | `test.skeleton.purpose-actions-reachable` | inspection | De tre veiene inn finnes i `reachableActionKeypaths`. | `SkeletonReachabilityAudit`. | `ACCEPT.md#ways-in` |
 | `test.skeleton.no-unreachable-elements` | command | Ingen flate skjuler egne veier inn. | `testNoLocalSurfaceHidesItsOwnWaysIn`. | `TESTRESULT.md#reachability` |
@@ -263,10 +376,35 @@ Fortsatt åpent:
 
 ## 6. Åpne spørsmål til Kjetil
 
-1.
+**6.1 — besvart 2026-09-18.** Scaffold-eierskap. Se §2A.1. Min formulering fra iterasjon 2 var feil
+og er rettet.
+
+**6.2 — besvart 2026-09-18.** Hvordan autorisasjonen skal kjenne entiteten. Svar: `IdentityLink` som
+bevis, se §2A.2. Mekanismen finnes; det som gjenstår er at autorisasjonsveien slår opp i den.
+
+**6.3 — besvart 2026-09-18.** AIGateway i appen med egne nøkler. Ja, og nøkkelmekanismen finnes
+allerede i CellScaffold-gatewayen — den skal flyttes, ikke oppfinnes. Se §2A.3.
+
+**6.4 To nye blader trenger en nikk.** `owner-brings-their-own-model` og
+`every-model-path-is-declared` kom til etter at G1 ble godkjent. Resten av treet står uendret. Sier du
+ja til de to, er G1 hel igjen og jeg kan skrive PLAN.md.
+
+**6.5 Hvor mange Apple Intelligence-ruter, egentlig?**
+Jeg foreslår tre — på enheten, Private Cloud Compute, tredjepart gjennom Apple — fordi de gir tre
+ulike svar på hvor dataene havner. Men jeg vet ikke om rammeverket lar oss *velge* vei, eller bare
+observere hvilken som ble brukt. Kan vi ikke velge, må erklæringen for «på enheten» si at den ikke er
+håndhevbar av oss, og da er spørsmålet om vi skal tilby den i det hele tatt. Det må undersøkes mot
+Apples dokumentasjon før G2.
+
+**6.6 Skal admin-rollen kunne vises frem?**
+Hvis «jeg eier serveren» ikke er en tilgangsgrunn, bør en bruker kunne se nøyaktig hva admin på
+scaffoldet *kan* — ellers må de ta det på tro. En lesbar, begrenset admin-erklæring per scaffold er
+mer arbeid, men det er den eneste måten påstanden blir etterprøvbar. Egen oppgave, eller hører den
+hjemme her?
 
 ## 7. Revisjonslogg
 
 | Iterasjon | Dato | Hva endret seg | Hvem |
 |---|---|---|---|
+| 5 | 2026-09-18 | Kjetil rettet scaffold-eierskapsmodellen: et scaffold er et sted flere entiteter kan ha celler, admin er en rolle over scaffoldet og ikke over innholdet, og grensen går ved cellen. `IdentityLink` pekt ut som beviset som lukker `authorization-resolves-entity`. To nye blader om egne nøkler og erklærte modellveier, inkludert Apple Intelligence — de venter på G1-delta. Fem nye negative tester. | Kjetil / Claude |
 | 0 | 2026-09-08 | Opprettet | Losen |

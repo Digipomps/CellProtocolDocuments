@@ -74,6 +74,20 @@ må avgjøres før noen skriver Swift — og den etterlater ett tall vi ikke har
 | Konstant minnebruk i Swift med samme form | **unavailable** — ikke målt, se §6.1 | — |
 | En celleendring i entitetsdata krever eiersignatur | **retrieved** — G1 godkjent 2026-09-15 | `PDD_entitetsdata-egen-kontroll_2026-09-08` |
 
+### 0.4b Bekreftet av Kjetil 2026-09-18
+
+> Det du sier om Grid er at den er mer egnet for flater mens tabell er det riktige verktøyet for å
+> vise tabell. Høres logisk ut - jeg er for.
+
+Det er delingen jeg foreslo, sagt kortere enn jeg klarte: **`Grid` er et layoutverktøy for flater,
+og et ark er verktøyet for å vise tabell.** Det avgjør §0.5 under — grensen mellom `List` og `Sheet`
+— og det avgjør at `Grid` ikke skal bygges ut til å bli en halv tabell. F1a i
+`SKELETON_UTVIDELSESFORSLAG_2026-09-15.md` (la overskriftsrad og dynamiske rader leve i samme `Grid`)
+står fortsatt, fordi det er en layoutsak. F1b — kolonner på `List` — hører til tabellsiden og
+behandles her.
+
+Retningen er dermed godkjent. Selve formålstreet venter fortsatt på G1.
+
 ### 0.5 Grensen mot `List` — to ting, ikke ett
 
 Det er fristende å la ett element dekke begge behov. Det bør det ikke.
@@ -303,5 +317,7 @@ formålsoppgave nå, eller vente til arket står?
 ## 7. Revisjonslogg
 
 - 2026-09-17, iterasjon 0: opprettet av `purpose_dev.py new`.
+- 2026-09-18: Kjetil bekreftet delingen — Grid for flater, ark for tabell. Retningen godkjent;
+  formålstreet venter fortsatt på G1.
 - 2026-09-17, iterasjon 1: prototype bygget og målt, formålstre skrevet. Retter mitt eget F1b-forslag
   fra 15.09: SwiftUI `Grid` måler alle barn og kan ikke brukes til et ark. Venter på G1.

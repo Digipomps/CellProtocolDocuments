@@ -26,3 +26,6 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
   «katalog som lekker» og «ingen oppdagelse», og skillet går mellom publisert og ikke publisert.
   Formål A erstattet av A1–A5. §6.1 bortfaller; tre nye åpne spørsmål om registerverten (DiMy),
   hva man publiserer om seg selv, og hva C ser når A spør om B. Venter fortsatt på G1.
+- 2026-09-18: iterasjon 3. §6.1 besvart: overlappet regnes ut inne i entiteten av en modell eieren
+  eier og kjører privat, aldri ved å spørre en tjeneste, og aldri ut av en celle andre eier — men
+  det er lov å be om tilgang til å spørre. Nytt formål A6 med tre negative tester. §6.6–6.8 står.

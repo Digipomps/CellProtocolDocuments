@@ -22,21 +22,30 @@ fargede meldingsbokser og seksjonsoverskrifter — alt fra `FileUpload` (med `su
 `cornerRadius`, `borderColor`, `shadowRadius`, `foregroundColor`, `fontStyle`, `fontSize`,
 `fontWeight`, `padding`.
 
-## Dette forfalsker bildene — les før godkjenning
+## RENDERINGSERKLÆRING
+
+Bildene er mockups, ikke Porthole-preview. Derfor står det her hva skjelettet **ikke** kan rendre slik
+bildene viser det. Denne listen er artefaktet G1-GUI hviler på i stedet for `skeleton/`, og den er
+etterprøvd mot kildekoden 2026-09-15 — to av punktene var opprinnelig feil og er rettet.
 
 1. **Tabellene.** Det finnes ingen `Table`. Radene i kolonnetolkningen, entitetsdata-listen og
    forslagsdiffen er `List`-rader, altså `VStack` per rad. Kolonnejustering må gjøres med `HStack`
    og faste bredder, eller `Grid` med `fixed`-kolonner. Den rene kolonnejusteringen i bildene er
    ikke oppnåelig som vist — forvent rader som brytes, eller et strammere `Grid` med mindre
    kontroll over bredder.
-2. **Monospace på keypaths.** `SkeletonModifiers` har `fontStyle`, `fontSize` og `fontWeight`, men
-   ingen dokumentert skrifttypefamilie. Den blå monospacen er uverifisert; hvis rendereren ikke
-   støtter den, blir keypaths vanlig tekst i en annen farge.
+2. **Monospace på keypaths.** Bekreftet mangel. `fontStyle` går gjennom `fontFromStyle`
+   (`SkeletonView.swift:16`) til de elleve semantiske `Font`-rollene, og `fontSize` gir
+   `.system(size:weight:)` uten `design:`-parameteren (`:1693`). Det finnes ingen vei til
+   `.monospaced`. Keypaths blir vanlig tekst i en annen farge. Foreslått som `fontDesign` i
+   `SKELETON_UTVIDELSESFORSLAG_2026-09-15.md` F2.
 3. **Chat-boblene.** `cornerRadius` er én verdi — de asymmetriske hjørnene finnes ikke. Og
    maksbredde i prosent (76 % / 86 %) er ikke i modifier-listen; `width` og `maxWidthInfinity`
    finnes, prosent gjør det ikke.
-4. **Understreket lenke inne i en setning** («eller *velg en fil*»). `Text` har `url`, men blandet
-   styling inne i én streng finnes ikke. Blir enten hele setningen som lenke, eller en egen knapp.
+4. **~~Blandet styling inne i én setning~~ — dette var min feil, det finnes.**
+   `styleRole: "markdown"` kjører teksten gjennom `AttributedString(markdown:)` med
+   `interpretedSyntax: .full` (`SkeletonView.swift:1667, 1722`). Uthevet tekst midt i en setning
+   virker, med riktig linjebryting. **Men:** markdown slås av så snart teksten har en lokalisering
+   (`:1723`), så en oversatt streng mister uthevingen og viser stjernene. Meldt som F5b.
 5. **De nummererte stegene** i forseglingsbildet har en smal førstekolonne. Gjøres med `HStack` og
    fast bredde; justeringen blir omtrentlig.
 

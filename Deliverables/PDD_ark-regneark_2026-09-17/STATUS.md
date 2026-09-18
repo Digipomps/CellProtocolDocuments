@@ -20,3 +20,5 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
   celler i DOM og 9,5 MB heap fra 1 000 til 250 000 rader, median tegnetid 2,3–3,6 ms. Retter mitt
   eget F1b-forslag fra 15.09 — SwiftUI Grid måler alle barn og duger ikke til et ark. Flaskehalsen
   er datakontrakten: getItems() henter hele settet. Tre bilder levert for G1-GUI. Venter på G1.
+- 2026-09-18: Kjetil bekreftet delingen — Grid er et layoutverktøy for flater, ark er verktøyet for
+  å vise tabell. Retningen godkjent. Formålstreet venter fortsatt på G1.

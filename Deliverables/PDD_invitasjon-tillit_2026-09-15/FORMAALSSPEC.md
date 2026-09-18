@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — invitasjon og tillit
 
-Oppgavemappe: `PDD_invitasjon-tillit_2026-09-15` · Opprettet 2026-09-15 · Iterasjon 1 (ikke godkjent)
+Oppgavemappe: `PDD_invitasjon-tillit_2026-09-15` · Opprettet 2026-09-15 · Iterasjon 3 (ikke godkjent)
 
 > Regel: ingen plan før G1 er godkjent av Kjetil. For GUI: ingen implementering før G1-GUI (rendret bilde) er godkjent.
 > Et dokument om leveransen teller aldri som leveransen.
@@ -144,6 +144,7 @@ tilgangsmodellen, brukt på oppslag.
 | **A2** `purpose://candidate.invite.register-is-a-host-not-an-owner` | Registeret er vert, ikke eier | `self-determination.data.recipients` | Den som er vert for et register — DiMy eller andre — lærer minst mulig av at oppslag skjer, kan ikke utlede sosiale grafer, og eier ingen av oppføringene. Bulkuthenting er begrenset og synlig. | Inspeksjon av hva verten kan se; ratetest som viser at iterasjon av registeret stanses. | candidate |
 | **A3** `purpose://candidate.invite.introduction-inside-an-agreed-relation` | Introduksjon bare der relasjonen er enig | `contact.introduction` | A kan be C om en vei til B bare når A, B og C er i samme relasjon, og relasjonens avtale sier at den kan brukes til introduksjon. C kan alltid la være å svare, uten at A får vite hvorfor. | Negativ test: samme forespørsel utenfor relasjonen, og i en relasjon uten introduksjonsavtale, avvises begge. | candidate |
 | **A4** `purpose://candidate.invite.ask-instead-of-keep` | Spør heller enn å lagre | `self-determination.data.duration` | Metadata om andre hentes ved behov og synkroniseres mot kilden, i stedet for å kopieres inn i egne entitetsdata. Det som likevel må lagres har en utløpsdato. | Test: en relasjon uten lokal kopi virker; en lokal kopi har utløp og hentes på nytt. | candidate |
+| **A6** `purpose://candidate.invite.overlap-is-inferred-inside` | Overlappet regnes ut inne i entiteten | `candidate.invite.only-the-published-is-findable` | «Tolv av kontaktene dine er allerede her» kommer av at en modell *eieren eier og kjører innenfor egen entitet* sammenligner det eieren allerede har med registre eieren har tilgang til. Ingen tjeneste blir spurt hvem som er medlem. Resonneringen kan aldri lese ut av en celle en annen eier — men den kan be om tilgang til å spørre. | `test.invite.overlap-is-local`, `test.invite.no-read-from-foreign-cell`, `test.invite.access-request-is-visible` | candidate |
 | **A5** `purpose://candidate.invite.minimum-both-ways` | Minst mulig begge veier | `self-determination.data.scope` | Hver forespørsel bærer ett formål og navngir feltene den trenger. Svaret inneholder bare de feltene. En forespørsel uten formål besvares ikke. | Negativ test: forespørsel uten `purpose://`, og forespørsel om felt utenfor formålet, avvises begge. Svaret telles felt for felt. | candidate |
 | **B** `purpose://candidate.invite.one-object-two-deliveries` | Én invitasjon, to leveranser | `contact.introduction` | Samme signerte invitasjon, enten mottakeren har entitet eller ikke. Bare transport og landingsflate skiller. | Samme invitasjons-id ender i samme aksept-/avslagstilstand gjennom begge veier. | candidate |
 | **C** `purpose://candidate.invite.claim-about-another` | Invitasjonen er en påstand om en annen | `self-determination.data` | Kontaktdata jeg holder om en ikke-medlem er merket som min uverifiserte påstand, med opphav, og kan kreves, rettes eller slettes av personen når de får egen entitet. | Importert post har `unconfirmed` + opphav; en kravflyt retter eller sletter den og etterlater spor. | candidate |
@@ -331,6 +332,9 @@ listen er en del av det du godkjenner.
 | `test.invite.no-second-message` | command | Ingen jobb, timer eller regel kan sende melding nr. 2. | Negativ XCTest + inspeksjon av planlagte jobber. | E | `TESTRESULT.md#negative` |
 | `test.invite.tombstone-survives-reimport` | command | Etter «aldri mer» kan samme person ikke inviteres av en ny import av samme fil. | XCTest: importer, avslå, importer igjen. | E, F | `TESTRESULT.md#invite` |
 | `test.invite.decline-without-entity` | command | Avslagsveien fullføres uten at det opprettes noen entitet eller identitet. | XCTest + negativ sjekk på at ingenting ble forseglet. | F | `TESTRESULT.md#negative` |
+| `test.invite.overlap-is-local` | command | Overlappberegningen gjør ingen forespørsel som spør om medlemskap; alt den bruker er data eieren allerede har tilgang til. | Nettverks- og resolverfelle rundt beregningen. | A6 | `TESTRESULT.md#negative` |
+| `test.invite.no-read-from-foreign-cell` | command | Modellen når ikke inn i en celle eid av en identitet i en annen entitet, heller ikke via omveier. | Negativ XCTest med to entiteter. | A6 | `TESTRESULT.md#negative` |
+| `test.invite.access-request-is-visible` | command | En forespørsel om å få gjøre spørringer er en synlig handling som kan avslås, ikke et stille oppslag. | XCTest + flatetest. | A6 | `TESTRESULT.md#invite` |
 | `test.invite.shown-equals-held` | command | Feltlisten mottakeren ser er nøyaktig den som er persistert. | XCTest sammenligner to lister. | G | `TESTRESULT.md#claim` |
 | `test.invite.acceptance-two-envelopes` | command | Aksept gir én `entity.batchPersist` per entitet, ingen skriving uten eierbevis. | XCTest som kap. 18 fase 4. | H | `TESTRESULT.md#trace` |
 | `test.invite.chat-cannot-act` | inspection | Hjelpechattens handlingskeypaths inneholder ingen send, aksept eller avslag. | `SkeletonReachabilityAudit.reachableActionKeypaths` + kontraktsinspeksjon. | I | `ACCEPT.md#help-chat` |
@@ -341,9 +345,34 @@ listen er en del av det du godkjenner.
 
 Disse endrer treet. Jeg har skrevet hva jeg ville valgt, men ingen av dem er mine å avgjøre.
 
-**6.1 — bortfalt 2026-09-17.** Spørsmålet forutsatte at oppdagelse måtte være enten lekk eller
-fraværende. Kjetils modell i §0.1 gjør det til et spørsmål om hvem som la dataene ut, og da er svaret
-gitt. Erstattet av §6.6.
+**6.1 — besvart 2026-09-18.** Ja, vi beholder «tolv av kontaktene dine er allerede her», og Kjetil
+har sagt hvor regnestykket hører hjemme:
+
+> Butler eller ev. avledet chat fra butler som er eid av brukeren og kjørt innenfor privat entitet —
+> kan resonnere seg frem til at identiteter i en gruppe overlapper med identiteter / entiteter i
+> private registre. Men det kan aldri gå fra en celle eid av noen andre. (Skjønt det er lov å spørre
+> om tilgang til å gjøre spørringer.)
+
+Det er en annen maskin enn den jeg beskrev i iterasjon 1, og den er bedre. Funksjonen er ikke et
+oppslag som sendes ut; den er en **slutning som trekkes inne**, av en modell eieren eier, på materiale
+eieren allerede har lov til å se. Ingen tjeneste får spørsmålet «hvem av disse er medlem». Og at det
+er *lov å be om tilgang* holder veien åpen: en forespørsel om å få spørre er selv en synlig handling
+som noen kan si nei til, i motsetning til et stille oppslag.
+
+Tre ting følger som må håndheves, ikke bare skrives:
+
+1. **Resonneringen leser aldri ut av en celle en annen eier.** Grensen går ved cellen, og den gjelder
+   modellen like fullt som brukeren. Har eieren tilgang, kan modellen bruke den; har eieren det ikke,
+   finnes det ingen omvei gjennom «AI-en så det».
+2. **Resultatet er en slutning, ikke et faktum om den andre.** «Sannsynligvis samme person» er noe
+   *jeg* har kommet frem til om Vegar. Det er entitetsdataene mine, med opphav og usikkerhet, og det
+   hører under formål C på lik linje med en importert rad.
+3. **Modellen som gjør dette må ikke kunne sende noe.** En modell som ser adresseboken og alle
+   registrene du har tilgang til kan utlede en sosial graf. Inne i entiteten er det riktig sted for
+   den. Prisen er at nettopp den modellen aldri må kunne nå ut — som er det
+   `every-model-path-is-declared` i entitetsdata-oppgaven finnes for.
+
+Nytt formål A6. §6.6–6.8 står fortsatt.
 
 **6.2 Hvilken identitet sender invitasjonen?**
 Kapittel 33 sier at domenebundne identiteter er pseudonymene. En invitasjon til en adressebokkontakt
@@ -390,6 +419,9 @@ få vite at A lette — enten straks, eller når en invitasjon faktisk kommer?
 
 - 2026-09-15, iterasjon 0: opprettet av `purpose_dev.py new`.
 - 2026-09-15, iterasjon 1: formålstre, forskningsgrunnlag og åpne spørsmål skrevet. Venter på G1.
+- 2026-09-18, iterasjon 3: §6.1 besvart. Overlappet regnes ut inne i entiteten av en modell eieren
+  eier — aldri ved å spørre en tjeneste, og aldri ut av en celle andre eier, men det er lov å be om
+  tilgang til å spørre. Nytt formål A6 med tre negative tester.
 - 2026-09-17, iterasjon 2: Kjetil rettet oppdagelsesmodellen. Formål A erstattet av A1–A5: bare det
   selvpubliserte er finnbart; registeret er vert og ikke eier; introduksjon bare innenfor en relasjon
   som er enig; spør heller enn å lagre; minst mulig begge veier. §6.1 bortfaller, tre nye åpne
