@@ -4,7 +4,7 @@
 - tags: ai, autorisasjon, eierskap, entitet, tillit
 
 ## Porter
-- G1: godkjent 2026-09-15    (formålsspesifikasjon godkjent av Kjetil, iterasjon 3)
+- G1: godkjent 2026-09-15, delta godkjent 2026-09-19    (formålsspesifikasjon iterasjon 5)
 - G1-GUI: godkjent 2026-09-15    (seks rendrede tilstander godkjent av Kjetil)
 - G2: venter        (plan godkjent; arbeidspakker 1:1 mot bladformål)
 - G3: venter        (akseptanse: forventning mot faktisk, alle avledede tester grønne)
@@ -25,3 +25,5 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
 - 2026-09-15: G1-GUI godkjent. Kjetil ba samtidig om at manglene i images/README.md legges fram
   som vurderbare utvidelsesforslag for skjelettet (SKELETON_UTVIDELSER_2026-09-15.md), og om at
   invitasjonsopplevelsen tas opp som egen formalsoppgave.
+- 2026-09-19: G1 hel igjen. Kjetil godkjente de to bladene som kom til i iterasjon 5
+  (owner-brings-their-own-model, every-model-path-is-declared). Neste port: G2 / PLAN.md.

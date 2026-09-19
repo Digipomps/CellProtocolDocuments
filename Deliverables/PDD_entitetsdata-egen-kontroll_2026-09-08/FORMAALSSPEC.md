@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — entitetsdata egen kontroll
 
-Oppgavemappe: `PDD_entitetsdata-egen-kontroll_2026-09-08` · Opprettet 2026-09-08 · Iterasjon 5 · **G1 godkjent 2026-09-15** · **G1-GUI godkjent 2026-09-15** · to nye blader venter på G1-delta
+Oppgavemappe: `PDD_entitetsdata-egen-kontroll_2026-09-08` · Opprettet 2026-09-08 · Iterasjon 5 · **G1 godkjent 2026-09-15** · **G1-GUI godkjent 2026-09-15** · **G1-delta godkjent 2026-09-19**
 
 > Regel: ingen plan før G1 er godkjent av Kjetil. For GUI: ingen implementering før G1-GUI (rendret bilde) er godkjent.
 > Et dokument om leveransen teller aldri som leveransen.
@@ -76,8 +76,8 @@ Rot for oppgaven er en eksisterende Book 23-node: **`purpose://self-determinatio
 | `purpose://candidate.entitetsdata.authorization-resolves-entity` | Autorisasjonen kjenner entiteten, ikke bare identiteten | `purpose://self-determination.data.recipients` | En mutasjon slippes gjennom når den forespurte Identiteten er en representant for den *Entiteten* som eier cellen — bevist med en lenkepost Entiteten har signert, innenfor godkjent identityDomain — og avvises ellers. I dag finnes entitetsmodellen i dataene og ikke i tilgangskontrollen. | `test.entitet.linked-identity-accepted`, `test.entitet.foreign-entity-refused` | candidate |
 | `purpose://candidate.entitetsdata.no-write-without-owner-proof` | Ingen andre kan endre mine entitetsdata | `purpose://self-determination.data.verifiability` | Feil identitet, usignert forslag, revokert modell, ukjent formål og direkte skriving utenom batch-veien blir alle avvist — bevist med negative tester, ikke med en policy-tekst. | `test.entitet.auth-negative` | candidate |
 | `purpose://candidate.entitetsdata.change-leaves-a-trace` | Hver endring etterlater spor | `purpose://self-determination.data.verifiability` | Hver akseptert endring ligger i chronicle med hvem som signerte, hva som ble endret, og hvilken modell som eventuelt foreslo det. | `test.entitet.trace` | candidate |
-| `purpose://candidate.entitetsdata.owner-brings-their-own-model` | Eieren kobler på sin egen modell | `purpose://self-determination.data.recipients` | Brukeren kan knytte eget abonnement eller egen API-nøkkel til gatewayen i appen. Nøkkelen ligger eier-scopet innenfor entiteten, brukes bare til ruter eieren har erklært, og kan fjernes uten at noe annet mister tilgang. | `test.entitet.own-key-scoped`, `test.entitet.key-removal-is-complete` | **ny, venter G1-delta** |
-| `purpose://candidate.entitetsdata.every-model-path-is-declared` | Hver modellvei er erklært, også Apples | `purpose://self-determination.data.locality` | Ingen modell nås utenom gatewayen. Apple Intelligence erklæres som egne ruter — på enheten, Private Cloud Compute, og tredjepart gjennom Apple — hver med sin egen påstand om hvor data havner. Ingen stille eskalering mellom dem. | `test.entitet.no-model-outside-gateway`, `test.entitet.no-silent-escalation` | **ny, venter G1-delta** |
+| `purpose://candidate.entitetsdata.owner-brings-their-own-model` | Eieren kobler på sin egen modell | `purpose://self-determination.data.recipients` | Brukeren kan knytte eget abonnement eller egen API-nøkkel til gatewayen i appen. Nøkkelen ligger eier-scopet innenfor entiteten, brukes bare til ruter eieren har erklært, og kan fjernes uten at noe annet mister tilgang. | `test.entitet.own-key-scoped`, `test.entitet.key-removal-is-complete` | candidate (G1-delta godkjent 2026-09-19) |
+| `purpose://candidate.entitetsdata.every-model-path-is-declared` | Hver modellvei er erklært, også Apples | `purpose://self-determination.data.locality` | Ingen modell nås utenom gatewayen. Apple Intelligence erklæres som egne ruter — på enheten, Private Cloud Compute, og tredjepart gjennom Apple — hver med sin egen påstand om hvor data havner. Ingen stille eskalering mellom dem. | `test.entitet.no-model-outside-gateway`, `test.entitet.no-silent-escalation` | candidate (G1-delta godkjent 2026-09-19) |
 | `purpose://candidate.entitetsdata.surface-offers-three-ways` | Flaten tilbyr faktisk de tre veiene | `purpose://skeleton.owner-entity-access` | Filopplasting, AI-forslag og direkte redigering er alle synlige og nåbare på flaten — ikke bare implementert. | `test.skeleton.purpose-actions-reachable` | candidate |
 
 Nye noder er navngitt her, ikke av en modell (`lesson.decomposition-is-classification`). Seks av ni foreldre er eksisterende Book 23-noder.
@@ -385,9 +385,8 @@ bevis, se §2A.2. Mekanismen finnes; det som gjenstår er at autorisasjonsveien 
 **6.3 — besvart 2026-09-18.** AIGateway i appen med egne nøkler. Ja, og nøkkelmekanismen finnes
 allerede i CellScaffold-gatewayen — den skal flyttes, ikke oppfinnes. Se §2A.3.
 
-**6.4 To nye blader trenger en nikk.** `owner-brings-their-own-model` og
-`every-model-path-is-declared` kom til etter at G1 ble godkjent. Resten av treet står uendret. Sier du
-ja til de to, er G1 hel igjen og jeg kan skrive PLAN.md.
+**6.4 — besvart 2026-09-19.** Kjetil: «G1 hel.» De to nye bladene `owner-brings-their-own-model` og
+`every-model-path-is-declared` er godkjent sammen med resten av treet. Neste port er G2 (PLAN.md).
 
 **6.5 Hvor mange Apple Intelligence-ruter, egentlig?**
 Jeg foreslår tre — på enheten, Private Cloud Compute, tredjepart gjennom Apple — fordi de gir tre
@@ -407,4 +406,5 @@ hjemme her?
 | Iterasjon | Dato | Hva endret seg | Hvem |
 |---|---|---|---|
 | 5 | 2026-09-18 | Kjetil rettet scaffold-eierskapsmodellen: et scaffold er et sted flere entiteter kan ha celler, admin er en rolle over scaffoldet og ikke over innholdet, og grensen går ved cellen. `IdentityLink` pekt ut som beviset som lukker `authorization-resolves-entity`. To nye blader om egne nøkler og erklærte modellveier, inkludert Apple Intelligence — de venter på G1-delta. Fem nye negative tester. | Kjetil / Claude |
+| 5b | 2026-09-19 | G1-delta godkjent av Kjetil: de to nye bladene fra iterasjon 5 er med i G1. | Kjetil |
 | 0 | 2026-09-08 | Opprettet | Losen |
