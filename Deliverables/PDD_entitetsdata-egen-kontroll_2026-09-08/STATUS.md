@@ -27,3 +27,7 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
   invitasjonsopplevelsen tas opp som egen formalsoppgave.
 - 2026-09-19: G1 hel igjen. Kjetil godkjente de to bladene som kom til i iterasjon 5
   (owner-brings-their-own-model, every-model-path-is-declared). Neste port: G2 / PLAN.md.
+- 2026-09-21: PLAN.md skrevet, venter på G2. 15 arbeidspakker 1:1 mot bladformålene, i seks
+  leveringsrunder. dataflow.md, contract/ (tre skjemaer, tolv fixturer, check_fixtures.py — 0 avvik)
+  og handoff/README.md er på plass. §5 supplert med de åtte testene §1 navngav men tabellen manglet.
+  WP11 (Apple Intelligence-veiene) er blokkert på §6.5 til jeg har lest Apples dokumentasjon.

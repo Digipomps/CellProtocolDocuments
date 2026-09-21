@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "x-contractRef": "haven://contract/entityanchor-genesis/v1",
+  "title": "Genesis — forsegling av entiteten til den som startet den",
+  "description": "Skjer første gang entiteten må persistere entitetsdata: onboarding som samler data, adressebok-import for å invitere, eller et VC-bevis. Import og genesis er samme flyt, ikke to runder.",
+  "type": "object",
+  "required": ["version", "anchorID", "sealedAt", "initiatorLink", "trigger"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {"const": 1},
+    "anchorID": {"type": "string", "minLength": 1},
+    "sealedAt": {"type": "string", "format": "date-time"},
+    "trigger": {
+      "description": "Hva som utløste genesis. Skrives ned fordi 'når ble entiteten min til, og hvorfor' er et spørsmål eieren skal kunne få svar på.",
+      "type": "string",
+      "enum": ["onboarding", "addressBookImport", "verifiableCredential", "fileUpload", "directEdit"]
+    },
+    "initiatorLink": {
+      "description": "Den første IdentityLinkRecord. Formen speiler CellProtocol/Sources/CellBase/Identity/IdentityLinkingModels.swift:290.",
+      "type": "object",
+      "required": ["linkID", "issuerType", "entityBinding", "linkedIdentityPublicKey", "algorithm", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "linkID": {"type": "string", "minLength": 1},
+        "issuerType": {"const": "existingDevice"},
+        "entityBinding": {
+          "type": "object",
+          "required": ["mode"],
+          "properties": {
+            "mode": {"const": "localEntityAnchor"},
+            "entityAnchorReference": {"type": "string"}
+          }
+        },
+        "linkedIdentityPublicKey": {"type": "string", "contentEncoding": "base64"},
+        "algorithm": {"type": "string", "enum": ["ed25519", "ecdsa-p256"]},
+        "approvedDomains": {"type": "array", "items": {"type": "string"}},
+        "approvedScopes": {"type": "array", "items": {"type": "string"}},
+        "status": {"const": "active"}
+      }
+    }
+  },
+  "x-invariants": [
+    "Forseglingen er irreversibel. Det finnes ingen handling som setter et forseglet anker tilbake til uforseglet.",
+    "Et andre genesis mot et forseglet anker avvises — test.entitet.no-refounding.",
+    "Genesis oppretter nøyaktig én initiatorLink. Flere lenker legges til senere gjennom approveEnrollment, aldri gjennom genesis.",
+    "Ankeret er identityUnique og eies av eierens private identitet — aldri scaffoldUnique."
+  ]
+}

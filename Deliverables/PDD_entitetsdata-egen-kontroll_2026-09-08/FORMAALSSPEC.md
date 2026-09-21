@@ -228,6 +228,14 @@ Det gir to nye blader i §1, og de to er det eneste i denne iterasjonen som tren
 
 | testRef | Type | Beskrivelse | Hvordan | Bevis |
 |---|---|---|---|---|
+| `test.entitet.genesis-once` | command | Første persistering av entitetsdata oppretter ankeret og forsegler det til initiatoren, med én `IdentityLinkRecord`. | XCTest mot EntityAnchorCell fra tom lagring. | `TESTRESULT.md#genesis` |
+| `test.entitet.no-refounding` | command | Et andre genesis-forsøk mot et forseglet anker avvises; ingen handling setter det tilbake til uforseglet. | Negativ XCTest + kildeinspeksjon av handlingslisten. | `TESTRESULT.md#negative` |
+| `test.entitet.read-without-proof-refused` | command | Lesing av `person`, `relations`, `agreements`, `identityLinks` og `chronicle` uten gyldig entitetsbevis avvises. | Negativ XCTest mot lese-intercepts. | `TESTRESULT.md#auth` |
+| `test.entitet.linked-identity-accepted` | command | En annen Identitet av *samme* Entitet, med aktiv lenke innenfor godkjent identityDomain og scope, får lese og skrive. | Positiv XCTest gjennom autorisasjonsveien. | `TESTRESULT.md#auth` |
+| `test.entitet.foreign-entity-refused` | command | En identitet fra en annen entitet avvises, også når den har en gyldig lenke i sin egen entitet. | Negativ XCTest med to entiteter. | `TESTRESULT.md#auth` |
+| `test.entitet.general-editor-covers-anchor` | command | Editoren når hvert felt EntityAnchor eksponerer, talt mot ankerets egen nøkkelliste — ikke en håndplukket delmengde. | XCTest som sammenligner to lister. | `TESTRESULT.md#edit` |
+| `test.entitet.chat-keypath-lookup` | command | Chatten finner riktig keypath for en beskrivelse i naturlig språk, og sier fra når den ikke finner noen. | XCTest med faste spørsmål og fasit. | `TESTRESULT.md#chat` |
+| `test.entitet.chat-change-is-a-proposal` | command | En endring foreslått i chatten havner i signaturkøen og skriver ingenting før signatur. | Negativ XCTest. | `TESTRESULT.md#negative` |
 | `test.entitet.file-roundtrip` | command | Fil inn via `FileUpload` → forhåndsbilde → bekreft → data i entiteten. | XCTest gjennom cellene, som `BookProjectImportEndToEndTests`. | `TESTRESULT.md#file` |
 | `test.entitet.direct-edit` | command | Endring av ett felt uten modell involvert. | XCTest. | `TESTRESULT.md#edit` |
 | `test.entitet.unsigned-proposal-refused` | command | Et forslag uten eiersignatur skriver ingenting. | Negativ XCTest mot AIGateway + EntityAnchor. | `TESTRESULT.md#auth` |
@@ -406,5 +414,6 @@ hjemme her?
 | Iterasjon | Dato | Hva endret seg | Hvem |
 |---|---|---|---|
 | 5 | 2026-09-18 | Kjetil rettet scaffold-eierskapsmodellen: et scaffold er et sted flere entiteter kan ha celler, admin er en rolle over scaffoldet og ikke over innholdet, og grensen går ved cellen. `IdentityLink` pekt ut som beviset som lukker `authorization-resolves-entity`. To nye blader om egne nøkler og erklærte modellveier, inkludert Apple Intelligence — de venter på G1-delta. Fem nye negative tester. | Kjetil / Claude |
+| 6 | 2026-09-21 | §5 supplert med de åtte testene §1 navngav men tabellen manglet. Treet uendret. PLAN.md skrevet, venter G2. | Claude |
 | 5b | 2026-09-19 | G1-delta godkjent av Kjetil: de to nye bladene fra iterasjon 5 er med i G1. | Kjetil |
 | 0 | 2026-09-08 | Opprettet | Losen |
