@@ -926,6 +926,26 @@
     "agreement"
    ],
    "source": "Deliverables/PDD_entitetsdata-egen-kontroll_2026-09-08/FORMAALSSPEC.md §2A.4 og dataflow.md §6-7"
+  },
+  {
+   "lessonRef": "lesson.read-origin-main-before-writing-a-mechanism",
+   "date": "2026-09-22",
+   "severity": "major",
+   "symptom": "Runde 1 av PDD_entitetsdata skrev en egen resolver for lenkede identiteter (EntityLinkAuthorizer, ny CellAuthorizationPath.linkedIdentity, ny hook pa GeneralCell). Da patchen ble lagt mot origin/main viste det seg at IdentityLinkRegistry og GeneralCell.authorizationEvidence allerede gjorde det samme, landet av en annen oppgave (purpose://candidate.entity-link.resolver-honours-link). Hele resolveren ble forkastet.",
+   "cause": "Kildene ble lest fra den lokale grenen som var sjekket ut (pdd/tillitspakke-agentflaate), 70-100 linjer bak main i akkurat de filene. Formalsspesifikasjonens brief-audit sa «retrieved» om noe som var lest fra feil revisjon. En mekanisme som finnes pa main er usynlig fra en gammel gren.",
+   "prevention": "Brief-audit skal si HVILKEN revisjon noe ble lest fra, og for et formal som skal endre en mekanisme skal kilden vaere origin/main (git show origin/main:<fil>), ikke utsjekket. Preflight-skriptet sjekker na at patchen passer mot origin/main i et eget worktree for noe legges pa. Og: for du skriver en mekanisme, grep pa main etter navnet pa det den skal gjore (her: sameEntity, linkedIdentity) - ikke bare etter typen du planlegger a lage.",
+   "purposeRefs": [
+    "purpose://quality.build-and-regression",
+    "purpose://grounding"
+   ],
+   "tags": [
+    "git",
+    "main",
+    "worktree",
+    "autorisasjon",
+    "grounding"
+   ],
+   "source": "Deliverables/PDD_entitetsdata-egen-kontroll_2026-09-08/TESTRESULT.md og handoff/runde1/"
   }
  ]
 }

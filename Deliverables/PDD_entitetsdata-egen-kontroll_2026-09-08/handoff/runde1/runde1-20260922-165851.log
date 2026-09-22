@@ -1,0 +1,240 @@
+=== preflight ===
+repo: /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol
+worktree: /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata
+branch i hovedutsjekk: pdd/tillitspakke-agentflaate (rores ikke)
+From github.com:Digipomps/CellProtocol
+ * branch            main       -> FETCH_HEAD
+MERK: hovedutsjekket har ulagrede endringer. De rores ikke; arbeidet skjer i et eget worktree:
+ M Package.swift
+ M Sources/CellApple/EntityAtlas/AppleKeychainSecureCredentialStore.swift
+main:        36372c5b95a7b57fbef92ffa54dea13bdf75a9e6
+origin/main: 473357cf4efee831cb3b55ae87bc921d4bb63c10
+MERK: lokal main og origin/main er ulike. Grenen lages fra origin/main.
+MERK: worktree finnes allerede: /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata
+  gren der: pdd/entitetsdata-egen-kontroll
+  tilstand: 7 endrede filer
+sjekker at patchen passer mot origin/main:
+patch: passer
+preflight: OK
+
+=== apply --go ===
+patch: ny versjon. Ingenting er committet pa grenen, sa worktreet nullstilles til origin/main og patchen legges pa nytt.
+M  Sources/CellApple/Cells/EntityAnchorCell.swift
+A  Sources/CellBase/Identity/EntityGenesis.swift
+M  Sources/CellBase/Identity/IdentityLinkRegistry.swift
+M  Sources/CellVapor/Cells/EntityAnchorCell.swift
+A  Tests/CellBaseTests/EntityAnchorGenesisTests.swift
+A  Tests/CellBaseTests/EntityGenesisTests.swift
+A  Tests/CellBaseTests/IdentityLinkRegistryBindingTests.swift
+apply: OK i /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata. Ingenting er committet.
+
+=== verify ===
+logg: /Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/PDD_entitetsdata-egen-kontroll_2026-09-08/handoff/runde1/verify-20260922-165853.log
+== git ==
+pdd/entitetsdata-egen-kontroll
+473357cf4efee831cb3b55ae87bc921d4bb63c10
+== build ==
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata/Sources/CellVapor/Cells/EntityAnchorCell.swift:273:37: [1;33mwarning: [1;39mno 'async' operations occur within 'await' expression[0;0m [#]8;;https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker\UnnecessaryEffectMarker]8;;\]
+ [0;36m271 |[0;0m                                 try await self.storage.set(keypath: keypath, setValue: .string(entityUuid))
+ [0;36m272 |[0;0m                                 let entityKeypath = "relations.entities.\(entityUuid).identities.\(identityUuid)"
+ [0;36m273 |[0;0m                                 try await self.storage.set(keypath: entityKeypath, setValue: value)
+     [0;36m|[0;0m                                     `- [1;33mwarning: [1;39mno 'async' operations occur within 'await' expression[0;0m [#]8;;https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker\UnnecessaryEffectMarker]8;;\]
+ [0;36m274 |[0;0m                             } else {
+ [0;36m275 |[0;0m                                 throw error
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata/Sources/CellVapor/Cells/EntityAnchorCell.swift:279:29: [1;33mwarning: [1;39mno 'async' operations occur within 'await' expression[0;0m [#]8;;https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker\UnnecessaryEffectMarker]8;;\]
+ [0;36m277 |[0;0m                         }
+ [0;36m278 |[0;0m                     default:
+ [0;36m279 |[0;0m                         try await self.storage.set(keypath: keypath, setValue: value)
+     [0;36m|[0;0m                             `- [1;33mwarning: [1;39mno 'async' operations occur within 'await' expression[0;0m [#]8;;https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker\UnnecessaryEffectMarker]8;;\]
+ [0;36m280 |[0;0m                     }
+ [0;36m281 |[0;0m                 } else {
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata/Sources/CellVapor/Cells/EntityAnchorCell.swift:282:25: [1;33mwarning: [1;39mno 'async' operations occur within 'await' expression[0;0m [#]8;;https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker\UnnecessaryEffectMarker]8;;\]
+ [0;36m280 |[0;0m                     }
+ [0;36m281 |[0;0m                 } else {
+ [0;36m282 |[0;0m                     try await self.storage.set(keypath: keypath, setValue: value)
+     [0;36m|[0;0m                         `- [1;33mwarning: [1;39mno 'async' operations occur within 'await' expression[0;0m [#]8;;https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker\UnnecessaryEffectMarker]8;;\]
+ [0;36m283 |[0;0m                 }
+ [0;36m284 |[0;0m 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata/Sources/CellVapor/Cells/EntityAnchorCell.swift:804:13: [1;33mwarning: [1;39minitialization of immutable value 'flowElement' was never used; consider replacing with assignment to '_' or removing it[0;0m [#]8;;https://docs.swift.org/compiler/documentation/diagnostics/no-usage\NoUsage]8;;\]
+ [0;36m802 |[0;0m         
+ [0;36m803 |[0;0m         let setDataObject: Object = ["keypath" : .string(keypath), "value" : value, "timestamp" : .float(Date.now.timeIntervalSince1970)]
+ [0;36m804 |[0;0m         let flowElement = FlowElement(title: "Set data", content: .object(setDataObject), properties: FlowElement.Properties(type: .event, contentType: .object))
+     [0;36m|[0;0m             `- [1;33mwarning: [1;39minitialization of immutable value 'flowElement' was never used; consider replacing with assignment to '_' or removing it[0;0m [#]8;;https://docs.swift.org/compiler/documentation/diagnostics/no-usage\NoUsage]8;;\]
+ [0;36m805 |[0;0m     }
+ [0;36m806 |[0;0m 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata/Sources/CellVapor/Cells/EntityAnchorCell.swift:797:13: [1;33mwarning: [1;39mno 'async' operations occur within 'await' expression[0;0m [#]8;;https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker\UnnecessaryEffectMarker]8;;\]
+ [0;36m795 |[0;0m 
+ [0;36m796 |[0;0m         // write to storage
+ [0;36m797 |[0;0m         try await self.storage.set(keypath: keypath, setValue: value)
+     [0;36m|[0;0m             `- [1;33mwarning: [1;39mno 'async' operations occur within 'await' expression[0;0m [#]8;;https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker\UnnecessaryEffectMarker]8;;\]
+ [0;36m798 |[0;0m         try await saveKeypathStorage(entity: self.storage)
+ [0;36m799 |[0;0m         
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata/Sources/CellVapor/Cells/EntityAnchorCell.swift:829:28: [1;33mwarning: [1;39mno 'async' operations occur within 'await' expression[0;0m [#]8;;https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker\UnnecessaryEffectMarker]8;;\]
+ [0;36m827 |[0;0m             try EntityValidatedContactRecordV1.validatePersistenceEnvelope(envelope)
+ [0;36m828 |[0;0m             let relationPolicy = EntityRelationRecordV1.interactionPolicy(
+ [0;36m829 |[0;0m                 from: try? await storage.get(keypath: EntityRelationRecordV1.interactionPolicyKeypath)
+     [0;36m|[0;0m                            `- [1;33mwarning: [1;39mno 'async' operations occur within 'await' expression[0;0m [#]8;;https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker\UnnecessaryEffectMarker]8;;\]
+ [0;36m830 |[0;0m             )
+ [0;36m831 |[0;0m             try EntityRelationRecordV1.validatePersistenceEnvelope(envelope, interactionPolicy: relationPolicy)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata/Sources/CellVapor/Cells/EntityAnchorCell.swift:838:35: [1;33mwarning: [1;39mno 'async' operations occur within 'await' expression[0;0m [#]8;;https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker\UnnecessaryEffectMarker]8;;\]
+ [0;36m836 |[0;0m                     stored = pending
+ [0;36m837 |[0;0m                 } else {
+ [0;36m838 |[0;0m                     stored = try? await storage.get(keypath: mutation.keypath)
+     [0;36m|[0;0m                                   `- [1;33mwarning: [1;39mno 'async' operations occur within 'await' expression[0;0m [#]8;;https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker\UnnecessaryEffectMarker]8;;\]
+ [0;36m839 |[0;0m                 }
+ [0;36m840 |[0;0m                 try EntityRelationRecordV1.validateExistingEvent(stored, proposed: mutation.value)
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+[33 / 34] haven-commons-product
+Build complete! (8,37 sek)
+== runde 1-tester ==
+[0;36m1449 |[0;0m         missingProof.proof.signatureData = Data()
+[0;36m1450 |[0;0m         let missingProofResult = try await evaluate(
+
+[#VariableNeverMutated]: <https://docs.swift.org/compiler/documentation/diagnostics/variable-never-mutated>
+[44 / 49] CellBaseTests-product
+[45 / 49] CellBaseTests-product
+[46 / 49] CellBaseTests-product
+[47 / 49] CellBaseTests-product
+Build complete! (19,69 sek)
+Test Suite 'Selected tests' started at 2026-09-22 16:59:28.347.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-09-22 16:59:28.348.
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-09-22 16:59:28.348.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-22 16:59:28.348.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds
+Test Suite 'Selected tests' started at 2026-09-22 16:59:28.411.
+Test Suite 'CellNearbyTests.xctest' started at 2026-09-22 16:59:28.412.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-09-22 16:59:28.412.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-22 16:59:28.412.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-22 16:59:28.477.
+Test Suite 'CellBaseTests.xctest' started at 2026-09-22 16:59:28.477.
+Test Suite 'EntityAnchorGenesisTests' started at 2026-09-22 16:59:28.477.
+Test Case '-[CellBaseTests.EntityAnchorGenesisTests testAnchorStartsUnsealed]' started.
+Test Case '-[CellBaseTests.EntityAnchorGenesisTests testAnchorStartsUnsealed]' passed (0.007 seconds).
+Test Case '-[CellBaseTests.EntityAnchorGenesisTests testExplicitGenesisSealsAnchorToOwner]' started.
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata/Tests/CellBaseTests/EntityAnchorGenesisTests.swift:78: error: -[CellBaseTests.EntityAnchorGenesisTests testExplicitGenesisSealsAnchorToOwner] : XCTAssertEqual failed: ("Optional(CellBase.ValueType.string("error"))") is not equal to ("Optional(CellBase.ValueType.string("sealed"))")
+Test Case '-[CellBaseTests.EntityAnchorGenesisTests testExplicitGenesisSealsAnchorToOwner]' failed (2.396 seconds).
+Test Case '-[CellBaseTests.EntityAnchorGenesisTests testGenesisCannotBeRevokedOrOverwritten]' started.
+Test Case '-[CellBaseTests.EntityAnchorGenesisTests testGenesisCannotBeRevokedOrOverwritten]' passed (0.004 seconds).
+Test Case '-[CellBaseTests.EntityAnchorGenesisTests testGenesisRecordWithoutValidSealIsNotHonoured]' started.
+Test Case '-[CellBaseTests.EntityAnchorGenesisTests testGenesisRecordWithoutValidSealIsNotHonoured]' passed (0.005 seconds).
+Test Case '-[CellBaseTests.EntityAnchorGenesisTests testIdentityFromAnotherEntityIsRefused]' started.
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata/Tests/CellBaseTests/EntityAnchorGenesisTests.swift:215: error: -[CellBaseTests.EntityAnchorGenesisTests testIdentityFromAnotherEntityIsRefused] : XCTAssertEqual failed: ("deniedIdentityReferenceMismatch") is not equal to ("deniedNoGrant")
+Test Case '-[CellBaseTests.EntityAnchorGenesisTests testIdentityFromAnotherEntityIsRefused]' failed (0.003 seconds).
+Test Case '-[CellBaseTests.EntityAnchorGenesisTests testLinkedIdentityWithoutKeyControlIsRefused]' started.
+Test Case '-[CellBaseTests.EntityAnchorGenesisTests testLinkedIdentityWithoutKeyControlIsRefused]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.EntityAnchorGenesisTests testLinkedSecondIdentityReadsAndWrites]' started.
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata/Sources/CellBase/Cells/GeneralCell/GeneralCell.swift:1673: error: -[CellBaseTests.EntityAnchorGenesisTests testLinkedSecondIdentityReadsAndWrites] : failed: caught error: "denied(CellBase.CellAuthorizationDecision(allowed: false, path: CellBase.CellAuthorizationPath.deniedNoGrant, reason: "No verified owner proof, signed contract, or cell-specific grant allowed the request.", request: CellBase.CellAuthorizationRequest(cellUUID: "AE7B0214-AFD6-4DF7-8F9F-9DDBB5BDA3DE", identityDomain: "private", keypath: "person", requestedAccess: "r---", requesterUUID: "00000000-0000-0000-0000-000000000002", requesterSigningKeyFingerprint: Optional("EdDSA:Curve25519:BTaijhGxgVF+fuvA8FfzowapyO+kBJorM5lliOHyUPs=")), reasonCode: Optional("agreement_or_proof_required"), userMessage: Optional("Access requires an owner proof, a signed contract, or a concrete policy proof."), requiredAction: Optional("request_contract_or_present_proof"), canAutoResolve: Optional(false), developerHint: Optional("Route this denial to admission/policy handling so the user can request a contract, present a proof, or complete an entity-extension flow."), agreementRef: nil, contractRef: nil, grantRef: nil, authorizationPolicyBinding: nil))"
+Test Case '-[CellBaseTests.EntityAnchorGenesisTests testLinkedSecondIdentityReadsAndWrites]' failed (0.005 seconds).
+Test Case '-[CellBaseTests.EntityAnchorGenesisTests testPairwiseLinkDoesNotOpenTheAnchor]' started.
+Test Case '-[CellBaseTests.EntityAnchorGenesisTests testPairwiseLinkDoesNotOpenTheAnchor]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.EntityAnchorGenesisTests testSecondGenesisIsRefused]' started.
+Test Case '-[CellBaseTests.EntityAnchorGenesisTests testSecondGenesisIsRefused]' passed (0.003 seconds).
+Test Suite 'EntityAnchorGenesisTests' failed at 2026-09-22 16:59:30.905.
+	 Executed 9 tests, with 3 failures (1 unexpected) in 2.427 (2.428) seconds
+Test Suite 'EntityGenesisTests' started at 2026-09-22 16:59:30.905.
+Test Case '-[CellBaseTests.EntityGenesisTests testGenesisKeypathsAreRecognisedAsImmutable]' started.
+Test Case '-[CellBaseTests.EntityGenesisTests testGenesisKeypathsAreRecognisedAsImmutable]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.EntityGenesisTests testGenesisSealsToInitiatorAndVerifies]' started.
+Test Case '-[CellBaseTests.EntityGenesisTests testGenesisSealsToInitiatorAndVerifies]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.EntityGenesisTests testInitiatorWithoutSigningKeyCannotSeal]' started.
+Test Case '-[CellBaseTests.EntityGenesisTests testInitiatorWithoutSigningKeyCannotSeal]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.EntityGenesisTests testPairwiseRecordIsRejected]' started.
+Test Case '-[CellBaseTests.EntityGenesisTests testPairwiseRecordIsRejected]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.EntityGenesisTests testSealDoesNotVerifyAgainstAnotherIdentitysRecord]' started.
+Test Case '-[CellBaseTests.EntityGenesisTests testSealDoesNotVerifyAgainstAnotherIdentitysRecord]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.EntityGenesisTests testTamperedSealFailsVerification]' started.
+Test Case '-[CellBaseTests.EntityGenesisTests testTamperedSealFailsVerification]' passed (0.000 seconds).
+Test Suite 'EntityGenesisTests' passed at 2026-09-22 16:59:30.907.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'IdentityLinkRegistryBindingTests' started at 2026-09-22 16:59:30.907.
+Test Case '-[CellBaseTests.IdentityLinkRegistryBindingTests testOnlyLocalEntityAnchorBindingOpensTheEntity]' started.
+Test Case '-[CellBaseTests.IdentityLinkRegistryBindingTests testOnlyLocalEntityAnchorBindingOpensTheEntity]' passed (0.000 seconds).
+Test Suite 'IdentityLinkRegistryBindingTests' passed at 2026-09-22 16:59:30.908.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'CellBaseTests.xctest' failed at 2026-09-22 16:59:30.908.
+	 Executed 16 tests, with 3 failures (1 unexpected) in 2.430 (2.431) seconds
+Test Suite 'Selected tests' failed at 2026-09-22 16:59:30.908.
+	 Executed 16 tests, with 3 failures (1 unexpected) in 2.430 (2.431) seconds
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/cellprotocol-genesis-B0F459AA-F26B-4765-B616-7ABA965FC53E/CellsContainer/8018EB13-C489-4533-9CFB-6ED4083E2F82
+Initing Entity Anchor cell for owner: 00000000-0000-0000-0000-000000000001
+*********** Finished setup keys in Entity Anchor ***********
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/cellprotocol-genesis-DD933F44-0AEA-46C1-ABB8-56B3819A092F/CellsContainer/3B5DC75B-8BCF-4A4C-9342-6134526B87D5
+Initing Entity Anchor cell for owner: 00000000-0000-0000-0000-000000000001
+*********** Finished setup keys in Entity Anchor ***********
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/cellprotocol-genesis-2A0DFAB7-6726-4441-A9B8-366EA0ACFEE5/CellsContainer/0B36DC55-F407-4279-91BC-AB2A0AB4BF52
+Initing Entity Anchor cell for owner: 00000000-0000-0000-0000-000000000001
+*********** Finished setup keys in Entity Anchor ***********
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/cellprotocol-genesis-8A305A29-3C0A-48EB-80F1-CC60C0F6E33E/CellsContainer/7012BDB6-826F-4113-BB54-B3870C4652B2
+Initing Entity Anchor cell for owner: 00000000-0000-0000-0000-000000000001
+*********** Finished setup keys in Entity Anchor ***********
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/cellprotocol-genesis-749CD7B1-E191-4DC1-B0AE-C302524C3E93/CellsContainer/2FA535CC-9427-4126-A016-051AB5968D8E
+Initing Entity Anchor cell for owner: 00000000-0000-0000-0000-000000000001
+*********** Finished setup keys in Entity Anchor ***********
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/cellprotocol-genesis-0D4A2DFE-6A2F-4F56-B507-74C9D0CED4D7/CellsContainer/39CEDBCB-5B21-4334-8A25-7FC161999B05
+Initing Entity Anchor cell for owner: 00000000-0000-0000-0000-000000000001
+*********** Finished setup keys in Entity Anchor ***********
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/cellprotocol-genesis-0EB30489-8FF5-433B-95E0-C6EB28CEF0EF/CellsContainer/AE7B0214-AFD6-4DF7-8F9F-9DDBB5BDA3DE
+Initing Entity Anchor cell for owner: 00000000-0000-0000-0000-000000000001
+*********** Finished setup keys in Entity Anchor ***********
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/cellprotocol-genesis-70F43452-F141-4966-A345-C5DBD2074C0C/CellsContainer/A0D34865-C586-4CC9-B68F-AEC3470D7776
+Initing Entity Anchor cell for owner: 00000000-0000-0000-0000-000000000001
+*********** Finished setup keys in Entity Anchor ***********
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/cellprotocol-genesis-EA07A0D7-8B50-4C7C-9782-9A5A0FFC732A/CellsContainer/480ACF32-9D69-4AD5-9DF5-1495B8C22338
+Initing Entity Anchor cell for owner: 00000000-0000-0000-0000-000000000001
+*********** Finished setup keys in Entity Anchor ***********
+Note: Some test targets reported failures:
+  - CellBaseTests (XCTest)
+== regresjon: autorisasjon og identitet ==
+General CellBase.GeneralCell. Linked identity 51C42005-1E4A-472D-8962-B47E048DF40A matched link E8C4082C-68D5-4C90-B2C5-3AA0643A6D12 but failed to prove control of the linked key.
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/cellprotocol-readiness-vapor-09A430BC-D0E4-4430-8DAC-31055BDFCD8A/CellsContainer/A3FFDFE8-528C-4295-9029-17CE1668BE56
+Initing Entity Anchor cell for owner: 00000000-0000-0000-0000-000000000001
+*********** Finished setup keys in Entity Anchor ***********
+*********** Finished setup keys in Entity Anchor ***********
+*********** Finished setup keys in Entity Anchor ***********
+Orchestrator (Porthole vapor) cell init
+Orchestrator (Porthole vapor) cell init
+Orchestrator (Porthole vapor) cell init
+############# deiniting orchestrator (8228BF2A-A8B5-41D4-A7F3-FDDF1CA0C8A8 ################
+############# deiniting orchestrator (8228BF2A-A8B5-41D4-A7F3-FDDF1CA0C8A8 ################
+############# deiniting orchestrator (8228BF2A-A8B5-41D4-A7F3-FDDF1CA0C8A8 ################
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/cellprotocol-strict-vapor-728EDE23-74FF-4FF5-A629-5C9146B5C500/CellsContainer/EA9F761F-602F-4570-98B4-30CE0CD93BD5
+Initing Entity Anchor cell for owner: 00000000-0000-0000-0000-000000000001
+*********** Finished setup keys in Entity Anchor ***********
+*********** Finished setup keys in Entity Anchor ***********
+Orchestrator (Porthole vapor) cell init
+Orchestrator (Porthole vapor) cell init
+orchestrator set. Keypath: setConfiguration value: {
+  "cellReferences" : [
+
+  ],
+  "description" : null,
+  "name" : "Strict Vapor Configuration",
+  "skeleton" : {
+    "Text" : {
+      "text" : "Hello HAVEN"
+    }
+  },
+  "uuid" : "BBC84FCF-44C2-40C1-B378-B5EB264C24F4"
+}
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/cellprotocol-strict-vapor-728EDE23-74FF-4FF5-A629-5C9146B5C500/CellsContainer/Porthole
+Orchestrator (Porthole vapor) cell init
+++++++++++ Load cell configuration ++++++++++++++
+############# deiniting orchestrator (FD62D106-6916-4523-9253-1478B22D651E ################
+############# deiniting orchestrator (FD62D106-6916-4523-9253-1478B22D651E ################
+############# deiniting orchestrator (FD62D106-6916-4523-9253-1478B22D651E ################
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/cellprotocol-signed-agreement-vapor-06F7F4A5-4174-4B4C-8F00-1137E2035027/CellsContainer/25ACE4B6-4F96-4310-B7D5-EC7AB350B729
+Initing Entity Anchor cell for owner: 00000000-0000-0000-0000-000000000001
+*********** Finished setup keys in Entity Anchor ***********
+
+Les 'Executed N tests, with M failures' i loggen. Exitkoden er ikke sannheten.

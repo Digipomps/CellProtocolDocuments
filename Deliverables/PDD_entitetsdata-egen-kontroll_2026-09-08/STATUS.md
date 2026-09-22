@@ -41,3 +41,11 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
   én ny autorisasjonssti (.linkedIdentity) med linkRef, identiske grep i Vapor- og Apple-ankeret,
   og 25 tester i tre filer. Ingenting kompilert — Kjetil kjører preflight/apply/verify med Codex.
   Forsegling ved første batchPersist er med i koden, men UTESTET til runde 2 har flow-harness.
+- 2026-09-22 (kveld): Runde 1 kjørt på Mac-en gjennom Finder → runde1.command (patch mot
+  origin/main i eget worktree, ingen berøring av Kjetils utsjekk). CellProtocol: bygger, 1244/1244
+  tester grønne, commit ebb0b7f på pdd/entitetsdata-egen-kontroll (ikke pushet). WP2 viste seg i
+  hovedsak å være landet på main av en annen oppgave — min parallelle resolver forkastet, to
+  herdinger beholdt (binding må være localEntityAnchor; genesis-lenke gjelder bare med gyldig segl).
+  Nedstrøms: CellScaffold og Binding er røde mot CellProtocol main uavhengig av patchen
+  (swift-crypto-konflikt via DiMyMint; skjeletteditor mangler Tree/ComponentSurface). Se TESTRESULT.
+  Ny lærdom: lesson.read-origin-main-before-writing-a-mechanism.

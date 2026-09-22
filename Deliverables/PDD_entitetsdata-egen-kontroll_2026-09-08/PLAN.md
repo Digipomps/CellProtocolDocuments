@@ -86,21 +86,35 @@ positiv og en negativ fixture som begge kjører.
 | | |
 |---|---|
 | **purposeRef** | `purpose://candidate.entitetsdata.authorization-resolves-entity` |
-| **Utfører** | Codex |
+| **Utfører** | Codex / Claude via Finder+Terminal |
 | **Avhenger av** | WP1 |
-| **Endrer** | `CellProtocol/Sources/CellBase/.../CellResolver` (eierskapssjekken), `GeneralCell.validateIdentityUniqueOwner` |
+| **Status 2026-09-22** | **I hovedsak landet på main av en annen oppgave.** Se under. |
 | **Tester** | `test.entitet.linked-identity-accepted`, `test.entitet.foreign-entity-refused` |
 | **Artefakt til §3** | `TESTRESULT.md#auth` |
 
-De fire skrittene fra §2A.2: signaturen stammer fra `linkedIdentity.publicKey`; lenken er `.active`
-og ikke revokert; handlingen ligger i `approvedScopes` og domenet i `approvedDomains`;
-`entityBinding` løser til den entiteten som eier cellen.
+**Oppdaget da patchen ble lagt mot `origin/main` (473357c):** hovedmekanismen finnes allerede.
+`IdentityLinkRegistry` (`Sources/CellBase/Identity/IdentityLinkRegistry.swift`) og
+`GeneralCell.authorizationEvidence` slår opp lenker med scope `same_entity`, krever at UUID *og*
+signeringsnøkkel matcher, at domenet står i `approvedDomains`, og kjører utfordringssignatur mot den
+lenkede nøkkelen. Det ble landet under `purpose://candidate.entity-link.resolver-honours-link`
+(en annen PDD-oppgave, tester i `IdentityLinkRegistryTests`). Jeg hadde lest en eldre gren
+(`pdd/tillitspakke-agentflaate`) og skrev en parallell resolver — den er forkastet, ikke lagt oppå.
 
-**Merk:** `CellResolver.swift` sto som ucommittet hos en annen tråd i august. Codex må sjekke
-`git status` før pakken starter, og stoppe hvis filen har ulagrede endringer — ikke flette forbi dem.
+Det denne oppgaven legger til, som to små herdinger med egne tester:
 
-**Ferdig når:** oppstartsidentiteten og Face ID-identiteten, som er to representanter for samme
-entitet, begge slipper til — og en identitet fra en annen entitet ikke gjør det.
+1. **Binding må være `localEntityAnchor`.** `sameEntityLink` slapp en `pairwise`/`blinded` lenke
+   gjennom; de beviser medlemskap for *andre* og skal ikke åpne ankeret.
+   (`IdentityLinkRegistryBindingTests`, `testPairwiseLinkDoesNotOpenTheAnchor`.)
+2. **En genesis-lenke gjelder bare mens seglet verifiserer.** `restoreIdentityLinkRegistry` i
+   ankeret filtrerer bort en genesis-post uten gyldig segl, så lagring ikke stoles på alene.
+   (`testGenesisRecordWithoutValidSealIsNotHonoured`.)
+
+Genesis-lenken (WP1) får scope `same_entity` og går gjennom **samme** sti som alle andre lenker.
+Ingen andre resolver. `test.entitet.linked-identity-accepted` er grønn gjennom mains sti
+(`path: .ownerProof`, `reasonCode: linked_identity_proof`).
+
+**Ferdig når:** de tre testene er grønne (de er det, 2026-09-22), og lærdommen om å lese
+`origin/main` før man skriver er i registeret.
 
 ### WP3 — Lesing krever bevis, ikke bare mutasjon
 
