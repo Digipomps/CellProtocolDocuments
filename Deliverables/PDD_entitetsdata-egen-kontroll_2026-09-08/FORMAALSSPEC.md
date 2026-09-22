@@ -206,6 +206,40 @@ en annen; en eskalering fra enhet til sky er en annen erklæring, og krever eier
 
 Det gir to nye blader i §1, og de to er det eneste i denne iterasjonen som trenger en ny nikk.
 
+### 2A.4 Rettelse 2026-09-22: entiteten er en eierskapsgrense, ikke en maskingrense
+
+Jeg skrev i `dataflow.md` at «en gateway utenfor entiteten gjør prompten til noen andres data», som
+begrunnelse for at AIGateway må ligge i appen. Kjetil:
+
+> Om en celle på et scaffold i skyen er eid av en spesifikk entitet — for eksempel meg — så er det
+> pr definisjon innenfor entiteten. Det skal ikke være mulig for andre, inkludert scaffold admin, å
+> få tilgang til data eller funksjonalitet inne i en celle jeg eier om jeg ikke eksplisitt har gitt
+> tilgang via et Agreement. Om det er mulig har dere gjort det feil.
+
+Setningen min var feil på to måter, og den andre er den farlige.
+
+**Den forvekslet plassering med eierskap.** Eier jeg cellen, er innholdet mitt uansett hvilken maskin
+prosessen kjører på. «Utenfor entiteten» er ikke et sted.
+
+**Og den ville smittet videre.** Hadde den fått stå, ville neste beslutning lett blitt at skyceller
+trenger et ekstra vern lokale celler ikke trenger. Regelen er motsatt: den er **uniform**, og et
+skyscaffold er ikke et svakere sted — det er samme sted, med samme grense. Blir vernet noe man legger
+på skyen spesielt, har man allerede godtatt at skyen er utrygg som utgangspunkt, og da er
+arkitekturen tapt.
+
+To konsekvenser i denne oppgaven:
+
+1. **Testen må dekke funksjonalitet, ikke bare felter.** `admin-cannot-enter-foreign-cell` sa
+   «verken lesing eller skriving». Å kalle en handling på cellen er også tilgang. Testen er skjerpet
+   til lesing, skriving **og handlinger**.
+2. **Agreement er den eneste døren, og den skal gi nøyaktig det den sier.** Den positive motsatsen
+   manglet helt: at en Agreement faktisk åpner, og ikke åpner mer enn sitt eget omfang. Ny test
+   `test.entitet.agreement-grants-exactly-what-it-says`.
+
+Begrunnelsen for gateway i appen er skrevet om i `dataflow.md` §7. De to som holder er rekkevidde til
+lokale modeller — `localLoopback` og Apple Intelligence finnes bare på enheten — og tilgjengelighet
+uten scaffold. Begge er testbare; den forrige var ikke.
+
 ## 3. Forventningskontrakt — «Det du kommer til å se»
 
 | Leveranse | Type | Hvor | Referanse | Godkjent |
@@ -242,7 +276,8 @@ Det gir to nye blader i §1, og de to er det eneste i denne iterasjonen som tren
 | `test.entitet.untrusted-model-refused` | command | Modell utenfor `trustedModels`, og revokert modell, avvises begge. | Negativ XCTest. | `TESTRESULT.md#auth` |
 | `test.entitet.gateway-owned` | inspection | `AIGateway` er `identityUnique`, eid av privat identitet, og nøkler ligger ikke utenfor entiteten. | Registreringssjekk + kildeinspeksjon. | `ACCEPT.md#gateway` |
 | `test.entitet.auth-negative` | command | Feil requester, feil keypath, `purpose://prompt.unknown`, direkte skriving utenom batch — alle avvist. | `pkg.std.cell-contract`. | `TESTRESULT.md#auth` |
-| `test.entitet.admin-cannot-enter-foreign-cell` | command | En entitet med admin på scaffoldet kommer ikke inn i en celle eid av en identitet i en annen entitet — verken lesing eller skriving. | Negativ XCTest mot et scaffold med to entiteter. | `TESTRESULT.md#auth` |
+| `test.entitet.admin-cannot-enter-foreign-cell` | command | En entitet med admin på scaffoldet kommer ikke inn i en celle eid av en identitet i en annen entitet — verken lesing, skriving **eller handlinger**. Gjelder likt på lokalt scaffold og skyscaffold. | Negativ XCTest mot et scaffold med to entiteter, kjørt i begge oppsett. | `TESTRESULT.md#auth` |
+| `test.entitet.agreement-grants-exactly-what-it-says` | command | En Agreement åpner faktisk — og åpner ikke mer enn sitt eget omfang. Felt og handlinger utenfor avtalen avvises. | Positiv og negativ XCTest mot samme avtale. | `TESTRESULT.md#auth` |
 | `test.entitet.own-key-scoped` | command | Eierens egen nøkkel brukes bare til ruter eieren har erklært, og er ikke lesbar for andre celler. | Negativ/positiv XCTest mot gatewayen i Binding. | `TESTRESULT.md#gateway` |
 | `test.entitet.key-removal-is-complete` | command | Fjernet nøkkel etterlater ingen brukbar rest; neste kall feiler med manglende hemmelighet. | XCTest. | `TESTRESULT.md#gateway` |
 | `test.entitet.no-model-outside-gateway` | inspection | Ingen kodesti når en modell utenom gatewayen — `AppleIntelligenceCell` inkludert. | Kildeinspeksjon + registreringssjekk. | `ACCEPT.md#gateway` |
@@ -414,6 +449,7 @@ hjemme her?
 | Iterasjon | Dato | Hva endret seg | Hvem |
 |---|---|---|---|
 | 5 | 2026-09-18 | Kjetil rettet scaffold-eierskapsmodellen: et scaffold er et sted flere entiteter kan ha celler, admin er en rolle over scaffoldet og ikke over innholdet, og grensen går ved cellen. `IdentityLink` pekt ut som beviset som lukker `authorization-resolves-entity`. To nye blader om egne nøkler og erklærte modellveier, inkludert Apple Intelligence — de venter på G1-delta. Fem nye negative tester. | Kjetil / Claude |
+| 7 | 2026-09-22 | Kjetil rettet en feil i dataflow.md: entiteten er en eierskapsgrense, ikke en maskingrense — en celle i skyen som jeg eier er innenfor min entitet. Regelen er uniform, og Agreement er eneste dør, for data **og** funksjonalitet. Testen skjerpet til å dekke handlinger; ny test for at en Agreement gir nøyaktig sitt omfang. Begrunnelsen for gateway i appen skrevet om. | Kjetil / Claude |
 | 6 | 2026-09-21 | §5 supplert med de åtte testene §1 navngav men tabellen manglet. Treet uendret. PLAN.md skrevet, venter G2. | Claude |
 | 5b | 2026-09-19 | G1-delta godkjent av Kjetil: de to nye bladene fra iterasjon 5 er med i G1. | Kjetil |
 | 0 | 2026-09-08 | Opprettet | Losen |

@@ -109,16 +109,44 @@ Intelligence er et rammeverkskall i prosessen, og det er Apple som avgjør om de
 enheten. **Vi kan erklære, ikke håndheve** — og erklæringen må si det, ellers later vi som vi har en
 kontroll vi ikke har. Om rammeverket i det hele tatt lar oss velge vei er §6.5, og den er ubesvart.
 
-## 6. Hvor ting ligger
+## 6. Hvor ting ligger — og hva «innenfor entiteten» faktisk betyr
 
-| Det | Hvor | Hvem eier |
-|---|---|---|
-| Entitetsdata | `EntityAnchorCell`, `identityUnique` | eierens private identitet |
-| API-nøkler | `OwnerScopedCredentialStore`, innenfor entiteten | eieren |
-| Tillitserklæringer | `trustedModels.<id>` under ankeret | eieren, signert |
-| Forslagskø | gateway-cellen, kortlivet | eieren |
-| Chronicle | under ankeret, kun tillegg | eieren |
-| Prompt og svar | innenfor entiteten, uansett hvor modellen kjører | eieren |
+**Entiteten er en eierskapsgrense, ikke en maskingrense.** En celle på et scaffold i skyen som eies
+av en bestemt entitet er per definisjon innenfor den entiteten. Hvor prosessen kjører er
+irrelevant for hvem som eier dataene.
 
-Det siste er hele grunnen til at gatewayen skal ligge i appen og ikke bare på serveren: en gateway
-utenfor entiteten gjør prompten til noen andres data.
+Det følger at én regel gjelder overalt, uten unntak for skyen:
+
+> Det skal ikke være mulig for andre — scaffold-admin inkludert — å få tilgang til **data eller
+> funksjonalitet** i en celle jeg eier, med mindre jeg eksplisitt har gitt tilgang gjennom en
+> Agreement. Er det mulig, er det en feil i implementasjonen, ikke en egenskap ved skyhosting.
+
+«Funksjonalitet» er med vilje: det holder ikke å hindre lesing og skriving av felter. Å kalle en
+handling på cellen er også tilgang, og skal falle på samme grense.
+
+| Det | Hvor | Hvem eier | Hvordan andre eventuelt kommer til |
+|---|---|---|---|
+| Entitetsdata | `EntityAnchorCell`, `identityUnique` | eierens private identitet | Agreement, med navngitt omfang |
+| API-nøkler | `OwnerScopedCredentialStore` | eieren | aldri |
+| Tillitserklæringer | `trustedModels.<id>` under ankeret | eieren, signert | Agreement, lesing |
+| Forslagskø | gateway-cellen, kortlivet | eieren | aldri |
+| Chronicle | under ankeret, kun tillegg | eieren | Agreement, lesing |
+| Prompt og svar | i gateway-cellen, uansett hvor den kjører | eieren | aldri |
+
+## 7. Hvorfor gatewayen likevel må finnes i appen
+
+Det er **ikke** fordi en gateway på et scaffold ville gjort prompten til noen andres data — den
+påstanden var feil, og §6 sier hvorfor. Eier jeg gateway-cellen, er prompten min uansett hvor
+cellen kjører.
+
+De to grunnene som holder:
+
+1. **Rekkevidde til lokale modeller.** `localLoopback` og Apple Intelligence finnes bare på
+   enheten. En gateway som kjører på et scaffold kan ikke nå en modell som kjører på min Mac. Skal
+   eieren kunne velge en lokal modell — som er hele poenget med `routeLocal` i
+   `contract/trustedmodels_v1.json` — må gatewayen være der modellen er.
+2. **Tilgjengelighet.** Appen skal virke uten scaffold: uten nett, når scaffoldet er nede, og for
+   en bruker som ikke har noe skyscaffold i det hele tatt. En AI-vei som forutsetter en server er
+   ikke en vei brukeren eier.
+
+Begge er konkrete og testbare. Den forrige begrunnelsen var verken.

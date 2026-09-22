@@ -8,12 +8,23 @@ den navngir er grønne og utdataene ligger i `TESTRESULT.md`.
 
 ## 0. To ting du bør vite før du leser videre
 
-**0.1 Jeg kan ikke bygge Swift herfra.** Cowork-VM-en har ingen verktøykjede — det ble bekreftet
-da jeg forsøkte å kjøre benchmarken i ark-oppgaven. Alt som rører Swift går derfor til Codex eller
-Xcode, og leveres som idempotente skript med tørrkjøring som standard
-(`pkg.std.codex-handoff`, se `handoff/README.md`). Det jeg selv kan gjøre er kontrakter,
-skjelett-JSON, dokumenter, og lesing av kildekode. Kolonnen «Utfører» sier hvem som gjør hva, og
-den er ikke en høflighetsformulering.
+**0.1 Jeg kan skrive Swift. Jeg kan ikke bygge eller kjøre den herfra.** Det er to forskjellige
+ting, og jeg var upresis om det i første utkast. Å generere Swift er ikke begrensningen — å bevise
+at den kompilerer og at testene er grønne, er det.
+
+Målt, ikke antatt: Cowork-VM-en (Ubuntu 24.04, x86_64) har ingen Swift-verktøykjede, og
+`download.swift.org` er avvist av utgangspolicyen — proxyen svarer 403 på CONNECT. Jeg kan altså
+ikke installere en heller.
+
+Og selv med en Linux-verktøykjede ville den ikke dekket denne oppgaven: `CellApple` er SwiftUI og
+`Binding` er en Xcode-app, og ingen av dem bygger på Linux. CellProtocol *har* Linux-CI
+(`.github/workflows/cellprotocol-swift-linux.yml`), men den dekker en smal del av CellBase — ikke
+gatewayen i appen eller skjelettflatene, som er der mesteparten av dette arbeidet ligger.
+
+Derfor: alt som skal bygges eller kjøres går til macOS, og leveres som idempotente skript med
+tørrkjøring som standard (`pkg.std.codex-handoff`, se `handoff/README.md`). Kolonnen «Utfører» sier
+hvem som gjør hva, og den er ikke en høflighetsformulering — men der det står «Codex» kan jeg skrive
+koden først og la Codex bygge og rette, i stedet for å beskrive hva som skal skrives.
 
 **0.2 §5 manglet åtte tester.** Formålstreet i §1 navngir `test.entitet.genesis-once`,
 `no-refounding`, `read-without-proof-refused`, `chat-keypath-lookup`, `chat-change-is-a-proposal`,
@@ -112,13 +123,21 @@ halvparten av kravet ditt som er lettest å glemme, fordi mutasjon er den synlig
 | **Utfører** | Codex |
 | **Avhenger av** | WP2 |
 | **Endrer** | testmål først; kode bare der en negativ test faktisk faller |
-| **Tester** | `test.entitet.auth-negative`, `test.entitet.admin-cannot-enter-foreign-cell` |
+| **Tester** | `test.entitet.auth-negative`, `test.entitet.admin-cannot-enter-foreign-cell`, `test.entitet.agreement-grants-exactly-what-it-says` |
 
 Fem avvisninger i én suite: feil identitet, usignert forslag, revokert modell, ukjent formål, og
-direkte skriving utenom batch-veien. Pluss den nye fra §2A.1: **en entitet med admin på scaffoldet
-kommer ikke inn i en celle eid av en identitet i en annen entitet.** Den siste krever et testoppsett
-med to entiteter på samme scaffold, og det oppsettet er selv en leveranse — uten det er påstanden
-«jeg eier serveren er ingen tilgangsgrunn» utestet.
+direkte skriving utenom batch-veien. Pluss de to fra §2A.1 og §2A.4:
+
+**En entitet med admin på scaffoldet kommer ikke inn i en celle eid av en identitet i en annen
+entitet — verken lesing, skriving eller handlinger.** Handlinger er med fordi å kalle noe på cellen
+også er tilgang. Kravet er uniformt: testen kjøres i to oppsett, lokalt scaffold og skyscaffold, og
+skal gi samme svar. Et skyscaffold er ikke et svakere sted.
+
+**Og den positive motsatsen, som manglet helt:** en Agreement åpner faktisk, og åpner ikke mer enn
+sitt eget omfang. Uten den testen har vi bare vist at døren er lukket, ikke at den er en dør.
+
+Begge krever et testoppsett med to entiteter på samme scaffold. Det oppsettet er selv en leveranse
+— uten det er påstanden «jeg eier serveren er ingen tilgangsgrunn» utestet.
 
 ### WP5 — Hver endring etterlater spor
 
@@ -198,6 +217,12 @@ tabellelementet. Fram til det står, bygges editoren med `List` og faste bredder
 Gatewayen finnes i CellScaffold (3462 linjer) og ikke i Binding. Dette er en flytting, ikke en
 nyskriving. Registrer `identityUnique` — ikke `scaffoldUnique`; det var den feilen som ga
 `deniedNoGrant` for hver andre identitet og 1778 ms oppstart på Entity Scanner.
+
+**Begrunnelsen, rettet 2026-09-22:** ikke «ellers blir prompten noen andres data» — eier jeg
+gateway-cellen er prompten min uansett hvor den kjører (§2A.4). De to grunnene som holder er
+*rekkevidde* — `localLoopback` og Apple Intelligence finnes bare på enheten, så en gateway på et
+scaffold kan ikke nå en modell som kjører på min Mac — og *tilgjengelighet*: appen skal virke uten
+scaffold, uten nett, og for en bruker som ikke har noe skyscaffold. Begge er testbare.
 
 ### WP10 — Eieren kobler på sin egen modell
 
@@ -326,5 +351,8 @@ så neste oppgave ikke arver samme hull. Sier du nei, lar jeg det ligge.
    spørsmål du skal svare på i blinde.
 3. **§6.6** fra spesifikasjonen — om admin-rollen skal kunne vises frem som begrenset. Egen oppgave
    eller her?
-4. **Hvem kjører Codex.** Jeg kan skrive handoff-skriptene, men noen må fyre dem av på macOS, og
-   det avgjør tempoet.
+4. **Hvor vi jobber.** Du sa du kjører Codex — bra, det er nok. Men se §0.1: jeg har ingen
+   Codex-MCP i denne økten nå, og ingen Swift her. Kjører du en Claude Code-økt på Mac-en i stedet,
+   forsvinner hele overleveringen: da bygger og tester jeg selv, og `handoff/` blir overflødig for
+   alt annet enn det du vil ha som skript uansett. Det er det enkleste grepet som gjør de seks
+   rundene raskere.

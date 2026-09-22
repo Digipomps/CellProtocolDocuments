@@ -31,3 +31,8 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
   leveringsrunder. dataflow.md, contract/ (tre skjemaer, tolv fixturer, check_fixtures.py — 0 avvik)
   og handoff/README.md er på plass. §5 supplert med de åtte testene §1 navngav men tabellen manglet.
   WP11 (Apple Intelligence-veiene) er blokkert på §6.5 til jeg har lest Apples dokumentasjon.
+- 2026-09-22: Kjetil rettet en feil i dataflow.md. Entiteten er en eierskapsgrense, ikke en
+  maskingrense: en celle i skyen som eies av meg er innenfor min entitet. Regelen er uniform, og
+  Agreement er eneste dør — for data og for funksjonalitet. §2A.4 skrevet, testen skjerpet til å
+  dekke handlinger, ny test for at en Agreement gir nøyaktig sitt omfang, og begrunnelsen for
+  gateway i appen skrevet om (rekkevidde til lokale modeller + tilgjengelighet uten scaffold).
