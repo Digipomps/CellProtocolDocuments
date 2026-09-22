@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — entitetsdata egen kontroll
 
-Oppgavemappe: `PDD_entitetsdata-egen-kontroll_2026-09-08` · Opprettet 2026-09-08 · Iterasjon 5 · **G1 godkjent 2026-09-15** · **G1-GUI godkjent 2026-09-15** · **G1-delta godkjent 2026-09-19**
+Oppgavemappe: `PDD_entitetsdata-egen-kontroll_2026-09-08` · Opprettet 2026-09-08 · Iterasjon 5 · **G1 godkjent 2026-09-15** · **G1-GUI godkjent 2026-09-15** · **G1-delta godkjent 2026-09-19** · **G2 godkjent 2026-09-22**
 
 > Regel: ingen plan før G1 er godkjent av Kjetil. For GUI: ingen implementering før G1-GUI (rendret bilde) er godkjent.
 > Et dokument om leveransen teller aldri som leveransen.

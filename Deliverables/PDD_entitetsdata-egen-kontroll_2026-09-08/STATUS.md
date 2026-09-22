@@ -6,7 +6,7 @@
 ## Porter
 - G1: godkjent 2026-09-15, delta godkjent 2026-09-19    (formålsspesifikasjon iterasjon 5)
 - G1-GUI: godkjent 2026-09-15    (seks rendrede tilstander godkjent av Kjetil)
-- G2: venter        (plan godkjent; arbeidspakker 1:1 mot bladformål)
+- G2: godkjent 2026-09-22    (Kjetil: «Ok - du implementerer som i PLAN §0.1.»)
 - G3: venter        (akseptanse: forventning mot faktisk, alle avledede tester grønne)
 
 Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py validate <mappe>` nekter porter uten artefakter.
@@ -36,3 +36,8 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
   Agreement er eneste dør — for data og for funksjonalitet. §2A.4 skrevet, testen skjerpet til å
   dekke handlinger, ny test for at en Agreement gir nøyaktig sitt omfang, og begrunnelsen for
   gateway i appen skrevet om (rekkevidde til lokale modeller + tilgjengelighet uten scaffold).
+- 2026-09-22: G2 godkjent. Runde 1 (WP1 genesis + WP2 autorisasjon via IdentityLink) skrevet som
+  patch med tester og lagt i handoff/runde1/. 1 283 linjer: to nye CellBase-filer med logikken,
+  én ny autorisasjonssti (.linkedIdentity) med linkRef, identiske grep i Vapor- og Apple-ankeret,
+  og 25 tester i tre filer. Ingenting kompilert — Kjetil kjører preflight/apply/verify med Codex.
+  Forsegling ved første batchPersist er med i koden, men UTESTET til runde 2 har flow-harness.

@@ -1,0 +1,1530 @@
+diff --git a/Sources/CellApple/Cells/EntityAnchorCell.swift b/Sources/CellApple/Cells/EntityAnchorCell.swift
+index 7b058f1..61de3ea 100644
+--- a/Sources/CellApple/Cells/EntityAnchorCell.swift
++++ b/Sources/CellApple/Cells/EntityAnchorCell.swift
+@@ -247,6 +247,7 @@ public class EntityAnchorCell: GeneralCell {
+             return await self.handleIdentityLinksSet(keypath: keypath, value: value, requester: requester)
+         })
+         for identityLinkAction in [
++            "identityLinks.genesis",
+             "identityLinks.approveEnrollment",
+             "identityLinks.completeEnrollment",
+             "identityLinks.revoke"
+@@ -486,6 +487,7 @@ public class EntityAnchorCell: GeneralCell {
+         await registerExploreContract(requester: requester, key: "identityLinks", method: .set, input: storedValue, returns: identityLinkResult, permissions: ["-w--"], required: false, flowEffects: [identityLinkEffect], description: .string("Stores identity-link state below the owner entity."))
+         await registerExploreContract(requester: requester, key: "identityLinks", method: .get, input: .null, returns: identityLinkResult, permissions: ["r---"], required: false, description: .string("Reads identity-link state below the owner entity."))
+         await registerExploreContract(requester: requester, key: "identityLinks.state", method: .get, input: .null, returns: identityLinkResult, permissions: ["r---"], required: false, description: .string("Reads normalized identity-link runtime state."))
++        await registerExploreContract(requester: requester, key: "identityLinks.genesis", method: .set, input: ExploreContract.oneOfSchema(options: [ExploreContract.schema(type: "string"), ExploreContract.objectSchema(properties: ["trigger": ExploreContract.schema(type: "string")], requiredKeys: [])]), returns: identityLinkResult, permissions: ["-w--"], required: true, flowEffects: [identityLinkEffect], description: .string("Seals the anchor to the requesting owner identity. Irreversible; refused once sealed."))
+         await registerExploreContract(requester: requester, key: "identityLinks.approveEnrollment", method: .set, input: ExploreContract.schema(type: "object"), returns: identityLinkResult, permissions: ["-w--"], required: true, flowEffects: [identityLinkEffect], description: .string("Approves a cryptographically bound identity enrollment."))
+         await registerExploreContract(requester: requester, key: "identityLinks.completeEnrollment", method: .set, input: ExploreContract.schema(type: "object"), returns: identityLinkResult, permissions: ["-w--"], required: true, flowEffects: [identityLinkEffect], description: .string("Completes a previously approved identity enrollment."))
+         await registerExploreContract(requester: requester, key: "identityLinks.revoke", method: .set, input: ExploreContract.oneOfSchema(options: [ExploreContract.schema(type: "string"), ExploreContract.objectSchema(properties: ["linkID": ExploreContract.schema(type: "string")], requiredKeys: ["linkID"])]), returns: identityLinkResult, permissions: ["-w--"], required: true, flowEffects: [identityLinkEffect], description: .string("Revokes an exact identity link."))
+@@ -786,6 +788,12 @@ public class EntityAnchorCell: GeneralCell {
+         _ envelope: EntityBatchPersistEnvelope,
+         requester: Identity
+     ) async throws -> EntityAnchorBatchPersistResult {
++        // Genesis on first need. Outside the gate: sealing writes through
++        // saveKeypathStorage, which takes the gate itself. Only a proven owner
++        // seals; anyone else falls through to the ownership guard below.
++        if loadGenesisSeal() == nil, await requesterProvesOwnership(requester) {
++            _ = try await performGenesis(requester: requester, trigger: .firstPersist, ownershipAlreadyProven: true)
++        }
+         await authorityCommitGate.acquire()
+         do {
+             try ensurePersistenceAvailable()
+@@ -878,8 +886,11 @@ public class EntityAnchorCell: GeneralCell {
+         if keypath == "identityLinks" || keypath == "identityLinks.state" || keypath == "state" {
+             let records = (try? storage.get(keypath: "identityLinks.records")) ?? .object(Object())
+             let used = (try? storage.get(keypath: "identityLinks.usedApprovalJTIs")) ?? .object(Object())
++            let genesis = (try? storage.get(keypath: EntityGenesisService.sealKeypath)) ?? .null
+             return .object([
+                 "status": .string("ready"),
++                "sealed": .bool(loadGenesisSeal() != nil),
++                "genesis": genesis,
+                 "records": records,
+                 "usedApprovalJTIs": used,
+                 "summary": .string("EntityAnchor identityLinks er klar for approveEnrollment, completeEnrollment og revoke.")
+@@ -891,6 +902,8 @@ public class EntityAnchorCell: GeneralCell {
+     private func handleIdentityLinksSet(keypath: String, value: ValueType, requester: Identity) async -> ValueType? {
+         do {
+             switch keypath {
++            case "identityLinks.genesis":
++                return try await sealGenesis(value: value, requester: requester)
+             case "identityLinks.approveEnrollment":
+                 return try await approveIdentityEnrollment(value: value, requester: requester)
+             case "identityLinks.completeEnrollment":
+@@ -898,6 +911,14 @@ public class EntityAnchorCell: GeneralCell {
+             case "identityLinks.revoke":
+                 return try await revokeIdentityLink(value: value, requester: requester)
+             default:
++                if EntityGenesisService.isImmutableGenesisKeypath(keypath) {
++                    throw EntityGenesisError.genesisKeypathIsImmutable(keypath)
++                }
++                if keypath.hasPrefix(EntityGenesisService.recordsKeypath + "."),
++                   let seal = loadGenesisSeal(),
++                   keypath == EntityGenesisService.recordKeypath(linkID: seal.linkID) {
++                    throw EntityGenesisError.genesisKeypathIsImmutable(keypath)
++                }
+                 try storage.set(keypath: keypath, setValue: value)
+                 try await saveKeypathStorage(entity: storage)
+                 pushIdentityLinkEvent(keypath: keypath, value: value, requester: requester)
+@@ -979,6 +1000,9 @@ public class EntityAnchorCell: GeneralCell {
+             linkID = rawLinkID
+         }
+ 
++        if EntityGenesisService.isGenesisLink(linkID) {
++            throw EntityGenesisError.cannotRevokeGenesisLink(linkID)
++        }
+         let recordKey = safeIdentityLinkKey(linkID)
+         let recordKeypath = "identityLinks.records.\(recordKey)"
+         let recordValue = try storage.get(keypath: recordKeypath)
+@@ -1010,6 +1034,115 @@ public class EntityAnchorCell: GeneralCell {
+         ])
+     }
+ 
++
++    // MARK: - Genesis
++    // purpose://candidate.entitetsdata.genesis-seals-to-initiator
++    //
++    // The first time this anchor must persist entity data it is sealed to the
++    // identity that did it. The seal is a signed IdentityLinkRecord issued by
++    // the initiator to itself. Nothing below ever removes it.
++
++    private func sealGenesis(value: ValueType, requester: Identity) async throws -> ValueType {
++        var trigger: EntityGenesisTrigger = .firstPersist
++        if case let .object(object) = value,
++           case let .string(raw)? = object["trigger"],
++           let parsed = EntityGenesisTrigger(rawValue: raw) {
++            trigger = parsed
++        } else if case let .string(raw) = value, let parsed = EntityGenesisTrigger(rawValue: raw) {
++            trigger = parsed
++        }
++        let result = try await performGenesis(requester: requester, trigger: trigger, ownershipAlreadyProven: false)
++        return .object([
++            "status": .string("sealed"),
++            "seal": try IdentityLinkProtocolService.value(from: result.seal),
++            "record": try IdentityLinkProtocolService.value(from: result.record)
++        ])
++    }
++
++    /// Seals on first need. Must be called OUTSIDE `authorityCommitGate`:
++    /// it writes through `saveKeypathStorage`, which takes that gate itself.
++    private func ensureSealed(requester: Identity, trigger: EntityGenesisTrigger) async throws {
++        guard loadGenesisSeal() == nil else { return }
++        _ = try await performGenesis(requester: requester, trigger: trigger, ownershipAlreadyProven: false)
++    }
++
++    private func performGenesis(
++        requester: Identity,
++        trigger: EntityGenesisTrigger,
++        ownershipAlreadyProven: Bool
++    ) async throws -> EntityGenesisResult {
++        if let existing = loadGenesisSeal() {
++            throw EntityGenesisError.alreadySealed(linkID: existing.linkID)
++        }
++        if ownershipAlreadyProven == false {
++            guard await requesterProvesOwnership(requester) else {
++                throw EntityGenesisError.initiatorIsNotOwner(requester: requester.uuid, owner: storedOwnerIdentity.uuid)
++            }
++        }
++        let result = try await EntityGenesisService.seal(
++            anchorID: uuid,
++            initiator: requester,
++            identityDomain: identityDomain,
++            trigger: trigger
++        )
++        let sealValue = try IdentityLinkProtocolService.value(from: result.seal)
++        let recordValue = try IdentityLinkProtocolService.value(from: result.record)
++        let recordKey = EntityGenesisService.safeRecordKey(result.record.linkID)
++        try storage.set(keypath: EntityGenesisService.sealKeypath, setValue: sealValue)
++        try storage.set(keypath: EntityGenesisService.recordKeypath(linkID: result.record.linkID), setValue: recordValue)
++        try storage.set(keypath: "proofs.identityLinks.\(recordKey)", setValue: .object([
++            "record": recordValue,
++            "seal": sealValue
++        ]))
++        try await saveKeypathStorage(entity: storage)
++        pushIdentityLinkEvent(keypath: EntityGenesisService.sealKeypath, value: sealValue, requester: requester)
++        return result
++    }
++
++    private func loadGenesisSeal() -> EntityGenesisSeal? {
++        guard let value = try? storage.get(keypath: EntityGenesisService.sealKeypath) else {
++            return nil
++        }
++        return try? decodeValue(value, as: EntityGenesisSeal.self)
++    }
++
++    private func loadIdentityLinkRecords() -> [IdentityLinkRecord] {
++        guard let value = try? storage.get(keypath: EntityGenesisService.recordsKeypath),
++              case let .object(object) = value else {
++            return []
++        }
++        return object.values.compactMap { try? decodeValue($0, as: IdentityLinkRecord.self) }
++    }
++
++    // MARK: - Linked identity
++    // purpose://candidate.entitetsdata.authorization-resolves-entity
++    //
++    // Consulted by GeneralCell only when the requester is not the stored owner
++    // reference. Two halves, both required: the link lookup says this key may
++    // act for the entity; the challenge signature proves the requester holds it.
++
++    public override func authorizeLinkedIdentity(
++        _ requestedAccess: String,
++        at keypath: String,
++        for identity: Identity
++    ) async -> EntityLinkAuthorization? {
++        let lookup = EntityLinkAuthorizer.authorize(
++            requestedAccess: requestedAccess,
++            requester: identity,
++            identityDomain: identityDomain,
++            anchorID: uuid,
++            records: loadIdentityLinkRecords(),
++            genesisSeal: loadGenesisSeal()
++        )
++        guard case let .success(authorization) = lookup else {
++            return nil
++        }
++        guard await verifyRequesterIdentityControl(identity) else {
++            return nil
++        }
++        return authorization
++    }
++
+     private func usedApprovalJTIs() -> Set<String> {
+         guard let usedValue = try? storage.get(keypath: "identityLinks.usedApprovalJTIs"),
+               case let .object(usedObject) = usedValue else {
+diff --git a/Sources/CellBase/Cells/GeneralCell/CellAuthorization.swift b/Sources/CellBase/Cells/GeneralCell/CellAuthorization.swift
+index 35aca1d..704dfe0 100644
+--- a/Sources/CellBase/Cells/GeneralCell/CellAuthorization.swift
++++ b/Sources/CellBase/Cells/GeneralCell/CellAuthorization.swift
+@@ -7,6 +7,9 @@ public enum CellAuthorizationPath: String, Codable, Sendable {
+     case debugBypass
+     case ownerProof
+     case signedContract
++    /// The requester is another identity of the entity that owns the cell,
++    /// proven by an active IdentityLink and a challenge signature.
++    case linkedIdentity
+     case cellSpecific
+     case deniedOwnerProofFailed
+     case deniedIdentityReferenceMismatch
+@@ -52,6 +55,8 @@ public struct CellAuthorizationDecision: Codable, Sendable {
+     public var agreementRef: String?
+     public var contractRef: String?
+     public var grantRef: String?
++    /// `identitylink://<linkID>` when the decision path is `.linkedIdentity`.
++    public var linkRef: String?
+     public var authorizationPolicyBinding: AuthorizationPolicyBinding?
+ 
+     public init(
+@@ -67,6 +72,7 @@ public struct CellAuthorizationDecision: Codable, Sendable {
+         agreementRef: String? = nil,
+         contractRef: String? = nil,
+         grantRef: String? = nil,
++        linkRef: String? = nil,
+         authorizationPolicyBinding: AuthorizationPolicyBinding? = nil
+     ) {
+         self.allowed = allowed
+@@ -81,6 +87,7 @@ public struct CellAuthorizationDecision: Codable, Sendable {
+         self.agreementRef = agreementRef
+         self.contractRef = contractRef
+         self.grantRef = grantRef
++        self.linkRef = linkRef
+         self.authorizationPolicyBinding = authorizationPolicyBinding
+     }
+ }
+@@ -176,7 +183,8 @@ public enum CellAuthorizationPolicy {
+         ownerUUIDMatches: Bool,
+         ownerProofValid: Bool,
+         contracts: [Agreement],
+-        cellSpecificAllowed: Bool
++        cellSpecificAllowed: Bool,
++        linkedIdentity: EntityLinkAuthorization? = nil
+     ) -> CellAuthorizationDecision {
+         if CellBase.debugValidateAccessForEverything {
+             return CellAuthorizationDecision(
+@@ -242,6 +250,20 @@ public enum CellAuthorizationPolicy {
+             )
+         }
+ 
++        if let link = linkedIdentity {
++            return CellAuthorizationDecision(
++                allowed: true,
++                path: .linkedIdentity,
++                reason: "Requester is a linked identity of the owning entity and proved control of the linked key.",
++                request: request,
++                reasonCode: "linked_identity",
++                userMessage: "Access granted: this identity is linked to the entity that owns the cell.",
++                requiredAction: "none",
++                canAutoResolve: true,
++                linkRef: link.linkRef
++            )
++        }
++
+         if cellSpecificAllowed {
+             return CellAuthorizationDecision(
+                 allowed: true,
+@@ -258,7 +280,7 @@ public enum CellAuthorizationPolicy {
+         return CellAuthorizationDecision(
+             allowed: false,
+             path: .deniedNoGrant,
+-            reason: "No verified owner proof, signed contract, or cell-specific grant allowed the request.",
++            reason: "No verified owner proof, signed contract, entity link, or cell-specific grant allowed the request.",
+             request: request,
+             reasonCode: "agreement_or_proof_required",
+             userMessage: "Access requires an owner proof, a signed contract, or a concrete policy proof.",
+diff --git a/Sources/CellBase/Cells/GeneralCell/GeneralCell.swift b/Sources/CellBase/Cells/GeneralCell/GeneralCell.swift
+index a96b722..66e7a9c 100644
+--- a/Sources/CellBase/Cells/GeneralCell/GeneralCell.swift
++++ b/Sources/CellBase/Cells/GeneralCell/GeneralCell.swift
+@@ -1969,6 +1969,11 @@ open class GeneralCell: CellProtocol, OwnerInstantiable, Codable, CellAuthorizat
+         let cellSpecificAllowed = evidence.ownerReferenceMatches
+             ? false
+             : await validateCellSpecificAccess(requestedAccess, at: keypath, for: identity)
++        // A linked identity is consulted only when the requester is not the
++        // stored owner reference; the owner path already covers that case.
++        let linkedIdentity = evidence.ownerReferenceMatches
++            ? nil
++            : await authorizeLinkedIdentity(requestedAccess, at: keypath, for: identity)
+ 
+         var decision = CellAuthorizationPolicy.decide(
+             request: request,
+@@ -1976,7 +1981,8 @@ open class GeneralCell: CellProtocol, OwnerInstantiable, Codable, CellAuthorizat
+             ownerUUIDMatches: owner.uuid == identity.uuid,
+             ownerProofValid: evidence.ownerProofValid,
+             contracts: evidence.contracts.map(\.agreement),
+-            cellSpecificAllowed: cellSpecificAllowed
++            cellSpecificAllowed: cellSpecificAllowed,
++            linkedIdentity: linkedIdentity
+         )
+         if decision.path == .signedContract {
+             let requestedGrant = Grant(keypath: keypath, permission: requestedAccess)
+@@ -2003,6 +2009,18 @@ open class GeneralCell: CellProtocol, OwnerInstantiable, Codable, CellAuthorizat
+         false
+     }
+ 
++    /// purpose://candidate.entitetsdata.authorization-resolves-entity
++    ///
++    /// Cells that hold identity links for their owning entity override this to
++    /// recognise another identity of the same entity. The override is
++    /// responsible for both halves: the link lookup (`EntityLinkAuthorizer`)
++    /// AND the challenge-signature proof that the requester controls the
++    /// linked key (`verifyRequesterIdentityControl`). Returning a value
++    /// without the proof would turn a UUID claim into access.
++    open func authorizeLinkedIdentity(_ requestedAccess: String, at keypath: String, for identity: Identity) async -> EntityLinkAuthorization? {
++        nil
++    }
++
+     private func authorizationContracts() async -> [Contract] {
+         (await currentAuthorizationSnapshot()).contracts
+     }
+diff --git a/Sources/CellBase/Identity/EntityGenesis.swift b/Sources/CellBase/Identity/EntityGenesis.swift
+new file mode 100644
+index 0000000..7f759fc
+--- /dev/null
++++ b/Sources/CellBase/Identity/EntityGenesis.swift
+@@ -0,0 +1,202 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++
++import Foundation
++
++// purpose://candidate.entitetsdata.genesis-seals-to-initiator
++//
++// Genesis is the one moment that cannot be undone. The first time an entity
++// needs to persist entity data, its anchor is sealed to the identity that
++// started it: a single IdentityLinkRecord, issued by the initiator to itself,
++// bound to this anchor, and signed so the seal can be verified later without
++// trusting the storage it was read from.
++//
++// Everything about entity ownership rests on this record. There is no
++// "unseal", and a second genesis against a sealed anchor is refused.
++
++public enum EntityGenesisTrigger: String, Codable, Sendable, CaseIterable {
++    case onboarding
++    case addressBookImport
++    case verifiableCredential
++    case fileUpload
++    case directEdit
++    /// The anchor had to persist something and nobody named a trigger. Recorded
++    /// honestly rather than guessed.
++    case firstPersist
++}
++
++public enum EntityGenesisError: Error, Equatable, Sendable {
++    case alreadySealed(linkID: String)
++    case notSealed
++    case initiatorHasNoSigningKey(String)
++    case initiatorIsNotOwner(requester: String, owner: String)
++    case sealProofInvalid
++    case sealDoesNotMatchRecord(String)
++    case cannotRevokeGenesisLink(String)
++    case genesisKeypathIsImmutable(String)
++}
++
++/// The seal itself. Stored at `identityLinks.genesis`; its presence means the
++/// anchor is sealed. The `proof` is the initiator's signature over the
++/// canonical payload of every other field.
++public struct EntityGenesisSeal: Codable, Equatable, Sendable, CanonicalPayloadSignable {
++    public var version: Int
++    public var anchorID: String
++    public var sealedAt: String
++    public var trigger: EntityGenesisTrigger
++    public var linkID: String
++    public var initiatorIdentityUUID: String
++    public var proof: IdentityEnrollmentApprovalProof?
++
++    public init(
++        version: Int = 1,
++        anchorID: String,
++        sealedAt: String,
++        trigger: EntityGenesisTrigger,
++        linkID: String,
++        initiatorIdentityUUID: String,
++        proof: IdentityEnrollmentApprovalProof? = nil
++    ) {
++        self.version = version
++        self.anchorID = anchorID
++        self.sealedAt = sealedAt
++        self.trigger = trigger
++        self.linkID = linkID
++        self.initiatorIdentityUUID = initiatorIdentityUUID
++        self.proof = proof
++    }
++
++    public func canonicalPayloadData() throws -> Data {
++        try CanonicalPayloadEncoder.data(for: self, excludingTopLevelKeys: ["proof"])
++    }
++}
++
++public struct EntityGenesisResult: Equatable, Sendable {
++    public var seal: EntityGenesisSeal
++    public var record: IdentityLinkRecord
++}
++
++public enum EntityGenesisService {
++    public static let sealKeypath = "identityLinks.genesis"
++    public static let recordsKeypath = "identityLinks.records"
++    public static let genesisLinkIDPrefix = "genesis-"
++
++    /// Scopes the initiator holds by virtue of having started the entity.
++    /// `identityLinks.issue` is what lets the initiator approve further links.
++    public static let initiatorScopes = [
++        EntityLinkScope.read.rawValue,
++        EntityLinkScope.write.rawValue,
++        EntityLinkScope.issueLinks.rawValue
++    ]
++
++    public static func genesisLinkID(anchorID: String) -> String {
++        genesisLinkIDPrefix + anchorID
++    }
++
++    /// Builds and signs the seal. Pure apart from the signature: nothing is
++    /// stored here. The caller must already have proven that `initiator` is
++    /// the anchor's owner — this function cannot check that and says so.
++    public static func seal(
++        anchorID: String,
++        initiator: Identity,
++        identityDomain: String,
++        trigger: EntityGenesisTrigger,
++        now: Date = Date()
++    ) async throws -> EntityGenesisResult {
++        let descriptor: IdentityPublicKeyDescriptor
++        do {
++            descriptor = try IdentityLinkProtocolService.descriptor(for: initiator)
++        } catch {
++            throw EntityGenesisError.initiatorHasNoSigningKey(initiator.uuid)
++        }
++
++        let sealedAt = IdentityLinkProtocolService.iso8601(now)
++        let linkID = genesisLinkID(anchorID: anchorID)
++
++        let record = IdentityLinkRecord(
++            linkID: linkID,
++            entityBinding: EntityBindingDescriptor(
++                mode: .localEntityAnchor,
++                entityAnchorReference: anchorID
++            ),
++            linkedIdentity: descriptor,
++            approvedDomains: [identityDomain],
++            approvedIdentityContexts: [],
++            approvedScopes: initiatorScopes,
++            issuerIdentityUUID: initiator.uuid,
++            issuerType: .existingDevice,
++            status: .active,
++            linkedAt: sealedAt
++        )
++
++        var seal = EntityGenesisSeal(
++            anchorID: anchorID,
++            sealedAt: sealedAt,
++            trigger: trigger,
++            linkID: linkID,
++            initiatorIdentityUUID: initiator.uuid
++        )
++        let payload = try seal.canonicalPayloadData()
++        guard let signature = try await initiator.sign(data: payload) else {
++            throw IdentityVaultError.signingFailed
++        }
++        seal.proof = IdentityEnrollmentApprovalProof(
++            issuerIdentityUUID: initiator.uuid,
++            issuerType: .existingDevice,
++            algorithm: descriptor.algorithm,
++            curveType: descriptor.curveType,
++            signature: signature
++        )
++        return EntityGenesisResult(seal: seal, record: record)
++    }
++
++    /// Verifies a stored seal against the record it points at. Both come from
++    /// storage, so neither is trusted on its own: the seal must be signed by
++    /// the key in the record, and the two must describe the same link.
++    public static func verify(seal: EntityGenesisSeal, record: IdentityLinkRecord) throws {
++        guard seal.linkID == record.linkID else {
++            throw EntityGenesisError.sealDoesNotMatchRecord("linkID")
++        }
++        guard seal.initiatorIdentityUUID == record.linkedIdentity.uuid,
++              seal.initiatorIdentityUUID == record.issuerIdentityUUID else {
++            throw EntityGenesisError.sealDoesNotMatchRecord("initiator")
++        }
++        guard record.entityBinding.mode == .localEntityAnchor,
++              record.entityBinding.entityAnchorReference == nil
++                || record.entityBinding.entityAnchorReference == seal.anchorID else {
++            throw EntityGenesisError.sealDoesNotMatchRecord("entityBinding")
++        }
++        guard record.issuerType == .existingDevice, record.status == .active else {
++            throw EntityGenesisError.sealDoesNotMatchRecord("record")
++        }
++        guard let signature = seal.proof?.signature else {
++            throw EntityGenesisError.sealProofInvalid
++        }
++        let payload = try seal.canonicalPayloadData()
++        guard IdentityPublicKeySignatureVerifier.verify(
++            signature: signature,
++            messageData: payload,
++            descriptor: record.linkedIdentity
++        ) else {
++            throw EntityGenesisError.sealProofInvalid
++        }
++    }
++
++    public static func isGenesisLink(_ linkID: String) -> Bool {
++        linkID.hasPrefix(genesisLinkIDPrefix)
++    }
++
++    /// Keypaths that no set may touch except genesis itself.
++    public static func isImmutableGenesisKeypath(_ keypath: String) -> Bool {
++        keypath == sealKeypath || keypath.hasPrefix(sealKeypath + ".")
++    }
++
++    public static func safeRecordKey(_ linkID: String) -> String {
++        let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_"))
++        return String(linkID.unicodeScalars.map { allowed.contains($0) ? Character($0) : "_" })
++    }
++
++    public static func recordKeypath(linkID: String) -> String {
++        recordsKeypath + "." + safeRecordKey(linkID)
++    }
++}
+diff --git a/Sources/CellBase/Identity/EntityLinkAuthorization.swift b/Sources/CellBase/Identity/EntityLinkAuthorization.swift
+new file mode 100644
+index 0000000..07ede85
+--- /dev/null
++++ b/Sources/CellBase/Identity/EntityLinkAuthorization.swift
+@@ -0,0 +1,164 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++
++import Foundation
++
++// purpose://candidate.entitetsdata.authorization-resolves-entity
++//
++// The Entity is the unit of ownership. Identities are its representatives.
++// Until now the authorization path only recognised the one stored owner
++// identity, so a second identity of the same entity — the Face ID identity
++// next to the startup identity — was treated as a stranger.
++//
++// This is the lookup that fixes it. Given the identity links an anchor holds,
++// it answers: is this requester a linked representative of the entity that
++// owns the cell, and does the link cover what is being asked?
++//
++// Four checks, in the order the spec names them:
++//   1. the requester's signing key is the one in the link
++//   2. the link is active and not revoked
++//   3. the requested access is inside the link's scopes and domain
++//   4. the link binds to this anchor's entity
++//
++// What this cannot do is prove the requester *controls* that key. That is a
++// challenge-signature check the cell must run afterwards; see
++// `EntityLinkAuthorizer.authorize` documentation. A match here without that
++// proof is a claim, not evidence.
++
++public enum EntityLinkScope: String, Codable, Sendable, CaseIterable {
++    case read = "entity.read"
++    case write = "entity.write"
++    case issueLinks = "identityLinks.issue"
++
++    /// The scope a permission string needs. Permission strings follow the
++    /// existing grant format: position 0 is read, position 1 is write.
++    public static func required(for requestedAccess: String) -> Set<EntityLinkScope> {
++        var needed = Set<EntityLinkScope>()
++        let chars = Array(requestedAccess)
++        if chars.count > 0, chars[0] == "r" { needed.insert(.read) }
++        if chars.count > 1, chars[1] == "w" { needed.insert(.write) }
++        return needed
++    }
++}
++
++public enum EntityLinkAuthorizationRefusal: Equatable, Sendable {
++    case noLinkForRequester
++    case linkKeyMismatch(linkID: String)
++    case linkNotActive(linkID: String, status: IdentityLinkStatus)
++    case scopeNotCovered(linkID: String, missing: [String])
++    case domainNotCovered(linkID: String, domain: String)
++    case boundToAnotherEntity(linkID: String)
++    case genesisNotVerified(linkID: String)
++}
++
++public struct EntityLinkAuthorization: Equatable, Sendable {
++    public var linkID: String
++    public var scopes: [String]
++    public var domain: String
++    public var isGenesis: Bool
++
++    public var linkRef: String { "identitylink://\(linkID)" }
++}
++
++public enum EntityLinkAuthorizer {
++    /// Pure lookup. Returns the link that covers the request, or the first
++    /// reason it does not. Runs no cryptography except, for a genesis link,
++    /// verifying the stored seal — that one is cheap and the seal is the
++    /// root everything else hangs from.
++    ///
++    /// The caller MUST then prove key control for the requester
++    /// (`GeneralCell.verifyRequesterIdentityControl`) before granting.
++    public static func authorize(
++        requestedAccess: String,
++        requester: Identity,
++        identityDomain: String,
++        anchorID: String,
++        records: [IdentityLinkRecord],
++        genesisSeal: EntityGenesisSeal?
++    ) -> Result<EntityLinkAuthorization, EntityLinkAuthorizationRefusal> {
++        let candidates = records.filter { $0.linkedIdentity.uuid == requester.uuid }
++        guard candidates.isEmpty == false else {
++            return .failure(.noLinkForRequester)
++        }
++
++        // Several links may exist for one identity (an old revoked one next to
++        // a fresh one). The first that passes every check wins; if none does,
++        // the first candidate's refusal is reported so the reason is stable.
++        var firstRefusal: EntityLinkAuthorizationRefusal?
++        for record in candidates {
++            switch check(
++                record: record,
++                requestedAccess: requestedAccess,
++                requester: requester,
++                identityDomain: identityDomain,
++                anchorID: anchorID,
++                genesisSeal: genesisSeal
++            ) {
++            case .success(let authorization):
++                return .success(authorization)
++            case .failure(let refusal):
++                if firstRefusal == nil { firstRefusal = refusal }
++            }
++        }
++        return .failure(firstRefusal ?? .noLinkForRequester)
++    }
++
++    private static func check(
++        record: IdentityLinkRecord,
++        requestedAccess: String,
++        requester: Identity,
++        identityDomain: String,
++        anchorID: String,
++        genesisSeal: EntityGenesisSeal?
++    ) -> Result<EntityLinkAuthorization, EntityLinkAuthorizationRefusal> {
++        // 1. Same signing key, not just same UUID. UUID equality is never ownership.
++        guard let requesterKey = requester.publicSecureKey?.compressedKey,
++              requesterKey.isEmpty == false,
++              requesterKey == record.linkedIdentity.publicKey else {
++            return .failure(.linkKeyMismatch(linkID: record.linkID))
++        }
++
++        // 2. Active. A revoked or pending link grants nothing.
++        guard record.status == .active, record.revokedAt == nil else {
++            return .failure(.linkNotActive(linkID: record.linkID, status: record.status))
++        }
++
++        // 3. Scope and domain.
++        let needed = EntityLinkScope.required(for: requestedAccess)
++        let held = Set(record.approvedScopes)
++        let missing = needed.filter { !held.contains($0.rawValue) }.map(\.rawValue).sorted()
++        guard missing.isEmpty else {
++            return .failure(.scopeNotCovered(linkID: record.linkID, missing: missing))
++        }
++        guard record.approvedDomains.contains(identityDomain) else {
++            return .failure(.domainNotCovered(linkID: record.linkID, domain: identityDomain))
++        }
++
++        // 4. Bound to this anchor's entity. Pairwise and blinded bindings are
++        //    for proving membership to *others*; they do not open the anchor.
++        guard record.entityBinding.mode == .localEntityAnchor,
++              record.entityBinding.entityAnchorReference == nil
++                || record.entityBinding.entityAnchorReference == anchorID else {
++            return .failure(.boundToAnotherEntity(linkID: record.linkID))
++        }
++
++        let isGenesis = EntityGenesisService.isGenesisLink(record.linkID)
++        if isGenesis {
++            guard let seal = genesisSeal else {
++                return .failure(.genesisNotVerified(linkID: record.linkID))
++            }
++            do {
++                try EntityGenesisService.verify(seal: seal, record: record)
++            } catch {
++                return .failure(.genesisNotVerified(linkID: record.linkID))
++            }
++        }
++
++        return .success(EntityLinkAuthorization(
++            linkID: record.linkID,
++            scopes: record.approvedScopes,
++            domain: identityDomain,
++            isGenesis: isGenesis
++        ))
++    }
++}
+diff --git a/Sources/CellBase/Security/CellSecurityEvent.swift b/Sources/CellBase/Security/CellSecurityEvent.swift
+index a610d90..b40351a 100644
+--- a/Sources/CellBase/Security/CellSecurityEvent.swift
++++ b/Sources/CellBase/Security/CellSecurityEvent.swift
+@@ -321,7 +321,7 @@ public extension CellSecurityEvent {
+             return .high
+         case .deniedNoGrant:
+             return .medium
+-        case .debugBypass, .ownerProof, .signedContract, .cellSpecific:
++        case .debugBypass, .ownerProof, .signedContract, .linkedIdentity, .cellSpecific:
+             return .info
+         }
+     }
+diff --git a/Sources/CellVapor/Cells/EntityAnchorCell.swift b/Sources/CellVapor/Cells/EntityAnchorCell.swift
+index 93b1f25..440e321 100644
+--- a/Sources/CellVapor/Cells/EntityAnchorCell.swift
++++ b/Sources/CellVapor/Cells/EntityAnchorCell.swift
+@@ -294,6 +294,7 @@ public class EntityAnchorCell: GeneralCell {
+             return await self.handleIdentityLinksSet(keypath: keypath, value: value, requester: requester)
+         })
+         for identityLinkAction in [
++            "identityLinks.genesis",
+             "identityLinks.approveEnrollment",
+             "identityLinks.completeEnrollment",
+             "identityLinks.revoke"
+@@ -449,6 +450,7 @@ public class EntityAnchorCell: GeneralCell {
+         await registerExploreContract(requester: requester, key: "identityLinks", method: .set, input: storedValue, returns: identityLinkResult, permissions: ["-w--"], required: false, flowEffects: [identityLinkEffect], description: .string("Stores identity-link state below the owner entity."))
+         await registerExploreContract(requester: requester, key: "identityLinks", method: .get, input: .null, returns: identityLinkResult, permissions: ["r---"], required: false, description: .string("Reads identity-link state below the owner entity."))
+         await registerExploreContract(requester: requester, key: "identityLinks.state", method: .get, input: .null, returns: identityLinkResult, permissions: ["r---"], required: false, description: .string("Reads normalized identity-link runtime state."))
++        await registerExploreContract(requester: requester, key: "identityLinks.genesis", method: .set, input: ExploreContract.oneOfSchema(options: [ExploreContract.schema(type: "string"), ExploreContract.objectSchema(properties: ["trigger": ExploreContract.schema(type: "string")], requiredKeys: [])]), returns: identityLinkResult, permissions: ["-w--"], required: true, flowEffects: [identityLinkEffect], description: .string("Seals the anchor to the requesting owner identity. Irreversible; refused once sealed."))
+         await registerExploreContract(requester: requester, key: "identityLinks.approveEnrollment", method: .set, input: ExploreContract.schema(type: "object"), returns: identityLinkResult, permissions: ["-w--"], required: true, flowEffects: [identityLinkEffect], description: .string("Approves a cryptographically bound identity enrollment."))
+         await registerExploreContract(requester: requester, key: "identityLinks.completeEnrollment", method: .set, input: ExploreContract.schema(type: "object"), returns: identityLinkResult, permissions: ["-w--"], required: true, flowEffects: [identityLinkEffect], description: .string("Completes a previously approved identity enrollment."))
+         await registerExploreContract(requester: requester, key: "identityLinks.revoke", method: .set, input: ExploreContract.oneOfSchema(options: [ExploreContract.schema(type: "string"), ExploreContract.objectSchema(properties: ["linkID": ExploreContract.schema(type: "string")], requiredKeys: ["linkID"])]), returns: identityLinkResult, permissions: ["-w--"], required: true, flowEffects: [identityLinkEffect], description: .string("Revokes an exact identity link."))
+@@ -750,6 +752,12 @@ public class EntityAnchorCell: GeneralCell {
+         _ envelope: EntityBatchPersistEnvelope,
+         requester: Identity
+     ) async throws -> EntityAnchorBatchPersistResult {
++        // Genesis on first need. Outside the gate: sealing writes through
++        // saveKeypathStorage, which takes the gate itself. Only a proven owner
++        // seals; anyone else falls through to the ownership guard below.
++        if loadGenesisSeal() == nil, await requesterProvesOwnership(requester) {
++            _ = try await performGenesis(requester: requester, trigger: .firstPersist, ownershipAlreadyProven: true)
++        }
+         await authorityCommitGate.acquire()
+         do {
+             try ensurePersistenceAvailable()
+@@ -834,8 +842,11 @@ public class EntityAnchorCell: GeneralCell {
+         if keypath == "identityLinks" || keypath == "identityLinks.state" || keypath == "state" {
+             let records = (try? storage.get(keypath: "identityLinks.records")) ?? .object(Object())
+             let used = (try? storage.get(keypath: "identityLinks.usedApprovalJTIs")) ?? .object(Object())
++            let genesis = (try? storage.get(keypath: EntityGenesisService.sealKeypath)) ?? .null
+             return .object([
+                 "status": .string("ready"),
++                "sealed": .bool(loadGenesisSeal() != nil),
++                "genesis": genesis,
+                 "records": records,
+                 "usedApprovalJTIs": used,
+                 "summary": .string("EntityAnchor identityLinks er klar for approveEnrollment, completeEnrollment og revoke.")
+@@ -847,6 +858,8 @@ public class EntityAnchorCell: GeneralCell {
+     private func handleIdentityLinksSet(keypath: String, value: ValueType, requester: Identity) async -> ValueType? {
+         do {
+             switch keypath {
++            case "identityLinks.genesis":
++                return try await sealGenesis(value: value, requester: requester)
+             case "identityLinks.approveEnrollment":
+                 return try await approveIdentityEnrollment(value: value, requester: requester)
+             case "identityLinks.completeEnrollment":
+@@ -854,6 +867,14 @@ public class EntityAnchorCell: GeneralCell {
+             case "identityLinks.revoke":
+                 return try await revokeIdentityLink(value: value, requester: requester)
+             default:
++                if EntityGenesisService.isImmutableGenesisKeypath(keypath) {
++                    throw EntityGenesisError.genesisKeypathIsImmutable(keypath)
++                }
++                if keypath.hasPrefix(EntityGenesisService.recordsKeypath + "."),
++                   let seal = loadGenesisSeal(),
++                   keypath == EntityGenesisService.recordKeypath(linkID: seal.linkID) {
++                    throw EntityGenesisError.genesisKeypathIsImmutable(keypath)
++                }
+                 try storage.set(keypath: keypath, setValue: value)
+                 try await saveKeypathStorage(entity: storage)
+                 pushIdentityLinkEvent(keypath: keypath, value: value, requester: requester)
+@@ -935,6 +956,9 @@ public class EntityAnchorCell: GeneralCell {
+             linkID = rawLinkID
+         }
+ 
++        if EntityGenesisService.isGenesisLink(linkID) {
++            throw EntityGenesisError.cannotRevokeGenesisLink(linkID)
++        }
+         let recordKey = safeIdentityLinkKey(linkID)
+         let recordKeypath = "identityLinks.records.\(recordKey)"
+         let recordValue = try storage.get(keypath: recordKeypath)
+@@ -966,6 +990,115 @@ public class EntityAnchorCell: GeneralCell {
+         ])
+     }
+ 
++
++    // MARK: - Genesis
++    // purpose://candidate.entitetsdata.genesis-seals-to-initiator
++    //
++    // The first time this anchor must persist entity data it is sealed to the
++    // identity that did it. The seal is a signed IdentityLinkRecord issued by
++    // the initiator to itself. Nothing below ever removes it.
++
++    private func sealGenesis(value: ValueType, requester: Identity) async throws -> ValueType {
++        var trigger: EntityGenesisTrigger = .firstPersist
++        if case let .object(object) = value,
++           case let .string(raw)? = object["trigger"],
++           let parsed = EntityGenesisTrigger(rawValue: raw) {
++            trigger = parsed
++        } else if case let .string(raw) = value, let parsed = EntityGenesisTrigger(rawValue: raw) {
++            trigger = parsed
++        }
++        let result = try await performGenesis(requester: requester, trigger: trigger, ownershipAlreadyProven: false)
++        return .object([
++            "status": .string("sealed"),
++            "seal": try IdentityLinkProtocolService.value(from: result.seal),
++            "record": try IdentityLinkProtocolService.value(from: result.record)
++        ])
++    }
++
++    /// Seals on first need. Must be called OUTSIDE `authorityCommitGate`:
++    /// it writes through `saveKeypathStorage`, which takes that gate itself.
++    private func ensureSealed(requester: Identity, trigger: EntityGenesisTrigger) async throws {
++        guard loadGenesisSeal() == nil else { return }
++        _ = try await performGenesis(requester: requester, trigger: trigger, ownershipAlreadyProven: false)
++    }
++
++    private func performGenesis(
++        requester: Identity,
++        trigger: EntityGenesisTrigger,
++        ownershipAlreadyProven: Bool
++    ) async throws -> EntityGenesisResult {
++        if let existing = loadGenesisSeal() {
++            throw EntityGenesisError.alreadySealed(linkID: existing.linkID)
++        }
++        if ownershipAlreadyProven == false {
++            guard await requesterProvesOwnership(requester) else {
++                throw EntityGenesisError.initiatorIsNotOwner(requester: requester.uuid, owner: storedOwnerIdentity.uuid)
++            }
++        }
++        let result = try await EntityGenesisService.seal(
++            anchorID: uuid,
++            initiator: requester,
++            identityDomain: identityDomain,
++            trigger: trigger
++        )
++        let sealValue = try IdentityLinkProtocolService.value(from: result.seal)
++        let recordValue = try IdentityLinkProtocolService.value(from: result.record)
++        let recordKey = EntityGenesisService.safeRecordKey(result.record.linkID)
++        try storage.set(keypath: EntityGenesisService.sealKeypath, setValue: sealValue)
++        try storage.set(keypath: EntityGenesisService.recordKeypath(linkID: result.record.linkID), setValue: recordValue)
++        try storage.set(keypath: "proofs.identityLinks.\(recordKey)", setValue: .object([
++            "record": recordValue,
++            "seal": sealValue
++        ]))
++        try await saveKeypathStorage(entity: storage)
++        pushIdentityLinkEvent(keypath: EntityGenesisService.sealKeypath, value: sealValue, requester: requester)
++        return result
++    }
++
++    private func loadGenesisSeal() -> EntityGenesisSeal? {
++        guard let value = try? storage.get(keypath: EntityGenesisService.sealKeypath) else {
++            return nil
++        }
++        return try? decodeValue(value, as: EntityGenesisSeal.self)
++    }
++
++    private func loadIdentityLinkRecords() -> [IdentityLinkRecord] {
++        guard let value = try? storage.get(keypath: EntityGenesisService.recordsKeypath),
++              case let .object(object) = value else {
++            return []
++        }
++        return object.values.compactMap { try? decodeValue($0, as: IdentityLinkRecord.self) }
++    }
++
++    // MARK: - Linked identity
++    // purpose://candidate.entitetsdata.authorization-resolves-entity
++    //
++    // Consulted by GeneralCell only when the requester is not the stored owner
++    // reference. Two halves, both required: the link lookup says this key may
++    // act for the entity; the challenge signature proves the requester holds it.
++
++    public override func authorizeLinkedIdentity(
++        _ requestedAccess: String,
++        at keypath: String,
++        for identity: Identity
++    ) async -> EntityLinkAuthorization? {
++        let lookup = EntityLinkAuthorizer.authorize(
++            requestedAccess: requestedAccess,
++            requester: identity,
++            identityDomain: identityDomain,
++            anchorID: uuid,
++            records: loadIdentityLinkRecords(),
++            genesisSeal: loadGenesisSeal()
++        )
++        guard case let .success(authorization) = lookup else {
++            return nil
++        }
++        guard await verifyRequesterIdentityControl(identity) else {
++            return nil
++        }
++        return authorization
++    }
++
+     private func usedApprovalJTIs() -> Set<String> {
+         guard let usedValue = try? storage.get(keypath: "identityLinks.usedApprovalJTIs"),
+               case let .object(usedObject) = usedValue else {
+diff --git a/Tests/CellBaseTests/EntityAnchorGenesisTests.swift b/Tests/CellBaseTests/EntityAnchorGenesisTests.swift
+new file mode 100644
+index 0000000..19d0acd
+--- /dev/null
++++ b/Tests/CellBaseTests/EntityAnchorGenesisTests.swift
+@@ -0,0 +1,264 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++
++#if os(macOS)
++import XCTest
++@testable import CellBase
++@testable import CellVapor
++
++// Cell-level half of round 1. Runs against the Vapor EntityAnchorCell with the
++// same harness VaporCellRuntimeReadinessContractTests uses.
++//
++//   test.entitet.genesis-once           testExplicitGenesisSealsAnchorToOwner (first-persist half: blocked, see below)
++//   test.entitet.no-refounding          testSecondGenesisIsRefused, testGenesisCannotBeRevokedOrOverwritten
++//   test.entitet.linked-identity-accepted   testLinkedSecondIdentityReadsAndWrites
++//   test.entitet.foreign-entity-refused     testIdentityFromAnotherEntityIsRefused
++final class EntityAnchorGenesisTests: XCTestCase {
++    private var previousVault: IdentityVaultProtocol?
++    private var previousDocumentRoot: String?
++    private var previousResolver: CellResolverProtocol?
++
++    override func setUp() async throws {
++        previousVault = CellBase.defaultIdentityVault
++        previousDocumentRoot = CellBase.documentRootPath
++        previousResolver = CellBase.defaultCellResolver
++        let root = FileManager.default.temporaryDirectory
++            .appendingPathComponent("cellprotocol-genesis-\(UUID().uuidString)", isDirectory: true)
++        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
++        CellBase.documentRootPath = root.path
++        CellBase.defaultCellResolver = MockCellResolver()
++    }
++
++    override func tearDown() async throws {
++        CellBase.defaultIdentityVault = previousVault
++        CellBase.documentRootPath = previousDocumentRoot
++        CellBase.defaultCellResolver = previousResolver
++    }
++
++    private func makeOwnerAndAnchor() async throws -> (vault: MockIdentityVault, owner: Identity, anchor: EntityAnchorCell) {
++        let vault = MockIdentityVault()
++        CellBase.defaultIdentityVault = vault
++        let owner = try XCTUnwrap(await vault.identity(for: "private", makeNewIfNotFound: true))
++        let anchor = await EntityAnchorCell(owner: owner)
++        return (vault, owner, anchor)
++    }
++
++    private func state(_ anchor: EntityAnchorCell, requester: Identity) async throws -> Object {
++        let value = try await anchor.get(keypath: "identityLinks.state", requester: requester)
++        guard case let .object(object) = value else {
++            throw XCTSkip("identityLinks.state did not return an object: \(value)")
++        }
++        return object
++    }
++
++    // MARK: genesis-once
++
++    func testAnchorStartsUnsealed() async throws {
++        let (_, owner, anchor) = try await makeOwnerAndAnchor()
++        let object = try await state(anchor, requester: owner)
++        XCTAssertEqual(object["sealed"], .bool(false))
++    }
++
++    func testExplicitGenesisSealsAnchorToOwner() async throws {
++        let (_, owner, anchor) = try await makeOwnerAndAnchor()
++        let result = try await anchor.set(
++            keypath: "identityLinks.genesis",
++            value: .object(["trigger": .string("addressBookImport")]),
++            requester: owner
++        )
++        guard case let .object(object)? = result else {
++            return XCTFail("Expected an object result from genesis, got \(String(describing: result))")
++        }
++        XCTAssertEqual(object["status"], .string("sealed"))
++
++        let sealed = try await state(anchor, requester: owner)
++        XCTAssertEqual(sealed["sealed"], .bool(true))
++        guard case let .object(seal)? = sealed["genesis"] else {
++            return XCTFail("Expected genesis seal in state")
++        }
++        XCTAssertEqual(seal["trigger"], .string("addressBookImport"))
++        XCTAssertEqual(seal["initiatorIdentityUUID"], .string(owner.uuid))
++        XCTAssertEqual(seal["anchorID"], .string(anchor.uuid))
++    }
++
++    // testFirstPersistSealsAnchorToOwner is deliberately NOT here.
++    //
++    // The batch-persist path is a feed intercept: it only runs when this cell
++    // absorbs another cell's flow through the auditor, which is the harness
++    // BindingPersonalChatChronicle builds and no CellBase test builds today.
++    // `GeneralCell.intercepts` is private, so the intercept cannot be invoked
++    // directly either. Sealing on first persist is four lines in
++    // persistBatchEnvelope; it stays UNTESTED until round 2 builds the flow
++    // harness that WP3–WP5 need anyway. TESTRESULT.md must say "blocked", not
++    // omit it.
++
++    // MARK: no-refounding
++
++    func testSecondGenesisIsRefused() async throws {
++        let (_, owner, anchor) = try await makeOwnerAndAnchor()
++        _ = try await anchor.set(keypath: "identityLinks.genesis", value: .string("onboarding"), requester: owner)
++        let second = try await anchor.set(keypath: "identityLinks.genesis", value: .string("onboarding"), requester: owner)
++        guard case let .object(object)? = second else {
++            return XCTFail("Expected an error object, got \(String(describing: second))")
++        }
++        XCTAssertEqual(object["status"], .string("error"))
++        XCTAssertTrue((try? object["message"]?.stringValue())??.contains("alreadySealed") == true,
++                      "Expected alreadySealed, got \(String(describing: object["message"]))")
++
++        let sealed = try await state(anchor, requester: owner)
++        guard case let .object(seal)? = sealed["genesis"] else {
++            return XCTFail("Seal should still be present")
++        }
++        XCTAssertEqual(seal["trigger"], .string("onboarding"))
++    }
++
++    func testGenesisCannotBeRevokedOrOverwritten() async throws {
++        let (_, owner, anchor) = try await makeOwnerAndAnchor()
++        _ = try await anchor.set(keypath: "identityLinks.genesis", value: .string("onboarding"), requester: owner)
++        let linkID = "genesis-\(anchor.uuid)"
++
++        let revoke = try await anchor.set(keypath: "identityLinks.revoke", value: .string(linkID), requester: owner)
++        guard case let .object(revokeObject)? = revoke else {
++            return XCTFail("Expected an error object from revoke")
++        }
++        XCTAssertEqual(revokeObject["status"], .string("error"))
++        XCTAssertTrue((try? revokeObject["message"]?.stringValue())??.contains("cannotRevokeGenesisLink") == true)
++
++        let overwrite = try await anchor.set(
++            keypath: "identityLinks.genesis.trigger",
++            value: .string("directEdit"),
++            requester: owner
++        )
++        guard case let .object(overwriteObject)? = overwrite else {
++            return XCTFail("Expected an error object from overwrite")
++        }
++        XCTAssertEqual(overwriteObject["status"], .string("error"))
++        XCTAssertTrue((try? overwriteObject["message"]?.stringValue())??.contains("genesisKeypathIsImmutable") == true)
++
++        let sealed = try await state(anchor, requester: owner)
++        guard case let .object(seal)? = sealed["genesis"] else {
++            return XCTFail("Seal should still be present")
++        }
++        XCTAssertEqual(seal["trigger"], .string("onboarding"))
++    }
++
++    // MARK: linked identity through the real authorization path
++
++    func testLinkedSecondIdentityReadsAndWrites() async throws {
++        let (vault, owner, anchor) = try await makeOwnerAndAnchor()
++        _ = try await anchor.set(keypath: "identityLinks.genesis", value: .string("onboarding"), requester: owner)
++
++        // A second identity of the same entity, in the same vault: the Face ID identity.
++        let faceID = try XCTUnwrap(await vault.identity(for: "faceid", makeNewIfNotFound: true))
++
++        // Before any link exists, it is a stranger.
++        do {
++            _ = try await anchor.get(keypath: "person", requester: faceID)
++            XCTFail("Unlinked identity must not read entity data")
++        } catch {
++            // expected
++        }
++
++        // The owner records a link for it. Enrollment has its own tests; here
++        // the record is written through the owner's identityLinks grant.
++        let link = IdentityLinkRecord(
++            linkID: "link-faceid",
++            entityBinding: EntityBindingDescriptor(mode: .localEntityAnchor, entityAnchorReference: anchor.uuid),
++            linkedIdentity: try IdentityLinkProtocolService.descriptor(for: faceID),
++            approvedDomains: ["private"],
++            approvedIdentityContexts: [],
++            approvedScopes: EntityGenesisService.initiatorScopes,
++            issuerIdentityUUID: owner.uuid,
++            issuerType: .existingDevice,
++            status: .active,
++            linkedAt: IdentityLinkProtocolService.iso8601(Date())
++        )
++        _ = try await anchor.set(
++            keypath: "identityLinks.records.link-faceid",
++            value: try IdentityLinkProtocolService.value(from: link),
++            requester: owner
++        )
++
++        // Now it reads and writes as a representative of the entity.
++        _ = try await anchor.get(keypath: "person", requester: faceID)
++        _ = try await anchor.set(keypath: "person.nickname", value: .string("Ada"), requester: faceID)
++        XCTAssertEqual(try await anchor.get(keypath: "person.nickname", requester: owner), .string("Ada"))
++
++        // And the decision names the link, so the trace can too.
++        let decision = await anchor.authorizationDecision(requestedAccess: "r---", at: "person", for: faceID)
++        XCTAssertTrue(decision.allowed)
++        XCTAssertEqual(decision.path, .linkedIdentity)
++        XCTAssertEqual(decision.linkRef, "identitylink://link-faceid")
++    }
++
++    func testIdentityFromAnotherEntityIsRefused() async throws {
++        let (_, owner, anchor) = try await makeOwnerAndAnchor()
++        _ = try await anchor.set(keypath: "identityLinks.genesis", value: .string("onboarding"), requester: owner)
++
++        // Another entity: its own vault, its own keys.
++        let otherVault = MockIdentityVault()
++        let other = try XCTUnwrap(await otherVault.identity(for: "private", makeNewIfNotFound: true))
++
++        // Even a link record that names it does not help if the record is bound
++        // to another anchor — and a record it wrote itself can never appear
++        // here, because it has no write grant on this cell.
++        let foreignLink = IdentityLinkRecord(
++            linkID: "link-foreign",
++            entityBinding: EntityBindingDescriptor(mode: .localEntityAnchor, entityAnchorReference: "some-other-anchor"),
++            linkedIdentity: try IdentityLinkProtocolService.descriptor(for: other),
++            approvedDomains: ["private"],
++            approvedIdentityContexts: [],
++            approvedScopes: EntityGenesisService.initiatorScopes,
++            issuerIdentityUUID: other.uuid,
++            issuerType: .existingDevice,
++            status: .active,
++            linkedAt: IdentityLinkProtocolService.iso8601(Date())
++        )
++        _ = try await anchor.set(
++            keypath: "identityLinks.records.link-foreign",
++            value: try IdentityLinkProtocolService.value(from: foreignLink),
++            requester: owner
++        )
++
++        let decision = await anchor.authorizationDecision(requestedAccess: "r---", at: "person", for: other)
++        XCTAssertFalse(decision.allowed)
++        XCTAssertEqual(decision.path, .deniedNoGrant)
++        do {
++            _ = try await anchor.get(keypath: "person", requester: other)
++            XCTFail("Identity from another entity must not read entity data")
++        } catch {
++            // expected
++        }
++    }
++
++    func testLinkedIdentityWithoutKeyControlIsRefused() async throws {
++        let (vault, owner, anchor) = try await makeOwnerAndAnchor()
++        _ = try await anchor.set(keypath: "identityLinks.genesis", value: .string("onboarding"), requester: owner)
++        let faceID = try XCTUnwrap(await vault.identity(for: "faceid", makeNewIfNotFound: true))
++        let link = IdentityLinkRecord(
++            linkID: "link-faceid",
++            entityBinding: EntityBindingDescriptor(mode: .localEntityAnchor, entityAnchorReference: anchor.uuid),
++            linkedIdentity: try IdentityLinkProtocolService.descriptor(for: faceID),
++            approvedDomains: ["private"],
++            approvedIdentityContexts: [],
++            approvedScopes: EntityGenesisService.initiatorScopes,
++            issuerIdentityUUID: owner.uuid,
++            issuerType: .existingDevice,
++            status: .active,
++            linkedAt: IdentityLinkProtocolService.iso8601(Date())
++        )
++        _ = try await anchor.set(
++            keypath: "identityLinks.records.link-faceid",
++            value: try IdentityLinkProtocolService.value(from: link),
++            requester: owner
++        )
++
++        // Same UUID and public key as the linked identity, but no vault: it
++        // cannot answer the challenge. The link matches; the proof fails.
++        let claimant = Identity(faceID.uuid, displayName: "claimant", identityVault: nil)
++        claimant.publicSecureKey = faceID.publicSecureKey
++        let decision = await anchor.authorizationDecision(requestedAccess: "r---", at: "person", for: claimant)
++        XCTAssertFalse(decision.allowed)
++    }
++}
++#endif
+diff --git a/Tests/CellBaseTests/EntityGenesisTests.swift b/Tests/CellBaseTests/EntityGenesisTests.swift
+new file mode 100644
+index 0000000..ff61ec2
+--- /dev/null
++++ b/Tests/CellBaseTests/EntityGenesisTests.swift
+@@ -0,0 +1,133 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++
++import XCTest
++@testable import CellBase
++
++// purpose://candidate.entitetsdata.genesis-seals-to-initiator
++// test.entitet.genesis-once — the pure half. The cell-level half (a second
++// genesis against a sealed anchor is refused) lives in EntityAnchorGenesisTests.
++final class EntityGenesisTests: XCTestCase {
++
++    func testGenesisSealsToInitiatorAndVerifies() async throws {
++        let vault = OrganizerAccessTestIdentityVault()
++        let initiator = await vault.makeIdentity(displayName: "initiator")
++        let now = Date(timeIntervalSince1970: 1_800_000_000)
++
++        let result = try await EntityGenesisService.seal(
++            anchorID: "anchor-1",
++            initiator: initiator,
++            identityDomain: "private",
++            trigger: .addressBookImport,
++            now: now
++        )
++
++        // The record is a normal IdentityLinkRecord the authorizer can use.
++        XCTAssertEqual(result.record.linkID, "genesis-anchor-1")
++        XCTAssertEqual(result.record.entityBinding.mode, .localEntityAnchor)
++        XCTAssertEqual(result.record.entityBinding.entityAnchorReference, "anchor-1")
++        XCTAssertEqual(result.record.linkedIdentity.uuid, initiator.uuid)
++        XCTAssertEqual(result.record.issuerIdentityUUID, initiator.uuid)
++        XCTAssertEqual(result.record.issuerType, .existingDevice)
++        XCTAssertEqual(result.record.status, .active)
++        XCTAssertEqual(result.record.approvedDomains, ["private"])
++        XCTAssertEqual(Set(result.record.approvedScopes), Set(EntityGenesisService.initiatorScopes))
++
++        // The seal names the same link and carries a signature that verifies
++        // against the key in the record — not against anything in storage.
++        XCTAssertEqual(result.seal.linkID, result.record.linkID)
++        XCTAssertEqual(result.seal.trigger, .addressBookImport)
++        XCTAssertEqual(result.seal.initiatorIdentityUUID, initiator.uuid)
++        XCTAssertNotNil(result.seal.proof?.signature)
++        XCTAssertNoThrow(try EntityGenesisService.verify(seal: result.seal, record: result.record))
++    }
++
++    func testTamperedSealFailsVerification() async throws {
++        let vault = OrganizerAccessTestIdentityVault()
++        let initiator = await vault.makeIdentity(displayName: "initiator")
++        let result = try await EntityGenesisService.seal(
++            anchorID: "anchor-1",
++            initiator: initiator,
++            identityDomain: "private",
++            trigger: .onboarding
++        )
++
++        var tampered = result.seal
++        tampered.trigger = .directEdit
++        XCTAssertThrowsError(try EntityGenesisService.verify(seal: tampered, record: result.record)) { error in
++            XCTAssertEqual(error as? EntityGenesisError, .sealProofInvalid)
++        }
++
++        var stripped = result.seal
++        stripped.proof = nil
++        XCTAssertThrowsError(try EntityGenesisService.verify(seal: stripped, record: result.record)) { error in
++            XCTAssertEqual(error as? EntityGenesisError, .sealProofInvalid)
++        }
++    }
++
++    func testSealDoesNotVerifyAgainstAnotherIdentitysRecord() async throws {
++        let vault = OrganizerAccessTestIdentityVault()
++        let initiator = await vault.makeIdentity(displayName: "initiator")
++        let attacker = await vault.makeIdentity(displayName: "attacker")
++        let genuine = try await EntityGenesisService.seal(
++            anchorID: "anchor-1",
++            initiator: initiator,
++            identityDomain: "private",
++            trigger: .onboarding
++        )
++        let forged = try await EntityGenesisService.seal(
++            anchorID: "anchor-1",
++            initiator: attacker,
++            identityDomain: "private",
++            trigger: .onboarding
++        )
++
++        // Attacker swaps in their own record under the genuine seal: the seal
++        // names the initiator, the record names the attacker.
++        XCTAssertThrowsError(try EntityGenesisService.verify(seal: genuine.seal, record: forged.record)) { error in
++            XCTAssertEqual(error as? EntityGenesisError, .sealDoesNotMatchRecord("initiator"))
++        }
++    }
++
++    func testRecordBoundToAnotherAnchorIsRejected() async throws {
++        let vault = OrganizerAccessTestIdentityVault()
++        let initiator = await vault.makeIdentity(displayName: "initiator")
++        let result = try await EntityGenesisService.seal(
++            anchorID: "anchor-1",
++            initiator: initiator,
++            identityDomain: "private",
++            trigger: .onboarding
++        )
++        var moved = result.record
++        moved.entityBinding = EntityBindingDescriptor(mode: .localEntityAnchor, entityAnchorReference: "anchor-2")
++        XCTAssertThrowsError(try EntityGenesisService.verify(seal: result.seal, record: moved)) { error in
++            XCTAssertEqual(error as? EntityGenesisError, .sealDoesNotMatchRecord("entityBinding"))
++        }
++    }
++
++    func testInitiatorWithoutSigningKeyCannotSeal() async {
++        let keyless = Identity(UUID().uuidString, displayName: "keyless", identityVault: nil)
++        do {
++            _ = try await EntityGenesisService.seal(
++                anchorID: "anchor-1",
++                initiator: keyless,
++                identityDomain: "private",
++                trigger: .onboarding
++            )
++            XCTFail("Expected genesis to refuse an initiator without a signing key")
++        } catch let error as EntityGenesisError {
++            XCTAssertEqual(error, .initiatorHasNoSigningKey(keyless.uuid))
++        } catch {
++            XCTFail("Unexpected error \(error)")
++        }
++    }
++
++    func testGenesisKeypathsAreRecognisedAsImmutable() {
++        XCTAssertTrue(EntityGenesisService.isImmutableGenesisKeypath("identityLinks.genesis"))
++        XCTAssertTrue(EntityGenesisService.isImmutableGenesisKeypath("identityLinks.genesis.proof"))
++        XCTAssertFalse(EntityGenesisService.isImmutableGenesisKeypath("identityLinks.genesisX"))
++        XCTAssertFalse(EntityGenesisService.isImmutableGenesisKeypath("identityLinks.records.abc"))
++        XCTAssertTrue(EntityGenesisService.isGenesisLink("genesis-anchor-1"))
++        XCTAssertFalse(EntityGenesisService.isGenesisLink("approval-123"))
++    }
++}
+diff --git a/Tests/CellBaseTests/EntityLinkAuthorizationTests.swift b/Tests/CellBaseTests/EntityLinkAuthorizationTests.swift
+new file mode 100644
+index 0000000..1c41a3d
+--- /dev/null
++++ b/Tests/CellBaseTests/EntityLinkAuthorizationTests.swift
+@@ -0,0 +1,210 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++
++import XCTest
++@testable import CellBase
++
++// purpose://candidate.entitetsdata.authorization-resolves-entity
++// test.entitet.linked-identity-accepted and test.entitet.foreign-entity-refused,
++// the pure half. The cell-level half goes through EntityAnchorCell.validateAccess
++// in EntityAnchorGenesisTests, where the challenge-signature proof is also exercised.
++final class EntityLinkAuthorizationTests: XCTestCase {
++
++    private struct Fixture {
++        var vault: OrganizerAccessTestIdentityVault
++        var initiator: Identity
++        var faceID: Identity
++        var stranger: Identity
++        var genesis: EntityGenesisResult
++        var faceIDLink: IdentityLinkRecord
++    }
++
++    private func makeFixture(faceIDScopes: [String] = EntityGenesisService.initiatorScopes,
++                             faceIDDomains: [String] = ["private"],
++                             anchorID: String = "anchor-1") async throws -> Fixture {
++        let vault = OrganizerAccessTestIdentityVault()
++        let initiator = await vault.makeIdentity(displayName: "startup-identity")
++        let faceID = await vault.makeIdentity(displayName: "faceid-identity")
++        let stranger = await vault.makeIdentity(displayName: "someone-else")
++        let genesis = try await EntityGenesisService.seal(
++            anchorID: anchorID,
++            initiator: initiator,
++            identityDomain: "private",
++            trigger: .onboarding
++        )
++        // A link the initiator has issued to its own second identity. Enrollment
++        // has its own tests; here the record is the input.
++        let faceIDLink = IdentityLinkRecord(
++            linkID: "link-faceid",
++            entityBinding: EntityBindingDescriptor(mode: .localEntityAnchor, entityAnchorReference: anchorID),
++            linkedIdentity: try IdentityLinkProtocolService.descriptor(for: faceID),
++            approvedDomains: faceIDDomains,
++            approvedIdentityContexts: [],
++            approvedScopes: faceIDScopes,
++            issuerIdentityUUID: initiator.uuid,
++            issuerType: .existingDevice,
++            status: .active,
++            linkedAt: IdentityLinkProtocolService.iso8601(Date())
++        )
++        return Fixture(vault: vault, initiator: initiator, faceID: faceID, stranger: stranger,
++                       genesis: genesis, faceIDLink: faceIDLink)
++    }
++
++    private enum SealChoice {
++        case fixture
++        case none
++        case custom(EntityGenesisSeal)
++    }
++
++    private func authorize(_ f: Fixture, requester: Identity, access: String = "rw--",
++                           records: [IdentityLinkRecord]? = nil, anchorID: String = "anchor-1",
++                           domain: String = "private", seal: SealChoice = .fixture)
++        -> Result<EntityLinkAuthorization, EntityLinkAuthorizationRefusal> {
++        let genesisSeal: EntityGenesisSeal?
++        switch seal {
++        case .fixture: genesisSeal = f.genesis.seal
++        case .none: genesisSeal = nil
++        case .custom(let custom): genesisSeal = custom
++        }
++        return EntityLinkAuthorizer.authorize(
++            requestedAccess: access,
++            requester: requester,
++            identityDomain: domain,
++            anchorID: anchorID,
++            records: records ?? [f.genesis.record, f.faceIDLink],
++            genesisSeal: genesisSeal
++        )
++    }
++
++    // MARK: linked identity accepted
++
++    func testSecondIdentityOfSameEntityIsAccepted() async throws {
++        let f = try await makeFixture()
++        switch authorize(f, requester: f.faceID) {
++        case .success(let auth):
++            XCTAssertEqual(auth.linkID, "link-faceid")
++            XCTAssertFalse(auth.isGenesis)
++            XCTAssertEqual(auth.linkRef, "identitylink://link-faceid")
++        case .failure(let refusal):
++            XCTFail("Expected the Face ID identity to be accepted, got \(refusal)")
++        }
++    }
++
++    func testInitiatorIsAcceptedThroughGenesisLinkWhenSealVerifies() async throws {
++        let f = try await makeFixture()
++        switch authorize(f, requester: f.initiator) {
++        case .success(let auth):
++            XCTAssertTrue(auth.isGenesis)
++            XCTAssertEqual(auth.linkID, "genesis-anchor-1")
++        case .failure(let refusal):
++            XCTFail("Expected initiator through genesis link, got \(refusal)")
++        }
++    }
++
++    func testReadOnlyLinkAcceptsReadAndRefusesWrite() async throws {
++        let f = try await makeFixture(faceIDScopes: [EntityLinkScope.read.rawValue])
++        if case .failure(let r) = authorize(f, requester: f.faceID, access: "r---") {
++            XCTFail("Read should be covered, got \(r)")
++        }
++        XCTAssertEqual(
++            authorize(f, requester: f.faceID, access: "-w--").failureValue,
++            .scopeNotCovered(linkID: "link-faceid", missing: ["entity.write"])
++        )
++    }
++
++    // MARK: foreign entity refused
++
++    func testIdentityWithNoLinkIsRefused() async throws {
++        let f = try await makeFixture()
++        XCTAssertEqual(authorize(f, requester: f.stranger).failureValue, .noLinkForRequester)
++    }
++
++    func testSameUUIDWithDifferentKeyIsRefused() async throws {
++        let f = try await makeFixture()
++        // Same UUID as the Face ID identity, attacker's key.
++        let impostor = Identity(f.faceID.uuid, displayName: "impostor", identityVault: f.vault)
++        impostor.publicSecureKey = f.stranger.publicSecureKey
++        XCTAssertEqual(
++            authorize(f, requester: impostor).failureValue,
++            .linkKeyMismatch(linkID: "link-faceid")
++        )
++    }
++
++    func testRevokedLinkIsRefused() async throws {
++        let f = try await makeFixture()
++        var revoked = f.faceIDLink
++        revoked.status = .revoked
++        revoked.revokedAt = IdentityLinkProtocolService.iso8601(Date())
++        XCTAssertEqual(
++            authorize(f, requester: f.faceID, records: [f.genesis.record, revoked]).failureValue,
++            .linkNotActive(linkID: "link-faceid", status: .revoked)
++        )
++    }
++
++    func testLinkBoundToAnotherAnchorIsRefused() async throws {
++        let f = try await makeFixture()
++        var elsewhere = f.faceIDLink
++        elsewhere.entityBinding = EntityBindingDescriptor(mode: .localEntityAnchor, entityAnchorReference: "anchor-2")
++        XCTAssertEqual(
++            authorize(f, requester: f.faceID, records: [f.genesis.record, elsewhere]).failureValue,
++            .boundToAnotherEntity(linkID: "link-faceid")
++        )
++    }
++
++    func testPairwiseBindingDoesNotOpenTheAnchor() async throws {
++        let f = try await makeFixture()
++        var pairwise = f.faceIDLink
++        pairwise.entityBinding = EntityBindingDescriptor(mode: .pairwise, bindingID: "b1", audience: "register")
++        XCTAssertEqual(
++            authorize(f, requester: f.faceID, records: [f.genesis.record, pairwise]).failureValue,
++            .boundToAnotherEntity(linkID: "link-faceid")
++        )
++    }
++
++    func testWrongIdentityDomainIsRefused() async throws {
++        let f = try await makeFixture(faceIDDomains: ["scaffold"])
++        XCTAssertEqual(
++            authorize(f, requester: f.faceID).failureValue,
++            .domainNotCovered(linkID: "link-faceid", domain: "private")
++        )
++    }
++
++    func testGenesisLinkWithoutVerifiedSealIsRefused() async throws {
++        let f = try await makeFixture()
++        XCTAssertEqual(
++            authorize(f, requester: f.initiator, seal: .none).failureValue,
++            .genesisNotVerified(linkID: "genesis-anchor-1")
++        )
++        var tampered = f.genesis.seal
++        tampered.trigger = .fileUpload
++        XCTAssertEqual(
++            authorize(f, requester: f.initiator, seal: .custom(tampered)).failureValue,
++            .genesisNotVerified(linkID: "genesis-anchor-1")
++        )
++    }
++
++    func testActiveLinkWinsOverStaleRevokedOneForSameIdentity() async throws {
++        let f = try await makeFixture()
++        var stale = f.faceIDLink
++        stale.linkID = "link-faceid-old"
++        stale.status = .revoked
++        switch authorize(f, requester: f.faceID, records: [stale, f.genesis.record, f.faceIDLink]) {
++        case .success(let auth): XCTAssertEqual(auth.linkID, "link-faceid")
++        case .failure(let r): XCTFail("Active link should win, got \(r)")
++        }
++    }
++
++    func testRequiredScopesFollowPermissionString() {
++        XCTAssertEqual(EntityLinkScope.required(for: "r---"), [.read])
++        XCTAssertEqual(EntityLinkScope.required(for: "-w--"), [.write])
++        XCTAssertEqual(EntityLinkScope.required(for: "rw--"), [.read, .write])
++        XCTAssertEqual(EntityLinkScope.required(for: "----"), [])
++    }
++}
++
++private extension Result {
++    var failureValue: Failure? {
++        if case .failure(let f) = self { return f }
++        return nil
++    }
++}
