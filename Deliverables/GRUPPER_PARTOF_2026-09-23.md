@@ -100,22 +100,35 @@ De opprinnelige urene arbeidsgrenene er ikke brukt til staging eller publisering
 | Repo | Før (hentet `origin/main`) | Etter innholdscommit |
 |---|---|---|
 | CellProtocol | `03d173881e8d6c662b402f716c985572b91d3183` | `a785dc71aadc2ea4e0468faae4dbfe9388952275` |
-| CellProtocolDocuments | `cdfa43513ab887a4be466b8ddd93b5c5867ce3e2` | Rapporteres etter publisering |
+| CellProtocolDocuments | `cdfa43513ab887a4be466b8ddd93b5c5867ce3e2` | `eb84b7f02dfc9ac704174ff39423751d238f1ece` |
 
 CellProtocol: push til `origin/main` gikk gjennom på første forsøk.
 `git ls-remote --exit-code origin refs/heads/main` bekreftet nøyaktig samme SHA.
 Alle ti committede filer er sammenlignet byte for byte med det rene arbeidstreet.
 Ingen rebase eller tvunget push var nødvendig.
-Dokumentrepoets publisering bekreftes i en etterfølgende rapportcommit.
+CellProtocolDocuments: innholdscommit `eb84b7f02dfc9ac704174ff39423751d238f1ece`
+ble også pushet på første forsøk. `git ls-remote` bekreftet samme SHA, og begge
+committede filer ble kontrollert byte for byte mot arbeidstreet. Ingen rebase
+eller tvunget push var nødvendig i noen av repoene.
+
+Denne etterfølgende rapportoppdateringen endrer bare
+`Deliverables/GRUPPER_PARTOF_2026-09-23.md`, for å kunne dokumentere observerte
+push-resultater. Rapportens egen commit-SHA kan ikke skrives inn i seg selv;
+den finnes med `git log -1 --format=%H -- Deliverables/GRUPPER_PARTOF_2026-09-23.md`.
+Etter rapportcommitens push brukes igjen `git ls-remote` og byte-sammenligning.
+Sluttkvitteringen med akkurat den SHA-en og push-resultatet ligger lokalt i
+`_worktrees/grupper-partof-20260923-evidence/CellProtocolDocuments-report-verification.json`
+og oppgis i leveringsmeldingen.
 
 Sluttkontroll før staging: 37 lokale Markdown-lenker finnes, ingen avsluttende
 blanktegn, Python-syntaks leses, og `git diff --check` er grønn i begge repoer.
 842 øvrige sporede filer i CellProtocol og 592 i dokumentrepoet er byte-uendret
 fra oppstart, inkludert henholdsvis 593 og 2 Swift-filer.
-Stilisten i CellProtocol ble kontrollert eksakt mot `git diff --cached --name-only`
-før commit; dokumentrepoet bruker den samme kontrollen med de to stiene under.
+Stilistene ble kontrollert eksakt mot `git diff --cached --name-only` før begge
+innholdscommitene: ti filer i CellProtocol og to i dokumentrepoet. Rapportoppdateringen
+har en egen liste med bare rapportstien, kontrollert på samme måte før commit.
 
-### Stier i CellProtocol — 10 filer
+### Stier faktisk committet i CellProtocol — 10 filer
 
 - `Docs/EntityData-Review-2026-09-11/BESLUTNING-UUID-OG-GRUPPER-2026-09-22.md`
 - `Docs/EntityData-Review-2026-09-11/EntityData.v2.example.json`
@@ -128,14 +141,14 @@ før commit; dokumentrepoet bruker den samme kontrollen med de to stiene under.
 - `Docs/EntityData-Review-2026-09-11/current-review.json`
 - `Docs/EntityData-Review-2026-09-11/validate_decisions_2026_09_23_groups.py`
 
-### Stier i CellProtocolDocuments — 2 filer
+### Stier faktisk committet i CellProtocolDocuments — 2 filer
 
 - `Book/37_EntityData.md`
 - `Deliverables/GRUPPER_PARTOF_2026-09-23.md`
 
 Uttrykkelige tillatelseslister ligger i den lokale evidensmappen
 `_worktrees/grupper-partof-20260923-evidence/`. `git diff --cached --name-only`
-skal være eksakt lik listen før hver commit. `build_v2_schema.py` og
+ble sammenlignet med den konkrete listen før hver commit. `build_v2_schema.py` og
 `IdentityLink-fixture.patch` er ikke med. Ingen andre Book-filer er med.
 
 CellProtocol-commit bruker nøyaktig meldingen eieren ba om:
@@ -152,7 +165,7 @@ Decided, not implemented.
 
 ## Filsummer før og etter
 
-Før er rene `main` etter fast-forward; etter er filene som skal publiseres.
+Før er rene `main` etter fast-forward; etter er de publiserte filene.
 Filnavnene nedenfor er under `Docs/EntityData-Review-2026-09-11/`.
 
 | Fil | SHA-256 før | SHA-256 etter |
