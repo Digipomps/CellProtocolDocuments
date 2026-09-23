@@ -14,6 +14,20 @@ eksempelets relasjonsnøkler og tilhørende referanser omskrives med faste UUID-
 Gruppe- og retningsbeslutningene er dokumentert i
 [22.09-rapporten](../Deliverables/ENTITYDATA_UUID_GRUPPER_2026-09-22.md).
 
+Undergruppesteget fra 23.09 legger valgfri `partOf` på gruppeobjektet i målskjemaet.
+Barnet peker til foreldregruppens uuid; `name` og `members` er fortsatt påkrevd.
+En rotgruppe har ingen `partOf`. Barnelisten persisteres ikke, men bygges ved
+dekoding som alle andre bakveier. `members` inneholder bare entitets-uuid-er;
+gruppe-uuid-er skal avvises. JSON Schema kontrollerer UUID-syntaks, men ikke
+referansetypene eller sykler i `partOf`: dekoderen må avvise disse feilene.
+Dokumentasjonsverktøyet har separate referansekontroller, ikke en Swift-implementasjon.
+
+`relations.bokprosjekt` med egne `members` og `groups` er tatt ut av målskjemaet
+og erstattet av `groups`-roten. Det fiktive eksempelet viser prosjekt → kapittel →
+to arbeidsgrupper med faste uuid-er. Runtime-grunnlaget og dagens Swift-lagring
+beholder den gamle formen; ekte data er ikke migrert.
+Se [rapporten om undergrupper](../Deliverables/GRUPPER_PARTOF_2026-09-23.md).
+
 ## Formål
 
 EntityData er navnet på **dataene en entitet holder under egen kontroll**: opplysninger om
