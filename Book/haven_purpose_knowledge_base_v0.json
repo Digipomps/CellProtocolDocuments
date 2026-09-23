@@ -2211,6 +2211,53 @@
           "no-expertise"
         ]
       }
+    },
+    {
+      "purposeRef": "purpose://access.audit.privacy.database-key-custody",
+      "parentRef": "purpose://access.audit.privacy",
+      "title": "Eierstyrt kryptering og nøkkellagring for celledata",
+      "summary": "Preserve owner control and independent private cell instances with cell-scoped SQLCipher, recipient-encrypted SecretCredentialCell custody, separate IdentityVault/Keychain unlocking roots and verified recovery. The database process remains trusted; discovery never authorizes key use.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.database-key-custody.owner-control",
+        "lifecycle": "continuous",
+        "outcome": "Owner and independent recovery recipient reopen the correct cell database; wrong owner/domain/cell/recipient/version and expired sessions are denied.",
+        "successSignals": [
+          "Authorized primary and recovery unwrap the same root.",
+          "Replay, tampered envelopes, wrong scope and old pinned versions fail closed.",
+          "Lock closes all handles; lost publication replies resume the same checkpoint.",
+          "Prompt routing finds the explanatory configuration without exposing keys."
+        ],
+        "verifier": "CellDatabaseKeyCustodyTests and cell database encryption/isolation tests; signed Keychain host and independently administered deployment acceptance remain separate."
+      },
+      "matchingHints": {
+        "aliases": [
+          "database encryption",
+          "key custody",
+          "sikker nøkkellagring",
+          "hemmelighetscelle",
+          "kryptere SQLite",
+          "Keychain IdentityVault",
+          "recovery"
+        ],
+        "tokens": [
+          "database",
+          "sqlite",
+          "sqlcipher",
+          "encryption",
+          "kryptering",
+          "nøkkellagring",
+          "keychain",
+          "identityvault",
+          "recovery",
+          "hemmelighetscelle"
+        ],
+        "capabilityHints": [
+          "SecretCredential",
+          "cell:///SecretCredential",
+          "SQLCipher"
+        ]
+      }
     }
   ],
   "facets": [

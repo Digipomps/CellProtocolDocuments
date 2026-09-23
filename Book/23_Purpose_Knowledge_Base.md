@@ -319,3 +319,20 @@ Recommended next steps:
    hydrate a subtree only when compact context is insufficient.
 5. Add a candidate-intake record type with nearest-parent, evidence, confidence, and review-state fields.
 6. Keep runtime canonicalization conservative: automatic staging is allowed, automatic canonical mutation is not.
+
+## Database privacy and key custody candidate (2026-09-22)
+
+`purpose://access.audit.privacy.database-key-custody` is a candidate child of
+`purpose://access.audit.privacy`, with goal
+`goal.database-key-custody.owner-control`. Preserve owner-controlled access to
+private cell data and independent service instances through per-cell SQLCipher,
+recipient-encrypted key custody, a separate IdentityVault/Keychain unlocking
+root, explicit recovery and bounded local sessions. A model may discover and
+explain this solution; discovery supplies neither keys nor authorization.
+
+The candidate is represented in the machine-readable artifact, derived index,
+CellScaffold `PurposeKnowledgeBase` and the informational configuration
+`Private celledata og sikker nøkkellagring`. The [Book 25 database profile](25_SecretCredentialCell.md#implemented-database-key-profile-2026-09-22)
+records concrete APIs and verification limits. Shared multi-user server workloads,
+admin access, unattended delegation and hardware custody must not be inferred
+from a match on “database” or “keychain”.
