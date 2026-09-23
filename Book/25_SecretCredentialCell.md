@@ -1,8 +1,8 @@
 # Chapter 25 — SecretCredentialCell
 
-Status: draft Cell contract.
+Status: implemented database-key profile; broader API/provider Cell contract remains draft.
 
-Last updated: 2026-06-18.
+Last updated: 2026-09-23.
 
 `SecretCredentialCell` is the entity-scoped credential boundary for HAVEN. It
 stores or references provider credentials without exposing raw secrets to
@@ -35,6 +35,79 @@ Apple references:
 - <https://developer.apple.com/documentation/cryptokit/chachapoly>
 - <https://developer.apple.com/documentation/security/keychain-services>
 - <https://developer.apple.com/documentation/security/keychain-items>
+
+## Implemented database-key profile (2026-09-23)
+
+The database-key profile implements a narrower owner-controlled contract beside
+the API/provider credential draft below. See the [implementation and runbook](../../CellScaffold/Documentation/Cell_Database_Key_Custody.md).
+The earlier `SecretCredentialCell` in Binding/HavenAgentD remains an API-key
+profile; its generic `unlockKey` input is not the database-key transport.
+
+**Purpose:** preserve the owner's control over private cell data and independent
+service instances. Use cell-scoped SQLite/SQLCipher for a private cell's workload,
+a portable recipient-encrypted secret Cell for custody, and a separate owner
+IdentityVault/Keychain root for authorized opening. A storage scaffold can hold
+ciphertexts without possessing the unlocking key. A process running SQLCipher
+necessarily sees its database key and plaintext. Choose a suitable server
+database for genuinely shared, concurrent multi-user work; do not share private
+cell databases merely for deployment convenience.
+
+Discovery candidate: `purpose://access.audit.privacy.database-key-custody`, child
+of `purpose://access.audit.privacy`; goal `goal.database-key-custody.owner-control`.
+Norwegian and English aliases include database encryption, key custody, Keychain,
+IdentityVault, recovery, hemmelighetscelle, kryptering and sikker nøkkellagring.
+The `Private celledata og sikker nøkkellagring` catalog entry explains the solution
+without conferring an unlock grant or exposing a secret operation to a model.
+
+Implemented source contracts:
+
+- CellBase `SecretCredentialContract.swift`: versioned owner-signed contexts,
+  RFC 9180 HPKE envelopes, non-Codable secret material, operation-based unwrap,
+  and audience/purpose/recipient/nonce/expiry-bound use requests.
+- CellApple `AppleDatabaseSecretUnwrapper`: explicit create-only X25519 wrapping
+  roots, Data Protection Keychain + userPresence + WhenUnlockedThisDeviceOnly;
+  fresh authentication context on opening. Software keys, not Secure Enclave.
+- CellScaffold `SecretCredentialCell`: `cell:///SecretCredential` template;
+  persist its instance UUID. `credentials.state` is owner-only metadata.
+  Sealed records use the separate `/cell-secrets/v1/<UUID>/exchange` data plane.
+  They are never ordinary get/set, Flow, Skeleton or LLM payloads.
+- The blind per-cell bootstrap journal verifies the persisted owner's signing
+  key, domain, audience, signed record and monotonic policy/version. It commits
+  consumed nonces with the mutation, uses private files and has no unwrap key.
+- `CellDatabaseKeyBroker` acquires keys asynchronously before SQL locks, caches
+  only file-derived session keys, coalesces concurrent opening and closes all
+  registered handles on lock/expiry. A remote revocation prevents future opens;
+  an existing local session lasts until explicit local lock or expiry.
+- Explicit migration preserves the original random 32-byte root and v1 HKDF;
+  both primary and recovery recipients are verified. A private encrypted
+  checkpoint precedes publication so lost replies can resume without new keys.
+  Legacy source keys are retained. `CellDatabaseRootRotation` stages every file under
+  the new cell root, verifies recovery and SQLCipher integrity, publishes the next
+  signed version, then atomically selects the complete generation. A durable pending
+  journal blocks normal opens and supports resuming after copied files or a lost
+  publication response. Lifetime file locks reject rotation with live handles.
+- `DatabaseServiceRequest` / `DatabaseServiceGrant` implement explicit delegated
+  execution: owner approval binds runtime identity, cell/domain, filename, purpose,
+  read/write action, audience, nonce, ephemeral recipient, versions and expiry.
+  HPKE releases only one derived file key, never the root. Consumption is one-time
+  against a pinned pending challenge. Renewal requires fresh approval. A hostile
+  recipient can retain released keys/data; TTL is not cryptographic revocation.
+- Binding's native **Private celledata** window provisions a Keychain recipient,
+  imports a typed signed request, displays its complete scope, obtains fresh local
+  user authorization, and exports the recipient-encrypted grant. Version pins survive
+  restart; missing handles never create replacement keys. Generic Cell/Flow/LLM
+  surfaces cannot approve, export or retrieve keys. Unattended delegation remains
+  an explicit future custodian profile, never an automatic fallback.
+
+Platform and acceptance boundaries: Apple's HPKE needs macOS 14/iOS 17 or newer;
+older systems fail unavailable. The native app is built with signing. Real Keychain user-presence acceptance must
+be reported separately from synthetic tests; an opt-in signed-host test uses unique
+synthetic items. Two independently configured HTTPS test servers cover trust-chain
+validation, proof/replay and network failure. They do not establish independent
+administration of production hosts. See the
+runbook's evidence link for executed tests and remaining deployment checks.
+
+The rest of this chapter remains the broader API/provider credential draft.
 
 ## 1. Responsibility
 
