@@ -1,11 +1,18 @@
 # Chapter 37 — EntityData
 
-Last verified against code: 2026-09-16 (v2-skjema lagt til 2026-09-17)
+Last verified against code: 2026-09-16 (bevismønsterets kilde og målskjema kontrollert 2026-09-23)
 
 Status: Struktur og nodemodell er kildebekreftet. Beslutningene i §7 er tatt av Kjetil
 16.09.2026, men er **ikke implementert** — de står her fordi et kapittel som beskriver
 dagens form uten å si hvor den er på vei, blir feil neste måned. Feltbeskrivelser i
-skjemaet er på engelsk for å bevare betydningen; forklaringen her er på norsk.
+skjemaets runtime-grunnlag er på engelsk for å bevare betydningen; forklaringen her er på norsk.
+Målskjemaet videreføres etter 22.09 og bevisavklaringen 23.09; se
+[gjeldende målform](../../CellProtocol/Docs/EntityData-Review-2026-09-11/V2-BESLUTTET-FORM.md).
+Det nye bevisfeltet `supports` og dekodingsbygget bevisoppslag er ikke implementert i Swift.
+Målskjemaet håndhever nå UUID-nøkler også i `relations.records`; det fiktive
+eksempelets relasjonsnøkler og tilhørende referanser omskrives med faste UUID-er.
+Gruppe- og retningsbeslutningene er dokumentert i
+[22.09-rapporten](../Deliverables/ENTITYDATA_UUID_GRUPPER_2026-09-22.md).
 
 ## Formål
 
@@ -85,8 +92,19 @@ Nøkkelstier adresserer deler av treet:
 
 Selektorlogikk og ID-likhet kontrolleres i runtime, ikke av JSON Schema.
 
-`proofs.index.byKeypath` kobler en escaped nøkkelsti til bevisene som støtter verdien der.
-Det er mekanismen som gjør at et **enkeltfelt** kan være bevist, ikke bare et helt dokument.
+Målkravet fra 23.09 er ett persistert, flatt bevislager i `proofs.credentials`,
+nøklet på bevis-uuid. Hver post bærer `supports.entityRef` (entitets-uuid) og
+`supports.keypaths` (eierens nøkkelstier som beviset hevdes å understøtte).
+`supports` er et tillegg til de seks beskrevne VCClaim-feltene, ikke implementert i Swift ennå.
+
+`proofs.index.byKeypath` dokumenterer formen escaped nøkkelsti → liste av
+bevis-uuid-er inn i lageret. Oppslaget skal bygges ved dekoding fra postene,
+slik `entityRepresentationNameReferences` kan bygges fordi `name` ligger på
+objektet selv. Det er avledet, ikke persistert sannhet eller en andre kilde.
+`proofRefs` og `evidenceRefs` peker inn i `proofs.credentials` på uuid.
+Oppslag fastslår ikke sannhet, gyldighet, utstedertillit eller samtykke.
+Se [23.09-rapporten](../Deliverables/ENTITYDATA_BEVIS_2026-09-23.md) for
+skjemakontroller og grensen mot uprøvd Swift-dekoding.
 
 ## 4. Nodemodellen
 
