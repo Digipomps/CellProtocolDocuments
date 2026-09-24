@@ -1,0 +1,351 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "HAVEN purpose composition and execution evidence v0",
+  "$defs": {
+    "composition": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "allOf"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "sequence"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "firstOf"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "anyOf"
+            },
+            "min": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "invariant"
+            },
+            "over": {
+              "type": "string",
+              "pattern": "^purpose://.+"
+            }
+          },
+          "required": [
+            "kind",
+            "over"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "node": {
+      "type": "object",
+      "properties": {
+        "purposeRef": {
+          "type": "string",
+          "pattern": "^purpose://.+"
+        },
+        "parentRef": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^purpose://.+"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "composition": {
+          "$ref": "#/$defs/composition"
+        },
+        "childOrder": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^purpose://.+"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "purposeRef"
+      ],
+      "additionalProperties": true,
+      "description": "Existing purpose node fields are retained. Non-leaves require composition semantically; omission is a migration warning in purpose_dev validate. childOrder lists all direct children once and is required for sequence and firstOf. No composition default.",
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "composition"
+            ],
+            "properties": {
+              "composition": {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "sequence",
+                      "firstOf"
+                    ]
+                  }
+                },
+                "required": [
+                  "kind"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "childOrder"
+            ]
+          }
+        }
+      ]
+    },
+    "attempt": {
+      "type": "object",
+      "properties": {
+        "attemptRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "purposeRef": {
+          "type": "string",
+          "pattern": "^purpose://.+"
+        },
+        "attemptedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "finishedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "attemptRef",
+        "purposeRef",
+        "attemptedAt"
+      ],
+      "additionalProperties": false
+    },
+    "measurement": {
+      "type": "object",
+      "properties": {
+        "purposeRef": {
+          "type": "string",
+          "pattern": "^purpose://.+"
+        },
+        "measuredAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "green",
+            "red",
+            "blocked",
+            "unverified"
+          ]
+        },
+        "evidenceRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attemptRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "phase": {
+          "enum": [
+            "before",
+            "after"
+          ]
+        }
+      },
+      "required": [
+        "purposeRef",
+        "measuredAt",
+        "state",
+        "evidenceRef"
+      ],
+      "additionalProperties": false,
+      "dependentRequired": {
+        "phase": [
+          "attemptRef"
+        ],
+        "attemptRef": [
+          "phase"
+        ]
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "blocked"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          "then": {
+            "required": [
+              "reason"
+            ]
+          }
+        }
+      ]
+    },
+    "report": {
+      "type": "object",
+      "properties": {
+        "purposeRef": {
+          "type": "string",
+          "pattern": "^purpose://.+"
+        },
+        "reportedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "green",
+            "red",
+            "blocked",
+            "unverified"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "branchRef": {
+          "type": "string",
+          "pattern": "^purpose://.+"
+        }
+      },
+      "required": [
+        "purposeRef",
+        "reportedAt",
+        "state"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "blocked"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          "then": {
+            "required": [
+              "reason"
+            ]
+          }
+        }
+      ]
+    },
+    "opinion": {
+      "type": "object",
+      "properties": {
+        "purposeRef": {
+          "type": "string",
+          "pattern": "^purpose://.+"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "purposeRef",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "execution": {
+      "type": "object",
+      "properties": {
+        "attempts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/attempt"
+          }
+        },
+        "measurements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/measurement"
+          }
+        },
+        "reports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/report"
+          }
+        },
+        "opinions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/opinion"
+          }
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "description": "Attempts record execution times; measurements record observations with evidence references; reports record claimed conclusions; opinions are never verification evidence. Semantic cross-record checks are performed by purpose_dev.py."
+    }
+  }
+}
