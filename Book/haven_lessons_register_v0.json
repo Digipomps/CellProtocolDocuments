@@ -1,0 +1,1120 @@
+{
+  "schema": "haven.lessons-register.v0",
+  "status": "draft-canonical-source",
+  "createdAt": "2026-09-03",
+  "description": "Register over erfarte feil og mangler i HAVEN-utviklingen, knyttet til formål og triggere slik at de hentes fram automatisk ved dekomponering av nye oppgaver. Hver lærdom skal være en observasjon med kilde, ikke en mening. Nye lærdommer legges til i P6 (Lær) i hver oppgave.",
+  "entryRules": {
+    "required": [
+      "lessonRef",
+      "date",
+      "symptom",
+      "cause",
+      "prevention",
+      "purposeRefs",
+      "tags",
+      "source"
+    ],
+    "symptomRule": "Hva som faktisk ble observert, i én setning.",
+    "causeRule": "Den forklaringen som er dokumentert — skriv 'ukjent' heller enn å gjette.",
+    "preventionRule": "Konkret handling eller test som ville fanget det, formulert så den kan bli en derivedTest.",
+    "severity": [
+      "blocker",
+      "major",
+      "minor"
+    ]
+  },
+  "lessons": [
+    {
+      "lessonRef": "lesson.text-ux-is-not-design",
+      "date": "2026-05-06",
+      "severity": "major",
+      "symptom": "Kjetil forventet en helt annen flate enn den som ble vist; den tekstlige UX-beskrivelsen var godkjent, bildet var det ikke.",
+      "cause": "En tekstlig beskrivelse av en flate er ikke et grafisk designforslag; to lesere ser to ulike bilder.",
+      "prevention": "Rendret bilde (Porthole-preview eller mockup) godkjennes før implementering; bildet er akseptansereferanse.",
+      "purposeRefs": [
+        "purpose://gui.expectation-agreed-before-build",
+        "purpose://gui.quality.functional-accessible"
+      ],
+      "tags": [
+        "gui",
+        "skeleton",
+        "design",
+        "mockup",
+        "forventning"
+      ],
+      "source": "Deliverables/Claude_Visual_Design_References_2026-05-06 og Porthole_Binding_GUI_Parity_Audit_2026-05-06.md"
+    },
+    {
+      "lessonRef": "lesson.parity-was-correctness-not-decoration",
+      "date": "2026-05-06",
+      "severity": "major",
+      "symptom": "Parity-audit mellom Porthole og Binding viste at problemet ikke var manglende dekorasjon, men produktkorrekthet (feil oppførsel).",
+      "cause": "Visuell likhet ble vurdert før funksjonell likhet.",
+      "prevention": "Akseptanse sammenligner både bilde og oppførsel (knapper trigger keypaths, felt tar input) — begge i ACCEPT.md.",
+      "purposeRefs": [
+        "purpose://gui.parity-with-approved-image",
+        "purpose://gui.quality.functional-accessible"
+      ],
+      "tags": [
+        "gui",
+        "porthole",
+        "binding",
+        "parity"
+      ],
+      "source": "Deliverables/Porthole_Binding_GUI_Parity_Audit_2026-05-06.md"
+    },
+    {
+      "lessonRef": "lesson.surface-load-alias-miss",
+      "date": "2026-08-24",
+      "severity": "blocker",
+      "symptom": "Flatelasting tok 46 541 ms (klientens 45 s-timeout) ved bom, 5 000 ms ved treff; målingen 10.08 målte en mislykket lasting.",
+      "cause": "resolveCellConfiguration matcher kun på uuid eller eksakt navn; 'Butler Chat' er bare et klientalias for 'Co-Pilot Chat'.",
+      "prevention": "Mål lastetid tre ganger og sjekk logg for navnebom før en flate erklæres ferdig; aliaser må løses server-side eller ikke brukes.",
+      "purposeRefs": [
+        "purpose://gui.surface-loads-in-time"
+      ],
+      "tags": [
+        "gui",
+        "porthole",
+        "binding",
+        "timeout",
+        "alias",
+        "flate"
+      ],
+      "source": "CellScaffold/Documentation/ProjectControl/Samlet_Oversikt_2026-08-24.md (via prosjektminne haven_status_2026-08-24)"
+    },
+    {
+      "lessonRef": "lesson.plan-instead-of-delivery",
+      "date": "2026-08-21",
+      "severity": "major",
+      "symptom": "Kjetil ba om en leveranse flere ganger og fikk planer/dokumenter om leveransen i stedet.",
+      "cause": "Arbeidsflyten manglet en port som skiller 'formålet er avklart' fra 'leveransen er levert'; planlegging ble oppfattet som fremdrift.",
+      "prevention": "G1 godkjenner formål, ikke arbeid; etter G2 telles bare artefakter listet i §3 'Det du kommer til å se' som fremdrift. Et dokument om leveransen teller aldri som leveransen.",
+      "purposeRefs": [
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "prosess",
+        "leveranse",
+        "plan"
+      ],
+      "source": "Brukerminne /preferences.md (stated) og haven_status_2026-08-24"
+    },
+    {
+      "lessonRef": "lesson.undocumented-plan-switch",
+      "date": "2026-08-24",
+      "severity": "major",
+      "symptom": "Tre produktive døgn (22.–24.08) så tomme ut i alle statusdokumenter fordi planbyttet fra bølge 1–3 til deploy-seremonien aldri ble skrevet ned.",
+      "cause": "Arbeidet foregikk utenfor kanalene oversikten leser fra.",
+      "prevention": "STATUS.md i oppgavemappen oppdateres ved hvert planbytte med dato og hvorfor; sjekkes i test.status-current.",
+      "purposeRefs": [
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "prosess",
+        "status",
+        "ledger"
+      ],
+      "source": "Prosjektminne haven_status_2026-08-24"
+    },
+    {
+      "lessonRef": "lesson.planned-documented-as-implemented",
+      "date": "2026-08-24",
+      "severity": "major",
+      "symptom": "Book/05_Flows_Lifecycle.md beskrev sekvensnummer, signatur og replay som ikke finnes i structen.",
+      "cause": "Planlagt oppførsel ble dokumentert i presens.",
+      "prevention": "Docs-diff i samme endring, med 'Last verified against code'-dato; planlagt oppførsel merkes eksplisitt.",
+      "purposeRefs": [
+        "purpose://quality.docs-in-same-change"
+      ],
+      "tags": [
+        "docs",
+        "book"
+      ],
+      "source": "Prosjektminne haven_status_2026-08-24; DEVELOPERS.md"
+    },
+    {
+      "lessonRef": "lesson.bridge-inferred-architecture-from-one-use",
+      "date": "2026-08-09",
+      "severity": "major",
+      "symptom": "En kodeassistent sluttet fra én observert bruksmåte av bridge til en egenskap ved arkitekturen og konkluderte feil.",
+      "cause": "Kapabiliteten var uuttalt; feilen var ikke slurv og gjentar seg så lenge kapabiliteten ikke er erklært.",
+      "prevention": "Erklær hver kapabilitet oppgaven bygger på som eget formål med kilde og Avgrensning (pkg.std.cell-combination).",
+      "purposeRefs": [
+        "purpose://cells.capabilities-declared-with-boundary",
+        "purpose://grounding"
+      ],
+      "tags": [
+        "bridge",
+        "kapabilitet",
+        "kombinasjon",
+        "antakelse"
+      ],
+      "source": "Deliverables/Bridge_Kapabiliteter_Som_Formaal_2026-08-09.md"
+    },
+    {
+      "lessonRef": "lesson.free-text-is-not-a-declaration",
+      "date": "2026-08-18",
+      "severity": "major",
+      "symptom": "Leksikalsk avledning fra fri formålstekst ga F1 0,060; strukturerte erklæringer ga 0,686 og 0,909 med ruting til menneske.",
+      "cause": "Eksplisitt for et menneske er ikke eksplisitt for en regel; fri tekst er ikke en erklæring.",
+      "prevention": "Formålsnoder skal ha strukturerte felt (goal, verifier, avgrensning, surfaces) — ikke bare summary; usikre noder rutes til Kjetil med confidence.",
+      "purposeRefs": [
+        "purpose://grounding",
+        "purpose://purpose-taxonomy.capture-and-place"
+      ],
+      "tags": [
+        "formål",
+        "dekomponering",
+        "struktur"
+      ],
+      "source": "Prosjektminne eu_ai_act_purpose_decomposition; Deliverables/EU_AI_Act_Formaalsavledning_Forsok_2026-08-18"
+    },
+    {
+      "lessonRef": "lesson.decomposition-is-classification",
+      "date": "2026-07-11",
+      "severity": "major",
+      "symptom": "Modeller som genererte purpose://-refs fritt hallusinerte referanser.",
+      "cause": "Formålsdekomponering ble behandlet som generering i stedet for klassifisering over et kjent sett.",
+      "prevention": "Dekomponering velger fra Book 23 + pakker først; nye noder merkes 'candidate' og navngis av Claude, aldri implisitt av en modell.",
+      "purposeRefs": [
+        "purpose://grounding.local-model-assisted-decomposition",
+        "purpose://test.acceptance.hallucination-evaluation"
+      ],
+      "tags": [
+        "formål",
+        "dekomponering",
+        "modell"
+      ],
+      "source": "Deliverables/Small_Model_Purpose_Decomposition_Research_2026-07-11.md"
+    },
+    {
+      "lessonRef": "lesson.cellscaffold-two-holes",
+      "date": "2026-09-01",
+      "severity": "blocker",
+      "symptom": "CellScaffold har tomme booking-/concierge-stubber og autorisasjon som kaster nøkkelstien og bare sjekker eierskap.",
+      "cause": "Stubber og forenklet autorisasjon ble levert som ferdig uten negative tester.",
+      "prevention": "Ikke porter celler fra CellScaffold til PalazzoScaffold uten å lukke begge hullene; test.cell.auth-negative og test.cell.stub-scan må være grønne.",
+      "purposeRefs": [
+        "purpose://cell.authorization-honours-keypath",
+        "purpose://cell.no-empty-stubs"
+      ],
+      "tags": [
+        "celle",
+        "palazzo",
+        "scaffold",
+        "autorisasjon",
+        "stub"
+      ],
+      "source": "Brukerminne /areas/haven.md (stated, sept. 2026)"
+    },
+    {
+      "lessonRef": "lesson.purpose-never-grants-rights",
+      "date": "2026-08-03",
+      "severity": "blocker",
+      "symptom": "Risiko for at formålsmatch tolkes som tilgang.",
+      "cause": "Formål og rettighet ble blandet.",
+      "prevention": "Et formål kan innsnevre en rettighet, aldri opprette, utvide eller arve en; exact match; purpose://prompt.unknown feiler lukket.",
+      "purposeRefs": [
+        "purpose://cell.authorization-honours-keypath",
+        "purpose://access.audit.privacy"
+      ],
+      "tags": [
+        "celle",
+        "autorisasjon",
+        "formål"
+      ],
+      "source": "Deliverables/Purpose_Bound_External_Action_Contract_2026-08-03"
+    },
+    {
+      "lessonRef": "lesson.zsh-no-inline-comments",
+      "date": "2026-08-25",
+      "severity": "minor",
+      "symptom": "Begge kommandolinjene feilet med 'ukjent argument: #' og ingenting kjørte.",
+      "cause": "Kjetils skall er zsh uten INTERACTIVE_COMMENTS; '#' bak en kommando sendes som argument.",
+      "prevention": "Aldri forklaring på samme linje som en kommando; skript har '\"#\"*) break ;;' i argumentparseren.",
+      "purposeRefs": [
+        "purpose://handoff.runnable-without-guessing"
+      ],
+      "tags": [
+        "codex",
+        "terminal",
+        "handoff",
+        "zsh"
+      ],
+      "source": "Prosjektminne haven_mcp_tool_notes"
+    },
+    {
+      "lessonRef": "lesson.mount-is-not-git",
+      "date": "2026-08-25",
+      "severity": "major",
+      "symptom": "Hver git-kommando fra device_bash etterlot en index.lock som ikke kunne fjernes og blokkerte Kjetils commits; seks repoer låst 24.08.",
+      "cause": "Mounten kan opprette men ikke unlink låsefiler; ingen DNS; ingen git-identitet.",
+      "prevention": "Aldri git mot $HOME/mnt fra device_bash; les .git/refs som filer; all git kjøres av Kjetil eller codex exec.",
+      "purposeRefs": [
+        "purpose://handoff.runnable-without-guessing"
+      ],
+      "tags": [
+        "codex",
+        "terminal",
+        "handoff",
+        "git",
+        "device_bash"
+      ],
+      "source": "Prosjektminne haven_mcp_tool_notes"
+    },
+    {
+      "lessonRef": "lesson.codex-mcp-60s",
+      "date": "2026-08-18",
+      "severity": "major",
+      "symptom": "Codex-MCP-kall kuttes etter ~60 s; registerlesning og Swift-bygg sprengte taket.",
+      "cause": "Broen har fast tidstak.",
+      "prevention": "Bygg/test/lange jobber går via terminal codex exec eller filbasert overlevering, aldri via Codex-MCP.",
+      "purposeRefs": [
+        "purpose://handoff.runnable-without-guessing"
+      ],
+      "tags": [
+        "codex",
+        "mcp",
+        "bygg",
+        "handoff"
+      ],
+      "source": "Prosjektminne haven_mcp_tool_notes; eu_ai_act_purpose_decomposition"
+    },
+    {
+      "lessonRef": "lesson.corr-approval-surfaces-timed-out",
+      "date": "2026-08-30",
+      "severity": "major",
+      "symptom": "Corr-godkjenningen (Vegar) er utestet fordi flater/godkjenninger timet ut før testing rakk å skje.",
+      "cause": "Testen forutsatte at alt den avhenger av (CellProtocol, CellScaffold, flater uten timeout) virket, uten at det var verifisert først.",
+      "prevention": "FORMAALSSPEC.md §2 lister avhengigheter som egne formål med verifier; pkg.std.everything-works og gui.surface-loads-in-time må være grønne før den egentlige testen kjøres.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression",
+        "purpose://gui.surface-loads-in-time"
+      ],
+      "tags": [
+        "correspondence",
+        "test",
+        "avhengighet",
+        "timeout"
+      ],
+      "source": "Brukerminne /areas/haven.md (stated, aug. 2026)"
+    },
+    {
+      "lessonRef": "lesson.unresolvable-condition-is-invisible",
+      "date": "2026-09-05",
+      "severity": "blocker",
+      "symptom": "Relasjoner-flaten viste tittel og ingen vei inn: ingen filopplasting, ingen knapper. Alle tester gronne.",
+      "cause": "Sju seksjoner var portet paa visible(when:) med rot-scope mot celletilstand. Rendereren gir userInfoValue = nil paa rotnivaa (BindingSkeletonView(element:)), saa resolve() gir nil, og evaluate() returnerer false for uoppslaabar keypath - samme svar som for en betingelse som er usann. Flaten var tom ved konstruksjon, ikke ved en tilstand.",
+      "prevention": "SkeletonReachabilityAudit kjores over hver flate; test.skeleton.no-unreachable-elements feiler med elementene som aldri kan sees og handlingene som gaar tapt med dem. Betingelser hoerer hjemme inne i List/Grid/Reference-rader, der radens verdi sendes videre; ellers skal cellen avgjore og innhold bindes.",
+      "purposeRefs": [
+        "purpose://gui.quality.functional-accessible",
+        "purpose://gui.parity-with-approved-image"
+      ],
+      "tags": [
+        "skeleton",
+        "gui",
+        "visibility",
+        "condition",
+        "binding",
+        "flate"
+      ],
+      "source": "Binding/Documentation/HAVEN_Hvorfor_Valideringen_Var_Gronn_2026-09-05.md; CellProtocol 83de326; Binding a76fa7db"
+    },
+    {
+      "lessonRef": "lesson.test-corpus-is-not-shipped-corpus",
+      "date": "2026-09-05",
+      "severity": "major",
+      "symptom": "Rot-probe-testen, lastetidstesten og finnbarhetsauditen var gronne i to uker mens Relasjoner-flaten var tom.",
+      "cause": "Alle tre itererer offeredCatalogConfigurationsForVerification(), som mapper scaffold-formaalsmalene. Flatene eieren aapner kommer fra personalCopilotV1MenuConfigurations() og sidemeny-enumen - en annen liste. Relasjoner var bare i den andre.",
+      "prevention": "Enhver flate-test skal bygge korpuset fra det som faktisk sendes ut (menykonfigurasjoner + navigasjonsdestinasjoner + verifiseringshjelperen), dedupliseres, og feile hvis korpuset er mindre enn appens egen meny.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "test",
+        "korpus",
+        "flate",
+        "regresjon",
+        "dekning"
+      ],
+      "source": "Binding a76fa7db; Binding/BindingTests/CellConfigurationVerifierXCTest.swift"
+    },
+    {
+      "lessonRef": "lesson.tested-a-different-path-than-production",
+      "date": "2026-09-05",
+      "severity": "major",
+      "symptom": "Rot-probene leste relations.state.* gjennom porthole.get og var gronne, mens rendereren aldri fikk de samme dataene.",
+      "cause": "Testen naadde dataene via porthole.get(keypath:); rendereren avgjor synlighet via userInfoValue. To ulike veier til samme data, bare den ene brukes av skjermen.",
+      "prevention": "Naar en test skal si noe om hva brukeren ser, maa den bruke produksjonens egen kodevei - helst produksjonens egen funksjon med produksjonens egne inndata (SkeletonReachabilityAudit kaller condition.evaluate(root: nil, ...) nettopp derfor).",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression",
+        "purpose://gui.quality.functional-accessible"
+      ],
+      "tags": [
+        "test",
+        "renderer",
+        "kodevei",
+        "falsk-gronn"
+      ],
+      "source": "Binding/Documentation/HAVEN_Hvorfor_Valideringen_Var_Gronn_2026-09-05.md"
+    },
+    {
+      "lessonRef": "lesson.findability-is-not-usability",
+      "date": "2026-09-05",
+      "severity": "major",
+      "symptom": "Flatene ble kalt validert fordi de bestod en beskrivelsesaudit; de var samtidig ubrukelige.",
+      "cause": "HavenSurfaceRelevance.audit sjekker at en flate er beskrevet godt nok til aa bli funnet. Det er en egenskap ved beskrivelsen, ikke ved flaten. Presisjonen fikk det til aa foles som dekning.",
+      "prevention": "En formaalssjekk maa navngi handlingene eieren skal kunne utfore, og testes mot SkeletonReachabilityAudit.reachableActionKeypaths - ikke mot hvor godt formaalet er formulert.",
+      "purposeRefs": [
+        "purpose://gui.expectation-agreed-before-build"
+      ],
+      "tags": [
+        "formaal",
+        "audit",
+        "beskrivelse",
+        "flate"
+      ],
+      "source": "Binding d48a5c93; Binding/Cells/HavenSurfaceRelevance.swift"
+    },
+    {
+      "lessonRef": "lesson.paste-command-instead-of-queue",
+      "date": "2026-09-07",
+      "severity": "major",
+      "symptom": "Kjetil fikk et innlimingsskript for å starte Codex; flagget --full-auto finnes ikke på `codex exec`, og kjøringen feilet ved første linje.",
+      "cause": "Losen kjente ikke til HAVEN/_losen-queue (launchd-kø for Codex, 38 fullførte jobber) og ga en utestet kommando til et menneske i stedet for til køen.",
+      "prevention": "Før enhver Codex-kjøring fra Cowork: `ls HAVEN/_losen-queue/inbox running; tail logs/runner.log`, legg jobben som <id>.job + <id>.prompt.md. Aldri gi Kjetil kommandoer å lime inn. Gyldige `codex exec`-flagg: --sandbox, --skip-git-repo-check, -C.",
+      "purposeRefs": [
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "arbeidsko",
+        "codex",
+        "cowork",
+        "handoff",
+        "ko",
+        "launchd"
+      ],
+      "source": "CellProtocolDocuments/Deliverables/PDD_palazzo-husk-det-jeg-sa_2026-09-05/STATUS.md"
+    },
+    {
+      "lessonRef": "lesson.baseline-count-from-report-not-run",
+      "date": "2026-09-07",
+      "severity": "minor",
+      "symptom": "PLAN.md sa «48 tester grønne»; baseline-kjøringen viste 68 tester med 3 røde.",
+      "cause": "Testtallet ble hentet fra en fire dager gammel rapport, ikke fra en kjøring; concierge-tester var lagt til, og en testfeil i configure.swift (rekursiv CellsContainer-rot) lå udetektert.",
+      "prevention": "WP0/S0 baseline er alltid en ekte kjøring før endring; PLAN oppgir testtall som «forventet ≈ N (fra <kilde, dato>)», og et rødt baseline stopper ikke arbeidet men registreres som eget avvik med årsak.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "baseline",
+        "test",
+        "plan"
+      ],
+      "source": "PalazzoComunaleScaffold/docs/Rapport_Husk_2026-09-05.md"
+    },
+    {
+      "lessonRef": "lesson.codex-sandbox-cannot-reach-docker",
+      "date": "2026-09-07",
+      "severity": "major",
+      "symptom": "S10 (docker compose build/up) endte i `permission denied … docker.sock` i Codex-sandkassen; deploy-slicen ble blocked.",
+      "cause": "`codex exec --sandbox workspace-write` tillater ikke Unix-socket-tilkobling til Docker-daemonen; køens runner tilbyr ikke annen modus.",
+      "prevention": "Deploy-/image-steg planlegges aldri som Codex-slice; de registreres som HAVEN-Deploy-post med eier Kjetil (eller en dispatcher-adapter med eksplisitt docker-rettighet når arbeidskø-PDD-en er levert). Se HD-0012.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "arbeidsko",
+        "codex",
+        "deploy",
+        "docker",
+        "sandbox"
+      ],
+      "source": "CellProtocolDocuments/Deliverables/PDD_palazzo-husk-det-jeg-sa_2026-09-05/TESTRESULT.md"
+    },
+    {
+      "lessonRef": "lesson.scaffold-without-porthole-host-has-no-preview",
+      "date": "2026-09-07",
+      "severity": "minor",
+      "symptom": "G1-GUI måtte bruke mockups rendret fra skeleton-JSON; ekte Porthole-preview var umulig.",
+      "cause": "PalazzoScaffold har ingen Porthole-vert (Public/ = README) og bridgehead er av; preview-verktøyet (`skeleton:iterate`) bor i CellScaffold.",
+      "prevention": "For scaffolds uten Porthole-vert: (1) images/README.md må si eksplisitt at bildene er mockups og hva skeleton ikke kan rendre, (2) paritet (test.gui.parity) planlegges som egen slice med kjørende scaffold + Binding/Porthole via bridge, ikke som del av implementeringsjobben.",
+      "purposeRefs": [
+        "purpose://gui.expectation-agreed-before-build",
+        "purpose://gui.parity-with-approved-image"
+      ],
+      "tags": [
+        "gui",
+        "porthole",
+        "preview",
+        "palazzo"
+      ],
+      "source": "CellProtocolDocuments/Deliverables/PDD_palazzo-husk-det-jeg-sa_2026-09-05/images/README.md"
+    },
+    {
+      "lessonRef": "lesson.codex-workspace-write-cannot-build-cellscaffold",
+      "date": "2026-09-09",
+      "severity": "major",
+      "symptom": "WP0-baselinen i køen ble blocked: `sandbox-exec: sandbox_apply: Operation not permitted`. Testkommandoen brukte 1 604 sekunder uten at én eneste test startet.",
+      "cause": "Codex' `workspace-write`-sandkasse får ikke lov til å starte swift build/test for CellScaffold på denne maskinen. Jobben var riktig spesifisert; det er kjøremiljøet som ikke kan.",
+      "prevention": "Lange bygg og testkjøringer legges ikke som `workspace-write`-køjobb. De kjøres som detached skript startet via Codex med `danger-full-access` og python Popen(start_new_session=True), med logg i en montert mappe som Cowork kan polle — samme mønster som produserte den notariserte HavenAgentD-pakken 2026-09-08. Køjobber brukes til analyse, kontrakter, dokumentasjon og korte kommandoer.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "codex",
+        "sandbox",
+        "baseline",
+        "cellscaffold",
+        "queue"
+      ],
+      "source": "_losen-queue/done/sad-wp0-baseline-20260909-0330.svar.md og CellProtocolDocuments/Deliverables/PDD_scaffold-admin-delegering_2026-09-08/TESTRESULT.md"
+    },
+    {
+      "lessonRef": "lesson.baseline-measured-another-pdds-branch",
+      "date": "2026-09-09",
+      "severity": "major",
+      "symptom": "WP0 målte `pdd/tillitspakke-agentflaate` med 181 skitne oppføringer, ikke et rent utgangspunkt for sin egen PDD. En regresjonsbaseline derfra sier ingenting om hva denne PDD-en endrer.",
+      "cause": "CellScaffold-arbeidstreet er delt mellom flere PDD-er. Jobben ba om `git branch --show-current` og fortsatte uansett hva svaret var.",
+      "prevention": "WP0 måler en ren eksport av den revisjonen arbeidet skal gå ut fra (`git archive <rev> | tar -x -C <scratch>`), ikke det delte arbeidstreet. Er arbeidstreet opptatt av en annen PDD, er det en planopplysning som hører i STATUS, ikke noe implementeringen skal jobbe rundt.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression",
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "baseline",
+        "worktree",
+        "cellscaffold",
+        "pdd"
+      ],
+      "source": "CellProtocolDocuments/Deliverables/PDD_scaffold-admin-delegering_2026-09-08/TESTRESULT.md#baseline"
+    },
+    {
+      "lessonRef": "lesson.worktree-created-from-vm-has-unusable-gitdir",
+      "date": "2026-09-09",
+      "severity": "major",
+      "symptom": "WP1 ble blocked etter ett minutt: `fatal: not a git repository: /sessions/<sesjon>/mnt/CellScaffold/.git/worktrees/_wt-sad-20260909`, exit 128. Branch og HEAD kunne ikke bekreftes.",
+      "cause": "Worktreet ble opprettet med `git worktree add` fra Cowork-VM-en. Git skrev VM-ens mount-sti inn i både `<worktree>/.git` og `.git/worktrees/<navn>/gitdir`. Den stien finnes bare inne i VM-en; Codex kjører på macOS og finner ingenting der. Samme klasse feil som stikonvensjonen advarer mot: en maskinspesifikk sti lagret i et delt artefakt.",
+      "prevention": "Opprett worktrees fra macOS (Codex), ikke fra VM-en. Er det allerede gjort fra VM-en: skriv om begge pekerfilene til macOS-stien og verifiser `branch --show-current` + `rev-parse HEAD` **fra macOS** før noen jobb legges i køen. En jobb skal aldri være første stedet en sti blir prøvd.",
+      "purposeRefs": [
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "git",
+        "worktree",
+        "cowork-vm",
+        "codex",
+        "paths"
+      ],
+      "source": "_losen-queue/done/sad-wp1-registry-20260909.svar.md"
+    },
+    {
+      "lessonRef": "lesson.cellbase-decodingerror-shadows-swift",
+      "date": "2026-09-09",
+      "severity": "minor",
+      "symptom": "WP1s nye celle ga 50 kompileringsfeil: `type 'DecodingError' has no member 'dataCorruptedError'` og `cannot infer contextual base in reference to member 'registry'`, alle fra én linje.",
+      "cause": "CellBase eksporterer `public enum DecodingError` (`CellProtocol::Sources/CellBase/Errors.swift:50`). Inne i App-modulen, som importerer CellBase, skygger den for Swifts egen `DecodingError`. ScaffoldKit bruker samme kall uten problemer fordi den ikke importerer CellBase.",
+      "prevention": "I App-modulen: skriv `Swift.DecodingError` når du vil ha standardbibliotekets. Gjelder generelt for typenavn CellBase også definerer — sjekk med `grep -rn \"enum <Navn>\" CellProtocol::Sources/CellBase` før du antar at et kjent Foundation-navn er Foundations.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "swift",
+        "cellbase",
+        "app-modul",
+        "kompilering"
+      ],
+      "source": "CellScaffold::_wt-sad-20260909/Sources/App/Cells/Admin/ScaffoldAdministratorRegistryCell.swift:129"
+    },
+    {
+      "lessonRef": "lesson.valuetype-equality-false-for-objects",
+      "date": "2026-09-09",
+      "severity": "major",
+      "symptom": "Fire av sju WP1-tester feilet på `XCTAssertEqual` mellom to `ValueType.object` som hadde identisk innhold. Feilmeldingen viste samme nøkler og verdier på begge sider, i ulik rekkefølge.",
+      "cause": "CellBase' `ValueType.==` har `case (.object(_), _): return false` og tilsvarende for `.list`, `.data`, `.keyValue`, `.cellConfiguration`, `.identity` med flere, uten noen strukturell fallback. To identiske objekter er derfor ALDRI like (`CellProtocol::Sources/CellBase/ValueTypes/ValueType.swift:241-330`). Det er ikke rekkefølge som er problemet — sammenligningen kan aldri lykkes.",
+      "prevention": "Aldri assert på hele sammensatte `ValueType`-verdier. Sammenlign kanonisk JSON (`JSONEncoder` med `.sortedKeys`) eller pakk ut og sammenlign felt for felt. Skalarer (`.string`, `.integer`, `.bool`, `.null`) sammenlignes trygt. Merk: dette er et funn i CellBase, ikke bare en testregel — App-kildene destrukturerer riktignok før sammenligning, men en fremtidig `==` på hele verdier vil stille behandle like verdier som ulike. Ikke revidert utover App-kildene.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression",
+        "purpose://cell.contract-explicit"
+      ],
+      "tags": [
+        "cellbase",
+        "valuetype",
+        "equatable",
+        "test"
+      ],
+      "source": "CellScaffold::_wt-sad-20260909/Tests/AppTests/ScaffoldAdministratorRegistryTests.swift"
+    },
+    {
+      "lessonRef": "lesson.syntax-check-reported-as-delivered",
+      "date": "2026-09-09",
+      "severity": "major",
+      "symptom": "WP1 ble rapportert som «kode og 7 tester levert, syntakssjekken bestod». Et faktisk bygg ga 50 kompileringsfeil, og testene feilet 4 av 7 da de først kunne kjøre.",
+      "cause": "Jeg instruerte slicen om å markere bygget som blocked fordi køens sandkasse ikke kan bygge. Da ble en syntakssjekk det eneste beviset, og «levert» kom til å bety «skrevet», ikke «virker».",
+      "prevention": "En implementeringsslice er ikke levert før et detached bygg med `danger-full-access` er kjørt mot arbeidstreet og både bygg og de nye testene er grønne. Legg byggejobben klar FØR slicen kjøres, og skriv i prompten at slicen skal rapportere «skrevet, ikke verifisert» — ikke «levert».",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression",
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "codex",
+        "kø",
+        "verifisering",
+        "prosess"
+      ],
+      "source": "_losen-queue/done/sad-wp1-registry-20260909b.svar.md"
+    },
+    {
+      "lessonRef": "lesson.cellbase-internal-members-look-public",
+      "date": "2026-09-09",
+      "severity": "minor",
+      "symptom": "WP2 stoppet på `'fullPermissionString' is inaccessible due to 'internal' protection level`. Medlemmet finnes og brukes i CellBase selv, så det så ut som et gyldig API.",
+      "cause": "`Permission.fullPermissionString` er internal; `Permission.permissionString` er public. De to gir dessuten ulik streng — `permissionString` er de fire gruppebitene (`-w-s`), `fullPermissionString` er åtte tegn (gruppe + other). WP2 sammenlignet mot en firetegnsstreng og trengte altså den public-varianten uansett.",
+      "prevention": "Sjekk tilgangsnivå og faktisk returverdi før du bruker et CellBase-medlem fra App: `grep -n \"var <navn>\" CellProtocol::Sources/CellBase/...`. Et medlem som brukes internt i CellBase er ikke automatisk en del av API-et, og navnelikhet betyr ikke verdilikhet.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "swift",
+        "cellbase",
+        "api",
+        "kompilering"
+      ],
+      "source": "CellScaffold::_wt-sad-20260909/Sources/App/Cells/Admin/ScaffoldMandateProofSupport.swift:95"
+    },
+    {
+      "lessonRef": "lesson.entityanchor-keypaths-are-registered",
+      "date": "2026-09-09",
+      "severity": "minor",
+      "symptom": "WP2-testen skrev en sentinel til `profile` på abonnentens EntityAnchor og fikk `notFound` ved gjenlesing. Skrivingen ga ingen feil.",
+      "cause": "EntityAnchor eksponerer registrerte keypaths, ikke vilkårlige. `profile` er ikke en av dem; `relations.people[+]` er, og brukes slik i `CellScaffold::Tests/AppTests/PersonalCopilotV1Tests.swift`. Et `set` på ukjent keypath feiler ikke høyt — det er lesingen som avslører det.",
+      "prevention": "Skriv aldri testdata til en oppdiktet keypath på en celle. Finn en keypath cellen faktisk registrerer, helst en annen test som allerede bruker den. At et `set` går gjennom er ikke bevis på at keypathen finnes.",
+      "purposeRefs": [
+        "purpose://cell.authorization-honours-keypath"
+      ],
+      "tags": [
+        "entityanchor",
+        "keypath",
+        "test",
+        "cellscaffold"
+      ],
+      "source": "CellScaffold::_wt-sad-20260909/Tests/AppTests/ScaffoldMandateTests.swift:341"
+    },
+    {
+      "lessonRef": "lesson.new-cell-must-declare-its-provisioning-mode",
+      "date": "2026-09-09",
+      "severity": "major",
+      "symptom": "To nye celler i CellScaffold ga tre nye regresjoner: `OrchestratorPersistenceTests testRequireExistingModeRejectsFreshStorageWithoutCreatingBootstrapCells` (opprettet en celle i require-existing-modus mot fersk lagring) og to `TopUpCheckoutTests` som teller celler i provision-only-modus (5 mot forventet 4).",
+      "cause": "Cellene ble registrert i `reconcilePortholePublishedCellResolves()`, som kjører uansett oppstartsmodus. CellScaffold har tre distinkte moduser å ta stilling til — `EagerBootstrapProvisioningPolicy.requireExisting`/`.provisionIfMissing` og flagget `provisionOnly` — og en ny celle som ikke sier noe om dem havner i alle.",
+      "prevention": "Enhver ny persistert celle i CellScaffold må eksplisitt svare på tre spørsmål før den registreres: (1) skal den opprettes i require-existing mot fersk lagring? Nei, med mindre den er kanonisk bootstrap. (2) Er den en av de kanoniske eager-bootstrap-cellene som provision-only skal lage? Nesten alltid nei — TopUpCheckoutTests teller dem eksplisitt. (3) Er den en Porthole-publisert flate? Bare da hører den i `reconcilePortholePublishedCellResolves`. Scaffold-intern tilstand registreres i egen funksjon, gated på policy OG provisionOnly, med gjenkjenning av eksisterende mapping.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "cellscaffold",
+        "bootstrap",
+        "provisionering",
+        "regresjon",
+        "configure"
+      ],
+      "source": "CellScaffold::_wt-sad-20260909/Sources/App/configure.swift:2258-2290"
+    },
+    {
+      "lessonRef": "lesson.test-the-representation-not-the-issuance-flow",
+      "date": "2026-09-09",
+      "severity": "minor",
+      "symptom": "Alle fire WP4-rolletestene feilet i oppsettet, ikke i det de skulle teste: `deniedNoGrant` på `requestEntry` mot `cell:///AdminEntry`. Testen fikk aldri gitt identiteten rollen.",
+      "cause": "Testen gikk gjennom menneskets vei til å FÅ en rolle — `AdminEntry.requestEntry` og `AdminRoleEnrollment.requestRole` — som krever kontrollplan-kontekst en celletest ikke har. Huset har allerede `AdminRoleCredentialTestSupport.install(...)`, som legger et eier-signert `AdminRoleCredential` på `role.proofKeypath`; det er representasjonen `AdminMetricsSupport.hasRoleProof` faktisk leser.",
+      "prevention": "Skille to spørsmål: «hvordan får noen rollen» og «hva gir rollen». Tester du det andre, installer rollen på husets etablerte måte og test virkningen. Let alltid etter en eksisterende `*TestSupport`-hjelper før du bygger oppsettet selv — `grep -rn \"TestSupport\" CellScaffold::Tests` — og se hvilke argumenter de andre testene gir den.",
+      "purposeRefs": [
+        "purpose://test.acceptance"
+      ],
+      "tags": [
+        "test",
+        "admin",
+        "roller",
+        "cellscaffold"
+      ],
+      "source": "CellScaffold::_wt-sad-20260909/Tests/AppTests/ScaffoldRoleIsNotAuthorityTests.swift:165"
+    },
+    {
+      "lessonRef": "lesson.branch-is-empty-after-eight-work-packages",
+      "symptom": "Åtte arbeidspakker rapportert utført og verifisert, ACCEPT.md skrevet — men `git branch -v` viste at `pdd/scaffold-admin-delegering` fortsatt pekte på samme commit som `main` (`e1f3e22f`). All koden lå ucommittet i et worktree som bare finnes på én maskin. Ett tapt worktree = 2 750 linjer kode og test borte, med full dokumentasjon på at arbeidet var «levert».",
+      "cause": "Ingen arbeidspakke hadde commit som leveranse, og verifikasjonen målte bygg og tester i arbeidstreet — som er grønt uansett om noe er committet. Worktreet kunne heller ikke sjekkes fra Linux-VM-en (`fatal: not a git repository`), så statusen ble aldri lest. Formuleringen «koden finnes på riktig branch» i akseptansen var sann om filene og usann om branchen.",
+      "prevention": "Skill «filene finnes» fra «branchen har dem». Sjekk `git rev-parse <branch>` mot `git rev-parse <base>` som del av hver verifikasjon som påstår at noe ligger på en branch; er de like, er branchen tom. Legg en commit-pakke inn i planen etter første grønne bygg, ikke etter siste arbeidspakke. Når worktreet bare kan leses fra macOS, kjør sjekken der — ikke hopp over den fordi verktøyet svarer feil.",
+      "purposeRefs": [
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "git",
+        "worktree",
+        "branch",
+        "verifikasjon",
+        "cellscaffold"
+      ],
+      "severity": "major",
+      "date": "2026-09-09",
+      "source": "Deliverables/PDD_scaffold-admin-delegering_2026-09-08"
+    },
+    {
+      "lessonRef": "lesson.stop-rule-too-wide-stops-the-job",
+      "symptom": "En commit-jobb til Codex stoppet før første `git add` fordi stoppregelen sa «finner du `.git/index.lock` eller annen låsefil: stopp». Et rekursivt søk fant 25 filer som heter `locked` under andre arbeidstrær — normale `git worktree lock`-markører som ikke blokkerer noe. Jobben gjorde ingenting, og hele runden gikk tapt.",
+      "cause": "Stoppregelen var skrevet som en kategori («annen låsefil») i stedet for en liste med navn og steder. Utføreren fulgte den bokstavelig, som den skal. Regelen manglet også det som faktisk er beviset på en lås: at en git-kommando blir avvist.",
+      "prevention": "Skriv stoppregler som navn og sti, ikke som kategori: «stopp hvis `index.lock`, `HEAD.lock` eller `*.lock` finnes under `<denne stien>`». Navngi eksplisitt det som ser ut som en treffer men ikke er det, og si at det skal ignoreres. Legg alltid til «stopp hvis kommandoen faktisk avvises med denne feilen» — en filsøk-treffliste er ikke et bevis på blokkering. Samme gjelder alle vide vendinger i en prompt: «eller lignende», «eller annet», «eventuelle andre».",
+      "purposeRefs": [
+        "purpose://handoff.runnable-without-guessing"
+      ],
+      "tags": [
+        "prompt",
+        "codex",
+        "git",
+        "stoppregel",
+        "jobbko"
+      ],
+      "severity": "minor",
+      "date": "2026-09-09",
+      "source": "Deliverables/PDD_scaffold-admin-delegering_2026-09-08"
+    },
+    {
+      "lessonRef": "lesson.ciphertext-field-held-plaintext-hash",
+      "date": "2026-09-10",
+      "severity": "blocker",
+      "symptom": "Losen fortalte Kjetil at lyd allerede var kryptert i lagring. Det var feil: filene i prod begynner med ID3 og er vanlig MP3. To ting forte dit. (1) Krypteringskoden som ble lest tilhorer MusicIngestCell paa /mvp/ingest/local, mens Butterpop publiserer gjennom MusicAssetStoreCell.storeLocalAsset, som skriver bytene slik de kommer. (2) storeLocalAsset setter ciphertextSHA256 = plaintextSHA256 = sha256(data), saa manifestet ser kryptert ut selv naar encryptionPolicy er none.",
+      "cause": "Arkitektonisk egenskap sluttet fra ett funnsted, uten aa folge stien produktet faktisk bruker. Forsterket av et feltnavn som paastaar mer enn verdien holder.",
+      "prevention": "En paastand om at noe er kryptert, signert eller verifisert skal bekreftes paa artefaktet - les bytene, ikke feltet. Et felt som heter ciphertext* skal ikke settes naar encryptionPolicy er none; enten utelates det, eller navnet sier hva det er. Kan bli derivedTest: manifest med encryptionPolicy none har ingen ciphertext-verdi.",
+      "purposeRefs": [
+        "purpose://grounding",
+        "purpose://cell.contract-explicit"
+      ],
+      "tags": [
+        "encryption",
+        "delivery",
+        "music",
+        "audit",
+        "naming"
+      ],
+      "source": "CellScaffold: Sources/App/Cells/MusicPublishing/MusicPublishingCells.swift:623-652,905-958; MusicReleasePipeline.swift:226"
+    },
+    {
+      "lessonRef": "lesson.local-main-is-not-main",
+      "symptom": "WP0-baselinen var rød og ble meldt som «main bygger ikke». Det var feil. Den commiten baselinen ble målt mot, `ba14895`, lå bare på den LOKALE main-grenen og var aldri pushet; den avhang av CellBase-kode som heller ikke var pushet. origin/main lå fire commits lenger fram, pinnet CellProtocol til en revisjon som ER på CellProtocol sin main, og hadde grønn CI hele tiden. Et helt døgns arbeid ble bygget oppå den lokale commiten.",
+      "cause": "Et lokalt utsjekk ble behandlet som om det var prosjektets main. Ingen sjekket `git rev-list origin/main..main` før baselinen ble målt. Da baselinen var rød, ble den «løst» med `swift package edit` mot lokale søsterutsjekk i stedet for at noen spurte hvorfor den var rød. Etter det bygde alt — på én maskin — og ble meldt som verifisert.",
+      "prevention": "Før du måler en baseline eller sier at main er rød: `git fetch origin main` og sammenlign. Er lokal main foran origin/main, er de commitene ikke main for andre — bygg aldri videre på dem. Se på CI for origin/main før du konkluderer. `swift package edit` skal aldri være på når noe måles eller meldes verifisert. Og den eneste sjekken som virkelig avgjør: klon fra GitHub til en tom katalog og bygg der. HavenAgentD::Scripts/preflight_before_landing.sh stiller alle fire spørsmålene.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "bygg",
+        "baseline",
+        "git",
+        "main",
+        "dev-link",
+        "havenagentd"
+      ],
+      "severity": "major",
+      "date": "2026-09-11",
+      "source": "Deliverables/PDD_agent-menylinje-og-varsler_2026-09-09"
+    },
+    {
+      "lessonRef": "lesson.empty-list-must-not-look-like-calm",
+      "symptom": "En flate som samler «hva venter på meg» ser roligere ut jo mindre den får lest. En kilde som svarer 403, et token som er feil, en agent som ikke svarer — alle tre gir en tom liste, og en tom liste ser ut som at ingenting venter.",
+      "cause": "Feiltilfellene kollapses til `nil` eller en tom samling fordi det er den korteste koden. Da forsvinner forskjellen mellom «ingenting venter» og «jeg fikk ikke spurt», og den forskjellen er hele poenget med flaten.",
+      "prevention": "Modeller fravær eksplisitt: én rad per kjent kilde, alltid med, med tilstand `read` / `unreadable` / `not-configured`, og en påkrevd grunn når den ikke er lest. Skill erklært fravær (vi vet at den ikke er koblet til) fra ukjent fravær (vi fikk ikke spurt) — bare det første får se rolig ut. Ha én boolsk verdi i visningsmodellen (`claimsAllClear`) som er sann på nøyaktig ett sted, og en test som går over **alle** feilutfall og krever at den er falsk og at listen ikke er tom. Gi hvert feilutfall sin egen overskrift: «det virker ikke» hjelper ingen, «token avvist» og «ingen kontakt» krever hver sin handling.",
+      "purposeRefs": [
+        "purpose://gui.quality.functional-accessible"
+      ],
+      "tags": [
+        "flate",
+        "fravær",
+        "feilhåndtering",
+        "varsler",
+        "menylinje"
+      ],
+      "severity": "major",
+      "date": "2026-09-10",
+      "source": "Deliverables/PDD_agent-menylinje-og-varsler_2026-09-09"
+    },
+    {
+      "lessonRef": "lesson.a-new-red-test-needs-a-repeated-baseline",
+      "symptom": "Første fulle kjøring med nye endringer viste to røde i stedet for baselinens én, og den nye lå i en fil jeg hadde endret. Det så ut som en regresjon jeg hadde innført.",
+      "cause": "En baseline målt én gang sier ingenting om en ustabil test. Testen brukte globale singletoner (`AgentRuntimeBridge.shared`, `CellBase.defaultIdentityVault`) og feilet avhengig av kjøringsrekkefølge.",
+      "prevention": "Når en ny rød dukker opp: kjør basen på nytt, i et eget rent worktree, **flere ganger** (tre holder som regel), før du enten tar på deg feilen eller avfeier den. Skriv resultatet av gjentakelsen i TESTRESULT — «2 av 3 på ren base» er et svar, «den er nok flaky» er ikke. Det koster ti minutter og avgjør om du bruker natten på å jage din egen feil eller andres.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "test",
+        "baseline",
+        "flaky",
+        "regresjon"
+      ],
+      "severity": "minor",
+      "date": "2026-09-10",
+      "source": "Deliverables/PDD_agent-menylinje-og-varsler_2026-09-09"
+    },
+    {
+      "lessonRef": "lesson.swift-test-exit-code-lies-in-havenagentd",
+      "symptom": "`swift test` i HavenAgentD avslutter med 1 selv når samtlige 212 tester passerer. Et skript som leser `$?` melder rødt på et helt grønt tre.",
+      "cause": "Den tomme XCTest-pakken `HavenAgentDPackageTests.xctest` kan ikke lastes: «have 'arm64', need 'x86_64'». Repoet har ingen `XCTestCase` i det hele tatt — alt er Swift Testing — så pakken er et levn. Feilen finnes ordrett på ren `main` og er ikke innført av noe pågående arbeid.",
+      "prevention": "Les resultatet fra linjen `Test run with N tests in M suites passed/failed`, ikke fra exitkoden, i alle skript og køjobber for dette repoet. Og fjern det tomme XCTest-målet, eller bygg det for riktig arkitektur, før noen setter opp CI her — ellers vil CI være rød uansett hva som gjøres.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "test",
+        "exitkode",
+        "swiftpm",
+        "xctest",
+        "havenagentd",
+        "ci"
+      ],
+      "severity": "minor",
+      "date": "2026-09-10",
+      "source": "Deliverables/PDD_agent-menylinje-og-varsler_2026-09-09"
+    },
+    {
+      "lessonRef": "lesson.pkill-pattern-killed-the-queue-job",
+      "symptom": "En commit-jobb i Losen-køen døde med EXIT=143 tolv sekunder etter start. Ingen feilmelding, ingen commit. Årsaken var min egen opprydding i et annet skript: `pkill -f \"<appnavn>\"`.",
+      "cause": "`pkill -f` matcher hele kommandolinjen. Køen kjører `codex exec ... \"$(cat <id>.prompt.md)\"`, så hele promptteksten står i argv. Prompten beskrev nettopp at demoskriptet ikke skulle bruke `pkill -f` — og inneholdt derfor selve strengen. Skriptet drepte jobben som skrev om faren ved skriptet.",
+      "prevention": "Bruk aldri `pkill -f <mønster>` på en maskin der andre prosesser kan ha teksten i argv. Stopp en prosess ved PID du selv startet, eller ved `pgrep -x <prosessnavn>` kombinert med en sjekk av `ps -o comm=` mot den nøyaktige kjørbare stien. Dette gjelder særlig når en jobbkø kjører prompter som argument: alt du skriver i en prompt står på en kommandolinje et sted.",
+      "purposeRefs": [
+        "purpose://handoff.runnable-without-guessing"
+      ],
+      "tags": [
+        "prosess",
+        "pkill",
+        "jobbko",
+        "codex",
+        "sideeffekter"
+      ],
+      "severity": "major",
+      "date": "2026-09-10",
+      "source": "Deliverables/PDD_agent-menylinje-og-varsler_2026-09-09"
+    },
+    {
+      "lessonRef": "lesson.queue-job-file-before-prompt",
+      "symptom": "Køjobben `formaalskomposisjon-fullfor-commit-20260910-1020` ble avvist med «mangler promptfil» 13 sekunder etter at `.job` ble skrevet; promptfilen kom to sekunder etter avvisningen og ligger foreldreløs i `_losen-queue/inbox/`, der runneren aldri ser den igjen.",
+      "cause": "Jobben ble registrert i feil rekkefølge: `.job` (10:18:25Z) før `.prompt.md` (10:18:40Z). Runneren kjører hvert 60. sekund, tolker en `.job` som ferdig registrering og tok jobben i mellomrommet. Runneren leser bare `*.job`, så en promptfil uten `.job` blir aldri oppdaget.",
+      "prevention": "Skriv `<id>.prompt.md` først og `<id>.job` sist, helst som `mv` fra en tmp-fil i samme mappe — `.job` er registreringssignalet, slik `job.json` er det i HavenAgentD::Docs/AgentJobs.md. Kan bli derivedTest: runneren eller `hd validate` rapporterer enhver `inbox/*.prompt.md` uten tilhørende `.job`, eldre enn to minutter, som foreldreløs.",
+      "purposeRefs": [
+        "purpose://handoff.runnable-without-guessing"
+      ],
+      "tags": [
+        "jobbko",
+        "arbeidsko",
+        "codex",
+        "prosess",
+        "handoff"
+      ],
+      "severity": "minor",
+      "date": "2026-09-10",
+      "source": "HAVEN::_losen-queue/logs/runner.log (2026-09-10T10:18:38Z); Deliverables/PDD_utviklerbenk-oppgavegraf_2026-09-10/FORMAALSSPEC.md §0.5"
+    },
+    {
+      "lessonRef": "lesson.pin-must-be-on-their-main",
+      "date": "2026-09-11",
+      "severity": "major",
+      "symptom": "En revisjonspin i Package.swift pekte på en CellProtocol-revisjon som ikke lå på CellProtocol sin main. Koden bygde bare på den ene maskinen som hadde revisjonen liggende lokalt.",
+      "cause": "Pinning ble brukt som et verktøy for å få et grønt bygg her og nå, ikke som et uttrykk for hva som faktisk er landet hos den andre. Da blir en pin en måte å slippe unna at avhengigheten ikke er landet.",
+      "prevention": "Å pinne er riktig — det er det som gjør bygget reproduserbart. Kravet er at revisjonen er en forfar av avhengighetens egen main. Da er «bygg fra andres main» og «reproduserbart bygg» samme krav. HavenAgentD::Scripts/assert_dependencies_are_on_their_main.sh håndhever det, og CI kjører den. Lander du en klient før cellen den bruker er på den andres main, har du laget et repo som bare bygger hos deg.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "swiftpm",
+        "pin",
+        "avhengigheter",
+        "main",
+        "ci"
+      ],
+      "source": "CellProtocolDocuments::Deliverables/PDD_agent-menylinje-og-varsler_2026-09-09"
+    },
+    {
+      "lessonRef": "lesson.a-red-baseline-is-a-question-not-an-answer",
+      "date": "2026-09-11",
+      "severity": "major",
+      "symptom": "En rød baseline ble behandlet som en opplysning om prosjektet, og arbeidet gikk videre med et tiltak som gjorde den grønn. Tiltaket skjulte årsaken i stedet for å fjerne den.",
+      "cause": "Det haster alltid å komme videre, og et grønt bygg føles som framgang. En rød baseline er derimot to helt forskjellige situasjoner som ser like ut: enten er prosjektet rødt, eller så er utsjekket ditt feil. De krever motsatt handling.",
+      "prevention": "Svar på tre spørsmål før du gjør noe med en rød baseline: er utsjekket mitt likt origin? er CI grønn på origin/main? hvilken commit gjorde den rød, og hvem eier den? Først når svaret er «prosjektet er faktisk rødt» er det riktig å jobbe rundt det — og da som en egen, navngitt sak, ikke som en stille lokal omgåelse.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "baseline",
+        "feilsoking",
+        "rutine",
+        "dev-link"
+      ],
+      "source": "CellProtocolDocuments::Deliverables/PDD_agent-menylinje-og-varsler_2026-09-09"
+    },
+    {
+      "lessonRef": "lesson.unavailable-was-a-repo-scoped-search",
+      "date": "2026-09-11",
+      "severity": "major",
+      "symptom": "Et uttrykk Kjetil brukte i bestillingen ble ført som «unavailable» i brief-auditen, med den begrunnelsen at det ikke fantes i HAVEN-repoene. Det fantes — i et annet repo i samme tre, og som navnet på Kjetils egen andre tråd i prosjektet. Spørsmålet gikk tilbake til ham som et åpent spørsmål han allerede hadde svart på ved å gjøre arbeidet.",
+      "cause": "Søket ble avgrenset til de repoene oppgaven handlet om (CellProtocolDocuments, Kallimachos) fordi det var der svaret var forventet. «Finnes ikke der jeg lette» ble skrevet ned som «finnes ikke». HAVEN-treet har over tretti repoer, og forskning som skal brukes ett sted ligger ofte der den ble gjort.",
+      "prevention": "Før en auditrad settes til «unavailable»: søk hele HAVEN-treet, ikke bare de berørte repoene, og søk også på norske og delvise former av uttrykket. Er det Kjetils eget ord, skal det behandles som at det finnes et sted — spør etter *hvor*, ikke *om*. En «unavailable»-rad skal oppgi hvilke stier som faktisk ble gjennomsøkt, slik at avgrensningen er synlig og kan motbevises.",
+      "purposeRefs": [
+        "purpose://knowledge",
+        "purpose://grounding"
+      ],
+      "tags": [
+        "audit",
+        "dekomponering",
+        "sok",
+        "rutine"
+      ],
+      "source": "CellProtocolDocuments::Deliverables/PDD_formaalsregister-som-graf_2026-09-11"
+    },
+    {
+      "lessonRef": "lesson.judgement-without-decoys-yields-all-yes",
+      "date": "2026-09-14",
+      "severity": "major",
+      "symptom": "Første dommerrunde for formålsoppslag ga 197 «ja» og 0 «nei» på 197 rader. Fasiten skilte ikke mellom noen kandidater, og tidskurven (7 094 s på første oppgave, 25–44 s på de fem siste) viste at de siste var klikket gjennom, ikke dømt.",
+      "cause": "Dommeren fikk bare se unionen av to metoders topp-10 — alt var forhåndsfiltrert som «sannsynligvis relevant», og «nei» hadde ingenting å feste seg til. I tillegg returnerte matcheren nesten samme liste til alle oppgaver (én lærdom sto i topp-10 for 11 av 15), så dommeren så de samme tretti lærdommene femten ganger. Feilen var i måledesignet, ikke hos dommeren.",
+      "prevention": "En menneskelig fasit-runde skal alltid blande inn lokkeduer fra utenfor topp-10, blindt, så et «nei» kan attesteres og en alle-ja-dommer avsløres. Kriteriet skal kreve et navn («hvilket valg/test/avgrensning ville den endret»), ikke et ja. Maks fem oppgaver per økt. Og en runde uten negativer merkes instrumenteringsrunde — den teller ikke som fasit, samme regel som PurposeContract håndhever for null- og positiv referanse.",
+      "purposeRefs": [
+        "purpose://test.acceptance",
+        "purpose://knowledge"
+      ],
+      "tags": [
+        "fasit",
+        "maaling",
+        "dommer",
+        "formaal",
+        "signalmatching"
+      ],
+      "source": "CellProtocolDocuments::Deliverables/PDD_formaalsregister-som-graf_2026-09-11/maaling/DOMMER_RUNDE1_FUNN.md"
+    },
+    {
+      "lessonRef": "lesson.a-conditional-artifact-must-still-cost-something",
+      "date": "2026-09-18",
+      "severity": "minor",
+      "symptom": "purpose_dev.py validate ble rød på PDD_entitetsdata-egen-kontroll fordi artefaktet 'skeleton/' manglet, selv om G1-GUI var godkjent på bilder Kjetil faktisk hadde sett. Pakken beskrev artefaktet som påkrevd «når Porthole-preview er brukt»; validatoren krevde det alltid.",
+      "cause": "Et betinget krav var skrevet som en parentes i beskrivelsen i stedet for som en regel koden kunne lese. Den nærliggende fiksen — hopp over sjekken når mappen mangler — ville gjort kravet gratis å omgå og gjenskapt den grønne-men-meningsløse valideringen som lesson.unresolvable-condition-is-invisible kom av.",
+      "prevention": "Et betinget krav oppfylles av et *annet krav*, aldri av et fravær. Feltet 'satisfiedByDeclaration' peker på en fil og en overskrift og krever minst ett punkt under den: enten viser du skjelett-JSON-en bildet er rendret fra, eller du skriver ned hva skjelettet ikke kan rendre. Begge tvinger frem spørsmålet «kan flaten dette?». Feilmeldingen navngir begge veier ut. Sjekket begge veier: rød uten erklæring, grønn med.",
+      "purposeRefs": [
+        "purpose://gui.expectation-agreed-before-build",
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "gui",
+        "skeleton",
+        "validering",
+        "verktoy",
+        "port"
+      ],
+      "source": "Tools/PurposePackages/purpose_dev.py (declaration_satisfies) og Book/haven_purpose_packages_v0.json (art.skeleton-json)"
+    },
+    {
+      "lessonRef": "lesson.location-is-not-ownership",
+      "date": "2026-09-22",
+      "severity": "major",
+      "symptom": "dataflow.md begrunnet at AIGateway matte ligge i appen med at «en gateway utenfor entiteten gjor prompten til noen andres data». Kjetil: en celle i skyen som eies av meg er pr definisjon innenfor min entitet.",
+      "cause": "Plassering ble forvekslet med eierskap. Entiteten er en eierskapsgrense definert av eier og Agreement, ikke av hvilken maskin prosessen kjorer pa. Feilen er farlig fordi den smitter: hadde den fatt sta, ville neste beslutning lett blitt at skyceller trenger et ekstra vern lokale celler ikke trenger — og da har man allerede godtatt at skyen er utrygg som utgangspunkt.",
+      "prevention": "Regelen er uniform og gjelder alle scaffolds likt: ingen andre, scaffold-admin inkludert, nar data ELLER funksjonalitet i en celle jeg eier uten en Agreement som sier det. Et vern som bare gjelder skyen er et tegn pa at grensen er tegnet feil. Negative tester skal kjores i begge oppsett, lokalt og sky, og gi samme svar — og de skal dekke handlinger, ikke bare felter. Den positive motsatsen ma ogsa testes: en Agreement apner nayktig sitt eget omfang.",
+      "purposeRefs": [
+        "purpose://self-determination.data.recipients",
+        "purpose://self-determination.data.locality"
+      ],
+      "tags": [
+        "entitet",
+        "eierskap",
+        "scaffold",
+        "autorisasjon",
+        "agreement"
+      ],
+      "source": "Deliverables/PDD_entitetsdata-egen-kontroll_2026-09-08/FORMAALSSPEC.md §2A.4 og dataflow.md §6-7"
+    },
+    {
+      "lessonRef": "lesson.read-origin-main-before-writing-a-mechanism",
+      "date": "2026-09-22",
+      "severity": "major",
+      "symptom": "Runde 1 av PDD_entitetsdata skrev en egen resolver for lenkede identiteter (EntityLinkAuthorizer, ny CellAuthorizationPath.linkedIdentity, ny hook pa GeneralCell). Da patchen ble lagt mot origin/main viste det seg at IdentityLinkRegistry og GeneralCell.authorizationEvidence allerede gjorde det samme, landet av en annen oppgave (purpose://candidate.entity-link.resolver-honours-link). Hele resolveren ble forkastet.",
+      "cause": "Kildene ble lest fra den lokale grenen som var sjekket ut (pdd/tillitspakke-agentflaate), 70-100 linjer bak main i akkurat de filene. Formalsspesifikasjonens brief-audit sa «retrieved» om noe som var lest fra feil revisjon. En mekanisme som finnes pa main er usynlig fra en gammel gren.",
+      "prevention": "Brief-audit skal si HVILKEN revisjon noe ble lest fra, og for et formal som skal endre en mekanisme skal kilden vaere origin/main (git show origin/main:<fil>), ikke utsjekket. Preflight-skriptet sjekker na at patchen passer mot origin/main i et eget worktree for noe legges pa. Og: for du skriver en mekanisme, grep pa main etter navnet pa det den skal gjore (her: sameEntity, linkedIdentity) - ikke bare etter typen du planlegger a lage.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression",
+        "purpose://grounding"
+      ],
+      "tags": [
+        "git",
+        "main",
+        "worktree",
+        "autorisasjon",
+        "grounding"
+      ],
+      "source": "Deliverables/PDD_entitetsdata-egen-kontroll_2026-09-08/TESTRESULT.md og handoff/runde1/"
+    },
+    {
+      "lessonRef": "lesson.dev-set-called-holdout",
+      "date": "2026-09-24",
+      "severity": "major",
+      "symptom": "Nattens formålsmatching rapporterte 0,16 → 0,40 «holdout top-1». Astra viste at rundene 2–4 var designet mot feilene i den samme 40 %-delen, at 27 kandidater ble lest av mot den, og at valgene gain=3 og priorvekt 0,12 ikke var forhåndsbestemte treningsregler (andre verdier hadde identisk treningsmål). Tallet var reprodusert, men settet var et gjenbrukt utviklingssett. I samme rapport ble en håndskrevet spørreordstabell kalt «avledet av Book», og en nullinvariant («null tekst → null») holdt bare fordi et generisk spørreord ble regnet som tekstbevis.",
+      "cause": "Hypotese → mål → juster i flere runder på én synlig delmengde gjør delmengden til treningsdata, uansett at terskelen formelt ble valgt på den andre delen og at skriptet er deterministisk etterpå. Forfatteren av korpuset var også forfatteren av tabellen som ble evaluert på det.",
+      "prevention": "Kall ingenting holdout som har vært lest av mer enn én gang. Frys sluttvarianten, og gjør én evaluering på et sett skrevet og merket av noen som ikke har sett reglene eller modellutdata, splittet etter frasefamilie og forfatter, med størrelse avtalt før kjøring. Skriv utvalgsregelen for hyperparametre ned FØR runden. En invariant om «null bevis» må definere bevis som domeneforankret registertekst, ikke enhver positiv score. Kall en håndskrevet tabell håndskrevet.",
+      "purposeRefs": [
+        "purpose://grounding",
+        "purpose://test.acceptance"
+      ],
+      "tags": [
+        "måling",
+        "holdout",
+        "formålsmatching",
+        "astra",
+        "fasit",
+        "grounding"
+      ],
+      "source": "Deliverables/PDD_formaalsregister-som-graf_2026-09-11/handoff/ASTRA_NATT_MOTSVAR.md og maaling/natt-2026-09-23/NATT_RAPPORT.md §8"
+    },
+    {
+      "lessonRef": "lesson.same-writers-holdout-overstates",
+      "date": "2026-09-24",
+      "severity": "major",
+      "symptom": "Butlers formålsgraf v3 løftet riktig forslag fra 20 % til 40 % på holdout, men bare fra 20 % til 28 % på 264 meldinger fra fire nye skribenter skrevet etter at grafen var frosset.",
+      "cause": "Holdout-radene kom fra de samme fire personaene som treningsradene og delte ordvalg med dem; frasene lærte grafen hvordan akkurat de skrev.",
+      "prevention": "Etter frysing: mål på et nytt korpus fra skribenter (personaer) som ikke har bidratt til treningen, og rapporter både holdout og uavhengig. Kall bare det uavhengige tallet generalisering.",
+      "purposeRefs": [
+        "purpose://measurement.gain-on-unseen-data",
+        "purpose://test.acceptance"
+      ],
+      "tags": [
+        "måling",
+        "holdout",
+        "korpus",
+        "formålsmatching",
+        "butler-forstaaelse",
+        "generalisering"
+      ],
+      "source": "Deliverables/PDD_butler-onboarding-og-formaalsforstaaelse_2026-09-23/TESTRESULT.md#uavhengig"
+    },
+    {
+      "lessonRef": "lesson.sequential-ids-can-leak-labels",
+      "date": "2026-09-24",
+      "severity": "minor",
+      "symptom": "Tolken var enig med generatoren i 264 av 264 meldinger når id-ene fulgte generatorens rekkefølge (etikett for etikett), og i 261 av 264 med tilfeldige, opake id-er.",
+      "cause": "ukjent — tre rader kan ikke skille lekkasje fra tilfeldighet; id-rekkefølgen gjorde lekkasje mulig.",
+      "prevention": "Gi tolken tilfeldige, opake id-er og stokket rekkefølge; behold kartet id→opak separat.",
+      "purposeRefs": [
+        "purpose://measurement.honest-labels"
+      ],
+      "tags": [
+        "måling",
+        "tolk",
+        "fasit",
+        "korpus",
+        "formålsmatching"
+      ],
+      "source": "Deliverables/PDD_butler-onboarding-og-formaalsforstaaelse_2026-09-23/maaling/tolk/v2/ (A = rekkefølge-id-er, B = opake)"
+    },
+    {
+      "lessonRef": "lesson.helper-bypassed-shared-negation-check",
+      "date": "2026-09-24",
+      "severity": "major",
+      "symptom": "«bare så du vet, ikke gjør noe med det ennå: … flytte styremøtene til tirsdager» ga et møteforslag etter graf v3; bare det uavhengige korpuset viste det, og v3 var allerede i prod.",
+      "cause": "Møte- og videohjelperen var de eneste scorerne som ikke kalte den felles nektelsessjekken (suppressesIntent); v3 la til ukedager som tidsord.",
+      "prevention": "Hver hjelper-scorer har en negativtest med «ikke/don't»; en ny scorer som ikke kaller den felles nektelsessjekken feiler testen. Mål på uavhengig korpus før prod, ikke etter.",
+      "purposeRefs": [
+        "purpose://measurement.negatives-guarded"
+      ],
+      "tags": [
+        "formålsmatching",
+        "butler-forstaaelse",
+        "negativer",
+        "nektelse",
+        "regresjon"
+      ],
+      "source": "Deliverables/PDD_butler-onboarding-og-formaalsforstaaelse_2026-09-23/TESTRESULT.md#uavhengig; CellScaffold PR #258"
+    },
+    {
+      "lessonRef": "lesson.method-lived-only-on-one-machine",
+      "date": "2026-09-24",
+      "severity": "major",
+      "symptom": "Metoden selv — Book 35 (PDD-arbeidsflyten), Book 36, lærdomsregisteret med 50 lærdommer, formålspakkene, purpose_dev.py — lå bare i ett utsjekk på Kjetils Mac på grenen codex/docs-cleanup-20260810, aldri på main; derfor verken i HAVEN eller hos andre utviklere.",
+      "cause": "Metodefilene ble behandlet som arbeidsnotater, ikke som leveranse; ingen test sjekket at de fantes på main.",
+      "prevention": "Metodeartefakter landes som kode: PR til main og pin-oppdatering i HAVEN. Test: git cat-file -e origin/main:<fil> for hver metodefil.",
+      "purposeRefs": [
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "metodikk",
+        "dokumentasjon",
+        "leveranse",
+        "book",
+        "formålspakke"
+      ],
+      "source": "Deliverables/PDD_butler-onboarding-og-formaalsforstaaelse_2026-09-23/FORMAALSSPEC.md Tillegg T0"
+    },
+    {
+      "lessonRef": "lesson.readonly-git-is-not-all-git",
+      "date": "2026-09-24",
+      "severity": "minor",
+      "symptom": "Et `git status` fra device_bash i CellProtocolDocuments etterlot .git/index.lock (0 byte) som ikke kunne fjernes fra VM-en, selv om git show/grep/log/rev-parse i samme økt ikke gjorde det.",
+      "cause": "Kommandoer som oppdaterer indeksen (status, diff mot arbeidstre, add, commit) tar låsen; kommandoer som bare leser objekter (show, grep <rev>, log, cat-file, rev-parse) gjør ikke det.",
+      "prevention": "Fra device_bash bare objektlesende git mot en revisjon (git show/grep/log/cat-file <rev>); aldri status, diff mot arbeidstreet, add eller commit. Finnes en lås likevel: flytt den til _to_delete/ (mv virker, rm gjør ikke).",
+      "purposeRefs": [
+        "purpose://handoff.runnable-without-guessing"
+      ],
+      "tags": [
+        "git",
+        "device_bash",
+        "handoff",
+        "terminal"
+      ],
+      "source": "CellProtocolDocuments/_to_delete/cpd-git-index.lock-20260924T0928Z; lesson.mount-is-not-git"
+    },
+    {
+      "lessonRef": "lesson.downstream-pin-must-come-from-the-consumer",
+      "date": "2026-09-24",
+      "severity": "major",
+      "symptom": "Nedstrøms-baselinen for CellScaffold var rød 22.09 («cellprotocol krever swift-crypto 4.5.2, dimymint krever 3.x») og ble rapportert som prosjektets blokkering. CellScaffold main pinnet DiMyMint af41630, som løser swift-crypto 4.x; skriptet hadde hardkodet en eldre revisjon (1718fda).",
+      "cause": "downstream.sh kopierte DiMyMint/DiMyMicropayments-revisjoner inn som konstanter i stedet for å lese dem fra CellScaffold sin egen Package.swift/Package.resolved på origin/main.",
+      "prevention": "Et nedstrøms-skript leser alle transitive pinner fra forbrukerens egen Package.swift/Package.resolved på origin/main ved kjøring, og logger dem. En rød avhengighetsoppløsning i et skript med hardkodede pinner er ikke et funn før pinnene er bekreftet mot forbrukerens resolved.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "nedstroms",
+        "baseline",
+        "swiftpm",
+        "pin"
+      ],
+      "source": "Deliverables/PDD_entitetsdata-egen-kontroll_2026-09-08/TESTRESULT.md#build (24.09)"
+    },
+    {
+      "lessonRef": "lesson.disposable-worktree-must-be-reset-before-checkout",
+      "date": "2026-09-24",
+      "severity": "minor",
+      "symptom": "pdd-check/Binding ble stående på 72f6a6c9 i to kjøringer selv om skriptet ba om origin/main: «Your local changes to project.pbxproj would be overwritten by checkout». Baselinen målte feil Binding-revisjon uten å si fra.",
+      "cause": "Forrige kjørings pbxproj-bytte (GitHub-pin → lokal pakke) lå igjen som lokal endring; checkout nektet, og skriptet fortsatte.",
+      "prevention": "Engangs-worktrees resettes hardt (`git reset --hard` + fjern Package.resolved) før hver utsjekk, og skriptet skriver ut revisjonen den faktisk står på — en avvikende revisjon skal stoppe kjøringen, ikke logges forbi.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "nedstroms",
+        "worktree",
+        "xcode"
+      ],
+      "source": "Deliverables/PDD_entitetsdata-egen-kontroll_2026-09-08/handoff/runde1/downstream.sh"
+    },
+    {
+      "lessonRef": "lesson.report-the-commit-you-pushed-not-the-one-you-planned",
+      "date": "2026-09-24",
+      "severity": "minor",
+      "symptom": "TESTRESULT og PLAN sa «commit ebb0b7f». Branchen sto på e66b7f1 — commit.sh hadde laget en ny hash — og var ikke pushet. Push-skriptets EXPECT måtte rettes før det kunne kjøre.",
+      "cause": "Hashen ble skrevet ned fra forventning, ikke lest tilbake fra `git rev-parse` etter commit.",
+      "prevention": "Etter hver commit/push: les `git rev-parse --short HEAD` og `git ls-remote --heads origin <branch>` og lim inn utdataene i STATUS/TESTRESULT. Sjekk også for remote-tracking ref før du sier «pushet» (lesson.branch-is-empty-after-eight-work-packages, samme familie).",
+      "purposeRefs": [
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "git",
+        "status",
+        "handoff"
+      ],
+      "source": "Deliverables/PDD_entitetsdata-egen-kontroll_2026-09-08/handoff/runde1/push-20260924-131712.log"
+    }
+  ]
+}

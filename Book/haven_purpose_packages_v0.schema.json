@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "haven.purpose-package-set.v0",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "haven.purpose-package-set.v0"
+    },
+    "packages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "packageRef": {
+            "type": "string",
+            "minLength": 1
+          },
+          "purposes": {
+            "type": "array",
+            "items": {
+              "$ref": "haven_purpose_composition_v0.schema.json#/$defs/node"
+            }
+          }
+        },
+        "required": [
+          "packageRef",
+          "purposes"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "execution": {
+      "$ref": "haven_purpose_composition_v0.schema.json#/$defs/execution"
+    }
+  },
+  "required": [
+    "schema",
+    "packages"
+  ],
+  "additionalProperties": true
+}

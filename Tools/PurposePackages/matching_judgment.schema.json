@@ -1,0 +1,276 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "G1 relevance judgments and planned prevention; absent rows are unknown",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "taskRef",
+    "snapshotHash",
+    "query",
+    "stage",
+    "createdAt",
+    "updatedAt",
+    "annotationSeconds",
+    "lessons",
+    "tests",
+    "rankings",
+    "presented",
+    "judgments",
+    "corpusHash",
+    "taskHash"
+  ],
+  "properties": {
+    "schema": {
+      "const": "haven.matching-judgment.v1"
+    },
+    "taskRef": {
+      "type": "string",
+      "minLength": 1
+    },
+    "snapshotHash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "query": {
+      "type": "string"
+    },
+    "stage": {
+      "const": "G1"
+    },
+    "createdAt": {
+      "type": "string",
+      "minLength": 1
+    },
+    "updatedAt": {
+      "type": "string",
+      "minLength": 1
+    },
+    "annotationSeconds": {
+      "type": "number",
+      "minimum": 0
+    },
+    "lessons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "lessonRef",
+          "date",
+          "symptom",
+          "prevention"
+        ],
+        "properties": {
+          "lessonRef": {
+            "type": "string",
+            "pattern": "^lesson\\.[a-z0-9-]+$"
+          },
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "symptom": {
+            "type": "string",
+            "minLength": 1
+          },
+          "prevention": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "tests": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^test\\.[a-zA-Z0-9_.-]+$"
+      }
+    },
+    "rankings": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "pattern": "^lesson\\.[a-z0-9-]+$"
+        }
+      }
+    },
+    "presented": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^lesson\\.[a-z0-9-]+$"
+      }
+    },
+    "judgments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "lessonRef": {
+            "type": "string",
+            "pattern": "^lesson\\.[a-z0-9-]+$"
+          },
+          "relevant": {
+            "type": "boolean"
+          },
+          "repeatOf": {
+            "oneOf": [
+              {
+                "type": "string",
+                "pattern": "^lesson\\.[a-z0-9-]+$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "preventedBy": {
+            "type": "string",
+            "pattern": "^test\\.[a-zA-Z0-9_.-]+$"
+          },
+          "unenforced": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "reason"
+            ],
+            "properties": {
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "required": [
+          "lessonRef",
+          "relevant",
+          "repeatOf"
+        ],
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "lessonRef": {
+                "type": "string",
+                "pattern": "^lesson\\.[a-z0-9-]+$"
+              },
+              "relevant": {
+                "const": false
+              },
+              "repeatOf": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^lesson\\.[a-z0-9-]+$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "lessonRef",
+              "relevant",
+              "repeatOf"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "lessonRef": {
+                "type": "string",
+                "pattern": "^lesson\\.[a-z0-9-]+$"
+              },
+              "relevant": {
+                "const": true
+              },
+              "repeatOf": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^lesson\\.[a-z0-9-]+$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "preventedBy": {
+                "type": "string",
+                "pattern": "^test\\.[a-zA-Z0-9_.-]+$"
+              }
+            },
+            "required": [
+              "lessonRef",
+              "relevant",
+              "repeatOf",
+              "preventedBy"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "lessonRef": {
+                "type": "string",
+                "pattern": "^lesson\\.[a-z0-9-]+$"
+              },
+              "relevant": {
+                "const": true
+              },
+              "repeatOf": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^lesson\\.[a-z0-9-]+$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "unenforced": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "reason"
+                ],
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            },
+            "required": [
+              "lessonRef",
+              "relevant",
+              "repeatOf",
+              "unenforced"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "corpusHash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "taskHash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}
