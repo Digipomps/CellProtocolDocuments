@@ -48,7 +48,7 @@ Hver regel kom av en feil noen har gjort.
 
 1. **Lokkeduer i hver dom.** En dom uten noe å si nei til er ikke en fasit (formålsregister-tråden: 197 ja, 0 nei).
 2. **Holdout røres ikke.** 25 % av korpuset (hash av id) måles hver gang, men ingen endring får begrunnes med en holdout-rad.
-3. **Tomt er ikke grønt.** Harnessen feiler hvis ingenting ble målt.
+3. **Tomt er ikke grønt, og rødt er ikke levert.** Harnessen feiler hvis ingenting ble målt, og måle-jobben skriver ikke «levert» hvis en rad mangler, et løp feilet eller regresjonstestene er røde.
 4. **Tilregnelighetssjekk.** Fasiten CI allerede tester (PromptPurposeLab) måles i samme kjøring. Scorer den lavt, er harnessen feil.
 5. **Negativer og hull er egne kategorier.** Småprat, «ikke gjør noe», spørsmål om assistenten selv og ønsker utenfor systemet er riktige når ingenting foreslås. Et formål uten flate i katalogen er et hull, ikke en bom.
 6. **«Spurte med riktig valg» er ikke top-1.** Nyttig, men egen kolonne.
@@ -118,7 +118,7 @@ krevde én ny testmetode og ett formålskart.
 | Tall med filsti | samme mappe, `TESTRESULT.md` |
 | Korpus, fasit, tolk, generator | `…/maaling/korpus/`, `fasit/`, `tolk/`, `generator/` |
 | Poengsetter | `…/maaling/score.py <korpus-mappe> <rapport-mappe>` |
-| Én måling | `HAVEN-Deploy/_handoff/WP-R/wp-butler-maaling-v2.sh <variant>` (variant = navnet på en patch i `BUTLER-MAALING/graf/`, eller `foer`) |
+| Én måling | `HAVEN-Deploy/_handoff/WP-R/wp-butler-maaling-v3.sh <variant>` (variant = navnet på en patch i `BUTLER-MAALING/graf/`, eller `foer`) |
 | Grafendringene | `…/maaling/grafendringer/GRAFENDRINGER-v3.md` |
 
 ## 8. Formålspakken og lærdommene
