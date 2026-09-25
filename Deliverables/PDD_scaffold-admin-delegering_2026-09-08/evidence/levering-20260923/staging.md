@@ -1,0 +1,25 @@
+Skript: `scripts/provision-scaffold-administrator-staging.sh` fra `77a922bc301a0ea7586a6b3677a87c2b1e0f73f7`, md5 `125f673cb6c70888641f8abde2200099`.
+Requests: `/root/sad-req-{kjetil2,vegar}.json`, 0600 root. Representanter (staging): kjetil2 `C8C99783…`/identity `DF8D4644…`, vegar `C2A12943…`/identity `8DCE5C5A…`.
+
+### `kjetil2` `--preflight` → exit 0
+
+```text
+status=preflight_ready revision=77a922bc301a0ea7586a6b3677a87c2b1e0f73f7 dataKiB=154364 freeKiB=41191436
+```
+
+### `kjetil2` `run` → exit 0
+
+```text
+scaffold_administrator_staging_receipt={"schema":"haven.scaffold-administrator.staging-operation.v1","status":"committed_verified","environment":"staging","appRevision":"77a922bc301a0ea7586a6b3677a87c2b1e0f73f7","transactionID":"20260923T114159Z-staging-77a922bc","networkDuringProvisioning":"none","backupDisposition":"deleted_after_verified_restart","completedAt":"2026-09-23T11:42:40Z","provisioning":{"administratorEntityRef":"entity:digipomps","appRevision":"77a922bc301a0ea7586a6b3677a87c2b1e0f73f7","approvalReference":"G3:user-approved:2026-09-11","authorityActions":["mandate.issue","mandate.revoke","orgLink.issue","orgLink.revoke"],"environment":"staging","registryReceiptID":"4331411D-D29E-495D-8191-DFFB4731CD73","representativeBindingSHA256":"sha256:9aead677899a571e2ca940860956aee3ab5fe798b11c22444e7a81eefbbd117a","requiredSignatures":1,"scaffoldRef":"scaffold:cellscaffold","schema":
+```
+
+### `vegar` `run` → exit 0
+
+```text
+scaffold_administrator_staging_receipt={"schema":"haven.scaffold-administrator.staging-operation.v1","status":"committed_verified","environment":"staging","appRevision":"77a922bc301a0ea7586a6b3677a87c2b1e0f73f7","transactionID":"20260923T114243Z-staging-77a922bc","networkDuringProvisioning":"none","backupDisposition":"deleted_after_verified_restart","completedAt":"2026-09-23T11:43:13Z","provisioning":{"administratorEntityRef":"entity:digipomps","appRevision":"77a922bc301a0ea7586a6b3677a87c2b1e0f73f7","approvalReference":"G3:user-approved:2026-09-11","authorityActions":["mandate.issue","mandate.revoke","orgLink.issue","orgLink.revoke"],"environment":"staging","registryReceiptID":"4331411D-D29E-495D-8191-DFFB4731CD73","representativeBindingSHA256":"sha256:b1a50a9bd1720bbfd4c6528caea3c229489bd303642b2ec5967002b11dc6fad3","requiredSignatures":1,"scaffoldRef":"scaffold:cellscaffold","schema":
+```
+
+## Readiness etterpaa
+
+```text
+{"runtimeAdvisories":["arendalsuka_published_read_access_not_provisioned","scaffold_administrator_threshold_below_two scaffold=scaffold:cellscaffold requiredSignatures=1 reason=utviklingsfase, styreleder alene setAt=2026-09-09T00:00:00Z"],"mode":"serving","acceptsNewTraffic":true,"status":"ready","updatedAt":1790163793.3002663,"runtimeDiagnostics":[]}```
