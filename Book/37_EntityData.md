@@ -1,12 +1,12 @@
 # Chapter 37 — EntityData
 
-Last verified against code: 2026-09-16 (bevismønsterets kilde og målskjema kontrollert 2026-09-23)
+Last verified against code: 2026-09-16 (målskjema og skill-beslutning kontrollert 2026-09-25)
 
 Status: Struktur og nodemodell er kildebekreftet. Beslutningene i §7 er tatt av Kjetil
 16.09.2026, men er **ikke implementert** — de står her fordi et kapittel som beskriver
 dagens form uten å si hvor den er på vei, blir feil neste måned. Feltbeskrivelser i
 skjemaets runtime-grunnlag er på engelsk for å bevare betydningen; forklaringen her er på norsk.
-Målskjemaet videreføres etter 22.09 og bevisavklaringen 23.09; se
+Målskjemaet videreføres etter 22.09, bevisavklaringen 23.09 og skill-beslutningen 25.09; se
 [gjeldende målform](../../CellProtocol/Docs/EntityData-Review-2026-09-11/V2-BESLUTTET-FORM.md).
 Det nye bevisfeltet `supports` og dekodingsbygget bevisoppslag er ikke implementert i Swift.
 Målskjemaet håndhever nå UUID-nøkler også i `relations.records`; det fiktive
@@ -71,7 +71,7 @@ Et navn, en UUID eller en referanse i JSON gir ikke i seg selv tilgang.
 
 | Rot | Hva den bærer |
 |---|---|
-| `person` | Navn, profil, kontakt, adresser, språk, arbeid, ferdigheter, preferanser og domenespesifikke data. |
+| `person` | Navn, profil, kontakt, adresser, språk, arbeid, preferanser og domenespesifikke data. |
 | `purposes` | Eierens egne formål og interesser. Administreres av PerspectiveCell. |
 | `relations` | Relasjoner til andre entiteter, identiteter og kontaktmuligheter. |
 | `proofs` | Bevismateriale: credentials, identitetskoblinger, medlemskap, inklusjonsbevis. |
@@ -115,7 +115,8 @@ nøklet på bevis-uuid. Hver post bærer `supports.entityRef` (entitets-uuid) og
 bevis-uuid-er inn i lageret. Oppslaget skal bygges ved dekoding fra postene,
 slik `entityRepresentationNameReferences` kan bygges fordi `name` ligger på
 objektet selv. Det er avledet, ikke persistert sannhet eller en andre kilde.
-`proofRefs` og `evidenceRefs` peker inn i `proofs.credentials` på uuid.
+`proofRefs` peker inn i `proofs.credentials` på uuid. Skill-listens
+`evidenceRefs` er fjernet i målformen 25.09; se den åpne sperren nedenfor.
 Oppslag fastslår ikke sannhet, gyldighet, utstedertillit eller samtykke.
 Se [23.09-rapporten](../Deliverables/ENTITYDATA_BEVIS_2026-09-23.md) for
 skjemakontroller og grensen mot uprøvd Swift-dekoding.
@@ -165,6 +166,28 @@ bruker verdier som 7.
 
 Et formål jeg selv har, og et formål jeg leter etter hos en annen, uttrykkes med samme
 `Purpose`-type. Det finnes ingen `SearchPurpose`, og det skal ikke lages en.
+
+**Avklart 25.09: skills er bare formål.** En skill er et formål brukeren hevder
+å kunne oppfylle, med samme nodeform som andre formål. `person.skills[]` er
+fjernet og eksplisitt forbudt i målskjemaets delte `PersonProfile`, også som
+avledet liste. Ingen egen `Skill`-type. Aktiv kontekst hører i `PerspectiveCell`;
+sporform, grovhet og levetid er fortsatt åpne.
+
+`Purpose.goal` er påkrevd i målformen. En skill uten et målbart resultat kan ikke
+uttrykkes slik, og det er med vilje. Det fiktive eksempelet viser et formål om å
+levere en nettside med nøyaktig tre tilgjengelige sider og null brutte interne
+lenker. Skjemaet krever konfigurasjonen, men beviser ikke målbarhet; ingen
+målecelle er implementert eller kjørt.
+
+**Åpen sperre for bevis:** `evidenceRefs` forsvinner sammen med skill-listen.
+`proofs.credentials` og `supports.keypaths` er uendret. Sistnevnte tillater
+ikke-tomme strenger, men stabil adressering av én `Purpose` gjennom vektede
+lister og `value`/`reference` er ikke kontraktfestet eller løst av dagens
+fixture-verktøy. Ingen erstatningsfelt er oppfunnet. Det tidligere identitetsbeviset
+er bevart; ingen skill-beviskobling hevdes løst.
+Se [beslutningen](../../CellProtocol/Docs/EntityData-Review-2026-09-11/BESLUTNING-UUID-OG-GRUPPER-2026-09-22.md#åpen-sperre-2509-bevis-til-en-bestemt-skill-node)
+og [kontroll- og publiseringsrapporten](../Deliverables/SKILLS_SOM_FORMAAL_2026-09-25.md).
+Dette er dokumentasjon og målskjema, **ikke implementert Swift-atferd**.
 
 `Purpose.goal` og `helperCells` peker på `CellConfiguration` — koblingen fra formål til noe
 kjørbart. CellConfiguration kan også brukes til å utføre get/set, og er grundig dokumentert i
@@ -249,7 +272,6 @@ faktisk skriver. Fullt referat av beslutningene:
 
 Dette står igjen som **ikke avgjort**:
 
-- Skal skills være annonserte formål brukeren hevder å kunne løse, heller enn egne poster?
 - Skal `person.work` bli et array med referanser til arbeidsorganisasjoner?
 - Skal relasjonen ha toveis binding — et array som lister hvilke relasjoner personen er
   medlem av? Krever grundig vurdering: det avgjør om relasjonsgrafen har én eier av sannheten
