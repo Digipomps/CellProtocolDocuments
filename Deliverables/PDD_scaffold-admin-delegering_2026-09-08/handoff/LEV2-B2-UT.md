@@ -1,0 +1,47 @@
+STATUS: LEVERT — staging og prod kjører sha-03fc0effe8e2dcc5df322b9d745f499582d187b6; entity:digipomps er scaffold-administrator i prod med kjetil2 og Vegar
+
+# Leveranse 2 — steg B2: staging, prod, provisjonering
+
+Skrevet av `HAVEN-Deploy/_handoff/WP-R/wp-lev2-b2-ut.sh` 2026-09-24T04:03:35Z.
+
+Image: `ghcr.io/digipomps/cellscaffold-web:sha-03fc0effe8e2dcc5df322b9d745f499582d187b6`
+
+## staging
+
+`sudo -n haven-ghcr-prefetch 03fc0effe8e2dcc5df322b9d745f499582d187b6` → exit 0
+`sudo -n haven-deploy-doctor staging` → exit 0
+`sudo -n haven-deploy staging 03fc0effe8e2dcc5df322b9d745f499582d187b6 --preflight` → exit 0
+Enhet `haven-deploy@staging-03fc0effe8e2dcc5df322b9d745f499582d187b6`: `inactive`
+```text
+Sep 24 04:01:40 ubuntu-16gb-hel1-1 haven-deploy[1777825]: 2026-09-24T04:01:40Z PREFLIGHT miljoe=staging commit=03fc0effe8e2dcc5df322b9d745f499582d187b6 txn=20260924T040140Z-staging-03fc0eff
+Sep 24 04:01:42 ubuntu-16gb-hel1-1 haven-deploy[1777825]: 2026-09-24T04:01:42Z PREFLIGHT_GREEN prev=f262a8ebc3f2b9916288603f3b5aaf2142dd5579 image=sha256:9c99519e4c8183d405585a834357321b760c14ec3ce0a81a954c277b881c1c19
+Sep 24 04:01:53 ubuntu-16gb-hel1-1 haven-deploy[1777825]: 2026-09-24T04:01:53Z STOPPED cellscaffold-app-1 — nedetiden starter her
+Sep 24 04:02:05 ubuntu-16gb-hel1-1 haven-deploy[1777825]: 2026-09-24T04:02:05Z READY_OK (foerste-start) etter 15s
+Sep 24 04:02:16 ubuntu-16gb-hel1-1 haven-deploy[1777825]: 2026-09-24T04:02:16Z READY_OK (restart) etter 15s
+Sep 24 04:02:17 ubuntu-16gb-hel1-1 haven-deploy[1777825]: 2026-09-24T04:02:17Z COMMITTED_VERIFIED
+Sep 24 04:02:17 ubuntu-16gb-hel1-1 haven-deploy[1777825]: 2026-09-24T04:02:17Z FERDIG — bevis i /mnt/disk1/app/haven-staging-evidence/deploy/20260924T040140Z-staging-03fc0eff
+```
+`https://staging.haven.digipomps.org/health/build`: `{"dimymicropayments_revision":"836ba8e6d71663d78836e2ec67a1e6f38bd8655b","dimymint_revision":"af41630bbc01cece2a26f3004fdf6f83724ca77e","cellprotocol_revision":"473357cf4efee831cb3b55ae87bc921d4bb63c10","environment":"staging","package_resolved_source":"\/app\/BuildMetadata\/Package.resolved","statu`
+
+## production
+
+`sudo -n haven-ghcr-prefetch-production 03fc0effe8e2dcc5df322b9d745f499582d187b6` → exit 0
+`sudo -n haven-deploy-doctor production` → exit 0
+`sudo -n haven-deploy production 03fc0effe8e2dcc5df322b9d745f499582d187b6 --preflight` → exit 0
+Enhet `haven-deploy@production-03fc0effe8e2dcc5df322b9d745f499582d187b6`: `inactive`
+```text
+Sep 24 04:02:28 ubuntu-16gb-hel1-1 haven-deploy[1781004]: 2026-09-24T04:02:28Z PREFLIGHT miljoe=production commit=03fc0effe8e2dcc5df322b9d745f499582d187b6 txn=20260924T040228Z-production-03fc0eff
+Sep 24 04:02:29 ubuntu-16gb-hel1-1 haven-deploy[1781004]: 2026-09-24T04:02:29Z PREFLIGHT_GREEN prev=77a922bc301a0ea7586a6b3677a87c2b1e0f73f7 image=sha256:9c99519e4c8183d405585a834357321b760c14ec3ce0a81a954c277b881c1c19
+Sep 24 04:02:30 ubuntu-16gb-hel1-1 haven-deploy[1781004]: 2026-09-24T04:02:30Z STOPPED cellscaffold-production-app-1 — nedetiden starter her
+Sep 24 04:02:38 ubuntu-16gb-hel1-1 haven-deploy[1781004]: 2026-09-24T04:02:38Z READY_OK (foerste-start) etter 10s
+Sep 24 04:02:44 ubuntu-16gb-hel1-1 haven-deploy[1781004]: 2026-09-24T04:02:44Z READY_OK (restart) etter 10s
+Sep 24 04:02:44 ubuntu-16gb-hel1-1 haven-deploy[1781004]: 2026-09-24T04:02:44Z COMMITTED_VERIFIED
+Sep 24 04:02:44 ubuntu-16gb-hel1-1 haven-deploy[1781004]: 2026-09-24T04:02:44Z FERDIG — bevis i /mnt/HC_Volume_104775511/haven-production-evidence/deploy/20260924T040228Z-production-03fc0eff
+```
+`https://haven.digipomps.org/health/build`: `{"cellprotocol_revision":"473357cf4efee831cb3b55ae87bc921d4bb63c10","app_revision":"03fc0effe8e2dcc5df322b9d745f499582d187b6","environment":"production","build_timestamp":"2026-09-24T00:29:29Z","dimymicropayments_revision":"836ba8e6d71663d78836e2ec67a1e6f38bd8655b","dimymint_revision":"af41630bbc01c`
+
+## Provisjonering i prod
+
+`wp-sad-prod.sh 03fc0effe8e2dcc5df322b9d745f499582d187b6` → STATUS: LEVERT — entity:digipomps er scaffold-administrator i prod; kjetil2 og Vegar er representanter
+
+Detaljer: `handoff/WP10-PROD-20260923.md`.
