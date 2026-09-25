@@ -123,7 +123,7 @@ brukes til publisering eller endres av jobben.
 | Repo | Før: hentet origin/main | Etter: innholdscommit |
 |---|---|---|
 | CellProtocol | `63975cd4aeb79595f24cdf1d7f75b9713b9eeb13` | `a40ceeb8af05e1c06b111500b50427bf08bdf4e6` |
-| CellProtocolDocuments | `af04ea5569841c68da598f14e3af98b46f217cf9` | Avventer commit/push |
+| CellProtocolDocuments | `af04ea5569841c68da598f14e3af98b46f217cf9` | `3e972c5bfc9572f4b1971b8f36fa8669915c3236` |
 
 CellProtocol ble først committet som `16615c5ac82d5c5f62bea2fa74c75ab556e8d678`, med
 nøyaktig eierens commit-melding. Første push ble avvist som non-fast-forward.
@@ -131,16 +131,23 @@ nøyaktig eierens commit-melding. Første push ble avvist som non-fast-forward.
 `git ls-remote --exit-code origin refs/heads/main` bekreftet
 `a40ceeb8af05e1c06b111500b50427bf08bdf4e6`. Alle ti filer var byte-like med arbeidstreet,
 og faktiske commit-stier var eksakt lik tillatelseslisten. Ingen force-push.
-Rebasen endret ingen av de ti gjennomgåtte filene. CellProtocol-arbeidstreet er rent.
+Rebasen endret ingen av de ti gjennomgåtte filene. Den tok inn
+`5609a9a` (bridge-konkurrens og tilhørende tester/workflows); ingen inngangsfil til
+skjemabyggingen eller skjemakontrollene ble endret. CellProtocol-arbeidstreet er rent.
 
-Dokumentrepoets innholdscommit og push føres inn i en etterfølgende oppdatering av
-bare denne rapporten. Rapportens egen endelige commit-SHA kan ikke skrives inn i seg selv;
+CellProtocolDocuments: innholdscommit `3e972c5bfc9572f4b1971b8f36fa8669915c3236`
+ble pushet på første forsøk, uten rebase. `git ls-remote` bekreftet samme SHA.
+Begge publiserte filer var byte-like med arbeidstreet, og commit-stiene var eksakt
+lik to-filslisten. Arbeidstreet var rent etter push.
+
+Denne etterfølgende oppdateringen endrer bare rapporten for å dokumentere observerte
+publiseringsresultater. Rapportens egen endelige commit-SHA kan ikke skrives inn i seg selv;
 den finnes med `git log -1 --format=%H -- Deliverables/SKILLS_SOM_FORMAAL_2026-09-25.md`.
 Etter hver push kontrolleres fjern-SHA og byte-likhet. Den endelige kvitteringen lagres
 lokalt som `_worktrees/skills-formaal-20260925-evidence/CellProtocolDocuments-report-published.json`
 og oppgis i leveringsmeldingen.
 
-### Uttrykkelig stiliste — CellProtocol (10 filer)
+### Faktisk committede stier — CellProtocol (10 filer)
 
 - `Docs/EntityData-Review-2026-09-11/BESLUTNING-UUID-OG-GRUPPER-2026-09-22.md`
 - `Docs/EntityData-Review-2026-09-11/EntityData.v2.example.json`
@@ -153,15 +160,16 @@ og oppgis i leveringsmeldingen.
 - `Docs/EntityData-Review-2026-09-11/current-review.json`
 - `Docs/EntityData-Review-2026-09-11/validate_decisions_2026_09_25_skills.py`
 
-### Uttrykkelig stiliste — CellProtocolDocuments (2 filer)
+### Faktisk committede stier — CellProtocolDocuments (2 filer)
 
 - `Book/37_EntityData.md`
 - `Deliverables/SKILLS_SOM_FORMAAL_2026-09-25.md`
 
-Før innholdscommitene kontrolleres `git diff --cached --name-only` eksakt mot den
-aktuelle listen. CellProtocols ti staged- og commit-stier er bekreftet. Dokumentrepoets
-to stier kontrolleres på samme måte før commit. Rapportoppdateringen får en egen
-én-stis liste, og samme kontroll.
+Før begge innholdscommitene ble `git diff --cached --name-only` kontrollert eksakt
+mot den aktuelle listen: ti filer i CellProtocol, to i CellProtocolDocuments.
+Faktiske commit-stier er også kontrollert. Rapportoppdateringen har en egen liste
+med bare `Deliverables/SKILLS_SOM_FORMAAL_2026-09-25.md`, kontrollert på samme måte
+før commit. Ingen andre stier stages i rapportoppdateringen.
 `build_v2_schema.py` og `IdentityLink-fixture.patch` er uttrykkelig utelatt.
 Ingen andre Book-filer eller kataloger inngår.
 
