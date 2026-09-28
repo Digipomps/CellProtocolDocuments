@@ -29,6 +29,49 @@ Resolver/Cell authorization boundary. Internal direct calls and app-specific
 adapters still require review; a renderer or transport must not become an
 authorization bypass.
 
+### 1.1 Endpoint address forms and UUID lookup
+
+`CellResolver.cellAtEndpoint(endpoint:requester:)` accepts these address forms:
+
+| Address | Resolution |
+|---|---|
+| `cell:///<name>` | Local name lookup through `auditor.loadNamedResolve`, using the registered scope. An `identityUnique` name selects the requester's instance. |
+| `cell:///<uuid>` | Local lookup of that concrete Cell instance: `loadCellFromMemory(uuid:)` first, then `loadCellFromPersistance(uuid:requester:)`. |
+| `cell://<host>/<reference>` | Remote route through a registered `RemoteCellHostRoute`; the path carries the Cell reference. See §8. |
+| `ws://...`, `wss://...` | The separate `emitCellAtWSEndpoint` bridge path, subject to the WebSocket policy in §9. |
+
+For local `cell://` endpoints, the resolver takes `URL.path`, removes one
+leading slash, and passes the remaining reference to `emitCellWithReference`.
+`isUUID(reference)` selects UUID lookup; other references use name lookup.
+The code also accepts `cell://localhost/<reference>` and the hostless
+`cell:/<reference>` as local forms. A remote address can include a port:
+`cell://<host>:<port>/<reference>`. The host is a routing host, not an owner UUID.
+
+**A Cell instance owned by another identity is addressed by its Cell UUID**, for
+example `cell:///123e4567-e89b-12d3-a456-426614174000` (illustrative UUID).
+This selects that existing instance in this resolver's memory or configured
+persistence, including an instance owned by someone else; it does not select
+the requester's own instance by name or discover a remote host automatically.
+
+**Addressing is not authorization.** For an `identityUnique` Cell, both the
+in-memory UUID path and the persistence load pass
+`validatesIdentityUniqueDirectReferenceAccess(_:requester:)`. That check accepts
+the proven owner, or, for a `GeneralCell`, a requester with a verified active
+signed authorization Contract in the Cell. Otherwise resolution throws
+`CellSetupError.ownerAuthorityUnavailable`. Resolving the Cell still does not
+grant read access: `GeneralCell` evaluates authorization for each GET/SET and
+its keypath. Knowing where to point is not permission to read.
+
+The statement in [Chapter 37](37_EntityData.md#tre-roller-som-blandes-lett) that a
+name, UUID, or JSON reference grants no access describes this authorization
+boundary; the address forms above explain how the Cell is selected.
+
+Source verified 2026-09-28 against CellProtocol
+`9c60001ac53abc35ba7ad6e2c0efa2a79ab2a366`,
+`Sources/CellBase/Cells/CellResolver/CellResolver.swift`: scheme dispatch
+1325–1340, local/remote selection 1382–1406, UUID/name lookup 1769–1807,
+persistence authorization 2712–2744, and direct-reference authority 2810–2830.
+
 ## 2. Lifecycle Management
 
 The runtime implements parts of this lifecycle through Resolver registration,

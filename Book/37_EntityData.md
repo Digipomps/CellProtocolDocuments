@@ -66,6 +66,9 @@ Alle røttene er valgfrie. En ny eller delvis utfylt entitet kan være `{}`.
 | **EntityAnchorCell** | Cellen som lagrer og betjener dataene på vegne av eieren. |
 
 Et navn, en UUID eller en referanse i JSON gir ikke i seg selv tilgang.
+En konkret celle, også en instans eid av en annen identitet, adresseres med
+`cell:///<uuid>`; se [kapittel 6 om adresseformer og UUID-oppslag](06_CellResolver.md#11-endpoint-address-forms-and-uuid-lookup).
+Adressering velger cellen; autorisasjon avgjør tilgangen.
 
 ## 2. Røttene
 
