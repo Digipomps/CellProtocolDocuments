@@ -1,0 +1,156 @@
+{
+  "schema": "haven.scaffold-mandate.contract.v1",
+  "status": "implemented-with-limitations — WP1–WP8 verifisert i worktree; G3 venter; ikke deployet",
+  "cell": {
+    "name": "ScaffoldMandate",
+    "endpoint": "cell:///ScaffoldMandate",
+    "scope": "mandater utstedt av en administrator-entitet for celler på ett scaffold",
+    "persistency": "mandatet persisteres som signert Agreement; mottakerens kopi lever i mottakerens egen EntityAnchor"
+  },
+  "principles": [
+    "Ett ledd. Et mandat gir rett til å handle, aldri rett til å utstede videre.",
+    "Et mandat uten resourceRefs, actionKeypaths, purposeRef, validUntil eller revocationRef er ugyldig og avvises — ikke tolket, ikke utfylt med standardverdier.",
+    "Tilbakekall er en autorisasjonshandling, ikke en sletting. Entiteten og dataene består.",
+    "Organisasjonstilknytning representeres som en rolleavtale med start, slutt og tilbakekall, ikke som implisitt medlemskap. Juridisk vurdering er ikke utført."
+  ],
+  "mandateShape": {
+    "mandateID": "uuid",
+    "kind": "administrate | use",
+    "scaffoldRef": "string",
+    "issuerEntityRef": "string (administrator-entiteten)",
+    "subjectIdentity": "{ uuid, publicKeyFingerprint }",
+    "resourceRefs": [
+      "cell:///…"
+    ],
+    "actionKeypaths": [
+      "string"
+    ],
+    "purposeRef": "purpose://…",
+    "issuedAt": "iso8601",
+    "validUntil": "iso8601",
+    "revocationRef": "cell:///…/mandates/<mandateID>",
+    "signatures": [
+      {
+        "identityUUID": "uuid",
+        "signedAt": "iso8601",
+        "signature": "base64url"
+      }
+    ],
+    "orgLinkRef": "string | null — rolleavtalen mandatet hviler på, når subjektet ikke er styremedlem"
+  },
+  "get": {
+    "mandate.list": {
+      "returns": "[{ mandateID, kind, subjectIdentityUUID, resourceRefs, actionKeypaths, validUntil, revoked }]",
+      "grant": "r---",
+      "requester": "eier av cellen mandatet gjelder, eller innehaver av administratormandat på scaffoldet",
+      "note": "Formålet delegation-is-visible-to-the-owner. Ikke-eier får avslag, ikke en tom liste.",
+      "selector": "mandate.list eller mandate.list.<base64url(resourceRef)>"
+    },
+    "mandate.read": {
+      "returns": "hele mandatet inkludert signaturer, revoked, revokedAt og revocationReason",
+      "grant": "r---",
+      "requester": "eier, utsteder eller subjekt",
+      "selector": "mandate.read.<UUID>; baseoperasjonen alene er ikke et lesbart mandat"
+    },
+    "orgLink.list": {
+      "returns": "[{ orgLinkRef, entityRef, roleLabel, from, to, revokedAt }]",
+      "grant": "r---",
+      "requester": "kryptografisk verifisert tilknyttet identitet eller organisasjonens verifiserte representant"
+    }
+  },
+  "set": {
+    "mandate.issue": {
+      "payload": {
+        "mandate": "mandateShape med faktiske signatures; mandateID kan utelates og hentes da fra UUID i revocationRef",
+        "subject": "offentlig Identity-deskriptor som matcher subjectIdentity",
+        "signerAuthorities": "eier-signerte representant-Contracts bundet til organisasjonen, scaffoldet og gjeldende registrerings-/overføringskvittering",
+        "reason": "string (8..512), inngår i hver signatur"
+      },
+      "grant": "-w-s",
+      "requester": "verifisert representant for administrator-entiteten med separat scaffold-eier-signert Contract; terskelpolicy for kind=administrate og én distinkt verifisert signatar for kind=use",
+      "denies": [
+        "kind=administrate med færre signaturer enn thresholdPolicy",
+        "to signaturer fra samme identitet regnes som én",
+        "kind=use med mandat-/orgLink-utstederrett eller administratorhandling; et mandat av noe slag godtas aldri som representantbevis for videre utstedelse",
+        "validUntil i fortiden eller mer enn 365 dager fram",
+        "manglende revocationRef"
+      ]
+    },
+    "mandate.revoke": {
+      "payload": {
+        "mandateID": "uuid",
+        "reason": "string (8..512)"
+      },
+      "grant": "-w-s",
+      "requester": "utsteder eller scaffoldets eier",
+      "effect": "Mandatet slutter å autorisere umiddelbart. Posten består med revokedAt og begrunnelse."
+    },
+    "orgLink.issue": {
+      "payload": {
+        "entityRef": "string",
+        "roleLabel": "string",
+        "from": "iso8601",
+        "to": "iso8601 | null",
+        "subject": "offentlig Identity-deskriptor",
+        "reason": "string (8..512)"
+      },
+      "grant": "-w-s",
+      "requester": "organisasjonsentiteten",
+      "effect": "Registrerer at en entitet har en navngitt rolle hos organisasjonen. Gir i seg selv ingen tilgang."
+    },
+    "orgLink.revoke": {
+      "payload": {
+        "orgLinkRef": "string",
+        "reason": "string (8..512)"
+      },
+      "grant": "-w-s",
+      "requester": "organisasjonsentiteten",
+      "effect": "Alle mandater med denne orgLinkRef slutter å autorisere. Entiteten, dataene og revisjonssporet består."
+    }
+  },
+  "audit": {
+    "everyIssuanceLogs": [
+      "mandateID",
+      "issuerEntityRef",
+      "actingIdentityUUID",
+      "reason",
+      "at"
+    ],
+    "note": "Formålet audit-names-org-and-person: både organisasjonen som ga mandatet og personen som brukte det skal stå i sporet."
+  },
+  "lastVerifiedAgainstCode": "2026-09-09",
+  "implementation": {
+    "repo": "CellScaffold",
+    "worktree": "_wt-sad-20260909",
+    "branch": "pdd/scaffold-admin-delegering",
+    "verification": "Tidligere grønne WP1/WP2/WP4-kjøringer i TESTRESULT.md; WP9 er kilde-/dokumentinspeksjon uten nye bygg/tester.",
+    "evidence": "Deliverables/PDD_scaffold-admin-delegering_2026-09-08/TESTRESULT.md#auth",
+    "acceptance": "Deliverables/PDD_scaffold-admin-delegering_2026-09-08/ACCEPT.md",
+    "canonicalSource": "Deliverables/PDD_scaffold-admin-delegering_2026-09-08/contract/scaffold-mandate_v1.json",
+    "bookMirror": "Book/scaffold-mandate_v1.json",
+    "deploymentStatus": "not-deployed; ingen staging-organisasjoner eller representanter provisjonert",
+    "noOpInventory": "Deliverables/PDD_scaffold-admin-delegering_2026-09-08/ACCEPT.md#stubs",
+    "gaps": "Gap_Analysis.md#scaffold-admin-delegering",
+    "sourceFiles": [
+      "Sources/App/Cells/Admin/ScaffoldMandate.swift",
+      "Sources/App/Cells/Admin/ScaffoldMandateCell.swift",
+      "Sources/App/Cells/Admin/ScaffoldMandateProofSupport.swift",
+      "Sources/App/Support/EntityAnchorProofSupport.swift"
+    ],
+    "revocationLookup": "Intern ScaffoldMandateProofSupport.authorize → ScaffoldMandateCell.authorize/validate kontrollerer sentral post ved hvert bruk. revocationRef er en kanonisk referanse, ikke et nytt offentlig GET-endepunkt.",
+    "singleHop": "Et administrate-mandat kan navngi mandate.issue og gi scaffold-innsyn, men er aldri utstederbevis. requireRepresentative krever alltid separat, opprinnelig eier-signert representant-Contract.",
+    "verifiedTargetAction": "ArendalsukaConfigurationPublisher.resetEditableCellConfiguration før og etter tilbakekall",
+    "sourceOnlyTargetWiring": "applyEditableCellConfiguration er koblet i kilde; denne testrekken beviser ikke en gjennomført publisering",
+    "publisherAccess.issue": {
+      "status": "not-implemented",
+      "note": "Fixture-handling på denne branchen; positiv mandatfixture beviser ikke utførelse i målcellen. SAD-01."
+    },
+    "otherTargetCells": "planned; ikke generell resolver-autorisasjon eller automatisk tilgang til alle celler",
+    "fixtures": [
+      "Deliverables/PDD_scaffold-admin-delegering_2026-09-08/contract/fixtures/mandate-positive.json",
+      "Deliverables/PDD_scaffold-admin-delegering_2026-09-08/contract/fixtures/mandate-negative.json",
+      "Deliverables/PDD_scaffold-admin-delegering_2026-09-08/contract/fixtures/threshold-policy.json"
+    ],
+    "fixtureInterpretation": "2 positive, 14 negative og 6 terskelcaser i 9 grønne XCTest-metoder. Reelle signaturer/identiteter og relative datoer materialiseres av testene; rolleetikettens feil er agreement_or_proof_required, ugyldig policy bruker WP1s invalidThreshold/invalidReason."
+  }
+}
