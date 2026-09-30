@@ -121,6 +121,35 @@ the HTML and sitemap.
 The Let's Encrypt certificate covers both production names. Certbot renewal
 has been verified with a successful dry-run.
 
+### Releasing content changes to production
+
+Releases are immutable directories under `/var/www/haven-public-new-releases/`
+named by UTC timestamp; the docroot symlink is moved to the new one. The method
+(copy the running release, replace exactly the changed files, `diff -rq`,
+`sha256sum` local = deployed, move the symlink, `nginx -t && reload`) is
+scripted in the deploy repository:
+
+```sh
+# from the HAVEN root on a machine with the host key (never hardcode the key:
+# HAVEN-Deploy/lib/vert.sh derives it)
+bash HAVEN-Deploy/_handoff/FORSIDE/website-release.sh dry-run        # writes nothing, shows the diff
+bash HAVEN-Deploy/_handoff/FORSIDE/website-release.sh release        # FILES from origin/main
+bash HAVEN-Deploy/_handoff/FORSIDE/website-release.sh merge-release  # squash-merge BRANCH's PR first
+```
+
+`FILES`, `BRANCH` and `SETNING` (a guard sentence that must exist on
+`origin/main` before a release is allowed) are set at the top of the script.
+It always releases from `origin/main`, never from a working tree, keeps the
+previous release for rollback and prints the rollback command in its log. It can
+also run as a `skript` job in the Losen queue (`_losen-queue/LES_MEG.md`).
+First use: the front-page sentence of PR #25, released 2026-09-28 as
+`20260928T120959Z`; dry-run verified against the host 2026-09-29.
+
+When verifying a release from an agent session, do not trust a single
+`WebFetch` of the page: it can return a stale copy (on 2026-09-29 it showed
+`/rettelser/` without the new entry although the host already served it). Add a
+cache-busting query such as `?kontroll=<date>`, or compare the file on the host.
+
 ## HAVEN VPS review deployment
 
 The active review target is:
