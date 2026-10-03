@@ -1,0 +1,69 @@
+Docs/BridgeCachingAndMultiplexing.md:20:[peer v3 authentication and record profile](../Documentation/BridgePeerChannelV3.md)
+Docs/BridgeIdentitySecurity.md:54:payload containing the canonical JSON: `channelAuthHello`, `channelAuthChallenge`,
+Docs/BridgeIdentitySecurity.md:55:`channelAuthProof`, `channelAuthAccepted`.
+Docs/BridgeIdentitySecurity.md:269:`BridgeChannelAuthenticationTests` covers canonical public envelopes, real local
+Docs/BridgeIdentitySecurity.md:326:## Multipeer peer profile (R3, N22 v3)
+Docs/BridgeIdentitySecurity.md:328:`org.haven.bridge-peer-channel.v3` is separate from the WS profile. The accepted
+Docs/BridgeIdentitySecurity.md:331:instance; acceptance is atomic and independent of the discovery index. Discovery names and MCSession possession grant no
+Docs/BridgeIdentitySecurity.md:332:identity or Cell authority. MCSession encryption remains required.
+Docs/BridgeIdentitySecurity.md:344:Separate application keys derive from the complete T5 transcript; HPC3 record
+Docs/BridgeIdentitySecurity.md:348:identities. Finished and application keys bind the whole exchange. Peer v1/v2,
+Docs/BridgeIdentitySecurity.md:349:HPC2, ready, plaintext fallback and cross-profile messages are rejected.
+Docs/BridgeIdentitySecurity.md:357:Peer v3 registers its principal only after validating encrypted Auth, identity MAC
+Docs/BridgeIdentitySecurity.md:386:`ScannerMultipeerProcessTests` runs real discovery, encrypted MCSession and Scanner
+Docs/BridgeIdentitySecurity.md:389:does not grant those rights. See [Scanner Multipeer verification](ScannerMultipeer.md).
+Docs/ScannerMultipeer.md:1:# Scanner Multipeer verification
+Docs/ScannerMultipeer.md:4:It specifies the five handshake messages, encrypted identity disclosure, HPC3
+Docs/ScannerMultipeer.md:6:current v3 contract. Peer v1/v2, HPC2, plaintext application messages and ready
+Docs/ScannerMultipeer.md:18:MCSession, endpoint, role and local invitation instance independently of discovery.
+Docs/ScannerMultipeer.md:50:One encrypted MCSession belongs to each physical peer/invitation. Close disconnects
+Docs/ScannerMultipeer.md:82:swift test --disable-automatic-resolution --sanitize thread --filter 'PublisherAsyncLifetimeTests|BridgeDescriptionConcurrencyTests|EntityScannerConsumerSecurityTests|ScannerNearbyInteractionTests|ScannerPeerAuthenticationTests|ScannerServiceInvitationTests|ScannerAdmissionTests|BridgePeerV3Tests|BridgePeerRecordLayerTests|BridgePeerFlowControlTests|BridgeMultiplexingTests|BridgeMuxSendLifetimeTests|BridgeResponseLifetimeTests|BridgeFactoryLifetimeTests|BridgeSigningLifetimeTests'
+Docs/ScannerMultipeer.md:83:CP53_MULTIPEER_TEST=1 swift test --disable-automatic-resolution --filter ScannerMultipeerProcessTests/testTwoProcessesUseRealMultipeerInBothInvitationDirections
+Docs/ScannerMultipeer.md:107:`_haven-radar._tcp` Bonjour service; see [Apple Multipeer documentation](https://developer.apple.com/documentation/multipeerconnectivity)
+Documentation/BridgeLifecycle.md:4:unchanged. These shared lifecycle rules apply to WS and peer v3, including mux.
+Documentation/BridgeLifecycle.md:57:existence lookup, immediately before signing, and after signing. Peer v3 retains
+Documentation/BridgeLifecycle.md:70:`BridgeSigningLifetimeTests` and `BridgePeerV3Tests`. The barriers deliberately
+Documentation/BridgePeerChannelV2.md:1:> Superseded by [Peer channel v3](BridgePeerChannelV3.md). Peer v2 and HPC2 are rejected.
+Documentation/BridgePeerChannelV2.md:6:Status: unreleased profile `org.haven.bridge-peer-channel.v2`. This replaces the
+Documentation/BridgePeerChannelV2.md:13:`ScannerPeerTransport` owns an immutable physical peer, MCSession, setup instance
+Documentation/BridgePeerChannelV2.md:14:and role. Discovery cannot change that binding. MCSession continues to require
+Documentation/BridgePeerChannelV2.md:28:layer; the enclosing MCSession still requires encryption.
+Documentation/BridgePeerChannelV2.md:30:1. I → R: plaintext `channelAuthPeerHello` containing I's hello.
+Documentation/BridgePeerChannelV2.md:31:2. R → I: plaintext `channelAuthPeerChallenge`, containing R's hello and R's
+Documentation/BridgePeerChannelV2.md:34:   sends plaintext `channelAuthPeerProof` with I's identity signature.
+Documentation/BridgePeerChannelV2.md:36:   `channelAuthPeerAccepted` as **R's record zero**. R has no active Base yet.
+Documentation/BridgePeerChannelV2.md:68:Canonical profile encoding is UTF-8 JSON from `BridgeChannelAuthentication.encode`
+Documentation/BridgePeerChannelV2.md:99:| 0–3 | ASCII `HPC2` |
+Documentation/BridgePeerChannelV2.md:162:quota accounting and N08/N09 regressions. The opt-in two-process Multipeer test
+Documentation/BridgePeerChannelV2.md:163:requires encrypted application-record counts in both directions on real MCSession.
+Documentation/BridgePeerChannelV3.md:3:Status: unreleased `org.haven.bridge-peer-channel.v3`. Peer v1/v2 and `HPC2`
+Documentation/BridgePeerChannelV3.md:6:TLS/endpoint contract. Peer v3 is not a WS upgrade or a WS parser alternative.
+Documentation/BridgePeerChannelV3.md:44:C(x) is UTF-8 JSON from `BridgeChannelAuthentication.encode`: sorted keys,
+Documentation/BridgePeerChannelV3.md:133:| M1 | I→R `channelAuthPeerV3Hello` | H_I |
+Documentation/BridgePeerChannelV3.md:134:| M2 | R→I `channelAuthPeerV3ResponderAuth` | `{hello:H_R,sealed:Seal(Pad_8192(Auth_R))}` |
+Documentation/BridgePeerChannelV3.md:135:| M3 | I→R `channelAuthPeerV3InitiatorAuth` | `{profile:P,sealed:Seal(Pad_8192(Auth_I))}` |
+Documentation/BridgePeerChannelV3.md:136:| M4 | R→I `channelAuthPeerV3ResponderFinished` | `{profile:P,sealed:Seal(Pad_1024(Finished_R))}` |
+Documentation/BridgePeerChannelV3.md:137:| M5 | I→R `channelAuthPeerV3InitiatorFinished` | `{profile:P,sealed:Seal(Pad_1024(Finished_I))}` |
+Documentation/BridgePeerChannelV3.md:167:`HPC3 || U(senderGeneration) || directionByte || U64(counter)` is the 49-byte
+Documentation/BridgePeerChannelV3.md:182:`BridgePeerV3Tests`, `BridgePeerRecordLayerTests` and
+Documentation/BridgePeerChannelV3.md:184:lifecycle. `Tests/CellBaseTests/Fixtures/PeerV3/reference.py` independently
+Documentation/BridgePeerChannelV3.md:207:mux-send, factory and signing protections. The opt-in ScannerMultipeerProcessTests parent also runs a three-process relay
+Documentation/BridgePeerChannelV3.md:211:BridgePeerV3Tests additionally exercises valid-AEAD field mutations against real
+Documentation/PeerPhysicalFlowControl.md:3:N14/N15/N18 extend the unreleased peer v3 implementation. The `HPC3` header,
+Documentation/PeerPhysicalFlowControl.md:11:Scanner allocates one `.required` MCSession per invitation/physical peer, never
+Documentation/PeerPhysicalFlowControl.md:18:reserved before MCSession allocation and remain charged during retirement until
+Documentation/PeerPhysicalFlowControl.md:57:Data records retain exact wire-byte reservations after MCSession.send returns.
+Documentation/PeerPhysicalFlowControl.md:109:Sources: [MCSession](https://developer.apple.com/documentation/multipeerconnectivity/mcsession),
+Documentation/PeerPhysicalFlowControl.md:110:[resource transfer](https://developer.apple.com/documentation/multipeerconnectivity/mcsession/sendresource(at:withname:topeer:withcompletionhandler:)).
+Documentation/ScannerAdmissionAndOrdering.md:3:Scanner opens peer v3 records in physical callback order. It then admits normal
+Documentation/ScannerAdmissionAndOrdering.md:13:Each pending, accepted or outgoing invitation owns a fixed MCPeerID, MCSession,
+Documentation/ScannerAdmissionAndOrdering.md:22:that never create a gate. Stop retires the service generation and every owned MCSession.
+Documentation/ScannerAdmissionAndOrdering.md:24:Timeout retires the invitation's dedicated MCSession with disconnect, including
+Documentation/ScannerAdmissionAndOrdering.md:37:heap or Multipeer OS allocation. Count limits also bound object overhead.
+Documentation/ScannerAdmissionAndOrdering.md:45:| Physical MCSession slots | 32 / 8192 | 2 / 512 | Held until physical retirement |
+Documentation/ScannerAdmissionAndOrdering.md:75:Multipeer before calling this delegate or establish N14/N15/N18 OS guarantees.
+Documentation/ScannerNearbyInteraction.md:6:gate. `ScannerConsumerContext` retains the exact MCPeerID/MCSession through the
+Documentation/ScannerNearbyInteraction.md:21:bounded, encrypted peer-v3 gate to exactly one captured context. Its content has
+Documentation/ScannerNearbyInteraction.md:69:It exercises the real peer-v3 gate and send path; radio and native token creation
+Packages/CellNearby/README.md:22:(NWBrowser macOS10.15/iOS13), so no Multipeer fallback is needed for those minimums.
+Packages/CellNearby/README.md:31:- [Apple TN3213](https://developer.apple.com/documentation/technotes/tn3213-moving-from-multipeer-connectivity-to-network-framework)

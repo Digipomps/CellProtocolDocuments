@@ -1,0 +1,46 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+body{margin:0;background:#fff;font-family:-apple-system,Helvetica,Arial,sans-serif;color:#1c1c1e}
+.wrap{width:1400px;padding:28px 32px;box-sizing:border-box}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:#6e6e73;font-size:13px;margin-bottom:18px}
+.lanes{display:grid;grid-template-columns:150px 1fr;row-gap:14px}
+.lane{display:contents}
+.label{font-weight:700;font-size:13px;padding:10px 8px;border-radius:8px;background:#f2f2f7;align-self:stretch;display:flex;align-items:center}
+.track{position:relative;height:110px;border-left:1px dashed #d1d1d6}
+.wp{position:absolute;top:10px;width:150px;height:88px;border-radius:12px;padding:8px 10px;box-sizing:border-box;font-size:12px;line-height:1.25;border:1.5px solid}
+.wp b{display:block;font-size:13px;margin-bottom:3px}
+.cloud{background:#e8f1ff;border-color:#5b8def}
+.mac{background:#eaf7ec;border-color:#3aa35b}
+.kj{background:#fff4e0;border-color:#e0a030}
+.doc{background:#f5e9ff;border-color:#9b5de5}
+.arrow{position:absolute;top:54px;height:2px;background:#8e8e93}
+.arrow:after{content:"";position:absolute;right:-1px;top:-4px;border:5px solid transparent;border-left-color:#8e8e93}
+.legend{margin-top:14px;font-size:12px;color:#6e6e73;display:flex;gap:18px}
+.legend span{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:5px;border:1px solid #999}
+</style></head><body><div class="wrap">
+<h1>Plan — Mine lister: celle og listekomponent (G2)</h1>
+<div class="sub">Lanes = hvem gjør det. Tid går mot høyre. Kjetils rad viser alt han skal gjøre.</div>
+<div class="lanes">
+ <div class="lane"><div class="label">Kjetil</div><div class="track">
+  <div class="wp kj" style="left:20px"><b>Nå</b>«G2 godkjent» + svar A/B om ComponentActionContext</div>
+  <div class="wp kj" style="left:980px"><b>PR åpen</b>Merge PR mot CellProtocol main (Losen kan ikke)</div>
+  <div class="wp kj" style="left:1160px"><b>G3</b>Les ACCEPT.md, si «G3 godkjent»</div>
+ </div></div>
+ <div class="lane"><div class="label">Losen (sky): skriver filer rett i arbeidstreet</div><div class="track">
+  <div class="wp cloud" style="left:360px"><b>WP1 logikk</b>ListsContracts.swift: sonering åpne/utførte, toggle, move, clearDone + tester</div>
+  <div class="wp cloud" style="left:540px"><b>WP2 celle</b>ListsCell.swift: nøkler, grants, persistens, feilkoder + tester</div>
+  <div class="wp cloud" style="left:720px"><b>WP3 fabrikk</b>ListsConfiguration.swift: ett skjelett, to innganger; reachability</div>
+  <div class="wp cloud" style="left:900px"><b>WP5 web-montering</b>render.js mot cellens ekte state (3 monteringer, instanceID)</div>
+  <div class="wp cloud" style="left:1160px"><b>WP7 aksept</b>TESTRESULT, ACCEPT, lærdommer, haven_learn</div>
+ </div></div>
+ <div class="lane"><div class="label">Kø på Macen (skript, uten Codex)</div><div class="track">
+  <div class="wp mac" style="left:180px"><b>WP0 baseline</b>worktree fra origin/main + diskvakt + swift build/test uendret</div>
+  <div class="wp mac" style="left:540px;top:-2px;height:30px;width:330px;font-size:11px;padding:6px 10px"><b style="display:inline">bygg+test etter WP1, WP2, WP3</b> → commit på grenen når grønt</div>
+  <div class="wp mac" style="left:980px"><b>WP6 regresjon + PR</b>hele suiten, no-format-change, push, PR, rev-parse i STATUS</div>
+ </div></div>
+ <div class="lane"><div class="label">Dokumenter (parallelt)</div><div class="track">
+  <div class="wp doc" style="left:540px;width:330px"><b>WP4 kontrakt + docs</b>contract/ validert grønt (allerede), Book-kopi, Docs/ListsCell.md, dataflow.md kontrollert mot kontrakten</div>
+ </div></div>
+</div>
+<div class="legend"><div><span style="background:#fff4e0"></span>Kjetil</div><div><span style="background:#e8f1ff"></span>Losen i skyen</div><div><span style="background:#eaf7ec"></span>skript-jobb i _losen-queue på Macen</div><div><span style="background:#f5e9ff"></span>dokumenter</div><div>Rekkefølge: WP0 → WP1 → WP2 → WP3 → WP5 → WP6 → WP7; WP4 fra WP2 og utover.</div></div>
+</div></body></html>

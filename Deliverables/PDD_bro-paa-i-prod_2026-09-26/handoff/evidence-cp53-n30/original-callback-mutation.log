@@ -1,0 +1,107 @@
+COMMAND=swift test --disable-sandbox --disable-automatic-resolution --cache-path /private/tmp/bro-swift-cache --jobs 4 --filter VaporWebSocketAdmissionTests/testAuthenticatedFeedOrderSurvivesHeldFirstDispatchAndMixedTextBinaryBurst|VaporWebSocketAdmissionTests/testDefaultAdaptersUseTheSameProcessWideBudget
+warning: /Users/kjetil/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/kjetil/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: 'bigint': /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/BigInt/Package.swift:18:19: warning: 'v4' is deprecated: watchOS 9.0 is the oldest supported version [#DeprecatedDeclaration]
+16 |         .iOS(.v12),
+17 |         .tvOS(.v12),
+18 |         .watchOS(.v4),
+   |                   `- warning: 'v4' is deprecated: watchOS 9.0 is the oldest supported version [#DeprecatedDeclaration]
+19 |         .macCatalyst(.v13),
+20 |         .visionOS(.v1),
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+warning: '_wt-bro-kanal-auth-20260927': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Using on-disk description]
+[1 / 83] BitCollections
+[1 / 169] Crypto
+[1 / 64] CellApple
+[2 / 14] CellVapor
+[4 / 16] CellVapor
+[7 / 18] CellVapor
+[12 / 17] CellVapor-product
+[12 / 17] CellRuntimeBenchmarks-product
+[13 / 19] CellRuntimeBenchmarks-product
+[14 / 19] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/VaporWebSocketAdmissionTests.swift:223:89: warning: left side of nil coalescing operator '??' has non-optional type 'String', so the right side is never used
+221 |     func consumeCommand(command: BridgeCommand) async throws { if command.command == .sign { signs.increment() } }
+222 |     func consumeResponse(command: BridgeCommand) async throws {
+223 |         guard case .flowElement(let flow) = command.payload, let value = Int(flow.title ?? "") else { otherResponses.increment(); return }
+    |                                                                                         `- warning: left side of nil coalescing operator '??' has non-optional type 'String', so the right side is never used
+224 |         let first = lock.withLock { received.append(value); return received.count == 1 }
+225 |         if first { await holdFirst?.wait() }
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/VaporWebSocketAdmissionTests.swift:262:41: warning: conformance of 'WebSocketFrameEncoder' to 'Sendable' is unavailable; this is an error in the Swift 6 language mode
+260 |         let endpoint = try BridgeChannelAuthentication.Endpoint(url: URL(string: "wss://n30.example/bridge")!, domain: "bridge")
+261 |         let listener = try await ServerBootstrap(group: group).childChannelInitializer { channel in
+262 |             channel.pipeline.addHandler(WebSocketFrameEncoder()).flatMap {
+    |                                         `- warning: conformance of 'WebSocketFrameEncoder' to 'Sendable' is unavailable; this is an error in the Swift 6 language mode
+263 |                 WebSocket.server(on: channel) { socket in
+264 |                     let close: @Sendable () async -> Void = {
+
+NIOWebSocket.WebSocketFrameEncoder:2:11: note: conformance of 'WebSocketFrameEncoder' to 'Sendable' has been explicitly marked unavailable here
+1 | @available(*, unavailable)
+2 | extension WebSocketFrameEncoder : Sendable {
+  |           `- note: conformance of 'WebSocketFrameEncoder' to 'Sendable' has been explicitly marked unavailable here
+3 | }
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/VaporWebSocketAdmissionTests.swift:302:34: warning: 'fireChannelRead' is deprecated: NIOAny is not Sendable. Avoid wrapping the value in NIOAny to silence this warning. [#DeprecatedDeclaration]
+300 |                 let frame = WebSocketFrame(fin: true, opcode: (binary ?? index.isMultiple(of: 2)) ? .binary : .text,
+301 |                     data: channel.allocator.buffer(bytes: bytes))
+302 |                 channel.pipeline.fireChannelRead(NIOAny(frame))
+    |                                  `- warning: 'fireChannelRead' is deprecated: NIOAny is not Sendable. Avoid wrapping the value in NIOAny to silence this warning. [#DeprecatedDeclaration]
+303 |             }
+304 |             return transport.receiveSnapshot
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+[17 / 22] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeFeedAndRPCOrderingTests.swift:55:21: warning: result of call to 'fulfillment(of:timeout:enforceOrder:)' is unused [#NoUsage]
+ 53 |     try await submit(.init(cmd: "feed", identity: requester, payload: nil, cid: 100))
+ 54 |     cell.values.send(BridgeOrderingFeedCell.value(1))
+ 55 |     await XCTWaiter.fulfillment(of: [hold.entered], timeout: 2)
+    |                     `- warning: result of call to 'fulfillment(of:timeout:enforceOrder:)' is unused [#NoUsage]
+ 56 |     cell.values.send(BridgeOrderingFeedCell.value(2))
+ 57 |     cell.values.send(completion: .finished)
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[23 / 27] CellBaseTests-product
+[25 / 27] CellBaseTests-product
+Build complete! (6,44 sek)
+Test Suite 'Selected tests' started at 2026-09-29 12:07:24.705.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-09-29 12:07:24.706.
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-09-29 12:07:24.706.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 12:07:24.706.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 12:07:24.773.
+Test Suite 'CellNearbyTests.xctest' started at 2026-09-29 12:07:24.773.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-09-29 12:07:24.773.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 12:07:24.773.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 12:07:24.846.
+Test Suite 'CellBaseTests.xctest' started at 2026-09-29 12:07:24.847.
+Test Suite 'VaporWebSocketAdmissionTests' started at 2026-09-29 12:07:24.847.
+Test Case '-[CellBaseTests.VaporWebSocketAdmissionTests testAuthenticatedFeedOrderSurvivesHeldFirstDispatchAndMixedTextBinaryBurst]' started.
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/VaporWebSocketAdmissionTests.swift:61: error: -[CellBaseTests.VaporWebSocketAdmissionTests testAuthenticatedFeedOrderSurvivesHeldFirstDispatchAndMixedTextBinaryBurst] : XCTAssertEqual failed: ("0") is not equal to ("64")
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/VaporWebSocketAdmissionTests.swift:62: error: -[CellBaseTests.VaporWebSocketAdmissionTests testAuthenticatedFeedOrderSurvivesHeldFirstDispatchAndMixedTextBinaryBurst] : XCTAssertEqual failed: ("[0, 2, 1, 3, 4, 5, 10, 7, 9, 12, 8, 6, 14, 11, 13, 18, 16, 15, 19, 20, 21, 22, 17, 25, 23, 29, 24, 28, 34, 30, 32, 33, 26, 36, 27, 41, 37, 51, 42, 35, 52, 39, 44, 54, 49, 40, 55, 45, 31, 48, 58, 53, 57, 56, 47, 50, 63, 59, 38, 61, 60, 43, 46, 62]") is not equal to ("[0]")
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/VaporWebSocketAdmissionTests.swift:65: error: -[CellBaseTests.VaporWebSocketAdmissionTests testAuthenticatedFeedOrderSurvivesHeldFirstDispatchAndMixedTextBinaryBurst] : XCTAssertEqual failed: ("[0, 2, 1, 3, 4, 5, 10, 7, 9, 12, 8, 6, 14, 11, 13, 18, 16, 15, 19, 20, 21, 22, 17, 25, 23, 29, 24, 28, 34, 30, 32, 33, 26, 36, 27, 41, 37, 51, 42, 35, 52, 39, 44, 54, 49, 40, 55, 45, 31, 48, 58, 53, 57, 56, 47, 50, 63, 59, 38, 61, 60, 43, 46, 62]") is not equal to ("[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63]")
+Test Case '-[CellBaseTests.VaporWebSocketAdmissionTests testAuthenticatedFeedOrderSurvivesHeldFirstDispatchAndMixedTextBinaryBurst]' failed (2.660 seconds).
+Test Case '-[CellBaseTests.VaporWebSocketAdmissionTests testDefaultAdaptersUseTheSameProcessWideBudget]' started.
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/VaporWebSocketAdmissionTests.swift:152: error: -[CellBaseTests.VaporWebSocketAdmissionTests testDefaultAdaptersUseTheSameProcessWideBudget] : XCTAssertEqual failed: ("0") is not equal to ("2")
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/VaporWebSocketAdmissionTests.swift:153: error: -[CellBaseTests.VaporWebSocketAdmissionTests testDefaultAdaptersUseTheSameProcessWideBudget] : XCTAssertEqual failed: ("0") is not equal to ("358")
+Test Case '-[CellBaseTests.VaporWebSocketAdmissionTests testDefaultAdaptersUseTheSameProcessWideBudget]' failed (0.002 seconds).
+Test Suite 'VaporWebSocketAdmissionTests' failed at 2026-09-29 12:07:27.510.
+	 Executed 2 tests, with 5 failures (0 unexpected) in 2.663 (2.663) seconds
+Test Suite 'CellBaseTests.xctest' failed at 2026-09-29 12:07:27.510.
+	 Executed 2 tests, with 5 failures (0 unexpected) in 2.663 (2.663) seconds
+Test Suite 'Selected tests' failed at 2026-09-29 12:07:27.510.
+	 Executed 2 tests, with 5 failures (0 unexpected) in 2.663 (2.664) seconds
+Note: Some test targets reported failures:
+  - CellBaseTests (XCTest)
+
+COMMAND_EXIT=1

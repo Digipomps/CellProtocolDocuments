@@ -1,0 +1,144 @@
+# STATUS — palazzo tolkning og vektjustering
+
+- surfaces: binding, cell, gui, scaffold, skeleton
+- tags: binding, formaal, interesse, palazzo, signalmatching, skeleton
+
+## Porter
+- G1: godkjent 2026-09-28 (Kjetil svarte på alle fire G1-valgene: «G1-GUI godkjent. 1. CellProtocol main 2. Forslaget er godkjent. 3. avgjøre om noe tilbys i det hele tatt 4. Fiks avviket.»)
+- G1-GUI: godkjent 2026-09-26 (Kjetil: «Har sett på G1-GUI. Vi går for B.» Referanse: images/artikkel-tolkning-v1.png. Avvik 1 rettes (Kjetil 28.9: «Fiks avviket»), avvik 2–3 står som i FORMAALSSPEC §3.)
+- G2: godkjent 2026-09-28 (Kjetil: «Ja til G2, du kan merge `codex/palazzo-vetofelle-20260924` inn i `pdd/palazzo-2026-09-14`. Fast i koden nå, men det er brukerens data så brukeren må kunne endre senere. Bruk de simulerte gjestene du foreslo.»)
+- G3: venter        (akseptanse: forventning mot faktisk, alle avledede tester grønne)
+
+Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py validate <mappe>` nekter porter uten artefakter.
+
+## Planbytter (dato — hvorfor)
+-
+
+## Logg
+- 2026-09-28: WP3 skrevet (Codex), ikke verifisert
+- 2026-09-26: opprettet
+- 2026-09-26: iterasjon 1–2 av FORMAALSSPEC (Kjetils tre svar, kildelesning, Fabels gjennomgang). Venter på G1: fire valg i boksen øverst i FORMAALSSPEC.
+- 2026-09-28: iterasjon 3. G1 godkjent. PLAN.md skrevet, venter på G2.
+- 2026-09-28: G2 godkjent. I køen: p1 merge av vetofelle (fast-forward), p2 prøve av bildevei, p3–p5 Codex (WP3, WP1a, WP2), p6–p8 verifisering. WP1a lander ikke før Kjetil har sett bildene (PORTS_ONLY).
+- 2026-09-28 18:20: runde 1 i køen.
+  - **Virket:** p1-merge (fast-forward, `origin/pdd/palazzo-2026-09-14` = `f548282`), WP1a skrevet (Codex) og WP2 skrevet (Codex, commit `cb4fcbc`).
+  - **Stoppet, med rettelse:**
+    - (a) WP3: Codex stoppet riktig fordi mine formler for gjentakelse og bytte motsa test.weights.monotone (b). Regelen er rettet: samme `approach` for alt, gjentakelse løfter bare målet, og invarianten `isMonotone` gjelder (`reinforce ≤ 0.6`). Se p3b-prompten.
+    - (b) Portene for WP1a: `git status --porcelain` setter anførselstegn rundt stier med mellomrom («Utility Views»). Rettet med NUL-separert lesing i både `wp1a-porter.sh` og `LANDING/land-cellprotocol.sh`. Port 1 flytter nå lokal main fram når den bare ligger bak origin/main.
+    - (c) WP2: Codex lagde en relativ `node_modules`-lenke som pekte feil. Skriptet erstatter en død lenke.
+    - (d) Bildevei-prøven: Swift 6 krever MainActor, og det er rettet.
+  - Runde 2 ligger i køen som p2b, p3b, p6b, p7b og p8b.
+- 2026-09-28 21:25: runde 2.
+  - **Virket:**
+    - Bildeveien: `NSHostingView` gir riktig bilde, mens `ImageRenderer` gir en gul «ikke støttet»-plakat. Sett i bildet, ikke bare målt.
+    - WP2 er grønn: Porthole-testen for brikker og de fire gamle tre-liste-testene passerer. `cb4fcbc` er pushet på `pdd/palazzo-tolkning-brikker` i CellScaffold, og skjermbildet ligger i images/actual/porthole-brikker-v1.png.
+    - WP3 er skrevet (Codex, `15caadf`). Fire eksisterende tester er endret, med begrunnelse i wp3-codex-svar.md.
+  - **Stoppet:**
+    - (a) WP3-worktreen ble laget inne i den delte `PalazzoScaffold/`, fordi stien i prompten var relativ til `-C`. `wp3-flytt-og-verifiser.sh` flytter den.
+    - (b) WP1a-worktreen har mistet git-metadataen sin (`CellProtocol/.git/worktrees/cellprotocol-native-treelist` er borte, trolig pruning fra en annen tråd). Filene er intakte. `wp1a-gjenopprett.sh` lager `_worktrees/cellprotocol-native-treelist-b` fra origin/main og kopierer filene inn, men bare der main ikke har endret dem.
+  - Runde 3 ligger i køen som p6c, p7a og p7c.
+- 2026-09-29 00:00: runde 3.
+  - **Virket:** WP1a-filene er gjenopprettet i `_worktrees/cellprotocol-native-treelist-b`, og main hadde ikke endret dem. WP3-worktreen er flyttet ut av den delte PalazzoScaffold/. Portene 1–2b er grønne for WP1a. Lokal main ble flyttet fram fordi den bare lå bak.
+  - **Stoppet før testene startet:**
+    - (a) `swift test` i CellProtocol stoppet på «Filesize limit exceeded» (exit 153). Årsaken er et nytt hardt skrivetak på 2 GiB i `_losen-queue/runner.sh`, lagt inn av en annen tråd 26.–28.9 etter at disken ble full. Taket er gjort mykt (`ulimit -S`), og byggskriptene hever det selv. Backup: `runner.sh.bak-20260929-ulimit`.
+    - (b) `verify-palazzo.sh` eksporterte CellProtocol til en katalog med feil navn, så SwiftPM fant ikke pakken. Det er rettet.
+  - Runde 4 ligger i køen som p6d og p7d.
+- 2026-09-29 03:00: runde 4 stoppet igjen på skrivetaket (exit 153).
+  - Runner-prosessen startet 23:37, før jeg gjorde taket mykt 23:53. Den kjører videre så lenge bane b har jobber, som er fem Codex-jobber til, så det harde taket gjelder fortsatt.
+  - Løsningen er `LANDING/uten-skrivetak.sh`: `swift test` kjøres som egen launchd-jobb når taket er hardt.
+  - Runde 5 ligger i køen: selvtest (p6-0), p6e og p7e.
+- 2026-09-29 03:40: runde 5.
+  - **Virket:**
+    - `uten-skrivetak.sh`: selvtesten skrev en glissen fil på 3 GiB via launchd, med exit 0.
+    - **WP3 verifisert:** hele Palazzo-suiten går fra 146 til 166 tester, med 0 feil. `15caadf` er pushet på `codex/palazzo-vekter-20260928`, ikke merget.
+    - **WP1a-portene er grønne (ikke landet):** CellProtocol går fra 1326 til 1337 tester, med 0 feil, 3 av 3 bundles og tre bilder.
+  - **Sett på bildene** (`images/actual/native-mot-godkjent-v1.png`):
+    - Raden er lukket til å begynne med og åpnes riktig.
+    - Brikkene i appen står i kolonner, bare tre per linje ved 390 pt, der bildet og Porthole har fem til seks.
+    - Det er for mye loddrett luft.
+    - Derfor ber jeg ikke om ja til landing ennå.
+  - I køen:
+    - q1: Codex retter pakkingen og luften i WP1a.
+    - q2: Codex skriver WP4, vektbenken.
+    - q3: Codex skriver WP5, reaksjonsraden.
+    - q4–q6: portene, verifisering av Palazzo og kjøring av benken.
+- 2026-09-29 08:30: runde 6.
+  - **Virket:**
+    - q1: Codex fant årsaken til kolonnene. Hver brikke i en `wrap`-liste ble målt med radens Spacer og polstring, minst 32 pt ekstra per brikke. Rettelsen berører også Arendalsukas interessebrikker og Butlers `scopeChips`/`branchChips` (se `wp1a2-codex-svar.md`).
+    - q2/q3: WP4 (`600b3d6`) og WP5 (`7e390e5`) er skrevet.
+    - q6: **benken er kjørt.** Oppsummering: `maaling/vektbenk-oppsummering-v1.md`, bilde `images/vektbenk-valg-v1.png`. I dag 3/7, foreløpige tall 5/7, anbefalt S032 (terskel 0, negativ vekt 0,5) 7/7 med 0 røde flagg. **Venter på Kjetils valg (A/B/C) før WP6.**
+  - **Stoppet:**
+    - (a) q4: WP1a kompilerte ikke. `CellListView.swift` brukte `applyIf`, som er fil-privat i `SkeletonView.swift`. Losen la inn en egen fil-privat hjelper i CellListView.
+    - (b) q5: 6 feil i `testBenchRecordsFollowArticleReact`. Innholdet var likt, men `ValueType` sammenlignet `.object`/`.list` som ulike (lesson.valuetype-equality-false-for-objects). Losen endret testen til kanonisk JSON.
+  - I køen (bane b): q7 kjører WP1a-portene på nytt; q8 committer testrettelsen og verifiserer Palazzo med push.
+- 2026-09-29 11:10: runde 7.
+  - **Virket:** q8. Palazzo-grenen går fra 146 til 186 tester, med 0 feil. `c87a80f` (WP3 + WP4 + WP5 + rettet selvtest) er pushet på `codex/palazzo-vekter-20260928`, ikke merget.
+  - **Stoppet:** q7. WP1a kompilerer nå, men `testWrappedListItemsTakeTheirOwnWidth` feiler (16 påstander; 1326 → 1339 tester). Brikkene får riktig bredde, men allerede den andre brikken havner på ny linje, selv om alle tre skal få plass. FlowLayout måler altså fortsatt hver rad som mye bredere enn brikken, omtrent 36 pt ekstra. Rettelsen fra runde 2 virker ikke.
+  - **Feil i verktøyet, rettet:** `wp1a-porter.sh` kopierte bildene fra runde 1 inn i `images/actual/` da port 3c ikke kjørte, så de så nye ut (samme md5, ny mtime). Nå kopieres bare bilder fra samme kjøring. Bildene i `images/actual/native-brikker-*.png` er fortsatt fra runde 1.
+  - I køen (bane c): q9 måler hvert lag rundt en brikke (ren tekst, SkeletonView-tekst, VStack-rad, hele wrap-lista) og lager bildene av runde 2. Deretter kan årsaken rettes.
+  - Vektbenken venter fortsatt på Kjetils valg (A/B/C).
+- 2026-09-29 12:00: runde 8 (diagnose).
+  - **Bildene av runde 2 finnes nå** (`images/actual/native-brikker-*.png`, sammenligning i `images/actual/native-mot-godkjent-v2.png`). Brikkene pakkes tett: sju på én linje ved 390 pt, fem og to ved 320 pt. Linjeavstanden er 4 pt, og det er ingen tom linje over brikkene. Bildetesten er grønn.
+  - **Målinger (q9):** en brikke måles til sin egen bredde i hvert lag (ren tekst, SkeletonView-tekst, VStack-rad): 20, 39 og 46 pt. Lagene rundt legger ikke til noe.
+  - **Det som fortsatt feiler** er `testWrappedListItemsTakeTheirOwnWidth`, og bare i to tilfeller:
+    - (a) Wrap-lista ligger alene på rotnivå, der CellListView bruker ScrollView-veien. Da havner hver brikke på egen linje. Når lista ligger inne i en rad, som i Palazzo, får alle plass.
+    - (b) Med eksplisitt `rowInsets` måler testen brikkerammen uten innfellingen. Tilgjengelighetsrammen er foreningen av barna, ikke den polstrede raden. Det er en feil i testen, ikke i rendereren.
+  - (a) kan ramme Arendalsuka og Butler, der brikkelistene leser cellestatus og ikke rad-data. q10 logger forslaget og grensene FlowLayout får på rotnivå.
+  - **q10, målt:** med eksplisitt innfelling ser FlowLayout 26, 44,5 og 52 pt, så innfellingen virker. Testen er rettet: den venter nå innfellingen i mellomrommet mellom brikkene, ikke i brikkerammen. På rotnivå får FlowLayout bredde 0 fra ScrollView-veien, og hver brikke havner på egen linje. Inne i en rad får den 112,5 pt, og alt er riktig.
+  - I køen (bane c): q11 kjører samme rotnivå-test på ren `origin/main` og på arbeidstreet. Den viser om 0-bredden er ny i WP1a eller fantes fra før.
+- 2026-09-29 12:36: q11 kompilerte ikke. Diagnosetesten hadde `"#eef1f5"` inne i en råstreng `#"…"#`, og `"#` avsluttet strengen. Rettet med `##"…"##`. Lagt i køen på nytt som q12. Arbeidstreet er lagt tilbake uendret.
+- 2026-09-29 13:00: **Kjetil fant ikke A/B/C eller vektbenken.** Valgene sto bare i chatteksten og i en markdown-fil, og benken var bare en Swift-test med rapport. Nå er vektbenken en side Kjetil kan bruke: https://claude.ai/artifact/839NLwdFpn8d3MwQBqgHhc
+  - Glidebrytere for alle tallene, knapper for A, B og tallene i koden, og alle sju gjestene med tilbud mot terskelen.
+  - «Velg disse tallene» lagrer valget i `valg/gjeldende`.
+  - Formelen er kontrollert mot benken: 630 av 630 like. Kilde og kontroll ligger i `maaling/vektbenk-side/`.
+- 2026-09-29 13:20: q12 kjørte. Wrap-lista ble lagt ut likt på `origin/main` (81601a6) og i arbeidstreet, både på rotnivå og i en VStack. Begge har de samme midlertidige passeringene med bredde 0, og begge ender på én linje ved 300 pt. Feilen på rotnivå ved trang bredde fantes altså før WP1a.
+  - Testen dekker nå bare det nestede tilfellet, slik Palazzo bruker lista.
+  - Rotnivå-tilfellet står som kjent avvik i `Documentation/Skeleton_List_Tree.md`. Årsaken er ikke funnet.
+  - Kjetil blir spurt om det skal rettes for seg.
+  - q13 kjører WP1a-portene på nytt, uten landing.
+  - Valget på vektbenk-siden: ingen dokumenter i `valg` ennå.
+- 2026-09-30 19:25: **q13: WP1a-portene er grønne (ikke landet).**
+  - Testene gikk fra 1326 til 1339, med 0 feil. Alle bundles er komplette.
+  - Bildetesten er grønn og skrev 4 bilder. De er byte-identiske med runde 2-bildene i `native-mot-godkjent-v2.png`, så sammenligningen gjelder uendret.
+  - `origin/main` står fortsatt på 81601a6.
+  - Venter på Kjetils ja til landing (`wp1a-land.spec`).
+  - Vektvalget på siden: fortsatt ingen dokumenter i `valg`.
+- 2026-09-30 19:30: **Kjetil: «Ja, land på main»** for WP1a, etter å ha sett `native-mot-godkjent-v2.png`. q14 kjører `wp1a-land.spec`.
+  - Rotnivå-avviket blir en egen oppgave etter landing, etter Kjetils svar «Egen oppgave senere».
+- 2026-09-30 20:15: **WP1a er LANDET på CellProtocol main som `253b4af`.**
+  - Testene gikk fra 1326 til 1339, med 0 feil. Alle 3 bundles er komplette. De 13 nye testene er nye testmetoder.
+  - Bevis: `HAVEN-Deploy/_handoff/PALAZZO-VEKT/landing-20260930T193301Z`.
+  - q15 leser CI-status (WP1b). WP7, Binding-pinnen, starter når CI er grønn.
+  - Rotnivå-avviket er lagt som egen oppgave i `CellProtocolDocuments/Deliverables/PDD_wrap-rotniva_2026-09-30/OPPGAVE.md`.
+  - Vektvalget: fortsatt ingen dokumenter i `valg`.
+- 2026-09-30 20:25: **WP1b ferdig.** CI på `253b4af` er grønn: CellProtocol Swift Linux, macOS regression, Vapor identity vault og Notify PyCellProtocol.
+  - q16 starter WP7 med `wp7-binding-pin.sh`:
+    - Worktree `_worktrees/binding-cp-253b4af` fra frisk `origin/main`.
+    - BindingTests kjøres før og etter pinnen flyttes til 253b4af, både i pbxproj-kravet (79497e8) og i Package.resolved (b5b7282).
+    - Grønn: grenen `losen/binding-cp-253b4af-20260930` pushes. Ingen PR og ingen merge.
+    - UI-testene er utelatt, fordi de tar over skjermen.
+- 2026-09-30 22:55: **WP7 kjørt (q16).** Grenen `losen/binding-cp-253b4af-20260930` er pushet som `cf66678`. Ingen PR og ingen merge.
+  - Pinnen er flyttet fra 79497e8 (pbxproj) og b5b7282 (Package.resolved) til 253b4af.
+  - BindingTests før og etter: 162 tester, 25 hoppet over, 2 feil. Begge feilene er de samme før og etter, med samme melding, så løftet ga ingen nye feil.
+  - **Rettelse av jobbens egen rapport:** den oppga «Executed 9 tests», som var siste delsuite og ikke hele bundelen. Skriptet leser nå linjen for «All tests». Dommen «GRØNN» betydde bare «ingen nye feil». Suiten var rød også før løftet.
+  - De to feilene som fantes fra før på Binding main (8ce634f):
+    - (1) `testNoLocalSurfaceHidesItsOwnWaysIn`: flaten **Butterpop Studio** har en knapp uten `keypath` (`ScrollView[0].VStack[1].Section[2].HStack[0].Button`). Dette er test.skeleton.no-unreachable-elements, som planen krever grønn i WP7.
+    - (2) `testRenderDenseRadar…`: miljøfeil. Testen får ikke skrive til `/tmp/haven-nearby-20260910/render`, fordi mappen eies av en annen prosess.
+- 2026-10-02 18:55: **Kjetil valgte tallene på vektbenk-siden: «A · Anbefalt»** (lagret 18:51 UTC i `valg/gjeldende`).
+  - Tallene: terskel 0, negativ vekt 0,5, tilnærming 0,5, forsterkning 0,25, Vil smake 0,8, Interessant 0,5, Ikke for meg 1,0, tak 1,0. Det gir 7 av 7 oppfylt og 0 røde flagg.
+  - **WP6 er startet:** q17 (Codex setter standardverdiene og testene) og q18 (verify-palazzo med push av grenen) ligger i bane c.
+  - Butterpop Studio-knappen er flyttet til egen tråd: `CellProtocolDocuments/Deliverables/PDD_butterpop-studio-knapp_2026-10-02/`, Codex-jobb r1 i bane b.
+- 2026-10-03 08:55: **WP6 er verifisert.** Codex-commit `fa66868` setter Kjetils valg A som `PalazzoWeightPolicy.standard` (terskel 0, negativ vekt 0,5).
+  - verify-palazzo: baseline 146 tester, etter 188 tester, 0 feil. Grenen `codex/palazzo-vekter-20260928` er pushet, ikke merget.
+  - Nye tester: sjugjestetesten (`PalazzoWeightBenchSelfTests`) og nullsumtesten (`PalazzoWeightPolicyTests`).
+  - Fem eksisterende tester ble tilpasset de nye tallene. Begrunnelsen for hver står i `HAVEN-Deploy/_handoff/PALAZZO-VEKT/wp6-codex-svar.md`.
+  - Gjenstår: WP8 (paritet i kjørende app), G3 og WP9.
+- 2026-10-03 09:10: **WP8 kan ikke gjøres slik planen beskriver.** Planen forutsetter at Binding kobles til lokal Palazzo «via broen». Den sikre native brokjeden finnes ikke ennå (CP53/AP5/AP7: `Binding/Implementation/SurfaceParityRepair-20260930/REPORT.md`, `PDD_bro-paa-i-prod_2026-09-26/STATUS.md`). Heller ikke Porthole mot lokal Palazzo (G5 i `PDD_palazzo-porthole-fjernt-scaffold_2026-09-14`) er verifisert.
+  - **Planbytte, foreslått til Kjetil:** WP8a gir paritet med ekte skjelett og frosset tilstand fra ekte Palazzo-celler, rendret i Bindings faktiske renderer (`SkeletonSnapshotRenderXCTest`, CellProtocol 253b4af) og i Porthole, for alle trinnene i test.article.row-refresh.
+  - Det WP8a ikke viser: at raden oppdateres i en kjørende HAVEN-app uten å gå ut og inn. Det står som blokkert av broen.
+  - q19 (Codex skriver korpus-eksportøren) ligger i bane c.
+- 2026-10-03 10:20: **Rettelse av oppføringen 09:10.** Påstanden «WP8 kan ikke gjøres slik planen beskriver» og «brokjeden finnes ikke» var feil. Den bygde på tre statusdokumenter, ikke på en prøve. Kjetil spurte «sier du at CellBridge ikke virker?», og svaret er nei.
+  - Det koden viser: CellBridge ligger i CellProtocol main. Palazzo registrerer `PalazzoBridgehead` og WebSocket-brotransportene, og brotestene (blant dem `testBridgeheadReaction`) er grønne. Binding åpner allerede Palazzo Concierge over `wss://…/bridgehead/…`, med en dokumentert lokal variant.
+  - Det som ikke er prøvd: at HAVEN-appen åpner gjestens artikkelflate fra en lokalt kjørende Palazzo over broen.
+  - Planbyttet er trukket. WP8 står som i planen. Neste steg er å prøve den ekte veien, når Kjetil har svart.
+  - q19 hadde allerede kjørt da rettelsen ble skrevet: Codex-commit `96f1c5f` (korpus-eksportør, bare testkode). Den er et tillegg, ikke en erstatning. q20 verifiserer grenen.

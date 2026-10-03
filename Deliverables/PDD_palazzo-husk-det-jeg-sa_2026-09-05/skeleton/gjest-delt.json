@@ -1,0 +1,25 @@
+{
+  "name": "Palazzo Gjest",
+  "_note": "Ny seksjon «Delt med Palazzo» i PalazzoGuestConfigurationFactory, etter consentSection.",
+  "skeleton": { "Section": {
+    "header": { "Text": { "text": "Delt med Palazzo" } },
+    "content": [
+      { "Text": { "text": "Dette er alt Palazzo har fått fra deg gjennom treff. Hver linje er signert av deg og kan trekkes tilbake.", "modifiers": { "fontStyle": "caption" } } },
+      { "List": {
+        "keypath": "entity.match.shared",
+        "flowElementSkeleton": { "VStack": {
+          "spacing": 4,
+          "modifiers": { "padding": 12, "cornerRadius": 12, "maxWidthInfinity": true, "hAlignment": "leading", "styleClasses": ["pz-shared-card"] },
+          "elements": [
+            { "Text": { "keypath": "signalTitle", "modifiers": { "fontStyle": "headline", "fontWeight": "bold" } } },
+            { "Text": { "keypath": "explanation", "modifiers": { "fontStyle": "body" } } },
+            { "Text": { "keypath": "grantsLabel", "modifiers": { "fontStyle": "caption" } } },
+            { "Text": { "keypath": "issuedAtLabel", "modifiers": { "fontStyle": "caption" } } },
+            { "Button": { "keypath": "entity.match.revoke", "label": "Trekk tilbake", "payload": { "matchID": "$id" }, "icon": "arrow.uturn.backward" } }
+          ]
+        } }
+      } }
+    ]
+  } },
+  "_verify_in_porthole": [ "Samme som treffkortet: Button i List-rad med radens id." ]
+}

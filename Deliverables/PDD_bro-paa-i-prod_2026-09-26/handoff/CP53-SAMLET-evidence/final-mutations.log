@@ -1,0 +1,103 @@
+Build capacity: 70.6 GiB free (7%); reserving 10 GiB leaves 60.6 GiB (6%).
+warning: /Users/kjetil/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/kjetil/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: '_wt-bro-kanal-auth-20260927': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Using on-disk description]
+[1 / 90] HavenCoreSchemas
+[1 / 196] KeyPathResolver
+[1 / 69] ServiceContextModule
+[2 / 7] CellBaseTests-product
+[4 / 9] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:18:14: warning: concurrently-executed local function 'data' must be marked as '@Sendable'; this is an error in the Swift 6 language mode
+  16 |     private func checkFullVector(_ name: String) async throws {
+  17 |         let v = try Self.vectors(name)
+  18 |         func data(_ name: String) -> Data { v[name]! }
+     |              `- warning: concurrently-executed local function 'data' must be marked as '@Sendable'; this is an error in the Swift 6 language mode
+  19 |         let endpoint = try A.decode(P.Endpoint.self, from: data("endpoint"))
+  20 |         let ih = try A.decode(P.Hello.self, from: data("hello0")), rh = try A.decode(P.Hello.self, from: data("hello1"))
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:250:54: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 248 |         i = try BridgeChannelTransport(underlying: it, peerEndpoint: endpoint, role: .initiator, owner: io,
+ 249 |             limits: limits, source: UUID().uuidString, disclosurePolicy: policy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 250 |             recheckPolicy: recheck, wallClock: clock.date, monotonic: clock.uptime) { [id] gate, session in
+     |                                                      `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 251 |                 if let factory, factoryRole == .initiator { return try await factory(gate, session) }
+ 252 |                 id.created(); gate.setDelegate(id)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:250:77: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 248 |         i = try BridgeChannelTransport(underlying: it, peerEndpoint: endpoint, role: .initiator, owner: io,
+ 249 |             limits: limits, source: UUID().uuidString, disclosurePolicy: policy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 250 |             recheckPolicy: recheck, wallClock: clock.date, monotonic: clock.uptime) { [id] gate, session in
+     |                                                                             `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 251 |                 if let factory, factoryRole == .initiator { return try await factory(gate, session) }
+ 252 |                 id.created(); gate.setDelegate(id)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:258:63: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 256 |         r = try BridgeChannelTransport(underlying: rt, peerEndpoint: endpoint, role: .responder, owner: ro,
+ 257 |             limits: limits, source: UUID().uuidString, disclosurePolicy: responderPolicy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 258 |             recheckPolicy: responderRecheck, wallClock: clock.date, monotonic: clock.uptime) { [rd] gate, session in
+     |                                                               `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 259 |                 if let factory, factoryRole == .responder { return try await factory(gate, session) }
+ 260 |                 rd.created(); gate.setDelegate(rd)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:258:86: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 256 |         r = try BridgeChannelTransport(underlying: rt, peerEndpoint: endpoint, role: .responder, owner: ro,
+ 257 |             limits: limits, source: UUID().uuidString, disclosurePolicy: responderPolicy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 258 |             recheckPolicy: responderRecheck, wallClock: clock.date, monotonic: clock.uptime) { [rd] gate, session in
+     |                                                                                      `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 259 |                 if let factory, factoryRole == .responder { return try await factory(gate, session) }
+ 260 |                 rd.created(); gate.setDelegate(rd)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:828:35: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 826 |         operation = try P.Operation(owner: owner, endpoint: gate.session.peerEndpoint!, role: role,
+ 827 |             generation: UUID().uuidString, policy: .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 828 |             wallClock: pair.clock.date, monotonic: pair.clock.uptime, ephemeral: privateKey)
+     |                                   `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 829 |     }
+ 830 |     func advance(to step: Int) async throws {
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:828:63: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 826 |         operation = try P.Operation(owner: owner, endpoint: gate.session.peerEndpoint!, role: role,
+ 827 |             generation: UUID().uuidString, policy: .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 828 |             wallClock: pair.clock.date, monotonic: pair.clock.uptime, ephemeral: privateKey)
+     |                                                               `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 829 |     }
+ 830 |     func advance(to step: Int) async throws {
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:969:88: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 967 | extension BridgePeerV3Tests {
+ 968 |     func testValidAEADInnerMutationsCloseRealGateReleaseQuotaAndPreserveHealthySibling() async throws {
+ 969 |         let quotaClock = V3Clock(), limits = BridgeChannelLimits(monotonic: quotaClock.uptime)
+     |                                                                                        `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 970 |         let sibling = try V3GatePair(limits: limits), healthy = try await sibling.start()
+ 971 |         for step in 1...5 { try await sibling.step(step) }; try await healthy.value
+[7 / 13] CellBaseTests-product
+[9 / 13] CellBaseTests-product
+[11 / 13] CellBaseTests-product
+Build complete! (5,94 sek)
+error: Process '/Applications/Xcode.app/Contents/Developer/usr/bin/xctest -XCTest CellBaseTests.BridgePeerV3Tests/testValidAEADInnerMutationsCloseRealGateReleaseQuotaAndPreserveHealthySibling /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Products/Debug/CellBaseTests.xctest' exited with unexpected signal code 5
+Test Suite 'Selected tests' started at 2026-09-29 08:35:45.832.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-09-29 08:35:45.833.
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-09-29 08:35:45.833.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 08:35:45.833.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 08:35:45.895.
+Test Suite 'CellNearbyTests.xctest' started at 2026-09-29 08:35:45.896.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-09-29 08:35:45.896.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 08:35:45.896.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 08:35:45.966.
+Test Suite 'CellBaseTests.xctest' started at 2026-09-29 08:35:45.966.
+Test Suite 'BridgePeerV3Tests' started at 2026-09-29 08:35:45.966.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testValidAEADInnerMutationsCloseRealGateReleaseQuotaAndPreserveHealthySibling]' started.
+Note: Some test targets reported failures:
+  - CellBaseTests (XCTest)
+
+COMMAND_EXIT=1

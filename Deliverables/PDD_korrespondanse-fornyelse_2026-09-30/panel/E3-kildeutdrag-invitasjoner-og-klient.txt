@@ -1,0 +1,46 @@
+Utdrag fra kildene. Hele kildefilene er ikke tilgjengelige for deg (Macen er frakoblet nå). Det som står her, er grep-utdata og notater fra lesing 30.09–02.10. Merk selv hva du ikke kan belegge.
+
+== CellScaffold, gren claude/korrespondanse-fornyelse-20260930, Sources/App/Cells/Agent/AssistantCorrespondenceCell.swift (2135 linjer)
+grep -n -i -E "INVITES|configuredInvite|ProcessInfo":
+625:    let invites = configuredInvites()
+626:    let invite = invites.first(where: { $0.inviteID == request.inviteID })
+629:      (32...512).contains(request.inviteSecret.utf8.count),
+630:      constantTimeEquals(sha256Base64URL(request.inviteSecret), expectedHash),
+709:    guard let invite = configuredInvites().first(where: { $0.inviteID == payload.inviteID }),
+727:    guard constantTimeEquals(sha256Base64URL(payload.inviteSecret), invite.secretSHA256Base64URL)
+1763:  private func configuredInvites() -> [AssistantCorrespondenceInvite] {
+1765:      let encoded = ProcessInfo.processInfo.environment[
+1766:        "HAVEN_ASSISTANT_CORRESPONDENCE_INVITES_BASE64"],
+1768:      let invites = try? JSONDecoder().decode([AssistantCorrespondenceInvite].self, from: data)
+1772:    return invites
+1777:      ProcessInfo.processInfo.environment["HAVEN_ASSISTANT_CORRESPONDENCE_REVOKED_PRINCIPALS"] ?? ""
+
+grep -n "deviceID" (utvalg):
+647:      invite.deviceID.map(validIdentifier) ?? true
+659:      deviceID: invite.deviceID,
+751:          existing.deviceID == payload.deviceID,
+1858:        "deviceID": .string(accessRequest.deviceID),      (i listen over ventende forespørsler til admin)
+1921:      "deviceID": .string(grant.deviceID),                (i enrollmentObject: svaret til klienten som melder seg inn)
+Det finnes ingen funksjon som lister eksisterende tilganger (grants) for eieren. Adminflaten viser bare ventende forespørsler (`pendingRequests`).
+
+== Klienten haven-correspondence-mcp, kildeversjon 3420c81, Sources/HavenCorrespondenceMCP/CorrespondenceClient.swift (lest 01.10)
+linje 132:  deviceID: invite.deviceID ?? "device-<uuid>"     (uten deviceID i invitasjonen lager `setup` en ny, tilfeldig enhets-ID)
+linje 155–174: `setup` lagrer en profil med `accessCredential` fra svaret (nil ved `pending_approval`)
+linje 235: `refreshAccess`/`activate` setter `accessCredential = nil` når forespørselen ikke er godkjent
+Følge: klienten har ikke noe gyldig bevis mellom `setup` og godkjent `activate`.
+
+== Prosjektminnet (skrevet 08.09.2026, oppdatert 01.10)
+«Invitene installert 2026-09-08 utløper 2026-09-15, grants 2026-10-08.»
+«Hele invitelisten erstattes, så alle som skal ha en ventende invitasjon må være med i grafen; allerede enrollede beholder tilgangsbeviset sitt.»
+«Container-env-en er eneste vei inn for verdien, og cutover-template.sh på serveren arver env fra containeren som kjører … Løsningen er /home/ops/cutover-invites-20260908.sh: samme transaksjonelle cutover (fingeravtrykk-vakt, mounts arvet fra runtime, rollback-container, readiness- og revisjonsgate), med ett innskudd som bytter HAVEN_ASSISTANT_CORRESPONDENCE_INVITES_BASE64-linja … ~35 s»
+Deltakergrafen: kjetil-d/kjetil-codex-d, kjetil-vegar-d/kjetil-vegar-codex-d, victoria/victoria-lille-robot, vegar/vegar-local-agent.
+
+== Live 30.09 (TESTRESULT #t5)
+Kjetils to utløpte principals ble fornyet på staging med 415ea3d2: fersk invitasjon med enhets-ID → `setup` ga `pending_approval` → Kjetil godkjente på adminsiden kl. 22:43 → `activate` ga `approved`, status `active`. Nye bevis gjelder til 2026-10-30T19:00:12Z. Vegars meldinger kom fram igjen 01.10 00:02–00:15Z (sekvens 13–15).
+
+== Testene på 06f32050 (TESTRESULT #t6 #t7 #t8)
+33 korrespondansetester, 0 feil. T6: en tilgang med tre dager igjen gir `pending_approval` med `renewsGrantID` ved fersk invitasjon; før godkjenning virker gammelt bevis; etter godkjenning gir gammelt bevis `error` og nytt bevis har invitasjonens frist. T7: åtte dager igjen gir `already_enrolled` uten `renewsGrantID`. T8: tilbakekalt principal kan ikke fornye.
+
+== Vegars meldinger 01.10 (ordrett utdrag)
+Sekvens 15: «Du nevnte at vår tilgang (vegar-local-agent) også har en utløpsdato. For å unngå samme situasjon igjen: kan du sende en fersk invitasjon for å fornye den? Du beskriver prosessen som "fersk invitasjon + eierens godkjenning, samme principal, maskin og nøkkel" — så det er bare å si fra når du er klar til å kjøre den.»
+Sekvens 13: ber om at CellProtocol-commit bcd45de (ikon på SkeletonNavigationBarItem, gren arendalsuka-navigationbar-icon-support) kommer i en utgivelse. Målt 02.10: commiten er ikke i taggene 2026.9.3 eller 2026.9.4 og ikke på origin/main i CellProtocol. CellScaffold origin/main bruker ikke `icon:` i Arendalsuka- eller NavigationBar-kildene.

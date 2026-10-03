@@ -1,0 +1,99 @@
+gui/501/io.digipomps.haven.agentmenu = {
+	active count = 4
+	path = /Users/kjetil/Library/LaunchAgents/io.digipomps.haven.agentmenu.plist
+	type = LaunchAgent
+	state = running
+
+	program = /Users/kjetil/Applications/HAVEN Agent.app/Contents/MacOS/HAVEN Agent
+	arguments = {
+		/Users/kjetil/Applications/HAVEN Agent.app/Contents/MacOS/HAVEN Agent
+	}
+
+	stdout path = /Users/kjetil/Library/Application Support/HAVENAgent/Logs/menu-stdout.log
+	stderr path = /Users/kjetil/Library/Application Support/HAVENAgent/Logs/menu-stderr.log
+	inherited environment = {
+		SSH_AUTH_SOCK => /var/run/com.apple.launchd.kbaE2YimBN/Listeners
+	}
+
+	default environment = {
+		PATH => /usr/bin:/bin:/usr/sbin:/sbin
+	}
+
+	environment = {
+		OSLogRateLimit => 64
+		XPC_SERVICE_NAME => io.digipomps.haven.agentmenu
+	}
+
+	domain = gui/501 [100022]
+	asid = 100022
+	minimum runtime = 10
+	exit timeout = 5
+	runs = 1
+	pid = 79997
+	immediate reason = speculative
+	forks = 0
+	execs = 1
+	initialized = 1
+	trampolined = 1
+	started suspended = 0
+	proxy started suspended = 0
+	checked allocations = 0 (queried = 1)
+	checked allocations reason = no host
+	checked allocations flags = 0x0
+	last exit code = (never exited)
+
+	pid-local endpoints = {
+		"com.apple.coredrag" = {
+			port = 0x114a03
+			active = 1
+			managed = 0
+			reset = 0
+			hide = 0
+			watching = 0
+		}
+		"com.apple.tsm.portname" = {
+			port = 0x1cd6ab
+			active = 1
+			managed = 0
+			reset = 0
+			hide = 0
+			watching = 0
+		}
+		"com.apple.axserver" = {
+			port = 0xe1187
+			active = 1
+			managed = 0
+			reset = 0
+			hide = 0
+			watching = 0
+		}
+	}
+
+	resource coalition = {
+		ID = 126813
+		type = resource
+		state = active
+		active count = 1
+		name = io.digipomps.haven.agentmenu
+	}
+
+	jetsam coalition = {
+		ID = 126814
+		type = jetsam
+		state = active
+		active count = 1
+		name = io.digipomps.haven.agentmenu
+	}
+
+	spawn type = interactive (4)
+	jetsam priority = 40
+	jetsam memory limit (active) = (unlimited)
+	jetsam memory limit (inactive) = (unlimited)
+	jetsamproperties category = daemon
+	jetsam thread limit = 32
+	cpumon = default
+	job state = running
+	sanitizer flags = 0x0
+
+	properties = runatload | inferred program
+}

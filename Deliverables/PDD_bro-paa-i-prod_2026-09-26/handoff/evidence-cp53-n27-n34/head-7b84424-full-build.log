@@ -1,0 +1,120 @@
+COMMAND=swift build --disable-sandbox --disable-automatic-resolution --cache-path /private/tmp/bro-swift-cache --jobs 4
+warning: /Users/kjetil/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/kjetil/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: '_wt-bro-kanal-auth-20260927': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Provisioning 39 / 166]
+[Using on-disk description]
+[6 / 121] KeyPathResolver
+[11 / 25] CellBase
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/Cells/Bridging/BridgeBase.swift:753:53: warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+ 739 |         self.connectPublisher = connectPublisher
+ 740 |         
+ 741 |         Task {
+     |              |- note: 'self' implicitly strongly captured here
+     |              `- note: add 'self' as a capture list item to silence
+ 742 |             if let identity = context.identity,
+ 743 |                let connectPublisher = self.connectPublisher
+     :
+ 751 |                         connectPublisher.send(completion: .failure(ConnectError.cancelled ))
+ 752 |                     })
+ 753 |                     .sink(receiveCompletion: {[weak self] completion in
+     |                                                     |- warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+     |                                                     `- note: explicitly assign the capture list item to silence
+ 754 |                         bridgeLog("Connect callback publisher completed")
+ 755 |  [13 / 27] CellBase
+                       connectPublisher.send(completion: .finished)
+
+[#ImplicitStrongCapture]: <https://docs.swift.org/compiler/documentation/diagnostics/implicit-strong-capture>
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PersistingCells/EntityRelationRecordV1.swift:321:16: warning: stored property 'entityRepresentation' of 'Sendable'-conforming struct 'EntityRelationRecord' contains non-Sendable type 'EntityRepresentation'; this is an error in the Swift 6 language mode
+ 319 |     /// Canonical owner-held knowledge when present. The legacy subject/tags/
+ 320 |     /// purposeRefs remain readable for existing clients and import adapters.
+ 321 |     public var entityRepresentation: EntityRepresentation?
+     |                `- warning: stored property 'entityRepresentation' of 'Sendable'-conforming struct 'EntityRelationRecord' contains non-Sendable type 'EntityRepresentation'; this is an error in the Swift 6 language mode
+ 322 | 
+ 323 |     public init(
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/EntityRepresentation.swift:61:14: note: class 'EntityRepresentation' does not conform to the 'Sendable' protocol
+ 59 | 
+ 60 | 
+ 61 | public class EntityRepresentation:  PerspectiveNodeImpl {
+    |              `- note: class 'EntityRepresentation' does not conform to the 'Sendable' protocol
+ 62 | 
+ 63 |     var fulfilled: Fullfilled = Fullfilled() // Until Interests and Purposes are moved
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/ClaimComposition.swift:36:16: warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimCounter' has non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 34 | public struct ClaimCounter: Codable, Equatable, Sendable {
+ 35 |     public var role: ClaimCounterRole
+ 36 |     public var composition: ClaimComposition
+    |                `- warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimCounter' has non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 37 | 
+ 38 |     public init(role: ClaimCounterRole, composition: ClaimComposition) {
+    :
+187 | }
+188 | 
+189 | public indirect enum ClaimComposition: Codable, Equatable {
+    |                      `- note: consider making enum 'ClaimComposition' conform to the 'Sendable' protocol
+190 |     case claim(ClaimCompositionLeaf)
+191 |     // allOf: linked premises, weakest link decides the score.
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/ClaimDefinition.swift:91:16: warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimDefinition' contains non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 89 |     public var goalID: String?
+ 90 |     public var supports: [ClaimSupportNode]
+ 91 |     public var composition: ClaimComposition?
+    |                `- warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimDefinition' contains non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 92 |     public var tags: [String]
+ 93 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/ClaimComposition.swift:189:22: note: consider making enum 'ClaimComposition' conform to the 'Sendable' protocol
+187 | }
+188 | 
+189 | public indirect enum ClaimComposition: Codable, Equatable {
+    |                      `- note: consider making enum 'ClaimComposition' conform to the 'Sendable' protocol
+190 |     case claim(ClaimCompositionLeaf)
+191 |     // allOf: linked premises, weakest link decides the score.
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/PerspectiveEntityProjection.swift:30:16: warning: stored property 'entities' of 'Sendable'-conforming struct 'PerspectiveEntityProjection' contains non-Sendable type 'Weight<EntityRepresentation>'; this is an error in the Swift 6 language mode
+ 28 |     /// delayed write cannot resurrect entities a newer one removed.
+ 29 |     public let epoch: Int
+ 30 |     public let entities: [Weight<EntityRepresentation>]
+    |                `- warning: stored property 'entities' of 'Sendable'-conforming struct 'PerspectiveEntityProjection' contains non-Sendable type 'Weight<EntityRepresentation>'; this is an error in the Swift 6 language mode
+ 31 | 
+ 32 |     public init(source: String, epoch: Int, entities: [Weight<EntityRepresentation>]) {
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/Weight.swift:13:15: note: consider making generic struct 'Weight' conform to the 'Sendable' protocol
+ 11 | import Foundation
+ 12 | 
+ 13 | public struct Weight<T: PerspectiveNode & Codable> :  Weighted, Codable {
+    |               `- note: consider making generic struct 'Weight' conform to the 'Sendable' protocol
+ 14 |     
+ 15 |     
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/RelationalLearningModels.swift:95:16: warning: stored property 'payload' of 'Sendable'-conforming struct 'RelationalLearningEventEnvelope' contains non-Sendable type 'ValueType'; this is an error in the Swift 6 language mode
+ 93 |     public var schemaVersion: String
+ 94 |     public var emittedAt: TimeInterval
+ 95 |     public var payload: Object
+    |                `- warning: stored property 'payload' of 'Sendable'-conforming struct 'RelationalLearningEventEnvelope' contains non-Sendable type 'ValueType'; this is an error in the Swift 6 language mode
+ 96 | 
+ 97 |     public init(eventType: RelationalLearningEventType,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/ValueTypes/ValueType.swift:11:22: note: consider making enum 'ValueType' conform to the 'Sendable' protocol
+  9 | #endif
+ 10 | 
+ 11 | public indirect enum ValueType: Codable {
+    |                      `- note: consider making enum 'ValueType' conform to the 'Sendable' protocol
+ 12 |     case flowElement(FlowElement)
+ 13 |     case bool(Bool)
+[19 / 28] CellBase
+[23 / 25] CellVapor-product
+[25 / 25] CellApple-product
+[25 / 25] haven-commons-product
+[26 / 27] haven-commons-product
+[28 / 29] CellRuntimeBenchmarks-product
+[30 / 31] ReferenceLoadBenchmark-product
+Build complete! (5,94 sek)
+
+COMMAND_EXIT=0

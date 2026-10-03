@@ -1,0 +1,43 @@
+== fetch ==
+origin/main: 33ad8d7
+== worktree /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata-r2 @ pdd/entitetsdata-runde2 ==
+HEAD: 33ad8d7
+== patch (dry-run) ==
+patch lagt på
+ M Sources/CellApple/Cells/EntityAnchorCell.swift
+ M Sources/CellVapor/Cells/EntityAnchorCell.swift
+ M Tests/CellBaseTests/EntityAnchorGenesisTests.swift
+?? Sources/CellBase/PersistingCells/EntityChangeTrace.swift
+?? Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift
+?? Tests/CellBaseTests/TestSupport/AppleEntityAnchorAlias.swift
+?? Tests/CellBaseTests/TestSupport/SimulatedEntity.swift
+?? Tests/CellBaseTests/TestSupport/VaporEntityAnchorAlias.swift
+== swift build ==
+Build: OK
+== nye tester ==
+	 Executed 9 tests, with 4 failures (0 unexpected) in 2.504 (2.505) seconds
+[0;36m369 |[0;0m             XCTAssertEqual(admission, .signed)
+[0;36m371 |[0;0m             XCTAssertTrue(localDecision.allowed, "Fresh local contract: \([4;39mlocalDecision.reasonCode[0;0m)")
+[0;36m1446 |[0;0m         XCTAssertEqual(decision(unsignedTimeResult), "untrusted")
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata-r2/Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift:341: error: -[CellBaseTests.EntityAnchorAccessBoundaryTests testEachAcceptedBatchLeavesOneTraceEntry] : XCTAssertEqual failed: ("Optional(CellBase.ValueType.list([CellBase.ValueType.string("person.headline"), CellBase.ValueType.string("person.nickname")]))") is not equal to ("Optional(CellBase.ValueType.list([CellBase.ValueType.string("person.headline"), CellBase.ValueType.string("person.nickname")]))") - [CellApple (personlig scaffold)]
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata-r2/Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift:341: error: -[CellBaseTests.EntityAnchorAccessBoundaryTests testEachAcceptedBatchLeavesOneTraceEntry] : XCTAssertEqual failed: ("Optional(CellBase.ValueType.list([CellBase.ValueType.string("person.headline"), CellBase.ValueType.string("person.nickname")]))") is not equal to ("Optional(CellBase.ValueType.list([CellBase.ValueType.string("person.headline"), CellBase.ValueType.string("person.nickname")]))") - [CellVapor (skyscaffold)]
+Test Case '-[CellBaseTests.EntityAnchorAccessBoundaryTests testEachAcceptedBatchLeavesOneTraceEntry]' failed (2.400 seconds).
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata-r2/Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift:280: error: -[CellBaseTests.EntityAnchorAccessBoundaryTests testUnknownPurposeFailsClosed] : XCTAssertTrue failed - [CellApple (personlig scaffold)] ["error": CellBase.ValueType.string("unknownPurposeFailsClosed"), "operation": CellBase.ValueType.string("entity.batchPersist"), "status": CellBase.ValueType.string("failed"), "correlationId": CellBase.ValueType.string("422612D6-635B-48BE-9DF5-CEAF1D30F7E6")]
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata-r2/Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift:280: error: -[CellBaseTests.EntityAnchorAccessBoundaryTests testUnknownPurposeFailsClosed] : XCTAssertTrue failed - [CellVapor (skyscaffold)] ["error": CellBase.ValueType.string("unknownPurposeFailsClosed"), "operation": CellBase.ValueType.string("entity.batchPersist"), "status": CellBase.ValueType.string("failed"), "correlationId": CellBase.ValueType.string("AD6B4A82-5F02-4E74-9786-0CAC470E4531")]
+Test Case '-[CellBaseTests.EntityAnchorAccessBoundaryTests testUnknownPurposeFailsClosed]' failed (0.011 seconds).
+Feed item handling failed with error: unknownPurposeFailsClosed
+Feed item handling failed with error: unknownPurposeFailsClosed
+Feed item handling failed with error: unknownPurposeFailsClosed
+Feed item handling failed with error: unknownPurposeFailsClosed
+Feed item handling failed with error: requestSignatureInvalid
+Feed item handling failed with error: requestSignatureInvalid
+== runde 1-tester ==
+	 Executed 16 tests, with 0 failures (0 unexpected) in 0.151 (0.153) seconds
+== hele CellBaseTests ==
+	 Executed 1262 tests, with 2 tests skipped and 8 failures (0 unexpected) in 130.390 (130.445) seconds
+== grønt — committer og pusher ==
+commit: 399f6d2
+ * [new branch]      pdd/entitetsdata-runde2 -> pdd/entitetsdata-runde2
+branch 'pdd/entitetsdata-runde2' set up to track 'origin/pdd/entitetsdata-runde2'.
+origin/pdd/entitetsdata-runde2: 399f6d2
+https://github.com/Digipomps/CellProtocol/pull/50

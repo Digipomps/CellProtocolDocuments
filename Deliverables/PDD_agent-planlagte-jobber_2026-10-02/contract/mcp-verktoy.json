@@ -1,0 +1,257 @@
+{
+  "beskrivelse": "MCP-verktøyene for planlagte jobber i haven-agentd-mcp (trinn 4). Samme form som verktøyene som finnes i Sources/HavenAgentDMCP/HavenAgentMCPService.swift: name, title, description, inputSchema. Det finnes med vilje ikke noe verktøy for å godkjenne eller kvittere. agent.review.approve gjelder fjernintenter og kjenner ikke planlagte jobber. pause, resume, stop og remove gjelder bare jobber som er bedt om; faste hendelser i config.json styres fra menylinjen og kommandolinjen.",
+  "verktoy": [
+    {
+      "name": "agent.schedule.request",
+      "title": "Request Scheduled Job",
+      "description": "Ask for a scheduled job. The job does not run until the operator approves it in the HAVEN Agent menu. Returns the exact text the operator will see. Without an id a new job is created and an existing id is an error. Passing the id of an existing requested job replaces that request and requires a new approval.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title",
+          "schedule",
+          "action"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+            "description": "Optional. Generated from the title when omitted; a generated id that already exists is rejected. Pass an existing id only to replace that request."
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "schedule": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "cron",
+                  "interval",
+                  "once"
+                ]
+              },
+              "cron": {
+                "type": "string"
+              },
+              "timeZone": {
+                "type": "string",
+                "description": "IANA name. Required for cron."
+              },
+              "everySeconds": {
+                "type": "integer",
+                "minimum": 900
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "notBefore": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Defaults to 30 days from now. At most 90 days."
+          },
+          "action": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "localTask",
+                  "spoolJob"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "description": "For localTask: the id of a task that already exists in the local automation policy."
+              },
+              "job": {
+                "type": "object",
+                "description": "For spoolJob: an .agent-spool job (cwd, steps, env, stopOnFailure). Only available when the operator has named the spool inbox and outbox in config. Checked for shape here; the spool runner enforces its own allowlist when the job runs."
+              }
+            }
+          },
+          "timeoutSeconds": {
+            "type": "integer",
+            "minimum": 10
+          }
+        }
+      },
+      "result": {
+        "id": "regresjon-havenagentd",
+        "status": "awaiting-approval",
+        "challengeId": "job:scheduled:regresjon-havenagentd:approval:6bcd7cab4b4d",
+        "shown": {
+          "title": "Claude ber om en planlagt jobb: «Regresjon HavenAgentD»",
+          "subject": "køjobb: git fetch, swift test · hverdager kl. 02:00 · til 11.11.",
+          "detail": "…"
+        }
+      },
+      "errors": [
+        "id-in-use",
+        "id-in-use-by-config",
+        "unknown-action",
+        "spool-not-enabled",
+        "invalid-job",
+        "invalid-schedule",
+        "too-frequent",
+        "ends-too-late",
+        "too-many-jobs",
+        "cannot-be-shown",
+        "timeout-too-long"
+      ]
+    },
+    {
+      "name": "agent.schedule.list",
+      "title": "List Scheduled Jobs",
+      "description": "List fixed events and requested jobs with status, next run, last outcome and missed runs. Same content as GET /scheduled-jobs. Fixed events are listed but cannot be controlled through MCP.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "result": "haven.scheduled-jobs-status.v1"
+    },
+    {
+      "name": "agent.schedule.state",
+      "title": "Read Scheduled Job",
+      "description": "Read one job: the request, its approval state, and the last runs. Log paths are relative; log content is not returned.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+          }
+        }
+      }
+    },
+    {
+      "name": "agent.schedule.pause",
+      "title": "Pause Scheduled Job",
+      "description": "Pause a requested job. Nothing runs until it is resumed, and a queued spool file that has not been taken is withdrawn. Passed occurrences are not counted while paused. Fixed events in config are refused.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+          }
+        }
+      },
+      "errors": [
+        "unknown-job",
+        "fixed-event",
+        "not-allowed-in-state"
+      ]
+    },
+    {
+      "name": "agent.schedule.resume",
+      "title": "Resume Scheduled Job",
+      "description": "Resume a paused requested job. Does not approve anything: a job that was never approved stays waiting. Fixed events in config are refused.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+          }
+        }
+      },
+      "errors": [
+        "unknown-job",
+        "fixed-event",
+        "not-allowed-in-state"
+      ]
+    },
+    {
+      "name": "agent.schedule.stop",
+      "title": "Stop Scheduled Job",
+      "description": "Stop a requested job for good. A stopped job must be requested and approved again to run. Fixed events in config are refused.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+          }
+        }
+      },
+      "errors": [
+        "unknown-job",
+        "fixed-event",
+        "not-allowed-in-state"
+      ]
+    },
+    {
+      "name": "agent.schedule.remove",
+      "title": "Remove Scheduled Job",
+      "description": "Remove a requested job that is stopped, ended or rejected. Its files are moved to State/ScheduledJobs/Removed/. Fixed events in config cannot be removed here.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+          }
+        }
+      },
+      "errors": [
+        "unknown-job",
+        "fixed-event",
+        "not-allowed-in-state"
+      ]
+    }
+  ],
+  "feilkoder": {
+    "unknown-action": "Handlingen finnes ikke i automationPolicy.localTasks.",
+    "spool-not-enabled": "scheduledJobs.spoolInbox og scheduledJobs.spoolOutbox er ikke begge satt i config.json.",
+    "invalid-schedule": "Uttrykket eller tidssonen kan ikke tolkes, eller gir ingen tidspunkt de neste åtte årene.",
+    "too-frequent": "Kortere enn 900 sekunder mellom to kjøringer en gang mellom nå og sluttdatoen.",
+    "ends-too-late": "Sluttdatoen er mer enn 90 døgn fram.",
+    "too-many-jobs": "Det finnes alt 10 jobber som venter eller er aktive.",
+    "cannot-be-shown": "Jobben kan ikke vises i sin helhet i saken: «Gjelder» blir over 200 tegn eller detaljen over 400, eller teksten inneholder noe som likner en hemmelighet.",
+    "id-in-use-by-config": "Id-en brukes av en hendelse i config.json.",
+    "timeout-too-long": "Over 900 sekunder for et fast program, eller over 43200 for en køjobb.",
+    "id-in-use": "Id-en finnes fra før, og den ble ikke oppgitt uttrykkelig. Oppgi id-en for å erstatte bestillingen.",
+    "invalid-job": "Jobbmalen har feil form: cwd må være en relativ sti uten .., steps må ha minst ett steg, hvert steg må ha cmd som en liste av tekster med minst ett ledd, timeoutSeconds i et steg må være et heltall fra 1 til 10800, name må være tekst, stopOnFailure må være sann eller usann, og env må, hvis det finnes, være et objekt der nøklene begynner med HAVEN_ og verdiene er tekst.",
+    "unknown-job": "Ingen jobb med den id-en.",
+    "fixed-event": "Id-en hører til en fast hendelse i config.json. De styres ikke gjennom MCP.",
+    "not-allowed-in-state": "Kommandoen gir ikke mening i tilstanden jobben har, for eksempel resume på en stoppet jobb."
+  }
+}

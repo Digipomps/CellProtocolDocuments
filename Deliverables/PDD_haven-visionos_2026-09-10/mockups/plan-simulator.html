@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<title>Plan — fra mockup til visionOS-simulator</title>
+<style>
+  :root{
+    --ink:#1d2430; --muted:#5b6675; --line:#d5dbe3; --bg:#f6f7f9;
+    --kjetil:#fff3c4; --kjetil-b:#e0b400; --losen:#e3f0ff; --losen-b:#3b82f6;
+    --mac:#e6f6ea; --mac-b:#2f9e5a; --bevis:#f1ecff; --bevis-b:#7c5cff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;width:1600px;height:900px;background:var(--bg);font-family:-apple-system,"SF Pro Text","Helvetica Neue",Arial,sans-serif;color:var(--ink);overflow:hidden}
+  .wrap{position:relative;width:1600px;height:900px;padding:28px 34px}
+  h1{margin:0;font-size:30px;font-weight:700;letter-spacing:-.2px}
+  .sub{margin:4px 0 0;font-size:16px;color:var(--muted);max-width:990px}
+  .grid{display:grid;grid-template-columns:150px repeat(5,1fr);grid-template-rows:60px repeat(3,1fr) 104px;gap:10px;height:740px;margin-top:12px}
+  .head{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;display:flex;flex-direction:column;justify-content:center}
+  .head b{font-size:17px}
+  .head span{font-size:13px;color:var(--muted)}
+  .lane{display:flex;align-items:center;justify-content:center;border-radius:12px;font-weight:700;font-size:15px;text-align:center;line-height:1.25;padding:8px}
+  .lane.k{background:var(--kjetil);border:1.5px solid var(--kjetil-b)}
+  .lane.l{background:var(--losen);border:1.5px solid var(--losen-b)}
+  .lane.m{background:var(--mac);border:1.5px solid var(--mac-b)}
+  .lane.b{background:var(--bevis);border:1.5px solid var(--bevis-b);font-size:14px}
+  .cell{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.32}
+  .cell.k{border-color:var(--kjetil-b);background:#fffaf0}
+  .cell.l{border-color:var(--losen-b);background:#f7fbff}
+  .cell.m{border-color:var(--mac-b);background:#f5fcf7}
+  .cell.b{border-color:var(--bevis-b);background:#faf8ff;font-size:12.5px;line-height:1.28;overflow-wrap:anywhere}
+  .cell code{font-size:11.5px;overflow-wrap:anywhere}
+  .cell ul{margin:0;padding-left:16px}
+  .cell li{margin:2px 0}
+  .tag{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 7px;border-radius:999px;margin-bottom:5px;white-space:nowrap}
+  .tag.now{background:#ffe08a;color:#5a4300}
+  .tag.gate{background:#ffd6d6;color:#7a1010}
+  .tag.opt{background:#e5e7eb;color:#374151}
+  .tag.par{background:#d1fae5;color:#065f46}
+  .cmd{font-family:"SF Mono",Menlo,monospace;font-size:11.5px;background:#eef1f5;border-radius:6px;padding:2px 6px;display:inline-block;margin-top:4px;white-space:nowrap}
+  .note{position:absolute;background:#fff8b8;border:1.5px solid #e0b400;border-radius:10px;padding:8px 12px;font-size:13px;line-height:1.3;max-width:330px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+  .foot{position:absolute;left:34px;bottom:14px;font-size:12.5px;color:var(--muted)}
+  .arrow{position:absolute;height:0;border-top:3px dashed #065f46}
+  .arrow:after{content:"";position:absolute;right:-2px;top:-8px;border:7px solid transparent;border-left:12px solid #065f46}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Fra mockup til visionOS-simulator — plan (utkast, 16.09.2026)</h1>
+  <p class="sub">Fem steg, tre baner. Rødt merke = krever Kjetils ord. Steg 3 går parallelt med steg 2 så snart bildet er godkjent. Portene G1/G1-GUI/G2/G3 står som «venter».</p>
+
+  <div class="grid">
+    <div class="head" style="background:transparent;border:none"></div>
+    <div class="head"><b>Steg 0 · Forhåndssjekk</b><span>tørrkjøring · ~1 min · endrer ingenting</span></div>
+    <div class="head"><b>Steg 1 · H1 byggeprobe</b><span>--go · 15–45 min · ren eksport av HEAD</span></div>
+    <div class="head"><b>Steg 2 · Starter i simulatoren</b><span>gren E · første kode · egne worktrees</span></div>
+    <div class="head"><b>Steg 3 · Baksiden (skive 1)</b><span>gren B · plattformnøytral · Mac først</span></div>
+    <div class="head"><b>Steg 4 · G3 og PR</b><span>forventning mot faktisk · rydding</span></div>
+
+    <div class="lane k"><div>Kjetil<br><small style="font-weight:400">beslutter</small></div></div>
+    <div class="cell k"><span class="tag gate">nå</span><ul><li>Si «G1 godkjent» (E, B) og «G2 godkjent» — eller hva som skal endres</li><li>Velg vei: skjermstyring / kjøre selv / kø</li></ul></div>
+    <div class="cell k"><span class="tag now">etter steg 0/1</span><ul><li>Mangler SDK/kjøretid: installer i Xcode › Components</li><li>Ucommitterte filer eller rød baseline: velg ref</li><li>Mac våken og på nett</li></ul></div>
+    <div class="cell k"><span class="tag now">når spørsmålet kommer</span><ul><li>Ja til <code>git worktree add</code> i Binding + CellProtocol</li><li>Godkjenn mappetilgang <code>_worktrees/</code> og ev. skjermstyring</li></ul></div>
+    <div class="cell k"><span class="tag gate">før kode</span><ul><li>Si «G1-GUI godkjent» for <b>bakside v2</b> (med tomtilstander) — eller hva som skal tegnes om</li></ul></div>
+    <div class="cell k"><span class="tag gate">til slutt</span><ul><li>Døm G3: forventning mot skjermbildene</li><li>Ja til sletting av scratch og worktrees</li></ul></div>
+
+    <div class="lane l"><div>Losen<br><small style="font-weight:400">herfra (sky + VM)</small></div></div>
+    <div class="cell l"><ul><li>Skriptet er skrevet og rettet (kjøretid, disk, --again)</li><li>Leser utskriften fra oppgavemappen</li></ul><span class="cmd">zsh …/handoff/h1_compile_probe.sh</span></div>
+    <div class="cell l"><ul><li>Leser <code>TESTRESULT.md#h1</code>: ekte feilliste per fil</li><li>Dimensjonerer steg 2 etter tallet</li></ul><span class="cmd">… h1_compile_probe.sh --go</span></div>
+    <div class="cell l"><ul><li>Patcher (Python, ankere med treffantall): 3 AppKit-i-#else → canImport, død haptikk-kode, pbxproj (xros, familie 7, entitlements/manifest per SDK)</li><li><code>KJOR-SELV-steg2-simulator.sh</code> (tørrkjøring uten --run)</li></ul></div>
+    <div class="cell l"><ul><li>Tegner <b>bakside v2</b> (lest / uleselig / stille / ikke koblet)</li><li><code>PortholeBacksideView</code> i CellApple, flipp fra redigeringsmodus; data fra cellen (<code>getCellConfiguration</code>, <code>attachedStatuses</code>), puls med ankomsttid</li><li>Set/get vises som «ikke koblet (F3)»</li></ul></div>
+    <div class="cell l"><ul><li>PR-tekst fra worktree-grenene (Binding + CellProtocol)</li><li>STATUS/TESTRESULT oppdatert med ekte tall</li></ul></div>
+
+    <div class="lane m"><div>Macen<br><small style="font-weight:400">bygg og simulator</small></div></div>
+    <div class="cell m"><ul><li>Xcode-versjon, ledig disk (≥ 30 GB)</li><li>xrsimulator-SDK? simulator-kjøretid?</li><li>branch / HEAD / skitne filer i begge repoer</li></ul></div>
+    <div class="cell m"><ul><li><code>git archive</code> → <code>_h1-visionos-probe-&lt;dato&gt;/</code></li><li>Baseline macOS → patch pbxproj → CellApple og HAVEN for visionOS Simulator (signering av)</li><li>Feil per fil → TESTRESULT, du -sh scratch</li></ul></div>
+    <div class="cell m"><span class="tag opt">1b valgfritt: «Designed for iPad» — null kode</span><ul><li>Søsken-worktrees <code>_worktrees/visionos-&lt;dato&gt;/</code></li><li>Bygg → <code>simctl boot</code> «Apple Vision Pro» → install → launch → <code>simctl io screenshot</code></li></ul></div>
+    <div class="cell m"><span class="tag par">parallelt med steg 2</span><ul><li>Bygg og skjermbilde på Mac</li><li>Skjermbilde i simulatoren når steg 2 er grønt</li></ul></div>
+    <div class="cell m"><ul><li>CI på PR-ene, merge</li><li><code>git worktree remove</code> + prune, <code>rm -rf</code> scratch (etter ja)</li></ul></div>
+
+    <div class="lane b">Bevis</div>
+    <div class="cell b">Terminal-utskrift: «Tørrkjøring ferdig» eller BLOCKED med årsak</div>
+    <div class="cell b"><code>TESTRESULT.md#h1</code>: exit-koder, feil per fil, scratch-størrelse. Rød baseline = gyldig utfall → stopp.</div>
+    <div class="cell b"><code>simulator-steg2-&lt;dato&gt;.png</code> + <code>TESTRESULT.md#steg2</code>; no-appkit-in-else 3→0; linttall ført inn</div>
+    <div class="cell b"><code>mac-steg3-*.png</code> (og <code>simulator-steg3-*.png</code>) ved siden av v2; <code>TESTRESULT.md#steg3</code></div>
+    <div class="cell b">«G3 godkjent» + PR-lenker; disk tilbake til utgangspunktet</div>
+  </div>
+
+  <div class="note" style="right:36px;top:22px;max-width:520px">
+    <b>Hva som ikke er i denne planen:</b> FlowTap/inspektør (scene 3), mange Portholes som vinduer (scene 1) og rommet (scene 4) er egne PDD-er etterpå. Simulatoren beviser «starter og viser», ikke «virker på Vision Pro».
+  </div>
+  <div class="foot">PDD_haven-visionos_2026-09-10 · PLAN.md §2 · Merking i planen: [belagt] lest i koden · [vurdering] anslag · [usikker] ikke sjekket · Motlest av «Fabel» 16.09 (PLAN.md §7)</div>
+</div>
+</body>
+</html>

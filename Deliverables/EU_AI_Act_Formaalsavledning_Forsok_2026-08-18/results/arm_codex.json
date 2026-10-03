@@ -1,0 +1,265 @@
+{
+  "schema": "haven.regulatory-overlay.arm-result.v0",
+  "arm": "codex",
+  "facetSource": "declarations_codex.json",
+  "nodesScored": 57,
+  "nodesMissingDeclaration": 0,
+  "classification": {
+    "truePositives": 8,
+    "falsePositives": 0,
+    "falseNegatives": 14,
+    "precision": 1,
+    "recall": 0.364,
+    "f1": 0.533,
+    "nodesExactlyRight": 46,
+    "nodeAccuracy": 0.807
+  },
+  "stratifiedRecallByLabelStrength": {
+    "confirmed": {
+      "expected": 13,
+      "found": 7,
+      "recall": 0.538
+    },
+    "boundary": {
+      "expected": 4,
+      "found": 1,
+      "recall": 0.25
+    },
+    "conditional": {
+      "expected": 5,
+      "found": 0,
+      "recall": 0
+    }
+  },
+  "perFieldAgreementVsReference": {
+    "domain": {
+      "same": 54,
+      "diff": 3,
+      "examples": [
+        "purpose://digital-work: ref=none arm=employment",
+        "purpose://project-work.share-selected-intent: ref=none arm=employment",
+        "purpose://digital-work.collect-structured-input: ref=none arm=employment"
+      ],
+      "agreement": 0.947
+    },
+    "decisionEffect": {
+      "same": 43,
+      "diff": 14,
+      "examples": [
+        "purpose://event.participation: ref=none arm=informational",
+        "purpose://event.schedule.change-request: ref=influences-human-decision arm=none",
+        "purpose://event.privacy-preserving-networking: ref=influences-human-decision arm=informational",
+        "purpose://digital-work: ref=none arm=informational",
+        "purpose://digital-work.coordinate: ref=influences-human-decision arm=informational",
+        "purpose://project-work.overview-and-sharing: ref=influences-human-decision arm=informational"
+      ],
+      "agreement": 0.754
+    },
+    "dataSubjects": {
+      "same": 47,
+      "diff": 10,
+      "examples": [
+        "purpose://human-agency: ref=none arm=self-owner",
+        "purpose://contact.communication: ref=none arm=named-third-parties",
+        "purpose://event.participation: ref=none arm=named-third-parties",
+        "purpose://digital-work: ref=none arm=named-third-parties",
+        "purpose://digital-work.collect-structured-input: ref=none arm=named-third-parties",
+        "purpose://content.review-before-publish: ref=public arm=self-owner"
+      ],
+      "agreement": 0.825
+    },
+    "outputModality": {
+      "same": 37,
+      "diff": 20,
+      "examples": [
+        "purpose://contact.introduction: ref=natural-language-to-human arm=structured-data",
+        "purpose://event.agenda.recommendation: ref=natural-language-to-human arm=ui-render",
+        "purpose://event.schedule.change-request: ref=ui-render arm=structured-data",
+        "purpose://digital-work.collect-structured-input: ref=none arm=structured-data",
+        "purpose://content.review-before-publish: ref=natural-language-to-human arm=ui-render",
+        "purpose://questionnaire.campaign.complete: ref=structured-data arm=ui-render"
+      ],
+      "agreement": 0.649
+    },
+    "aiInvolvement": {
+      "same": 33,
+      "diff": 24,
+      "examples": [
+        "purpose://contact.introduction: ref=model-generated arm=deterministic-code",
+        "purpose://event.schedule.change-request: ref=model-assisted arm=deterministic-code",
+        "purpose://event.privacy-preserving-networking: ref=model-assisted arm=deterministic-code",
+        "purpose://digital-work.collect-structured-input: ref=none arm=deterministic-code",
+        "purpose://content.review-before-publish: ref=model-generated arm=deterministic-code",
+        "purpose://gui.quality.functional-accessible: ref=none arm=deterministic-code"
+      ],
+      "agreement": 0.579
+    },
+    "flags": {
+      "same": 51,
+      "diff": 6,
+      "examples": [],
+      "agreement": 0.895
+    }
+  },
+  "confusionByField": {
+    "domain": {
+      "none -> employment": 3
+    },
+    "decisionEffect": {
+      "none -> informational": 6,
+      "influences-human-decision -> none": 1,
+      "influences-human-decision -> informational": 4,
+      "informational -> none": 3
+    },
+    "dataSubjects": {
+      "none -> self-owner": 2,
+      "none -> named-third-parties": 5,
+      "public -> self-owner": 1,
+      "self-owner -> none": 2
+    },
+    "outputModality": {
+      "natural-language-to-human -> structured-data": 2,
+      "natural-language-to-human -> ui-render": 2,
+      "ui-render -> structured-data": 1,
+      "none -> structured-data": 10,
+      "structured-data -> ui-render": 1,
+      "none -> ui-render": 3,
+      "structured-data -> none": 1
+    },
+    "aiInvolvement": {
+      "model-generated -> deterministic-code": 2,
+      "model-assisted -> deterministic-code": 4,
+      "none -> deterministic-code": 17,
+      "deterministic-code -> none": 1
+    }
+  },
+  "disagreements": [
+    {
+      "purposeRef": "purpose://contact.introduction",
+      "expected": [
+        "50.1",
+        "50.2"
+      ],
+      "got": [],
+      "missed": [
+        "50.1",
+        "50.2"
+      ],
+      "extra": []
+    },
+    {
+      "purposeRef": "purpose://event.schedule.change-request",
+      "expected": [
+        "50.1"
+      ],
+      "got": [],
+      "missed": [
+        "50.1"
+      ],
+      "extra": []
+    },
+    {
+      "purposeRef": "purpose://event.privacy-preserving-networking",
+      "expected": [
+        "50.1",
+        "5.1.c"
+      ],
+      "got": [],
+      "missed": [
+        "50.1",
+        "5.1.c"
+      ],
+      "extra": []
+    },
+    {
+      "purposeRef": "purpose://digital-work.coordinate",
+      "expected": [
+        "III.4"
+      ],
+      "got": [],
+      "missed": [
+        "III.4"
+      ],
+      "extra": []
+    },
+    {
+      "purposeRef": "purpose://project-work.overview-and-sharing",
+      "expected": [
+        "III.4"
+      ],
+      "got": [],
+      "missed": [
+        "III.4"
+      ],
+      "extra": []
+    },
+    {
+      "purposeRef": "purpose://project-work.project-portfolio",
+      "expected": [
+        "III.4"
+      ],
+      "got": [],
+      "missed": [
+        "III.4"
+      ],
+      "extra": []
+    },
+    {
+      "purposeRef": "purpose://project-work.work-items",
+      "expected": [
+        "III.4"
+      ],
+      "got": [],
+      "missed": [
+        "III.4"
+      ],
+      "extra": []
+    },
+    {
+      "purposeRef": "purpose://project-work.current-status-and-outstanding",
+      "expected": [
+        "III.4"
+      ],
+      "got": [],
+      "missed": [
+        "III.4"
+      ],
+      "extra": []
+    },
+    {
+      "purposeRef": "purpose://content.review-before-publish",
+      "expected": [
+        "50.2",
+        "50.4"
+      ],
+      "got": [],
+      "missed": [
+        "50.2",
+        "50.4"
+      ],
+      "extra": []
+    },
+    {
+      "purposeRef": "purpose://preference.owner-controlled",
+      "expected": [
+        "5.1.c"
+      ],
+      "got": [],
+      "missed": [
+        "5.1.c"
+      ],
+      "extra": []
+    },
+    {
+      "purposeRef": "purpose://value-and-commons",
+      "expected": [
+        "III.5"
+      ],
+      "got": [],
+      "missed": [
+        "III.5"
+      ],
+      "extra": []
+    }
+  ]
+}

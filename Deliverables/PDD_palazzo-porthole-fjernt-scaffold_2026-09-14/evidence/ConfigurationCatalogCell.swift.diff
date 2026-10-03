@@ -1,0 +1,27 @@
+--- before/CellScaffold/Sources/App/Cells/ConfigurationCatalog/ConfigurationCatalogCell.swift
++++ CellScaffold/Sources/App/Cells/ConfigurationCatalog/ConfigurationCatalogCell.swift
+@@ -9,6 +9,8 @@
+ 
+ import Foundation
+ import CellBase
++// purposeRef: purpose://candidate.palazzo-porthole-fjernt-scaffold.published-allowlist
++import ScaffoldKit
+ 
+ final class ConfigurationCatalogCell: GeneralCell, PortholeRuntimeBindingEnsuring {
+     private enum MenuSlot: String, Codable, CaseIterable {
+@@ -2745,6 +2747,15 @@
+         if isControlPlaneEndpoint {
+             return publishedControlPlaneNames.contains(configuration.name)
+         }
++        // purposeRef: purpose://candidate.palazzo-porthole-fjernt-scaffold.published-allowlist
++        // Preserve the existing control-plane policy and static local list.
++        if let url = URL(string: endpoint), url.scheme == "cell",
++           let host = url.host, !host.isEmpty, host.lowercased() != "localhost",
++           let port = url.port,
++           url.user == nil, url.password == nil, url.query == nil, url.fragment == nil,
++           !url.path.isEmpty, url.path != "/" {
++            return RemoteBridgeheadAccess.allows(host: host, port: port)
++        }
+         return portholeSupportedEndpoints.contains(endpoint)
+     }
+ 

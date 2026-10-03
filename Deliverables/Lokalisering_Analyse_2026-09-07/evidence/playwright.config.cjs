@@ -1,0 +1,1 @@
+module.exports = { testDir: "/Users/kjetil/Build/Digipomps/HAVEN/CellScaffold/playwright", workers: 1, timeout: 30000, outputDir: "/private/tmp/haven-localization-live-results", reporter: "list", use: { browserName: "chromium", headless: true, trace: "retain-on-failure" } };

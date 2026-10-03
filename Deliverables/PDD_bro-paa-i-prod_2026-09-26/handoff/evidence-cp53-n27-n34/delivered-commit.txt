@@ -1,0 +1,35 @@
+commit dab8106a5e1f2004bfa06587b5fa68c2bb30ac35
+Author:     Kjetil Hustveit <kjetil@digipomps.org>
+AuthorDate: Tue Sep 29 11:31:23 2026 +0200
+Commit:     Kjetil Hustveit <kjetil@digipomps.org>
+CommitDate: Tue Sep 29 11:31:23 2026 +0200
+
+    PDD_bro-paa-i-prod_2026-09-26 N27/N34: synchronize peer fixture startup
+    
+    CI 36548128002 exhausted the fixture's fixed Task.yield loop before the first
+    hello was submitted. Wait for the first physical-frame event with a bounded
+    XCTest deadline in all three startup readers. Keep production deadlines,
+    authorization checks and adversarial assertions unchanged.
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_011CHU13qBKbb5szsQQo53rW
+
+commit 7b8442411d1383092d5ed739bfc2c5d16d71f62d
+Author:     Kjetil Hustveit <kjetil@digipomps.org>
+AuthorDate: Tue Sep 29 11:16:32 2026 +0200
+Commit:     Kjetil Hustveit <kjetil@digipomps.org>
+CommitDate: Tue Sep 29 11:16:32 2026 +0200
+
+    PDD_bro-paa-i-prod_2026-09-26: fix N27 feed ordering and N34 RPC reply ownership
+    
+    Drain admitted feed values in publisher order through normal completion, retain
+    operation/byte leases through send, and fail queued values on upstream revocation
+    or send/admission failure. Keep close scoped to the captured logical transport.
+    
+    Register cid/session-owned set and description Futures before sending. Retain
+    early replies and isolate timeout, malformed response, close and renewal cleanup.
+    Add WS, mux and encrypted peer regressions, including tests run against the
+    original implementation, and extend the existing Linux and TSAN test gates.
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_011CHU13qBKbb5szsQQo53rW

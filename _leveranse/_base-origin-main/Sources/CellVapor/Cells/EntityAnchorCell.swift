@@ -1,0 +1,1148 @@
+// SPDX-License-Identifier: Apache-2.0
+// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
+
+//
+//  EntityAnchorCell.swift
+//  CellProtocol
+//
+//  Created by Kjetil Hustveit on 27/05/2025.
+//
+@_spi(HAVENRuntime) import CellBase
+import Foundation
+
+private actor SignedAgreementCommitGate {
+    private var isHeld = false
+    private var waiters = [CheckedContinuation<Void, Never>]()
+
+    func withExclusiveAccess<T>(_ operation: () async -> T) async -> T {
+        await acquire()
+        defer { release() }
+        return await operation()
+    }
+
+    private func acquire() async {
+        guard isHeld else {
+            isHeld = true
+            return
+        }
+        await withCheckedContinuation { waiters.append($0) }
+    }
+
+    private func release() {
+        guard !waiters.isEmpty else {
+            isHeld = false
+            return
+        }
+        waiters.removeFirst().resume()
+    }
+}
+
+public class EntityAnchorCell: GeneralCell {
+    static let storageFilename = "keypathstorage.json"
+    static let authorityJournalFilename = "entity-authority-journal.json"
+    private var storage: Entity
+    private let signedAgreementCommitGate = SignedAgreementCommitGate()
+    private var authorityJournal = EntityAuthorityJournalDocument()
+    private var persistenceFailureReason: String?
+    private var legacySideFiles = Set<String>()
+    private let authorityCommitGate = EntityAuthorityCommitGate()
+   
+    // Should  support set/get keypath and persistance of json
+    
+    required init(owner: Identity) async {
+        self.storage = Entity() // hmmm...
+        await super.init(owner: owner)
+        await initialLoading()
+        
+        
+
+        // Read storagejson - we may outsource persistence to a separate CS
+        
+        
+        
+        print("Initing Entity Anchor cell for owner: \(owner.uuid)")
+       
+        
+        try? await ensureRuntimeReady()
+    }
+    
+    private func setupPermissions(owner: Identity) async  {
+        self.agreementTemplate.ensureGrant("rw--", for: "person")
+        self.agreementTemplate.ensureGrant("rw--", for: "purposes") // I think this is the one that should hold realations and Interests too?
+        self.agreementTemplate.ensureGrant("rw--", for: "relations")
+        self.agreementTemplate.ensureGrant("rw--", for: "proofs")
+        self.agreementTemplate.ensureGrant("rw--", for: "agreements")
+        self.agreementTemplate.ensureGrant("rw--", for: "signedAgreementEntity")
+        self.agreementTemplate.ensureGrant("-w--", for: "signedAgreementEntity.commit")
+        self.agreementTemplate.ensureGrant("rw--", for: "entityRepresentation")
+        self.agreementTemplate.ensureGrant("r--s", for: "dataInventory")
+        self.agreementTemplate.ensureGrant("rw--", for: "chronicle")
+        self.agreementTemplate.ensureGrant("rw--", for: "identityLinks")
+        self.agreementTemplate.ensureGrant("r---", for: "entityAuthority")
+        self.agreementTemplate.ensureGrant("r---", for: "entityContactSchema")
+        self.agreementTemplate.ensureGrant("r---", for: "entityRelationSchema")
+        
+        // This cell will only be accessed from it's owner so adding ggrants will not be necessary
+        
+    }
+    
+    private func setupKeys(owner: Identity) async  {
+        await registerContracts(requester: owner)
+        
+        await addIntercept(requester: owner, intercept: { flowElement, requester in
+//                print("Incoming flowElement to Keypath storage (PDS)")
+            return nil
+        })
+
+    await addInterceptForGet(requester: owner, key: "person", getValueIntercept: {
+        keypath, requester in
+        if await self.validateAccess("r---", at: "person", for: requester) {
+            return try self.storage.get(keypath: keypath)
+        } else {
+            throw KeypathStorageErrors.denied
+        }
+    })
+        
+        await addInterceptForGet(requester: owner, key: "proofs", getValueIntercept: {
+            keypath, requester in
+            if await self.validateAccess("r---", at: "proofs", for: requester) {
+                return try self.storage.get(keypath: keypath) 
+            } else {
+                throw KeypathStorageErrors.denied
+            }
+        })
+
+        await addInterceptForGet(requester: owner, key: "relations", getValueIntercept: {
+            keypath, requester in
+            if await self.validateAccess("r---", at: "relations", for: requester) {
+                return try self.storage.get(keypath: keypath)
+            } else {
+                throw KeypathStorageErrors.denied
+            }
+        })
+
+        await addInterceptForGet(requester: owner, key: "identityLinks", getValueIntercept: {
+            keypath, requester in
+            if await self.validateAccess("r---", at: "identityLinks", for: requester) {
+                return try self.identityLinksValue(for: keypath)
+            } else {
+                throw KeypathStorageErrors.denied
+            }
+        })
+
+        await addInterceptForGet(requester: owner, key: "identityLinks.state", getValueIntercept: {
+            _, requester in
+            if await self.validateAccess("r---", at: "identityLinks", for: requester) {
+                return try self.identityLinksValue(for: "identityLinks.state")
+            }
+            throw KeypathStorageErrors.denied
+        })
+
+        await addInterceptForGet(requester: owner, key: "signedAgreementEntity", getValueIntercept: {
+            keypath, requester in
+            if await self.validateAccess("r---", at: "signedAgreementEntity", for: requester) {
+                return try self.storage.get(keypath: keypath)
+            } else {
+                throw KeypathStorageErrors.denied
+            }
+        })
+
+        await addInterceptForSet(requester: owner, key: "signedAgreementEntity.commit", setValueIntercept: { [weak self] _, value, requester in
+            guard let self else { return .string("failure") }
+            guard await self.validateAccess("-w--", at: "signedAgreementEntity.commit", for: requester),
+                  self.storedOwnerIdentity.referencesSameSigningIdentity(as: requester),
+                  await self.verifyRequesterIdentityControl(requester) else {
+                throw KeypathStorageErrors.denied
+            }
+            return await self.signedAgreementCommitGate.withExclusiveAccess {
+                await self.commitSignedAgreement(value: value, requester: requester)
+            }
+        })
+
+        await addInterceptForGet(requester: owner, key: "entityRepresentation", getValueIntercept: {
+            keypath, requester in
+            if await self.validateAccess("r---", at: "entityRepresentation", for: requester) {
+                return try self.storage.get(keypath: keypath)
+            } else {
+                throw KeypathStorageErrors.denied
+            }
+        })
+
+        await addInterceptForGet(requester: owner, key: "dataInventory", getValueIntercept: {
+            keypath, requester in
+            if await self.validateAccess("r---", at: "dataInventory", for: requester) {
+                return try self.storage.get(keypath: keypath)
+            }
+            throw KeypathStorageErrors.denied
+        })
+
+        await addInterceptForGet(requester: owner, key: "chronicle", getValueIntercept: {
+            keypath, requester in
+            if await self.validateAccess("r---", at: "chronicle", for: requester) {
+                return try self.storage.get(keypath: keypath)
+            } else {
+                throw KeypathStorageErrors.denied
+            }
+        })
+
+        await addInterceptForGet(requester: owner, key: "entityAuthority", getValueIntercept: {
+            _, requester in
+            if await self.validateAccess("r---", at: "entityAuthority", for: requester) {
+                return try await self.authorityCommitStateValue()
+            }
+            throw KeypathStorageErrors.denied
+        })
+
+        await addInterceptForGet(requester: owner, key: "entityContactSchema", getValueIntercept: {
+            _, requester in
+            guard await self.validateAccess("r---", at: "entityContactSchema", for: requester) else {
+                throw KeypathStorageErrors.denied
+            }
+            return EntityValidatedContactRecordV1.schemaValue()
+        })
+        await addInterceptForGet(requester: owner, key: "entityRelationSchema") { _, requester in
+            guard await self.validateAccess("r---", at: "entityRelationSchema", for: requester) else {
+                throw KeypathStorageErrors.denied
+            }
+            return EntityRelationRecordV1.schemaValue()
+        }
+    
+    await addInterceptForSet(requester: owner, key: "person", setValueIntercept:  { keypath, value, requester in
+        if await self.validateAccess("-w--", at: "person", for: requester) {
+            CellBase.diagnosticLog("Entity data set keypath=\(keypath)", domain: .identity)
+            try await self.storage.set(keypath: keypath, setValue: value)
+            try await self.saveKeypathStorage(entity: self.storage)
+            // Send flowElement notification
+            
+            let payloadObject:Object = ["keypath" : .string(keypath), "data" : value]
+            
+            
+            let flowElement = FlowElement(title: "PDS update", content: .object(payloadObject), properties: FlowElement.Properties(type: .content, contentType: .object))
+        
+            
+            self.pushFlowElement(flowElement, requester: requester)
+        }
+        return nil
+    })
+    
+	    await addInterceptForSet(requester: owner, key: "proofs", setValueIntercept:  { keypath, value, requester in
+            guard await self.validateAccess("-w--", at: "proofs", for: requester) else {
+                throw KeypathStorageErrors.denied
+            }
+            do {
+                CellBase.diagnosticLog("Entity data set keypath=\(keypath)", domain: .identity)
+                try await self.storage.set(keypath: keypath, setValue: value)
+                try await self.saveKeypathStorage(entity: self.storage)
+                // Send flowElement notification
+                
+                let payloadObject:Object = ["keypath" : .string(keypath), "data" : value]
+                var flowElement = FlowElement(title: "PDS update", content: .object(payloadObject), properties: FlowElement.Properties(type: .content, contentType: .object))
+                
+                flowElement.origin = self.uuid
+                flowElement.topic = "entity"
+                self.pushFlowElement(flowElement, requester: requester)
+            } catch {
+                print("Set \(keypath) failed with error: \(error)")
+            }
+    
+	        return nil
+	    })
+
+        await addInterceptForSet(requester: owner, key: "relations", setValueIntercept: { [weak self] keypath, value, requester in
+            guard let self = self else { return nil }
+            guard await self.validateAccess("-w--", at: "relations", for: requester) else {
+                throw KeypathStorageErrors.denied
+            }
+            try EntityValidatedContactRecordV1.rejectDirectMutation(to: keypath)
+            try EntityRelationRecordV1.rejectDirectMutation(to: keypath, value: value)
+            do {
+                let keypathArray = keypath.split(separator: ".")
+                if keypathArray.count > 1 {
+                    let subkey = String(keypathArray[1])
+                    switch subkey {
+                    case "identities":
+                        do {
+                            _ = try self.storage.get(keypath: keypath)
+                            try await self.storage.set(keypath: keypath, setValue: value)
+                        } catch {
+                            if case KeyPathError.notFound = error {
+                                let identityUuid = String(keypathArray[keypathArray.count - 1])
+                                let entityUuid = UUID().uuidString
+                                try await self.storage.set(keypath: keypath, setValue: .string(entityUuid))
+                                let entityKeypath = "relations.entities.\(entityUuid).identities.\(identityUuid)"
+                                try await self.storage.set(keypath: entityKeypath, setValue: value)
+                            } else {
+                                throw error
+                            }
+                        }
+                    default:
+                        try await self.storage.set(keypath: keypath, setValue: value)
+                    }
+                } else {
+                    try await self.storage.set(keypath: keypath, setValue: value)
+                }
+
+                try await self.saveKeypathStorage(entity: self.storage)
+                let payloadObject: Object = ["keypath": .string(keypath), "data": value]
+                var flowElement = FlowElement(
+                    title: "PDS update",
+                    content: .object(payloadObject),
+                    properties: FlowElement.Properties(type: .content, contentType: .object)
+                )
+                flowElement.origin = self.uuid
+                flowElement.topic = "entity"
+                self.pushFlowElement(flowElement, requester: requester)
+            } catch {
+                print("Set \(keypath) failed with error: \(error)")
+            }
+            return nil
+        })
+
+        await addInterceptForSet(requester: owner, key: "identityLinks", setValueIntercept: { [weak self] keypath, value, requester in
+            guard let self = self else { return nil }
+            return await self.handleIdentityLinksSet(keypath: keypath, value: value, requester: requester)
+        })
+        for identityLinkAction in [
+            "identityLinks.approveEnrollment",
+            "identityLinks.completeEnrollment",
+            "identityLinks.revoke"
+        ] {
+            await addInterceptForSet(requester: owner, key: identityLinkAction, setValueIntercept: { [weak self] keypath, value, requester in
+                guard let self = self else { return nil }
+                return await self.handleIdentityLinksSet(keypath: keypath, value: value, requester: requester)
+            })
+        }
+    
+    await addIntercept(requester: owner, intercept: {
+        flowElement, identity in
+        var correlationId: String?
+        var operation: String?
+        do {
+            CellBase.diagnosticLog(
+                "EntityAnchor received flowElement title=\(flowElement.title) topic=\(flowElement.topic)",
+                domain: .identity
+            )
+
+            guard case let  .object(paramObject) = flowElement.content else {
+                throw SetValueError.paramErr
+            }
+            correlationId = try? paramObject["correlationId"]?.stringValue()
+            operation = try? paramObject["operation"]?.stringValue()
+
+            if operation == EntityBatchPersistEnvelope.operation {
+                guard let envelopeValue = paramObject["envelope"] else {
+                    throw SetValueError.noParamValue("envelope")
+                }
+                guard case let .object(envelopeObject) = envelopeValue else {
+                    throw SetValueError.wrongParamType
+                }
+                let envelope = try EntityBatchPersistEnvelope(object: envelopeObject)
+                let result = try await self.persistBatchEnvelope(envelope, requester: identity)
+
+                var payloadObject: Object = [
+                    "status": .string(result.receipt == nil ? "persisted" : "authority_committed"),
+                    "schema": .string(envelope.schema),
+                    "persistedPaths": .list(result.persistedPaths.map { .string($0) }),
+                    "idempotentReplay": .bool(result.idempotentReplay)
+                ]
+                if let receipt = result.receipt {
+                    payloadObject["commitReceipt"] = try receipt.valueType()
+                }
+                if let correlationId {
+                    payloadObject["correlationId"] = .string(correlationId)
+                }
+                if let operation {
+                    payloadObject["operation"] = .string(operation)
+                }
+
+                var response = FlowElement(title: "PDS update", content: .object(payloadObject), properties: FlowElement.Properties(type: .content, contentType: .object))
+                response.origin = self.uuid
+                response.topic = flowElement.topic
+                return response
+            }
+
+            guard let keypathValue = paramObject["keypath"] else {
+                throw SetValueError.noParamValue("keypath")
+            }
+            guard case let .string(keypath) = keypathValue else {
+                throw SetValueError.wrongParamType
+            }
+
+            guard let value = paramObject["value"] else {
+                throw SetValueError.noParamValue("value")
+            }
+
+            try await self.set(keypath: keypath, value: value)
+            
+            var payloadObject:Object = [
+                "keypath" : .string(keypath),
+                "data" : value,
+                "status": .string("persisted")
+            ]
+            if let correlationId {
+                payloadObject["correlationId"] = .string(correlationId)
+            }
+            if let operation {
+                payloadObject["operation"] = .string(operation)
+            }
+            
+            
+            var response = FlowElement(title: "PDS update", content: .object(payloadObject), properties: FlowElement.Properties(type: .content, contentType: .object))
+            response.origin = self.uuid
+            response.topic = flowElement.topic
+            return response
+            
+            
+        } catch {
+            print("Feed item handling failed with error: \(error)")
+            if correlationId != nil || operation != nil {
+                var payloadObject = self.authorityCommitFailurePayload(error)
+                if let correlationId {
+                    payloadObject["correlationId"] = .string(correlationId)
+                }
+                if let operation {
+                    payloadObject["operation"] = .string(operation)
+                }
+                var response = FlowElement(title: "PDS update", content: .object(payloadObject), properties: FlowElement.Properties(type: .content, contentType: .object))
+                response.origin = self.uuid
+                response.topic = flowElement.topic
+                return response
+            }
+        }
+        return flowElement // This may be good for debugging
+    })
+    
+    await addInterceptForGet(requester: owner, key: "reloadStorage", getValueIntercept: {
+        keypath, requester in
+        if await self.validateAccess("--x-", at: "reloadStorage", for: requester) {
+            try await self.reloadStorage(requester:  requester)
+            return .string("reloaded")
+        } else {
+            throw KeypathStorageErrors.denied
+        }
+    })
+        
+        print("*********** Finished setup keys in Entity Anchor ***********")
+    }
+
+    private func registerContracts(requester: Identity) async {
+        let storedValue = Self.storedValueSchema()
+        let identityLinkResult = ExploreContract.oneOfSchema(
+            options: [ExploreContract.schema(type: "object"), ExploreContract.schema(type: "string")],
+            description: "Returns identity-link state/result metadata or an error string."
+        )
+        let identityLinkEffect = ExploreContract.flowEffect(trigger: .set, topic: "entity.identityLinks", contentType: "object")
+
+        await registerExploreContract(requester: requester, key: "person", method: .set, input: storedValue, returns: .null, permissions: ["-w--"], required: false, description: .string("Stores owner entity person data."))
+        await registerExploreContract(requester: requester, key: "person", method: .get, input: .null, returns: storedValue, permissions: ["r---"], required: false, description: .string("Reads owner entity person data."))
+        await registerExploreContract(requester: requester, key: "proofs", method: .set, input: storedValue, returns: .null, permissions: ["-w--"], required: false, description: .string("Stores proof data under the configured Agreement policy."))
+        await registerExploreContract(requester: requester, key: "proofs", method: .get, input: .null, returns: storedValue, permissions: ["r---"], required: false, description: .string("Reads proof data under the configured Agreement policy."))
+        await registerExploreContract(requester: requester, key: "relations", method: .set, input: storedValue, returns: .null, permissions: ["-w--"], required: false, description: .string("Stores owner entity relation data."))
+        await registerExploreContract(requester: requester, key: "relations", method: .get, input: .null, returns: storedValue, permissions: ["r---"], required: false, description: .string("Reads owner entity relation data."))
+        await registerExploreContract(requester: requester, key: "chronicle", method: .get, input: .null, returns: storedValue, permissions: ["r---"], required: false, description: .string("Reads the owner entity chronicle."))
+        await registerExploreContract(requester: requester, key: "entityAuthority", method: .get, input: .null, returns: ExploreContract.schema(type: "object"), permissions: ["r---"], required: false, description: .string("Reads the signed Entity authority epoch, revision, head hash, and declared durability boundary."))
+        await registerExploreContract(requester: requester, key: "entityContactSchema", method: .get, input: .null, returns: EntityValidatedContactRecordV1.schemaExploreReturn(), permissions: ["r---"], required: true, description: .string("Reads the value-free, fail-closed schema for owner-signed validated contact persistence."))
+        await registerExploreContract(requester: requester, key: "entityRelationSchema", method: .get, input: .null, returns: ExploreContract.schema(type: "object"), permissions: ["r---"], required: false, description: .string("Reads the value-free schema for relation records (relations.records.<id>) and their chronicle events. No raw contact values are admitted there."))
+        await registerExploreContract(requester: requester, key: "signedAgreementEntity", method: .get, input: .null, returns: storedValue, permissions: ["r---"], required: false, description: .string("Reads signed Agreement entity data."))
+        await registerExploreContract(
+            requester: requester,
+            key: "signedAgreementEntity.commit",
+            method: .set,
+            input: Self.signedAgreementCommitSchema(),
+            returns: Self.signedAgreementCommitResultSchema(),
+            permissions: ["-w--"],
+            required: true,
+            description: .string("Verifies and immutably persists an owner-signed Contract, then returns an owner-signed read-after-write receipt.")
+        )
+        await registerExploreContract(requester: requester, key: "entityRepresentation", method: .get, input: .null, returns: storedValue, permissions: ["r---"], required: false, description: .string("Reads the owner entity representation."))
+        await registerExploreContract(requester: requester, key: "dataInventory", method: .get, input: .null, returns: ExploreContract.schema(type: "object"), permissions: ["r---"], required: false, description: .string("Reads the private owner-signed inventory of authorized data representations. Updates are committed through the owner-authorized Entity authority journal."))
+        await registerExploreContract(requester: requester, key: "identityLinks", method: .set, input: storedValue, returns: identityLinkResult, permissions: ["-w--"], required: false, flowEffects: [identityLinkEffect], description: .string("Stores identity-link state below the owner entity."))
+        await registerExploreContract(requester: requester, key: "identityLinks", method: .get, input: .null, returns: identityLinkResult, permissions: ["r---"], required: false, description: .string("Reads identity-link state below the owner entity."))
+        await registerExploreContract(requester: requester, key: "identityLinks.state", method: .get, input: .null, returns: identityLinkResult, permissions: ["r---"], required: false, description: .string("Reads normalized identity-link runtime state."))
+        await registerExploreContract(requester: requester, key: "identityLinks.approveEnrollment", method: .set, input: ExploreContract.schema(type: "object"), returns: identityLinkResult, permissions: ["-w--"], required: true, flowEffects: [identityLinkEffect], description: .string("Approves a cryptographically bound identity enrollment."))
+        await registerExploreContract(requester: requester, key: "identityLinks.completeEnrollment", method: .set, input: ExploreContract.schema(type: "object"), returns: identityLinkResult, permissions: ["-w--"], required: true, flowEffects: [identityLinkEffect], description: .string("Completes a previously approved identity enrollment."))
+        await registerExploreContract(requester: requester, key: "identityLinks.revoke", method: .set, input: ExploreContract.oneOfSchema(options: [ExploreContract.schema(type: "string"), ExploreContract.objectSchema(properties: ["linkID": ExploreContract.schema(type: "string")], requiredKeys: ["linkID"])]), returns: identityLinkResult, permissions: ["-w--"], required: true, flowEffects: [identityLinkEffect], description: .string("Revokes an exact identity link."))
+        await registerExploreContract(requester: requester, key: "reloadStorage", method: .get, input: .null, returns: ExploreContract.schema(type: "string"), permissions: [], required: false, description: .string("Legacy owner-only compatibility trigger that reloads persisted storage."))
+    }
+
+    private static func storedValueSchema() -> ValueType {
+        ExploreContract.oneOfSchema(
+            options: [
+                ExploreContract.schema(type: "object"),
+                ExploreContract.schema(type: "list"),
+                ExploreContract.schema(type: "string"),
+                ExploreContract.schema(type: "bool"),
+                ExploreContract.schema(type: "integer"),
+                ExploreContract.schema(type: "float"),
+                ExploreContract.schema(type: "data"),
+                ExploreContract.schema(type: "flowElement"),
+                ExploreContract.schema(type: "keyValue"),
+                ExploreContract.schema(type: "setValueState"),
+                ExploreContract.schema(type: "setValueResponse"),
+                ExploreContract.schema(type: "cellConfiguration"),
+                ExploreContract.schema(type: "cellReference"),
+                ExploreContract.schema(type: "verifiableCredential"),
+                ExploreContract.schema(type: "identity"),
+                ExploreContract.schema(type: "connectContext"),
+                ExploreContract.schema(type: "connectState"),
+                ExploreContract.schema(type: "contractState"),
+                ExploreContract.schema(type: "signData"),
+                ExploreContract.schema(type: "signature"),
+                ExploreContract.schema(type: "agreementPayload"),
+                ExploreContract.schema(type: "description"),
+                ExploreContract.schema(type: "cell"),
+                .null
+            ],
+            description: "A supported persisted Entity ValueType."
+        )
+    }
+
+    private static func signedAgreementCommitSchema() -> ValueType {
+        ExploreContract.objectSchema(
+            properties: [
+                "contract": ExploreContract.schema(type: "object"),
+                "metadata": ExploreContract.schema(type: "object"),
+                "credentialReceipts": ExploreContract.listSchema(item: ExploreContract.schema(type: "object"))
+            ],
+            requiredKeys: ["contract"],
+            description: "Owner-signed Contract plus public-safe metadata and verifier-signed VC evaluation receipts."
+        )
+    }
+
+    private static func signedAgreementCommitResultSchema() -> ValueType {
+        ExploreContract.objectSchema(
+            properties: [
+                "status": ExploreContract.schema(type: "string"),
+                "record": ExploreContract.schema(type: "object"),
+                "receipt": ExploreContract.schema(type: "object"),
+                "error": ExploreContract.schema(type: "string")
+            ],
+            requiredKeys: ["status"],
+            description: "Persisted/conflict/error result. Persisted results include the verified record and signed commit receipt."
+        )
+    }
+
+    private func commitSignedAgreement(value: ValueType, requester: Identity) async -> ValueType {
+        do {
+            let request = try SignedAgreementEntityCommitRequest.from(value: value)
+            let expectedDomain = SignedAgreementEntitySupport.ownerEntityDomain(for: storedOwnerIdentity)
+            guard await request.contract.verifyAuthorizationBinding(
+                expectedIssuer: storedOwnerIdentity,
+                expectedSubject: storedOwnerIdentity,
+                expectedDomain: expectedDomain
+            ) else {
+                throw SignedAgreementEntityCommitError.invalidContract
+            }
+            if request.credentialReceipts.isEmpty {
+                guard SignedAgreementEntitySupport.credentialReceiptsAreBound(
+                    request: request,
+                    expectedVerifier: storedOwnerIdentity
+                ) else {
+                    throw SignedAgreementEntityCommitError.invalidCredentialReceipt
+                }
+            } else {
+                guard let resolver = CellBase.defaultCellResolver,
+                      let verifierCell = try? await resolver.cellAtEndpoint(
+                        endpoint: TrustedIssuerEvaluationReceipt.verifierEndpoint,
+                        requester: requester
+                      ),
+                      let verifierOwner = try? await verifierCell.getOwner(requester: requester),
+                      SignedAgreementEntitySupport.credentialReceiptsAreBound(
+                        request: request,
+                        expectedVerifier: verifierOwner
+                      ) else {
+                    throw SignedAgreementEntityCommitError.invalidCredentialReceipt
+                }
+            }
+
+            let contractHash = try SignedAgreementEntitySupport.contractHash(request.contract)
+            let contentHash = try SignedAgreementEntitySupport.immutableContentHash(
+                request: request,
+                contractHash: contractHash
+            )
+            let recordKeypath = "signedAgreementEntity.records.\(request.contract.uuid)"
+            let record: Object
+            if let existing = try? storage.get(keypath: recordKeypath),
+               case let .object(existingRecord) = existing {
+                guard case let .string(existingContentHash)? = existingRecord["immutableContentHash"],
+                      existingContentHash == contentHash else {
+                    throw SignedAgreementEntityCommitError.immutableRecordConflict
+                }
+                record = existingRecord
+            } else {
+                let newRecord = try SignedAgreementEntitySupport.recordObject(
+                    request: request,
+                    contractHash: contractHash
+                )
+                try storage.set(keypath: recordKeypath, setValue: .object(newRecord))
+                record = newRecord
+            }
+
+            let expectedRecordHash = try SignedAgreementEntitySupport.recordHash(record)
+            let receipt = try await SignedAgreementEntityCommitReceipt.issue(
+                recordID: request.contract.uuid,
+                entityKeypath: recordKeypath,
+                entityOwner: requester,
+                contractHash: contractHash,
+                recordHash: expectedRecordHash
+            )
+            let receiptKeypath = "signedAgreementEntity.receipts.\(receipt.receiptID)"
+            try storage.set(keypath: receiptKeypath, setValue: .object(receipt.asObject()))
+            try await saveKeypathStorage(entity: storage)
+            let persistedStorage = try await loadKeypathStorage()
+            guard case let .object(persistedRecord) = try persistedStorage.get(keypath: recordKeypath),
+                  try SignedAgreementEntitySupport.recordHash(persistedRecord) == expectedRecordHash,
+                  case let .object(persistedReceiptObject) = try persistedStorage.get(keypath: receiptKeypath) else {
+                throw SignedAgreementEntityCommitError.readAfterWriteMismatch
+            }
+            let persistedReceipt = try SignedAgreementEntityCommitReceipt.from(object: persistedReceiptObject)
+            guard persistedReceipt.verifySignature(),
+                  persistedReceipt.recordHash == expectedRecordHash else {
+                throw SignedAgreementEntityCommitError.readAfterWriteMismatch
+            }
+            storage = persistedStorage
+
+            return .object([
+                "status": .string("persisted"),
+                "record": .object(record),
+                "receipt": .object(persistedReceiptObject)
+            ])
+        } catch SignedAgreementEntityCommitError.immutableRecordConflict {
+            return .object([
+                "status": .string("conflict"),
+                "error": .string("immutable_record_conflict")
+            ])
+        } catch {
+            return .object([
+                "status": .string("error"),
+                "error": .string(String(describing: error))
+            ])
+        }
+    }
+    
+    private func initialLoading() async {
+        do {
+            let loadedStorage = try await self.loadKeypathStorage()
+            let loadedJournal = try await self.loadAuthorityJournalIfPresent()
+            try loadedJournal.validateStructure()
+            guard try loadedJournal.verifyReceipts(authority: storedOwnerIdentity) else {
+                throw EntityAuthorityCommitError.journalCorrupt("authority_receipt_signature")
+            }
+            let recoveredStorage = try loadedJournal.replay(on: loadedStorage)
+            self.authorityJournal = loadedJournal
+            self.storage = recoveredStorage
+            self.persistenceFailureReason = nil
+            if try legacySideFiles.contains(Self.storageFilename) ||
+                (Self.canonicalEntityData(recoveredStorage) != Self.canonicalEntityData(loadedStorage)) {
+                try await self.writeKeypathStorage(entity: recoveredStorage)
+            }
+            if legacySideFiles.contains(Self.authorityJournalFilename) {
+                try await self.writeAuthorityJournal(loadedJournal)
+            }
+        } catch {
+            if Self.isMissingFile(error) {
+                let stubsEntity: Object = ["person" : .object(Object()), "relations" : .object(Object()), "proofs" : .object(Object()), "identityLinks" : .object(Object()), "dataInventory" : .object(Object()), "agremments" : .object(Object()),  "chronicle" : .object(Object())]
+                do {
+                    let existingJournal = try await self.loadAuthorityJournalIfPresent()
+                    try existingJournal.validateStructure()
+                    guard try existingJournal.verifyReceipts(authority: storedOwnerIdentity) else {
+                        throw EntityAuthorityCommitError.journalCorrupt("authority_receipt_signature")
+                    }
+                    let recoveredStorage = try existingJournal.replay(on: stubsEntity)
+                    try await self.writeKeypathStorage(entity: recoveredStorage)
+                    if legacySideFiles.contains(Self.authorityJournalFilename) {
+                        try await self.writeAuthorityJournal(existingJournal)
+                    }
+                    self.authorityJournal = existingJournal
+                    self.storage = recoveredStorage
+                    self.persistenceFailureReason = nil
+                } catch {
+                    self.persistenceFailureReason = String(describing: error)
+                    CellBase.diagnosticLog("Could not initialize EntityAnchor storage", domain: .identity)
+                }
+            } else {
+                self.persistenceFailureReason = String(describing: error)
+                CellBase.diagnosticLog("EntityAnchor storage validation failed; existing files were not overwritten", domain: .identity)
+            }
+        }
+    }
+    
+    enum CodingKeys: CodingKey {
+        case storage
+        case cell
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let tempStorage = try container.decodeIfPresent(Entity.self, forKey: .storage)
+        if let tmpStorage = tempStorage {
+            self.storage = tmpStorage
+        } else {
+            self.storage = Entity()
+        }
+        try super.init(from: decoder)
+        
+    }
+
+    public override func installCellRuntimeBindingsForAccess() async throws {
+        let bindingOwner = storedOwnerIdentity
+        await initialLoading()
+        await setupPermissions(owner: bindingOwner)
+        await setupKeys(owner: bindingOwner)
+        await restoreIdentityLinkRegistry()
+    }
+
+    /// Resolveren spør `IdentityLinkRegistry` ved hvert oppslag; det må speile det som ligger i lageret.
+    private func restoreIdentityLinkRegistry() async {
+        guard let recordsValue = try? storage.get(keypath: "identityLinks.records"),
+              case let .object(recordsObject) = recordsValue else {
+            await IdentityLinkRegistry.shared.restore(ownerUUID: storedOwnerIdentity.uuid, records: [])
+            return
+        }
+        let records = recordsObject.values.compactMap { try? decodeValue($0, as: IdentityLinkRecord.self) }
+        await IdentityLinkRegistry.shared.restore(ownerUUID: storedOwnerIdentity.uuid, records: records)
+    }
+    
+    public override func encode(to encoder: Encoder) throws {
+      var container = encoder.container(keyedBy: CodingKeys.self)
+      try container.encode(storage, forKey: .storage)
+      try super.encode(to: encoder)
+    }
+
+    private func readSideFile(filename: String) async throws -> Data {
+        let stored = try await getFileDataInCellDirectory(filename: filename)
+        let plaintext = try EntityAnchorPersistence.decode(stored, cellUUID: uuid, filename: filename)
+        if !CellPersistenceCrypto.isEncryptedEnvelope(stored),
+           EntityAnchorPersistence.requiresEncryption(agreement: agreementTemplate) {
+            legacySideFiles.insert(filename)
+        }
+        return plaintext
+    }
+
+    private func writeSideFile(_ plaintext: Data, filename: String) async throws {
+        let stored = try EntityAnchorPersistence.encode(plaintext, cellUUID: uuid, filename: filename,
+            owner: storedOwnerIdentity, agreement: agreementTemplate)
+        try await writeFileDataInCellDirectory(fileData: stored, filename: filename)
+        legacySideFiles.remove(filename)
+    }
+
+    func loadKeypathStorage() async throws -> Entity {
+        let entityJsonData = try await readSideFile(filename: EntityAnchorCell.storageFilename)
+        let loadedEntity = try JSONDecoder().decode(Entity.self, from: entityJsonData)
+        return loadedEntity
+    }
+
+    private func loadAuthorityJournalIfPresent() async throws -> EntityAuthorityJournalDocument {
+        do {
+            let data = try await readSideFile(filename: EntityAnchorCell.authorityJournalFilename)
+            return try JSONDecoder().decode(EntityAuthorityJournalDocument.self, from: data)
+        } catch {
+            if Self.isMissingFile(error) {
+                return EntityAuthorityJournalDocument()
+            }
+            throw error
+        }
+    }
+
+    func saveKeypathStorage(entity: Entity) async throws {
+        await authorityCommitGate.acquire()
+        do {
+            try ensurePersistenceAvailable()
+            let recovered = try authorityJournal.replay(on: entity)
+            guard try Self.canonicalEntityData(recovered) == Self.canonicalEntityData(entity) else {
+                self.storage = recovered
+                throw EntityAuthorityCommitError.journalCorrupt("legacy_write_conflicts_with_committed_keypath")
+            }
+            try await writeKeypathStorage(entity: entity)
+            self.storage = entity
+            await authorityCommitGate.release()
+        } catch {
+            await authorityCommitGate.release()
+            throw error
+        }
+    }
+
+    private func writeKeypathStorage(entity: Entity) async throws {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        let entityData = try encoder.encode(entity)
+        try await writeSideFile(entityData, filename: EntityAnchorCell.storageFilename)
+    }
+
+    private func writeAuthorityJournal(_ journal: EntityAuthorityJournalDocument) async throws {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        let data = try encoder.encode(journal)
+        try await writeSideFile(data, filename: EntityAnchorCell.authorityJournalFilename)
+    }
+
+    func set(keypath: String, value: ValueType) async throws {
+        // Validate
+        // Check if it is a change
+        try EntityValidatedContactRecordV1.rejectDirectMutation(to: keypath)
+        try EntityRelationRecordV1.rejectDirectMutation(to: keypath, value: value)
+
+        // write to storage
+        try await self.storage.set(keypath: keypath, setValue: value)
+        try await saveKeypathStorage(entity: self.storage)
+        
+        // Check whether we should post a storage saved notification? (Flow Element)
+        
+        
+        let setDataObject: Object = ["keypath" : .string(keypath), "value" : value, "timestamp" : .float(Date.now.timeIntervalSince1970)]
+        let flowElement = FlowElement(title: "Set data", content: .object(setDataObject), properties: FlowElement.Properties(type: .event, contentType: .object))
+    }
+
+    private func persistBatchEnvelope(
+        _ envelope: EntityBatchPersistEnvelope,
+        requester: Identity
+    ) async throws -> EntityAnchorBatchPersistResult {
+        await authorityCommitGate.acquire()
+        do {
+            try ensurePersistenceAvailable()
+            let verificationAuthority = storedOwnerIdentity
+            guard try authorityJournal.verifyReceipts(authority: verificationAuthority) else {
+                throw EntityAuthorityCommitError.journalCorrupt("authority_receipt_signature")
+            }
+            guard await requesterProvesOwnership(requester) else {
+                throw EntityAuthorityCommitError.requesterMismatch
+            }
+            try EntityValidatedContactRecordV1.validatePersistenceEnvelope(envelope)
+            let relationPolicy = EntityRelationRecordV1.interactionPolicy(
+                from: try? await storage.get(keypath: EntityRelationRecordV1.interactionPolicyKeypath)
+            )
+            try EntityRelationRecordV1.validatePersistenceEnvelope(envelope, interactionPolicy: relationPolicy)
+            var relationEvents: [String: ValueType] = [:]
+            for mutation in envelope.mutations where EntityRelationRecordV1.isRelationChronicleKeypath(mutation.keypath) {
+                let stored: ValueType?
+                if let pending = relationEvents[mutation.keypath] {
+                    stored = pending
+                } else {
+                    stored = try? await storage.get(keypath: mutation.keypath)
+                }
+                try EntityRelationRecordV1.validateExistingEvent(stored, proposed: mutation.value)
+                relationEvents[mutation.keypath] = mutation.value
+            }
+            // The stored descriptor is intentionally public-only. After an explicit
+            // ownership proof, the active requester supplies the vault-backed signer.
+            let authority = requester
+            let recoveredStorage = try authorityJournal.replay(on: self.storage)
+            let result: EntityAnchorBatchPersistResult
+            if envelope.commitRequest == nil {
+                var updatedStorage = recoveredStorage
+                for mutation in envelope.mutations {
+                    try updatedStorage.set(keypath: mutation.keypath, setValue: mutation.value)
+                }
+                try await writeKeypathStorage(entity: updatedStorage)
+                self.storage = updatedStorage
+                result = EntityAnchorBatchPersistResult(
+                    persistedPaths: envelope.mutations.map(\.keypath),
+                    receipt: nil,
+                    idempotentReplay: false
+                )
+            } else {
+                let outcome = try await authorityJournal.appending(
+                    envelope: envelope,
+                    to: recoveredStorage,
+                    requester: requester,
+                    authority: authority,
+                    authorityCellUUID: uuid,
+                    committedAtEpochMilliseconds: Int(Date().timeIntervalSince1970 * 1_000)
+                )
+                try await writeAuthorityJournal(outcome.journal)
+                self.authorityJournal = outcome.journal
+                self.storage = outcome.snapshot
+                try await writeKeypathStorage(entity: outcome.snapshot)
+                result = EntityAnchorBatchPersistResult(
+                    persistedPaths: envelope.mutations.map(\.keypath),
+                    receipt: outcome.receipt,
+                    idempotentReplay: outcome.idempotentReplay
+                )
+            }
+            await authorityCommitGate.release()
+            return result
+        } catch {
+            await authorityCommitGate.release()
+            throw error
+        }
+    }
+    
+    
+    func reloadStorage(requester: Identity) async throws {
+        await authorityCommitGate.acquire()
+        do {
+            try ensurePersistenceAvailable()
+            let loadedStorage = try await self.loadKeypathStorage()
+            let loadedJournal = try await self.loadAuthorityJournalIfPresent()
+            try loadedJournal.validateStructure()
+            guard try loadedJournal.verifyReceipts(authority: storedOwnerIdentity) else {
+                throw EntityAuthorityCommitError.journalCorrupt("authority_receipt_signature")
+            }
+            self.authorityJournal = loadedJournal
+            self.storage = try loadedJournal.replay(on: loadedStorage)
+            await authorityCommitGate.release()
+        } catch {
+            await authorityCommitGate.release()
+            throw error
+        }
+        let setDataObject: Object = ["reload" : .string("reload_persistant_data"), "timestamp" : .float(Date.now.timeIntervalSince1970)]
+        var flowElement = FlowElement(title: "Reload", content: .object(setDataObject), properties: FlowElement.Properties(type: .event, contentType: .object))
+        flowElement.origin = self.uuid
+        
+        self.pushFlowElement(flowElement, requester: requester)
+    }
+
+    private func identityLinksValue(for keypath: String) throws -> ValueType {
+        if keypath == "identityLinks" || keypath == "identityLinks.state" || keypath == "state" {
+            let records = (try? storage.get(keypath: "identityLinks.records")) ?? .object(Object())
+            let used = (try? storage.get(keypath: "identityLinks.usedApprovalJTIs")) ?? .object(Object())
+            return .object([
+                "status": .string("ready"),
+                "records": records,
+                "usedApprovalJTIs": used,
+                "summary": .string("EntityAnchor identityLinks er klar for approveEnrollment, completeEnrollment og revoke.")
+            ])
+        }
+        return try storage.get(keypath: keypath)
+    }
+
+    private func handleIdentityLinksSet(keypath: String, value: ValueType, requester: Identity) async -> ValueType? {
+        do {
+            switch keypath {
+            case "identityLinks.approveEnrollment":
+                return try await approveIdentityEnrollment(value: value, requester: requester)
+            case "identityLinks.completeEnrollment":
+                return try await completeIdentityEnrollment(value: value, requester: requester)
+            case "identityLinks.revoke":
+                return try await revokeIdentityLink(value: value, requester: requester)
+            default:
+                try storage.set(keypath: keypath, setValue: value)
+                try await saveKeypathStorage(entity: storage)
+                pushIdentityLinkEvent(keypath: keypath, value: value, requester: requester)
+                return .object(["status": .string("stored"), "keypath": .string(keypath)])
+            }
+        } catch {
+            return .object([
+                "status": .string("error"),
+                "keypath": .string(keypath),
+                "message": .string(String(describing: error))
+            ])
+        }
+    }
+
+    private func approveIdentityEnrollment(value: ValueType, requester: Identity) async throws -> ValueType {
+        let envelope = try decodeValue(value, as: IdentityLinkApprovalEnvelope.self)
+        let package = try await IdentityLinkProtocolService.approveEnrollment(
+            envelope,
+            issuerIdentity: requester
+        )
+        let packageValue = try IdentityLinkProtocolService.value(from: package)
+        let approvalKey = safeIdentityLinkKey(package.approval.approvalID)
+        let keypath = "identityLinks.approvals.\(approvalKey)"
+        try storage.set(keypath: keypath, setValue: packageValue)
+        try await saveKeypathStorage(entity: storage)
+        pushIdentityLinkEvent(keypath: keypath, value: packageValue, requester: requester)
+        return .object([
+            "status": .string("approved"),
+            "approvalID": .string(package.approval.approvalID),
+            "approvalPackage": packageValue
+        ])
+    }
+
+    private func completeIdentityEnrollment(value: ValueType, requester: Identity) async throws -> ValueType {
+        var envelope = try decodeValue(value, as: IdentityLinkCompletionEnvelope.self)
+        let policyRequiresEvidence = await IdentityLinkRuntimePolicy.shared.requireFreshAuthEvidence
+        let policyVerifier = await IdentityLinkRuntimePolicy.shared.freshAuthVerifier
+        if policyRequiresEvidence {
+            envelope.requireFreshAuthEvidence = true
+        }
+        let result = try await IdentityLinkProtocolService.verifyCompletion(
+            envelope,
+            usedApprovalJTIs: usedApprovalJTIs(),
+            freshAuthVerifier: policyVerifier
+        )
+        let recordValue = try IdentityLinkProtocolService.value(from: result.record)
+        let recordKey = safeIdentityLinkKey(result.record.linkID)
+        let jtiKey = safeIdentityLinkKey(result.approvalJTI)
+        let recordKeypath = "identityLinks.records.\(recordKey)"
+        let proofKeypath = "proofs.identityLinks.\(recordKey)"
+        let replayKeypath = "identityLinks.usedApprovalJTIs.\(jtiKey)"
+        let proofValue: ValueType = .object([
+            "record": recordValue,
+            "requestHash": .data(result.requestHash),
+            "approvalJTI": .string(result.approvalJTI),
+            "credentialID": .string(result.credentialID),
+            "presentationID": .string(result.presentationID),
+            "completedAt": .string(result.record.linkedAt)
+        ])
+
+        try storage.set(keypath: recordKeypath, setValue: recordValue)
+        try storage.set(keypath: proofKeypath, setValue: proofValue)
+        try storage.set(keypath: replayKeypath, setValue: .string(result.approvalJTI))
+        try await saveKeypathStorage(entity: storage)
+        await IdentityLinkRegistry.shared.register(ownerUUID: storedOwnerIdentity.uuid, completion: result)
+        pushIdentityLinkEvent(keypath: recordKeypath, value: recordValue, requester: requester)
+
+        return .object([
+            "status": .string("completed"),
+            "record": recordValue,
+            "recordKeypath": .string(recordKeypath),
+            "proofKeypath": .string(proofKeypath),
+            "approvalJTI": .string(result.approvalJTI)
+        ])
+    }
+
+    private func revokeIdentityLink(value: ValueType, requester: Identity) async throws -> ValueType {
+        let linkID: String
+        if case let .string(rawLinkID) = value {
+            linkID = rawLinkID
+        } else {
+            let object = try decodeValue(value, as: Object.self)
+            guard case let .string(rawLinkID)? = object["linkID"] else {
+                throw IdentityLinkCompletionError.missingRequiredContext("linkID")
+            }
+            linkID = rawLinkID
+        }
+
+        let recordKey = safeIdentityLinkKey(linkID)
+        let recordKeypath = "identityLinks.records.\(recordKey)"
+        let recordValue = try storage.get(keypath: recordKeypath)
+        let record = try decodeValue(recordValue, as: IdentityLinkRecord.self)
+        let revoked = IdentityLinkRecord(
+            linkID: record.linkID,
+            entityBinding: record.entityBinding,
+            linkedIdentity: record.linkedIdentity,
+            approvedDomains: record.approvedDomains,
+            approvedIdentityContexts: record.approvedIdentityContexts,
+            approvedScopes: record.approvedScopes,
+            issuerIdentityUUID: record.issuerIdentityUUID,
+            issuerType: record.issuerType,
+            status: .revoked,
+            linkedAt: record.linkedAt,
+            lastUsedAt: record.lastUsedAt,
+            revokedAt: IdentityLinkProtocolService.iso8601(Date()),
+            revocationReference: record.revocationReference
+        )
+        let revokedValue = try IdentityLinkProtocolService.value(from: revoked)
+        try storage.set(keypath: recordKeypath, setValue: revokedValue)
+        try storage.set(keypath: "proofs.identityLinks.\(recordKey).record", setValue: revokedValue)
+        try await saveKeypathStorage(entity: storage)
+        await IdentityLinkRegistry.shared.revoke(ownerUUID: storedOwnerIdentity.uuid, linkID: record.linkID, revokedAt: revoked.revokedAt ?? "")
+        pushIdentityLinkEvent(keypath: recordKeypath, value: revokedValue, requester: requester)
+        return .object([
+            "status": .string("revoked"),
+            "record": revokedValue,
+            "recordKeypath": .string(recordKeypath)
+        ])
+    }
+
+    private func usedApprovalJTIs() -> Set<String> {
+        guard let usedValue = try? storage.get(keypath: "identityLinks.usedApprovalJTIs"),
+              case let .object(usedObject) = usedValue else {
+            return []
+        }
+        return Set(usedObject.compactMap { key, value in
+            if case let .string(jti) = value {
+                return jti
+            }
+            return key
+        })
+    }
+
+    private func decodeValue<T: Decodable>(_ value: ValueType, as type: T.Type) throws -> T {
+        let data = try JSONEncoder().encode(value)
+        return try JSONDecoder().decode(T.self, from: data)
+    }
+
+    private func safeIdentityLinkKey(_ value: String) -> String {
+        let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_"))
+        return String(value.unicodeScalars.map { allowed.contains($0) ? Character($0) : "_" })
+    }
+
+    private func pushIdentityLinkEvent(keypath: String, value: ValueType, requester: Identity) {
+        let payloadObject: Object = [
+            "keypath": .string(keypath),
+            "data": value,
+            "status": .string("persisted")
+        ]
+        var flowElement = FlowElement(title: "Identity link update", content: .object(payloadObject), properties: FlowElement.Properties(type: .content, contentType: .object))
+        flowElement.origin = self.uuid
+        flowElement.topic = "entity.identityLinks"
+        self.pushFlowElement(flowElement, requester: requester)
+    }
+
+    private func authorityCommitStateValue() async throws -> ValueType {
+        await authorityCommitGate.acquire()
+        do {
+            try ensurePersistenceAvailable()
+            let value = try authorityJournal.state().valueType()
+            await authorityCommitGate.release()
+            return value
+        } catch {
+            await authorityCommitGate.release()
+            throw error
+        }
+    }
+
+    private func ensurePersistenceAvailable() throws {
+        if let persistenceFailureReason {
+            throw EntityAuthorityCommitError.journalCorrupt(persistenceFailureReason)
+        }
+    }
+
+    private func authorityCommitFailurePayload(_ error: Error) -> Object {
+        guard let commitError = error as? EntityAuthorityCommitError else {
+            return [
+                "status": .string("failed"),
+                "error": .string(String(describing: error))
+            ]
+        }
+        return [
+            "status": .string(commitError.isConflict ? "conflict" : "failed"),
+            "errorCode": .string(commitError.code),
+            "error": .string(commitError.localizedDescription),
+            "commitState": (try? authorityJournal.state().valueType()) ?? .null
+        ]
+    }
+
+    private static func isMissingFile(_ error: Error) -> Bool {
+        let nsError = error as NSError
+        return nsError.domain == NSCocoaErrorDomain
+            && nsError.code == CocoaError.fileReadNoSuchFile.rawValue
+    }
+
+    private static func canonicalEntityData(_ entity: Entity) throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        return try encoder.encode(entity)
+    }
+}
+
+private struct EntityAnchorBatchPersistResult {
+    var persistedPaths: [String]
+    var receipt: EntityAuthorityCommitReceipt?
+    var idempotentReplay: Bool
+}
+
+private actor EntityAuthorityCommitGate {
+    private var locked = false
+    private var waiters: [CheckedContinuation<Void, Never>] = []
+
+    func acquire() async {
+        if locked == false {
+            locked = true
+            return
+        }
+        await withCheckedContinuation { continuation in
+            waiters.append(continuation)
+        }
+    }
+
+    func release() {
+        if waiters.isEmpty {
+            locked = false
+        } else {
+            waiters.removeFirst().resume()
+        }
+    }
+}

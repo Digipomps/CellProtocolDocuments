@@ -1,0 +1,597 @@
+COMMAND=swift test --disable-sandbox --disable-automatic-resolution --cache-path /private/tmp/bro-swift-cache --jobs 4 --filter VaporWebSocketAdmissionTests|BridgeChannelWebSocketTests
+warning: /Users/kjetil/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/kjetil/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: '_wt-bro-kanal-auth-20260927': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Using on-disk description]
+[1 / 176] CellVapor
+[1 / 68] CCryptoBoringSSLShims
+[2 / 13] CellBaseTests-product
+[7 / 24] CellBaseTests-product
+[9 / 24] CellBaseTests-product
+[14 / 24] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/TrustedIssuerCellTests.swift:1448:13: warning: variable 'missingProof' was never mutated; consider changing to 'let' constant [#VariableNeverMutated]
+1446 |         XCTAssertEqual(decision(unsignedTimeResult), "untrusted")
+1447 | 
+1448 |         var missingProof = try await makeClaim()
+     |             `- warning: variable 'missingProof' was never mutated; consider changing to 'let' constant [#VariableNeverMutated]
+1449 |         missingProof.proof.signatureData = Data()
+1450 |         let missingProofResult = try await evaluate(
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/VaporWebSocketAdmissionTests.swift:205:89: warning: left side of nil coalescing operator '??' has non-optional type 'String', so the right side is never used
+203 |     func consumeCommand(command: BridgeCommand) async throws { if command.command == .sign { signs.increment() } }
+204 |     func consumeResponse(command: BridgeCommand) async throws {
+205 |         guard case .flowElement(let flow) = command.payload, let value = Int(flow.title ?? "") else { otherResponses.increment(); return }
+    |                                                                                         `- warning: left side of nil coalescing operator '??' has non-optional type 'String', so the right side is never used
+206 |         let first = lock.withLock { received.append(value); return received.count == 1 }
+207 |         if first { await holdFirst?.wait() }
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/VaporWebSocketAdmissionTests.swift:244:41: warning: conformance of 'WebSocketFrameEncoder' to 'Sendable' is unavailable; this is an error in the Swift 6 language mode
+242 |         let endpoint = try BridgeChannelAuthentication.Endpoint(url: URL(string: "wss://n30.example/bridge")!, domain: "bridge")
+243 |         let listener = try await ServerBootstrap(group: group).childChannelInitializer { channel in
+244 |             channel.pipeline.addHandler(WebSocketFrameEncoder()).flatMap {
+    |                                         `- warning: conformance of 'WebSocketFrameEncoder' to 'Sendable' is unavailable; this is an error in the Swift 6 language mode
+245 |                 WebSocket.server(on: channel) { socket in
+246 |                     let transport = VaporBridgeTransport(webSocket: socket, receiveBudget: budget, closeUnderlyingChannel: {
+
+NIOWebSocket.WebSocketFrameEncoder:2:11: note: conformance of 'WebSocketFrameEncoder' to 'Sendable' has been explicitly marked unavailable here
+1 | @available(*, unavailable)
+2 | extension WebSocketFrameEncoder : Sendable {
+  |           `- note: conformance of 'WebSocketFrameEncoder' to 'Sendable' has been explicitly marked unavailable here
+3 | }
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/VaporWebSocketAdmissionTests.swift:278:34: warning: 'fireChannelRead' is deprecated: NIOAny is not Sendable. Avoid wrapping the value in NIOAny to silence this warning. [#DeprecatedDeclaration]
+276 |                 let frame = WebSocketFrame(fin: true, opcode: (binary ?? index.isMultiple(of: 2)) ? .binary : .text,
+277 |                     data: channel.allocator.buffer(bytes: bytes))
+278 |                 channel.pipeline.fireChannelRead(NIOAny(frame))
+    |                                  `- warning: 'fireChannelRead' is deprecated: NIOAny is not Sendable. Avoid wrapping the value in NIOAny to silence this warning. [#DeprecatedDeclaration]
+279 |             }
+280 |             return transport.receiveSnapshot
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+[#VariableNeverMutated]: <https://docs.swift.org/compiler/documentation/diagnostics/variable-never-mutated>
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/IntegrationTests.swift:1071:18: warning: weak variable 'releasedCell' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1069 |         let emitter = await CancellationObservingEmitter(owner: owner)
+1070 |         var cell: GeneralCell? = await GeneralCell(owner: owner)
+1071 |         weak var releasedCell = cell
+     |                  `- warning: weak variable 'releasedCell' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1072 | 
+1073 |         let state = try await cell?.attach(emitter: emitter, label: "source", requester: owner)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/IntegrationTests.swift:1096:18: warning: weak variable 'releasedCell' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1094 |         let emitter = await CancellationObservingEmitter(owner: owner)
+1095 |         var cell: GeneralCell? = await GeneralCell(owner: owner)
+1096 |         weak var releasedCell = cell
+     |                  `- warning: weak variable 'releasedCell' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1097 | 
+1098 |         let downstreamEntered = expectation(description: "Downstream subscriber entered")
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/IntegrationTests.swift:1145:18: warning: weak variable 'releasedCell' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1143 |         let interceptGate = SuspendedFlowGate()
+1144 |         var cell: GeneralCell? = await GeneralCell(owner: owner)
+1145 |         weak var releasedCell = cell
+     |                  `- warning: weak variable 'releasedCell' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1146 | 
+1147 |         await cell?.addIntercept(requester: owner) { element, _ in
+
+[#VariableNeverMutated]: <https://docs.swift.org/compiler/documentation/diagnostics/variable-never-mutated>
+[#WeakMutability]: <https://docs.swift.org/compiler/documentation/diagnostics/weak-mutability>
+[16 / 24] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeDescriptionConcurrencyTests.swift:42:25: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 40 | 
+ 41 |     private static func deliver(_ payload: ValueType, to bridge: BridgeBase) async throws {
+ 42 |         let commandID = await bridge.auditor.getNewCommandId()
+    |                         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 43 |         await bridge.auditor.storeBridgeCommand(
+ 44 |             BridgeCommand(cmd: Command.description.rawValue, payload: nil, cid: commandID),
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeDescriptionConcurrencyTests.swift:43:9: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 41 |     private static func deliver(_ payload: ValueType, to bridge: BridgeBase) async throws {
+ 42 |         let commandID = await bridge.auditor.getNewCommandId()
+ 43 |         await bridge.auditor.storeBridgeCommand(
+    |         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 44 |             BridgeCommand(cmd: Command.description.rawValue, payload: nil, cid: commandID),
+ 45 |             for: commandID
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeDescriptionConcurrencyTests.swift:105:23: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+103 |             try await group.waitForAll()
+104 |         }
+105 |         let pending = await bridge.auditor.pendingCommandCount()
+    |                       `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+106 |         XCTAssertEqual(pending, 0)
+107 |         Self.assertCoherent(try await bridge.advertise(for: owner))
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeDiagnosticPrivacyTests.swift:40:23: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 38 |         for (request, code) in [(Command.description, "description"), (.admit, "connect"), (.connectEmitter, "connect"),
+ 39 |                                 (.agreement, "contract"), (.feed, "flow")] {
+ 40 |             let cid = await bridge.auditor.getNewCommandId()
+    |                       `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 41 |             await bridge.auditor.storeBridgeCommand(.init(cmd: request.rawValue, payload: nil, cid: cid), for: cid)
+ 42 |             let count = logs.lines.count
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeDiagnosticPrivacyTests.swift:41:13: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 39 |                                 (.agreement, "contract"), (.feed, "flow")] {
+ 40 |             let cid = await bridge.auditor.getNewCommandId()
+ 41 |             await bridge.auditor.storeBridgeCommand(.init(cmd: request.rawValue, payload: nil, cid: cid), for: cid)
+    |             `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 42 |             let count = logs.lines.count
+ 43 |             try await bridge.consumeResponse(command: .init(cmd: "response", payload: .string(marker), cid: cid))
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeDiagnosticPrivacyTests.swift:71:23: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 69 |         XCTAssertTrue(logs.lines.contains { $0.contains("code=get_failed cid=73") })
+ 70 |         await bridge.sendCommand(command: .description, identity: owner, payload: .string(marker))
+ 71 |         let request = await bridge.auditor.getNewCommandId()
+    |                       `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 72 |         await bridge.auditor.storeBridgeCommand(.init(cmd: marker, payload: .string(marker), cid: request), for: request)
+ 73 |         try await bridge.consumeResponse(command: .init(cmd: "response", payload: .string(marker), cid: request))
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeDiagnosticPrivacyTests.swift:72:9: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 70 |         await bridge.sendCommand(command: .description, identity: owner, payload: .string(marker))
+ 71 |         let request = await bridge.auditor.getNewCommandId()
+ 72 |         await bridge.auditor.storeBridgeCommand(.init(cmd: marker, payload: .string(marker), cid: request), for: request)
+    |         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 73 |         try await bridge.consumeResponse(command: .init(cmd: "response", payload: .string(marker), cid: request))
+ 74 |         XCTAssertTrue(logs.lines.contains { $0.contains("Response did not match request type=none") })
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeFeedAndRPCOrderingTests.swift:55:21: warning: result of call to 'fulfillment(of:timeout:enforceOrder:)' is unused [#NoUsage]
+ 53 |     try await submit(.init(cmd: "feed", identity: requester, payload: nil, cid: 100))
+ 54 |     cell.values.send(BridgeOrderingFeedCell.value(1))
+ 55 |     await XCTWaiter.fulfillment(of: [hold.entered], timeout: 2)
+    |                     `- warning: result of call to 'fulfillment(of:timeout:enforceOrder:)' is unused [#NoUsage]
+ 56 |     cell.values.send(BridgeOrderingFeedCell.value(2))
+ 57 |     cell.values.send(completion: .finished)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeIdentityBoundaryTests.swift:371:75: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+369 |             XCTAssertEqual(admission, .signed)
+370 |             let localDecision = await cell.authorizationDecision(requestedAccess: "r---", at: "feed", for: identity)
+371 |             XCTAssertTrue(localDecision.allowed, "Fresh local contract: \(localDecision.reasonCode)")
+    |                                                                           |             |- note: provide a default value to avoid this warning
+    |                                                                           |             `- note: use 'String(describing:)' to silence this warning
+    |                                                                           `- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+372 |             let outgoing = PairedTransport()
+373 |             let incoming = PairedTransport()
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeMuxSendLifetimeTests.swift:45:21: warning: result of call to 'fulfillment(of:timeout:enforceOrder:)' is unused [#NoUsage]
+43 |     try await submit(lifecycleMuxCommand("openChannel", owner, "sibling", target: "healthy", cid: 7))
+44 |     let old = Task { try await submit(lifecycleMuxCommand("get", owner, "reused", cid: 1)) }
+45 |     await XCTWaiter.fulfillment(of: [hold.entered], timeout: 2)
+   |                     `- warning: result of call to 'fulfillment(of:timeout:enforceOrder:)' is unused [#NoUsage]
+46 |     try await submit(lifecycleMuxCommand("closeChannel", owner, "reused"))
+47 |     XCTAssertEqual(stats.snapshot.retired, 1)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:18:14: warning: concurrently-executed local function 'data' must be marked as '@Sendable'; this is an error in the Swift 6 language mode
+  16 |     private func checkFullVector(_ name: String) async throws {
+  17 |         let v = try Self.vectors(name)
+  18 |         func data(_ name: String) -> Data { v[name]! }
+     |              `- warning: concurrently-executed local function 'data' must be marked as '@Sendable'; this is an error in the Swift 6 language mode
+  19 |         let endpoint = try A.decode(P.Endpoint.self, from: data("endpoint"))
+  20 |         let ih = try A.decode(P.Hello.self, from: data("hello0")), rh = try A.decode(P.Hello.self, from: data("hello1"))
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:266:54: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 264 |         i = try BridgeChannelTransport(underlying: it, peerEndpoint: endpoint, role: .initiator, owner: io,
+ 265 |             limits: limits, source: UUID().uuidString, disclosurePolicy: policy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 266 |             recheckPolicy: recheck, wallClock: clock.date, monotonic: clock.uptime) { [id] gate, session in
+     |                                                      `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 267 |                 if let factory, factoryRole == .initiator { return try await factory(gate, session) }
+ 268 |                 id.created(); gate.setDelegate(id)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:266:77: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 264 |         i = try BridgeChannelTransport(underlying: it, peerEndpoint: endpoint, role: .initiator, owner: io,
+ 265 |             limits: limits, source: UUID().uuidString, disclosurePolicy: policy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 266 |             recheckPolicy: recheck, wallClock: clock.date, monotonic: clock.uptime) { [id] gate, session in
+     |                                                                             `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 267 |                 if let factory, factoryRole == .initiator { return try await factory(gate, session) }
+ 268 |                 id.created(); gate.setDelegate(id)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:274:63: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 272 |         r = try BridgeChannelTransport(underlying: rt, peerEndpoint: endpoint, role: .responder, owner: ro,
+ 273 |             limits: limits, source: UUID().uuidString, disclosurePolicy: responderPolicy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 274 |             recheckPolicy: responderRecheck, wallClock: clock.date, monotonic: clock.uptime) { [rd] gate, session in
+     |                                                               `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 275 |                 if let factory, factoryRole == .responder { return try await factory(gate, session) }
+ 276 |                 rd.created(); gate.setDelegate(rd)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:274:86: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 272 |         r = try BridgeChannelTransport(underlying: rt, peerEndpoint: endpoint, role: .responder, owner: ro,
+ 273 |             limits: limits, source: UUID().uuidString, disclosurePolicy: responderPolicy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 274 |             recheckPolicy: responderRecheck, wallClock: clock.date, monotonic: clock.uptime) { [rd] gate, session in
+     |                                                                                      `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 275 |                 if let factory, factoryRole == .responder { return try await factory(gate, session) }
+ 276 |                 rd.created(); gate.setDelegate(rd)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:844:35: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 842 |         operation = try P.Operation(owner: owner, endpoint: gate.session.peerEndpoint!, role: role,
+ 843 |             generation: UUID().uuidString, policy: .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 844 |             wallClock: pair.clock.date, monotonic: pair.clock.uptime, ephemeral: privateKey)
+     |                                   `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 845 |     }
+ 846 |     func advance(to step: Int) async throws {
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:844:63: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 842 |         operation = try P.Operation(owner: owner, endpoint: gate.session.peerEndpoint!, role: role,
+ 843 |             generation: UUID().uuidString, policy: .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 844 |             wallClock: pair.clock.date, monotonic: pair.clock.uptime, ephemeral: privateKey)
+     |                                                               `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 845 |     }
+ 846 |     func advance(to step: Int) async throws {
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:984:88: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 982 | extension BridgePeerV3Tests {
+ 983 |     func testValidAEADInnerMutationsCloseRealGateReleaseQuotaAndPreserveHealthySibling() async throws {
+ 984 |         let quotaClock = V3Clock(), limits = BridgeChannelLimits(monotonic: quotaClock.uptime)
+     |                                                                                        `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 985 |         let sibling = try V3GatePair(limits: limits), healthy = try await sibling.start()
+ 986 |         for step in 1...5 { try await sibling.step(step) }; try await healthy.value
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:1030:78: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+1028 | extension BridgePeerV3Tests {
+1029 |     func testWrongHandshakeStateAndMalformedRecordsRetireOnlyOffendingGate() async throws {
+1030 |         let clock = V3Clock(), limits = BridgeChannelLimits(monotonic: clock.uptime)
+     |                                                                              `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+1031 |         let sibling = try V3GatePair(limits: limits), healthy = try await sibling.start()
+1032 |         for step in 1...5 { try await sibling.step(step) }; try await healthy.value
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:1266:91: warning: left side of nil coalescing operator '??' has non-optional type 'String', so the right side is never used
+1264 |             let plain = try pair.i.openPeerFrame(data)
+1265 |             if let command = try? JSONDecoder().decode(BridgeCommand.self, from: plain),
+1266 |                case let .flowElement(value) = command.payload { values.append(value.title ?? "") }
+     |                                                                                           `- warning: left side of nil coalescing operator '??' has non-optional type 'String', so the right side is never used
+1267 |         }
+1268 |         XCTAssertEqual(values, ["1", "2", "1", "2"])
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeResponseLifetimeTests.swift:87:154: warning: left side of nil coalescing operator '??' has non-optional type 'String', so the right side is never used
+ 85 |         await bridge.channelDidClose(try XCTUnwrap(oldWire.channelSession))
+ 86 |         let freshWire = try await install(bridge, owner: owner), received = ResponseLifetimeValues()
+ 87 |         let newSubscription = try await bridge.flow(requester: owner).sink(receiveCompletion: { _ in }, receiveValue: { received.append(.string($0.title ?? "")) })
+    |                                                                                                                                                          `- warning: left side of nil coalescing operator '??' has non-optional type 'String', so the right side is never used
+ 88 |         let fresh = try XCTUnwrap(freshWire.commands.last { $0.command == .feed })
+ 89 |         await barrier.release()
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeTests.swift:315:9: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 313 |         )
+ 314 | 
+ 315 |         await auditor.storeBridgeCommand(command, for: 1, now: now)
+     |         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 316 | 
+ 317 |         let initialPendingCount = await auditor.pendingCommandCount(now: now.addingTimeInterval(0.5))
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeTests.swift:317:35: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 315 |         await auditor.storeBridgeCommand(command, for: 1, now: now)
+ 316 | 
+ 317 |         let initialPendingCount = await auditor.pendingCommandCount(now: now.addingTimeInterval(0.5))
+     |                                   `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 318 |         let takenCommand = await auditor.takeBridgeCommandForCommandId(1, now: now.addingTimeInterval(0.5))
+ 319 |         let pendingCountAfterTake = await auditor.pendingCommandCount(now: now.addingTimeInterval(0.5))
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeTests.swift:318:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 316 | 
+ 317 |         let initialPendingCount = await auditor.pendingCommandCount(now: now.addingTimeInterval(0.5))
+ 318 |         let takenCommand = await auditor.takeBridgeCommandForCommandId(1, now: now.addingTimeInterval(0.5))
+     |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 319 |         let pendingCountAfterTake = await auditor.pendingCommandCount(now: now.addingTimeInterval(0.5))
+ 320 |         XCTAssertEqual(initialPendingCount, 1)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeTests.swift:319:37: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 317 |         let initialPendingCount = await auditor.pendingCommandCount(now: now.addingTimeInterval(0.5))
+ 318 |         let takenCommand = await auditor.takeBridgeCommandForCommandId(1, now: now.addingTimeInterval(0.5))
+ 319 |         let pendingCountAfterTake = await auditor.pendingCommandCount(now: now.addingTimeInterval(0.5))
+     |                                     `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 320 |         XCTAssertEqual(initialPendingCount, 1)
+ 321 |         XCTAssertEqual(takenCommand?.cid, 1)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeTests.swift:324:9: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 322 |         XCTAssertEqual(pendingCountAfterTake, 0)
+ 323 | 
+ 324 |         await auditor.storeBridgeCommand(command, for: 2, now: now)
+     |         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 325 | 
+ 326 |         let expiredCommand = await auditor.loadBridgeCommandForCommandId(2, now: now.addingTimeInterval(2))
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeTests.swift:326:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 324 |         await auditor.storeBridgeCommand(command, for: 2, now: now)
+ 325 | 
+ 326 |         let expiredCommand = await auditor.loadBridgeCommandForCommandId(2, now: now.addingTimeInterval(2))
+     |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 327 |         let pendingCountAfterExpiry = await auditor.pendingCommandCount(now: now.addingTimeInterval(2))
+ 328 |         XCTAssertNil(expiredCommand)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeTests.swift:327:39: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 325 | 
+ 326 |         let expiredCommand = await auditor.loadBridgeCommandForCommandId(2, now: now.addingTimeInterval(2))
+ 327 |         let pendingCountAfterExpiry = await auditor.pendingCommandCount(now: now.addingTimeInterval(2))
+     |                                       `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 328 |         XCTAssertNil(expiredCommand)
+ 329 |         XCTAssertEqual(pendingCountAfterExpiry, 0)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeTests.swift:507:35: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 505 |         XCTAssertEqual(resolvedFirst, firstExpected)
+ 506 |         XCTAssertEqual(resolvedSecond, secondExpected)
+ 507 |         let pendingCommandCount = await bridge.auditor.pendingCommandCount()
+     |                                   `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 508 |         XCTAssertEqual(pendingCommandCount, 0)
+ 509 |     }
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeTests.swift:536:35: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 534 |             XCTAssertTrue(String(describing: error).contains("timeout"))
+ 535 |         }
+ 536 |         let pendingCommandCount = await bridge.auditor.pendingCommandCount()
+     |                                   `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 537 |         XCTAssertEqual(pendingCommandCount, 0)
+ 538 |     }
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+[17 / 24] CellBaseTests-product
+[18 / 24] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/GeneralCellInterfaceTests.swift:127:51: warning: 'restoreStoredOwnerIdentity(using:)' is deprecated: renamed to 'bindStoredOwnerToRuntimeIdentity(_:)' [#DeprecatedDeclaration]
+ 125 |         let publicSnapshotOwnsCell = await restored.requesterProvesOwnership(publicOwner)
+ 126 |         let foreignOwnsCell = await restored.requesterProvesOwnership(foreign)
+ 127 |         let foreignRestoredOwner = await restored.restoreStoredOwnerIdentity(using: foreign)
+     |                                                   |- warning: 'restoreStoredOwnerIdentity(using:)' is deprecated: renamed to 'bindStoredOwnerToRuntimeIdentity(_:)' [#DeprecatedDeclaration]
+     |                                                   `- note: use 'bindStoredOwnerToRuntimeIdentity(_:)' instead
+ 128 | 
+ 129 |         let ownerRestoredOwner = await restored.restoreStoredOwnerIdentity(using: owner)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/GeneralCellInterfaceTests.swift:129:49: warning: 'restoreStoredOwnerIdentity(using:)' is deprecated: renamed to 'bindStoredOwnerToRuntimeIdentity(_:)' [#DeprecatedDeclaration]
+ 127 |         let foreignRestoredOwner = await restored.restoreStoredOwnerIdentity(using: foreign)
+ 128 | 
+ 129 |         let ownerRestoredOwner = await restored.restoreStoredOwnerIdentity(using: owner)
+     |                                                 |- warning: 'restoreStoredOwnerIdentity(using:)' is deprecated: renamed to 'bindStoredOwnerToRuntimeIdentity(_:)' [#DeprecatedDeclaration]
+     |                                                 `- note: use 'bindStoredOwnerToRuntimeIdentity(_:)' instead
+ 130 |         let ownerOwnsCell = await restored.requesterProvesOwnership(owner)
+ 131 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/GeneralCellInterfaceTests.swift:1425:20: warning: 'setInterceptValueForKey(requester:key:setValueForKeyIntercept:)' is deprecated [#DeprecatedDeclaration]
+1423 |         var rootWasMutated = false
+1424 | 
+1425 |         await cell.setInterceptValueForKey(requester: owner, key: "profile") { _ in
+     |                    `- warning: 'setInterceptValueForKey(requester:key:setValueForKeyIntercept:)' is deprecated [#DeprecatedDeclaration]
+1426 |             .object(["name": .string("Private"), "secret": .string("must-not-leak")])
+1427 |         }
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/GeneralCellInterfaceTests.swift:1428:20: warning: 'setInterceptSetValueForKey(requester:key:setValueForKeyIntercept:)' is deprecated [#DeprecatedDeclaration]
+1426 |             .object(["name": .string("Private"), "secret": .string("must-not-leak")])
+1427 |         }
+1428 |         await cell.setInterceptSetValueForKey(requester: owner, key: "profile") { _, _ in
+     |                    `- warning: 'setInterceptSetValueForKey(requester:key:setValueForKeyIntercept:)' is deprecated [#DeprecatedDeclaration]
+1429 |             rootWasMutated = true
+1430 |         }
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeChannelAuthenticationTests.swift:397:24: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+395 |         let audit = BridgeBaseAuditor(maximumPendingCommands: 1)
+396 |         let command = BridgeCommand(cmd: "set", payload: nil, cid: 1)
+397 |         let accepted = await audit.storeBridgeCommand(command, for: 1)
+    |                        `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+398 |         let refused = await audit.storeBridgeCommand(command, for: 2)
+399 |         let retained = await audit.loadBridgeCommandForCommandId(1)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeChannelAuthenticationTests.swift:398:23: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+396 |         let command = BridgeCommand(cmd: "set", payload: nil, cid: 1)
+397 |         let accepted = await audit.storeBridgeCommand(command, for: 1)
+398 |         let refused = await audit.storeBridgeCommand(command, for: 2)
+    |                       `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+399 |         let retained = await audit.loadBridgeCommandForCommandId(1)
+400 |         XCTAssertTrue(accepted); XCTAssertFalse(refused); XCTAssertNotNil(retained)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeChannelAuthenticationTests.swift:399:24: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+397 |         let accepted = await audit.storeBridgeCommand(command, for: 1)
+398 |         let refused = await audit.storeBridgeCommand(command, for: 2)
+399 |         let retained = await audit.loadBridgeCommandForCommandId(1)
+    |                        `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+400 |         XCTAssertTrue(accepted); XCTAssertFalse(refused); XCTAssertNotNil(retained)
+401 |         await audit.clear()
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeChannelAuthenticationTests.swift:401:9: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+399 |         let retained = await audit.loadBridgeCommandForCommandId(1)
+400 |         XCTAssertTrue(accepted); XCTAssertFalse(refused); XCTAssertNotNil(retained)
+401 |         await audit.clear()
+    |         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+402 |         let count = await audit.pendingCommandCount(); XCTAssertEqual(count, 0)
+403 |     }
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeChannelAuthenticationTests.swift:402:21: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+400 |         XCTAssertTrue(accepted); XCTAssertFalse(refused); XCTAssertNotNil(retained)
+401 |         await audit.clear()
+402 |         let count = await audit.pendingCommandCount(); XCTAssertEqual(count, 0)
+    |                     `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+403 |     }
+404 | 
+
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:500:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 498 |         // concerns A's physical route, and preserves the receive sequence.
+ 499 |         _ = try pair.pb.gate.openPeerFrame(heldRequest.data)
+ 500 |         let pendingCommand = await bridge.auditor.loadBridgeCommandForCommandId(1)
+     |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 501 |         XCTAssertNotNil(pendingCommand)
+ 502 |         let forged = BridgeCommand(cmd: "response", payload: .string("from-c"), cid: 1,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:506:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 504 |         try await pc.gate.sendData(A.encode(forged))
+ 505 |         try await pair.deliverNext()
+ 506 |         let stillPending = await bridge.auditor.loadBridgeCommandForCommandId(1)
+     |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 507 |         XCTAssertNotNil(stillPending, "C's response must not consume B's pending cid")
+ 508 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:532:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 530 |             await pair.pb.bridge!.sendCommand(command: .description, identity: pair.b.owner, payload: nil)
+ 531 |             let oldCommand = try await pair.next(), captured = try pair.receiver(oldCommand)
+ 532 |             let firstCID = await pair.pb.bridge!.auditor.loadBridgeCommandForCommandId(1)
+     |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 533 |             XCTAssertEqual(firstCID?.cid, 1)
+ 534 |             try await pair.deliver(oldCommand)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:541:26: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 539 |             await fresh.1.bridge!.sendCommand(command: .description, identity: pair.b.owner, payload: nil)
+ 540 |             let newCommand = try await pair.next()
+ 541 |             let newCID = await fresh.1.bridge!.auditor.loadBridgeCommandForCommandId(1)
+     |                          `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 542 |             XCTAssertEqual(firstCID?.cid, newCID?.cid, "Actual Base cid reuse")
+ 543 |             // A callback already captured by an old transport cannot close the new one.
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:865:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 863 |                 XCTAssertNotEqual(oldKey, freshKey)
+ 864 |                 let request = BridgeCommand(cmd: "description", identity: pair.a.owner.publicIdentitySnapshot(), payload: nil, cid: 1)
+ 865 |                 let stored = await fresh.0.bridge!.auditor.storeBridgeCommand(request, for: 1)
+     |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 866 |                 XCTAssertTrue(stored)
+ 867 |                 // M knows the public new generation and the expected counter.
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:172:31: warning: capture of 'service' with non-Sendable type 'ScannerService' in a '@Sendable' closure [#SendableClosureCaptures]
+170 |             service.duringInvitationAcceptance = { entered.fulfill(); _ = release.wait(timeout: .now() + 3) }
+171 |             DispatchQueue.global().async {
+172 |                 XCTAssertTrue(service.respondToInvitation(remoteUUID: "remote", accept: true)); accepted.fulfill()
+    |                               `- warning: capture of 'service' with non-Sendable type 'ScannerService' in a '@Sendable' closure [#SendableClosureCaptures]
+173 |             }
+174 |             await fulfillment(of: [entered], timeout: 2)
+
+CellApple.ScannerService:1:16: note: class 'ScannerService' does not conform to the 'Sendable' protocol
+ 1 | internal class ScannerService : NSObject, ObservableObject {
+   |                `- note: class 'ScannerService' does not conform to the 'Sendable' protocol
+ 2 |     @MainActor internal var advertisementExchange: CellApple.NearbyAdvertisementExchange?
+ 3 |     internal func readAdvertisement(remoteUUID: String) async -> CellApple.NearbyAdvertisement?
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:4:11: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellApple' [#AddPreconcurrencyImport]
+  2 | import Foundation
+  3 | import XCTest
+  4 | @testable import CellApple
+    |           `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellApple' [#AddPreconcurrencyImport]
+  5 | @testable import CellBase
+  6 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:177:42: warning: capture of 'service' with non-Sendable type 'ScannerService' in a '@Sendable' closure [#SendableClosureCaptures]
+175 |             DispatchQueue.global().async {
+176 |                 competing.fulfill()
+177 |                 if race == "collision" { service.browser(browser, foundPeer: c, withDiscoveryInfo: ["uuid": "remote"]) }
+    |                                          `- warning: capture of 'service' with non-Sendable type 'ScannerService' in a '@Sendable' closure [#SendableClosureCaptures]
+178 |                 else { service.stop() }
+179 |                 finished.fulfill()
+
+CellApple.ScannerService:1:16: note: class 'ScannerService' does not conform to the 'Sendable' protocol
+ 1 | internal class ScannerService : NSObject, ObservableObject {
+   |                `- note: class 'ScannerService' does not conform to the 'Sendable' protocol
+ 2 |     @MainActor internal var advertisementExchange: CellApple.NearbyAdvertisementExchange?
+ 3 |     internal func readAdvertisement(remoteUUID: String) async -> CellApple.NearbyAdvertisement?
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:177:58: warning: capture of 'browser' with non-Sendable type 'MCNearbyServiceBrowser' in a '@Sendable' closure [#SendableClosureCaptures]
+175 |             DispatchQueue.global().async {
+176 |                 competing.fulfill()
+177 |                 if race == "collision" { service.browser(browser, foundPeer: c, withDiscoveryInfo: ["uuid": "remote"]) }
+    |                                                          `- warning: capture of 'browser' with non-Sendable type 'MCNearbyServiceBrowser' in a '@Sendable' closure [#SendableClosureCaptures]
+178 |                 else { service.stop() }
+179 |                 finished.fulfill()
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/MultipeerConnectivity.framework/Headers/MCNearbyServiceBrowser.h:46:12: note: class 'MCNearbyServiceBrowser' does not conform to the 'Sendable' protocol
+44 | NS_ASSUME_NONNULL_BEGIN
+45 | API_DEPRECATED("Use Network Framework instead", macos(10.10, 27.0), ios(7.0, 27.0), tvos(10.0, 27.0))
+46 | @interface MCNearbyServiceBrowser : NSObject
+   |            `- note: class 'MCNearbyServiceBrowser' does not conform to the 'Sendable' protocol
+47 | - (instancetype)initWithPeer:(MCPeerID *)myPeerID serviceType:(NSString *)serviceType NS_DESIGNATED_INITIALIZER;
+48 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:1:1: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'MultipeerConnectivity' [#AddPreconcurrencyImport]
+  1 | import MultipeerConnectivity
+    | `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'MultipeerConnectivity' [#AddPreconcurrencyImport]
+  2 | import Foundation
+  3 | import XCTest
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:177:78: warning: capture of 'c' with non-Sendable type 'MCPeerID' in a '@Sendable' closure [#SendableClosureCaptures]
+175 |             DispatchQueue.global().async {
+176 |                 competing.fulfill()
+177 |                 if race == "collision" { service.browser(browser, foundPeer: c, withDiscoveryInfo: ["uuid": "remote"]) }
+    |                                                                              `- warning: capture of 'c' with non-Sendable type 'MCPeerID' in a '@Sendable' closure [#SendableClosureCaptures]
+178 |                 else { service.stop() }
+179 |                 finished.fulfill()
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/MultipeerConnectivity.framework/Headers/MCPeerID.h:32:12: note: class 'MCPeerID' does not conform to the 'Sendable' protocol
+30 | NS_ASSUME_NONNULL_BEGIN
+31 | API_DEPRECATED("Use Network Framework instead", macos(10.10, 27.0), ios(7.0, 27.0), tvos(10.0, 27.0))
+32 | @interface MCPeerID : NSObject <NSCopying, NSSecureCoding>
+   |            `- note: class 'MCPeerID' does not conform to the 'Sendable' protocol
+33 | - (instancetype)initWithDisplayName:(NSString *)myDisplayName NS_DESIGNATED_INITIALIZER;
+34 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/SkeletonLocalizationTests.swift:158:62: warning: 'accessibilityAttributeValue' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+156 |         // standalone XCTest host (the setting is scoped to this process).
+157 |         let accessibilityMode = NSAccessibility.Attribute(rawValue: "AXEnhancedUserInterface")
+158 |         let previousAccessibilityMode = NSApplication.shared.accessibilityAttributeValue(accessibilityMode)
+    |                                                              `- warning: 'accessibilityAttributeValue' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+159 |         NSApplication.shared.accessibilitySetValue(true, forAttribute: accessibilityMode)
+160 |         defer { NSApplication.shared.accessibilitySetValue(previousAccessibilityMode, forAttribute: accessibilityMode) }
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/SkeletonLocalizationTests.swift:159:30: warning: 'accessibilitySetValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+157 |         let accessibilityMode = NSAccessibility.Attribute(rawValue: "AXEnhancedUserInterface")
+158 |         let previousAccessibilityMode = NSApplication.shared.accessibilityAttributeValue(accessibilityMode)
+159 |         NSApplication.shared.accessibilitySetValue(true, forAttribute: accessibilityMode)
+    |                              `- warning: 'accessibilitySetValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+160 |         defer { NSApplication.shared.accessibilitySetValue(previousAccessibilityMode, forAttribute: accessibilityMode) }
+161 |         let host = NSHostingView(rootView: SkeletonView(element: element).environmentObject(model))
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/SkeletonLocalizationTests.swift:160:38: warning: 'accessibilitySetValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+158 |         let previousAccessibilityMode = NSApplication.shared.accessibilityAttributeValue(accessibilityMode)
+159 |         NSApplication.shared.accessibilitySetValue(true, forAttribute: accessibilityMode)
+160 |         defer { NSApplication.shared.accessibilitySetValue(previousAccessibilityMode, forAttribute: accessibilityMode) }
+    |                                      `- warning: 'accessibilitySetValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+161 |         let host = NSHostingView(rootView: SkeletonView(element: element).environmentObject(model))
+162 |         host.frame = NSRect(x: 0, y: 0, width: 600, height: 420)
+
+[#AddPreconcurrencyImport]: <https://docs.swift.org/compiler/documentation/diagnostics/add-preconcurrency-import>
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+[#SendableClosureCaptures]: <https://docs.swift.org/compiler/documentation/diagnostics/sendable-closure-captures>
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+[20 / 24] CellBaseTests-product
+[22 / 24] CellBaseTests-product
+Build complete! (24,91 sek)
+Test Suite 'Selected tests' started at 2026-09-29 12:04:25.891.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-09-29 12:04:25.893.
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-09-29 12:04:25.893.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 12:04:25.893.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds
+Test Suite 'Selected tests' started at 2026-09-29 12:04:25.957.
+Test Suite 'CellNearbyTests.xctest' started at 2026-09-29 12:04:25.958.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-09-29 12:04:25.958.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 12:04:25.958.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 12:04:26.024.
+Test Suite 'CellBaseTests.xctest' started at 2026-09-29 12:04:26.025.
+Test Suite 'BridgeChannelWebSocketTests' started at 2026-09-29 12:04:26.025.
+Test Case '-[CellBaseTests.BridgeChannelWebSocketTests testCloseCancelsARealSocketStalledBeforeWebSocketUpgrade]' started.
+2026-09-29T12:04:26+0200 notice codes.vapor.application: [Vapor] Server started on http://127.0.0.1:57333
+2026-09-29T12:04:26+0200 info codes.vapor.application: request-id=F59264E1-22E0-4B2B-8313-CB6503D63626 [Vapor] GET /stall
+Test Case '-[CellBaseTests.BridgeChannelWebSocketTests testCloseCancelsARealSocketStalledBeforeWebSocketUpgrade]' passed (0.013 seconds).
+Test Case '-[CellBaseTests.BridgeChannelWebSocketTests testVaporSocketRequiresProofThenPerformsProtectedReadWithNoServerSigner]' started.
+2026-09-29T12:04:26+0200 notice codes.vapor.application: [Vapor] Server started on http://127.0.0.1:57335
+2026-09-29T12:04:26+0200 info codes.vapor.application: request-id=7AE51E16-19AE-4FEA-8B9C-BA41551AC81E [Vapor] GET /bridge
+2026-09-29T12:04:26+0200 info codes.vapor.application: request-id=6FCBA550-47F8-46B3-8639-D1D33EF2EF03 [Vapor] GET /bridge
+Test Case '-[CellBaseTests.BridgeChannelWebSocketTests testVaporSocketRequiresProofThenPerformsProtectedReadWithNoServerSigner]' passed (0.139 seconds).
+Test Suite 'BridgeChannelWebSocketTests' passed at 2026-09-29 12:04:26.176.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.151 (0.152) seconds
+Test Suite 'VaporWebSocketAdmissionTests' started at 2026-09-29 12:04:26.176.
+Test Case '-[CellBaseTests.VaporWebSocketAdmissionTests testAuthenticatedFeedOrderSurvivesHeldFirstDispatchAndMixedTextBinaryBurst]' started.
+Test Case '-[CellBaseTests.VaporWebSocketAdmissionTests testAuthenticatedFeedOrderSurvivesHeldFirstDispatchAndMixedTextBinaryBurst]' passed (0.281 seconds).
+Test Case '-[CellBaseTests.VaporWebSocketAdmissionTests testAuthenticatedQuotaPlusOneKeepsInFlightChargeUntilConsumerReturns]' started.
+Test Case '-[CellBaseTests.VaporWebSocketAdmissionTests testAuthenticatedQuotaPlusOneKeepsInFlightChargeUntilConsumerReturns]' passed (0.036 seconds).
+Test Case '-[CellBaseTests.VaporWebSocketAdmissionTests testGlobalCountAndByteBudgetsSpanConnectionsAndReleaseForFreshSibling]' started.
+Test Case '-[CellBaseTests.VaporWebSocketAdmissionTests testGlobalCountAndByteBudgetsSpanConnectionsAndReleaseForFreshSibling]' passed (0.324 seconds).
+Test Case '-[CellBaseTests.VaporWebSocketAdmissionTests testLargeTextAndBinaryFramesAndConnectionByteQuotaRejectBeforePreparation]' started.
+Test Case '-[CellBaseTests.VaporWebSocketAdmissionTests testLargeTextAndBinaryFramesAndConnectionByteQuotaRejectBeforePreparation]' passed (0.558 seconds).
+Test Case '-[CellBaseTests.VaporWebSocketAdmissionTests testOnlySigningControlPassesHeldDispatchAndMalformedFrameFailsClosed]' started.
+Test Case '-[CellBaseTests.VaporWebSocketAdmissionTests testOnlySigningControlPassesHeldDispatchAndMalformedFrameFailsClosed]' passed (0.291 seconds).
+Test Case '-[CellBaseTests.VaporWebSocketAdmissionTests testPreProofBurstIsAdmittedBeforeTasksAndQuotaPlusOneClosesOnlyOffender]' started.
+Test Case '-[CellBaseTests.VaporWebSocketAdmissionTests testPreProofBurstIsAdmittedBeforeTasksAndQuotaPlusOneClosesOnlyOffender]' passed (0.315 seconds).
+Test Suite 'VaporWebSocketAdmissionTests' passed at 2026-09-29 12:04:27.983.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 1.805 (1.806) seconds
+Test Suite 'CellBaseTests.xctest' passed at 2026-09-29 12:04:27.983.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 1.956 (1.958) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 12:04:27.983.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 1.956 (1.958) seconds
+
+COMMAND_EXIT=0

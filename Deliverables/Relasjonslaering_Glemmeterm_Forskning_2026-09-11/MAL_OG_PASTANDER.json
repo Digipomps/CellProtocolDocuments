@@ -1,0 +1,475 @@
+{
+  "note": "Individuelle definitions følger Swift wire-typer. Evaluation og dokumentomslag er forskningsmetadata, ikke påstått runtime-skjema. Hypoteser med isInferred er analytikerens, ikke sitater tillagt Vegar.",
+  "goals": [
+    {
+      "schema": "haven.goal-definition.v1",
+      "purposeRef": "purpose://validation",
+      "lifecycle": "one-shot",
+      "evaluatorKind": "custom",
+      "timeframe": "2026-09-12",
+      "helperCells": [],
+      "privacy": {
+        "rawEvidenceVisibility": "owner-only",
+        "publishableStatuses": [
+          "satisfied",
+          "blocked"
+        ],
+        "doNotExportRawLocation": true
+      },
+      "tags": [
+        "HD-0050",
+        "synthetic-only"
+      ],
+      "goalID": "G1",
+      "title": "Verifiser måleinstrument og dagens semantikk",
+      "description": "Verifiser måleinstrument og dagens semantikk",
+      "metric": "passerte kontrollfixtures og eksisterende tester",
+      "baseline": "F3 bare utledet",
+      "target": "Målte null- og positivreferanser; Swift-paritet",
+      "evidenceSources": [
+        {
+          "sourceID": "G1-0",
+          "keypath": "simulering/resultater/instrument_references.json",
+          "visibility": "owner-only",
+          "summary": "simulering/resultater/instrument_references.json"
+        },
+        {
+          "sourceID": "G1-1",
+          "keypath": "simulering/resultater/swift_parity.json",
+          "visibility": "owner-only",
+          "summary": "simulering/resultater/swift_parity.json"
+        },
+        {
+          "sourceID": "G1-2",
+          "keypath": "simulering/resultater/swift_tests.txt",
+          "visibility": "owner-only",
+          "summary": "simulering/resultater/swift_tests.txt"
+        }
+      ]
+    },
+    {
+      "schema": "haven.goal-definition.v1",
+      "purposeRef": "purpose://validation",
+      "lifecycle": "one-shot",
+      "evaluatorKind": "custom",
+      "timeframe": "2026-09-12",
+      "helperCells": [],
+      "privacy": {
+        "rawEvidenceVisibility": "owner-only",
+        "publishableStatuses": [
+          "satisfied",
+          "blocked"
+        ],
+        "doNotExportRawLocation": true
+      },
+      "tags": [
+        "HD-0050",
+        "synthetic-only"
+      ],
+      "goalID": "G2",
+      "title": "Sammenlign samme logger",
+      "description": "Sammenlign samme logger",
+      "metric": "logg- og kandidatantall; replaylikhet",
+      "baseline": "0 kjørte logger",
+      "target": "144 logger; 1152 kandidatkjøringer; alle replay like",
+      "evidenceSources": [
+        {
+          "sourceID": "G2-0",
+          "keypath": "simulering/resultater/manifest.json",
+          "visibility": "owner-only",
+          "summary": "simulering/resultater/manifest.json"
+        },
+        {
+          "sourceID": "G2-1",
+          "keypath": "simulering/resultater/seed_metrics.json",
+          "visibility": "owner-only",
+          "summary": "simulering/resultater/seed_metrics.json"
+        }
+      ]
+    },
+    {
+      "schema": "haven.goal-definition.v1",
+      "purposeRef": "purpose://validation",
+      "lifecycle": "one-shot",
+      "evaluatorKind": "custom",
+      "timeframe": "2026-09-12",
+      "helperCells": [],
+      "privacy": {
+        "rawEvidenceVisibility": "owner-only",
+        "publishableStatuses": [
+          "satisfied",
+          "blocked"
+        ],
+        "doNotExportRawLocation": true
+      },
+      "tags": [
+        "HD-0050",
+        "synthetic-only"
+      ],
+      "goalID": "G3",
+      "title": "Lever beslutningsgrunnlag",
+      "description": "Lever beslutningsgrunnlag",
+      "metric": "besvarte S-spørsmål og én anbefaling",
+      "baseline": "ingen målt anbefaling",
+      "target": "8/8 S-spørsmål, én INN/AVVIST-anbefaling, opptil5 Vegar-spørsmål",
+      "evidenceSources": [
+        {
+          "sourceID": "G3-0",
+          "keypath": "RAPPORT.md",
+          "visibility": "owner-only",
+          "summary": "RAPPORT.md"
+        }
+      ]
+    }
+  ],
+  "goalEvaluations": [
+    {
+      "goalID": "G1",
+      "status": "satisfied",
+      "evidence": [
+        "simulering/resultater/instrument_references.json",
+        "simulering/resultater/swift_parity.json",
+        "simulering/resultater/swift_tests.txt"
+      ]
+    },
+    {
+      "goalID": "G2",
+      "status": "satisfied",
+      "evidence": [
+        "simulering/resultater/manifest.json",
+        "simulering/resultater/seed_metrics.json"
+      ]
+    },
+    {
+      "goalID": "G3",
+      "status": "satisfied",
+      "evidence": [
+        "RAPPORT.md"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "schema": "haven.claim-definition.v0",
+      "claimID": "C1",
+      "statement": "Dagens clamp skjuler forskjell mellom råskårer over 1.",
+      "claimType": "factual",
+      "strength": "moderated",
+      "isInferred": false,
+      "sourceRefs": [
+        "simulering/oracle/fixtures/saturation.output.json"
+      ],
+      "purposeRef": "purpose://validation",
+      "goalID": "G3",
+      "supports": [
+        {
+          "supportID": "C1-evidence",
+          "kind": "evidence",
+          "statement": "Måling eller audit oppgitt i kildeankeret; påstanden evalueres separat.",
+          "sourceRefs": [
+            "simulering/oracle/fixtures/saturation.output.json"
+          ],
+          "sourceAuditStatus": "supported",
+          "confidence": 1
+        }
+      ],
+      "tags": [
+        "measured-bounded-claim"
+      ]
+    },
+    {
+      "schema": "haven.claim-definition.v0",
+      "claimID": "C2",
+      "statement": "Tilleggs-hybriden arver generell enhetsnorm og PCA.",
+      "claimType": "predictive",
+      "strength": "moderated",
+      "isInferred": true,
+      "sourceRefs": [
+        "simulering/resultater/controls.json",
+        "underlag/LITTERATURREVISJON.md"
+      ],
+      "purposeRef": "purpose://validation",
+      "goalID": "G3",
+      "supports": [
+        {
+          "supportID": "C2-evidence",
+          "kind": "evidence",
+          "statement": "Måling eller audit oppgitt i kildeankeret; påstanden evalueres separat.",
+          "sourceRefs": [
+            "simulering/resultater/controls.json",
+            "underlag/LITTERATURREVISJON.md"
+          ],
+          "sourceAuditStatus": "supported",
+          "confidence": 1
+        }
+      ],
+      "tags": [
+        "analyst-inferred-hypothesis"
+      ]
+    },
+    {
+      "schema": "haven.claim-definition.v0",
+      "claimID": "C3",
+      "statement": "Vektnorm 1 garanterer raw-skår maksimalt 1.",
+      "claimType": "predictive",
+      "strength": "moderated",
+      "isInferred": true,
+      "sourceRefs": [
+        "simulering/resultater/controls.json"
+      ],
+      "purposeRef": "purpose://validation",
+      "goalID": "G3",
+      "supports": [
+        {
+          "supportID": "C3-evidence",
+          "kind": "evidence",
+          "statement": "Måling eller audit oppgitt i kildeankeret; påstanden evalueres separat.",
+          "sourceRefs": [
+            "simulering/resultater/controls.json"
+          ],
+          "sourceAuditStatus": "supported",
+          "confidence": 1
+        }
+      ],
+      "tags": [
+        "analyst-inferred-hypothesis"
+      ]
+    },
+    {
+      "schema": "haven.claim-definition.v0",
+      "claimID": "C4",
+      "statement": "En alltid-aktiv kontekstnode dominerer nødvendigvis usentrerte positive input.",
+      "claimType": "predictive",
+      "strength": "moderated",
+      "isInferred": true,
+      "sourceRefs": [
+        "simulering/resultater/controls.json",
+        "underlag/LITTERATURREVISJON.md"
+      ],
+      "purposeRef": "purpose://validation",
+      "goalID": "G3",
+      "supports": [
+        {
+          "supportID": "C4-evidence",
+          "kind": "evidence",
+          "statement": "Måling eller audit oppgitt i kildeankeret; påstanden evalueres separat.",
+          "sourceRefs": [
+            "simulering/resultater/controls.json",
+            "underlag/LITTERATURREVISJON.md"
+          ],
+          "sourceAuditStatus": "supported",
+          "confidence": 1
+        }
+      ],
+      "tags": [
+        "analyst-inferred-hypothesis"
+      ]
+    },
+    {
+      "schema": "haven.claim-definition.v0",
+      "claimID": "C5",
+      "statement": "Fast policy og samme kanoniske syntetiske logg gir identisk målt kant- og sentreringstilstand i denne runtime.",
+      "claimType": "statistical",
+      "strength": "moderated",
+      "isInferred": false,
+      "sourceRefs": [
+        "simulering/resultater/manifest.json"
+      ],
+      "purposeRef": "purpose://validation",
+      "goalID": "G3",
+      "supports": [
+        {
+          "supportID": "C5-evidence",
+          "kind": "evidence",
+          "statement": "Måling eller audit oppgitt i kildeankeret; påstanden evalueres separat.",
+          "sourceRefs": [
+            "simulering/resultater/manifest.json"
+          ],
+          "sourceAuditStatus": "supported",
+          "confidence": 1
+        }
+      ],
+      "tags": [
+        "measured-bounded-claim"
+      ]
+    },
+    {
+      "schema": "haven.claim-definition.v0",
+      "claimID": "C6",
+      "statement": "Å endre dagens config bevarer gammel lifecycle-replaytilstand.",
+      "claimType": "predictive",
+      "strength": "moderated",
+      "isInferred": true,
+      "sourceRefs": [
+        "underlag/migration_summary.json"
+      ],
+      "purposeRef": "purpose://validation",
+      "goalID": "G3",
+      "supports": [
+        {
+          "supportID": "C6-evidence",
+          "kind": "evidence",
+          "statement": "Måling eller audit oppgitt i kildeankeret; påstanden evalueres separat.",
+          "sourceRefs": [
+            "underlag/migration_summary.json"
+          ],
+          "sourceAuditStatus": "supported",
+          "confidence": 1
+        }
+      ],
+      "tags": [
+        "analyst-inferred-hypothesis"
+      ]
+    },
+    {
+      "schema": "haven.claim-definition.v0",
+      "claimID": "C7",
+      "statement": "Hybrid raw .02 forbedrer raw-rangering generelt i den prøvde scenariofamilien.",
+      "claimType": "statistical",
+      "strength": "moderated",
+      "isInferred": true,
+      "sourceRefs": [
+        "simulering/resultater/aggregate.json"
+      ],
+      "purposeRef": "purpose://validation",
+      "goalID": "G3",
+      "supports": [
+        {
+          "supportID": "C7-evidence",
+          "kind": "evidence",
+          "statement": "Måling eller audit oppgitt i kildeankeret; påstanden evalueres separat.",
+          "sourceRefs": [
+            "simulering/resultater/aggregate.json"
+          ],
+          "sourceAuditStatus": "supported",
+          "confidence": 1
+        }
+      ],
+      "tags": [
+        "analyst-inferred-hypothesis"
+      ]
+    },
+    {
+      "schema": "haven.claim-definition.v0",
+      "claimID": "C8",
+      "statement": "Raw-sortering fjerner clamp-tap uten å endre vektene i de prøvde loggene.",
+      "claimType": "statistical",
+      "strength": "moderated",
+      "isInferred": false,
+      "sourceRefs": [
+        "simulering/resultater/seed_metrics.json"
+      ],
+      "purposeRef": "purpose://validation",
+      "goalID": "G3",
+      "supports": [
+        {
+          "supportID": "C8-evidence",
+          "kind": "evidence",
+          "statement": "Måling eller audit oppgitt i kildeankeret; påstanden evalueres separat.",
+          "sourceRefs": [
+            "simulering/resultater/seed_metrics.json"
+          ],
+          "sourceAuditStatus": "supported",
+          "confidence": 1
+        }
+      ],
+      "tags": [
+        "measured-bounded-claim"
+      ]
+    }
+  ],
+  "claimEvaluations": [
+    {
+      "claimID": "C1",
+      "status": "supported",
+      "sourceAuditStatus": "supported",
+      "evidence": [
+        "simulering/oracle/fixtures/saturation.output.json"
+      ],
+      "checkedAt": "2026-09-12",
+      "boundary": "Kun oppgitte kontrolltilfeller/kildekontrakter; ingen person- eller generell brukernyttepåstand."
+    },
+    {
+      "claimID": "C2",
+      "status": "contradicted",
+      "sourceAuditStatus": "contradicted",
+      "evidence": [
+        "simulering/resultater/controls.json",
+        "underlag/LITTERATURREVISJON.md"
+      ],
+      "checkedAt": "2026-09-12",
+      "boundary": "Kun oppgitte kontrolltilfeller/kildekontrakter; ingen person- eller generell brukernyttepåstand."
+    },
+    {
+      "claimID": "C3",
+      "status": "contradicted",
+      "sourceAuditStatus": "contradicted",
+      "evidence": [
+        "simulering/resultater/controls.json"
+      ],
+      "checkedAt": "2026-09-12",
+      "boundary": "Kun oppgitte kontrolltilfeller/kildekontrakter; ingen person- eller generell brukernyttepåstand."
+    },
+    {
+      "claimID": "C4",
+      "status": "contradicted",
+      "sourceAuditStatus": "contradicted",
+      "evidence": [
+        "simulering/resultater/controls.json",
+        "underlag/LITTERATURREVISJON.md"
+      ],
+      "checkedAt": "2026-09-12",
+      "boundary": "Kun oppgitte kontrolltilfeller/kildekontrakter; ingen person- eller generell brukernyttepåstand."
+    },
+    {
+      "claimID": "C5",
+      "status": "supported",
+      "sourceAuditStatus": "supported",
+      "evidence": [
+        "simulering/resultater/manifest.json"
+      ],
+      "checkedAt": "2026-09-12",
+      "boundary": "Kun oppgitte kontrolltilfeller/kildekontrakter; ingen person- eller generell brukernyttepåstand."
+    },
+    {
+      "claimID": "C6",
+      "status": "contradicted",
+      "sourceAuditStatus": "contradicted",
+      "evidence": [
+        "underlag/migration_summary.json"
+      ],
+      "checkedAt": "2026-09-12",
+      "boundary": "Kun oppgitte kontrolltilfeller/kildekontrakter; ingen person- eller generell brukernyttepåstand."
+    },
+    {
+      "claimID": "C7",
+      "status": "contradicted",
+      "sourceAuditStatus": "contradicted",
+      "evidence": [
+        "simulering/resultater/aggregate.json"
+      ],
+      "checkedAt": "2026-09-12",
+      "boundary": "Kun oppgitte kontrolltilfeller/kildekontrakter; ingen person- eller generell brukernyttepåstand."
+    },
+    {
+      "claimID": "C8",
+      "status": "supported",
+      "sourceAuditStatus": "supported",
+      "evidence": [
+        "simulering/resultater/seed_metrics.json"
+      ],
+      "checkedAt": "2026-09-12",
+      "boundary": "Kun oppgitte kontrolltilfeller/kildekontrakter; ingen person- eller generell brukernyttepåstand."
+    }
+  ],
+  "recommendation": {
+    "value": "AVVIST som produksjonsendring nå",
+    "owner": "Kjetil",
+    "humanApprovalRecorded": false,
+    "openItems": [
+      "Faktisk brukernytte utover generatoren",
+      "Læringspolicy-/preferansekontrakt før eventuell v2",
+      "HD-0051 implementering etter målbeslutning"
+    ]
+  }
+}

@@ -1,0 +1,1467 @@
+diff -ruN base/Sources/CellBase/Cells/Chat/ChatCell.swift work/Sources/CellBase/Cells/Chat/ChatCell.swift
+--- base/Sources/CellBase/Cells/Chat/ChatCell.swift	2026-09-26 11:19:54.000000000 +0000
++++ work/Sources/CellBase/Cells/Chat/ChatCell.swift	2026-09-26 11:38:09.063245827 +0000
+@@ -1903,7 +1903,10 @@
+                 expectedChatCellUUID: uuid
+             )
+ 
+-            let inviteeIdentity = resolveInvitationIdentity(from: artifact.invitedIdentity)
++            let inviteeIdentity = resolveInvitationIdentity(
++                from: artifact.invitedIdentity,
++                keyAgreementKey: acceptance.inviteeKeyAgreementKey
++            )
+             let now = Self.timestampString()
+             guard var record = invitationRecordsByIdentityUUID[inviteeIdentity.uuid] else {
+                 return .string("error: invitation record not found for artifact")
+@@ -2553,12 +2556,22 @@
+         }
+     }
+ 
+-    private func resolveInvitationIdentity(from descriptor: IdentityPublicKeyDescriptor) -> Identity {
++    private func resolveInvitationIdentity(
++        from descriptor: IdentityPublicKeyDescriptor,
++        keyAgreementKey: Data? = nil
++    ) -> Identity {
+         if let resolved = resolveIdentity(explicitUUID: descriptor.uuid) {
++            // An invitee known only by signing key gains the key-agreement key
++            // its signed acceptance carried; a key already on file is kept.
++            if resolved.publicKeyAgreementSecureKey == nil,
++               let keyAgreementKey, !keyAgreementKey.isEmpty {
++                resolved.publicKeyAgreementSecureKey = ChatInvitationProofUtility.keyAgreementSecureKey(keyAgreementKey)
++            }
+             return resolved
+         }
+         return ChatInvitationProofUtility.identity(
+             from: descriptor,
++            keyAgreementKey: keyAgreementKey,
+             identityVault: CellBase.defaultIdentityVault
+         )
+     }
+@@ -4057,6 +4070,7 @@
+                 "chatCellUUID": ExploreContract.schema(type: "string"),
+                 "inviterIdentityUUID": ExploreContract.schema(type: "string"),
+                 "inviteeIdentity": identityPublicKeyDescriptorSchema(),
++                "inviteeKeyAgreementKey": ExploreContract.schema(type: "data"),
+                 "createdAt": ExploreContract.schema(type: "string"),
+                 "nonce": ExploreContract.schema(type: "data"),
+                 "proof": invitationAcceptanceProofSchema()
+@@ -4419,6 +4433,7 @@
+             "chatCellUUID": .string(acceptance.chatCellUUID),
+             "inviterIdentityUUID": .string(acceptance.inviterIdentityUUID),
+             "inviteeIdentity": .object(Self.identityPublicKeyDescriptorObject(acceptance.inviteeIdentity)),
++            "inviteeKeyAgreementKey": acceptance.inviteeKeyAgreementKey.map(ValueType.data) ?? .null,
+             "createdAt": .string(acceptance.createdAt),
+             "nonce": .data(acceptance.nonce),
+             "proof": acceptance.proof.map { proof in
+diff -ruN base/Sources/CellBase/Cells/Chat/ChatInvitationProofUtility.swift work/Sources/CellBase/Cells/Chat/ChatInvitationProofUtility.swift
+--- base/Sources/CellBase/Cells/Chat/ChatInvitationProofUtility.swift	2026-09-26 11:19:54.000000000 +0000
++++ work/Sources/CellBase/Cells/Chat/ChatInvitationProofUtility.swift	2026-09-26 11:31:16.840607987 +0000
+@@ -133,6 +133,11 @@
+     public var chatCellUUID: String
+     public var inviterIdentityUUID: String
+     public var inviteeIdentity: IdentityPublicKeyDescriptor
++    /// The invitee's public key-agreement key (compressed). Without it the
++    /// chat cell knows the invitee only by signing key and cannot seal a
++    /// message to them (purpose://candidate.invite.acceptance-carries-the-key-to-seal-to).
++    /// Optional, so acceptances from older apps still decode and verify.
++    public var inviteeKeyAgreementKey: Data?
+     public var createdAt: String
+     public var nonce: Data
+     public var proof: ChatInvitationAcceptanceProof?
+@@ -146,6 +151,7 @@
+         chatCellUUID: String,
+         inviterIdentityUUID: String,
+         inviteeIdentity: IdentityPublicKeyDescriptor,
++        inviteeKeyAgreementKey: Data? = nil,
+         createdAt: String,
+         nonce: Data,
+         proof: ChatInvitationAcceptanceProof? = nil
+@@ -158,6 +164,7 @@
+         self.chatCellUUID = chatCellUUID
+         self.inviterIdentityUUID = inviterIdentityUUID
+         self.inviteeIdentity = inviteeIdentity
++        self.inviteeKeyAgreementKey = inviteeKeyAgreementKey
+         self.createdAt = createdAt
+         self.nonce = nonce
+         self.proof = proof
+@@ -188,7 +195,11 @@
+         )
+     }
+ 
+-    public static func identity(from descriptor: IdentityPublicKeyDescriptor, identityVault: IdentityVaultProtocol? = nil) -> Identity {
++    public static func identity(
++        from descriptor: IdentityPublicKeyDescriptor,
++        keyAgreementKey: Data? = nil,
++        identityVault: IdentityVaultProtocol? = nil
++    ) -> Identity {
+         let identity = Identity(
+             descriptor.uuid,
+             displayName: descriptor.displayName ?? descriptor.uuid,
+@@ -205,9 +216,28 @@
+             y: nil,
+             compressedKey: descriptor.publicKey
+         )
++        if let keyAgreementKey, !keyAgreementKey.isEmpty {
++            identity.publicKeyAgreementSecureKey = keyAgreementSecureKey(keyAgreementKey)
++        }
+         return identity
+     }
+ 
++    /// The public half of an X25519 key-agreement key, as the chat envelope
++    /// expects to find it on a recipient.
++    public static func keyAgreementSecureKey(_ compressedKey: Data) -> SecureKey {
++        SecureKey(
++            date: Date(),
++            privateKey: false,
++            use: .keyAgreement,
++            algorithm: .X25519,
++            size: compressedKey.count * 8,
++            curveType: .Curve25519,
++            x: nil,
++            y: nil,
++            compressedKey: compressedKey
++        )
++    }
++
+     public static func generateInvitationArtifact(
+         chatCellUUID: String,
+         topic: String,
+@@ -332,6 +362,9 @@
+             chatCellUUID: artifact.chatCellUUID,
+             inviterIdentityUUID: artifact.inviterIdentity.uuid,
+             inviteeIdentity: inviteeDescriptor,
++            // Carry the key the inviter needs to seal to us. Signed with the
++            // rest, so nobody can swap it on the way.
++            inviteeKeyAgreementKey: invitee.publicKeyAgreementSecureKey?.compressedKey,
+             createdAt: createdAt,
+             nonce: acceptanceNonce,
+             proof: ChatInvitationAcceptanceProof(
+diff -ruN base/Sources/CellBase/Identity/EphemeralIdentityVault.swift work/Sources/CellBase/Identity/EphemeralIdentityVault.swift
+--- base/Sources/CellBase/Identity/EphemeralIdentityVault.swift	2026-09-26 11:34:34.176426632 +0000
++++ work/Sources/CellBase/Identity/EphemeralIdentityVault.swift	2026-09-26 11:34:34.226810237 +0000
+@@ -8,9 +8,13 @@
+ import Crypto
+ #endif
+ 
+-public actor EphemeralIdentityVault: IdentityVaultProtocol {
++public actor EphemeralIdentityVault: IdentityVaultProtocol, IdentityKeyRoleProviderProtocol {
+     private var identitiesByContext: [String: Identity] = [:]
+     private var privateKeysByUUID: [String: Curve25519.Signing.PrivateKey] = [:]
++    /// One X25519 key per identity, minted with the signing key, so an
++    /// ephemeral identity can be sealed to — not only signed for
++    /// (purpose://candidate.invite.acceptance-carries-the-key-to-seal-to).
++    private var keyAgreementKeysByUUID: [String: Curve25519.KeyAgreement.PrivateKey] = [:]
+     private var idCounter = 1
+     private let vaultReference = "ephemeral:\(UUID().uuidString)"
+ 
+@@ -113,6 +117,24 @@
+         ("ephemeral-key-\(tag)", "ephemeral-iv-\(tag)")
+     }
+ 
++    public func publicSecureKey(for identity: Identity, role: IdentityKeyRole) async throws -> SecureKey? {
++        switch role {
++        case .signing:
++            return identity.publicSecureKey
++        case .keyAgreement:
++            return identity.publicKeyAgreementSecureKey
++        }
++    }
++
++    public func privateKeyData(for identity: Identity, role: IdentityKeyRole) async throws -> Data? {
++        switch role {
++        case .signing:
++            return privateKeysByUUID[identity.uuid]?.rawRepresentation
++        case .keyAgreement:
++            return keyAgreementKeysByUUID[identity.uuid]?.rawRepresentation
++        }
++    }
++
+     private func ensureSigningKey(for identity: Identity) {
+         if privateKeysByUUID[identity.uuid] == nil, identity.publicSecureKey == nil {
+             let privateKey = Curve25519.Signing.PrivateKey()
+@@ -129,6 +151,22 @@
+                 compressedKey: privateKey.publicKey.rawRepresentation
+             )
+         }
++        if keyAgreementKeysByUUID[identity.uuid] == nil, identity.publicKeyAgreementSecureKey == nil,
++           privateKeysByUUID[identity.uuid] != nil {
++            let keyAgreementKey = Curve25519.KeyAgreement.PrivateKey()
++            keyAgreementKeysByUUID[identity.uuid] = keyAgreementKey
++            identity.publicKeyAgreementSecureKey = SecureKey(
++                date: Date(),
++                privateKey: false,
++                use: .keyAgreement,
++                algorithm: .X25519,
++                size: 32,
++                curveType: .Curve25519,
++                x: nil,
++                y: nil,
++                compressedKey: keyAgreementKey.publicKey.rawRepresentation
++            )
++        }
+     }
+ 
+     private func publicSigningKeyMatches(requested: Identity, stored: Identity) -> Bool {
+diff -ruN base/Sources/CellBase/Invitation/HavenContactBasisV1.swift work/Sources/CellBase/Invitation/HavenContactBasisV1.swift
+--- base/Sources/CellBase/Invitation/HavenContactBasisV1.swift	1970-01-01 00:00:00.000000000 +0000
++++ work/Sources/CellBase/Invitation/HavenContactBasisV1.swift	2026-09-26 11:31:47.844416745 +0000
+@@ -0,0 +1,191 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++
++//
++//  HavenContactBasisV1.swift
++//  CellProtocol
++//
++//  What an owner holds about a person who is not (yet) here, in two parts.
++//
++//  The *basis* is the claim: a handful of named fields, each with where it
++//  came from and whether the person has confirmed it
++//  (purpose://candidate.invite.claim-about-another). It is what an invitation
++//  is built from, and exactly what the person gets to see before answering
++//  (purpose://candidate.invite.recipient-sees-what-is-held).
++//
++//  The *private notes* are the owner's own. They have no path into a ticket,
++//  a publication, a contact request or a landing page
++//  (purpose://candidate.invite.private-notes-never-leave). The only way out
++//  of this type is `basisFields()`, and that method does not know they exist.
++//
++
++import Foundation
++
++public struct HavenContactBasisV1: Codable, Equatable, Sendable {
++
++    public static let schema = "haven.contact.basis.v1"
++
++    /// The fields a basis may carry. Anything else is not a claim about a
++    /// person, it is text — and text is what private notes are for.
++    public static let allowedKeys: Set<String> = [
++        "name", "givenName", "email", "phone", "organization", "role", "context"
++    ]
++    public static let maximumValueBytes = 160
++    public static let maximumValueWords = 12
++
++    public enum Status: String, Codable, Equatable, Sendable {
++        /// The owner's claim, not yet seen by the person it is about.
++        case unconfirmed
++        /// The person has seen it and let it stand.
++        case confirmed
++    }
++
++    /// Where a field came from. Rendered for the person as
++    /// "Boklisten, 12. sep., kolonne Epost" — a label, never a path.
++    public struct Origin: Codable, Equatable, Sendable {
++        public var file: String?
++        public var date: String?
++        public var column: String?
++
++        public init(file: String? = nil, date: String? = nil, column: String? = nil) {
++            self.file = file
++            self.date = date
++            self.column = column
++        }
++
++        public var displayText: String {
++            var parts: [String] = []
++            if let file, !file.isEmpty { parts.append(file) }
++            if let date, !date.isEmpty { parts.append(date) }
++            if let column, !column.isEmpty { parts.append("kolonne \(column)") }
++            return parts.joined(separator: ", ")
++        }
++    }
++
++    public struct Field: Codable, Equatable, Sendable {
++        public var key: String
++        public var value: String
++        public var origin: Origin?
++        public var status: Status
++
++        public init(key: String, value: String, origin: Origin? = nil, status: Status = .unconfirmed) {
++            self.key = key
++            self.value = value
++            self.origin = origin
++            self.status = status
++        }
++    }
++
++    public var schema: String
++    public var fields: [Field]
++    /// Never leaves the entity. Not part of `basisFields()`, not compared in
++    /// "shown equals held", not readable by anything with a send path.
++    public var privateNotes: String?
++
++    public init(
++        schema: String = HavenContactBasisV1.schema,
++        fields: [Field],
++        privateNotes: String? = nil
++    ) {
++        self.schema = schema
++        self.fields = fields
++        self.privateNotes = privateNotes
++    }
++
++    // MARK: Validation
++
++    public enum ValidationError: Error, Equatable, CustomStringConvertible, Sendable {
++        case wrongSchema
++        case empty
++        case unknownKey(String)
++        case duplicateKey(String)
++        case emptyValue(String)
++        case freeText(String)
++        case originTooLong(String)
++
++        public var description: String {
++            switch self {
++            case .wrongSchema: return "Feil skjema for grunnlag."
++            case .empty: return "Grunnlaget har ingen felt."
++            case .unknownKey(let key): return "«\(key)» er ikke et grunnlagsfelt. Fritekst hører i private notater."
++            case .duplicateKey(let key): return "Feltet «\(key)» finnes to ganger."
++            case .emptyValue(let key): return "Feltet «\(key)» er tomt."
++            case .freeText(let key): return "Feltet «\(key)» ser ut som fritekst. Fritekst hører i private notater, og de sendes aldri."
++            case .originTooLong(let key): return "Opphavet til «\(key)» er for langt til å være en merkelapp."
++            }
++        }
++    }
++
++    /// Fails closed on anything that is not a short, single-line claim in a
++    /// known field. This is what keeps a private note from being smuggled
++    /// into the basis by putting it under a made-up key.
++    public func validate() throws {
++        guard schema == Self.schema else { throw ValidationError.wrongSchema }
++        guard !fields.isEmpty else { throw ValidationError.empty }
++        var seen: Set<String> = []
++        for field in fields {
++            guard Self.allowedKeys.contains(field.key) else { throw ValidationError.unknownKey(field.key) }
++            guard seen.insert(field.key).inserted else { throw ValidationError.duplicateKey(field.key) }
++            let value = field.value.trimmingCharacters(in: .whitespacesAndNewlines)
++            guard !value.isEmpty else { throw ValidationError.emptyValue(field.key) }
++            guard Self.isShortClaim(value) else { throw ValidationError.freeText(field.key) }
++            if let origin = field.origin {
++                for part in [origin.file, origin.date, origin.column].compactMap({ $0 }) {
++                    guard part.utf8.count <= 96, !part.contains("\n") else {
++                        throw ValidationError.originTooLong(field.key)
++                    }
++                }
++            }
++        }
++    }
++
++    public static func isShortClaim(_ value: String) -> Bool {
++        guard !value.contains("\n"), !value.contains("\r") else { return false }
++        guard value.utf8.count <= maximumValueBytes else { return false }
++        let words = value.split(whereSeparator: { $0.isWhitespace })
++        return words.count <= maximumValueWords
++    }
++
++    // MARK: The only way out
++
++    /// The fields an invitation carries and the person sees. Built from
++    /// `fields` alone; `privateNotes` is not an input to this function.
++    public func basisFields() -> [HavenInviteBasisField] {
++        fields.map { field in
++            HavenInviteBasisField(
++                key: field.key,
++                value: field.value,
++                origin: field.origin.map(\.displayText).flatMap { $0.isEmpty ? nil : $0 }
++            )
++        }
++    }
++
++    /// Does what the invitation shows match what is held? Compared field by
++    /// field against the basis — never against the whole record.
++    public func shownEqualsHeld(_ shown: [HavenInviteBasisField]) -> Bool {
++        let held = basisFields()
++        guard held.count == shown.count else { return false }
++        let heldByKey = Dictionary(uniqueKeysWithValues: held.map { ($0.key, $0) })
++        return shown.allSatisfy { heldByKey[$0.key] == $0 }
++    }
++
++    /// Marks a field as confirmed by the person it is about; other fields
++    /// keep their status.
++    public func confirming(_ key: String) -> HavenContactBasisV1 {
++        var copy = self
++        copy.fields = fields.map { field in
++            var field = field
++            if field.key == key { field.status = .confirmed }
++            return field
++        }
++        return copy
++    }
++
++    /// The person asked for a field to go. The claim disappears; nothing of
++    /// its value is kept in the basis.
++    public func erasing(_ key: String) -> HavenContactBasisV1 {
++        var copy = self
++        copy.fields = fields.filter { $0.key != key }
++        return copy
++    }
++}
+diff -ruN base/Sources/CellBase/Invitation/HavenInvitePublication.swift work/Sources/CellBase/Invitation/HavenInvitePublication.swift
+--- base/Sources/CellBase/Invitation/HavenInvitePublication.swift	2026-09-26 11:19:54.000000000 +0000
++++ work/Sources/CellBase/Invitation/HavenInvitePublication.swift	2026-09-26 11:31:16.852212631 +0000
+@@ -259,6 +259,35 @@
+     }
+ }
+ 
++/// What the *sender* gets to see. Four states, not six: "opened" is not one
++/// of them, and "declined" reads as "Besvart — ikke nå". Whether the invitee
++/// looked, hesitated or said no is theirs
++/// (purpose://candidate.invite.decline-without-account, §6.5).
++public enum HavenInviteSenderView: String, Codable, Equatable, Sendable {
++    case published
++    case answered
++    case expired
++    case revoked
++
++    public init(_ lifecycle: HavenInviteLifecycle) {
++        switch lifecycle {
++        case .published, .opened: self = .published
++        case .accepted, .declined: self = .answered
++        case .expired: self = .expired
++        case .revoked: self = .revoked
++        }
++    }
++
++    public var displayText: String {
++        switch self {
++        case .published: return "Sendt"
++        case .answered: return "Besvart"
++        case .expired: return "Utløpt"
++        case .revoked: return "Trukket tilbake"
++        }
++    }
++}
++
+ /// What the scaffold knows about one ticket. This is the first real signal in
+ /// the funnel — before publication, every status was self-reported.
+ public struct HavenInviteStatusReport: Codable, Equatable, Sendable {
+@@ -294,6 +323,60 @@
+         self.contactRequestCount = contactRequestCount
+         self.resultingEntityRef = resultingEntityRef
+     }
++
++    /// The projection the sender's app shows. Open counts and first-open
++    /// times are for the scaffold's own bookkeeping and never reach the sender.
++    public var senderView: HavenInviteSenderView { HavenInviteSenderView(state) }
++
++    /// The report the scaffold serves on the sender's status route. The
++    /// fuller form never leaves the scaffold.
++    public func projectedForSender() -> HavenInviteSenderReport {
++        HavenInviteSenderReport(
++            ticketID: ticketID,
++            view: senderView,
++            respondedAt: senderView == .answered ? respondedAt : nil,
++            contactRequestCount: contactRequestCount,
++            resultingEntityRef: resultingEntityRef
++        )
++    }
++}
++
++/// Status as the sender sees it: no open count, no first-open time, no
++/// difference between "ble med" and "takket nei" until a contact request
++/// actually arrives.
++public struct HavenInviteSenderReport: Codable, Equatable, Sendable {
++
++    public static let schema = "haven.invite.senderStatus.v1"
++
++    public var schema: String
++    public var ticketID: String
++    public var view: HavenInviteSenderView
++    public var respondedAt: Int?
++    public var contactRequestCount: Int
++    public var resultingEntityRef: String?
++
++    public init(
++        schema: String = HavenInviteSenderReport.schema,
++        ticketID: String,
++        view: HavenInviteSenderView,
++        respondedAt: Int? = nil,
++        contactRequestCount: Int = 0,
++        resultingEntityRef: String? = nil
++    ) {
++        self.schema = schema
++        self.ticketID = ticketID
++        self.view = view
++        self.respondedAt = respondedAt
++        self.contactRequestCount = contactRequestCount
++        self.resultingEntityRef = resultingEntityRef
++    }
++
++    public var displayText: String {
++        switch view {
++        case .answered where contactRequestCount == 0: return "Besvart — ikke nå"
++        default: return view.displayText
++        }
++    }
+ }
+ 
+ // MARK: - Contact request
+@@ -320,6 +403,11 @@
+     /// Optional, and only what the sender chose to reveal.
+     public var senderEndpoint: String?
+     public var message: String?
++    /// The sender's public key-agreement key (compressed), so the issuer can
++    /// seal chat messages to the invitee from the first message
++    /// (purpose://candidate.invite.acceptance-carries-the-key-to-seal-to). Absent on requests
++    /// from apps older than 2026-09-26.
++    public var senderKeyAgreementKey: Data?
+     public var createdAt: Int
+     public var expiresAt: Int
+     public var nonce: Data
+@@ -335,6 +423,7 @@
+         senderEntityRef: String? = nil,
+         senderEndpoint: String? = nil,
+         message: String? = nil,
++        senderKeyAgreementKey: Data? = nil,
+         createdAt: Int,
+         expiresAt: Int,
+         nonce: Data,
+@@ -349,6 +438,7 @@
+         self.senderEntityRef = senderEntityRef
+         self.senderEndpoint = senderEndpoint
+         self.message = message
++        self.senderKeyAgreementKey = senderKeyAgreementKey
+         self.createdAt = createdAt
+         self.expiresAt = expiresAt
+         self.nonce = nonce
+@@ -373,6 +463,9 @@
+         ]
+         if let senderEntityRef { payload["introEntityRef"] = .string(senderEntityRef) }
+         if let message { payload["introMessage"] = .string(message) }
++        if let senderKeyAgreementKey, !senderKeyAgreementKey.isEmpty {
++            payload["introKeyAgreementKey"] = .string(senderKeyAgreementKey.base64EncodedString())
++        }
+ 
+         return [
+             "schema": .string("cellprotocol.contact.request.v1"),
+@@ -398,6 +491,12 @@
+         case badSignature
+         case ticketMismatch(String)
+         case expired
++        /// The ticket the envelope refers to has itself run out.
++        case ticketExpired
++        /// The ticket does not verify, with the verifier's own code.
++        case ticketInvalid(String)
++        /// A reply of the wrong kind for what is being checked.
++        case wrongDecision
+ 
+         public var code: String {
+             switch self {
+@@ -406,6 +505,9 @@
+             case .badSignature: return "bad_signature"
+             case .ticketMismatch: return "ticket_mismatch"
+             case .expired: return "expired"
++            case .ticketExpired: return "ticket_expired"
++            case .ticketInvalid(let code): return "ticket_invalid:\(code)"
++            case .wrongDecision: return "wrong_decision"
+             }
+         }
+ 
+@@ -416,6 +518,9 @@
+             case .badSignature: return "Signaturen stemmer ikke."
+             case .ticketMismatch(let detail): return "Meldingen passer ikke billetten: \(detail)."
+             case .expired: return "Meldingen er utløpt."
++            case .ticketExpired: return "Invitasjonen meldingen viser til er utløpt."
++            case .ticketInvalid(let code): return "Invitasjonen meldingen viser til gjelder ikke (\(code))."
++            case .wrongDecision: return "Svaret er av feil slag for dette."
+             }
+         }
+     }
+@@ -434,6 +539,14 @@
+ 
+         let verdict = HavenInviteVerifier.verify(ticket: ticket, now: now)
+         guard verdict.signatureValid else { throw Failure.badSignature }
++        // A publication of an expired ticket, or of one that claims more life
++        // than the maximum, is refused at the door
++        // (purpose://candidate.invite.expires-by-itself).
++        if ticket.isExpired(at: now) { throw Failure.ticketExpired }
++        if ticket.claimsTooLongALife { throw Failure.ticketInvalid("ttl_too_long") }
++        guard publication.expiresAt == ticket.expiresAt else {
++            throw Failure.ticketMismatch("expiresAt")
++        }
+ 
+         guard ticket.ticketID == publication.ticketID else {
+             throw Failure.ticketMismatch("ticketID")
+@@ -473,12 +586,30 @@
+             throw Failure.ticketMismatch("issuerEndpointID")
+         }
+         guard !request.isExpired(at: now) else { throw Failure.expired }
++        // The invitation has run out: no new contact request rides on it, even
++        // a well-signed one (purpose://candidate.invite.expires-by-itself).
++        guard !ticket.isExpired(at: now) else { throw Failure.ticketExpired }
+         guard request.sender.uuid != ticket.issuer.uuid else {
+             throw Failure.issuerMismatch
+         }
+         try verifyEnvelope(request, signedBy: request.sender)
+     }
+ 
++    /// The invitee's answer — yes, not now, or never. Signed by the replier,
++    /// bound to the ticket and to the audience the ticket was made for, and
++    /// refused once the ticket has run out.
++    public static func verifyReply(
++        _ reply: HavenInviteReply,
++        forTicket ticket: HavenInviteTicket,
++        now: Date = Date()
++    ) throws {
++        guard reply.ticketID == ticket.ticketID else { throw Failure.ticketMismatch("ticketID") }
++        guard reply.audienceToken == ticket.audienceToken else { throw Failure.ticketMismatch("audienceToken") }
++        guard !ticket.isExpired(at: now) else { throw Failure.ticketExpired }
++        guard reply.replier.uuid != ticket.issuer.uuid else { throw Failure.issuerMismatch }
++        try verifyEnvelope(reply, signedBy: reply.replier)
++    }
++
+     private static func verifyEnvelope(
+         _ envelope: some CanonicalPayloadSignable,
+         signedBy descriptor: IdentityPublicKeyDescriptor
+@@ -501,6 +632,7 @@
+         if let publication = envelope as? HavenInvitePublication { return publication.proof }
+         if let notice = envelope as? HavenInviteRevocationNotice { return notice.proof }
+         if let request = envelope as? HavenInviteContactRequest { return request.proof }
++        if let reply = envelope as? HavenInviteReply { return reply.proof }
+         return nil
+     }
+ }
+diff -ruN base/Sources/CellBase/Invitation/HavenInviteReply.swift work/Sources/CellBase/Invitation/HavenInviteReply.swift
+--- base/Sources/CellBase/Invitation/HavenInviteReply.swift	1970-01-01 00:00:00.000000000 +0000
++++ work/Sources/CellBase/Invitation/HavenInviteReply.swift	2026-09-26 11:31:16.851990880 +0000
+@@ -0,0 +1,230 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++
++//
++//  HavenInviteReply.swift
++//  CellProtocol
++//
++//  The invitee's answer, and what a "never" leaves behind.
++//
++//  Three answers exist: yes, not now, never. The sender learns only that the
++//  invitation was answered (purpose://candidate.invite.decline-without-account, §6.5).
++//  A "never" is different in one way: it closes the door for good. The
++//  scaffold keeps a tombstone — signed by the person who said never — and
++//  refuses to publish a new invitation from that issuer to that audience
++//  (purpose://candidate.invite.no-automatic-reminders).
++//
++//  Nothing here is stored under the invitee's name on the sender's side. The
++//  tombstone names an audience token, not a person.
++//
++
++import Foundation
++
++// MARK: - Decision
++
++public enum HavenInviteDecision: String, Codable, Equatable, Sendable {
++    case yes
++    case notNow
++    case never
++
++    /// What the scaffold records. Both refusals read as "declined": the
++    /// difference between them lives in the tombstone, not in the status.
++    public var lifecycle: HavenInviteLifecycle {
++        switch self {
++        case .yes: return .accepted
++        case .notNow, .never: return .declined
++        }
++    }
++}
++
++// MARK: - Reply
++
++/// Signed by the replier's own identity — for a "yes", the brand-new one the
++/// landing page just minted; for a refusal, an ephemeral one is enough. The
++/// signature is what stops a third party from declining on someone's behalf,
++/// and what makes a tombstone something the issuer can check rather than a
++/// note the scaffold wrote to itself.
++public struct HavenInviteReply: Codable, Equatable, Sendable, CanonicalPayloadSignable {
++
++    public static let schema = "haven.invite.reply.v1"
++
++    public var schema: String
++    public var replyID: String
++    public var ticketID: String
++    /// Bound to the ticket's audience, so a reply cannot be lifted onto
++    /// another invitation to someone else.
++    public var audienceToken: String
++    public var decision: HavenInviteDecision
++    public var replier: IdentityPublicKeyDescriptor
++    /// Public key-agreement key of the replier, only meaningful on a "yes"
++    /// (purpose://candidate.invite.acceptance-carries-the-key-to-seal-to).
++    public var replierKeyAgreementKey: Data?
++    public var createdAt: Int
++    public var nonce: Data
++    public var proof: HavenSignatureProof?
++
++    public init(
++        schema: String = HavenInviteReply.schema,
++        replyID: String,
++        ticketID: String,
++        audienceToken: String,
++        decision: HavenInviteDecision,
++        replier: IdentityPublicKeyDescriptor,
++        replierKeyAgreementKey: Data? = nil,
++        createdAt: Int,
++        nonce: Data,
++        proof: HavenSignatureProof? = nil
++    ) {
++        self.schema = schema
++        self.replyID = replyID
++        self.ticketID = ticketID
++        self.audienceToken = audienceToken
++        self.decision = decision
++        self.replier = replier
++        self.replierKeyAgreementKey = replierKeyAgreementKey
++        self.createdAt = createdAt
++        self.nonce = nonce
++        self.proof = proof
++    }
++
++    public func canonicalPayloadData() throws -> Data {
++        try CanonicalPayloadEncoder.data(for: self, excludingTopLevelKeys: ["proof"])
++    }
++
++    /// Builds and signs a reply to `ticket` with `replier`'s vault key.
++    public static func make(
++        to ticket: HavenInviteTicket,
++        decision: HavenInviteDecision,
++        by replier: Identity,
++        now: Date = Date(),
++        nonce: Data? = nil
++    ) async throws -> HavenInviteReply {
++        guard let descriptor = IdentityPublicKeySignatureVerifier.descriptor(for: replier) else {
++            throw IdentityVaultError.signingFailed
++        }
++        var randomNonce = Data(count: 12)
++        for index in randomNonce.indices { randomNonce[index] = UInt8.random(in: 0...255) }
++        var reply = HavenInviteReply(
++            replyID: "rp-" + UUID().uuidString.lowercased(),
++            ticketID: ticket.ticketID,
++            audienceToken: ticket.audienceToken,
++            decision: decision,
++            replier: descriptor,
++            replierKeyAgreementKey: decision == .yes ? replier.publicKeyAgreementSecureKey?.compressedKey : nil,
++            createdAt: Int(now.timeIntervalSince1970),
++            nonce: nonce ?? randomNonce
++        )
++        reply.proof = try await HavenInviteSigning.proof(over: try reply.canonicalPayloadData(), by: replier)
++        return reply
++    }
++}
++
++// MARK: - Tombstone
++
++/// What a "never" leaves on the scaffold. It carries the signed reply, so
++/// the refusal can be re-verified by anyone who holds the ticket, and it
++/// names the issuer and the audience token it closes.
++///
++/// The scaffold consults it at *publish* time: a new ticket from the same
++/// issuer to the same audience is refused before it exists anywhere. The
++/// issuer's app sees only "Besvart"; the tombstone is not a status.
++public struct HavenInviteTombstone: Codable, Equatable, Sendable {
++
++    public static let schema = "haven.invite.tombstone.v1"
++
++    public var schema: String
++    public var issuerIdentityUUID: String
++    public var audienceToken: String
++    public var reply: HavenInviteReply
++    public var createdAt: Int
++
++    public init(
++        schema: String = HavenInviteTombstone.schema,
++        issuerIdentityUUID: String,
++        audienceToken: String,
++        reply: HavenInviteReply,
++        createdAt: Int
++    ) {
++        self.schema = schema
++        self.issuerIdentityUUID = issuerIdentityUUID
++        self.audienceToken = audienceToken
++        self.reply = reply
++        self.createdAt = createdAt
++    }
++
++    /// Only a verified "never" becomes a tombstone. A "not now" does not:
++    /// the door stays open — that answer is about *this* invitation, not all
++    /// future ones (purpose://candidate.invite.decline-without-account).
++    public static func make(
++        from reply: HavenInviteReply,
++        forTicket ticket: HavenInviteTicket,
++        now: Date = Date()
++    ) throws -> HavenInviteTombstone {
++        guard reply.decision == .never else {
++            throw HavenInvitePublicationVerifier.Failure.wrongDecision
++        }
++        try HavenInvitePublicationVerifier.verifyReply(reply, forTicket: ticket, now: now)
++        return HavenInviteTombstone(
++            issuerIdentityUUID: ticket.issuer.uuid,
++            audienceToken: ticket.audienceToken,
++            reply: reply,
++            createdAt: Int(now.timeIntervalSince1970)
++        )
++    }
++
++    /// Re-checks the enclosed reply against the ticket it answered. The
++    /// ticket may since have expired; the reply is judged at its own time.
++    public func verify(forTicket ticket: HavenInviteTicket) throws {
++        guard reply.decision == .never else {
++            throw HavenInvitePublicationVerifier.Failure.wrongDecision
++        }
++        guard issuerIdentityUUID == ticket.issuer.uuid else {
++            throw HavenInvitePublicationVerifier.Failure.issuerMismatch
++        }
++        guard audienceToken == ticket.audienceToken else {
++            throw HavenInvitePublicationVerifier.Failure.ticketMismatch("audienceToken")
++        }
++        try HavenInvitePublicationVerifier.verifyReply(
++            reply,
++            forTicket: ticket,
++            now: Date(timeIntervalSince1970: TimeInterval(reply.createdAt))
++        )
++    }
++
++    public func blocks(issuerIdentityUUID issuer: String, audienceToken token: String) -> Bool {
++        issuerIdentityUUID == issuer && audienceToken == token
++    }
++
++    /// Does this tombstone close the door on `ticket`?
++    public func blocks(_ ticket: HavenInviteTicket) -> Bool {
++        blocks(issuerIdentityUUID: ticket.issuer.uuid, audienceToken: ticket.audienceToken)
++    }
++}
++
++/// The scaffold's set of closed doors. In memory here; the scaffold persists
++/// it under its own key and rebuilds it on start.
++public struct HavenInviteTombstoneLedger: Codable, Equatable, Sendable {
++
++    public private(set) var tombstones: [HavenInviteTombstone]
++
++    public init(tombstones: [HavenInviteTombstone] = []) {
++        self.tombstones = tombstones
++    }
++
++    /// Records a tombstone. A second "never" for the same door is a no-op.
++    public mutating func record(_ tombstone: HavenInviteTombstone) {
++        guard !isClosed(issuerIdentityUUID: tombstone.issuerIdentityUUID, audienceToken: tombstone.audienceToken) else {
++            return
++        }
++        tombstones.append(tombstone)
++    }
++
++    public func isClosed(issuerIdentityUUID: String, audienceToken: String) -> Bool {
++        tombstones.contains { $0.blocks(issuerIdentityUUID: issuerIdentityUUID, audienceToken: audienceToken) }
++    }
++
++    /// What the scaffold asks before it publishes anything.
++    public func refuses(_ ticket: HavenInviteTicket) -> Bool {
++        tombstones.contains { $0.blocks(ticket) }
++    }
++}
+diff -ruN base/Sources/CellBase/Invitation/HavenInviteTicket.swift work/Sources/CellBase/Invitation/HavenInviteTicket.swift
+--- base/Sources/CellBase/Invitation/HavenInviteTicket.swift	2026-09-26 11:19:54.000000000 +0000
++++ work/Sources/CellBase/Invitation/HavenInviteTicket.swift	2026-09-26 11:31:16.839138040 +0000
+@@ -64,6 +64,52 @@
+     }
+ }
+ 
++// MARK: - Basis
++
++/// One field the issuer holds about the invitee and shows them in the
++/// invitation — exactly the field, with where it came from
++/// (purpose://candidate.invite.recipient-sees-what-is-held). Never a private
++/// note: those have no path into a ticket
++/// (purpose://candidate.invite.private-notes-never-leave).
++public struct HavenInviteBasisField: Codable, Equatable, Sendable {
++    public var key: String
++    public var value: String
++    /// Human-readable origin, e.g. "Boklisten, 12. sep." — not a file path.
++    public var origin: String?
++
++    public init(key: String, value: String, origin: String? = nil) {
++        self.key = key
++        self.value = value
++        self.origin = origin
++    }
++
++    public enum CodingKeys: String, CodingKey {
++        case key = "k"
++        case value = "v"
++        case origin = "o"
++    }
++}
++
++/// Signs a canonical payload with an identity's own vault key and returns the
++/// proof the invitation types carry. One helper, so the app, the landing page
++/// and the tests all sign the same way.
++public enum HavenInviteSigning {
++    public static func proof(over payload: Data, by identity: Identity) async throws -> HavenSignatureProof {
++        guard let descriptor = IdentityPublicKeySignatureVerifier.descriptor(for: identity) else {
++            throw IdentityVaultError.signingFailed
++        }
++        guard let signature = try await identity.sign(data: payload), signature.isEmpty == false else {
++            throw IdentityVaultError.signingFailed
++        }
++        return HavenSignatureProof(
++            byIdentityUUID: descriptor.uuid,
++            algorithm: descriptor.algorithm,
++            curveType: descriptor.curveType,
++            signature: signature
++        )
++    }
++}
++
+ // MARK: - Ticket
+ 
+ public struct HavenInviteTicket: Codable, Equatable, Sendable, CanonicalPayloadSignable {
+@@ -74,6 +120,11 @@
+         "create_own_entity",
+         "send_contact_request_to_issuer"
+     ]
++    /// purpose://candidate.invite.expires-by-itself: 14 days unless the issuer
++    /// says otherwise, and never more than 90. A ticket that claims more is
++    /// not a ticket the verifier accepts.
++    public static let defaultTimeToLive: Int = 14 * 86_400
++    public static let maximumTimeToLive: Int = 90 * 86_400
+ 
+     public var version: Int
+     public var ticketID: String
+@@ -97,6 +148,13 @@
+     /// First name only, so the landing page can greet without holding a record.
+     public var greetingName: String?
+     public var note: String?
++    /// The identityDomain the issuer sent this from — the domain the relation
++    /// will live in (purpose://candidate.invite.sender-is-the-domain-identity).
++    /// Absent on tickets issued before 2026-09-26.
++    public var identityDomain: String?
++    /// What the issuer holds about the invitee, shown to them before they
++    /// answer. Empty on older tickets.
++    public var basis: [HavenInviteBasisField]
+     /// Epoch seconds. Ints rather than ISO strings: same meaning, ~40 fewer
+     /// characters in a link that is already too long.
+     public var createdAt: Int
+@@ -117,6 +175,8 @@
+         humanCode: String,
+         greetingName: String? = nil,
+         note: String? = nil,
++        identityDomain: String? = nil,
++        basis: [HavenInviteBasisField] = [],
+         createdAt: Int,
+         expiresAt: Int,
+         nonce: Data,
+@@ -134,6 +194,8 @@
+         self.humanCode = humanCode
+         self.greetingName = greetingName
+         self.note = note
++        self.identityDomain = identityDomain
++        self.basis = basis
+         self.createdAt = createdAt
+         self.expiresAt = expiresAt
+         self.nonce = nonce
+@@ -153,6 +215,8 @@
+         case humanCode = "hc"
+         case greetingName = "gn"
+         case note = "no"
++        case identityDomain = "id"
++        case basis = "bs"
+         case createdAt = "ca"
+         case expiresAt = "ea"
+         case nonce = "nc"
+@@ -173,6 +237,8 @@
+         humanCode = try container.decode(String.self, forKey: .humanCode)
+         greetingName = try container.decodeIfPresent(String.self, forKey: .greetingName)
+         note = try container.decodeIfPresent(String.self, forKey: .note)
++        identityDomain = try container.decodeIfPresent(String.self, forKey: .identityDomain)
++        basis = try container.decodeIfPresent([HavenInviteBasisField].self, forKey: .basis) ?? []
+         createdAt = try container.decode(Int.self, forKey: .createdAt)
+         expiresAt = try container.decode(Int.self, forKey: .expiresAt)
+         nonce = try container.decodeIfPresent(Data.self, forKey: .nonce) ?? Data()
+@@ -196,6 +262,8 @@
+         try container.encode(humanCode, forKey: .humanCode)
+         try container.encodeIfPresent(greetingName, forKey: .greetingName)
+         try container.encodeIfPresent(note, forKey: .note)
++        try container.encodeIfPresent(identityDomain, forKey: .identityDomain)
++        if !basis.isEmpty { try container.encode(basis, forKey: .basis) }
+         try container.encode(createdAt, forKey: .createdAt)
+         try container.encode(expiresAt, forKey: .expiresAt)
+         if !nonce.isEmpty { try container.encode(nonce, forKey: .nonce) }
+@@ -217,6 +285,12 @@
+         moment.timeIntervalSince1970 > TimeInterval(expiresAt)
+     }
+ 
++    public var timeToLive: Int { expiresAt - createdAt }
++
++    /// A ticket that claims to live longer than the maximum is refused
++    /// outright — the issuer's app clips input, the verifier holds the line.
++    public var claimsTooLongALife: Bool { timeToLive > HavenInviteTicket.maximumTimeToLive }
++
+     /// True when the ticket promises a reply channel that actually exists.
+     /// A capability with no receiver is a lie, and the composer must not
+     /// advertise it.
+@@ -467,6 +541,10 @@
+             return verdict(false, false, "bad_signature",
+                            "Signaturen stemmer ikke. Invitasjonen kan være endret underveis.", audienceMatches)
+         }
++        if ticket.claimsTooLongALife {
++            return verdict(false, true, "ttl_too_long",
++                           "Invitasjonen påstår å gjelde lenger enn \(HavenInviteTicket.maximumTimeToLive / 86_400) dager.", audienceMatches)
++        }
+         if revoked {
+             return verdict(false, true, "revoked",
+                            "\(issuerName) har trukket denne invitasjonen tilbake.", audienceMatches)
+diff -ruN base/Tests/CellBaseTests/HavenInviteRoundATests.swift work/Tests/CellBaseTests/HavenInviteRoundATests.swift
+--- base/Tests/CellBaseTests/HavenInviteRoundATests.swift	1970-01-01 00:00:00.000000000 +0000
++++ work/Tests/CellBaseTests/HavenInviteRoundATests.swift	2026-09-26 11:37:18.159327342 +0000
+@@ -0,0 +1,454 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++
++//
++//  HavenInviteRoundATests.swift
++//  PDD_invitasjon-tillit runde A, WP1–WP5.
++//
++//  Every test here is a boundary: what the ticket carries under its
++//  signature, when the verifier says no, what the sender may see, and what
++//  never leaves. Two simulated entities per test (own vault, random UUIDs).
++//
++
++import Foundation
++import XCTest
++@testable import CellBase
++
++final class HavenInviteRoundATests: XCTestCase {
++
++    // The one string that must never appear anywhere a message can go.
++    private let sentinel = "PRIVAT-NOTAT-SENTINEL-7f3a9c"
++
++    // MARK: - Fixtures
++
++    private struct Issued {
++        let issuer: SimulatedEntity
++        let ticket: HavenInviteTicket
++    }
++
++    private func basis() -> HavenContactBasisV1 {
++        HavenContactBasisV1(
++            fields: [
++                .init(key: "name", value: "Vegar Testesen",
++                      origin: .init(file: "Boklisten", date: "12. sep.", column: "Navn")),
++                .init(key: "email", value: "vegar@example.test",
++                      origin: .init(file: "Boklisten", date: "12. sep.", column: "Epost"))
++            ],
++            privateNotes: "Møtte ham på seminaret. \(sentinel)"
++        )
++    }
++
++    private func issue(
++        domain: String = "private",
++        basis: HavenContactBasisV1? = nil,
++        ttl: Int = HavenInviteTicket.defaultTimeToLive,
++        now: Date = Date(),
++        endpoint: String? = "ep-1"
++    ) async throws -> Issued {
++        let issuer = await SimulatedEntity.make("kjetil", domain: domain)
++        let descriptor = try XCTUnwrap(IdentityPublicKeySignatureVerifier.descriptor(for: issuer.owner))
++        let createdAt = Int(now.timeIntervalSince1970)
++        var ticket = HavenInviteTicket(
++            ticketID: "inv-" + UUID().uuidString.lowercased(),
++            issuer: descriptor,
++            issuerDisplayName: "Kjetil",
++            issuerContactEndpoint: endpoint,
++            audienceToken: "aud-vegar",
++            audienceKind: "email",
++            humanCode: "ABC234",
++            greetingName: "Vegar",
++            identityDomain: domain,
++            basis: (basis ?? self.basis()).basisFields(),
++            createdAt: createdAt,
++            expiresAt: createdAt + ttl,
++            nonce: Data(repeating: 7, count: 12)
++        )
++        ticket.proof = try await HavenInviteSigning.proof(over: try ticket.canonicalPayloadData(), by: issuer.owner)
++        return Issued(issuer: issuer, ticket: ticket)
++    }
++
++    private func publication(for issued: Issued, now: Date = Date()) async throws -> HavenInvitePublication {
++        var publication = HavenInvitePublication(
++            ticketID: issued.ticket.ticketID,
++            humanCode: issued.ticket.humanCode,
++            ticketToken: try HavenInviteLink.encode(issued.ticket),
++            audienceToken: issued.ticket.audienceToken,
++            issuerIdentityUUID: issued.ticket.issuer.uuid,
++            expiresAt: issued.ticket.expiresAt,
++            publishedAt: Int(now.timeIntervalSince1970),
++            statusKey: HavenInvitePublication.makeStatusKey()
++        )
++        publication.proof = try await HavenInviteSigning.proof(over: try publication.canonicalPayloadData(), by: issued.issuer.owner)
++        return publication
++    }
++
++    private func contactRequest(
++        from invitee: SimulatedEntity,
++        to issued: Issued,
++        message: String? = nil,
++        now: Date = Date()
++    ) async throws -> HavenInviteContactRequest {
++        let descriptor = try XCTUnwrap(IdentityPublicKeySignatureVerifier.descriptor(for: invitee.owner))
++        let createdAt = Int(now.timeIntervalSince1970)
++        var request = HavenInviteContactRequest(
++            requestID: "req-" + UUID().uuidString.lowercased(),
++            ticketID: issued.ticket.ticketID,
++            issuerEndpointID: issued.ticket.issuerContactEndpoint ?? "",
++            sender: descriptor,
++            senderDisplayName: "Vegar",
++            message: message,
++            senderKeyAgreementKey: invitee.owner.publicKeyAgreementSecureKey?.compressedKey,
++            createdAt: createdAt,
++            expiresAt: createdAt + 3_600,
++            nonce: Data(repeating: 9, count: 12)
++        )
++        request.proof = try await HavenInviteSigning.proof(over: try request.canonicalPayloadData(), by: invitee.owner)
++        return request
++    }
++
++    private func failureCode(_ body: () throws -> Void) -> String? {
++        do { try body(); return nil } catch let failure as HavenInvitePublicationVerifier.Failure { return failure.code } catch { return "other:\(error)" }
++    }
++
++    // MARK: - WP1  M: the sender is the domain identity
++
++    func testTicketCarriesIdentityDomainUnderSignature() async throws {
++        let issued = try await issue(domain: "work")
++        XCTAssertEqual(issued.ticket.identityDomain, "work")
++        XCTAssertEqual(HavenInviteVerifier.verify(ticket: issued.ticket).code, "valid")
++
++        // Round trip through the link keeps it.
++        let decoded = try HavenInviteLink.decode(try HavenInviteLink.encode(issued.ticket))
++        XCTAssertEqual(decoded.identityDomain, "work")
++        XCTAssertEqual(HavenInviteVerifier.verify(ticket: decoded).code, "valid")
++
++        // Swapping the domain after signing breaks the signature.
++        var tampered = issued.ticket
++        tampered.identityDomain = "private"
++        XCTAssertEqual(HavenInviteVerifier.verify(ticket: tampered).code, "bad_signature")
++    }
++
++    func testTicketWithoutDomainOrBasisStillEncodesAndDecodesAsBefore() async throws {
++        // A ticket issued by an app from before 26.09 has neither "id" nor "bs".
++        let issued = try await issue()
++        var old = issued.ticket
++        old.identityDomain = nil
++        old.basis = []
++        old.proof = try await HavenInviteSigning.proof(over: try old.canonicalPayloadData(), by: issued.issuer.owner)
++        let token = try HavenInviteLink.encode(old)
++        let json = String(decoding: try XCTUnwrap(HavenInviteLink.dataFromBase64URL(token)), as: UTF8.self)
++        XCTAssertFalse(json.contains("\"id\""))
++        XCTAssertFalse(json.contains("\"bs\""))
++        let decoded = try HavenInviteLink.decode(token)
++        XCTAssertNil(decoded.identityDomain)
++        XCTAssertEqual(decoded.basis, [])
++        XCTAssertEqual(HavenInviteVerifier.verify(ticket: decoded).code, "valid")
++    }
++
++    // MARK: - WP2  O: expires by itself
++
++    func testDefaultLifeIsFourteenDaysAndMaximumNinety() async throws {
++        let issued = try await issue()
++        XCTAssertEqual(issued.ticket.timeToLive, 14 * 86_400)
++        XCTAssertEqual(HavenInviteTicket.maximumTimeToLive, 90 * 86_400)
++        XCTAssertFalse(issued.ticket.claimsTooLongALife)
++    }
++
++    func testTicketClaimingMoreThanNinetyDaysIsRefusedEvenWhenWellSigned() async throws {
++        let issued = try await issue(ttl: 91 * 86_400)
++        let verdict = HavenInviteVerifier.verify(ticket: issued.ticket)
++        XCTAssertTrue(verdict.signatureValid)
++        XCTAssertFalse(verdict.isValid)
++        XCTAssertEqual(verdict.code, "ttl_too_long")
++
++        let publication = try await publication(for: issued)
++        XCTAssertEqual(failureCode { _ = try HavenInvitePublicationVerifier.verifyPublication(publication) }, "ticket_invalid:ttl_too_long")
++    }
++
++    func testExpiredTicketIsDeadOnPublicationReplyAndContactRequest() async throws {
++        let past = Date().addingTimeInterval(-30 * 86_400)
++        let issued = try await issue(ttl: 14 * 86_400, now: past)
++        XCTAssertTrue(issued.ticket.isExpired())
++        XCTAssertEqual(HavenInviteVerifier.verify(ticket: issued.ticket).code, "expired")
++
++        let publication = try await publication(for: issued)
++        XCTAssertEqual(failureCode { _ = try HavenInvitePublicationVerifier.verifyPublication(publication) }, "ticket_expired")
++
++        let vegar = await SimulatedEntity.make("vegar")
++        let request = try await contactRequest(from: vegar, to: issued)
++        XCTAssertEqual(failureCode { try HavenInvitePublicationVerifier.verifyContactRequest(request, forTicket: issued.ticket) }, "ticket_expired")
++
++        let reply = try await HavenInviteReply.make(to: issued.ticket, decision: .yes, by: vegar.owner)
++        XCTAssertEqual(failureCode { try HavenInvitePublicationVerifier.verifyReply(reply, forTicket: issued.ticket) }, "ticket_expired")
++    }
++
++    func testPublicationMustAgreeWithTicketOnExpiry() async throws {
++        let issued = try await issue()
++        var publication = try await publication(for: issued)
++        publication.expiresAt += 86_400
++        publication.proof = try await HavenInviteSigning.proof(over: try publication.canonicalPayloadData(), by: issued.issuer.owner)
++        XCTAssertEqual(failureCode { _ = try HavenInvitePublicationVerifier.verifyPublication(publication) }, "ticket_mismatch")
++    }
++
++    // MARK: - WP3  C + D: the basis is a claim with an origin, and only the basis
++
++    func testBasisRejectsFreeTextAndUnknownKeys() throws {
++        var good = basis()
++        XCTAssertNoThrow(try good.validate())
++
++        var unknownKey = good
++        unknownKey.fields.append(.init(key: "notes", value: "husk å ringe"))
++        XCTAssertThrowsError(try unknownKey.validate()) { error in
++            XCTAssertEqual(error as? HavenContactBasisV1.ValidationError, .unknownKey("notes"))
++        }
++
++        var freeText = good
++        freeText.fields[0].value = "Vegar, som jeg møtte på seminaret i fjor og som sa han var interessert i det vi driver med, kanskje"
++        XCTAssertThrowsError(try freeText.validate()) { error in
++            XCTAssertEqual(error as? HavenContactBasisV1.ValidationError, .freeText("name"))
++        }
++
++        var multiline = good
++        multiline.fields[1].value = "vegar@example.test\nring før 10"
++        XCTAssertThrowsError(try multiline.validate()) { error in
++            XCTAssertEqual(error as? HavenContactBasisV1.ValidationError, .freeText("email"))
++        }
++
++        good.fields[0].status = .confirmed
++        XCTAssertNoThrow(try good.validate())
++    }
++
++    func testBasisFieldsAreMarkedUnconfirmedWithOrigin() throws {
++        let held = basis()
++        XCTAssertTrue(held.fields.allSatisfy { $0.status == .unconfirmed })
++        let shown = held.basisFields()
++        XCTAssertEqual(shown.count, 2)
++        XCTAssertEqual(shown[1].origin, "Boklisten, 12. sep., kolonne Epost")
++        // The person can confirm or erase a claim; the rest stands.
++        XCTAssertEqual(held.confirming("email").fields[1].status, .confirmed)
++        XCTAssertEqual(held.confirming("email").fields[0].status, .unconfirmed)
++        XCTAssertEqual(held.erasing("email").fields.map(\.key), ["name"])
++    }
++
++    // MARK: - WP4  G + R: shown equals held; private notes never leave
++
++    func testTicketCarriesExactlyTheBasisAndNothingFromPrivateNotes() async throws {
++        let held = basis()
++        let issued = try await issue(basis: held)
++        XCTAssertTrue(held.shownEqualsHeld(issued.ticket.basis))
++        XCTAssertEqual(HavenInviteVerifier.verify(ticket: issued.ticket).code, "valid")
++
++        // A basis edited after signing is a different ticket.
++        var tampered = issued.ticket
++        tampered.basis[0].value = "Someone Else"
++        XCTAssertEqual(HavenInviteVerifier.verify(ticket: tampered).code, "bad_signature")
++
++        // The sentinel from privateNotes is in none of the things that travel.
++        let token = try HavenInviteLink.encode(issued.ticket)
++        XCTAssertFalse(token.contains(sentinel))
++        XCTAssertFalse(try HavenInviteLink.decode(token).basis.contains { $0.value.contains(sentinel) || ($0.origin ?? "").contains(sentinel) })
++
++        let publication = try await publication(for: issued)
++        let publicationJSON = String(decoding: try JSONEncoder().encode(publication), as: UTF8.self)
++        XCTAssertFalse(publicationJSON.contains(sentinel))
++
++        let vegar = await SimulatedEntity.make("vegar")
++        let request = try await contactRequest(from: vegar, to: issued, message: "Hei!")
++        let requestJSON = String(decoding: try JSONEncoder().encode(request), as: UTF8.self)
++        XCTAssertFalse(requestJSON.contains(sentinel))
++        let endpointPayload = try JSONEncoder().encode(request.contactEndpointPayload())
++        XCTAssertFalse(String(decoding: endpointPayload, as: UTF8.self).contains(sentinel))
++
++        let message = HavenInviteCopy.compose(
++            ticket: issued.ticket,
++            recipientDisplayName: "Vegar Testesen",
++            recipientEndpoint: "vegar@example.test",
++            link: "https://example.test/i/ABC234",
++            channel: "email",
++            senderNote: nil
++        )
++        XCTAssertFalse(message.body.contains(sentinel))
++        XCTAssertFalse((message.handoffURL ?? "").contains(sentinel))
++    }
++
++    func testShownEqualsHeldComparesAgainstTheBasisNotTheWholeRecord() throws {
++        let held = basis()
++        // Same fields, different order: still equal.
++        XCTAssertTrue(held.shownEqualsHeld(held.basisFields().reversed()))
++        // One field fewer than held: not equal — the person would see less than is held.
++        XCTAssertFalse(held.shownEqualsHeld(Array(held.basisFields().dropLast())))
++        // One field more: not equal — the invitation claims more than is held.
++        XCTAssertFalse(held.shownEqualsHeld(held.basisFields() + [HavenInviteBasisField(key: "phone", value: "+4700000000")]))
++    }
++
++    // MARK: - WP5  E + F: one message, a tombstone, "besvart — ikke nå"
++
++    func testNeverLeavesAVerifiableTombstoneThatBlocksTheNextTicket() async throws {
++        let issued = try await issue()
++        let vegar = await SimulatedEntity.make("vegar")
++        let never = try await HavenInviteReply.make(to: issued.ticket, decision: .never, by: vegar.owner)
++        XCTAssertNil(never.replierKeyAgreementKey, "A refusal carries no key to seal to.")
++
++        let tombstone = try HavenInviteTombstone.make(from: never, forTicket: issued.ticket)
++        XCTAssertNoThrow(try tombstone.verify(forTicket: issued.ticket))
++
++        var ledger = HavenInviteTombstoneLedger()
++        ledger.record(tombstone)
++        ledger.record(tombstone)
++        XCTAssertEqual(ledger.tombstones.count, 1)
++
++        // A second ticket from the same issuer to the same audience is refused.
++        let descriptor = try XCTUnwrap(IdentityPublicKeySignatureVerifier.descriptor(for: issued.issuer.owner))
++        let now = Int(Date().timeIntervalSince1970)
++        let again = HavenInviteTicket(
++            ticketID: "inv-again", issuer: descriptor, issuerDisplayName: "Kjetil",
++            audienceToken: issued.ticket.audienceToken, audienceKind: "email", humanCode: "DEF567",
++            createdAt: now, expiresAt: now + 86_400, nonce: Data(repeating: 1, count: 12)
++        )
++        XCTAssertTrue(ledger.refuses(again))
++
++        // …but not one to someone else, and not one from another issuer.
++        var other = again
++        other.audienceToken = "aud-someone-else"
++        XCTAssertFalse(ledger.refuses(other))
++        let otherIssuer = await SimulatedEntity.make("victoria")
++        var fromOther = again
++        fromOther.issuer = try XCTUnwrap(IdentityPublicKeySignatureVerifier.descriptor(for: otherIssuer.owner))
++        XCTAssertFalse(ledger.refuses(fromOther))
++
++        // The tombstone survives the ticket's own expiry: it is judged at reply time.
++        let expiredCopy = issued.ticket
++        XCTAssertNoThrow(try tombstone.verify(forTicket: expiredCopy))
++        let ledgerJSON = try JSONEncoder().encode(ledger)
++        let reloaded = try JSONDecoder().decode(HavenInviteTombstoneLedger.self, from: ledgerJSON)
++        XCTAssertTrue(reloaded.refuses(again))
++        XCTAssertNoThrow(try reloaded.tombstones[0].verify(forTicket: issued.ticket))
++    }
++
++    func testForgedOrMisdirectedNeverIsNotATombstone() async throws {
++        let issued = try await issue()
++        let vegar = await SimulatedEntity.make("vegar")
++
++        // The issuer cannot say "never" on the invitee's behalf.
++        let byIssuer = try await HavenInviteReply.make(to: issued.ticket, decision: .never, by: issued.issuer.owner)
++        XCTAssertEqual(failureCode { _ = try HavenInviteTombstone.make(from: byIssuer, forTicket: issued.ticket) }, "issuer_mismatch")
++
++        // A reply edited after signing does not verify.
++        var edited = try await HavenInviteReply.make(to: issued.ticket, decision: .notNow, by: vegar.owner)
++        edited.decision = .never
++        XCTAssertEqual(failureCode { _ = try HavenInviteTombstone.make(from: edited, forTicket: issued.ticket) }, "bad_signature")
++
++        // A "never" for another audience cannot be lifted onto this ticket.
++        var lifted = try await HavenInviteReply.make(to: issued.ticket, decision: .never, by: vegar.owner)
++        lifted.audienceToken = "aud-someone-else"
++        XCTAssertEqual(failureCode { _ = try HavenInviteTombstone.make(from: lifted, forTicket: issued.ticket) }, "ticket_mismatch")
++
++        // "Not now" is an answer, not a tombstone.
++        let notNow = try await HavenInviteReply.make(to: issued.ticket, decision: .notNow, by: vegar.owner)
++        XCTAssertNoThrow(try HavenInvitePublicationVerifier.verifyReply(notNow, forTicket: issued.ticket))
++        XCTAssertEqual(failureCode { _ = try HavenInviteTombstone.make(from: notNow, forTicket: issued.ticket) }, "wrong_decision")
++        XCTAssertEqual(notNow.decision.lifecycle, .declined)
++    }
++
++    func testSenderSeesAnsweredOnlyAndNeverOpened() throws {
++        XCTAssertEqual(HavenInviteSenderView(.published), .published)
++        XCTAssertEqual(HavenInviteSenderView(.opened), .published, "Opened is not something the sender learns.")
++        XCTAssertEqual(HavenInviteSenderView(.accepted), .answered)
++        XCTAssertEqual(HavenInviteSenderView(.declined), .answered)
++        XCTAssertEqual(HavenInviteSenderView(.expired), .expired)
++        XCTAssertEqual(HavenInviteSenderView(.revoked), .revoked)
++
++        let declined = HavenInviteStatusReport(
++            ticketID: "inv-1", state: .declined, firstOpenedAt: 1_700_000_000, openCount: 3, respondedAt: 1_700_000_500
++        ).projectedForSender()
++        let neverAnswered = HavenInviteStatusReport(
++            ticketID: "inv-1", state: .declined, firstOpenedAt: 1_700_000_000, openCount: 1, respondedAt: 1_700_000_500
++        ).projectedForSender()
++        XCTAssertEqual(declined, neverAnswered, "Not now and never look the same to the sender.")
++        XCTAssertEqual(declined.displayText, "Besvart — ikke nå")
++
++        let accepted = HavenInviteStatusReport(
++            ticketID: "inv-1", state: .accepted, openCount: 5, respondedAt: 1_700_000_500, contactRequestCount: 1
++        ).projectedForSender()
++        XCTAssertEqual(accepted.view, .answered)
++        XCTAssertEqual(accepted.displayText, "Besvart")
++
++        let opened = HavenInviteStatusReport(ticketID: "inv-1", state: .opened, firstOpenedAt: 1_700_000_000, openCount: 2).projectedForSender()
++        XCTAssertEqual(opened.view, .published)
++        XCTAssertNil(opened.respondedAt)
++        let json = String(decoding: try JSONEncoder().encode(opened), as: UTF8.self)
++        XCTAssertFalse(json.contains("openCount"))
++        XCTAssertFalse(json.contains("firstOpenedAt"))
++    }
++
++    // MARK: - T (first half): the acceptance carries the key to seal to
++
++    func testChatAcceptanceCarriesInviteeKeyAgreementKeyUnderSignature() async throws {
++        let kjetil = await SimulatedEntity.make("kjetil")
++        let vegar = await SimulatedEntity.make("vegar")
++        XCTAssertNotNil(vegar.owner.publicKeyAgreementSecureKey, "A simulated entity can be sealed to.")
++
++        let artifact = try await ChatInvitationProofUtility.generateInvitationArtifact(
++            chatCellUUID: "chat-cell",
++            topic: "general",
++            audienceMode: "invited",
++            suiteID: "suite",
++            persistenceMode: "local",
++            inviter: kjetil.owner,
++            invited: vegar.owner,
++            invitationID: "invitation-1",
++            createdAt: "2026-01-01T00:00:00Z",
++            expiresAt: "2999-01-01T00:00:00Z",
++            nonce: Data(repeating: 0x11, count: 64)
++        )
++        let acceptance = try await ChatInvitationProofUtility.generateAcceptance(
++            for: artifact,
++            invitee: vegar.owner,
++            acceptanceID: "acceptance-1",
++            createdAt: "2026-01-01T00:00:01Z",
++            nonce: Data(repeating: 0x12, count: 64)
++        )
++        XCTAssertEqual(acceptance.inviteeKeyAgreementKey, vegar.owner.publicKeyAgreementSecureKey?.compressedKey)
++        let verified = try await ChatInvitationProofUtility.verifyAcceptance(acceptance, for: artifact, expectedChatCellUUID: "chat-cell", identityVault: kjetil.vault)
++        XCTAssertTrue(verified)
++
++        // Swapping the key after signing is caught: an attacker cannot make the
++        // inviter seal to a key of their choosing.
++        var swapped = acceptance
++        swapped.inviteeKeyAgreementKey = Data(repeating: 0xEE, count: 32)
++        do {
++            _ = try await ChatInvitationProofUtility.verifyAcceptance(swapped, for: artifact, expectedChatCellUUID: "chat-cell", identityVault: kjetil.vault)
++            XCTFail("A swapped key-agreement key must not verify.")
++        } catch {
++            // expected
++        }
++
++        // On the inviter's side, the identity built from the acceptance can be sealed to.
++        let rebuilt = ChatInvitationProofUtility.identity(from: acceptance.inviteeIdentity, keyAgreementKey: acceptance.inviteeKeyAgreementKey)
++        XCTAssertEqual(rebuilt.publicKeyAgreementSecureKey?.compressedKey, vegar.owner.publicKeyAgreementSecureKey?.compressedKey)
++        XCTAssertEqual(rebuilt.publicKeyAgreementSecureKey?.use, .keyAgreement)
++
++        // And an acceptance from an older app (no key) still verifies — it just cannot be sealed to.
++        var legacy = acceptance
++        legacy.inviteeKeyAgreementKey = nil
++        XCTAssertNil(ChatInvitationProofUtility.identity(from: legacy.inviteeIdentity, keyAgreementKey: legacy.inviteeKeyAgreementKey).publicKeyAgreementSecureKey)
++    }
++
++    func testContactRequestCarriesSenderKeyAgreementKeyIntoTheEndpointPayload() async throws {
++        let issued = try await issue()
++        let vegar = await SimulatedEntity.make("vegar")
++        let request = try await contactRequest(from: vegar, to: issued)
++        XCTAssertNoThrow(try HavenInvitePublicationVerifier.verifyContactRequest(request, forTicket: issued.ticket))
++        XCTAssertEqual(request.senderKeyAgreementKey, vegar.owner.publicKeyAgreementSecureKey?.compressedKey)
++
++        let payload = request.contactEndpointPayload()
++        guard case let .object(inner)? = payload["payload"], case let .string(key)? = inner["introKeyAgreementKey"] else {
++            return XCTFail("The endpoint payload must carry the key.")
++        }
++        XCTAssertEqual(Data(base64Encoded: key), vegar.owner.publicKeyAgreementSecureKey?.compressedKey)
++
++        var swapped = request
++        swapped.senderKeyAgreementKey = Data(repeating: 0xEE, count: 32)
++        XCTAssertEqual(failureCode { try HavenInvitePublicationVerifier.verifyContactRequest(swapped, forTicket: issued.ticket) }, "bad_signature")
++    }
++}

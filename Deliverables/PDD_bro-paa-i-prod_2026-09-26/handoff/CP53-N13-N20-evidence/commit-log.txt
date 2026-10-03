@@ -1,0 +1,44 @@
+commit ff8b9e259caa517b299bb399424c1115335e91de
+Author:     Kjetil Hustveit <kjetil@digipomps.org>
+AuthorDate: Tue Sep 29 06:50:47 2026 +0200
+Commit:     Kjetil Hustveit <kjetil@digipomps.org>
+CommitDate: Tue Sep 29 06:50:47 2026 +0200
+
+    PDD_bro-paa-i-prod_2026-09-26 N13/N20: derive encounter role from session binding
+    
+    Two devices may use the same signing identity. Select the local encounter role from the validated requester session, not identity UUID equality. Add a real signed exchange and EntityAnchor persistence regression for this case.
+    
+    Validation: targeted real-consumer regression passed.
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_011CHU13qBKbb5szsQQo53rW
+
+commit b85a877a28e80f8507c789a1c786ad5c79963f27
+Author:     Kjetil Hustveit <kjetil@digipomps.org>
+AuthorDate: Tue Sep 29 06:43:07 2026 +0200
+Commit:     Kjetil Hustveit <kjetil@digipomps.org>
+CommitDate: Tue Sep 29 06:43:07 2026 +0200
+
+    PDD_bro-paa-i-prod_2026-09-26 N13/N20: align native retirement observation
+    
+    Use the same physical session state and remote-observation window for raw peers as for authenticated peers. Preserve all retirement, post-close send and healthy-sibling assertions. The first native run timed out on the callback deadline, while an unchanged rerun passed; production expiry and quotas are unchanged.
+    
+    Full build and full suite completed with only the three known local Keychain failures. All eight new consumer regressions and both bridge description tests passed under Thread Sanitizer.
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_011CHU13qBKbb5szsQQo53rW
+
+commit 89ba71e0717333f55d088b2250407578666c9105
+Author:     Kjetil Hustveit <kjetil@digipomps.org>
+AuthorDate: Tue Sep 29 06:38:28 2026 +0200
+Commit:     Kjetil Hustveit <kjetil@digipomps.org>
+CommitDate: Tue Sep 29 06:38:28 2026 +0200
+
+    PDD_bro-paa-i-prod_2026-09-26 N13/N20: bind Scanner consumers and contact proofs
+    
+    Await the real MainActor consumer under the authenticated work lease; bound pending records to the captured channel and consume contact acceptances once. Validate all signed request/session/principal bindings and atomically guard the encrypted EntityAnchor commit. Add real-consumer suspension, flood, replay and persistence regressions and include them in TSAN CI.
+    
+    Validation so far: full build passed; full test 1459 tests, only three known local Keychain failures. Both native invitation directions passed; the appended physical-isolation scenario timed out during expiry and is being investigated.
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_011CHU13qBKbb5szsQQo53rW

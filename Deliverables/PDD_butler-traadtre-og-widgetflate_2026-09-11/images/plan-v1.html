@@ -1,0 +1,79 @@
+<!doctype html><html lang="no"><head><meta charset="utf-8"><title>Plan — Butler Chat</title>
+<style>
+body{margin:0;background:#f3f7fb;font:14px/1.35 "Avenir Next","Segoe UI",system-ui,sans-serif;color:#17212b}
+#stage{position:relative;width:1900px;height:1100px}
+.lane{position:absolute;top:0;bottom:0;border-left:1px dashed #d5e0eb}
+.lane h2{margin:0;padding:10px 12px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:#556273}
+.box{position:absolute;width:250px;min-height:44px;background:#fff;border:1.5px solid #d5e0eb;border-radius:10px;padding:9px 12px;box-shadow:0 1px 2px rgba(16,32,48,.06)}
+.box b{display:block;font-size:13px;margin-bottom:3px}
+.box span{color:#556273;font-size:12px}
+.box .who{position:absolute;top:-9px;right:10px;font-size:10.5px;padding:1px 7px;border-radius:10px;background:#0f4c81;color:#fff}
+.box.kjetil{border-color:#ef7c2d;border-width:2.5px;background:#fff7f0}
+.box.kjetil .who{background:#ef7c2d}
+.box.done{border-color:#0f8a61;background:#f2fbf7}
+.box.done .who{background:#0f8a61}
+.box.natt{border-color:#0f4c81;border-width:2px;background:#eef4fa}
+.box.codex .who{background:#7a4fbf}
+svg{position:absolute;left:0;top:0;pointer-events:none}
+.legend{position:absolute;left:20px;bottom:14px;font-size:12px;color:#556273;display:flex;gap:18px;align-items:center}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;border:2px solid;vertical-align:-2px;margin-right:5px}
+</style></head><body><div id="stage">
+<div class="lane" style="left:0;width:380px"><h2>Forutsetninger</h2></div>
+<div class="lane" style="left:380px;width:380px"><h2>A · hjelpertre (PR 1)</h2></div>
+<div class="lane" style="left:760px;width:380px"><h2>B · widgetflate (PR 2)</h2></div>
+<div class="lane" style="left:1140px;width:380px"><h2>Paritet · dokumentasjon</h2></div>
+<div class="lane" style="left:1520px;width:380px"><h2>Deploy</h2></div>
+
+
+<div class="box done" id="k1" style="left:60px;top:60px"><span class="who">Codex · levert</span><b>WP-K1 Elementkart ×3</b><span>tre / chat / flate: hva dagens format kan, og hva som mangler</span></div>
+<div class="box kjetil" id="k2" style="left:60px;top:170px"><span class="who">Kjetil</span><b>WP-K2 Ja/nei til nye elementer</b><span>listen i handoff/SKJELETT_ELEMENTER.md</span></div>
+<div class="box codex" id="r" style="left:60px;top:280px"><span class="who">Codex + Xcode</span><b>WP-R Format + renderere</b><span>gren pdd/skjelett-elementer (PR 0)</span></div>
+<div class="box" id="k3" style="left:60px;top:500px"><span class="who">Claude</span><b>WP-K3 Iterasjon mot staging</b><span>modifikatorer justeres til flaten ser ut som mockupen</span></div>
+<div class="box" id="wp0" style="left:60px;top:720px"><span class="who">Kjetil + Codex</span><b>WP0 Baseline</b><span>disk må ryddes først (7,5 % ledig)</span></div>
+
+<div class="box natt codex" id="a5" style="left:440px;top:60px"><span class="who">Codex · i natt</span><b>WP-A5 Datamodell</b><span>hjelpertre i cellen, migrering</span></div>
+<div class="box natt codex" id="a1" style="left:440px;top:170px"><span class="who">Codex · i natt</span><b>WP-A1 Node = hjelper m/ forelder</b><span>kontraktstest</span></div>
+<div class="box natt codex" id="a2" style="left:440px;top:280px"><span class="who">Codex · i natt</span><b>WP-A2 Skop</b><span>undertre / bare denne</span></div>
+<div class="box natt" id="pr1" style="left:440px;top:390px"><span class="who">Kjetil · i morgen</span><b>PR 1 → CI</b><span>gren pdd/butler-hjelpertre</span></div>
+<div class="box codex" id="a3" style="left:440px;top:500px"><span class="who">Codex</span><b>WP-A3 Ruting</b><span>oppover til Butler; feillinjen (PR 3)</span></div>
+<div class="box codex" id="a4" style="left:440px;top:610px"><span class="who">Codex</span><b>WP-A4 Forslag om ny hjelper</b><span>fra formålsmatching — måles mot nullreferanse</span></div>
+
+<div class="box natt codex" id="b0" style="left:820px;top:60px"><span class="who">Codex · i natt</span><b>WP-B0 restore/pinned</b><span>mistenkt feil lukkes først</span></div>
+<div class="box natt codex" id="b2b" style="left:820px;top:170px"><span class="who">Codex · i natt</span><b>WP-B2b Persistens</b><span>widgets eies av brukeren, i cellen</span></div>
+<div class="box natt codex" id="b1" style="left:820px;top:280px"><span class="who">Codex · i natt</span><b>WP-B1 Grep + slipp (web)</b><span>kort ut av loggen → «Flaten rundt»</span></div>
+<div class="box natt" id="pr2" style="left:820px;top:390px"><span class="who">Kjetil · i morgen</span><b>PR 2 → CI</b><span>gren pdd/butler-widgetflate</span></div>
+<div class="box codex" id="b2" style="left:820px;top:500px"><span class="who">Codex</span><b>WP-B2 Levende binding</b><span>widget følger kilden (PR 4)</span></div>
+<div class="box codex" id="b3" style="left:820px;top:610px"><span class="who">Codex</span><b>WP-B3 Full flate</b><span>flere kolonner (trenger WP-R)</span></div>
+<div class="box codex" id="b4" style="left:820px;top:720px"><span class="who">Codex</span><b>WP-B4 Nåbarhet</b><span>alt widgeten kan, kan bes om i chatten</span></div>
+<div class="box codex" id="b2c" style="left:820px;top:830px"><span class="who">Codex</span><b>WP-B2c Skopforslag</b><span>alle / denne / utvalg — fra formål</span></div>
+
+<div class="box" id="c1" style="left:1200px;top:500px"><span class="who">Xcode / Kjetil</span><b>WP-C1 Paritet HAVEN app</b><span>én fabrikk; app-DnD egen PDD</span></div>
+<div class="box" id="c2" style="left:1200px;top:720px"><span class="who">Claude + Astra</span><b>WP-C2 Mønsterdokumenter</b><span>referansetre · løsrivbart element</span></div>
+
+<div class="box kjetil" id="d1" style="left:1580px;top:350px"><span class="who">Kjetil · i morgen</span><b>WP-D1 Staging</b><span>KJOR-SELV-MORGEN.sh: push, PR, CI, merge, deploy</span></div>
+<div class="box kjetil" id="g3" style="left:1580px;top:500px"><span class="who">Kjetil</span><b>G3 Akseptanse</b><span>ACCEPT.md: forventet mot faktisk, bilde mot bilde</span></div>
+<div class="box kjetil" id="d2" style="left:1580px;top:610px"><span class="who">Kjetil</span><b>WP-D2 Prod</b><span>bare etter verifisert staging (R-D24)</span></div>
+
+<div class="legend"><span><i style="border-color:#0f8a61;background:#f2fbf7"></i>levert</span><span><i style="border-color:#0f4c81;background:#eef4fa"></i>kjører i natt (dagens skjelettformat)</span><span><i style="border-color:#ef7c2d;background:#fff7f0"></i>din handling</span><span><i style="border-color:#d5e0eb;background:#fff"></i>senere</span></div>
+<svg id="arrows" width="1900" height="1100"></svg>
+</div>
+<script>
+// kanter: [fra, til, type]  v = rett ned i samme lane, h = rett til høyre i samme rad, bus = ortogonal via buss-y og gutter
+const E=[["k1","k2","v"],["k2","r","v"],["r","k3","v"],
+["a5","a1","v"],["a1","a2","v"],["a2","pr1","v"],["pr1","a3","v"],["a3","a4","v"],
+["b0","b2b","v"],["b2b","b1","v"],["b1","pr2","v"],["pr2","b2","v"],["b2","b3","v"],["b3","b4","v"],["b4","b2c","v"],
+["d1","g3","v"],["g3","d2","v"],
+["pr1","d1","top",372],["pr2","d1","top",372],
+["r","a3","bus",475],["r","b3","bus",475],["r","c1","bus",475],
+["k3","c1","bus",585],["a4","c2","bus",695],["b4","c2","h"]];
+const svg=document.getElementById('arrows');
+svg.innerHTML='<defs><marker id="m" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#556273"/></marker></defs>';
+const st=document.getElementById('stage').getBoundingClientRect();
+function r(id){const b=document.getElementById(id).getBoundingClientRect();return{l:b.left-st.left,t:b.top-st.top,r:b.right-st.left,b:b.bottom-st.top,cx:(b.left+b.right)/2-st.left,cy:(b.top+b.bottom)/2-st.top}}
+for(const [a,b,k,y] of E){const A=r(a),B=r(b);let d;
+ if(k==='v') d=`M${A.cx},${A.b} L${B.cx},${B.t}`;
+ else if(k==='h') d=`M${A.r},${A.cy} L${B.l},${B.cy}`;
+ else if(k==='top') d=`M${A.cx},${A.t} V${y} H${B.l}`;
+ else { const gx=B.l-22; d=`M${A.cx},${A.b} V${y} H${gx} V${B.cy} H${B.l}`; }
+ const p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',d);p.setAttribute('fill','none');p.setAttribute('stroke','#556273');p.setAttribute('stroke-width','1.6');p.setAttribute('marker-end','url(#m)');svg.appendChild(p)}
+</script></body></html>

@@ -1,0 +1,161 @@
+warning: /Users/kjetil/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/kjetil/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: '_wt-bro-kanal-auth-20260927': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Using on-disk description]
+[1 / 48] _RopeModule
+[1 / 76] Random
+[2 / 32] CellApple
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/WebSocketConnection.swift:184:64: warning: 'weak' ownership of capture 'webSocketTask' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+175 |             throw WebSocketConnectionError.NoTask
+176 |         }
+177 |       webSocketTask.sendPing { [weak self] error in
+    |                              |- note: 'webSocketTask' implicitly strongly captured here
+    |                              `- note: add 'webSocketTask' as a capture list item to silence
+178 |           guard let self = self else { return }
+179 |           guard self.webSocketTask === webSocketTask else { return }
+    :
+182 |         } else {
+183 | //            print("Web Socket connection is alive")
+184 |             let workItem = DispatchWorkItem { [weak self, weak webSocketTask] in
+    |                                                                |- warning: 'weak' ownership of capture 'webSocketTask' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+    |                                                                `- note: explicitly assign the capture list item to silence
+185 |                 guard let self = self else { return }
+186 |                 guard let webSocketTask, self.webSocketTask === webSocketTask else { return }
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/WebSocketConnection.swift:180:16: warning: value 'error' was defined but never used; consider replacing with boolean test [#NoUsage]
+178 |           guard let self = self else { return }
+179 |           guard self.webSocketTask === webSocketTask else { return }
+180 |         if let error = error {
+    |                `- warning: value 'error' was defined but never used; consider replacing with boolean test [#NoUsage]
+181 |           CellBase.diagnosticLog("Websocket ping failed code=ping_failed", domain: .bridge)
+182 |         } else {
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/WebSocketConnection.swift:319:64: warning: 'weak' ownership of capture 'webSocketTask' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+310 |             throw WebSocketConnectionError.NoTask
+311 |         }
+312 |       webSocketTask.sendPing { [weak self] error in
+    |                              |- note: 'webSocketTask' implicitly strongly captured here
+    |                              `- note: add 'webSocketTask' as a capture list item to silence
+313 |           guard let self = self else { return }
+314 |           guard self.webSocketTask === webSocketTask else { return }
+    :
+317 |         } else {
+318 | //            print("Web Socket connection is alive")
+319 |             let workItem = DispatchWorkItem { [weak self, weak webSocketTask] in
+    |                                                                |- warning: 'weak' ownership of capture 'webSocketTask' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+    |                                                                `- note: explicitly assign the capture list item to silence
+320 |                 guard let self = self else { return }
+321 |                 guard let webSocketTask, self.webSocketTask === webSocketTask else { return }
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/WebSocketConnection.swift:315:16: warning: value 'error' was defined but never used; consider replacing with boolean test [#NoUsage]
+313 |           guard let self = self else { return }
+314 |           guard self.webSocketTask === webSocketTask else { return }
+315 |         if let error = error {
+    |                `- warning: value 'error' was defined but never used; consider replacing with boolean test [#NoUsage]
+316 |           CellBase.diagnosticLog("Websocket ping failed code=ping_failed", domain: .bridge)
+317 |         } else {
+
+[#ImplicitStrongCapture]: <https://docs.swift.org/compiler/documentation/diagnostics/implicit-strong-capture>
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[4 / 34] CellApple
+[5 / 35] CellApple
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:255:9: warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+253 | struct SkeletonBorderShape: Shape {
+254 |     let radius: CGFloat
+255 |     let edges: [SkeletonEdge]?
+    |         `- warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+256 |     let rtl: Bool
+257 |     func path(in rect: CGRect) -> Path {
+
+CellBase.SkeletonEdge:1:13: note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+1 | public enum SkeletonEdge : String, Codable {
+  |             `- note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+2 |     case top
+3 |     case leading
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:5:1: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  3 | 
+  4 | import SwiftUI
+  5 | import CellBase
+    | `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  6 | #if os(macOS)
+  7 | import AppKit
+
+[#AddPreconcurrencyImport]: <https://docs.swift.org/compiler/documentation/diagnostics/add-preconcurrency-import>
+[13 / 24] CellApple-product
+[13 / 24] CellBaseTests-product
+[17 / 28] CellBaseTests-product
+[23 / 27] CellBaseTests-product
+[25 / 27] CellBaseTests-product
+Build complete! (5,47 sek)
+Test Suite 'Selected tests' started at 2026-09-29 05:04:09.620.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-09-29 05:04:09.620.
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-09-29 05:04:09.620.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 05:04:09.620.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 05:04:09.678.
+Test Suite 'CellNearbyTests.xctest' started at 2026-09-29 05:04:09.678.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-09-29 05:04:09.678.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 05:04:09.679.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 05:04:09.738.
+Test Suite 'CellBaseTests.xctest' started at 2026-09-29 05:04:09.739.
+Test Suite 'BridgePeerV3Tests' started at 2026-09-29 05:04:09.739.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testActiveInitiatorCanReadResponderButUnrelatedRelayDHCannot]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testActiveInitiatorCanReadResponderButUnrelatedRelayDHCannot]' passed (0.008 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testAuthenticatedInnerFieldMutationsRequireMACSignatureAndFrozenContext]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testAuthenticatedInnerFieldMutationsRequireMACSignatureAndFrozenContext]' passed (0.051 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCanonicalEnvelopeAndPaddingRejectEveryAlternativeEncoding]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCanonicalEnvelopeAndPaddingRejectEveryAlternativeEncoding]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCloseAndDirectRevokeWinBeforePhysicalSendAdmission]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCloseAndDirectRevokeWinBeforePhysicalSendAdmission]' passed (0.110 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryHelloFieldAndLegacyProfileFailsBeforeDisclosure]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryHelloFieldAndLegacyProfileFailsBeforeDisclosure]' passed (0.020 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryOutOfOrderHandshakeMessageAndTamperedTagIsTerminal]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryOutOfOrderHandshakeMessageAndTamperedTagIsTerminal]' passed (0.028 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testExplicitDisclosurePolicyRejectsBeforeInitiatorSigning]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testExplicitDisclosurePolicyRejectsBeforeInitiatorSigning]' passed (0.163 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testHandshakeQuotasStayBoundedAndFinalFinishedWaitsForAuthenticatedProgress]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testHandshakeQuotasStayBoundedAndFinalFinishedWaitsForAuthenticatedProgress]' passed (0.071 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentDHLegsCannotSpliceProofOrFinishedEvenWithSameIdentities]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentDHLegsCannotSpliceProofOrFinishedEvenWithSameIdentities]' passed (0.174 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentFullHandshakeAndAllKeyPurposes]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentFullHandshakeAndAllKeyPurposes]' passed (0.030 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLateM1SendCompletionCannotUndoAuthenticatedProgress]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLateM1SendCompletionCannotUndoAuthenticatedProgress]' passed (0.007 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLiveMixedAlgorithmsFixedLengthsAndSameKeyReflection]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLiveMixedAlgorithmsFixedLengthsAndSameKeyReflection]' passed (0.368 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerLateFactoryTransportBindingRetiresSubscriptionAndDeinitializesForBothRoles]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerLateFactoryTransportBindingRetiresSubscriptionAndDeinitializesForBothRoles]' passed (0.530 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerMuxHeldPhysicalSubmissionFencesReusedIDAndCIDWhileSiblingWorks]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerMuxHeldPhysicalSubmissionFencesReusedIDAndCIDWhileSiblingWorks]' passed (0.021 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringEitherFactoryRetiresResultWithoutReady]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringEitherFactoryRetiresResultWithoutReady]' passed (0.115 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringVaultLookupOrSigningStopsDisclosure]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringVaultLookupOrSigningStopsDisclosure]' passed (0.042 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRegisteredRemoteRevocationAndSuspendedPolicyPreventLocalDisclosure]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRegisteredRemoteRevocationAndSuspendedPolicyPreventLocalDisclosure]' passed (0.068 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRetiredSignerCannotAffectFreshChannelWithSameIdentity]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRetiredSignerCannotAffectFreshChannelWithSameIdentity]' passed (0.017 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedFactoryIsRetiredOnceAndNeverPublishesReady]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedFactoryIsRetiredOnceAndNeverPublishesReady]' passed (0.041 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedVaultExistenceAndSignerCannotSurviveCloseRevokeOrExpiry]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedVaultExistenceAndSignerCannotSurviveCloseRevokeOrExpiry]' passed (0.958 seconds).
+Test Suite 'BridgePeerV3Tests' passed at 2026-09-29 05:04:12.562.
+	 Executed 20 tests, with 0 failures (0 unexpected) in 2.820 (2.823) seconds
+Test Suite 'WebSocketSendCompletionTests' started at 2026-09-29 05:04:12.562.
+Test Case '-[CellBaseTests.WebSocketSendCompletionTests testTextAndDataWaitForURLSessionCompletionAndPropagateFailure]' started.
+Test Case '-[CellBaseTests.WebSocketSendCompletionTests testTextAndDataWaitForURLSessionCompletionAndPropagateFailure]' passed (0.017 seconds).
+Test Suite 'WebSocketSendCompletionTests' passed at 2026-09-29 05:04:12.579.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.017 (0.017) seconds
+Test Suite 'CellBaseTests.xctest' passed at 2026-09-29 05:04:12.579.
+	 Executed 21 tests, with 0 failures (0 unexpected) in 2.837 (2.840) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 05:04:12.579.
+	 Executed 21 tests, with 0 failures (0 unexpected) in 2.837 (2.841) seconds

@@ -1,0 +1,29 @@
+--- BridgeBase
++++ BridgeBase-mutant
+@@ -1360,12 +1360,7 @@
+     
+     private func validateOriginSigning(_ data: Data, identity: Identity, session: BridgeChannelSession,
+                                        deadline: TimeInterval, permit: BridgeIdentityProofAuthorization.Permit? = nil) throws {
+-        try Task.checkCancellation()
+-        guard signingMonotonic() < deadline, ready, session === channelSession else {
+-            throw BridgeChannelAuthentication.Failure.staleGeneration
+-        }
+-        let now = signingWallClock()
+-        _ = try IdentitySigningChallenge.validateSigningData(data, for: identity, now: now)
++        let now = signingWallClock() // MUTATION: omit post-lookup challenge/deadline/cancellation checks
+         if let permit, !identityProofAuthorization.isCurrent(permit, now: now, monotonic: signingMonotonic()) {
+             throw BridgeChannelAuthentication.Failure.closed
+         }
+--- BridgeChannelClientOperation
++++ BridgeChannelClientOperation-mutant
+@@ -58,9 +58,7 @@
+         // concurrent signing or extend a permit while the vault is suspended.
+         signingStarted = true
+         guard await vault.identityExistInVault(owner), active else { throw Auth.Failure.identityMismatch }
+-        // The vault lookup may suspend past either deadline without observing
+-        // cancellation. Revalidate the local permit at private-key admission.
+-        try validate(challenge, now: wallClock())
++        // MUTATION: sign immediately after the suspended existence lookup.
+         let signature = try await vault.signMessageForIdentity(messageData: challenge.signingData, identity: owner)
+         guard active, monotonic() < deadline,
+               IdentityPublicKeySignatureVerifier.verify(signature: signature, messageData: challenge.signingData, identity: hello.identity.makeIdentity()) else {

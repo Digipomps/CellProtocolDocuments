@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Proposed provenance event — review only",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "eventID",
+    "writerID",
+    "sequence",
+    "observedAt",
+    "ownerRef",
+    "hostID",
+    "volumeID",
+    "jobID",
+    "attemptID",
+    "kind",
+    "artifactID",
+    "coverage",
+    "evidenceKind"
+  ],
+  "properties": {
+    "eventID": {
+      "type": "string",
+      "minLength": 1
+    },
+    "writerID": {
+      "type": "string",
+      "minLength": 1
+    },
+    "observedAt": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ownerRef": {
+      "type": "string",
+      "minLength": 1
+    },
+    "hostID": {
+      "type": "string",
+      "minLength": 1
+    },
+    "volumeID": {
+      "type": "string",
+      "minLength": 1
+    },
+    "jobID": {
+      "type": "string",
+      "minLength": 1
+    },
+    "attemptID": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifactID": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema": {
+      "const": "haven.artifact-provenance.v1"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "kind": {
+      "enum": [
+        "created",
+        "observed",
+        "updated",
+        "moved",
+        "deleted",
+        "use-started",
+        "use-ended",
+        "coverage-gap"
+      ]
+    },
+    "coverage": {
+      "enum": [
+        "writer-confirmed",
+        "reconciled",
+        "partial",
+        "unknown"
+      ]
+    },
+    "evidenceKind": {
+      "enum": [
+        "registered-writer",
+        "exclusive-job-root",
+        "inventory-diff",
+        "filesystem-observation",
+        "unknown"
+      ]
+    },
+    "relativePath": {
+      "type": "string"
+    },
+    "logicalBytes": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "allocatedBytes": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "projectRef": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "agentRef": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "purposeRef": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "generationRef": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "retentionUntil": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "$comment": "Draft, not registered Explore schema. Runtime must additionally validate authorized roots, time syntax, sequence/hash binding and evidence; JSON Schema alone cannot authorize or prove capture."
+}

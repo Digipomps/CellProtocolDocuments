@@ -1,0 +1,119 @@
+vert: ubuntu-16gb-hel1-1  bruker: root  tid: 2026-09-23T09:43:54Z
+
+== cellscaffold-app-1
+   -- mounts (Type | Source -> Destination):
+      bind | /var/lib/haven/cellscaffold-key-continuity-f76de5a -> /run/cellscaffold-key-continuity
+      bind | /mnt/disk1/app/CellsContainer.staging-f76de5a -> /app/CellsContainer
+      bind | /etc/haven/cellscaffold-runtime-secrets-f76de5a/apns-auth-key.p8 -> /run/secrets/apns-auth-key.p8
+      bind | /etc/haven/cellscaffold-runtime-secrets-f76de5a/admin-bridge-client-credential.json -> /run/secrets/admin-bridge-client-credential.json
+      bind | /etc/haven/cellscaffold-runtime-secrets-f76de5a/cell-vault-master-key -> /run/secrets/cell-vault-master-key
+      bind | /etc/haven/cellscaffold-runtime-secrets-f76de5a/admin-alert-relay-token -> /run/secrets/alertmanager-notification-relay-token
+      bind | /etc/haven/cellscaffold-runtime-identity-manifest-f76de5a/runtime-identity-manifest.v2.json -> /etc/haven/cellscaffold-runtime-secrets/runtime-identity-manifest.v2.json
+
+   -- SQLITE_DATABASE_PATH i containeren:
+      /app/CellsContainer/db.sqlite
+   -- andre db-relaterte env:
+      SQLITE_DATABASE_PATH=/app/CellsContainer/db.sqlite
+   -- WorkingDir: /app
+   -- db.sqlite sett INNENFRA:
+      -rw-r--r-- 1 vapor vapor 364544 Sep 23 07:16 /app/CellsContainer/db.sqlite
+      --- ls /app/CellsContainer:
+      total 5692
+      drwxrwxr-x 1309 vapor vapor  86016 Sep 23 07:16 .
+      drwxr-x---    1 vapor vapor   4096 Sep 23 09:39 ..
+      drwx------    2 vapor vapor   4096 Aug 19 17:51 .secrets
+      drwx------    2 vapor vapor   4096 Sep  8 09:36 0032FC5A-1E0D-42F7-BC05-6BBCF9534D37
+      drwx------    2 vapor vapor   4096 Sep  2 08:23 00364070-C8DE-41C4-93AF-42E4F9420342
+      drwx------    2 vapor vapor   4096 Sep  1 20:38 00AA2EB3-3C6E-4B2A-AB35-0DE493B2959A
+      drwx------    2 vapor vapor   4096 Sep  2 05:26 00E80149-D503-48A9-A4D4-A0E50F33E586
+      drwx------    2 vapor vapor   4096 Sep  8 05:55 011765E8-8F93-433B-A40C-815AF5374CAC
+      drwx------    2 vapor vapor   4096 Sep  2 05:26 015F161E-FDDD-4ADF-BE73-36A61FC1D07B
+      drwx------    2 vapor vapor   4096 Sep  3 22:43 01837B0F-1732-48C3-AE8E-43DD4C366404
+      drwx------    2 vapor vapor   4096 Sep  8 05:55 01B9272D-1D2D-470B-B4DB-5135A2DB37BC
+      drwx------    2 vapor vapor   4096 Sep  2 08:23 01E4A113-1F45-4B52-8812-9311D24CA931
+      drwx------    2 vapor vapor   4096 Sep  2 08:23 0218EFD4-106E-4D5F-9372-E69B473AFD19
+      drwx------    2 vapor vapor   4096 Sep 10 21:50 026ECD24-EF50-4647-A61B-1A7A3E19774D
+      drwx------    2 vapor vapor   4096 Sep  4 10:44 027936D1-9335-4106-9E4B-B5AFB25E9388
+      drwx------    2 vapor vapor   4096 Aug 24 10:16 02AD8C94-B5AE-425C-8269-EAE2E0D46622
+      drwx------    2 vapor vapor   4096 Sep  4 10:46 02B25E16-F96C-4981-8C56-E6A87A0AFDAC
+      drwx------    2 vapor vapor   4096 Sep  8 05:45 02B98FEA-518F-4BC3-A6E9-18481E12593E
+      drwx------    2 vapor vapor   4096 Aug 23 18:42 02BF3264-256A-442F-A6CB-40685365DCC5
+      drwx------    2 vapor vapor   4096 Sep 22 12:36 02C3B7D2-1BC4-4EE2-9CC8-31F19DC372D0
+      drwx------    2 vapor vapor   4096 Aug 24 10:06 02DF5B8A-3FD1-49F7-BDDB-D34238DB207F
+      drwx------    2 vapor vapor   4096 Sep  2 08:24 02DF7076-1F3F-43C9-85E1-A3BBAE4FDD19
+      drwx------    2 vapor vapor   4096 Sep  2 05:26 02F71141-F355-4327-AF7D-48BB6857965D
+      drwx------    2 vapor vapor   4096 Sep  2 11:38 030465B9-5A6E-4DA7-AEF6-72ED38FFCD67
+
+== cellscaffold-production-app-1
+   -- mounts (Type | Source -> Destination):
+      bind | /var/lib/haven/cellscaffold-production-key-continuity -> /run/cellscaffold-key-continuity
+      bind | /etc/haven/cellscaffold-production-runtime-secrets/cell-vault-master-key -> /run/secrets/cell-vault-master-key
+      bind | /etc/haven/cellscaffold-production-payment-secrets/stripe-secret-key -> /run/secrets/payments/stripe-secret-key
+      bind | /etc/haven/cellscaffold-production-payment-secrets/stripe-webhook-secret -> /run/secrets/payments/stripe-webhook-secret
+      bind | /mnt/HC_Volume_104775511/haven-production/IdentityVaults -> /app/IdentityVaults
+      bind | /mnt/HC_Volume_104775511/haven-production/CellsContainer -> /app/CellsContainer
+      bind | /etc/haven/cellscaffold-production-runtime-secrets/apns-auth-key.p8 -> /run/secrets/apns-auth-key.p8
+      bind | /mnt/HC_Volume_104775511/haven-production/Database -> /app/Database
+      bind | /etc/haven/cellscaffold-production-payment-secrets/vipps-subscription-key -> /run/secrets/payments/vipps-subscription-key
+      bind | /etc/haven/cellscaffold-production-payment-secrets/vipps-access-token -> /run/secrets/payments/vipps-access-token
+      bind | /etc/haven/cellscaffold-production-payment-secrets/vipps-webhook-secret -> /run/secrets/payments/vipps-webhook-secret
+      bind | /etc/haven/cellscaffold-production-runtime-secrets/admin-alert-relay-token -> /run/secrets/alertmanager-notification-relay-token
+      bind | /etc/haven/cellscaffold-production-runtime-identity-manifest/runtime-identity-manifest.v2.json -> /etc/haven/cellscaffold-runtime-secrets/runtime-identity-manifest.v2.json
+      bind | /etc/haven/cellscaffold-production-runtime-secrets/admin-bridge-client-credential.json -> /run/secrets/admin-bridge-client-credential.json
+
+   -- SQLITE_DATABASE_PATH i containeren:
+      /app/Database/db.sqlite
+   -- andre db-relaterte env:
+      SQLITE_DATABASE_PATH=/app/Database/db.sqlite
+   -- WorkingDir: /app
+   -- db.sqlite sett INNENFRA:
+      -rw-r--r-- 1 vapor vapor 335872 Sep 22 06:27 /app/Database/db.sqlite
+      --- ls /app/CellsContainer:
+      total 2568
+      drwxrwxr-x 633 vapor vapor 36864 Sep 18 14:00 .
+      drwxr-x---   1 vapor vapor  4096 Sep 23 07:34 ..
+      drwx------   2 vapor vapor  4096 Sep 18 14:00 006BE634-D20A-4367-8482-74C61294E6AD
+      drwx------   2 vapor vapor  4096 Sep 18 14:00 011B519B-EF6D-4852-BC73-A010752A18C0
+      drwx------   2 vapor vapor  4096 Aug  9 16:11 014B2901-A90C-4D84-93EB-B2EB41CE2E95
+      drwx------   2 vapor vapor  4096 Aug  9 18:11 017E86D3-5890-458A-B923-5C3C1CFA659C
+      drwx------   2 vapor vapor  4096 Sep 18 14:00 017FCA98-94AB-4AB2-BA2F-2A1E6B6CE42D
+      drwx------   2 vapor vapor  4096 Aug 10 06:49 03287396-C914-4C7A-BCB2-BC6D9254059F
+      drwx------   2 vapor vapor  4096 Aug  9 16:11 03304ED3-7E4B-42DF-8E8A-318133CC9B9F
+      drwx------   2 vapor vapor  4096 Aug 10 06:50 0331B847-C357-4469-918F-130EEB720592
+      drwx------   2 vapor vapor  4096 Aug  9 16:11 03500B70-C314-4353-AA94-C87F8403F2CD
+      drwx------   2 vapor vapor  4096 Aug  9 23:05 03F4AD73-56D8-4A03-A23D-2BA258E15283
+      drwx------   2 vapor vapor  4096 Aug 21 13:57 0577C2DE-A146-46F3-AEEF-7C62FD038A8F
+      drwx------   2 vapor vapor  4096 Aug  9 18:26 059EE6E7-7889-49AD-ADCB-11E1A37CA2DA
+      drwx------   2 vapor vapor  4096 Aug 10 06:49 05E71E7D-FD92-42EC-80E5-41F3539A9C3B
+      drwx------   2 vapor vapor  4096 Sep 18 14:00 0625C7E1-6DDC-46CE-B4CB-CD849E50B2CD
+      drwx------   2 vapor vapor  4096 Aug  9 23:05 075BD46E-D26C-40A6-BBF7-6EF1F8521DA7
+      drwx------   2 vapor vapor  4096 Aug  9 23:05 075F77A5-E667-477D-9C75-33EBCE618296
+      drwx------   2 vapor vapor  4096 Aug 19 23:13 07F4AF81-B42A-48BC-91BF-9FE469E3FF24
+      drwx------   2 vapor vapor  4096 Aug  9 23:05 086D3382-23F9-48DE-9394-45DD90D906CB
+      drwx------   2 vapor vapor  4096 Aug  9 16:09 088F49B3-7BF1-4029-9A17-B42ABC7323D4
+      drwx------   2 vapor vapor  4096 Aug  9 16:11 08A1801F-61EC-432B-87C7-82B0D935E2A6
+      drwx------   2 vapor vapor  4096 Aug 21 13:57 08D50F6B-EA46-418F-860C-1476B59718E8
+      drwx------   2 vapor vapor  4096 Aug 10 06:50 08EEB1C0-153D-48B7-8128-9E5853B601D3
+
+== find db.sqlite (avgrenset, maxdepth 6)
+   -- /mnt/HC_Volume_104775511
+      /mnt/HC_Volume_104775511/haven-cellscaffold-atomic-backups/cellscaffold-post-20260802T232025Z-1cab74dc9f5d/db.sqlite
+      /mnt/HC_Volume_104775511/haven-cellscaffold-atomic-backups/cellscaffold-pre-20260818T185614Z-185486bbd3ac/db.sqlite
+      /mnt/HC_Volume_104775511/haven-cellscaffold-atomic-backups/cellscaffold-pre-20260804T120835Z-4582faccdafe/db.sqlite
+      /mnt/HC_Volume_104775511/haven-cellscaffold-atomic-backups/cellscaffold-post-20260805T134700Z-41092715c707/db.sqlite
+      /mnt/HC_Volume_104775511/haven-cellscaffold-atomic-backups/cellscaffold-post-20260802T184643Z-a2f2e7fc01bc/db.sqlite
+      /mnt/HC_Volume_104775511/haven-cellscaffold-atomic-backups/cellscaffold-pre-20260802T141747Z-5036d59e7a7d/db.sqlite
+      /mnt/HC_Volume_104775511/haven-cellscaffold-atomic-backups/cellscaffold-migration-input-20260802T155622Z-7deb0c65b7a2/db.sqlite
+      /mnt/HC_Volume_104775511/haven-cellscaffold-atomic-backups/cellscaffold-pre-20260802T232025Z-1cab74dc9f5d/db.sqlite
+      /mnt/HC_Volume_104775511/haven-cellscaffold-atomic-backups/cellscaffold-pre-20260731T231818Z-d4c42951f25a/db.sqlite
+      /mnt/HC_Volume_104775511/haven-cellscaffold-atomic-backups/cellscaffold-migration-input-20260802T141747Z-5036d59e7a7d/db.sqlite
+      /mnt/HC_Volume_104775511/haven-cellscaffold-atomic-backups/cellscaffold-recovery-pre-20260807T205041Z-24a58340ec16/db.sqlite
+      /mnt/HC_Volume_104775511/haven-cellscaffold-atomic-backups/cellscaffold-pre-20260801T133706Z-7cf47409fb38/db.sqlite
+      /mnt/HC_Volume_104775511/haven-cellscaffold-atomic-backups/cellscaffold-pre-20260806T104532Z-a718f54af687/db.sqlite
+      /mnt/HC_Volume_104775511/haven-cellscaffold-atomic-backups/cellscaffold-pre-20260804T202644Z-4582faccdafe/db.sqlite
+      /mnt/HC_Volume_104775511/haven-cellscaffold-atomic-backups/cellscaffold-migration-input-20260802T101007Z-6789dd1ef7a9/db.sqlite
+      /mnt/HC_Volume_104775511/haven-cellscaffold-atomic-backups/cellscaffold-pre-20260819T115631Z-accd229ad73f/db.sqlite
+      /mnt/HC_Volume_104775511/haven-cellscaffold-atomic-backups/cellscaffold-pre-20260806T122007Z-a718f54af687/db.sqlite
+      /mnt/HC_Volume_104775511/haven-cellscaffold-atomic-backups/cellscaffold-pre-20260801T071442Z-be15840d9362/db.sqlite
+      /mnt/HC_Volume_104775511/haven-cellscaffold-atomic-backups/cellscaffold-post-20260819T115631Z-accd229ad73f/db.sqlite
+      /mnt/HC_Volume_104775511/haven-cellscaffold-atomic-backups/cellscaffold-pre-20260805T075151Z-4582faccdafe/db.sqlite

@@ -1,0 +1,2043 @@
+{
+  "agentActions" : [
+    "AgentActionCapabilityDescriptor(actionID: \"mac.finder.close-all-windows\", title: \"Close all Finder windows\", summary: \"Ask HAVENAgentD to close Finder windows through a locally allowlisted AppleScript action. Useful as a controlled smoke test for chat-to-agent execution.\", kind: \"apple_script_action\", purposeRefs: [\"personal.agent.local.gui.finder.close-windows\", \"personal.chat.assist.local-automation\"], interests: [\"finder\", \"window-management\", \"macos-automation\", \"local-agent\", \"requires-user-approval\", \"purpose-interest-weighted\"], scopes: [\"chat\", \"macos\"], riskLevel: App.AgentActionRiskLevel.medium, requiresExplicitUserApproval: true, requiresSignedRemoteIntent: true, requiresExpiry: true, requiresNonce: true, requiresLocalAllowlist: true, requiresLocalReview: true, requiredNativePermissions: [\"macos.automation.finder\"], argumentSchema: [:], agentCellTargets: [App.AgentActionCellTarget(endpoint: \"cell:\/\/\/agent\/intents\/inbox\", typeName: \"RemoteIntentInboxCell\", readKeypaths: [\"state\", \"queue\", \"flow\"], writeKeypaths: [\"enqueueSigned\"], sideEffectBoundary: \"Queues signed structured intents only. No local side effect.\"), App.AgentActionCellTarget(endpoint: \"cell:\/\/\/agent\/intents\/review\", typeName: \"RemoteIntentReviewCell\", readKeypaths: [\"state\", \"audit\", \"flow\"], writeKeypaths: [\"approve\", \"reject\"], sideEffectBoundary: \"Approves or rejects verified intents; dispatches only local allowlisted actions.\"), App.AgentActionCellTarget(endpoint: \"cell:\/\/\/agent\/supervisor\", typeName: \"AgentSupervisorCell\", readKeypaths: [\"state\", \"bootstrap\", \"porthole\", \"identity\", \"lastAction\", \"lastError\", \"flow\"], writeKeypaths: [\"refresh\"], sideEffectBoundary: \"Read-only runtime health projection plus explicit refresh event.\")], sourceContracts: [\"HAVENAgentD.RemoteIntentInboxCell.enqueueSigned\", \"HAVENAgentD.RemoteIntentReviewCell.approve\", \"HAVENAgentD.RemoteIntentVerifier\", \"HAVENAgentD.AutomationPolicy\", \"HAVENAgentD.RemoteIntentExecutionBridge\"], safeSuggestionExamples: [\"lukk alle finder vinduer\", \"close all Finder windows\", \"rydd Finder-vinduene\"], auditEventTypes: [\"intent.inbox.enqueued\", \"intent.inbox.rejected\", \"intent.review.updated\"], safetyNotes: [\"This descriptor intentionally does not include AppleScript source.\", \"The same actionID must be present in the local HAVENAgentD AutomationPolicy.appleScripts with allowedForRemoteExecution=true before review can dispatch it.\", \"RemoteIntentReviewCell.approve is the only side-effecting review path.\"], autocompleteSafe: true)",
+    "AgentActionCapabilityDescriptor(actionID: \"shortcut.binding.wake\", title: \"Wake Binding for a pending input\", summary: \"Ask the local agent to wake Binding or surface a pending action when a watched folder, notification or chat workflow needs owner attention.\", kind: \"shortcut_action\", purposeRefs: [\"personal.agent.binding.wake\", \"personal.chat.assist.binding-handoff\"], interests: [\"binding\", \"wake\", \"notification\", \"local-agent\", \"requires-user-approval\", \"purpose-interest-weighted\"], scopes: [\"chat\", \"binding\", \"notification\"], riskLevel: App.AgentActionRiskLevel.medium, requiresExplicitUserApproval: true, requiresSignedRemoteIntent: true, requiresExpiry: true, requiresNonce: true, requiresLocalAllowlist: true, requiresLocalReview: true, requiredNativePermissions: [\"macos.notifications\"], argumentSchema: [\"sourceCellEndpoint\": App.AgentActionArgumentDescriptor(valueType: \"string\", required: false, maxLength: 512, allowedValues: [], pattern: nil, privacy: \"cell-endpoint\", description: \"Optional source cell endpoint for the handoff.\"), \"reason\": App.AgentActionArgumentDescriptor(valueType: \"string\", required: true, maxLength: 256, allowedValues: [], pattern: nil, privacy: \"intent-summary\", description: \"Short reason shown to the owner.\")], agentCellTargets: [App.AgentActionCellTarget(endpoint: \"cell:\/\/\/agent\/intents\/inbox\", typeName: \"RemoteIntentInboxCell\", readKeypaths: [\"state\", \"queue\", \"flow\"], writeKeypaths: [\"enqueueSigned\"], sideEffectBoundary: \"Queues signed structured intents only. No local side effect.\"), App.AgentActionCellTarget(endpoint: \"cell:\/\/\/agent\/intents\/review\", typeName: \"RemoteIntentReviewCell\", readKeypaths: [\"state\", \"audit\", \"flow\"], writeKeypaths: [\"approve\", \"reject\"], sideEffectBoundary: \"Approves or rejects verified intents; dispatches only local allowlisted actions.\"), App.AgentActionCellTarget(endpoint: \"cell:\/\/\/agent\/supervisor\", typeName: \"AgentSupervisorCell\", readKeypaths: [\"state\", \"bootstrap\", \"porthole\", \"identity\", \"lastAction\", \"lastError\", \"flow\"], writeKeypaths: [\"refresh\"], sideEffectBoundary: \"Read-only runtime health projection plus explicit refresh event.\")], sourceContracts: [\"HAVENAgentD.RemoteIntentInboxCell.enqueueSigned\", \"HAVENAgentD.RemoteIntentReviewCell.approve\", \"HAVENAgentD.RemoteIntentVerifier\", \"HAVENAgentD.AutomationPolicy\", \"HAVENAgentD.RemoteIntentExecutionBridge\"], safeSuggestionExamples: [\"vekke Binding for denne filen\", \"notify Binding about this pending action\", \"be Binding absorbere input\"], auditEventTypes: [\"intent.inbox.enqueued\", \"intent.inbox.rejected\", \"intent.review.updated\"], safetyNotes: [\"The action may wake or notify; it must not bypass Binding consent or open private cell data.\", \"Payloads should carry endpoint\/correlation metadata, not file contents.\"], autocompleteSafe: true)",
+    "AgentActionCapabilityDescriptor(actionID: \"binding.absorb.cell-input\", title: \"Ask Binding to absorb a cell input\", summary: \"Create a structured handoff where Binding can review and absorb a cell, file reference or other input through an owner-visible bridge.\", kind: \"cell_bridge_action\", purposeRefs: [\"personal.agent.binding.absorb-cell\", \"personal.chat.assist.cell-bridge\"], interests: [\"binding\", \"cell-bridge\", \"file-input\", \"owner-review\", \"requires-user-approval\", \"purpose-interest-weighted\"], scopes: [\"chat\", \"binding\", \"cell-bridge\"], riskLevel: App.AgentActionRiskLevel.high, requiresExplicitUserApproval: true, requiresSignedRemoteIntent: true, requiresExpiry: true, requiresNonce: true, requiresLocalAllowlist: true, requiresLocalReview: true, requiredNativePermissions: [], argumentSchema: [\"artifactRef\": App.AgentActionArgumentDescriptor(valueType: \"string\", required: false, maxLength: 512, allowedValues: [], pattern: nil, privacy: \"opaque-reference\", description: \"Opaque artifact reference; never raw file bytes.\"), \"purposeRef\": App.AgentActionArgumentDescriptor(valueType: \"string\", required: true, maxLength: 256, allowedValues: [], pattern: nil, privacy: \"purpose\", description: \"Purpose that justifies the handoff.\"), \"sourceCellEndpoint\": App.AgentActionArgumentDescriptor(valueType: \"string\", required: true, maxLength: 512, allowedValues: [], pattern: nil, privacy: \"cell-endpoint\", description: \"Cell endpoint or porthole source to review.\")], agentCellTargets: [App.AgentActionCellTarget(endpoint: \"cell:\/\/\/agent\/intents\/inbox\", typeName: \"RemoteIntentInboxCell\", readKeypaths: [\"state\", \"queue\", \"flow\"], writeKeypaths: [\"enqueueSigned\"], sideEffectBoundary: \"Queues signed structured intents only. No local side effect.\"), App.AgentActionCellTarget(endpoint: \"cell:\/\/\/agent\/intents\/review\", typeName: \"RemoteIntentReviewCell\", readKeypaths: [\"state\", \"audit\", \"flow\"], writeKeypaths: [\"approve\", \"reject\"], sideEffectBoundary: \"Approves or rejects verified intents; dispatches only local allowlisted actions.\"), App.AgentActionCellTarget(endpoint: \"cell:\/\/\/agent\/supervisor\", typeName: \"AgentSupervisorCell\", readKeypaths: [\"state\", \"bootstrap\", \"porthole\", \"identity\", \"lastAction\", \"lastError\", \"flow\"], writeKeypaths: [\"refresh\"], sideEffectBoundary: \"Read-only runtime health projection plus explicit refresh event.\")], sourceContracts: [\"HAVENAgentD.RemoteIntentInboxCell.enqueueSigned\", \"HAVENAgentD.RemoteIntentReviewCell.approve\", \"HAVENAgentD.RemoteIntentVerifier\", \"HAVENAgentD.AutomationPolicy\", \"HAVENAgentD.RemoteIntentExecutionBridge\"], safeSuggestionExamples: [\"absorber denne cellen i Binding\", \"send dette inputet til Binding for gjennomgang\"], auditEventTypes: [\"intent.inbox.enqueued\", \"intent.inbox.rejected\", \"intent.review.updated\"], safetyNotes: [\"Binding must still apply its own CellProtocol grants and visible consent gates.\", \"Use opaque references and verified source endpoints; do not place private file contents in remote intent arguments.\"], autocompleteSafe: true)",
+    "AgentActionCapabilityDescriptor(actionID: \"folder-watch.changed-input\", title: \"React to a watched folder change\", summary: \"Represent a local folder-watch event as a purpose-scoped handoff that can wake Binding or enqueue another local action.\", kind: \"folder_watch_event\", purposeRefs: [\"personal.agent.folder.changed-file\", \"personal.agent.binding.wake\"], interests: [\"folder-watch\", \"file-input\", \"local-agent\", \"notification\", \"purpose-interest-weighted\"], scopes: [\"folder-watch\", \"binding\", \"notification\"], riskLevel: App.AgentActionRiskLevel.medium, requiresExplicitUserApproval: true, requiresSignedRemoteIntent: true, requiresExpiry: true, requiresNonce: true, requiresLocalAllowlist: true, requiresLocalReview: true, requiredNativePermissions: [\"local.folder-watch\"], argumentSchema: [\"watchID\": App.AgentActionArgumentDescriptor(valueType: \"string\", required: true, maxLength: 128, allowedValues: [], pattern: nil, privacy: \"watch-identifier\", description: \"Local watch ID from AgentD config.\"), \"eventNames\": App.AgentActionArgumentDescriptor(valueType: \"string\", required: true, maxLength: 128, allowedValues: [], pattern: nil, privacy: \"event-summary\", description: \"Comma-separated event names.\"), \"relativePath\": App.AgentActionArgumentDescriptor(valueType: \"string\", required: false, maxLength: 512, allowedValues: [], pattern: nil, privacy: \"redacted-path\", description: \"Optional path relative to a named watch root; never absolute path by default.\")], agentCellTargets: [App.AgentActionCellTarget(endpoint: \"cell:\/\/\/agent\/intents\/inbox\", typeName: \"RemoteIntentInboxCell\", readKeypaths: [\"state\", \"queue\", \"flow\"], writeKeypaths: [\"enqueueSigned\"], sideEffectBoundary: \"Queues signed structured intents only. No local side effect.\"), App.AgentActionCellTarget(endpoint: \"cell:\/\/\/agent\/intents\/review\", typeName: \"RemoteIntentReviewCell\", readKeypaths: [\"state\", \"audit\", \"flow\"], writeKeypaths: [\"approve\", \"reject\"], sideEffectBoundary: \"Approves or rejects verified intents; dispatches only local allowlisted actions.\"), App.AgentActionCellTarget(endpoint: \"cell:\/\/\/agent\/supervisor\", typeName: \"AgentSupervisorCell\", readKeypaths: [\"state\", \"bootstrap\", \"porthole\", \"identity\", \"lastAction\", \"lastError\", \"flow\"], writeKeypaths: [\"refresh\"], sideEffectBoundary: \"Read-only runtime health projection plus explicit refresh event.\")], sourceContracts: [\"HAVENAgentD.RemoteIntentInboxCell.enqueueSigned\", \"HAVENAgentD.RemoteIntentReviewCell.approve\", \"HAVENAgentD.RemoteIntentVerifier\", \"HAVENAgentD.AutomationPolicy\", \"HAVENAgentD.RemoteIntentExecutionBridge\"], safeSuggestionExamples: [\"når en fil kommer i mappen, vekke Binding\", \"watch this folder and process new input\"], auditEventTypes: [\"intent.inbox.enqueued\", \"intent.inbox.rejected\", \"intent.review.updated\"], safetyNotes: [\"Folder monitoring already exists in HAVENAgentD, but event payloads should be minimized before they are surfaced in chat or Binding.\", \"Absolute local paths can leak private structure; prefer watchID plus relativePath.\"], autocompleteSafe: true)",
+    "AgentActionCapabilityDescriptor(actionID: \"sprout.sync.local-agent\", title: \"Synchronize agent state with Sprout\", summary: \"Use the existing Sprout bootstrap\/resolver bridge to synchronize local agent contracts, porthole ingress and entity references.\", kind: \"sprout_sync_action\", purposeRefs: [\"personal.agent.sprout.sync\", \"personal.agent.remote-continuity\"], interests: [\"sprout\", \"resolver\", \"porthole-ingress\", \"entity-continuity\", \"local-agent\", \"purpose-interest-weighted\"], scopes: [\"sprout\", \"chat\"], riskLevel: App.AgentActionRiskLevel.high, requiresExplicitUserApproval: true, requiresSignedRemoteIntent: true, requiresExpiry: true, requiresNonce: true, requiresLocalAllowlist: true, requiresLocalReview: true, requiredNativePermissions: [\"sprout.resolver-contract\"], argumentSchema: [\"resolverPurpose\": App.AgentActionArgumentDescriptor(valueType: \"string\", required: true, maxLength: 256, allowedValues: [], pattern: nil, privacy: \"purpose\", description: \"Purpose for the resolver interaction.\"), \"contractRef\": App.AgentActionArgumentDescriptor(valueType: \"string\", required: false, maxLength: 512, allowedValues: [], pattern: nil, privacy: \"opaque-reference\", description: \"Opaque reference to a verified resolver\/porthole contract.\")], agentCellTargets: [App.AgentActionCellTarget(endpoint: \"cell:\/\/\/agent\/intents\/inbox\", typeName: \"RemoteIntentInboxCell\", readKeypaths: [\"state\", \"queue\", \"flow\"], writeKeypaths: [\"enqueueSigned\"], sideEffectBoundary: \"Queues signed structured intents only. No local side effect.\"), App.AgentActionCellTarget(endpoint: \"cell:\/\/\/agent\/intents\/review\", typeName: \"RemoteIntentReviewCell\", readKeypaths: [\"state\", \"audit\", \"flow\"], writeKeypaths: [\"approve\", \"reject\"], sideEffectBoundary: \"Approves or rejects verified intents; dispatches only local allowlisted actions.\"), App.AgentActionCellTarget(endpoint: \"cell:\/\/\/agent\/supervisor\", typeName: \"AgentSupervisorCell\", readKeypaths: [\"state\", \"bootstrap\", \"porthole\", \"identity\", \"lastAction\", \"lastError\", \"flow\"], writeKeypaths: [\"refresh\"], sideEffectBoundary: \"Read-only runtime health projection plus explicit refresh event.\")], sourceContracts: [\"HAVENAgentD.RemoteIntentInboxCell.enqueueSigned\", \"HAVENAgentD.RemoteIntentReviewCell.approve\", \"HAVENAgentD.RemoteIntentVerifier\", \"HAVENAgentD.AutomationPolicy\", \"HAVENAgentD.RemoteIntentExecutionBridge\"], safeSuggestionExamples: [\"synkroniser agenten mot sprout\", \"oppdater sprout bridge status\"], auditEventTypes: [\"intent.inbox.enqueued\", \"intent.inbox.rejected\", \"intent.review.updated\"], safetyNotes: [\"Sprout synchronization should use existing bootstrap and resolver contracts, not ad hoc network calls from chat.\", \"Entity values remain protected by EntityAnchor and CellProtocol grants.\"], autocompleteSafe: true)"
+  ],
+  "configurations" : [
+    {
+      "interests" : [
+        "agreement",
+        "permissions",
+        "identity",
+        "approval",
+        "skeleton",
+        "testing",
+        "proofs",
+        "vc",
+        "admin",
+        "admin-entry",
+        "admin-credential",
+        "external-admin-review",
+        "purposeRef=admin.identity.vc.request"
+      ],
+      "name" : "Access Requirement Prompt",
+      "purpose" : "Be om eller legge inn tilgangs-proof\/VC",
+      "purposeDescription" : "Vis en eksplisitt tilgangsdialog nar en referert celle krever agreement-basert grant eller proof\/VC. Admin-proof kan bare sendes til ekstern admin-review eller valideres av AdminEntry; chatten kan ikke selvgodkjenne admin-tilgang.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/AccessRequirementPrompt",
+      "sourceCellName" : "AccessRequirementPromptCell"
+    },
+    {
+      "interests" : [
+        "agreement",
+        "permissions",
+        "conditions",
+        "identity",
+        "binding",
+        "governance"
+      ],
+      "name" : "Agreement Workbench",
+      "purpose" : "Avtaleverksted og tilgangsdesign",
+      "purposeDescription" : "Bygg en agreement fra mal, rediger grants og conditions direkte, og se både vanlig språk og maskinlesbar representasjon.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/AgreementWorkbench",
+      "sourceCellName" : "AgreementWorkbenchCell"
+    },
+    {
+      "interests" : [
+        "ai",
+        "agent",
+        "llm",
+        "prompting",
+        "gateway",
+        "byok",
+        "automation",
+        "guided-setup",
+        "purposeRef=personal.ai.gateway.configure"
+      ],
+      "name" : "AI Agent Workspace",
+      "purpose" : "AI agent og modellgateway",
+      "purposeDescription" : "Konfigurer modell, API-tilgang og prompt i en innsettbar agentflate som bruker den typed `ai.invoke`-kontrakten.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/AIGateway",
+      "sourceCellName" : "AIGatewayCell"
+    },
+    {
+      "interests" : [
+        "ageRatingHint=12+",
+        "appStoreScope=personal-copilot-v1",
+        "apple-intelligence",
+        "assistant",
+        "executionScope=device",
+        "nativePermissionRequests=apple-intelligence-on-explicit-action",
+        "personal",
+        "policyCategory=apple-intelligence",
+        "presentationClass=detail",
+        "purpose=requestLocalSuggestion+applyUserApprovedSuggestion",
+        "requiresLogin=false",
+        "requiresUserGeneratedContentModeration=false",
+        "reviewSummary=Binding-owned device Personal Co-Pilot surface: Device intelligence for Personal Co-Pilot.",
+        "semantic-matching",
+        "surfaceFamily=intelligence",
+        "universalLink=https:\/\/staging.haven.digipomps.org\/app\/personal\/apple-intelligence",
+        "visibleAction=applyUserApprovedSuggestion",
+        "visibleAction=requestLocalSuggestion"
+      ],
+      "name" : "Apple Intelligence",
+      "purpose" : "Device intelligence for Personal Co-Pilot",
+      "purposeDescription" : "Lokale forslag og semantisk hjelp bak eksplisitt brukerhandling. Remote configs kan bare beskrive intent.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/AppleIntelligence",
+      "sourceCellName" : "AppleIntelligenceCell"
+    },
+    {
+      "interests" : [
+        "arendalsuka",
+        "program",
+        "agenda",
+        "matching",
+        "local-commerce",
+        "map",
+        "lost-found",
+        "notifications",
+        "actor-packages",
+        "purposeRef=arendalsuka.democracy.participation",
+        "purposeRef=arendalsuka.democracy.vote",
+        "purposeRef=arendalsuka.local-commerce.discover",
+        "purposeRef=arendalsuka.social-networking.meet",
+        "purposeRef=arendalsuka.meeting-place.agree",
+        "purposeRef=arendalsuka.group-chat.vote",
+        "purposeRef=purpose:\/\/democracy.vote.participate",
+        "purposeRef=purpose:\/\/event.meeting-place.agree",
+        "purposeRef=purpose:\/\/event.group-chat.vote"
+      ],
+      "name" : "Arendalsuka Event Atlas",
+      "purpose" : "Arendalsuka event atlas",
+      "purposeDescription" : "Import source-backed Arendalsuka program data, classify sessions into purpose\/interests, and connect local actors, offers, anchors, Lost & Found and actor package entitlements.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/ArendalsukaEventAtlas",
+      "sourceCellName" : "ArendalsukaEventAtlasCell"
+    },
+    {
+      "interests" : [
+        "arendalsuka",
+        "participant",
+        "program",
+        "agenda",
+        "navigation",
+        "ordinary-user",
+        "meeting-place",
+        "local-commerce",
+        "democracy",
+        "polling",
+        "chat",
+        "session-chat",
+        "actor-chat",
+        "provenance",
+        "purposeRef=arendalsuka.participant.good-tool",
+        "purposeRef=arendalsuka.program.navigate",
+        "purposeRef=conference.agenda.view",
+        "purposeRef=arendalsuka.companion.introduce",
+        "purposeRef=arendalsuka.local-actor.discover",
+        "purposeRef=arendalsuka.local-commerce.discover",
+        "purposeRef=arendalsuka.social-networking.meet",
+        "purposeRef=arendalsuka.meeting-place.agree",
+        "purposeRef=arendalsuka.democracy.vote",
+        "purposeRef=arendalsuka.group-chat.vote",
+        "purposeRef=purpose:\/\/event.meeting-place.agree",
+        "purposeRef=purpose:\/\/event.group-chat.vote",
+        "purposeRef=purpose:\/\/democracy.vote.participate"
+      ],
+      "name" : "Arendalsuka Participant Program",
+      "purpose" : "Arendalsuka participant program",
+      "purposeDescription" : "Help a normal participant search the Arendalsuka program, open event details, discover venues, restaurants, bars and shops, inspect provenance, and find meeting\/voting support.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/ArendalsukaConfigurationPublisher",
+      "sourceCellName" : "ArendalsukaConfigurationPublisherCell"
+    },
+    {
+      "interests" : [
+        "cellprotocol",
+        "cells",
+        "ownership",
+        "access",
+        "identity",
+        "graph",
+        "scaffold",
+        "remote",
+        "purposeRef=cell.access.graph.view"
+      ],
+      "name" : "Cell Ownership Map",
+      "purpose" : "Cell ownership\/access map",
+      "purposeDescription" : "Synliggjør lokale eier-\/tilgangsrelasjoner, runtime-celler, persistente celletyper og kjente remote routes uten å omgå resolver-policy.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/EntityCellGraph",
+      "sourceCellName" : "EntityCellGraphCell"
+    },
+    {
+      "interests" : [
+        "catalog",
+        "configuration",
+        "discovery",
+        "binding",
+        "menus",
+        "matching"
+      ],
+      "name" : "CellScaffold Configuration Catalog",
+      "purpose" : "Konfigurasjonskatalog og discovery",
+      "purposeDescription" : "Publiserer konfigurasjoner, menyer og matching slik at et annet scaffold kan discovere og bruke CellScaffold-funksjonalitet.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/ConfigurationCatalog",
+      "sourceCellName" : "ConfigurationCatalogCell"
+    },
+    {
+      "interests" : [
+        "ageRatingHint=12+",
+        "appStoreScope=personal-copilot-v1",
+        "best-fit-model-selection",
+        "block",
+        "bug-report",
+        "capability-map",
+        "cell-scoped-ai-provider",
+        "chat",
+        "chat-assistant",
+        "component-motion",
+        "component-surface",
+        "entity-enrichment",
+        "entity-extension",
+        "executionScope=cloud",
+        "external-collaboration-request",
+        "guest-contribution-without-account",
+        "guided-onboarding",
+        "idea-capture",
+        "invite-only",
+        "invite-person",
+        "local-agent-action",
+        "location",
+        "meeting-video-intent",
+        "moderation",
+        "nativePermissionRequests=none",
+        "nearby",
+        "owned-device",
+        "owned-service",
+        "owner-controlled-reshare",
+        "personal",
+        "policyCategory=purpose-driven-chat",
+        "poll",
+        "presentationClass=detail",
+        "project-intent",
+        "provider-maintenance",
+        "provider-slot",
+        "purpose-bound-share-link",
+        "purpose-interest-weighted",
+        "purpose=invite-accept-compose-report-block-assist-poll-rag-agent-action-provider-route",
+        "purposeRef=conference.participant.onboarding",
+        "purposeRef=personal.agent.binding.absorb-cell",
+        "purposeRef=personal.agent.binding.wake",
+        "purposeRef=personal.agent.folder.changed-file",
+        "purposeRef=personal.agent.local.gui.finder.close-windows",
+        "purposeRef=personal.agent.sprout.sync",
+        "purposeRef=personal.ai.provider.maintain",
+        "purposeRef=personal.ai.provider.select.best-fit",
+        "purposeRef=personal.chat.assist.entity-extension",
+        "purposeRef=personal.chat.assist.guided-onboarding",
+        "purposeRef=personal.chat.assist.idea.capture",
+        "purposeRef=personal.chat.assist.invite",
+        "purposeRef=personal.chat.assist.local-agent-action",
+        "purposeRef=personal.chat.assist.meeting.schedule",
+        "purposeRef=personal.chat.assist.meeting.video",
+        "purposeRef=personal.chat.assist.moderation",
+        "purposeRef=personal.chat.assist.poll",
+        "purposeRef=personal.chat.assist.project",
+        "purposeRef=personal.chat.assist.provider-route",
+        "purposeRef=personal.chat.assist.rag-query",
+        "purposeRef=personal.chat.assist.reminder",
+        "purposeRef=personal.chat.assist.resource-router",
+        "purposeRef=personal.chat.assist.spatial-query",
+        "purposeRef=personal.chat.assist.todo",
+        "purposeRef=personal.chat.assist.work-item.capture",
+        "purposeRef=purpose:\/\/access.audit.privacy",
+        "purposeRef=purpose:\/\/contact.introduction",
+        "purposeRef=purpose:\/\/digital-work.coordinate",
+        "purposeRef=purpose:\/\/project-work.share-selected-intent",
+        "rag-query",
+        "reminder-intent",
+        "requires-user-approval",
+        "requiresLogin=true",
+        "requiresUserGeneratedContentModeration=true",
+        "resource-router",
+        "reviewSummary=Purpose-driven Butler Chat with invite-only human chat, report\/block\/filtering and no payment or external purchase CTA.",
+        "schedule-meeting-intent",
+        "signed-remote-intent",
+        "spatial-discovery",
+        "spatial-map",
+        "surfaceFamily=relationship",
+        "todo-intent",
+        "ugc",
+        "universalLink=https:\/\/staging.haven.digipomps.org\/app\/personal\/chat\/copilot",
+        "vault",
+        "visibleAction=absorbChat",
+        "visibleAction=acceptInvite",
+        "visibleAction=agent.review.create",
+        "visibleAction=agent.review.execute",
+        "visibleAction=assistant.acceptSuggestion",
+        "visibleAction=assistant.analyzeDraft",
+        "visibleAction=assistant.dismissSuggestion",
+        "visibleAction=assistant.provider.invoke",
+        "visibleAction=assistant.provider.recommend",
+        "visibleAction=assistant.provider.register",
+        "visibleAction=assistant.queryResource",
+        "visibleAction=assistant.selectCandidate",
+        "visibleAction=assistant.setCandidateQuery",
+        "visibleAction=blockUser",
+        "visibleAction=clearComposer",
+        "visibleAction=collaboration.approveIdentityBinding",
+        "visibleAction=collaboration.prepareExternal",
+        "visibleAction=collaboration.rejectIdentityBinding",
+        "visibleAction=collaboration.revoke",
+        "visibleAction=collaboration.revokeGrant",
+        "visibleAction=declineInvite",
+        "visibleAction=entityExtension.scan",
+        "visibleAction=idea.capture",
+        "visibleAction=idea.content",
+        "visibleAction=idea.title",
+        "visibleAction=invite",
+        "visibleAction=meeting.schedule",
+        "visibleAction=onboarding.answer",
+        "visibleAction=onboarding.cancel",
+        "visibleAction=onboarding.complete",
+        "visibleAction=onboarding.confirmStep",
+        "visibleAction=onboarding.editStep",
+        "visibleAction=onboarding.resume",
+        "visibleAction=onboarding.skipStep",
+        "visibleAction=onboarding.start",
+        "visibleAction=poll.close",
+        "visibleAction=poll.create",
+        "visibleAction=poll.setOptions",
+        "visibleAction=poll.setQuestion",
+        "visibleAction=poll.vote",
+        "visibleAction=project.create",
+        "visibleAction=prompt.submit",
+        "visibleAction=releaseAbsorbedChat",
+        "visibleAction=reminder.create",
+        "visibleAction=reportMessage",
+        "visibleAction=sendComposedMessage",
+        "visibleAction=setActiveAbsorbedChat",
+        "visibleAction=setCombinedChatView",
+        "visibleAction=setComposer",
+        "visibleAction=spatial.draftArtifact",
+        "visibleAction=spatial.explainFeature",
+        "visibleAction=spatial.queryAround",
+        "visibleAction=spatial.requestPresence",
+        "visibleAction=spatial.revokePresence",
+        "visibleAction=todo.create",
+        "visibleAction=ui.dismissComponentSurface",
+        "visibleAction=ui.minimizeComponentSurface",
+        "visibleAction=ui.openComponentSurface",
+        "visibleAction=ui.pinComponentSurface",
+        "visibleAction=ui.restoreComponentSurface",
+        "visibleAction=unblockUser",
+        "visibleAction=workItem.capture",
+        "visibleAction=workItem.cell",
+        "visibleAction=workItem.currentBehavior",
+        "visibleAction=workItem.expectedBehavior",
+        "visibleAction=workItem.kind",
+        "visibleAction=workItem.priority",
+        "visibleAction=workItem.project",
+        "visibleAction=workItem.repo",
+        "visibleAction=workItem.severity",
+        "visibleAction=workItem.summary",
+        "visibleAction=workItem.surface",
+        "visibleAction=workItem.title",
+        "work-item",
+        "work-item-capture"
+      ],
+      "name" : "Co-Pilot Chat",
+      "purpose" : "Central purpose-driven co-pilot chat",
+      "purposeDescription" : "Kompakt chat-first arbeidsflate som matcher brukerens naturlige språk mot synlige formål, interesser, CellConfigurations, tilgjengelige RAG-cases, trygge agent-action metadata og owner-scoped entity extension. Invitasjon, avstemning, work item\/feilrapport, oppgave, prosjekt\/idé, påminnelse, møtemetadata, eksplisitt RAG-query, tilgangsskann og signert agent-review er handlende workbench-moduler, men alle sideeffekter krever klikk og scope-godkjenning.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/PersonalChatHub",
+      "sourceCellName" : "PersonalChatHubCell"
+    },
+    {
+      "interests" : [
+        "conference",
+        "participant",
+        "agenda",
+        "detail",
+        "selection",
+        "binding",
+        "web"
+      ],
+      "name" : "Conference Agenda Session Detail",
+      "purpose" : "Conference Agenda Session Detail",
+      "purposeDescription" : "Participant-owned detail workspace for the currently selected session in min agenda.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/ConferenceParticipantPreviewShell",
+      "sourceCellName" : "ConferenceParticipantPreviewShellCell"
+    },
+    {
+      "interests" : [
+        "conference",
+        "participant",
+        "agenda",
+        "detail",
+        "selection",
+        "binding",
+        "web"
+      ],
+      "name" : "Conference Agenda Track Detail",
+      "purpose" : "Conference Agenda Track Detail",
+      "purposeDescription" : "Participant-owned detail workspace for the currently selected track in min agenda.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/ConferenceParticipantPreviewShell",
+      "sourceCellName" : "ConferenceParticipantPreviewShellCell"
+    },
+    {
+      "interests" : [
+        "conference",
+        "organizer",
+        "admin",
+        "control-tower",
+        "insights",
+        "simulation",
+        "publishing",
+        "binding",
+        "web"
+      ],
+      "name" : "Conference Control Tower",
+      "purpose" : "Conference control tower",
+      "purposeDescription" : "Organizer-siden av conference-demoen. Denne flaten viser hvordan participant onboarding, programvalg, møter, innsikter og sponsor-signaler samles i ett control tower uten å gå utenom den faktiske ConferenceAdminShell-kontrakten.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/ConferenceAdminPreviewShell",
+      "sourceCellName" : "ConferenceAdminPreviewShellCell"
+    },
+    {
+      "interests" : [
+        "conference",
+        "demo",
+        "story",
+        "participant",
+        "sponsor",
+        "exhibitor",
+        "organizer",
+        "simulation",
+        "perspective",
+        "contact-endpoint",
+        "binding",
+        "web",
+        "resource-router",
+        "purposeRef=conference.demo.story.run"
+      ],
+      "name" : "Conference Demo Story",
+      "purpose" : "Conference demo story orchestration",
+      "purposeDescription" : "Starter rollebaserte konferansehistorier for deltaker, sponsor, utstiller og arrangør med readiness-sjekk, demo-perspektiv og linker til eksisterende conference CellConfigurations.",
+      "purposeRefs" : [
+        "conference.demo.story.run"
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/ConferenceDemoStory",
+      "sourceCellName" : "ConferenceDemoStoryCell"
+    },
+    {
+      "interests" : [
+        "conference",
+        "participant",
+        "dashboard",
+        "agenda",
+        "people-discovery",
+        "chat",
+        "meetings",
+        "binding",
+        "web"
+      ],
+      "name" : "Conference Participant Portal Dashboard",
+      "purpose" : "Conference participantportal",
+      "purposeDescription" : "Primær deltakerflate for konferansen: vis neste steg, agenda, anbefalte personer, chat, møter og avanserte proof\/session-verktøy med fungerende actions fra ConferenceParticipantShell.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/ConferenceParticipantPreviewShell",
+      "sourceCellName" : "ConferenceParticipantPreviewShellCell"
+    },
+    {
+      "interests" : [
+        "conference",
+        "partnering",
+        "matchmaking",
+        "scheduling",
+        "insights",
+        "sponsor",
+        "binding",
+        "web"
+      ],
+      "name" : "Conference Partnering MVP",
+      "purpose" : "Conference partnering og innsikt",
+      "purposeDescription" : "Product-oriented conference workspace rendered from a canonical skeleton so Binding and web can show the same onboarding, matching, meeting, insight, and sponsor flows.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/ConferenceUIRouter",
+      "sourceCellName" : "ConferenceUIRouterCell"
+    },
+    {
+      "interests" : [
+        "document",
+        "dokument",
+        "skrive",
+        "rapport",
+        "brev",
+        "møtereferat",
+        "writing",
+        "rich-text",
+        "collaboration",
+        "comments",
+        "samarbeid",
+        "markdown",
+        "pdf",
+        "word",
+        "bilder",
+        "diagram",
+        "chart"
+      ],
+      "name" : "Dokument",
+      "purpose" : "Dokumentskriving og samarbeid",
+      "purposeDescription" : "Skriv dokumenter, rapporter, brev og møtereferater sammen. Rik tekst, bilder, diagrammer, kommentarer, skrivehjelp og eksport til Markdown, PDF og Word.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/RichDocument",
+      "sourceCellName" : "RichDocumentCell"
+    },
+    {
+      "interests" : [
+        "ageRatingHint=12+",
+        "appStoreScope=personal-copilot-v1",
+        "executionScope=device",
+        "identity",
+        "nativePermissionRequests=nearby-on-explicit-action,bluetooth-on-explicit-action",
+        "nearby",
+        "peer",
+        "personal",
+        "policyCategory=hardware-scanner",
+        "presentationClass=detail",
+        "proofs",
+        "purpose=requestScanPermission+selectDiscoveredEntity+shareApprovedProof",
+        "requiresLogin=false",
+        "requiresUserGeneratedContentModeration=false",
+        "reviewSummary=Binding-owned device Personal Co-Pilot surface: Entity Scanner for personal contact discovery.",
+        "scanner",
+        "surfaceFamily=intelligence",
+        "universalLink=https:\/\/staging.haven.digipomps.org\/app\/personal\/entity-scanner",
+        "visibleAction=requestScanPermission",
+        "visibleAction=selectDiscoveredEntity",
+        "visibleAction=shareApprovedProof"
+      ],
+      "name" : "Entity Scanner",
+      "purpose" : "Entity Scanner for personal contact discovery",
+      "purposeDescription" : "Oppdag naerliggende enheter med tydelige permissions. Remote cells mottar bare bruker-godkjente resultatsammendrag.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/EntityScanner",
+      "sourceCellName" : "EntityScannerCell"
+    },
+    {
+      "interests" : [
+        "entity",
+        "entities",
+        "private-entities",
+        "relations",
+        "relasjoner",
+        "mine-relasjoner",
+        "agreements",
+        "binding",
+        "identity",
+        "editing",
+        "inspection",
+        "protocol",
+        "purposeRef=personal.entity.relations.manage"
+      ],
+      "name" : "Entity Studio",
+      "purpose" : "Private entities, relasjoner og trygg redigering",
+      "purposeDescription" : "Utforsk og rediger requesterens private entity-data, relasjoner, signed agreements, agreement refs og binding-ruter i ett arbeidsrom med eksplisitt draft\/apply.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/EntityStudio",
+      "sourceCellName" : "EntityStudioCell"
+    },
+    {
+      "interests" : [
+        "ageRatingHint=12+",
+        "appStoreScope=personal-copilot-v1",
+        "cell-scoped-ai-provider",
+        "chat",
+        "dry-run",
+        "executable-language-grounding",
+        "executionScope=cloud",
+        "grounded-action-plan",
+        "local-agent-review",
+        "nativePermissionRequests=none",
+        "personal",
+        "policyCategory=executable-purpose-grounding",
+        "presentationClass=inspector",
+        "purpose-interest-weighted",
+        "purposeRef=personal.chat.assist.executable-grounding",
+        "purposeRef=personal.chat.assist.local-agent-action",
+        "purposeRef=personal.chat.assist.rag-query",
+        "purposeRef=personal.chat.assist.resource-router",
+        "rag-query",
+        "requires-user-approval",
+        "requiresLogin=true",
+        "requiresUserGeneratedContentModeration=false",
+        "resource-router",
+        "reviewSummary=Verifier-owned grounding layer: providers may suggest plans, but schemas, grants and dry-runs decide what the UI may expose.",
+        "schema-verification",
+        "side-effect-free",
+        "surfaceFamily=assistant",
+        "universalLink=https:\/\/staging.haven.digipomps.org\/app\/personal\/chat\/grounding",
+        "visibleAction=grounding.analyze",
+        "visibleAction=grounding.decompose",
+        "visibleAction=grounding.dismiss",
+        "visibleAction=grounding.dryRun",
+        "visibleAction=grounding.openHelper",
+        "visibleAction=grounding.verify",
+        "visibleAction=purpose.context.pack",
+        "visibleAction=purpose.knowledge.resolve",
+        "xlang-like"
+      ],
+      "name" : "Executable Purpose Grounding",
+      "purpose" : "Verify executable purpose plans",
+      "purposeDescription" : "CellProtocol-native grounding layer that turns natural language into requester-scoped GroundedActionPlan data, verifies schemas\/grants\/risk and produces dry-runs before any helper or action can run.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/ExecutablePurposeGrounding",
+      "sourceCellName" : "ExecutablePurposeGroundingCell"
+    },
+    {
+      "interests" : [
+        "purpose",
+        "coverage",
+        "assurance",
+        "project-control",
+        "palazzo"
+      ],
+      "name" : "Formålsdekning",
+      "purpose" : "purpose:\/\/project-work.purpose-first",
+      "purposeDescription" : "Se hva prosjektet faktisk har bevist, hvilken assurance-kilde som ligger bak, og bestrid en utledet status uten å overskrive den.",
+      "purposeRefs" : [
+        "purpose:\/\/palazzo.family-belonging",
+        "purpose:\/\/palazzo.guest.reachable"
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/Purpose",
+      "sourceCellName" : "Purpose"
+    },
+    {
+      "interests" : [
+        "ageRatingHint=12+",
+        "agent-swarm",
+        "ai-assistant-thread",
+        "ai-gateway",
+        "anthropic",
+        "appStoreScope=personal-copilot-v1",
+        "borealis",
+        "cell-scoped-ai-provider",
+        "chat",
+        "chat-assistant",
+        "chatgpt",
+        "claude",
+        "component-surface",
+        "executionScope=hybrid",
+        "local-llm",
+        "local-model",
+        "nativePermissionRequests=none",
+        "openai",
+        "parallel-ai-chat",
+        "parallel-fan-out",
+        "parallel-local-borealis",
+        "personal",
+        "policyCategory=purpose-driven-ai-group-chat",
+        "presentationClass=detail",
+        "provider-route",
+        "purpose=post-user-message-haven-teaching-swarm",
+        "purpose=post-user-message-parallel-local-borealis",
+        "purposeRef=personal.chat.assist.haven-teaching-swarm",
+        "purposeRef=personal.chat.assist.local-model",
+        "purposeRef=personal.chat.assist.parallel-ai-chat",
+        "purposeRef=personal.chat.assist.private-local-model",
+        "purposeRef=personal.chat.assist.provider-route",
+        "qwen",
+        "requires-user-approval",
+        "requiresLogin=true",
+        "requiresUserGeneratedContentModeration=true",
+        "reviewSummary=Co-Pilot surface for an AIAssistantThread teaching swarm using explicit provider routes and local model scope.",
+        "surfaceFamily=assistant",
+        "universalLink=https:\/\/staging.haven.digipomps.org\/app\/personal\/chat\/haven-teaching-group",
+        "visibleAction=messages",
+        "visibleAction=pendingRequests",
+        "visibleAction=postUserMessage",
+        "visibleAction=refresh",
+        "visibleAction=runState",
+        "visibleAction=state",
+        "visibleAction=summary"
+      ],
+      "name" : "HAVEN Teaching Group Chat",
+      "purpose" : "Run a HAVEN teaching group with ChatGPT, Claude and local Qwen",
+      "purposeDescription" : "Start en CellProtocol-native gruppechat der ChatGPT 4o-mini og Claude kjører som lærere, mens den lokale Qwen-ruten deltar som liten læringsmodell. Diskusjonen vises som egne agentmeldinger i Co-Pilot-flaten.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/AIAssistantThread",
+      "sourceCellName" : "AIAssistantThreadCell"
+    },
+    {
+      "interests" : [
+        "haven",
+        "projects",
+        "tasks",
+        "bugs",
+        "features",
+        "triage",
+        "roadmap",
+        "portfolio",
+        "graph",
+        "github",
+        "docs",
+        "board",
+        "kanban",
+        "trello",
+        "purposeRef=haven.work.board.view",
+        "cellprotocol"
+      ],
+      "name" : "HAVEN Workbench",
+      "purpose" : "HAVEN project workbench",
+      "purposeDescription" : "Fang ideer, features, bugs og utestaaende arbeid som canonical WorkItem records, triager dem mot portfolio\/roadmap\/GitHub\/docs, og bruk board\/kanban\/Trello-lignende state-first Flow-events for sync.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/WorkItem",
+      "sourceCellName" : "WorkItemCell"
+    },
+    {
+      "interests" : [
+        "ageRatingHint=12+",
+        "appStoreScope=personal-copilot-v1",
+        "capability-resolution",
+        "chat",
+        "executionScope=local",
+        "local-agent",
+        "nativePermissionRequests=none",
+        "personal",
+        "policyCategory=local-agent-capability-resolution",
+        "presentationClass=inspector",
+        "purpose-escalation",
+        "purposeRef=personal.chat.assist.local-agent-action",
+        "purposeRef=purpose:\/\/access.audit.privacy",
+        "purposeRef=purpose:\/\/capability.delivery",
+        "registration-evidence",
+        "requires-user-approval",
+        "requiresLogin=true",
+        "requiresUserGeneratedContentModeration=false",
+        "reviewSummary=Owner-scoped purpose-to-AgentD decision support with separate runtime evidence and explicit setup\/review relations.",
+        "side-effect-free",
+        "surfaceFamily=assistant",
+        "universalLink=https:\/\/staging.haven.digipomps.org\/app\/personal\/chat\/agent-capability",
+        "visibleAction=capability.evaluate",
+        "visibleAction=registration.clear",
+        "visibleAction=registration.report"
+      ],
+      "name" : "HAVENAgentD Capability Check",
+      "purpose" : "Decide whether a registered local HAVENAgentD capability can help",
+      "purposeDescription" : "Koble et deklarert formål til en kjent AgentD-handling, kontroller separat registreringsstatus, og eskaler til oppsettshjelp når agenten eller handlingen mangler. Matching gir aldri grant eller utførelsesrett.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/HAVENAgentCapabilityBroker",
+      "sourceCellName" : "HAVENAgentCapabilityBrokerCell"
+    },
+    {
+      "interests" : [
+        "ageRatingHint=12+",
+        "appStoreScope=personal-copilot-v1",
+        "executionScope=local",
+        "explicit-confirmation",
+        "installation-guidance",
+        "local-agent",
+        "loopback-only",
+        "nativePermissionRequests=none",
+        "onboarding",
+        "personal",
+        "policyCategory=local-agent-installation-guidance",
+        "presentationClass=form",
+        "purposeRef=purpose:\/\/access.audit.privacy",
+        "purposeRef=purpose:\/\/capability.delivery",
+        "purposeRef=purpose:\/\/test.acceptance.purpose-decomposition",
+        "requiresLogin=true",
+        "requiresUserGeneratedContentModeration=false",
+        "reviewSummary=Side-effect-free AgentD setup guidance requiring artifact, hash, signing evidence, user review and local OS confirmation.",
+        "surfaceFamily=assistant",
+        "trust-packet",
+        "universalLink=https:\/\/staging.haven.digipomps.org\/app\/personal\/chat\/agent-setup",
+        "visibleAction=setup.clear",
+        "visibleAction=setup.inspect",
+        "visibleAction=setup.install.prepare"
+      ],
+      "name" : "HAVENAgentD Setup",
+      "purpose" : "Explain, inspect and prepare a safe HAVENAgentD installation",
+      "purposeDescription" : "Forklar hvorfor AgentD trengs for det valgte formålet, kontroller en lokal statusobservasjon uten token eller hemmeligheter, og lag en gjennomgåbar installasjonsplan med tillitspakke. Cellen kjører aldri installatøren selv.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/HAVENAgentSetup",
+      "sourceCellName" : "HAVENAgentSetupCell"
+    },
+    {
+      "interests" : [
+        "kallimachos",
+        "bibliotekar",
+        "commons",
+        "librarian",
+        "advisor",
+        "katalog",
+        "kilde",
+        "kilder",
+        "utdrag",
+        "konsept",
+        "forklaring",
+        "verktøy",
+        "flate",
+        "formål",
+        "rådgiver",
+        "capability-index",
+        "citations",
+        "grounding",
+        "cost",
+        "sustainment",
+        "purposeRef=knowledge.demo.kallimachos"
+      ],
+      "name" : "Kallimachos · rådgiver med kapabel modell",
+      "purpose" : "Kallimachos rådgiver og verktøyoppslag",
+      "purposeDescription" : "Still et spørsmål om HAVEN og få kildefast svar, forslag til hvilken celle eller flate som løser formålet, ærlige kataloghull og målt driftskostnad for svaret.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/KallimachosAdvisor",
+      "sourceCellName" : "KallimachosAdvisorCell"
+    },
+    {
+      "interests" : [
+        "public-presence",
+        "artist-profile",
+        "media-gallery",
+        "art-exhibition",
+        "digital-art",
+        "explicit-publish-consent",
+        "usage-quota",
+        "access-entitlement",
+        "rights-proof",
+        "download"
+      ],
+      "name" : "Kunstutstillinger og salg",
+      "purpose" : "Still ut og selg digitale kunstverk",
+      "purposeDescription" : "La kunstnere publisere eksplisitt valgte preview-, visnings- og originalfiler; la publikum betale inngang eller kjøpe et verk med separat pris og signert lisensbevis.",
+      "purposeRefs" : [
+        "personal.art.exhibition.publish",
+        "personal.art.license.prove",
+        "personal.art.sell",
+        "personal.profile.gallery.publish",
+        "personal.profile.media.publish",
+        "personal.public-presence.publish"
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/ArtistSalesChannel",
+      "sourceCellName" : "ArtistSalesChannelCell"
+    },
+    {
+      "interests" : [
+        "conference",
+        "leads",
+        "consent",
+        "entitlements",
+        "audit",
+        "sales-ops"
+      ],
+      "name" : "Lead Vault Qualification Harness",
+      "purpose" : "Conference Lead Vault",
+      "purposeDescription" : "Lead capture, consent, entitlement gating, unlock og audit\/export for conference-flyt.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/LeadVault",
+      "sourceCellName" : "LeadVaultCell"
+    },
+    {
+      "interests" : [
+        "ageRatingHint=12+",
+        "appStoreScope=personal-copilot-v1",
+        "consent",
+        "executionScope=cloud",
+        "matchmaking",
+        "nativePermissionRequests=none",
+        "personal",
+        "policyCategory=matching",
+        "presentationClass=list",
+        "purpose=mutual-consent-no-auto-chat",
+        "recommendations",
+        "requiresLogin=true",
+        "requiresUserGeneratedContentModeration=true",
+        "reviewSummary=Consent-based matching; chat remains gated by explicit mutual approval.",
+        "social",
+        "surfaceFamily=relationship",
+        "universalLink=https:\/\/staging.haven.digipomps.org\/app\/personal\/matches",
+        "visibleAction=acceptMatchConsent",
+        "visibleAction=clearMatchSuggestion",
+        "visibleAction=declineMatchConsent",
+        "visibleAction=editPreferences",
+        "visibleAction=refreshSuggestions",
+        "visibleAction=requestMatchConsent"
+      ],
+      "name" : "Matches",
+      "purpose" : "Consent-based matching",
+      "purposeDescription" : "Gi match-forslag basert på publiserte profiler og eksplisitte preferanser. Chat starter aldri automatisk.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/PersonalMatchmaking",
+      "sourceCellName" : "PersonalMatchmakingCell"
+    },
+    {
+      "interests" : [
+        "media",
+        "photos",
+        "events",
+        "guests",
+        "attachments",
+        "cache",
+        "vc",
+        "location",
+        "ar"
+      ],
+      "name" : "Media Collection",
+      "purpose" : "Delt mediesamling",
+      "purposeDescription" : "La inviterte gjester eller kollegaer publisere bilde-, video-, lyd-, tekst- og lokasjonsreferanser uten aa kopiere raadata inn i UI-cellen.",
+      "purposeRefs" : [
+        "event.guest.media",
+        "media.collection.share"
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/MediaCollection",
+      "sourceCellName" : "MediaCollectionCell"
+    },
+    {
+      "interests" : [
+        "ageRatingHint=12+",
+        "appStoreScope=personal-copilot-v1",
+        "executionScope=hybrid",
+        "intent",
+        "jitsi",
+        "meeting",
+        "nativePermissionRequests=none",
+        "personal",
+        "policyCategory=meeting-intent",
+        "presentationClass=form",
+        "purpose=propose-accept-decline-no-native-permission",
+        "requiresLogin=true",
+        "requiresUserGeneratedContentModeration=true",
+        "reviewSummary=MeetingBridge metadata only; Binding asks for native capability consent later.",
+        "safe-placeholder",
+        "surfaceFamily=relationship",
+        "universalLink=https:\/\/staging.haven.digipomps.org\/app\/personal\/meeting",
+        "visibleAction=acceptTime",
+        "visibleAction=clearMeetingIntent",
+        "visibleAction=declineTime",
+        "visibleAction=editMeetingIntent",
+        "visibleAction=proposeTimes",
+        "visibleAction=updateMeetingIntent"
+      ],
+      "name" : "Meeting Intent",
+      "purpose" : "Coordinate meeting intent safely",
+      "purposeDescription" : "Foreslå møtetider og Jitsi-metadata som trygg placeholder uten native calendar, camera eller mic-permission.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/PersonalMeetingCoordinator",
+      "sourceCellName" : "PersonalMeetingCoordinatorCell"
+    },
+    {
+      "interests" : [
+        "mermaid",
+        "diagram",
+        "flowchart",
+        "rendering",
+        "svg",
+        "png",
+        "deterministic",
+        "resource-router",
+        "purposeRef=personal.diagram.mermaid.render"
+      ],
+      "name" : "Mermaid Renderer Playground",
+      "purpose" : "Mermaid diagram-rendering",
+      "purposeDescription" : "Render Mermaid-diagrammer med webview-backend (SVG\/PNG) og native backend (PNG der støttet).",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/MermaidRenderer",
+      "sourceCellName" : "MermaidRendererCell"
+    },
+    {
+      "interests" : [
+        "music",
+        "musikk",
+        "publishing",
+        "publisering",
+        "publish-music",
+        "publiser-musikk",
+        "streaming",
+        "hls",
+        "studio",
+        "private-review",
+        "collaboration",
+        "collective",
+        "micropayments",
+        "storage",
+        "cellprotocol",
+        "purposeRef=personal.music.publish"
+      ],
+      "name" : "Music Publishing Console",
+      "purpose" : "Musikkpublisering",
+      "purposeDescription" : "Publiser musikk fra egne celler med metadata, betalingspolicy og beskyttet player-leveranse.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/MusicPublishingConsole",
+      "sourceCellName" : "MusicPublishingConsoleCell"
+    },
+    {
+      "interests" : [
+        "ageRatingHint=12+",
+        "appStoreScope=personal-copilot-v1",
+        "consent",
+        "draft",
+        "executionScope=local",
+        "nativePermissionRequests=none",
+        "personal",
+        "policyCategory=profile-draft",
+        "presentationClass=form",
+        "profile",
+        "public-profile",
+        "purpose=editDraft+previewPublicProfile+recordPublishConsent+resetDraft",
+        "requiresLogin=false",
+        "requiresUserGeneratedContentModeration=true",
+        "reviewSummary=Binding-owned local Personal Co-Pilot surface: Private profile draft.",
+        "surfaceFamily=identity",
+        "universalLink=https:\/\/staging.haven.digipomps.org\/app\/personal\/my-profile",
+        "visibleAction=editDraft",
+        "visibleAction=previewPublicProfile",
+        "visibleAction=recordPublishConsent",
+        "visibleAction=resetDraft"
+      ],
+      "name" : "My Profile",
+      "purpose" : "Private profile draft",
+      "purposeDescription" : "Holder arbeidsutkast, preview og publiseringssamtykke lokalt for profilen sendes til CellScaffold.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/PersonalProfileDraft",
+      "sourceCellName" : "PersonalProfileDraftCell"
+    },
+    {
+      "interests" : [
+        "ageRatingHint=12+",
+        "appStoreScope=personal-copilot-v1",
+        "assistant",
+        "copilot",
+        "executionScope=owner-scoped",
+        "local-model-default",
+        "nativePermissionRequests=none",
+        "owner-control",
+        "personal",
+        "policyCategory=personal-assistant-profile",
+        "presentationClass=form",
+        "privacy",
+        "purposeRef=personal.chat.assist.guided-onboarding",
+        "requiresLogin=false",
+        "requiresUserGeneratedContentModeration=false",
+        "reviewSummary=Owner-scoped assistant preferences with explicit learning and provider policy. No provider invocation in this surface.",
+        "surfaceFamily=identity",
+        "universalLink=https:\/\/staging.haven.digipomps.org\/app\/personal\/copilot\/profile",
+        "visibleAction=profile.reset",
+        "visibleAction=profile.setDeclaredInterests",
+        "visibleAction=profile.setDeclaredPurpose",
+        "visibleAction=profile.setDisplayName",
+        "visibleAction=profile.setInteractionStyle",
+        "visibleAction=profile.setLearningPolicy",
+        "visibleAction=profile.setNecessaryContent",
+        "visibleAction=profile.setProviderPolicy"
+      ],
+      "name" : "Personal Assistant Profile",
+      "purpose" : "Configure an owner-scoped personal Co-Pilot",
+      "purposeDescription" : "Gi Co-Piloten navn, eksplisitt formål, nødvendig innhold og interesser. Passiv adferdslæring er av, lokale modeller er standard og ekstern provider krever et separat valg med tillitspakke.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/PersonalAssistantProfile",
+      "sourceCellName" : "PersonalAssistantProfileCell"
+    },
+    {
+      "interests" : [
+        "ageRatingHint=12+",
+        "appStoreScope=personal-copilot-v1",
+        "appstore",
+        "catalog",
+        "configuration",
+        "executionScope=cloud",
+        "nativePermissionRequests=none",
+        "personal",
+        "policy",
+        "policyCategory=catalog",
+        "presentationClass=list",
+        "purpose=approved-personal-catalog",
+        "requiresLogin=true",
+        "requiresUserGeneratedContentModeration=false",
+        "reviewSummary=Catalog returns only Personal Co-Pilot V1 entries and excludes Conference\/demo\/admin surfaces.",
+        "surfaceFamily=catalog",
+        "universalLink=https:\/\/staging.haven.digipomps.org\/app\/personal\/catalog",
+        "visibleAction=entries",
+        "visibleAction=entries.allowed",
+        "visibleAction=entries.unavailable",
+        "visibleAction=entryDetail",
+        "visibleAction=policySummary"
+      ],
+      "name" : "Personal Co-Pilot Catalog",
+      "purpose" : "Personal Co-Pilot approved catalog",
+      "purposeDescription" : "App Store-godkjent katalog som kun returnerer personal-copilot-v1-konfigurasjoner med policy, scope og execution metadata.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/PersonalCopilotConfigurationCatalog",
+      "sourceCellName" : "PersonalCopilotConfigurationCatalogCell"
+    },
+    {
+      "interests" : [
+        "personal-data",
+        "provenance",
+        "privacy",
+        "http-transparency",
+        "retention",
+        "entity-control"
+      ],
+      "name" : "Personal Data Trust Package",
+      "purpose" : "Forhåndsvis behandling av persondata",
+      "purposeDescription" : "Vis forslag, kilder, planlagte eksterne kall, lagringstid og separate Entity-\/delingsbeslutninger før handling.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/PersonalDataTrustPackage",
+      "sourceCellName" : "PersonalDataTrustPackageCell"
+    },
+    {
+      "interests" : [
+        "activity",
+        "dashboard",
+        "observability",
+        "owner",
+        "personal",
+        "projects",
+        "work-items",
+        "privacy",
+        "accessibility"
+      ],
+      "name" : "Personal Entity Activity — Work & Projects",
+      "purpose" : "Arbeid og prosjekter – siste innlasting",
+      "purposeDescription" : "Arbeids- og prosjektstatus ved siste innlasting fra datakildene du allerede har tilgang til. Vis bare eksisterende eierautorisert status med kilde og versjon, uten å gjette manglende data.",
+      "purposeRefs" : [
+        "purpose:\/\/access.audit.privacy",
+        "purpose:\/\/gui.quality.functional-accessible",
+        "purpose:\/\/personal-entity.activity-dashboard.view",
+        "purpose:\/\/project-work.current-status-and-outstanding",
+        "purpose:\/\/skeleton.owner-entity-access"
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/WorkItem",
+      "sourceCellName" : "WorkItemCell"
+    },
+    {
+      "interests" : [
+        "account",
+        "ageRatingHint=12+",
+        "appStoreScope=personal-copilot-v1",
+        "delete",
+        "executionScope=local",
+        "export",
+        "identity",
+        "nativePermissionRequests=none",
+        "personal",
+        "policyCategory=identity-and-account",
+        "presentationClass=hero",
+        "privacy",
+        "purpose=viewIdentity+exportAccount+deleteAccount",
+        "requiresLogin=false",
+        "requiresUserGeneratedContentModeration=false",
+        "reviewSummary=Binding-owned local Personal Co-Pilot surface: Personal Co-Pilot startside.",
+        "surfaceFamily=identity",
+        "universalLink=https:\/\/staging.haven.digipomps.org\/app\/personal\/personal-home",
+        "visibleAction=deleteAccount",
+        "visibleAction=exportAccount",
+        "visibleAction=viewIdentity"
+      ],
+      "name" : "Personal Home",
+      "purpose" : "Personal Co-Pilot startside",
+      "purposeDescription" : "Lokal inngang til requester, public\/private identity, samtykker, eksport og sletting uten sky-publisering.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/PersonalIdentity",
+      "sourceCellName" : "PersonalIdentityCell"
+    },
+    {
+      "interests" : [
+        "ageRatingHint=12+",
+        "appStoreScope=personal-copilot-v1",
+        "consent",
+        "directory-opt-in",
+        "executionScope=cloud",
+        "hosting-policy",
+        "identity",
+        "media-upload",
+        "nativePermissionRequests=none",
+        "personal",
+        "personal-page",
+        "policyCategory=public-presence-page",
+        "presentationClass=form",
+        "profile",
+        "profile-page",
+        "public-presence",
+        "public-profile",
+        "publish",
+        "purpose=template-preview-hosting-publish-unpublish-delete",
+        "purposeRef=personal.profile.page.create",
+        "purposeRef=personal.profile.page.edit",
+        "purposeRef=personal.public-presence.hosting.configure",
+        "purposeRef=personal.public-presence.publish",
+        "purposeRef=personal.public-presence.template.choose",
+        "requiresLogin=true",
+        "requiresUserGeneratedContentModeration=true",
+        "reviewSummary=Explicit page publishing adapter with template selection, hosting readiness and public-read-model guardrails.",
+        "storage-quota",
+        "surfaceFamily=identity",
+        "template-library",
+        "universalLink=https:\/\/staging.haven.digipomps.org\/app\/personal\/page\/publish",
+        "visibleAction=deletePage",
+        "visibleAction=deleteSelectedMedia",
+        "visibleAction=draft.costModel",
+        "visibleAction=draft.deletionGuarantee",
+        "visibleAction=draft.directoryListed",
+        "visibleAction=draft.estimatedMonthlyCost",
+        "visibleAction=draft.hostingProvider",
+        "visibleAction=draft.pageSummary",
+        "visibleAction=draft.pageTitle",
+        "visibleAction=draft.sourceProfileEndpoint",
+        "visibleAction=draft.sourceRefs",
+        "visibleAction=draft.templateID",
+        "visibleAction=excludeSelectedMedia",
+        "visibleAction=includeSelectedMedia",
+        "visibleAction=publishPage",
+        "visibleAction=refreshPreview",
+        "visibleAction=selectMedia",
+        "visibleAction=selectPage",
+        "visibleAction=selectTemplate",
+        "visibleAction=setActiveTab",
+        "visibleAction=unpublishPage",
+        "visibleAction=uploadMedia"
+      ],
+      "name" : "Personal Page Publisher",
+      "purpose" : "Create and manage public personal pages",
+      "purposeDescription" : "Lag, forhåndsvis og publiser en offentlig side fra eksplisitt valgt tekst og private medieopplastinger. Medieinkludering, lagringskvote, directory-listing, hosting-policy og publisering er separate valg.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/PersonalPagePublisher",
+      "sourceCellName" : "PersonalPagePublisherCell"
+    },
+    {
+      "interests" : [
+        "ageRatingHint=12+",
+        "appStoreScope=personal-copilot-v1",
+        "audit",
+        "consent",
+        "executionScope=local",
+        "nativePermissionRequests=none",
+        "permissions",
+        "personal",
+        "policyCategory=privacy-audit",
+        "presentationClass=list",
+        "privacy",
+        "purpose=viewAuditEvents+filterAuditEvents",
+        "remote-config",
+        "requiresLogin=false",
+        "requiresUserGeneratedContentModeration=false",
+        "reviewSummary=Binding-owned local Personal Co-Pilot surface: Local privacy audit.",
+        "surfaceFamily=governance",
+        "universalLink=https:\/\/staging.haven.digipomps.org\/app\/personal\/privacy-audit",
+        "visibleAction=filterAuditEvents",
+        "visibleAction=viewAuditEvents"
+      ],
+      "name" : "Privacy Audit",
+      "purpose" : "Local privacy audit",
+      "purposeDescription" : "Lokal logg som forklarer hva som ble publisert, rapportert, blokkert, slettet eller delt.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/PersonalPrivacyAudit",
+      "sourceCellName" : "PersonalPrivacyAuditCell"
+    },
+    {
+      "interests" : [
+        "project-operations",
+        "service-catalog",
+        "rag",
+        "drafts",
+        "versions",
+        "prompts",
+        "implementation-queue"
+      ],
+      "name" : "Project Operations",
+      "purpose" : "Project operations og servicekatalog",
+      "purposeDescription" : "Styr videre arbeid med ærlig servicekatalog, RAG query-flate, prompts og generiske drafts\/versions.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/ServiceCatalog",
+      "sourceCellName" : "ServiceCatalogCell"
+    },
+    {
+      "interests" : [
+        "ageRatingHint=12+",
+        "appStoreScope=personal-copilot-v1",
+        "block",
+        "directory",
+        "executionScope=cloud",
+        "moderation",
+        "nativePermissionRequests=none",
+        "personal",
+        "policyCategory=public-directory",
+        "presentationClass=list",
+        "profile",
+        "public-presence",
+        "public-profile",
+        "purpose=search-report-hide-block",
+        "purposeRef=personal.public-directory.search",
+        "requiresLogin=true",
+        "requiresUserGeneratedContentModeration=true",
+        "reviewSummary=Searchable public profile read model with report, hide and block.",
+        "search",
+        "surfaceFamily=relationship",
+        "universalLink=https:\/\/staging.haven.digipomps.org\/app\/personal\/directory",
+        "visibleAction=blockProfile",
+        "visibleAction=hideProfile",
+        "visibleAction=profileDetail",
+        "visibleAction=reportProfile",
+        "visibleAction=searchProfiles"
+      ],
+      "name" : "Public Profile Directory",
+      "purpose" : "Search public profiles safely",
+      "purposeDescription" : "Søk i publiserte profiler og la brukeren rapportere, skjule eller blokkere profiler fra samme flate.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/PublicProfileDirectory",
+      "sourceCellName" : "PublicProfileDirectoryCell"
+    },
+    {
+      "interests" : [
+        "public-presence",
+        "publishing",
+        "blog",
+        "info-pages",
+        "artist-profile",
+        "organization-profile",
+        "project-log",
+        "markdown",
+        "media",
+        "explicit-publish-consent",
+        "usage-quota",
+        "access-entitlement",
+        "ai-proposal"
+      ],
+      "name" : "Publisering",
+      "purpose" : "Publiser sider og innlegg om deg, prosjektet eller organisasjonen",
+      "purposeDescription" : "Skriv info-sider og blogginnlegg i markdown, last opp medier, la assistenten foreslå et oppsett, og publiser eksplisitt til en offentlig adresse. Prøveperioden på hosting er en bruksrett støttet av DiMy.",
+      "purposeRefs" : [
+        "organization.presence.publish",
+        "personal.profile.publish",
+        "personal.public-presence.publish",
+        "project.log.publish"
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/Publication",
+      "sourceCellName" : "PublicationCell"
+    },
+    {
+      "interests" : [
+        "ageRatingHint=12+",
+        "appStoreScope=personal-copilot-v1",
+        "consent",
+        "executionScope=cloud",
+        "identity",
+        "nativePermissionRequests=none",
+        "personal",
+        "policyCategory=profile-publish",
+        "presentationClass=form",
+        "profile",
+        "profile-page",
+        "public-presence",
+        "public-profile",
+        "publish",
+        "purpose=publish-unpublish-delete",
+        "purposeRef=personal.public-presence.publish",
+        "requiresLogin=true",
+        "requiresUserGeneratedContentModeration=true",
+        "reviewSummary=Explicit user-controlled public profile publishing with unpublish and delete.",
+        "surfaceFamily=identity",
+        "universalLink=https:\/\/staging.haven.digipomps.org\/app\/personal\/profile\/publish",
+        "visibleAction=deleteProfile",
+        "visibleAction=editPublicPayload",
+        "visibleAction=profileStatus",
+        "visibleAction=publishProfile",
+        "visibleAction=unpublishProfile"
+      ],
+      "name" : "Publish Public Profile",
+      "purpose" : "Publish public profile",
+      "purposeDescription" : "Publiser, avpubliser eller slett en offentlig profil bare når brukeren har skrevet eller valgt data for publisering og bekreftet samtykke.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/PersonalProfilePublisher",
+      "sourceCellName" : "PersonalProfilePublisherCell"
+    },
+    {
+      "interests" : [
+        "access-proof",
+        "ageRatingHint=12+",
+        "appStoreScope=personal-copilot-v1",
+        "bookproject",
+        "campaign",
+        "entity-representation",
+        "executionScope=cloud",
+        "group-presence",
+        "innovation-policy",
+        "nativePermissionRequests=none",
+        "personal",
+        "policyCategory=questionnaire-campaign",
+        "presentationClass=inspector",
+        "purpose=import-preview-send-submit-export",
+        "purposeRef=purpose:\/\/bookproject.group-membership",
+        "purposeRef=purpose:\/\/bookproject.group-message",
+        "purposeRef=purpose:\/\/questionnaire.response",
+        "questionnaire",
+        "recipient-import",
+        "requiresLogin=true",
+        "requiresUserGeneratedContentModeration=true",
+        "reviewSummary=Reusable questionnaire campaign surface with access-only transport payloads, group membership read model and consent-gated person-linked responses.",
+        "surfaceFamily=relationship",
+        "universalLink=https:\/\/staging.haven.digipomps.org\/app\/personal\/questionnaire\/campaign",
+        "visibleAction=campaign.consentText",
+        "visibleAction=campaign.contextText",
+        "visibleAction=campaign.createOrUpdate",
+        "visibleAction=campaign.endsAt",
+        "visibleAction=campaign.questionsPerPage",
+        "visibleAction=campaign.status",
+        "visibleAction=campaign.title",
+        "visibleAction=campaign.updateSettings",
+        "visibleAction=delivery.emailBody",
+        "visibleAction=delivery.emailSubject",
+        "visibleAction=delivery.preview",
+        "visibleAction=delivery.recordFailure",
+        "visibleAction=delivery.sendReady",
+        "visibleAction=delivery.smsBody",
+        "visibleAction=export.csv",
+        "visibleAction=export.json",
+        "visibleAction=questions.remove",
+        "visibleAction=questions.replaceFromJSON",
+        "visibleAction=questions.upsert",
+        "visibleAction=recipients.importRows",
+        "visibleAction=recipients.selectForDelivery",
+        "visibleAction=recipients.selectGroupsForDelivery",
+        "visibleAction=respondent.openLink",
+        "visibleAction=respondent.saveDraft",
+        "visibleAction=respondent.submit",
+        "visibleAction=respondent.withdrawConsent"
+      ],
+      "name" : "Questionnaire Campaign",
+      "purpose" : "Run reusable questionnaire campaigns",
+      "purposeDescription" : "Importer mottakere som EntityRepresentation-kompatible records, send tilgangslenker med access proof, og les samtykke-gatede spørreskjemasvar.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/QuestionnaireCampaign",
+      "sourceCellName" : "QuestionnaireCampaignCell"
+    },
+    {
+      "interests" : [
+        "rag",
+        "documentation",
+        "prompts",
+        "knowledge",
+        "citations",
+        "search"
+      ],
+      "name" : "RAG Gateway Workspace",
+      "purpose" : "Domenespesifikk RAG-utforskning",
+      "purposeDescription" : "Case-aware RAG for sporsmal, sitater, corpus-utforskning og dokumentlenker.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/RAGGateway",
+      "sourceCellName" : "RAGGatewayCell"
+    },
+    {
+      "interests" : [
+        "sales",
+        "crm",
+        "follow-up",
+        "email-bridge",
+        "social-network",
+        "todo",
+        "cellprotocol-transition"
+      ],
+      "name" : "Sales Workspace",
+      "purpose" : "Sales workspace",
+      "purposeDescription" : "Salgsscope eid av selskapet eller prosjektet man selger fra, med kontoer, lokale kontakter, relasjoner og Todo-basert oppfolging.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/SalesWorkspace",
+      "sourceCellName" : "SalesWorkspaceCell"
+    },
+    {
+      "interests" : [
+        "api-key",
+        "credentials",
+        "executionScope=cell-scoped",
+        "oauth-token",
+        "owner-only",
+        "presentationClass=tool",
+        "purposeRef=credential.scoped.configure",
+        "purposeRef=personal.chat.assist.credentials.configure",
+        "requires-user-approval",
+        "scoped-secret",
+        "surfaceFamily=knowledge",
+        "visibleAction=credential.clear",
+        "visibleAction=credential.remove",
+        "visibleAction=credential.upsert"
+      ],
+      "name" : "Scoped Credentials",
+      "purpose" : "Configure requester-scoped credential aliases",
+      "purposeDescription" : "Lagrer owner-scoped alias og metadata for credentials slik at celler kan be om eksplisitt bruk av et alias uten at hemmeligheten vises i GUI eller katalog. Secret values returneres aldri fra state.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/ScopedCredential",
+      "sourceCellName" : "ScopedCredentialCell"
+    },
+    {
+      "interests" : [
+        "documentation",
+        "executionScope=cell-scoped",
+        "presentationClass=tool",
+        "purposeRef=knowledge.source.ingest",
+        "purposeRef=personal.chat.assist.truth-source.ingest",
+        "rag-candidate",
+        "requires-user-approval",
+        "source-ingestion",
+        "surfaceFamily=knowledge",
+        "truth-source",
+        "visibleAction=source.clear",
+        "visibleAction=source.ingest"
+      ],
+      "name" : "Source Ingestion",
+      "purpose" : "Turn fetched or provided content into a truth source descriptor",
+      "purposeDescription" : "Tar inn bruker-godkjent innhold fra web-fetch, search-resultat eller manuelt input og lager en TruthSourceDescriptor. Registrering som aktiv sannhetskilde er eksplisitt.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/SourceIngestion",
+      "sourceCellName" : "SourceIngestionCell"
+    },
+    {
+      "interests" : [
+        "map",
+        "kart",
+        "spatial",
+        "geospatial",
+        "geodata",
+        "location",
+        "lokasjon",
+        "sted",
+        "nearby",
+        "nærhet",
+        "naerhet",
+        "data-map",
+        "visualization",
+        "purpose-interest-weighted",
+        "requires-user-approval",
+        "purposeRef=personal.chat.assist.spatial-query",
+        "purposeRef=knowledge.map.visualize",
+        "purposeRef=spatial.map.render",
+        "visibleAction=spatial.queryAround",
+        "visibleAction=spatial.explainFeature",
+        "visibleAction=spatial.selectFeature",
+        "visibleAction=spatial.draftArtifact",
+        "visibleAction=spatial.requestPresence",
+        "visibleAction=spatial.revokePresence",
+        "surfaceFamily=knowledge",
+        "presentationClass=map",
+        "executionScope=cell-scoped"
+      ],
+      "name" : "Spatial Map Workspace",
+      "purpose" : "Purpose-filtered map with spatial data",
+      "purposeDescription" : "Vis kartdata fra SpatialRegistry som matcher brukerens formål og interesser. Presence og nye kartpunkter krever eksplisitt brukerhandling.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/SpatialProjection",
+      "sourceCellName" : "SpatialProjectionCell"
+    },
+    {
+      "interests" : [
+        "evidence",
+        "executionScope=cell-scoped",
+        "presentationClass=tool",
+        "purposeRef=knowledge.transcript.hold",
+        "purposeRef=personal.data.retention.govern",
+        "requires-user-approval",
+        "retention-governed",
+        "surfaceFamily=knowledge",
+        "time-to-live",
+        "transcript",
+        "user-controlled-deletion",
+        "visibleAction=transcript.read",
+        "visibleAction=transcript.release",
+        "visibleAction=transcript.setPolicy",
+        "visibleAction=transcript.sweep",
+        "visibleAction=transcript.tidy"
+      ],
+      "name" : "Transcript Store",
+      "purpose" : "Hold verbatim material under a declared retention policy",
+      "purposeDescription" : "Oppbevarer ordrett materiale — panelsvar, hentede kilder, transkripsjoner — for én requester til brukeren flytter det ut, til levetiden går ut og policyen tillater sletting, eller til brukeren ber cellen rydde opp etter seg. Cellen tolker ikke det den lagrer, og lister aldri innholdet uten at det leses eksplisitt.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/TranscriptStore",
+      "sourceCellName" : "TranscriptStoreCell"
+    },
+    {
+      "interests" : [
+        "trust-packet",
+        "consent",
+        "receipt",
+        "signature",
+        "provenance",
+        "purpose",
+        "privacy",
+        "audit",
+        "revoke",
+        "export"
+      ],
+      "name" : "Trust Packet",
+      "purpose" : "Tillitspakke og kvittering",
+      "purposeDescription" : "Vis hva som deles, hvorfor, med hvem, hvor lenge, hvilken AI\/evidence som brukes, og hvordan receipt kan verifiseres, eksporteres eller trekkes tilbake.",
+      "purposeRefs" : [
+        "purpose:\/\/trust.ai-and-data-transparency",
+        "purpose:\/\/trust.consent-and-revocation",
+        "purpose:\/\/trust.portable-receipt",
+        "purpose:\/\/trust.understandable-boundaries"
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/TrustPacketWorkbench",
+      "sourceCellName" : "TrustPacketWorkbenchCell"
+    },
+    {
+      "interests" : [
+        "entity-scope",
+        "executionScope=cell-scoped",
+        "knowledge-source",
+        "presentationClass=tool",
+        "purpose-interest-weighted",
+        "purposeRef=knowledge.truth-source.manage",
+        "purposeRef=personal.chat.assist.truth-source.manage",
+        "requires-user-approval",
+        "subjective",
+        "surfaceFamily=knowledge",
+        "truth-source",
+        "visibleAction=truthSource.clear",
+        "visibleAction=truthSource.disable",
+        "visibleAction=truthSource.enable",
+        "visibleAction=truthSource.remove",
+        "visibleAction=truthSource.upsert"
+      ],
+      "name" : "Truth Source Manager",
+      "purpose" : "Manage subjective truth sources for this entity\/requester",
+      "purposeDescription" : "Lar brukeren velge, slå av og administrere hvilke subjektive sannhetskilder Co-Pilot og andre celler kan bruke i denne entity-scopen. Cellen attesterer ikke at kildene faktisk er sanne.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/TruthSourceManager",
+      "sourceCellName" : "TruthSourceManagerCell"
+    },
+    {
+      "interests" : [
+        "ageRatingHint=12+",
+        "appStoreScope=personal-copilot-v1",
+        "executionScope=local",
+        "ideas",
+        "markdown",
+        "nativePermissionRequests=vault-on-explicit-action",
+        "notes",
+        "personal",
+        "policyCategory=local-vault",
+        "presentationClass=detail",
+        "projects",
+        "purpose=createNote+editNote+shareExplicitExport",
+        "requiresLogin=false",
+        "requiresUserGeneratedContentModeration=false",
+        "reviewSummary=Binding-owned local Personal Co-Pilot surface: Personal vault for ideas.",
+        "surfaceFamily=content",
+        "universalLink=https:\/\/staging.haven.digipomps.org\/app\/personal\/vault-ideas",
+        "vault",
+        "visibleAction=createNote",
+        "visibleAction=editNote",
+        "visibleAction=shareExplicitExport"
+      ],
+      "name" : "Vault \/ Ideas",
+      "purpose" : "Personal vault for ideas",
+      "purposeDescription" : "Organiser ideer, prosjekter og notater lokalt. Remote flater får ikke vault-tilgang uten eksplisitt eksport eller deling.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/Vault",
+      "sourceCellName" : "VaultCell"
+    },
+    {
+      "interests" : [
+        "credential-alias",
+        "executionScope=cell-scoped",
+        "external-information",
+        "fetch",
+        "presentationClass=tool",
+        "purposeRef=knowledge.web.fetch",
+        "purposeRef=personal.chat.assist.external-info.fetch",
+        "requires-user-approval",
+        "source-preview",
+        "surfaceFamily=knowledge",
+        "truth-source-candidate",
+        "visibleAction=web.clear",
+        "visibleAction=web.fetch",
+        "web"
+      ],
+      "name" : "Web Fetch",
+      "purpose" : "Fetch an explicit web page as a bounded source preview",
+      "purposeDescription" : "Henter en bruker-godkjent URL etter eksplisitt klikk, med HTTPS som standard, byte-grense og valgfri credential-alias. Brukes når Co-Pilot trenger mer informasjon fra en konkret side.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/WebFetch",
+      "sourceCellName" : "WebFetchCell"
+    },
+    {
+      "interests" : [
+        "executionScope=cell-scoped",
+        "external-information",
+        "presentationClass=tool",
+        "provider-slot",
+        "purposeRef=knowledge.web.search",
+        "purposeRef=personal.chat.assist.external-info.search",
+        "requires-user-approval",
+        "search",
+        "surfaceFamily=knowledge",
+        "truth-source-candidate",
+        "visibleAction=web.clear",
+        "visibleAction=web.search",
+        "web"
+      ],
+      "name" : "Web Search",
+      "purpose" : "Search external sources through a configured provider",
+      "purposeDescription" : "Søker på nettet bare når en requester-scoped search provider er konfigurert og brukeren klikker eksplisitt. Uten provider returnerer cellen tydelig provider_unconfigured.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/WebSearch",
+      "sourceCellName" : "WebSearchCell"
+    },
+    {
+      "interests" : [
+        "workbench",
+        "agreement",
+        "access",
+        "delegation",
+        "verifiable-credential",
+        "entity",
+        "dimy",
+        "project-management"
+      ],
+      "name" : "Workbench Access Grant",
+      "purpose" : "Delegert tilgang til HAVEN Workbench",
+      "purposeDescription" : "Utsted en tidsbegrenset engangsinvitasjon som ved innloesning signerer konkrete Agreement-contracts paa eierens Workbench-celler og publiserer en delt Workbench-konfigurasjon for mottaker.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/WorkbenchAccessGrant",
+      "sourceCellName" : "WorkbenchAccessGrantCell"
+    },
+    {
+      "interests" : [
+        "ageRatingHint=12+",
+        "appStoreScope=personal-copilot-v1",
+        "automation",
+        "executionScope=local",
+        "nativePermissionRequests=none",
+        "personal",
+        "personal-productivity",
+        "policyCategory=workflow-studio",
+        "presentationClass=detail",
+        "purpose=createWorkflow+testWorkflow+disableWorkflow",
+        "requiresLogin=false",
+        "requiresUserGeneratedContentModeration=false",
+        "reviewSummary=Binding-owned local Personal Co-Pilot surface: Workflow Studio for Personal Co-Pilot.",
+        "studio",
+        "surfaceFamily=content",
+        "universalLink=https:\/\/staging.haven.digipomps.org\/app\/personal\/workflow-studio",
+        "visibleAction=createWorkflow",
+        "visibleAction=disableWorkflow",
+        "visibleAction=testWorkflow",
+        "workflow"
+      ],
+      "name" : "Workflow Studio",
+      "purpose" : "Workflow Studio for Personal Co-Pilot",
+      "purposeDescription" : "Bygg og test personlige arbeidsflyter uten å eksponere skjulte remote features eller generell plugin-marketplace.",
+      "purposeRefs" : [
+
+      ],
+      "sourceCellEndpoint" : "cell:\/\/\/WorkflowStudio",
+      "sourceCellName" : "WorkflowStudioCell"
+    }
+  ],
+  "documentation" : [
+    {
+      "id" : "book:book-08-bridging-transport",
+      "purposeRefs" : [
+        "cellprotocol.docs.lookup",
+        "cellprotocol.book.bridging-transport"
+      ],
+      "summary" : "CellProtocol Book chapter in connectivity-semantics: Book\/08_Bridging_Transport.md",
+      "title" : "Chapter 08 — Bridging and Transport"
+    },
+    {
+      "id" : "book:book-01-core",
+      "purposeRefs" : [
+        "cellprotocol.docs.lookup",
+        "cellprotocol.book.cellprotocol-core"
+      ],
+      "summary" : "CellProtocol Book chapter in core-protocol: Book\/01_CellProtocol_Core.md",
+      "title" : "Chapter 01 — CellProtocol Core"
+    },
+    {
+      "id" : "book:book-02-interfaces",
+      "purposeRefs" : [
+        "cellprotocol.docs.lookup",
+        "cellprotocol.book.cell-interfaces"
+      ],
+      "summary" : "CellProtocol Book chapter in core-protocol: Book\/02_Cell_Interfaces.md",
+      "title" : "Chapter 02 — Cell Interfaces"
+    },
+    {
+      "id" : "book:book-10-quickstart",
+      "purposeRefs" : [
+        "cellprotocol.docs.lookup",
+        "cellprotocol.book.quickstart"
+      ],
+      "summary" : "CellProtocol Book chapter in developer-guides: Book\/10_Quickstart.md",
+      "title" : "Chapter 10 — Quickstart"
+    },
+    {
+      "id" : "book:book-11-developer-guide-cell",
+      "purposeRefs" : [
+        "cellprotocol.docs.lookup",
+        "cellprotocol.book.developer-guide-cell"
+      ],
+      "summary" : "CellProtocol Book chapter in developer-guides: Book\/11_Developer_Guide_Cell.md",
+      "title" : "Chapter 11 — Developer Guide: Implementing a Cell"
+    },
+    {
+      "id" : "book:book-12-skeleton-spec",
+      "purposeRefs" : [
+        "cellprotocol.docs.lookup",
+        "cellprotocol.book.skeleton-specification"
+      ],
+      "summary" : "CellProtocol Book chapter in developer-guides: Book\/12_Skeleton_Spec.md",
+      "title" : "Chapter 12 — Skeleton Specification"
+    },
+    {
+      "id" : "book:book-13-agent-instructions",
+      "purposeRefs" : [
+        "cellprotocol.docs.lookup",
+        "cellprotocol.book.agent-instructions"
+      ],
+      "summary" : "CellProtocol Book chapter in developer-guides: Book\/13_Agent_Instructions.md",
+      "title" : "Chapter 13 — Agent Instructions (Cells + Skeleton UI)"
+    },
+    {
+      "id" : "book:book-14-perspective-runtime-matching",
+      "purposeRefs" : [
+        "cellprotocol.docs.lookup",
+        "cellprotocol.book.perspective-runtime-matching"
+      ],
+      "summary" : "CellProtocol Book chapter in developer-guides: Book\/14_Perspective_Runtime_Matching.md",
+      "title" : "Chapter 14 — Perspective Runtime Matching (Phase 0 + 1)"
+    },
+    {
+      "id" : "book:book-15-documentation-discovery-rag",
+      "purposeRefs" : [
+        "cellprotocol.docs.lookup",
+        "cellprotocol.book.documentation-discovery-rag"
+      ],
+      "summary" : "CellProtocol Book chapter in developer-guides: Book\/15_Documentation_Discovery_and_RAG.md",
+      "title" : "Chapter 15 - Documentation Discovery and RAG"
+    },
+    {
+      "id" : "book:book-16-reference-workspace",
+      "purposeRefs" : [
+        "cellprotocol.docs.lookup",
+        "cellprotocol.book.book-reference-workspace"
+      ],
+      "summary" : "CellProtocol Book chapter in developer-guides: Book\/16_Book_Reference_Workspace.md",
+      "title" : "Chapter 16 - Book Reference Workspace"
+    },
+    {
+      "id" : "book:book-17-documentation-workbench",
+      "purposeRefs" : [
+        "cellprotocol.docs.lookup",
+        "cellprotocol.book.documentation-workbench-landing-plan"
+      ],
+      "summary" : "CellProtocol Book chapter in developer-guides: Book\/17_Documentation_Workbench_Landing_and_Development_Plan.md",
+      "title" : "Chapter 17 - Documentation Workbench Landing and Development Plan"
+    },
+    {
+      "id" : "book:book-05-flows-lifecycle",
+      "purposeRefs" : [
+        "cellprotocol.docs.lookup",
+        "cellprotocol.book.flows-lifecycle"
+      ],
+      "summary" : "CellProtocol Book chapter in event-model-execution: Book\/05_Flows_Lifecycle.md",
+      "title" : "Chapter 05 — Flows and Stream Lifecycle"
+    },
+    {
+      "id" : "book:book-06-cellresolver",
+      "purposeRefs" : [
+        "cellprotocol.docs.lookup",
+        "cellprotocol.book.cellresolver"
+      ],
+      "summary" : "CellProtocol Book chapter in event-model-execution: Book\/06_CellResolver.md",
+      "title" : "Chapter 06 — CellResolver"
+    },
+    {
+      "id" : "book:book-07-scaffold-runtime",
+      "purposeRefs" : [
+        "cellprotocol.docs.lookup",
+        "cellprotocol.book.scaffold-runtime-model"
+      ],
+      "summary" : "CellProtocol Book chapter in event-model-execution: Book\/07_Scaffold_Runtime.md",
+      "title" : "Chapter 07 — Scaffold and Runtime Model"
+    },
+    {
+      "id" : "book:book-03-identity-model",
+      "purposeRefs" : [
+        "cellprotocol.docs.lookup",
+        "cellprotocol.book.identity-model"
+      ],
+      "summary" : "CellProtocol Book chapter in identity-authorization: Book\/03_Identity_Model.md",
+      "title" : "Chapter 03 — Identity Model"
+    },
+    {
+      "id" : "book:book-04-agreements-contracts",
+      "purposeRefs" : [
+        "cellprotocol.docs.lookup",
+        "cellprotocol.book.agreements-contracts"
+      ],
+      "summary" : "CellProtocol Book chapter in identity-authorization: Book\/04_Agreements_Contracts.md",
+      "title" : "Chapter 04 — Agreements and Contracts"
+    },
+    {
+      "id" : "book:book-home",
+      "purposeRefs" : [
+        "cellprotocol.docs.lookup",
+        "cellprotocol.book.book-home"
+      ],
+      "summary" : "CellProtocol Book chapter in navigation: Book\/00_Book_Home.md",
+      "title" : "Book Home"
+    },
+    {
+      "id" : "book:book-09-purpose-interests",
+      "purposeRefs" : [
+        "cellprotocol.docs.lookup",
+        "cellprotocol.book.purpose-interests"
+      ],
+      "summary" : "CellProtocol Book chapter in semantics-trust-human-alignment: Book\/09_Purpose_Interests.md",
+      "title" : "Chapter 09 — Purpose and Interests"
+    },
+    {
+      "id" : "book:book-extras",
+      "purposeRefs" : [
+        "cellprotocol.docs.lookup",
+        "cellprotocol.book.book-extras"
+      ],
+      "summary" : "CellProtocol Book chapter in supplementary-material: Book\/Book_Extras.md",
+      "title" : "Book Extras"
+    },
+    {
+      "id" : "book:book-17-conference-ownership-dataflow",
+      "purposeRefs" : [
+        "cellprotocol.docs.lookup",
+        "cellprotocol.book.conference-ownership-dataflow"
+      ],
+      "summary" : "CellProtocol Book chapter in supplementary-material: Book\/17_Conference_Ownership_Dataflow.md",
+      "title" : "Chapter 17 - Conference Ownership and Dataflow"
+    },
+    {
+      "id" : "book:book-18-conference-connectionhub-agreement-lifecycle",
+      "purposeRefs" : [
+        "cellprotocol.docs.lookup",
+        "cellprotocol.book.conference-connectionhub-agreement-lifecycle"
+      ],
+      "summary" : "CellProtocol Book chapter in supplementary-material: Book\/18_Conference_ConnectionHub_Agreement_Entity_Lifecycle.md",
+      "title" : "Chapter 18 - ConferenceConnectionHubCell, Agreements, and Entity Lifecycle"
+    }
+  ],
+  "schema" : "haven.butler-maaling.katalog.v1",
+  "truthSources" : [
+
+  ]
+}

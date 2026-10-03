@@ -84,6 +84,27 @@ typed decision.
 This supports authorization at the audited boundary. It does not make internal
 direct calls, unregistered hosts, or application fallback automatically safe.
 
+### 3.0 Identity-unique owner proof over bridges
+
+Verified locally and in CI 2026-09-22; merged CellProtocol revision
+`0f688b57e6e976482c2c045bed2cf13040a2fad2` ([PR #43](https://github.com/Digipomps/CellProtocol/pull/43)).
+Before creating a guest's identity-unique Cell, the resolver uses the existing
+structured `IdentitySigningChallenge`, scoped to the registered identity domain
+and endpoint name. Stored non-GeneralCell owner checks use the Cell domain and
+UUID; mapping recovery uses `CellResolver` and `identity-mappings:<requester UUID>`.
+The existing `checkIdentityOrigin` / `GeneralCell` operation and audience remain.
+
+The resolver generates a fresh local nonce and verifies the signature against
+the public key. Over a bridge, the peer must sign; a copied descriptor cannot
+borrow a key from the server's vault. No Cell is registered before this proof.
+Client signing-scope policies and ordinary Cell keypath authorization remain
+separate gates. The fix preserves the wire schema and all private data boundaries.
+See `CellProtocol/Docs/Resolver_Bridge_Owner_Proof_2026-09-22.md` and
+`BridgeIdentityBoundaryTests` for the bounded evidence. Its paired-endpoint
+regression pins both creation name/domain and known Cell UUID/domain, rejects
+a wrong creation scope and post-operation challenge replay. It does not claim
+unconfigured discovery/bootstrap or Porthole remote loading.
+
 ### 3.1 Storage authorization boundary
 
 The canonical Grant permission has four positions: `r`, `w`, `x`, and `s`.

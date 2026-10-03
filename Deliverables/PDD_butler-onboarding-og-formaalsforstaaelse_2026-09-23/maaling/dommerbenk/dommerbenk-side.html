@@ -1,0 +1,315 @@
+<title>Dommerbenken · Butler-korpus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --paper: #f5f6f3;
+    --card: #ffffff;
+    --ink: #1c2530;
+    --muted: #5b6672;
+    --line: #d9dfe3;
+    --accent: #0f6e5c;
+    --accent-soft: #e3f2ed;
+    --accent-ink: #ffffff;
+    --chosen: #0f6e5c;
+    --warn: #8a5a00;
+    --warn-soft: #fff4dc;
+    --focus: #1f6fd1;
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --sans: "Public Sans", "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --paper: #12171c;
+      --card: #1a2128;
+      --ink: #e6ebef;
+      --muted: #9aa6b1;
+      --line: #2e3842;
+      --accent: #5cc4a6;
+      --accent-soft: #173a32;
+      --accent-ink: #0c1f1a;
+      --chosen: #5cc4a6;
+      --warn: #f0c46a;
+      --warn-soft: #3a2f16;
+      --focus: #7fb3ff;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --paper: #12171c;
+    --card: #1a2128;
+    --ink: #e6ebef;
+    --muted: #9aa6b1;
+    --line: #2e3842;
+    --accent: #5cc4a6;
+    --accent-soft: #173a32;
+    --accent-ink: #0c1f1a;
+    --chosen: #5cc4a6;
+    --warn: #f0c46a;
+    --warn-soft: #3a2f16;
+    --focus: #7fb3ff;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.5; }
+  .wrap { max-width: 760px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 64px; display: grid; gap: 20px; }
+  header { display: grid; gap: 6px; }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  h1 { margin: 0; font-family: var(--serif); font-weight: 600; font-size: 30px; line-height: 1.15; text-wrap: balance; }
+  .lead { margin: 0; color: var(--muted); max-width: 62ch; }
+  .status { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .status b { color: var(--ink); }
+  .notice { border: 1px solid var(--warn); background: var(--warn-soft); color: var(--ink); border-radius: 8px; padding: 10px 12px; font-size: 14px; }
+  nav.okter { display: grid; gap: 10px; }
+  .delrad { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .delnavn { font-size: 13px; font-weight: 700; min-width: 11ch; }
+  .okt { font: 500 13px var(--mono); border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 4px 10px; cursor: pointer; font-variant-numeric: tabular-nums; }
+  .okt[aria-current="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .okt.ferdig { background: var(--accent-soft); border-color: var(--accent); }
+  .okt:focus-visible, .valg input:focus-visible + span, button:focus-visible, textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .instruks { border-left: 3px solid var(--accent); padding: 4px 0 4px 12px; display: grid; gap: 4px; }
+  .instruks h2 { margin: 0; font-size: 16px; }
+  .instruks p { margin: 0; color: var(--muted); font-size: 14px; max-width: 64ch; }
+  .liste { display: grid; gap: 14px; }
+  .oppg { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 12px; }
+  .oppg.besvart { border-color: var(--accent); }
+  .topp { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font: 12px var(--mono); color: var(--muted); }
+  .melding { margin: 0; font-family: var(--serif); font-size: 19px; line-height: 1.45; }
+  .melding::before { content: "«"; color: var(--muted); }
+  .melding::after { content: "»"; color: var(--muted); }
+  .valgliste { display: grid; gap: 8px; }
+  .valg { display: block; position: relative; cursor: pointer; }
+  .valg input { position: absolute; opacity: 0; pointer-events: none; }
+  .valg span { display: grid; gap: 1px; border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; background: var(--card); }
+  .valg small { font: 12px var(--mono); color: var(--muted); }
+  .valg input:checked + span { border-color: var(--chosen); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--chosen); }
+  .rad { display: flex; flex-wrap: wrap; gap: 8px; }
+  .rad .valg { flex: 1 1 140px; }
+  .notat { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+  .notat textarea { font: 14px var(--sans); color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-height: 38px; resize: vertical; width: 100%; }
+  .lagret { font: 12px var(--mono); color: var(--accent); min-height: 1em; }
+  .bunn { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center; }
+  .knapp { font: 600 14px var(--sans); border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  .knapp.sekundaer { background: transparent; color: var(--accent); }
+  footer { font-size: 13px; color: var(--muted); max-width: 64ch; }
+  @media (prefers-reduced-motion: no-preference) { .oppg { transition: border-color .15s ease; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">PDD_butler-onboarding-og-formaalsforstaaelse · WP-C1 og WP-C2</div>
+    <h1>Dommerbenken for Butler-korpuset</h1>
+    <p class="lead">To korte oppgaver. Del A: hva vil brukeren? Del B: ville noen skrevet dette til Butler? Fem meldinger per økt. Ta én økt av gangen og stopp når du vil.</p>
+    <div class="status" id="status"><span>Laster …</span></div>
+  </header>
+
+  <div class="notice" id="ingen-lagring" hidden>Svar kan ikke lagres i denne visningen. Åpne siden i claude.ai for å dømme.</div>
+
+  <nav class="okter" id="okter" aria-label="Økter"></nav>
+
+  <section class="instruks" id="instruks"></section>
+
+  <section class="liste" id="liste" aria-live="polite"></section>
+
+  <div class="bunn">
+    <button class="knapp sekundaer" id="forrige" type="button">Forrige økt</button>
+    <button class="knapp" id="neste" type="button">Neste økt</button>
+  </div>
+
+  <footer>
+    Hvert svar lagres med en gang du klikker. Noen meldinger er lagt inn med vilje for å sjekke målingen, og de er ikke merket. Svarer du ja på alt, teller runden ikke som fasit. Et kort notat hjelper når ingen av valgene passer.
+  </footer>
+</div>
+
+<script>
+(() => {
+  const INSTRUKS = {
+    A: { tittel: "Del A · Hva vil brukeren?", tekst: "Velg det Butler burde gjøre. To tolkninger var uenige om disse meldingene. Passer ingen av dem, velg «Ingen av dem» og skriv gjerne hva det burde vært." },
+    B: { tittel: "Del B · Ville noen skrevet dette?", tekst: "Svar ja hvis en ekte bruker kunne skrevet meldingen til Butler, i chatten, med disse ordene. Svar nei hvis den virker kunstig." },
+  };
+  const LANG = { nb: "bokmål", en: "engelsk" };
+  let db = null;
+  let oppgaver = [];
+  const svar = new Map();
+  let aktivOkt = null;
+  const visningsstart = new Map();
+  const lagrer = new Set();
+
+  const el = (tag, attrs = {}, ...children) => {
+    const node = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === "class") node.className = v;
+      else if (k === "text") node.textContent = v;
+      else node.setAttribute(k, v);
+    }
+    for (const c of children) if (c) node.append(c);
+    return node;
+  };
+
+  const okter = () => {
+    const map = new Map();
+    for (const o of oppgaver) { if (!map.has(o.okt)) map.set(o.okt, []); map.get(o.okt).push(o); }
+    for (const list of map.values()) list.sort((a, b) => a.rekke - b.rekke);
+    return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0], "nb", { numeric: true }));
+  };
+
+  function renderStatus() {
+    const s = document.getElementById("status");
+    s.textContent = "";
+    if (!oppgaver.length) { s.append(el("span", { text: db ? "Ingen oppgaver lastet ennå." : "Venter på lagring …" })); return; }
+    for (const del of ["A", "B"]) {
+      const alle = oppgaver.filter((o) => o.del === del);
+      const besvart = alle.filter((o) => svar.has(o.id)).length;
+      const span = el("span");
+      span.append(`Del ${del}: `, el("b", { text: `${besvart} av ${alle.length}` }), " besvart");
+      s.append(span);
+    }
+  }
+
+  function renderOkter() {
+    const nav = document.getElementById("okter");
+    nav.textContent = "";
+    const grupper = { A: [], B: [] };
+    for (const [navn, list] of okter()) grupper[navn[0]].push([navn, list]);
+    for (const del of ["A", "B"]) {
+      const rad = el("div", { class: "delrad" }, el("span", { class: "delnavn", text: del === "A" ? "Del A · hensikt" : "Del B · realisme" }));
+      for (const [navn, list] of grupper[del]) {
+        const ferdige = list.filter((o) => svar.has(o.id)).length;
+        const b = el("button", { class: "okt" + (ferdige === list.length ? " ferdig" : ""), type: "button", "aria-current": String(navn === aktivOkt) });
+        b.textContent = `${navn} · ${ferdige}/${list.length}`;
+        b.addEventListener("click", () => velgOkt(navn));
+        rad.append(b);
+      }
+      nav.append(rad);
+    }
+  }
+
+  function renderInstruks() {
+    const box = document.getElementById("instruks");
+    box.textContent = "";
+    if (!aktivOkt) return;
+    const i = INSTRUKS[aktivOkt[0]];
+    box.append(el("h2", { text: `${i.tittel} · økt ${aktivOkt.slice(1)}` }), el("p", { text: i.tekst }));
+  }
+
+  function radio(name, value, label, hint, checked) {
+    const input = el("input", { type: "radio", name, value, id: `${name}-${value}` });
+    input.checked = checked;
+    const span = el("span");
+    span.append(label);
+    if (hint) span.append(el("small", { text: hint }));
+    return el("label", { class: "valg", for: `${name}-${value}` }, input, span);
+  }
+
+  function renderListe() {
+    const liste = document.getElementById("liste");
+    liste.textContent = "";
+    const list = (okter().find(([n]) => n === aktivOkt) || [null, []])[1];
+    for (const o of list) {
+      const gitt = svar.get(o.id) || {};
+      const card = el("article", { class: "oppg" + (svar.has(o.id) ? " besvart" : ""), "data-id": o.id });
+      card.append(el("div", { class: "topp" }, el("span", { text: `${o.id} · ${LANG[o.lang] || o.lang}` }), el("span", { class: "lagret", text: svar.has(o.id) ? "lagret" : "" })));
+      card.append(el("p", { class: "melding", text: o.tekst }));
+      const navn = `valg-${o.id}`;
+      const valgliste = el("div", { class: o.del === "A" ? "valgliste" : "rad", role: "radiogroup", "aria-label": "Svar" });
+      if (o.del === "A") {
+        for (const v of o.valg || []) valgliste.append(radio(navn, v.kode, v.navn, v.kode, gitt.valg === v.kode));
+        const rest = el("div", { class: "rad" });
+        rest.append(radio(navn, "ingen", "Ingen av dem", "", gitt.valg === "ingen"), radio(navn, "usikker", "Usikker", "", gitt.valg === "usikker"));
+        valgliste.append(rest);
+      } else {
+        valgliste.append(
+          radio(navn, "ja", "Ja, noen kunne skrevet dette", "", gitt.valg === "ja"),
+          radio(navn, "nei", "Nei, virker kunstig", "", gitt.valg === "nei"),
+          radio(navn, "usikker", "Usikker", "", gitt.valg === "usikker"),
+        );
+      }
+      valgliste.addEventListener("change", (e) => lagre(o, { valg: e.target.value }, card));
+      card.append(valgliste);
+      const ta = el("textarea", { id: `notat-${o.id}`, rows: "1", placeholder: o.del === "A" ? "Valgfritt: hva burde Butler gjort?" : "Valgfritt: hva er unaturlig?" });
+      ta.value = gitt.notat || "";
+      let timer = null;
+      ta.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(() => lagre(o, { notat: ta.value.trim() }, card), 700); });
+      card.append(el("label", { class: "notat", for: `notat-${o.id}` }, "Notat", ta));
+      liste.append(card);
+      if (!visningsstart.has(o.id)) visningsstart.set(o.id, Date.now());
+    }
+  }
+
+  async function lagre(o, felt, card) {
+    const merke = card.querySelector(".lagret");
+    if (!db) { merke.textContent = "ikke lagret"; return; }
+    const forrige = svar.get(o.id) || {};
+    const neste = { ...forrige, ...felt, oppgave: o.id, del: o.del, okt: o.okt, tid: new Date().toISOString() };
+    if (felt.valg && forrige.ms == null) neste.ms = Date.now() - (visningsstart.get(o.id) || Date.now());
+    svar.set(o.id, neste);
+    card.classList.add("besvart");
+    merke.textContent = "lagrer …";
+    while (lagrer.has(o.id)) await new Promise((r) => setTimeout(r, 80));
+    lagrer.add(o.id);
+    try {
+      await db.doc(`svar/${o.id}`).set(neste);
+      merke.textContent = "lagret";
+    } catch (e) {
+      merke.textContent = e && e.code === "invalid_argument" ? "du kan ikke skrive her" : "ikke lagret, prøv igjen";
+    } finally {
+      lagrer.delete(o.id);
+      renderStatus();
+      renderOkter();
+    }
+  }
+
+  function velgOkt(navn) {
+    aktivOkt = navn;
+    renderOkter(); renderInstruks(); renderListe();
+    try { localStorage.setItem("dommerbenk-okt", navn); } catch (_) {}
+  }
+
+  function flytt(steg) {
+    const navn = okter().map(([n]) => n);
+    const i = Math.max(0, navn.indexOf(aktivOkt));
+    const j = Math.min(navn.length - 1, Math.max(0, i + steg));
+    if (navn[j]) { velgOkt(navn[j]); window.scrollTo({ top: 0, behavior: "smooth" }); }
+  }
+  document.getElementById("forrige").addEventListener("click", () => flytt(-1));
+  document.getElementById("neste").addEventListener("click", () => flytt(1));
+
+  function forsteUferdige() {
+    for (const [navn, list] of okter()) if (list.some((o) => !svar.has(o.id))) return navn;
+    return okter()[0]?.[0] || null;
+  }
+
+  renderStatus();
+
+  const timeout = setTimeout(() => { if (!db) document.getElementById("ingen-lagring").hidden = false; }, 11000);
+  (async () => {
+    try { db = window.claude ? await window.claude.use("db") : null; } catch (_) { db = null; }
+    clearTimeout(timeout);
+    if (!db) { document.getElementById("ingen-lagring").hidden = false; renderStatus(); return; }
+    let lastetSvar = false, lastetOppg = false;
+    const ferdigLastet = () => {
+      if (!lastetSvar || !lastetOppg) return;
+      if (!aktivOkt) {
+        let husket = null;
+        try { husket = localStorage.getItem("dommerbenk-okt"); } catch (_) {}
+        aktivOkt = okter().some(([n]) => n === husket) ? husket : forsteUferdige();
+        renderInstruks(); renderListe();
+      }
+      renderStatus(); renderOkter();
+    };
+    db.collection("oppgaver").onSnapshot((snap) => {
+      oppgaver = snap.docs.map((d) => d.data()).filter(Boolean);
+      lastetOppg = true;
+      if (aktivOkt) renderListe();
+      ferdigLastet();
+    }, () => { document.getElementById("ingen-lagring").hidden = false; });
+    db.collection("svar").onSnapshot((snap) => {
+      for (const d of snap.docs) { const v = d.data(); if (v && !lagrer.has(d.id)) svar.set(d.id, v); }
+      lastetSvar = true;
+      ferdigLastet();
+    }, () => {});
+  })();
+})();
+</script>

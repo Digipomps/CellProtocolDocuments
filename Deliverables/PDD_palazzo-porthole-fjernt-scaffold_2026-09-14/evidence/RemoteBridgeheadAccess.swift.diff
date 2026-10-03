@@ -1,0 +1,23 @@
+--- before/CellScaffold/Sources/ScaffoldKit/RemoteBridgeheadAccess.swift
++++ CellScaffold/Sources/ScaffoldKit/RemoteBridgeheadAccess.swift
+@@ -31,6 +31,20 @@
+         return Self(token: token, endpoints: endpoints)
+     }
+ 
++    // purposeRef: purpose://candidate.palazzo-porthole-fjernt-scaffold.trust-boundary
++    /// Uses the same token/host validation as transport setup. Invalid or
++    /// incomplete settings fail closed, including an absent token.
++    public static func allows(
++        host: String,
++        port: Int,
++        environment: [String: String] = ProcessInfo.processInfo.environment
++    ) -> Bool {
++        guard let access = try? fromEnvironment(environment) else { return false }
++        return access.endpoints.contains {
++            $0.host?.lowercased() == host.lowercased() && $0.port == port
++        }
++    }
++
+     func headers(for endpoint: URL) -> HTTPHeaders? {
+         guard ["ws", "wss"].contains(endpoint.scheme?.lowercased() ?? ""),
+               endpoint.user == nil, endpoint.password == nil,

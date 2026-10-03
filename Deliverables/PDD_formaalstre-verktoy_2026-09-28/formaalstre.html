@@ -1,0 +1,752 @@
+<title>Formålstrær</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f3f5f2; --surface:#ffffff; --surface2:#eef1ed; --ink:#1b2420; --muted:#5a6862; --faint:#8a9791;
+  --line:#d3dbd6; --line2:#b9c4be; --accent:#1f6b58; --accent-ink:#ffffff; --focus:#2f7fd6;
+  --danger:#b3372f; --warn:#9a6a00; --ok:#2d7a45;
+  --h0:#2f7a6c; --h1:#b0702a; --h2:#8a4f8f; --h3:#3d6fa8; --h4:#7a7a2e; --h5:#b4505a; --h6:#3f8a8f; --h7:#6b5ba8;
+  --tint:0.14;
+  --sans:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#101614; --surface:#18201d; --surface2:#1f2925; --ink:#e3eae6; --muted:#a2b0a9; --faint:#74827c;
+    --line:#2c3833; --line2:#3b4a44; --accent:#5cc2a5; --accent-ink:#0d1a15; --focus:#6aa9ef;
+    --danger:#ef7d72; --warn:#e2b04a; --ok:#6fcf8a;
+    --h0:#5cc2a5; --h1:#e0a15a; --h2:#c890cc; --h3:#7fb0ea; --h4:#c2c267; --h5:#ec8b94; --h6:#6cc8cc; --h7:#a898ea;
+    --tint:0.2;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#101614; --surface:#18201d; --surface2:#1f2925; --ink:#e3eae6; --muted:#a2b0a9; --faint:#74827c;
+  --line:#2c3833; --line2:#3b4a44; --accent:#5cc2a5; --accent-ink:#0d1a15; --focus:#6aa9ef;
+  --danger:#ef7d72; --warn:#e2b04a; --ok:#6fcf8a;
+  --h0:#5cc2a5; --h1:#e0a15a; --h2:#c890cc; --h3:#7fb0ea; --h4:#c2c267; --h5:#ec8b94; --h6:#6cc8cc; --h7:#a898ea;
+  --tint:0.2;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.app{display:grid;grid-template-rows:auto 1fr;height:100%}
+/* topbar */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--surface)}
+.brand{font-weight:700;font-size:15px;letter-spacing:.01em;margin-right:4px}
+.brand small{display:block;font-weight:400;color:var(--muted);font-size:11.5px;letter-spacing:.04em;text-transform:uppercase}
+select.picker{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:7px 10px;max-width:280px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);background:var(--surface);border-radius:8px;padding:6px 11px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--surface2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.danger{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 45%,var(--line))}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 16%,var(--surface));border-color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:default}
+.spacer{flex:1}
+.status{font-size:12px;color:var(--muted)}
+.status b{color:var(--ink);font-weight:400}
+/* stage */
+.main{position:relative;display:grid;grid-template-columns:1fr auto;min-height:0}
+.stage{position:relative;overflow:hidden;cursor:grab;touch-action:none;background-image:radial-gradient(color-mix(in srgb,var(--line) 70%,transparent) 1px,transparent 1px);background-size:22px 22px}
+.stage.dragging{cursor:grabbing}
+.layer{position:absolute;left:0;top:0;transform-origin:0 0}
+svg.links{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+.links path{fill:none;stroke-width:2}
+.links path.anc{stroke:var(--line2);stroke-dasharray:5 5}
+.node{position:absolute;width:260px;min-height:46px;display:flex;align-items:center;gap:8px;padding:6px 10px 6px 12px;border-radius:23px;border:1.5px solid var(--hue);background:color-mix(in srgb,var(--hue) calc(var(--tint)*100%),var(--surface));cursor:pointer;user-select:none;box-sizing:border-box}
+.node:hover{box-shadow:0 0 0 3px color-mix(in srgb,var(--hue) 22%,transparent)}
+.node.sel{box-shadow:0 0 0 3px var(--hue)}
+.node .t{flex:1;min-width:0;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.node .code{font-family:var(--mono);font-size:11px;padding:1px 6px;border-radius:6px;background:var(--hue);color:var(--surface);flex:none}
+.node .badge{font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);flex:none}
+.node.anc{--hue:var(--line2);border-style:dashed;background:var(--surface2);color:var(--muted);opacity:.85}
+.node.prop-add{border-style:dashed}
+.node.prop-remove .t{text-decoration:line-through;opacity:.6}
+.node.hit{outline:2px dashed var(--focus);outline-offset:3px}
+.tog{position:absolute;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--hue);background:var(--surface);font-size:11px;font-family:var(--mono);display:grid;place-items:center;cursor:pointer;padding:0;color:var(--ink)}
+.tog:hover{background:var(--surface2)}
+.zoom{position:absolute;left:16px;bottom:16px;display:flex;gap:6px;z-index:3}
+.zoom .btn{background:var(--surface)}
+.legend{position:absolute;right:16px;bottom:16px;z-index:3;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12px;color:var(--muted);max-width:280px}
+.legend .row{display:flex;gap:6px;align-items:center;margin:2px 0}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--hue);flex:none}
+.notice{position:absolute;left:50%;top:18px;transform:translateX(-50%);z-index:4;background:var(--surface);border:1px solid var(--line2);border-radius:10px;padding:8px 12px;font-size:13px;max-width:min(560px,calc(100% - 32px))}
+/* drawer */
+.drawer{width:380px;max-width:100vw;border-left:1px solid var(--line);background:var(--surface);overflow:auto;display:flex;flex-direction:column}
+.drawer[hidden]{display:none}
+.dh{position:sticky;top:0;background:var(--surface);padding:14px 16px 10px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:flex-start;z-index:1}
+.dh h2{font-size:16px;margin:0;flex:1;text-wrap:balance;line-height:1.3}
+.db{padding:14px 16px 24px;display:flex;flex-direction:column;gap:14px}
+.ref{font-family:var(--mono);font-size:11.5px;color:var(--muted);word-break:break-all}
+.crumbs{display:flex;flex-wrap:wrap;gap:4px;font-size:12px;color:var(--muted)}
+.crumbs button{border:none;background:none;padding:0;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);letter-spacing:.02em}
+label.f input,label.f textarea,label.f select{font-size:14px;color:var(--ink);background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:7px 9px}
+label.f textarea{min-height:64px;resize:vertical;line-height:1.4}
+.ro{background:var(--surface2);border-radius:8px;padding:8px 10px;line-height:1.45}
+.ro ul{margin:4px 0 0;padding-left:18px}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.confirm{border:1px solid var(--danger);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px;font-size:13px}
+.sect{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin-top:4px}
+/* add / autocomplete */
+.addbox{position:relative}
+.addbox input{width:100%;box-sizing:border-box;font-size:14px;background:var(--surface2);border:1px solid var(--line2);border-radius:8px;padding:8px 10px}
+.sugg{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--surface);border:1px solid var(--line2);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.14);z-index:10;max-height:340px;overflow:auto}
+.sugg[hidden]{display:none}
+.opt{display:flex;gap:8px;padding:8px 10px;cursor:pointer;align-items:flex-start;border-bottom:1px solid var(--line)}
+.opt:last-child{border-bottom:none}
+.opt[aria-selected="true"],.opt:hover{background:var(--surface2)}
+.opt .dot{margin-top:4px}
+.opt .ot{font-weight:700;line-height:1.25}
+.opt .os{font-size:12px;color:var(--muted);margin-top:2px}
+.opt.special .ot{font-weight:400;color:var(--accent)}
+.decomp{display:flex;flex-direction:column;gap:8px}
+.card{border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;gap:8px;align-items:flex-start}
+.card .ct{font-weight:700}
+.card .cs{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.35}
+.pill{display:inline-block;font-size:11px;padding:1px 7px;border-radius:9px;border:1px solid var(--line2);color:var(--muted);margin-top:4px}
+.pill.m{border-color:var(--ok);color:var(--ok)}
+.pill.n{border-color:var(--warn);color:var(--warn)}
+.card.child{margin-left:18px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);padding:0 16px;background:var(--surface)}
+.tabs button{border:none;background:none;padding:9px 8px;border-bottom:2px solid transparent;cursor:pointer;color:var(--muted)}
+.tabs button[aria-selected="true"]{border-color:var(--accent);color:var(--ink)}
+.prop{border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.prop .k{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.st-venter{color:var(--warn)} .st-godkjent{color:var(--ok)} .st-avvist{color:var(--danger)} .st-innfort{color:var(--muted)}
+textarea.json{font-family:var(--mono);font-size:11.5px;min-height:180px;width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:8px}
+@media (max-width:760px){
+  .main{grid-template-columns:1fr}
+  .drawer{position:absolute;left:0;right:0;bottom:0;width:auto;max-height:62%;border-left:none;border-top:1px solid var(--line2);border-radius:14px 14px 0 0;box-shadow:0 -8px 24px rgba(0,0,0,.18);z-index:6}
+  .legend{display:none}
+  select.picker{max-width:100%}
+}
+@media (prefers-reduced-motion: no-preference){ .layer.anim{transition:transform .25s ease} }
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">Formålstrær<small>HAVEN · PDD</small></div>
+    <select class="picker" id="picker" aria-label="Velg tre"></select>
+    <button class="btn" id="btnAnc" aria-pressed="true" title="Vis hvor treet hører hjemme i Book 23">Vis i høyere tre</button>
+    <button class="btn" id="btnNew">Nytt tre</button>
+    <span class="spacer"></span>
+    <span class="status" id="status">Kobler til lagring…</span>
+  </header>
+  <div class="main">
+    <div class="stage" id="stage" aria-label="Formålstre">
+      <div class="layer" id="layer"><svg class="links" id="links"></svg></div>
+      <div class="zoom">
+        <button class="btn" id="zOut" aria-label="Zoom ut">−</button>
+        <button class="btn" id="zFit">Tilpass</button>
+        <button class="btn" id="zIn" aria-label="Zoom inn">+</button>
+        <button class="btn" id="btnAll" title="Åpne alle">Åpne alle</button>
+      </div>
+      <div class="legend" id="legend"></div>
+      <div class="notice" id="notice" hidden></div>
+    </div>
+    <aside class="drawer" id="drawer" hidden aria-label="Detaljer"></aside>
+  </div>
+</div>
+
+<script>
+(() => {
+"use strict";
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const HUES = 8, NODE_W = 260, NODE_H = 46, COL = 330, ROW = 62;
+const BOOK = "book23";
+
+const S = {
+  db: null, sample: null, user: null, isOwner: false,
+  kb: null, trees: {}, proposals: [],
+  current: BOOK, collapsed: {}, selected: null, showAnc: true,
+  view: { x: 40, y: 40, k: 1 }, drawerTab: "detaljer",
+};
+
+// ---------- per-viewer conveniences ----------
+function loadLocal() {
+  try { const v = JSON.parse(localStorage.getItem("formaalstre.v1") || "{}"); if (v.current) S.current = v.current; if (v.collapsed) S.collapsed = v.collapsed; if (typeof v.showAnc === "boolean") S.showAnc = v.showAnc; } catch (e) {}
+}
+function saveLocal() {
+  try { localStorage.setItem("formaalstre.v1", JSON.stringify({ current: S.current, collapsed: S.collapsed, showAnc: S.showAnc })); } catch (e) {}
+}
+
+// ---------- text helpers ----------
+const fold = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/ø/g, "o").replace(/æ/g, "ae").replace(/å/g, "a");
+const words = (s) => fold(s).split(/[^a-z0-9]+/).filter((w) => w.length > 1);
+const slug = (s) => fold(s).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "formaal";
+const lastSeg = (ref) => String(ref || "").replace("purpose://", "").split(".").slice(-1)[0];
+
+// ---------- knowledge base ----------
+function kbIndex() {
+  const kb = S.kb; if (!kb) return null;
+  if (kb._idx) return kb._idx;
+  const by = {}, kids = {};
+  kb.nodes.forEach((n) => { by[n.ref] = n; (kids[n.parentRef] = kids[n.parentRef] || []).push(n.ref); });
+  kb._idx = { by, kids };
+  return kb._idx;
+}
+function kbChain(ref) {
+  const ix = kbIndex(); if (!ix) return [];
+  const out = []; let r = ref, guard = 0;
+  while (r && ix.by[r] && guard++ < 40) { out.unshift(ix.by[r]); r = ix.by[r].parentRef; }
+  return out;
+}
+
+// ---------- current view model ----------
+function currentTree() { return S.current === BOOK ? null : S.trees[S.current]; }
+function viewModel() {
+  if (S.current === BOOK) {
+    if (!S.kb) return null;
+    const nodes = S.kb.nodes.map((n) => ({ ...n }));
+    const pend = S.proposals.filter((p) => p.status === "venter" || p.status === "godkjent");
+    for (const p of pend) {
+      if (p.kind === "add" && p.node) nodes.push({ ...p.node, parentRef: p.parentRef, _prop: "add", _propId: p.id });
+      const t = nodes.find((n) => n.ref === p.targetRef);
+      if (t && p.kind === "remove") { t._prop = "remove"; t._propId = p.id; }
+      if (t && p.kind === "edit") { t._prop = "edit"; t._propId = p.id; }
+    }
+    return { mode: "book", title: "Book 23 — kunnskapsbasen", rootRef: S.kb.rootRef, nodes, anchorRef: null };
+  }
+  const t = currentTree(); if (!t) return null;
+  return { mode: "tree", title: t.title, rootRef: t.rootRef, nodes: t.nodes, anchorRef: t.anchorRef, tree: t };
+}
+
+// ---------- layout ----------
+function layout(vm) {
+  const by = {}, kids = {};
+  vm.nodes.forEach((n) => { by[n.ref] = n; });
+  vm.nodes.forEach((n) => { if (n.parentRef && by[n.parentRef]) (kids[n.parentRef] = kids[n.parentRef] || []).push(n.ref); });
+  const roots = vm.nodes.filter((n) => !n.parentRef || !by[n.parentRef]).map((n) => n.ref);
+  const rootRef = by[vm.rootRef] ? vm.rootRef : roots[0];
+  const coll = S.collapsed[S.current] || {};
+  const pos = {}; let row = 0;
+  const hueOf = {};
+  function place(ref, depth, hue) {
+    hueOf[ref] = hue;
+    const ch = coll[ref] ? [] : (kids[ref] || []);
+    if (!ch.length) { pos[ref] = { x: depth * COL, y: row * ROW }; row++; return; }
+    ch.forEach((c, i) => place(c, depth + 1, depth === 0 ? i % HUES : hue));
+    const ys = ch.map((c) => pos[c].y);
+    pos[ref] = { x: depth * COL, y: (Math.min(...ys) + Math.max(...ys)) / 2 };
+  }
+  const offset = [];
+  const others = roots.filter((r) => r !== rootRef);
+  if (rootRef) place(rootRef, 0, -1);
+  others.forEach((r) => { row += 1; place(r, 0, -1); });
+  // ancestors from Book 23
+  let anc = [];
+  if (vm.mode === "tree" && S.showAnc && vm.anchorRef) {
+    anc = kbChain(vm.anchorRef);
+    const y0 = rootRef && pos[rootRef] ? pos[rootRef].y : 0;
+    anc.forEach((a, i) => { pos["anc:" + a.ref] = { x: -(anc.length - i) * COL, y: y0 }; });
+  }
+  return { by, kids, pos, hueOf, rootRef, anc, coll };
+}
+
+// ---------- render ----------
+const stage = $("#stage"), layer = $("#layer"), svg = $("#links");
+function hueVar(h) { return h < 0 ? "var(--accent)" : `var(--h${h})`; }
+function render() {
+  const vm = viewModel();
+  layer.querySelectorAll(".node,.tog").forEach((e) => e.remove());
+  svg.innerHTML = "";
+  renderPicker();
+  $("#btnAnc").setAttribute("aria-pressed", String(S.showAnc));
+  $("#btnAnc").hidden = !vm || vm.mode !== "tree";
+  if (!vm) { renderLegend(null); return; }
+  const L = layout(vm); S._L = L; S._vm = vm;
+  let minX = 0, minY = 0, maxX = 0, maxY = 0;
+  const paths = [];
+  const link = (a, b, cls, stroke) => {
+    const x1 = a.x + NODE_W, y1 = a.y + NODE_H / 2, x2 = b.x, y2 = b.y + NODE_H / 2, mx = (x1 + x2) / 2;
+    paths.push(`<path class="${cls}" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}" ${stroke ? `style="stroke:${stroke}"` : ""}/>`);
+  };
+  // ancestors
+  L.anc.forEach((a, i) => {
+    const p = L.pos["anc:" + a.ref];
+    const el = document.createElement("div");
+    el.className = "node anc"; el.style.left = p.x + "px"; el.style.top = p.y + "px"; el.tabIndex = 0;
+    el.innerHTML = `<span class="t">${esc(a.title)}</span><span class="badge">Book 23</span>`;
+    el.title = a.ref;
+    el.onclick = () => openBookNode(a.ref);
+    layer.appendChild(el);
+    const next = i < L.anc.length - 1 ? L.pos["anc:" + L.anc[i + 1].ref] : L.pos[L.rootRef];
+    if (next) link(p, next, "anc");
+    minX = Math.min(minX, p.x);
+  });
+  for (const ref in L.pos) {
+    if (ref.startsWith("anc:")) continue;
+    const n = L.by[ref], p = L.pos[ref], h = L.hueOf[ref];
+    const el = document.createElement("div");
+    el.className = "node" + (S.selected === ref ? " sel" : "") + (n._prop ? " prop-" + n._prop : "");
+    el.style.left = p.x + "px"; el.style.top = p.y + "px";
+    el.style.setProperty("--hue", hueVar(h));
+    el.tabIndex = 0; el.dataset.ref = ref; el.setAttribute("role", "button");
+    const badge = n._prop ? `<span class="badge">forslag</span>` : (n.reused ? `<span class="badge">gjenbruk</span>` : "");
+    el.innerHTML = (n.code ? `<span class="code">${esc(n.code)}</span>` : "") + `<span class="t">${esc(n.title)}</span>` + badge;
+    el.title = n.title + "\n" + ref;
+    el.onclick = (e) => { e.stopPropagation(); select(ref); };
+    el.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(ref); } };
+    layer.appendChild(el);
+    const ch = L.kids[ref] || [];
+    if (ch.length) {
+      const t = document.createElement("button");
+      t.className = "tog"; t.style.setProperty("--hue", hueVar(h));
+      t.style.left = (p.x + NODE_W - 12) + "px"; t.style.top = (p.y + NODE_H / 2 - 12) + "px";
+      const closed = !!L.coll[ref];
+      t.textContent = closed ? "+" + countDesc(L.kids, ref) : "−";
+      t.setAttribute("aria-label", closed ? "Vis underformål" : "Skjul underformål");
+      t.onclick = (e) => { e.stopPropagation(); toggle(ref); };
+      layer.appendChild(t);
+      if (!closed) ch.forEach((c) => L.pos[c] && link(p, L.pos[c], "", hueVar(L.hueOf[c])));
+    }
+    minX = Math.min(minX, p.x); minY = Math.min(minY, p.y); maxX = Math.max(maxX, p.x + NODE_W); maxY = Math.max(maxY, p.y + NODE_H);
+  }
+  svg.innerHTML = paths.join("");
+  S._bounds = { minX, minY, maxX, maxY };
+  applyView();
+  renderLegend(vm, L);
+}
+function countDesc(kids, ref) { let n = 0; (kids[ref] || []).forEach((c) => { n += 1 + countDesc(kids, c); }); return n; }
+function applyView() { layer.style.transform = `translate(${S.view.x}px,${S.view.y}px) scale(${S.view.k})`; }
+function fit(anim) {
+  const b = S._bounds; if (!b) return;
+  const w = stage.clientWidth, h = stage.clientHeight, pad = 40;
+  const k = Math.max(0.3, Math.min(1.2, Math.min((w - pad * 2) / (b.maxX - b.minX + 30), (h - pad * 2) / (b.maxY - b.minY + 10))));
+  S.view = { k, x: pad - b.minX * k, y: Math.max(pad, (h - (b.maxY - b.minY) * k) / 2) - b.minY * k };
+  if (anim) { layer.classList.add("anim"); setTimeout(() => layer.classList.remove("anim"), 300); }
+  applyView();
+}
+function renderLegend(vm, L) {
+  const el = $("#legend");
+  if (!vm || !L) { el.hidden = true; return; }
+  const top = L.kids[L.rootRef] || [];
+  el.hidden = !top.length;
+  el.innerHTML = `<div style="margin-bottom:4px;color:var(--ink)">${esc(vm.title)}</div>` + top.slice(0, 11).map((r) =>
+    `<div class="row"><span class="dot" style="--hue:${hueVar(L.hueOf[r])}"></span>${esc(L.by[r].title)}</div>`).join("");
+}
+function renderPicker() {
+  const p = $("#picker");
+  const opts = [`<option value="${BOOK}">Book 23 — kunnskapsbasen${S.kb ? "" : " (ikke lastet)"}</option>`]
+    .concat(Object.values(S.trees).sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || "")).map((t) => `<option value="${esc(t.id)}">${esc(t.title)}</option>`));
+  const html = opts.join("");
+  if (p._html !== html) { p.innerHTML = html; p._html = html; }
+  p.value = S.current;
+}
+
+// ---------- interactions ----------
+function toggle(ref) {
+  const c = (S.collapsed[S.current] = S.collapsed[S.current] || {});
+  if (c[ref]) delete c[ref]; else c[ref] = true;
+  saveLocal(); render();
+}
+function select(ref) { S.selected = ref; S.drawerTab = "detaljer"; render(); renderDrawer(); }
+function openBookNode(ref) { S.current = BOOK; S.selected = ref; saveLocal(); render(); fit(true); renderDrawer(); }
+
+// pan & zoom
+let drag = null;
+stage.addEventListener("pointerdown", (e) => {
+  if (e.target.closest(".node,.tog,.zoom,.legend,.notice")) return;
+  drag = { x: e.clientX, y: e.clientY, vx: S.view.x, vy: S.view.y, moved: false };
+  stage.setPointerCapture(e.pointerId); stage.classList.add("dragging");
+});
+stage.addEventListener("pointermove", (e) => {
+  if (!drag) return;
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  if (Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true;
+  S.view.x = drag.vx + dx; S.view.y = drag.vy + dy; applyView();
+});
+stage.addEventListener("pointerup", () => {
+  if (drag && !drag.moved && S.selected) { S.selected = null; render(); renderDrawer(); }
+  drag = null; stage.classList.remove("dragging");
+});
+stage.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  if (e.ctrlKey || e.metaKey || Math.abs(e.deltaY) > 40 && !e.deltaX) zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * 0.0022));
+  else { S.view.x -= e.deltaX; S.view.y -= e.deltaY; applyView(); }
+}, { passive: false });
+function zoomAt(cx, cy, f) {
+  const r = stage.getBoundingClientRect(), k = Math.max(0.25, Math.min(2, S.view.k * f));
+  const px = cx - r.left, py = cy - r.top;
+  S.view.x = px - (px - S.view.x) * (k / S.view.k); S.view.y = py - (py - S.view.y) * (k / S.view.k); S.view.k = k; applyView();
+}
+$("#zIn").onclick = () => { const r = stage.getBoundingClientRect(); zoomAt(r.left + r.width / 2, r.top + r.height / 2, 1.2); };
+$("#zOut").onclick = () => { const r = stage.getBoundingClientRect(); zoomAt(r.left + r.width / 2, r.top + r.height / 2, 1 / 1.2); };
+$("#zFit").onclick = () => fit(true);
+$("#btnAll").onclick = () => { S.collapsed[S.current] = {}; saveLocal(); render(); fit(true); };
+$("#picker").onchange = (e) => { S.current = e.target.value; S.selected = null; saveLocal(); render(); fit(); renderDrawer(); };
+$("#btnAnc").onclick = () => { S.showAnc = !S.showAnc; saveLocal(); render(); fit(true); };
+$("#btnNew").onclick = () => { S.selected = null; S.drawerTab = "nytt"; renderDrawer(); };
+
+// ---------- search (autocomplete) ----------
+function searchPurposes(q, excludeRefs) {
+  const qw = words(q); if (!qw.length) return [];
+  const qf = fold(q).trim();
+  const pool = [];
+  (S.kb?.nodes || []).forEach((n) => pool.push({ n, src: "Book 23" }));
+  const t = currentTree(); if (t) t.nodes.forEach((n) => pool.push({ n, src: "dette treet" }));
+  const seen = new Set();
+  const scored = [];
+  for (const { n, src } of pool) {
+    if (seen.has(n.ref) || (excludeRefs && excludeRefs.has(n.ref))) continue; seen.add(n.ref);
+    const tf = fold(n.title), tw = new Set(words(n.title)), aw = new Set((n.aliases || []).flatMap(words)),
+      iw = new Set((n.interests || []).flatMap(words)), sw = new Set(words((n.summary || "") + " " + (n.outcome || "")));
+    let s = 0;
+    if (tf.startsWith(qf)) s += 8; else if (tf.includes(qf)) s += 5;
+    if ((n.aliases || []).some((a) => fold(a).includes(qf))) s += 5;
+    for (const w of qw) {
+      if (tw.has(w)) s += 3; else if ([...tw].some((x) => x.startsWith(w))) s += 2;
+      if (aw.has(w)) s += 2; if (iw.has(w)) s += 1.5; if (sw.has(w)) s += 0.7; else if (w.length > 3 && [...sw].some((x) => x.startsWith(w))) s += 0.5;
+      if (fold(n.ref).includes(w)) s += 1;
+    }
+    if (s > 0) scored.push({ n, src, s });
+  }
+  return scored.sort((a, b) => b.s - a.s).slice(0, 8);
+}
+function hueForRef(ref) {
+  const ch = kbChain(ref); if (ch.length < 2) return "var(--accent)";
+  const top = (kbIndex().kids[S.kb.rootRef] || []).indexOf(ch[1].ref);
+  return top < 0 ? "var(--accent)" : hueVar(top % HUES);
+}
+let acSeq = 0;
+function mountAutocomplete(box, { placeholder, exclude, onPick, onNew, onDecompose }) {
+  const uid = "ac" + (++acSeq);
+  box.innerHTML = `<input type="text" id="${uid}" autocomplete="off" placeholder="${esc(placeholder)}" aria-label="${esc(placeholder)}" aria-autocomplete="list" aria-controls="${uid}l"><div class="sugg" id="${uid}l" role="listbox" hidden></div>`;
+  const inp = $("#" + uid, box), list = $("#" + uid + "l", box);
+  let items = [], act = -1;
+  const draw = () => {
+    const q = inp.value.trim();
+    if (q.length < 2) { list.hidden = true; return; }
+    const hits = searchPurposes(q, exclude);
+    items = hits.map((h) => ({ type: "pick", h }));
+    items.push({ type: "new" });
+    if (S.sample) items.push({ type: "decomp" });
+    list.innerHTML = items.map((it, i) => {
+      if (it.type === "pick") {
+        const ch = kbChain(it.h.n.ref).slice(1, -1).map((x) => x.title).join(" › ");
+        return `<div class="opt" role="option" data-i="${i}" aria-selected="${i === act}"><span class="dot" style="--hue:${hueForRef(it.h.n.ref)}"></span><div><div class="ot">${esc(it.h.n.title)}</div><div class="os">${esc(it.h.src)}${ch ? " · " + esc(ch) : ""}</div><div class="os ref">${esc(it.h.n.ref)}</div></div></div>`;
+      }
+      if (it.type === "new") return `<div class="opt special" role="option" data-i="${i}" aria-selected="${i === act}"><div><div class="ot">Legg til «${esc(q)}» som nytt formål</div><div class="os">Blir en kandidat. Ingen match brukes.</div></div></div>`;
+      return `<div class="opt special" role="option" data-i="${i}" aria-selected="${i === act}"><div><div class="ot">Dekomponer «${esc(q.length > 60 ? q.slice(0, 60) + "…" : q)}» med Claude</div><div class="os">Deler fri tekst i formål og matcher hvert mot eksisterende.</div></div></div>`;
+    }).join("");
+    list.hidden = false;
+  };
+  const choose = (i) => {
+    const it = items[i]; if (!it) return; const q = inp.value.trim();
+    list.hidden = true;
+    if (it.type === "pick") onPick(it.h.n); else if (it.type === "new") onNew(q); else onDecompose(q);
+  };
+  inp.addEventListener("input", () => { act = -1; draw(); });
+  inp.addEventListener("focus", draw);
+  inp.addEventListener("keydown", (e) => {
+    if (list.hidden && e.key !== "Enter") return;
+    if (e.key === "ArrowDown") { e.preventDefault(); act = Math.min(items.length - 1, act + 1); draw(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); act = Math.max(0, act - 1); draw(); }
+    else if (e.key === "Enter") { e.preventDefault(); if (inp.value.trim().length < 2) return; if (act >= 0) choose(act); else if (items[0]?.type === "pick" && items[0].h.s >= 8) choose(0); else { draw(); act = 0; draw(); } }
+    else if (e.key === "Escape") list.hidden = true;
+  });
+  list.addEventListener("mousedown", (e) => { const o = e.target.closest(".opt"); if (o) { e.preventDefault(); choose(+o.dataset.i); } });
+  inp.addEventListener("blur", () => setTimeout(() => { list.hidden = true; }, 150));
+  return inp;
+}
+
+// ---------- decomposition with Claude ----------
+async function decompose(text, parent) {
+  const kbList = (S.kb?.nodes || []).map((n) => `${n.ref} | ${n.title} | ${(n.summary || "").slice(0, 110)}`).join("\n");
+  const t = currentTree();
+  const treeList = t ? t.nodes.map((n) => `${n.ref} | ${n.title}`).join("\n") : "";
+  const ctx = parent ? `Formålet de nye skal henge under: «${parent.title}» (${parent.ref}). Mål: ${parent.outcome || "—"}.` : "De nye formålene blir et nytt tre.";
+  const prompt = `Du dekomponerer fri tekst til formål for HAVEN, etter metoden i Book 23.
+Regler:
+- Ett formål per utfall som kan observeres. Tittel på norsk, kort, uten tekniske ord med mindre teksten bruker dem.
+- For hvert formål: gi et observerbart mål (outcome) og hvordan det kan sjekkes (verifier).
+- Match hvert formål mot eksisterende formål i listene under. Bruk ref BARE fra listene, aldri en ny. Sett match.ref til null når ingen passer godt. confidence 0–1.
+- Underformål som barn der teksten tydelig har en del–helhet. Maks 3 nivåer.
+- At noe skal finnes er ett formål; hva det skal løse er andre formål.
+${ctx}
+
+Eksisterende formål i Book 23 (ref | tittel | sammendrag):
+${kbList}
+${treeList ? "\nFormål i treet som redigeres (ref | tittel):\n" + treeList : ""}
+
+Fri tekst:
+"""${text}"""
+
+Svar bare med JSON: {"purposes":[{"title":"","outcome":"","verifier":"","match":{"ref":null,"confidence":0,"why":""},"children":[]}],"note":""}`;
+  const res = await S.sample.json(prompt, { modelTier: "default" });
+  const valid = new Set((S.kb?.nodes || []).map((n) => n.ref).concat(t ? t.nodes.map((n) => n.ref) : []));
+  const clean = (arr, d) => (Array.isArray(arr) ? arr : []).slice(0, 12).map((p) => ({
+    title: String(p.title || "").slice(0, 140), outcome: String(p.outcome || "").slice(0, 500), verifier: String(p.verifier || "").slice(0, 300),
+    match: p.match && valid.has(p.match.ref) ? { ref: p.match.ref, confidence: +p.match.confidence || 0, why: String(p.match.why || "").slice(0, 200) } : null,
+    children: d < 2 ? clean(p.children, d + 1) : [],
+  })).filter((p) => p.title);
+  return { purposes: clean(res?.purposes, 0), note: String(res?.note || "").slice(0, 400) };
+}
+
+// ---------- mutations ----------
+function nowIso() { return new Date().toISOString().replace(/\.\d+Z$/, "Z"); }
+async function whoAmI() { try { return S.user ? await S.user.id() : null; } catch (e) { return null; } }
+function candRef(title, parentRef) {
+  const t = currentTree();
+  const base = t ? `purpose://candidate.${t.id}.` : `purpose://candidate.${lastSeg(parentRef) || "ny"}.`;
+  let r = base + slug(title), i = 2;
+  const exists = (x) => (t ? t.nodes.some((n) => n.ref === x) : false) || (S.kb?.nodes || []).some((n) => n.ref === x);
+  while (exists(r)) r = base + slug(title) + "-" + i++;
+  return r;
+}
+async function saveTree(t, note) {
+  if (!S.db) { flash("Lagring er ikke tilgjengelig i denne visningen."); return false; }
+  const body = JSON.parse(JSON.stringify(t)); delete body.id;
+  body.updatedAt = nowIso(); body.updatedBy = (await whoAmI()) || "ukjent";
+  try { await S.db.doc("trees/" + t.id).set(body); flash(note || "Lagret."); return true; }
+  catch (e) { flash(e.code === "invalid_argument" ? "Du har ikke skrivetilgang til dette treet." : "Kunne ikke lagre: " + (e.message || e.code)); return false; }
+}
+async function propose(p) {
+  if (!S.db) { flash("Lagring er ikke tilgjengelig i denne visningen."); return; }
+  const body = { ...p, status: "venter", createdAt: nowIso(), createdBy: (await whoAmI()) || "ukjent" };
+  try { await S.db.collection("proposals").add(body); flash("Forslaget er lagret. Book 23 endres først når det er godkjent og innført."); }
+  catch (e) { flash("Kunne ikke lagre forslaget: " + (e.message || e.code)); }
+}
+function addNodes(parentRef, list) {
+  // list: [{title,outcome,verifier,matchRef?,children:[]}]
+  const vm = S._vm;
+  if (vm.mode === "tree") {
+    const t = structuredClone(currentTree());
+    const push = (items, pRef) => items.forEach((it) => {
+      let ref = it.matchRef;
+      const reused = !!ref;
+      if (!ref || t.nodes.some((n) => n.ref === ref)) ref = candRef(it.title, pRef);
+      const kbn = reused ? S.kb?.nodes.find((n) => n.ref === it.matchRef) : null;
+      t.nodes.push({ ref, parentRef: pRef, title: kbn ? kbn.title : it.title, code: "", outcome: it.outcome || kbn?.outcome || "", verifier: it.verifier || kbn?.verifier || "", status: reused ? "gjenbruk" : "candidate", signals: [], reused });
+      push(it.children || [], ref);
+    });
+    push(list, parentRef);
+    const c = S.collapsed[S.current]; if (c) delete c[parentRef];
+    return saveTree(t, "Lagt til i treet.");
+  } else {
+    const run = async () => {
+      for (const it of list) {
+        const ref = it.matchRef || candRef(it.title, parentRef);
+        await propose({ kind: "add", parentRef, targetRef: ref, node: { ref, title: it.title, outcome: it.outcome || "", verifier: it.verifier || "", status: "candidate", reusedFrom: it.matchRef || null } });
+      }
+    };
+    return run();
+  }
+}
+
+// ---------- drawer ----------
+const drawer = $("#drawer");
+function renderDrawer() {
+  const vm = S._vm;
+  if (S.drawerTab === "nytt") return renderNewTree();
+  if (S.drawerTab === "forslag") return renderProposals();
+  if (!S.selected || !vm || !S._L?.by[S.selected]) {
+    if (vm?.mode === "book" && S.proposals.length) { drawer.hidden = false; return renderProposals(); }
+    drawer.hidden = true; return;
+  }
+  drawer.hidden = false;
+  const n = S._L.by[S.selected];
+  const editable = vm.mode === "tree";
+  const chain = vm.mode === "book" ? kbChain(n.ref) : [];
+  const ancChain = vm.mode === "tree" && vm.anchorRef ? kbChain(vm.anchorRef) : [];
+  const kbTwin = S.kb?.nodes.find((x) => x.ref === n.ref);
+  const tabs = vm.mode === "book" ? `<div class="tabs" role="tablist"><button role="tab" aria-selected="true">Detaljer</button><button role="tab" aria-selected="false" id="tabProps">Forslag (${S.proposals.filter((p) => p.status === "venter").length})</button></div>` : "";
+  drawer.innerHTML = `
+    <div class="dh"><h2>${esc(n.title)}</h2><button class="btn ghost" id="dClose" aria-label="Lukk">✕</button></div>${tabs}
+    <div class="db">
+      <div class="ref">${esc(n.ref)}${n.code ? " · " + esc(n.code) : ""}${n._prop ? " · forslag: " + esc(n._prop) : ""}</div>
+      ${chain.length > 1 ? `<div><div class="sect">Plassering i Book 23</div><div class="crumbs">${chain.slice(0, -1).map((c) => `<button data-go="${esc(c.ref)}">${esc(c.title)}</button> ›`).join(" ")} <span>${esc(n.title)}</span></div></div>` : ""}
+      ${editable && S.selected === vm.rootRef ? `<div><div class="sect">Hører hjemme i</div>${ancChain.length ? `<div class="crumbs">${ancChain.map((c) => `<button data-go="${esc(c.ref)}">${esc(c.title)}</button>`).join(" › ")}</div>` : `<div class="status">Ikke plassert i Book 23.</div>`}
+        ${vm.tree.anchorNote ? `<div class="status" style="margin-top:4px">${esc(vm.tree.anchorNote)}</div>` : ""}
+        <div class="addbox" id="anchorBox" style="margin-top:8px"></div></div>` : ""}
+      ${editable ? `
+        <label class="f">Tittel<input id="fTitle" value="${esc(n.title)}"></label>
+        <div style="display:flex;gap:8px"><label class="f" style="width:90px">Kode<input id="fCode" value="${esc(n.code || "")}"></label>
+        <label class="f" style="flex:1">Status<select id="fStatus">${["candidate", "gjenbruk", "pakke", "draft", "active", "godkjent", "ferdig"].map((s) => `<option ${s === n.status ? "selected" : ""}>${s}</option>`).join("")}${["candidate", "gjenbruk", "pakke", "draft", "active", "godkjent", "ferdig"].includes(n.status) ? "" : `<option selected>${esc(n.status)}</option>`}</select></label></div>
+        <label class="f">Mål (observerbart utfall)<textarea id="fOutcome">${esc(n.outcome || "")}</textarea></label>
+        <label class="f">Hvordan det sjekkes (verifier / tester)<textarea id="fVerifier">${esc(n.verifier || "")}</textarea></label>
+        <div class="actions"><button class="btn primary" id="bSave">Lagre</button></div>
+      ` : `
+        ${n.summary ? `<div class="ro">${esc(n.summary)}</div>` : ""}
+        ${n.outcome ? `<div><div class="sect">Mål</div><div class="ro">${esc(n.outcome)}${(n.signals || []).length ? `<ul>${n.signals.map((s) => `<li>${esc(s)}</li>`).join("")}</ul>` : ""}</div></div>` : ""}
+        ${n.verifier ? `<div><div class="sect">Hvordan det sjekkes</div><div class="ro">${esc(n.verifier)}</div></div>` : ""}
+        <div class="status">Status: <b>${esc(n.status || "—")}</b>. Endringer her blir forslag til Book 23.</div>
+      `}
+      ${kbTwin && editable ? `<div class="status">Gjenbruker ${esc(kbTwin.ref)} fra Book 23. <button class="btn ghost" data-go="${esc(kbTwin.ref)}" style="padding:0;color:var(--accent)">Vis der</button></div>` : ""}
+      <div><div class="sect">${editable ? "Legg til underformål" : "Foreslå nytt underformål"}</div>
+        <div class="addbox" id="addBox" style="margin-top:6px"></div>
+        <div class="decomp" id="decompOut" style="margin-top:8px"></div></div>
+      <div id="dangerZone">
+        ${vm.mode === "book" && !editable ? `<div class="actions"><button class="btn" id="bPropEdit">Foreslå endring</button><button class="btn danger" id="bPropRemove">Foreslå fjernet</button></div>` : ""}
+        ${editable ? `<div class="actions"><button class="btn danger" id="bRemove">Fjern${countDesc(S._L.kids, n.ref) ? " med " + countDesc(S._L.kids, n.ref) + " underformål" : ""}</button></div>` : ""}
+      </div>
+    </div>`;
+  $("#dClose").onclick = () => { S.selected = null; render(); renderDrawer(); };
+  $("#tabProps")?.addEventListener("click", () => { S.drawerTab = "forslag"; renderDrawer(); });
+  drawer.querySelectorAll("[data-go]").forEach((b) => b.onclick = () => openBookNode(b.dataset.go));
+  const existing = new Set(vm.nodes.map((x) => x.ref));
+  mountAutocomplete($("#addBox"), {
+    placeholder: "Søk etter formål, eller skriv fritt…", exclude: existing,
+    onPick: (kbn) => addNodes(n.ref, [{ title: kbn.title, matchRef: kbn.ref }]),
+    onNew: (q) => addNodes(n.ref, [{ title: q }]),
+    onDecompose: (q) => runDecompose(q, n),
+  });
+  if ($("#anchorBox")) mountAutocomplete($("#anchorBox"), {
+    placeholder: "Flytt til et annet sted i Book 23…", exclude: null,
+    onPick: async (kbn) => { const t = structuredClone(vm.tree); t.anchorRef = kbn.ref; t.anchorNote = ""; await saveTree(t, "Plassering i Book 23 endret."); },
+    onNew: () => flash("Plasseringen må være et formål som finnes i Book 23. Foreslå det nye formålet i Book 23 først."),
+    onDecompose: (q) => flash("Velg et eksisterende formål som plassering."),
+  });
+  if (editable) {
+    $("#bSave").onclick = async () => {
+      const t = structuredClone(vm.tree); const x = t.nodes.find((y) => y.ref === n.ref);
+      x.title = $("#fTitle").value.trim() || x.title; x.code = $("#fCode").value.trim(); x.status = $("#fStatus").value;
+      x.outcome = $("#fOutcome").value.trim(); x.verifier = $("#fVerifier").value.trim();
+      if (x.ref === t.rootRef && x.title) t.title = t.title || x.title;
+      await saveTree(t);
+    };
+    $("#bRemove").onclick = () => {
+      const k = countDesc(S._L.kids, n.ref);
+      $("#dangerZone").innerHTML = `<div class="confirm"><div>Fjerne «${esc(n.title)}»${k ? ` og ${k} underformål` : ""} fra treet? Book 23 endres ikke.</div><div class="actions"><button class="btn danger" id="bYes">Fjern</button><button class="btn" id="bNo">Avbryt</button></div></div>`;
+      $("#bNo").onclick = renderDrawer;
+      $("#bYes").onclick = async () => {
+        const t = structuredClone(vm.tree); const gone = new Set([n.ref]);
+        let grew = true; while (grew) { grew = false; t.nodes.forEach((y) => { if (!gone.has(y.ref) && gone.has(y.parentRef)) { gone.add(y.ref); grew = true; } }); }
+        if (gone.has(t.rootRef)) { flash("Roten kan ikke fjernes. Slett heller hele treet."); return; }
+        t.nodes = t.nodes.filter((y) => !gone.has(y.ref)); S.selected = n.parentRef;
+        await saveTree(t, "Fjernet.");
+      };
+    };
+  } else {
+    $("#bPropEdit")?.addEventListener("click", () => {
+      $("#dangerZone").innerHTML = `<div class="confirm" style="border-color:var(--line2)"><label class="f">Tittel<input id="pTitle" value="${esc(n.title)}"></label><label class="f">Mål<textarea id="pOutcome">${esc(n.outcome || "")}</textarea></label><label class="f">Hvorfor<textarea id="pWhy" placeholder="Kort begrunnelse"></textarea></label><div class="actions"><button class="btn primary" id="pSend">Lagre forslag</button><button class="btn" id="pCancel">Avbryt</button></div></div>`;
+      $("#pCancel").onclick = renderDrawer;
+      $("#pSend").onclick = () => propose({ kind: "edit", targetRef: n.ref, parentRef: n.parentRef, before: { title: n.title, outcome: n.outcome || "" }, node: { title: $("#pTitle").value.trim(), outcome: $("#pOutcome").value.trim() }, why: $("#pWhy").value.trim() });
+    });
+    $("#bPropRemove")?.addEventListener("click", () => {
+      $("#dangerZone").innerHTML = `<div class="confirm"><div>Foreslå at «${esc(n.title)}» fjernes fra Book 23?</div><label class="f">Hvorfor<textarea id="pWhy"></textarea></label><div class="actions"><button class="btn danger" id="pSend">Lagre forslag</button><button class="btn" id="pCancel">Avbryt</button></div></div>`;
+      $("#pCancel").onclick = renderDrawer;
+      $("#pSend").onclick = () => propose({ kind: "remove", targetRef: n.ref, parentRef: n.parentRef, why: $("#pWhy").value.trim() });
+    });
+  }
+}
+async function runDecompose(text, parent) {
+  const out = $("#decompOut");
+  if (!S.sample) { out.innerHTML = `<div class="status">Claude er ikke tilgjengelig i denne visningen.</div>`; return; }
+  out.innerHTML = `<div class="status">Claude dekomponerer… (5–60 sekunder)</div>`;
+  let r;
+  try { r = await decompose(text, parent); }
+  catch (e) {
+    out.innerHTML = `<div class="status">${e.code === "not_granted" ? "Dekomponering krever at du tillater Claude for denne siden." : e.code === "rate_limited" ? "For mange forespørsler akkurat nå. Prøv igjen om litt." : "Dekomponeringen feilet: " + esc(e.message || e.code)}</div>`;
+    return;
+  }
+  if (!r.purposes.length) { out.innerHTML = `<div class="status">Claude fant ingen formål i teksten.</div>`; return; }
+  const flat = []; const walk = (arr, d) => arr.forEach((p) => { flat.push({ p, d }); walk(p.children, d + 1); });
+  walk(r.purposes, 0);
+  out.innerHTML = `<div class="sect">Forslag fra Claude — velg det som skal inn</div>` + flat.map(({ p, d }, i) => {
+    const m = p.match, kbn = m ? (S.kb?.nodes.find((x) => x.ref === m.ref) || currentTree()?.nodes.find((x) => x.ref === m.ref)) : null;
+    return `<label class="card${d ? " child" : ""}" style="margin-left:${d * 18}px"><input type="checkbox" data-i="${i}" checked>
+      <div><div class="ct">${esc(p.title)}</div><div class="cs">${esc(p.outcome)}</div>
+      ${m ? `<span class="pill m">matcher «${esc(kbn?.title || m.ref)}» · ${Math.round(m.confidence * 100)} %</span> <label class="cs"><input type="checkbox" data-use="${i}" ${m.confidence >= 0.6 ? "checked" : ""}> bruk eksisterende</label>` : `<span class="pill n">nytt formål</span>`}
+      </div></label>`;
+  }).join("") + (r.note ? `<div class="status">${esc(r.note)}</div>` : "") + `<div class="actions"><button class="btn primary" id="dAdd">Legg til valgte</button><button class="btn" id="dDrop">Forkast</button></div>`;
+  $("#dDrop").onclick = () => { out.innerHTML = ""; };
+  $("#dAdd").onclick = () => {
+    const keep = (i) => out.querySelector(`input[data-i="${i}"]`)?.checked;
+    const useM = (i) => out.querySelector(`input[data-use="${i}"]`)?.checked;
+    let idx = 0;
+    const build = (arr) => arr.map((p) => { const i = idx++; const kids = build(p.children); return keep(i) ? [{ title: p.title, outcome: p.outcome, verifier: p.verifier, matchRef: p.match && useM(i) ? p.match.ref : null, children: kids.flat() }] : kids.flat(); }).flat();
+    const items = build(r.purposes);
+    if (!items.length) { flash("Ingen valgt."); return; }
+    addNodes(parent.ref, items);
+    out.innerHTML = "";
+  };
+}
+function renderNewTree() {
+  drawer.hidden = false;
+  drawer.innerHTML = `<div class="dh"><h2>Nytt formålstre</h2><button class="btn ghost" id="dClose" aria-label="Lukk">✕</button></div>
+  <div class="db">
+    <label class="f">Navn på treet<input id="nTitle" placeholder="F.eks. Formålstre-verktøyet"></label>
+    <label class="f">Rotformålet — hva skal oppnås?<textarea id="nRoot" placeholder="Skriv fritt. Du kan dekomponere det etterpå."></textarea></label>
+    <div><div class="sect">Hører hjemme i Book 23</div><div class="addbox" id="nAnchor" style="margin-top:6px"></div><div class="status" id="nAnchorShow" style="margin-top:4px">Ikke valgt.</div></div>
+    <div class="actions"><button class="btn primary" id="nCreate">Lag treet</button></div>
+  </div>`;
+  let anchor = null;
+  $("#dClose").onclick = () => { S.drawerTab = "detaljer"; renderDrawer(); };
+  mountAutocomplete($("#nAnchor"), { placeholder: "Søk i Book 23…", exclude: null,
+    onPick: (k) => { anchor = k.ref; $("#nAnchorShow").textContent = kbChain(k.ref).map((c) => c.title).join(" › "); },
+    onNew: () => flash("Velg et formål som finnes i Book 23."), onDecompose: () => flash("Velg et formål som finnes i Book 23.") });
+  $("#nCreate").onclick = async () => {
+    const title = $("#nTitle").value.trim(), root = $("#nRoot").value.trim();
+    if (!title || !root) { flash("Gi treet et navn og skriv rotformålet."); return; }
+    const id = slug(title) + "-" + new Date().toISOString().slice(0, 10);
+    const rootRef = `purpose://candidate.${id}.root`;
+    const t = { id, title, rootRef, anchorRef: anchor, anchorNote: "", source: "", nodes: [{ ref: rootRef, parentRef: null, title: root.length > 120 ? root.slice(0, 117) + "…" : root, code: "", outcome: root, verifier: "", status: "candidate", signals: [] }] };
+    if (await saveTree(t, "Treet er laget.")) { S.current = id; S.selected = rootRef; S.drawerTab = "detaljer"; saveLocal(); }
+  };
+}
+function renderProposals() {
+  drawer.hidden = false;
+  const ps = [...S.proposals].sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+  const label = { add: "Nytt formål", edit: "Endring", remove: "Fjerning" };
+  drawer.innerHTML = `<div class="dh"><h2>Forslag til Book 23</h2><button class="btn ghost" id="dClose" aria-label="Lukk">✕</button></div>
+  <div class="tabs" role="tablist"><button role="tab" aria-selected="false" id="tabDet">Detaljer</button><button role="tab" aria-selected="true">Forslag (${ps.filter((p) => p.status === "venter").length})</button></div>
+  <div class="db">
+    <div class="status">Book 23 endres ikke herfra. Et godkjent forslag føres inn i <span class="ref">Book/haven_purpose_knowledge_base_v0.json</span> av Losen, og står da som «innført».</div>
+    ${ps.length ? ps.map((p) => `<div class="prop"><div class="k">${label[p.kind] || p.kind} · <span class="st-${p.status === "innført" ? "innfort" : p.status}">${esc(p.status)}</span></div>
+      <div><b>${esc(p.node?.title || S.kb?.nodes.find((n) => n.ref === p.targetRef)?.title || p.targetRef)}</b></div>
+      <div class="ref">${esc(p.targetRef || "")}${p.parentRef ? " under " + esc(p.parentRef) : ""}</div>
+      ${p.kind === "edit" && p.before ? `<div class="status">Før: ${esc(p.before.title)}</div>` : ""}
+      ${p.why ? `<div class="status">Hvorfor: ${esc(p.why)}</div>` : ""}
+      <div class="actions">${S.isOwner && p.status === "venter" ? `<button class="btn primary" data-dec="godkjent" data-id="${esc(p.id)}">Godkjenn</button><button class="btn" data-dec="avvist" data-id="${esc(p.id)}">Avvis</button>` : ""}
+      ${p.status !== "innført" ? `<button class="btn ghost" data-go="${esc(p.parentRef || p.targetRef)}">Vis</button>` : ""}</div></div>`).join("") : `<div class="status">Ingen forslag ennå. Velg et formål i Book 23 for å foreslå noe.</div>`}
+  </div>`;
+  $("#dClose").onclick = () => { S.drawerTab = "detaljer"; S.selected = null; drawer.hidden = true; };
+  $("#tabDet").onclick = () => { S.drawerTab = "detaljer"; renderDrawer(); };
+  drawer.querySelectorAll("[data-go]").forEach((b) => b.onclick = () => { S.drawerTab = "detaljer"; openBookNode(b.dataset.go); });
+  drawer.querySelectorAll("[data-dec]").forEach((b) => b.onclick = async () => {
+    try { await S.db.doc("proposals/" + b.dataset.id).update({ status: b.dataset.dec, decidedAt: nowIso() }); flash(b.dataset.dec === "godkjent" ? "Godkjent. Losen fører det inn i Book 23." : "Avvist."); }
+    catch (e) { flash("Kunne ikke lagre: " + (e.message || e.code)); }
+  });
+}
+
+// ---------- notice ----------
+let flashT;
+function flash(msg) { const n = $("#notice"); n.textContent = msg; n.hidden = false; clearTimeout(flashT); flashT = setTimeout(() => (n.hidden = true), 4200); }
+function setStatus(html) { $("#status").innerHTML = html; }
+
+// ---------- boot ----------
+loadLocal();
+render();
+let firstFit = true;
+function afterData() {
+  if (S.current !== BOOK && !S.trees[S.current]) S.current = Object.keys(S.trees)[0] || BOOK;
+  render(); if (firstFit && (S.kb || Object.keys(S.trees).length)) { firstFit = false; fit(); }
+  if (S.selected || S.drawerTab !== "detaljer") renderDrawer();
+  const n = Object.keys(S.trees).length;
+  setStatus(`${n} tre${n === 1 ? "" : "r"} · Book 23: ${S.kb ? `<b>${S.kb.nodes.length} formål</b>` : "ikke lastet"}${S.proposals.filter((p) => p.status === "venter").length ? ` · <b>${S.proposals.filter((p) => p.status === "venter").length} forslag venter</b>` : ""}`);
+}
+(async () => {
+  const [db, sample, user] = await Promise.all([window.claude?.use?.("db"), window.claude?.use?.("sample"), window.claude?.use?.("user")].map((p) => Promise.resolve(p).catch(() => null)));
+  S.db = db || null; S.sample = sample || null; S.user = user || null;
+  try { S.isOwner = !!(S.user && S.user.isOwner()); } catch (e) { S.isOwner = false; }
+  if (!S.db) { setStatus("Lagring er ikke tilgjengelig i denne visningen. Åpne siden i Claude."); return; }
+  const onErr = (what) => (e) => setStatus(`Mistet kontakten med ${what} (${esc(e.code)}). Last siden på nytt.`);
+  S.db.doc("kb/book23").onSnapshot((snap) => { S.kb = snap.exists ? structuredClone(snap.data()) : null; afterData(); }, onErr("kunnskapsbasen"));
+  S.db.collection("trees").onSnapshot((snap) => {
+    S.trees = {}; snap.docs.forEach((d) => { S.trees[d.id] = { ...structuredClone(d.data()), id: d.id }; }); afterData();
+  }, onErr("trærne"));
+  S.db.collection("proposals").onSnapshot((snap) => {
+    S.proposals = snap.docs.map((d) => ({ ...structuredClone(d.data()), id: d.id })); afterData();
+  }, onErr("forslagene"));
+})();
+window.addEventListener("resize", () => { if (S._bounds) applyView(); });
+})();
+</script>

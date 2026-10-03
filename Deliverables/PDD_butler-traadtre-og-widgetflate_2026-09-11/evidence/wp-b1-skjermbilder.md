@@ -1,0 +1,2 @@
+STATUS: GRØNN — commit ee04f722993658382864ad05463877b75e742db3 — bilder i evidence/wp-b1-skjermbilder/bilder: 1-tree-open.png 1b-tree-expanded.png 2-child-selected.png 3-root-collapsed.png 
+T-P1-MAALING {"baseURL":"http://127.0.0.1:9192","rootRows":2,"rootInitiallyExpanded":false,"childCount":16,"childID":"helper-invite","childComposerTarget":"skriver til: Inviter","childRows":0,"rootRowsAfterReturn":2,"childrenAfterCollapse":0}

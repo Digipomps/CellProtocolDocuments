@@ -1,0 +1,459 @@
+# Testsuiter som kjøres i CI, én per linje.
+# Kjøres i bolker av ci/run-tests.sh slik at ingen enkelt prosess
+# må holde hele suiten i minnet. Legg til her, ikke i workflowen.
+AdminBridgeHandshakeAuthenticationTests
+AdminControlPlaneRoutingTests
+AdminScaffoldRuntimeTests
+AdminCredentialPolicyTests
+AdminCredentialRevocationTests
+AdminScaffoldBootstrapTests
+AdminOperationsMetricsTests
+AdminScaffoldSnapshotIngestTests
+AdminNodeFleetCellTests
+AdminEntityProofPersistenceSupportTests
+AdminCatalogRoutesTests
+AdminWorkspaceConfigurationFactoryTests
+AssistantCorrespondenceCellTests
+AssistantCorrespondenceOnboardingRoutesTests
+DevelopmentStatusSnapshotTests
+DevelopmentStatusRoutesTests
+ArendalsukaPersistedAtlasRecoveryTests
+WorkbenchAccessGrantConfigurationTests
+PortholeWebSessionPersonaTests
+---
+# Denne suiten har en streng veggklokkegate for V2-chat-recovery. Hold den i
+# en egen prosess, slik at nye suiter ikke flytter den til slutten av en tung
+# bolk og gjør ytelsesbeviset avhengig av prosessnaboer.
+PortholeIdentityContinuityRoutesTests
+---
+PortholeBootstrapProjectionTests
+CellProtocolIdentityProofTests
+BrowserClientIdentityVaultTests
+ConferencePlaywrightIdentityVaultTests
+ProductionOwnerIdentityContinuityTests
+TopUpCheckoutTests
+PaymentGateCellTests
+PaymentGateCreditIssuerTests
+CellScaffoldServiceIdentityRegistryTests
+CellScaffoldServiceIdentityManifestTests
+CellScaffoldRuntimeIdentityRegistryTests.testDefaultProductionProfileHasExactBindingSet
+CellScaffoldRuntimeIdentityRegistryTests.testProvisioningAndPhaseSetsAreExactAndPrivateIsNeverProvisionable
+CellScaffoldRuntimeIdentityRegistryTests.testCanonicalEncodingHasStableSHA256GoldenAndNoSecretsOrPaths
+CellScaffoldRuntimeIdentityProvisionerTests.testAdoptionAcceptsPreexistingRegistryDeclaredBinding
+CellScaffoldRuntimeIdentityProvisionerTests.testAdoptionStillRefusesBindingTheRegistryDoesNotDeclare
+CellScaffoldRuntimeIdentityProvisionerTests.testAdoptionRefusesWhenAnOwnerSignedManifestAlreadyExists
+CellScaffoldRuntimeIdentityProvisionerTests.testFirstEnrollmentRejectsPreexistingUnhistoricalBindingBeforeVaultCAS
+CellScaffoldRuntimeIdentityProvisionerTests.testUnknownCentralVaultBindingFailsClosedUsingCompleteInventory
+CellScaffoldRuntimeIdentityProvisionerTests.testProvisionerCreatesOnlyOfflineAllowedBindingsAndWritesOwnerSignedManifest
+CellScaffoldRuntimeIdentityProvisionerTests.testRetiredContextPresenceFailsClosed
+CellScaffoldRuntimeIdentityProvisionerTests.testFeatureInactiveContextPresenceFailsClosed
+BrowserClientIdentityReconciliationTests
+ConferencePreviewWrapperResolverSupportTests
+EntityCellGraphCellTests
+AccessRequirementPromptCellTests
+AccessSensitiveRuntimeReadinessTests
+NodeAdminAgentDeliveryTests
+NodeAdminAgentSnapshotBuilderTests
+NodeAdminDockerCollectorTests
+PalazzoCommunaleRoutesTests
+WorkItemCellTests
+ProjectPortfolioCellTests
+GitHubWorkSyncCellTests
+HavenWorkbenchConfigurationTests
+WorkbenchOwnerSetupCellTests
+ProjectOperationsTests
+AdminCopilotWorkspaceConfigurationTests
+ChatAuthTokenManagerTests
+ChatCellTests
+RichDocumentCellTests
+ChatInterpreterEscalationCeilingTests
+ChatMVPLoginScopingTests
+ChatMVPRoutesTests
+ChatPurposeResourceRouterTests
+ChatScopedAIProviderRouterTests
+CommonsLibrarianCellTests
+ConferenceProofChatLaunchCellTests
+KallimachosArendalsukaDemoCellTests
+# Kallimachos-rådgiveren. Live-, kanarie- og showcase-testene i suiten hopper av
+# seg selv uten sine env-flagg, så CI kjører kontrakt-, port- og kjedetestene.
+KallimachosAdvisorCellTests
+PersonalChatHubAccountCompatibilityTests
+PersonalChatPromptEvaluationTests
+PersonalCopilotCollaborationInviteTests
+PersonalCopilotV1Tests
+TodoPlannerCopilotConfigurationTests
+UsageMeterRecorderTests
+ValueFlowViewerCellTests
+---
+# Torsdagens Arendalsuka-/Workbench-P0. Nye suiter kjores samlet; for de
+# arvede, suite-unntatte flatene kjores bare metodene som denne pakken endrer.
+AgentRunCellTests
+AgentRunWorkbenchWiringTests
+WorkItemsExploreContractTests
+ArendalsukaEventAtlasCellTests.testMatchingCellKeepsEventRecommendationsPrivateAndRequiresBilateralPeopleConsentAndVisibility
+ArendalsukaEventAtlasCellTests.testMatchingCellExposesAResolvableSkeletonConfiguration
+ConferenceConnectionHubCellTests.testArendalsukaProfileMutationsSurviveFreshResolverAndStorageReload
+ConferenceConnectionHubCellTests.testArendalsukaProfileMutationsReportStorageFailureAndRollBack
+ConfigurationCatalogCellTests.testRemoteEventConfigurationsAreAgreementGatedUntilPublicRelease
+ConfigurationCatalogCellTests.testDefaultCatalogConfigurationsNowExposeExpandedDiscoverySet
+ConfigurationCatalogCellTests.testCatalogContractsExposeSharedContractShapeAndParityFixtures
+PortholeConfigurationLoadingTests.testBootstrapUsesChatWorkbenchAsDefaultWhenCurrentConfigurationHasNoSkeleton
+---
+AdminEntryRemoteBridgeLoopbackTests
+AdminFundingCellTests
+AdminPersistedRuntimeReadinessTests
+AdminRoleEnrollmentCellTests
+AdminSecurityPolicyCellTests
+AgeProofDoorCellTests
+AgentActionCapabilityCatalogV1Tests
+AgentConversationInboxCellTests
+ArendalsukaConfigurationPublisherAuthorizationRoutesTests
+AdminScaffoldBridgeMultiplexRouteTests
+ArendalsukaConfigurationPublisherCellTests
+AgreementWorkbenchCellTests
+AgreementWorkbenchConfigurationFactoryTests
+DocumentationWorkbenchRoutesTests
+SecurityWorkbenchCellTests
+AIGatewayCellTests
+AIGatewayConfigurationFactoryTests
+AdminAccessRequestCellTests
+AdminAuthenticatedVaporBridgeTransportTests
+AdminDeploymentSupervisorCellTests
+---
+# ConferenceShellCellsTests må kjøre alene.
+# testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback henger
+# på Linux når Chat-suitene har kjørt først i samme prosess — den starter og
+# returnerer aldri, ingen assertion, ingen krasjlogg. Reproduserte tre ganger,
+# også i en fersk prosess med bare 20 suiter. Passerer på macOS og passerer
+# alene. Det er en ekte ordensavhengighet som skal feilsøkes, ikke skjules;
+# isolasjonen her er inneslutning, ikke en løsning.
+ConferenceShellCellsTests
+---
+# Nye suiter fra #150. Egen bolk slik at gruppegrensene over ikke forskyves.
+HostRoutedBridgeTransportTests
+PalazzoCommunaleUnavailableReasonTests
+
+# Ny suite fra #158. Egen bolk slik at gruppegrensene over ikke forskyves.
+CorrespondenceApprovalConfigurationFactoryTests
+
+# --- Testgjeld hentet inn 2026-09-01 ---------------------------------------
+# Tjue suiter som sto som «arvet 2026-08-20, ikke vurdert» ble kjoert i CI.
+# Tretten er groenne og staar her. De sju andre gikk tilbake i gjeldslisten,
+# men med en maalt grunn i stedet for «ikke vurdert».
+# Hentet inn fra gjeldslisten 2026-09-01, bolk 1 av 3. Sju Porthole- og
+# korrespondansesuiter ble kjoert; disse seks staar. Fem var groenne som de var,
+# og PortholeWebEditorSupportTests hadde en foreldet forventning som er rettet i
+# samme PR. Egen bolk slik at gruppegrensene over ikke forskyves.
+PortholeMenuFallbackTests
+PortholeRuntimeBindingEnsuringTests
+PortholeWebActionStateSourceTests
+PortholeWebEditorSupportTests
+PortholeWebPayloadTests
+AssistantCorrespondenceAdminRoutesTests
+
+# Bolk 2 av 3. Aatte identitets- og vaultsuiter ble kjoert; disse fem er
+# groenne. De tre andre feiler alle av samme grunn - bevisfiler under
+# verdensskrivbar /tmp - og staar i gjeldslisten med den diagnosen. Manifest, vault-readiness, noekkelavtale og device ingress-handtrykk
+# er kjernen identitetsmodellen hviler paa.
+CellScaffoldRuntimeIdentityManifestTests
+StrictIdentityVaultReadinessMonitorTests
+BrowserClientIdentityVaultKeyAgreementTests
+DeviceIngressIdentityLinkHandshakeContractTests
+PaymentGateOwnerIdentitySupportTests
+
+# Bolk 3 av 3. Fem musikksuiter ble kjoert; disse tre er groenne.
+MusicPublishingConfigurationFactoryTests
+MusicPublishingMVPRoutesTests
+ButterpopPilotReadinessTests
+
+# Invitasjonslandingen lagrer signerte billetter og kontaktforespørsler.
+# Retention-, bearer- og offentlig-copy-kontrakten er derfor en obligatorisk gate.
+InviteLandingRetentionTests
+
+---
+# Ny suite fra PurposeCell fase 1. Egen bolk slik at gruppegrensene over
+# ikke forskyves.
+PurposeCellTests
+ChatAssistantDegradationTests
+ButlerLatencyCachingTests
+
+---
+# Kontrakten adminflatene deler: skallet i roten, avgrensede lister,
+# Grid-kolonneformen rendereren godtar, skuffer som kan lukkes, statuspiller
+# som ser paa raden, ingen engangsroller, og at hver erklaerte rolle har
+# styling. Suiten er ren - ingen runtime, ingen nett - og tar under et
+# sekund. Egen bolk slik at gruppegrensene over ikke forskyves.
+AdminSkeletonContractTests
+
+---
+# Vegars private CellConfiguration-opplasting og publiseringsisolasjon er en
+# obligatorisk Arendalsuka-gate. Kjør suiten alene for tydelig feilisolasjon.
+CellConfigurationStudioImportTests
+
+---
+# Publiseringsflaten (PR #206): celle, hosting-tidslinje, medier, assistent, markdown, /pub-ruter.
+PublicationCellTests
+PublicationPublicSurfaceTests
+
+---
+# Regresjonsgate for prod-500 på /skeleton-parity/<variant>/api/configuration.
+# Suiten setter en streng runtime-vault foran rutene, slik den er i prod, og
+# beviser at parity-fikstursene ikke lenger krever at sentralvaulten lager en
+# «skeleton-parity:»-identitet. Må kjøres — SkeletonParityRoutesTests står i
+# ci/test-exclusions.txt og fanger derfor ingenting.
+SkeletonParityStrictVaultRequesterTests
+
+---
+# Vernet mot å rydde bort en miks som fortsatt har en låt i katalogen.
+# Regelen er én setning, men den naive lesningen av den er feil i tre tilfeller:
+# tilbaketrukket låt (miksen beholder trackID), upublisert-men-servert låt, og
+# republisering der miksen og publiseringsjournalen peker på hver sin låt.
+MixTidyPolicyTests
+
+---
+# 503-en på /arendalsuka/api/knowledge/* var aldri en feil: bryteren
+# ARENDALSUKA_KNOWLEDGE_ENABLED er ikke satt i noe miljø, så cellen registreres
+# aldri. Suiten holder på at svaret sier hvilken av de to det er. Egen suite
+# fordi ArendalsukaPublicSurfaceRouteTests står i ci/test-exclusions.txt og
+# derfor ikke fanger noe.
+ArendalsukaKnowledgeDisabledRouteTests
+
+# Butler-signalmatching og aerlighetskontrakten i chatten: at ingen tur ender
+# som blindvei, at meldinger uten bestilling kvitteres, og at boeyde former
+# ("analysere") naar fram. Deterministisk, ingen ekstern leverandoer.
+ButlerSignalMatcherTests
+
+---
+# Entitetslenking på tvers av scaffolds (PDD 2026-09-04): møteplassen som relé,
+# og rutene som skal feile lukket uten sesjon og uten å lekke hvem som eier en billett.
+IdentityLinkRendezvousStoreTests
+IdentityLinkRoutesTests
+
+# 2026-09-09: gjennomgang av «arvet 2026-08-20, ikke vurdert».
+# Alle 159 ble kjørt i fire bolker (1223 tester). De 149 under var grønne og er
+# flyttet hit; de ti som feilet står igjen i test-exclusions.txt med hva som
+# feiler. Kjøringen er dokumentert i
+# Deliverables/PDD_butler-verktoyflate_2026-09-09/TESTGJENNOMGANG.md.
+# Merk: CI kjører i bolker à 20 suiter, altså en annen rekkefølge enn
+# gjennomgangen. Dukker det opp rekkefølgeavhengige feil, skal suiten få sin
+# egen linje med årsak — ikke tilbake til den udifferensierte haugen.
+ArendalsukaEventAtlasCellTests
+ArendalsukaFavoritesImportCodeParserTests
+ArendalsukaInterestTaxonomyBuilderTests
+ArendalsukaKnowledgeCellTests
+ArendalsukaKnowledgeSQLiteStoreTests
+ArendalsukaProfileCellTests
+ArendalsukaPublicSurfaceRouteTests
+ArtistSalesChannelCellTests
+AssociatedDomainsRouteTests
+CalendarSurfaceConfigurationTests
+CellScaffoldRuntimeIdentityMigrationCandidateCommandTests
+CellScaffoldRuntimeIdentityMigrationPlannerTests
+CellScaffoldRuntimeStorageRootTests
+CodableTests
+ConciergeKnowledgeCorpusCellTests
+ConferenceAIAssistantConfigurationTests
+ConferenceAgendaCellTests
+ConferenceAudienceDiscoveryCellTests
+ConferenceBroadcastStudioCellTests
+ConferenceConfigurationCatalogTests
+ConferenceConnectionHubCellTests
+ConferenceDemoStoryCellTests
+ConferenceInsightAggregateCellTests
+ConferenceInterestTaxonomyBuilderTests
+ConferenceLiveInteractionShellBridgeTests
+ConferenceMVPSkeletonTests
+ConferenceMessageExchangeAcceptanceTests
+ConferenceOnboardingCellTests
+ConferencePublicProfileCellTests
+ConferencePublicShellReadinessTests
+ConferenceRecommendationCellTests
+ConferenceRegistrationCellTests
+ConferenceShellConfigurationFactoryTests
+ConferenceSimulationClockCellTests
+ConferenceSimulationPlaybackCellTests
+ConferenceSimulationPopulationCellTests
+ConferenceSimulationStudioCellTests
+ConfigurationArchitectWorkspaceTests
+ConfigurationCatalogCellTests
+ConfigurationCatalogClientTests
+ConfigurationCatalogSkeletonParityTests
+ContactEndpointCellTests
+ContactRegistryCellTests
+ContextTransitionPayloadFactoryTests
+DevelopmentStatusSnapshotProducerTests
+DeviceCallbackCapabilityServerTests
+DeviceIngressCallbackRuntimeTests
+DeviceRegistrationReadinessTests
+EntityAnchorDataV1ContractTests
+EntityAtlasRoutesTests
+EntityGraphStorageTests
+EntityMergePolicyRegistryV0Tests
+EntityOperationEnvelopeV0Tests
+EntityScaffoldEnrollmentCellTests
+EntityStudioCellTests
+EntityStudioConfigurationFactoryTests
+EventPlatformRoutesTests
+EventPublisherRegistryCellTests
+ExactStagingDeviceIngressPilotTests
+ExecutablePurposeGroundingCellTests
+FlowDebugProbeCellTests
+FundingEntitlementAgreementTests
+GraphStoreCellTests
+GuidedOnboardingCellTests
+HAVENAgentCapabilityBrokerCellTests
+IdeaTaskWorkspaceTests
+JWTAuthRoutesTests
+LeadVaultCellTests
+LeadVaultRoutesTests
+LiveInteractionCellTests
+LocalLLMGatewayCellTests
+MVPAdminAccessTests
+MarkdownRendererCellTests
+MediaCollectionCellTests
+MermaidRendererCellTests
+MicropaymentsAuditRoutesTests
+MintClientBootstrapTests
+MultilevelCodableTests
+NativeLocalModelBridgeTests
+NotificationPushProviderTests
+NotificationRuntimeReadinessTests
+ObjectStorageAdapterCellTests
+ObsidianAIWorkspaceConfigurationTests
+OrchestratorPersistenceTests
+PalazzoCommunaleServiceTests
+ParticipationHubCellTests
+ParticipationHubConfigurationFactoryTests
+PaymentAccessCredentialStoreLifecycleTests
+PaymentProofDoorCellTests
+PersistedRuntimeReadinessTests
+PersonalAIProviderPolicyTests
+PersonalAssistantProfileCellTests
+PersonalDataTrustPackageCellTests
+PersonalEntityActivityDashboardConfigurationTests
+PersonalPagePublisherCellTests
+PersonalPagePublisherConfigurationTests
+PersonlogProjectionCellTests
+PerspectiveCellTests
+ProductionRuntimeAdmissionMiddlewareTests
+ProductionSkeletonBindingIntegrityTests
+ProofDoorMVPRouteSecurityTests
+PublishedConfigurationCatalogCellTests
+PurposeQualityMonitorCellTests
+QuestionnaireCampaignCellTests
+QuestionnaireCampaignRoutesTests
+QuestionnaireResponseCellTests
+RAGCellAccessSecurityTests
+RAGGatewayCellTests
+RAGGatewayConfigTests
+RAGGatewayConfigurationFactoryTests
+RAGGatewayHTTPClientTests
+RAGIngestionCellTests
+RAGMVPRoutesTests
+RAGPersistedRuntimeReadinessTests
+RAGPromptAdminCellTests
+RAGPromptAdminConfigurationFactoryTests
+RestaurantExperiencePlanCellTests
+RestaurantOnboardingCellTests
+RestaurantPublishedContentCellTests
+RestaurantShellCellsTests
+RestaurantSurfaceRoutesTests
+RestaurantVisitContextCellTests
+SMIAgreementSettlementCellTests
+SalesWorkspaceCellTests
+ScaffoldLaunchRegistryCellTests
+ScaffoldNotificationContractsTests
+ScaffoldOwnerAdminRoutesTests
+ScaffoldSetupCellTests
+ScaffoldSurfaceGatePolicyTests
+ScaffoldTruthSourceCatalogTests
+SecureDevelopmentStatusSnapshotFileTests
+SkeletonElementParityMatrixTests
+SkeletonParityRoutesTests
+SkeletonPortableModelTests
+SkeletonRuntimeDecoderTests
+SpatialCellsTests
+SpatialRegistryRemoteIntegrationTests
+SproutBridgeDiscoveryRoutesTests
+SproutExecutableCatalogRoutesTests
+SproutResolverRoutesTests
+SwarmIdentityAdmissionCellTests
+TodoCellConfigurationTests
+TranscriptStoreCellTests
+TrustPacketConfigurationFactoryTests
+UserSimulationScaffoldTests
+VaultMVPRoutesTests
+VaultStudioWorkspaceTests
+WebKnowledgeCellsTests
+
+---
+# WP-A5/A1/A2: hjelpertre med skop — modell, migrering, skop og produksjonsaudit.
+PersonalCopilotHelperTreeTests
+PersonalCopilotHelperTreeReachabilityTests
+
+---
+# Bootstrap av foerste utsteder av publiseringstilgang (PDD 2026-09-09, §5).
+# Ren logikk: navngitt og smalt grant, bare konfigurert mottaker med eksakt
+# match, og feiler lukket uten miljoevariabel. Ingen nettverk, ingen disk -
+# EphemeralIdentityVault og IsolatedCellTestCase. Egen bolk slik at
+# gruppegrensene over ikke forskyves.
+ArendalsukaPublisherBootstrapTests
+PersonEntityLinkEvidenceStoreTests
+EncryptedEntityAuthorityReplicaPersistenceTests
+EntityReplicaProcessTests
+EntityPersonBridgeProcessTests
+EntityDataGatewayCellTests
+PersonEntityLinkCompletionTests
+
+---
+# WP-B0/B2b/B1: real Butler cell actions, disk reload and production skeleton audit.
+PersonalCopilotWidgetCanvasTests
+
+---
+# Integrated runtime WIP: trust receipts, provider persistence, credentials,
+# remote bridgeheads, durable product control, and renderer drift.
+AIGatewayProviderToolsOffTests
+AgentTrustPackageAdjustTests
+AgentTrustPackageAntiPurposeTests
+AgentTrustPackageApprovalTests
+AgentTrustPackageAuditTests
+AgentTrustPackageCellTests
+AgentTrustPackageE2ETests
+AgentTrustPackageReachTests
+ChatAIGatewayDiscoveryCacheTests
+ChatScopedAIProviderRegistryPersistenceTests
+CredentialSealingTests
+EffectReceiptTests
+OwnerScopedCredentialCellTests
+OwnerScopedCredentialStoreTests
+PortholeWebRemoteConfigurationTests
+RemoteBridgeheadAccessTests
+SkeletonStyleParityCSSDriftTests
+VaporProductControlDurabilityTests
+WebFetchCeilingTests
+
+---
+# Owner-local library candidate contracts and owner denial (no live services).
+EntityPurposeLibrarySetupContractTests
+EntityPurposeLibrarySetupCellTests
+PerspectiveRuntimeBindingTests
+PerspectiveLibraryProjectionTests
+
+# Co-Pilot decision/state boundaries with synthetic Perspective and model doubles.
+PersonalCopilotPerspectiveBoundaryTests
+
+# Administrator registry, signed mandates, role boundary and provisioning.
+ScaffoldAdministratorRegistryTests
+ScaffoldMandateTests
+ScaffoldRoleIsNotAuthorityTests
+ScaffoldAdministratorProvisionerTests
+
+ChatAIGatewayRequestTests
+
+# Existing users must receive the current built-in Butler UI without losing custom layouts.
+ButlerBuiltInConfigurationUpgradeTests
+
+---
+# WP-R4: public read-only policy and mounted source action integration.
+ConferencePublicConfigurationPolicyTests
+PortholeComponentSourceActionTests

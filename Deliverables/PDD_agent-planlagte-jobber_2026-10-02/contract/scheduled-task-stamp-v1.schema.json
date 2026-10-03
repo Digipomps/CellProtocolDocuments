@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digipomps.org/haven/contracts/scheduled-task-stamp-v1.schema.json",
+  "title": "HAVEN scheduled task stamp v1",
+  "description": "Stempelet et fast program skriver etter hver kjøring. Det andre programmet leser det for å oppdage at dette har stoppet. Stempelet vises aldri i menylinjen, så det kan bære rå feiltekst.",
+  "type": "object",
+  "required": [
+    "schema",
+    "task",
+    "programSha256",
+    "firstRunAt",
+    "runCount",
+    "startedAt",
+    "finishedAt",
+    "outcome",
+    "exitCode"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "haven.scheduled-task-stamp.v1"
+    },
+    "task": {
+      "enum": [
+        "korrespondanse-sjekk",
+        "korrespondanse-frist"
+      ]
+    },
+    "programSha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Sjekksummen av programfila som kjørte."
+    },
+    "firstRunAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Første kjøring etter installasjonen. Føres videre fra forrige stempel; installasjonens «fjern» sletter stempelet."
+    },
+    "runCount": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Antall kjøringer siden firstRunAt. Føres videre fra forrige stempel. Bestemmer hvilken profil som tas først."
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "finishedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "outcome": {
+      "enum": [
+        "ok",
+        "partial",
+        "failed"
+      ],
+      "description": "ok: alt ble lest. partial: minst én profil ble lest og minst én ikke. failed: ingenting ble lest."
+    },
+    "exitCode": {
+      "enum": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "profile",
+          "outcome",
+          "consecutiveFailures"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "outcome": {
+            "enum": [
+              "ok",
+              "failed"
+            ]
+          },
+          "consecutiveFailures": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "unread": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "senders": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "expiresAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "failureClass": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 80
+          },
+          "failureDetail": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 500
+          }
+        }
+      }
+    },
+    "markers": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "written": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 120
+          }
+        },
+        "removed": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 120
+          }
+        }
+      }
+    },
+    "siblingStale": {
+      "type": "boolean",
+      "description": "Sant når det andre programmets stempel var for gammelt."
+    },
+    "note": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 300
+    }
+  }
+}

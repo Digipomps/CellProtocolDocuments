@@ -1,0 +1,164 @@
+warning: /Users/kjetil/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/kjetil/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: '_wt-bro-kanal-auth-20260927': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Provisioning 2 / 169]
+[Using on-disk description]
+[1 / 108] PurposeInterestBenchmarkSupport
+[1 / 38] _NIOFileSystem
+[2 / 25] CellBase
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/Cells/Bridging/BridgeBase.swift:777:53: warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+ 763 |         self.connectPublisher = connectPublisher
+ 764 |         
+ 765 |         Task {
+     |              |- note: 'self' implicitly strongly captured here
+     |              `- note: add 'self' as a capture list item to silence
+ 766 |             if let identity = context.identity,
+ 767 |                let connectPublisher = self.connectPublisher
+     :
+ 775 |                         connectPublisher.send(completion: .failure(ConnectError.cancelled ))
+ 776 |                     })
+ 777 |                     .sink(receiveCompletion: {[weak self] completion in
+     |                                                     |- warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+     |                                                     `- note: explicitly assign the capture list item to silence
+ 778 |                         bridgeLog("Connect callback publisher completed")
+ 779 |                         connectPublisher.send(completion: .finished)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/Cells/Bridging/BridgeBase.swift:1863:9: warning: no calls to throwing functions occur within 'try' expression [#UnnecessaryEffectMarker]
+1861 |         }
+1862 |         await afterResponseLookup?(lookedUp)
+1863 |         try connectionStateLock.withLock {
+     |         `- warning: no calls to throwing functions occur within 'try' expression [#UnnecessaryEffectMarker]
+1864 |             let commandRequest = lookedUp // MUTATION: trust the pre-suspension copy
+1865 |             let retainCommandForStream = commandRequest.command == .feed
+
+[#ImplicitStrongCapture]: <https://docs.swift.org/compiler/documentation/diagnostics/implicit-strong-capture>
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+[4 / 27] CellBase
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PersistingCells/EntityRelationRecordV1.swift:321:16: warning: stored property 'entityRepresentation' of 'Sendable'-conforming struct 'EntityRelationRecord' contains non-Sendable type 'EntityRepresentation'; this is an error in the Swift 6 language mode
+ 319 |     /// Canonical owner-held knowledge when present. The legacy subject/tags/
+ 320 |     /// purposeRefs remain readable for existing clients and import adapters.
+ 321 |     public var entityRepresentation: EntityRepresentation?
+     |                `- warning: stored property 'entityRepresentation' of 'Sendable'-conforming struct 'EntityRelationRecord' contains non-Sendable type 'EntityRepresentation'; this is an error in the Swift 6 language mode
+ 322 | 
+ 323 |     public init(
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/EntityRepresentation.swift:61:14: note: class 'EntityRepresentation' does not conform to the 'Sendable' protocol
+ 59 | 
+ 60 | 
+ 61 | public class EntityRepresentation:  PerspectiveNodeImpl {
+    |              `- note: class 'EntityRepresentation' does not conform to the 'Sendable' protocol
+ 62 | 
+ 63 |     var fulfilled: Fullfilled = Fullfilled() // Until Interests and Purposes are moved
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/ClaimComposition.swift:36:16: warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimCounter' has non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 34 | public struct ClaimCounter: Codable, Equatable, Sendable {
+ 35 |     public var role: ClaimCounterRole
+ 36 |     public var composition: ClaimComposition
+    |                `- warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimCounter' has non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 37 | 
+ 38 |     public init(role: ClaimCounterRole, composition: ClaimComposition) {
+    :
+187 | }
+188 | 
+189 | public indirect enum ClaimComposition: Codable, Equatable {
+    |                      `- note: consider making enum 'ClaimComposition' conform to the 'Sendable' protocol
+190 |     case claim(ClaimCompositionLeaf)
+191 |     // allOf: linked premises, weakest link decides the score.
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/ClaimDefinition.swift:91:16: warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimDefinition' contains non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 89 |     public var goalID: String?
+ 90 |     public var supports: [ClaimSupportNode]
+ 91 |     public var composition: ClaimComposition?
+    |                `- warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimDefinition' contains non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 92 |     public var tags: [String]
+ 93 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/ClaimComposition.swift:189:22: note: consider making enum 'ClaimComposition' conform to the 'Sendable' protocol
+187 | }
+188 | 
+189 | public indirect enum ClaimComposition: Codable, Equatable {
+    |                      `- note: consider making enum 'ClaimComposition' conform to the 'Sendable' protocol
+190 |     case claim(ClaimCompositionLeaf)
+191 |     // allOf: linked premises, weakest link decides the score.
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/PerspectiveEntityProjection.swift:30:16: warning: stored property 'entities' of 'Sendable'-conforming struct 'PerspectiveEntityProjection' contains non-Sendable type 'Weight<EntityRepresentation>'; this is an error in the Swift 6 language mode
+ 28 |     /// delayed write cannot resurrect entities a newer one removed.
+ 29 |     public let epoch: Int
+ 30 |     public let entities: [Weight<EntityRepresentation>]
+    |                `- warning: stored property 'entities' of 'Sendable'-conforming struct 'PerspectiveEntityProjection' contains non-Sendable type 'Weight<EntityRepresentation>'; this is an error in the Swift 6 language mode
+ 31 | 
+ 32 |     public init(source: String, epoch: Int, entities: [Weight<EntityRepresentation>]) {
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/Weight.swift:13:15: note: consider making generic struct 'Weight' conform to the 'Sendable' protocol
+ 11 | import Foundation
+ 12 | 
+ 13 | public struct Weight<T: PerspectiveNode & Codable> :  Weighted, Codable {
+    |               `- note: consider making generic struct 'Weight' conform to the 'Sendable' protocol
+ 14 |     
+ 15 |     
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/RelationalLearningModels.swift:95:16: warning: stored property 'payload' of 'Sendable'-conforming struct 'RelationalLearningEventEnvelope' contains non-Sendable type 'ValueType'; this is an error in the Swift 6 language mode
+ 93 |     public var schemaVersion: String
+ 94 |     public var emittedAt: TimeInterval
+ 95 |     public var payload: Object
+    |                `- warning: stored property 'payload' of 'Sendable'-conforming struct 'RelationalLearningEventEnvelope' contains non-Sendable type 'ValueType'; this is an error in the Swift 6 language mode
+ 96 | 
+ 97 |     public init(eventType: RelationalLearningEventType,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/ValueTypes/ValueType.swift:11:22: note: consider making enum 'ValueType' conform to the 'Sendable' protocol
+  9 | #endif
+ 10 | 
+ 11 | public indirect enum ValueType: Codable {
+    |                      `- note: consider making enum 'ValueType' conform to the 'Sendable' protocol
+ 12 |     case flowElement(FlowElement)
+ 13 |     case bool(Bool)
+[8 / 25]
+[13 / 17] CellBase-product
+[14 / 17] CellVapor-product
+[16 / 17] CellApple-product
+[16 / 17] CellBaseTests-product
+[18 / 20] CellBaseTests-product
+[21 / 21] haven-commons-product
+Build complete! (5,73 sek)
+Test Suite 'Selected tests' started at 2026-09-29 03:31:33.026.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-09-29 03:31:33.027.
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-09-29 03:31:33.027.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 03:31:33.027.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 03:31:33.081.
+Test Suite 'CellNearbyTests.xctest' started at 2026-09-29 03:31:33.081.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-09-29 03:31:33.081.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 03:31:33.081.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 03:31:33.138.
+Test Suite 'CellBaseTests.xctest' started at 2026-09-29 03:31:33.138.
+Test Suite 'BridgeResponseLifetimeTests' started at 2026-09-29 03:31:33.138.
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorDescriptionCannotReplaceRenewedMetadataOrScope]' started.
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeResponseLifetimeTests.swift:70: error: -[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorDescriptionCannotReplaceRenewedMetadataOrScope] : failed - Old description admitted
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeResponseLifetimeTests.swift:71: error: -[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorDescriptionCannotReplaceRenewedMetadataOrScope] : XCTAssertEqual failed: ("old") is not equal to ("fresh")
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeResponseLifetimeTests.swift:71: error: -[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorDescriptionCannotReplaceRenewedMetadataOrScope] : XCTAssertEqual failed: ("Optional("old")") is not equal to ("Optional("fresh")")
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeResponseLifetimeTests.swift:71: error: -[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorDescriptionCannotReplaceRenewedMetadataOrScope] : XCTAssertEqual failed: ("old") is not equal to ("fresh")
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorDescriptionCannotReplaceRenewedMetadataOrScope]' failed (2.101 seconds).
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorFeedCannotPublishIntoRenewedStream]' started.
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeResponseLifetimeTests.swift:90: error: -[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorFeedCannotPublishIntoRenewedStream] : failed - Old feed admitted
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeResponseLifetimeTests.swift:91: error: -[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorFeedCannotPublishIntoRenewedStream] : XCTAssertTrue failed
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeResponseLifetimeTests.swift:93: error: -[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorFeedCannotPublishIntoRenewedStream] : XCTAssertEqual failed: ("[CellBase.ValueType.string("old"), CellBase.ValueType.string("fresh")]") is not equal to ("[CellBase.ValueType.string("fresh")]")
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorFeedCannotPublishIntoRenewedStream]' failed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorGetCannotConsumeSameKeypathInRenewedBase]' started.
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeResponseLifetimeTests.swift:43: error: -[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorGetCannotConsumeSameKeypathInRenewedBase] : failed - Old response admitted
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorGetCannotConsumeSameKeypathInRenewedBase]' failed (0.001 seconds).
+Test Suite 'BridgeResponseLifetimeTests' failed at 2026-09-29 03:31:35.243.
+	 Executed 3 tests, with 8 failures (0 unexpected) in 2.104 (2.104) seconds
+Test Suite 'CellBaseTests.xctest' failed at 2026-09-29 03:31:35.243.
+	 Executed 3 tests, with 8 failures (0 unexpected) in 2.104 (2.104) seconds
+Test Suite 'Selected tests' failed at 2026-09-29 03:31:35.243.
+	 Executed 3 tests, with 8 failures (0 unexpected) in 2.104 (2.105) seconds
+Note: Some test targets reported failures:
+  - CellBaseTests (XCTest)

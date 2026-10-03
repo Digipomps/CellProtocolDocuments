@@ -1,0 +1,256 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digipomps.org/haven/contracts/agent-challenge-v1.schema.json",
+  "title": "HAVEN agent challenge inbox v1",
+  "description": "Alt som venter på et menneske, samlet på ett sted. Kontrakten har to lister med vilje: 'challenges' er det som venter, 'sources' er hver kilde med sin egen tilstand. En klient kan bare konkludere med ro når minst én kilde står som 'read' og ingen står som 'unreadable'. 'not-configured' hindrer ikke ro: det er et erklært fravær — kilden er kjent, og at den ikke er koblet til er sagt høyt. 'unreadable' er et ukjent fravær, og skal alltid vises.",
+  "type": "object",
+  "required": [
+    "contractVersion",
+    "generatedAt",
+    "sources",
+    "challenges"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "contractVersion": {
+      "const": 1
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Hver kjente kilde, alltid med. En kilde som ikke kunne leses forsvinner ikke — den får state 'unreadable' og en grunn.",
+      "items": {
+        "type": "object",
+        "required": [
+          "source",
+          "state",
+          "lastAttemptAt"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "$ref": "#/$defs/source"
+          },
+          "state": {
+            "enum": [
+              "read",
+              "unreadable",
+              "not-configured"
+            ]
+          },
+          "lastAttemptAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastReadAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 300,
+            "description": "Påkrevd når state ikke er 'read'. Menneskelesbar grunn uten hemmeligheter."
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "state": {
+                  "const": "read"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "lastReadAt"
+              ]
+            },
+            "else": {
+              "required": [
+                "reason"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "challenges": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/challenge"
+      }
+    }
+  },
+  "$defs": {
+    "source": {
+      "enum": [
+        "intent-review",
+        "scaffold-queue",
+        "agent-health",
+        "job",
+        "correspondence",
+        "tool-link"
+      ],
+      "description": "'job' er deklarert uten produsent i v1: AgentJobs-arbeidet er ikke landet på main, og skal kunne kobles på uten kontraktsendring. 'tool-link' (2026-09-24): entitetslenker mellom eieren og verktøycellene — forespørsler, tilbud og nylige svar."
+    },
+    "challenge": {
+      "type": "object",
+      "required": [
+        "id",
+        "source",
+        "kind",
+        "title",
+        "createdAt",
+        "needsHuman",
+        "answerPath",
+        "responses"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Stabil for den underliggende saken, slik at samme sak sett to ganger ikke gir to varsler."
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        },
+        "kind": {
+          "enum": [
+            "access-grant",
+            "topup",
+            "intent-approval",
+            "agent-attention"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "description": "Vises i varsel og meny. Aldri token, nøkkel, signatur eller engangshemmelighet."
+        },
+        "detail": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 400
+        },
+        "requestedBy": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "displayName": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 120
+            },
+            "didKey": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 200
+            }
+          }
+        },
+        "subject": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "needsHuman": {
+          "type": "boolean",
+          "description": "Formålsporten. Bare true gir varsling. Samme skille som NetworkHealthPurposeCatalog.warrantsNotification gjør for nettverksvarsler."
+        },
+        "answerPath": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Den faktiske kodeveien svaret går gjennom, f.eks. 'RemoteIntentReview.approve' eller 'AdminFundingQueueCell.approveRequest'. Skrevet ned så en test kan bevise at flaten ikke har laget en snarvei utenom."
+        },
+        "responses": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "enum": [
+                  "approve",
+                  "reject",
+                  "open",
+                  "dismiss-today"
+                ]
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "destructive": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "handleAt": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "Agentens forslag om hvor mennesket best behandler saken. En anbefaling, ikke et vedtak: en flate kan vise saken et annet sted, men da har den tatt et valg. Utelates nar kilden ikke vet.",
+          "required": [
+            "venue",
+            "reason"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "venue": {
+              "enum": [
+                "here",
+                "admin-window",
+                "phone",
+                "scaffold-admin",
+                "assistant"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "description": "Hvorfor akkurat der. Vises til mennesket, og barer aldri hemmeligheter."
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,29 @@
+# HAVEN-Deploy advisor brief
+
+generated: 2026-09-09T05:01:11Z  
+root: /Users/kjetil/Build/Digipomps/HAVEN/HAVEN-Deploy
+
+## Facts
+- environments: {"production": {"commit": "b8df547e", "observed": "2026-09-08T04:45Z", "verified_against_health_build": true}, "staging": {"commit": "b8df547e", "observed": "2026-09-07T19:20Z", "verified_against_health_build": true}} (evidence: maturity/features.json)
+- tasks_by_status: {"COMMITTED_VERIFIED": 3, "HANDOFF_REQUIRED": 3, "PREPARING": 11}
+- active_claims: []
+- events_total: 190
+- rules: {"active": 34, "total": 34}
+- lessons: 62
+- maturity: {"AdminScaffold staging (admin.staging.haven.digipomps.org)": "3_IMAGE", "Atlas startup-write fiks (alt. 2)": "0_IDEA", "DeviceIngress v3 / APNs": "0_IDEA", "HavenAgentD agent-job-v1": "0_IDEA", "Palazzo /palazzo/api/ask 503-fiks (HostRoutedBridgeTransport)": "5_PROD", "Porthole refresh-rekkefølge (preserve default, sekvens, selvforsynt submit)": "5_PROD", "PurposeReadinessCell v1": "0_IDEA", "Vegar Arendalsuka runtime + chat": "1_BRANCH", "admin GUI (admin-gui + followup + leaf-theme)": "2_MAIN", "cellscaffold-deploy-status.py (offentlig statusprojeksjon)": "1_BRANCH", "correspondence approval surface": "1_BRANCH", "correspondence round-trip": "4_STAGING", "deploy evidence scripts": "2_MAIN", "deploy secret env / vipps env passthrough": "2_MAIN", "deploy-staging-atomic-v3.py (corr-deploy)": "1_BRANCH", "haven-deploy --env-only": "4_STAGING", "haven-deploy-doctor (~35 sjekker)": "5_PROD", "haven-deploy-kjede (preflight→seremoni→cutover→readiness→kontrollert restart)": "5_PROD", "haven-ghcr-prefetch / haven-ghcr-prefetch-production": "0_IDEA", "identity link web": "1_BRANCH", "music free-play (butterpop)": "5_PROD", "owner-signert runtime-identity-manifest uten bypass": "5_PROD", "porthole lookup fastfail (surface-lasting 46 s)": "1_BRANCH", "pr-167": "1_BRANCH", "publication cell (publisering/blogg)": "2_MAIN", "purpose cell fase 1": "1_BRANCH", "release-candidate-preflight.py": "1_BRANCH", "runtime-editerbare skjeletter (9 celler)": "5_PROD", "signal matching": "2_MAIN", "skeleton list tree follow-tail": "1_BRANCH", "studio copy / porthole a11y copy / empty-without-text / mix-tidy / catalog-summary / natt-qa-docs / arendalsuka-knowledge-off": "1_BRANCH", "tabs optimistic hold": "1_BRANCH", "topic register": "2_MAIN", "workbench agent run model v1": "1_BRANCH"}
+
+## Proposals
+- **G2** [block] HD-0001: host.mutation without an active coordination claim at the time (claimed earlier but released, or never claimed) (evidence: ev_1d31d7c076ea75cc)
+- **G6** [block] HD-0011: COMMITTED_VERIFIED recorded without evidence (evidence: ev_2f0cc52caf5707e8)
+- **G7** [warn] HD-0002: PREPARING for 110h with unsatisfied needs: file:CellScaffold/scripts/production/haven-ghcr-prefetch, file:CellScaffold/scripts/production/haven-ghcr-prefetch-production (evidence: ev_07bc290f5fb710cb, ev_9761cf926ba7df1f, ev_efbf3270251314be)
+- **G7** [warn] HD-0003: PREPARING for 110h with unsatisfied needs: file:CellScaffold/Documentation/Operations/formaal-testberedskap-20260827/recreate3.sh (evidence: ev_4ee9ea608bd6e94d, ev_85e37dcc7ca64def, ev_e0e395ac8cd1b7ff)
+- **G7** [warn] HD-0004: PREPARING for 110h with unsatisfied needs: pin:cellprotocol=8c09560, pin:dimymicropayments=1b31aec-on-main (evidence: ev_0120224634a0ce42, ev_2ad315c11cac6a9a, ev_56f371ba41ed2490)
+- **G7** [warn] HD-0005: PREPARING for 110h with unsatisfied needs: approval:kjetil-role-bootstrap, file:staging-logs (evidence: ev_38f36cc050ee205a, ev_5aa12743f0b5d6c4, ev_f498f66ba7b26073)
+- **G7** [warn] HD-0006: PREPARING for 110h with unsatisfied needs: secret:HAVEN_ASSISTANT_CORRESPONDENCE_INVITES_BASE64, script:DiMyMicropayments/preflight-formaal.sh (evidence: ev_3894703b96f61f52, ev_eb16966d6dbbe1c0, ev_ec98482a7887cd3e, ev_f235ffaf7b8c9fb7)
+- **G7** [warn] HD-0007: PREPARING for 110h with unsatisfied needs: disk:/Users/kjetil (evidence: ev_21688ef344cea884, ev_765aaee608519c0b)
+- **G7** [warn] HD-0010: PREPARING for 104h with unsatisfied needs: approval:kjetil, coordination:89.167.90.101 (evidence: ev_3c03c5b4c0d245c2, ev_6e684da7fb59bd68, ev_f560e68359325a3b)
+
+## Silence
+- G1: no task stuck in DEPLOYING > 45 min
+- G3: no repeated fingerprint without handoff
+- G4: no handoff > 48h without a lesson

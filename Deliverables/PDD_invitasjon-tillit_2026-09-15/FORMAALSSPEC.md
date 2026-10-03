@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — invitasjon og tillit
 
-Oppgavemappe: `PDD_invitasjon-tillit_2026-09-15` · Opprettet 2026-09-15 · Iterasjon 3 (ikke godkjent)
+Oppgavemappe: `PDD_invitasjon-tillit_2026-09-15` · Opprettet 2026-09-15 · Iterasjon 7 (G1 24.09 · G1-GUI 24.09 · G2 26.09 · tillegg R, T, U etter G1)
 
 > Regel: ingen plan før G1 er godkjent av Kjetil. For GUI: ingen implementering før G1-GUI (rendret bilde) er godkjent.
 > Et dokument om leveransen teller aldri som leveransen.
@@ -67,6 +67,89 @@ kikker og mye om hva du har liggende; et levende oppslag er motsatt. Det er en r
 en detalj — og den blir skarpere når verten er DiMy, altså vår egen kommersielle part. Formål A4, og
 §6.6.
 
+### 0.1c Beslutninger 2026-09-23 som rammer inn testingen
+
+Kjetil, 23.09: *«Simulerte entiteter skal kjøres i swarm — som vel bør være et eget scaffold — men det
+kan vi ta etterpå. Vi kan kjøre testen mellom Vegar og meg. (men ikke bruk correspondence, bruk
+invite og chat).»*
+
+Tre konsekvenser:
+
+1. **Ende-til-ende-testen av denne oppgaven kjøres mellom to ekte entiteter — Kjetil og Vegar —
+   over `invite` og `chat`.** Ikke over correspondence. §3 sin «kjørende flate» er byttet ut med det.
+2. **Simulerte entiteter er ikke en del av denne oppgaven.** De skal kjøres i en swarm på et eget
+   scaffold, og det blir en egen PDD senere. Tester i §5 som trenger «to entiteter» bruker inntil da
+   to vaults med egne nøkler i samme prosess — og sier det. (Merk fra runde 1 i entitetsdata:
+   `MockIdentityVault` gir deterministiske UUID-er, så to vaults kolliderer; harnessen må lage
+   tilfeldige.)
+3. **Den ekte testen kan ikke starte før stiene i §2 er grønne** — `lesson.corr-approval-surfaces-timed-out`
+   handlet nettopp om en Vegar-test som aldri fikk sjansen. Byggene nedstrøms (Binding, CellScaffold)
+   var røde 22.09 av grunner utenfor entitetsdata-oppgaven; det må lukkes først.
+
+### 0.1d Rettelse fra Kjetil 2026-09-23: hvor nykommeren lander avhenger av veien inn
+
+> Hvis den inviterte bruker et grensesnitt som går direkte mot mitt scaffold er det viktig. Men om
+> brukeren starter HAVEN app blir det generert en ny entitet ved første oppstart — samme om brukeren
+> går via et annet scaffold. Vi bør vurdere å lage en enkel måte å flytte entitetsdata over til et
+> annet scaffold der entiteten er representert så temporære entiteter — eller fragmenter av — kan ta
+> med seg dataene til et sted det er mer tilgjengelig. Vi må ha et veldig rent og enkelt GUI design på
+> invite→chat flyten så det er lett forståelig og oser tillit.
+
+Iterasjon 4 lot formål N gjelde alle nykommere. Det var for bredt. Det finnes to veier inn, og de gir
+to ulike entiteter:
+
+- **Direkte mot avsenders scaffold** (landingssiden, eller et annet grensesnitt uten app): da blir
+  entiteten til *der*, og regelen fra 22.09 gjelder fullt ut — forseglet til nykommeren, ulesbar for
+  avsender og admin. Det er dette N nå handler om, og det er her det er viktig.
+- **Via HAVEN-appen** (eller et annet scaffold nykommeren selv velger): appen lager en ny entitet ved
+  første oppstart, uansett hvem som inviterte. Avsenders scaffold er da bare stedet billetten ble
+  hentet fra. Ingen entitet blir til hos avsender.
+
+Konsekvensen er at én og samme person kan ende opp med *to* entiteter — en midlertidig på avsenders
+scaffold fra et raskt svar på landingssiden, og en varig i appen dagen etter. Det er ikke en feil, det
+er en situasjon som trenger en utvei. Derfor nytt formål **P**: en midlertidig entitet, eller et
+fragment av en, skal enkelt kunne ta med seg dataene sine til det scaffoldet der entiteten er
+representert. Kapittel 32 beskriver hjemme-scaffold-*valg*; det som mangler er selve *flyttingen* av
+entitetsdata som en handling nykommeren kan utføre uten hjelp.
+
+Og for flaten: **invite→chat skal være én ren, enkel stripe som er lett å forstå og oser tillit.** Det er
+ikke en dekorasjon oppå formålene, det er et formål — **Q** — og det avgjøres av bildene ved G1-GUI,
+ikke av en beskrivelse (`lesson.text-ux-is-not-design`).
+
+### 0.1e Tillegg fra Kjetil 2026-09-24, etter G1 og G1-GUI: private notater
+
+> G1-GUI godkjent. Men vi bør vel ha mulighet for å ha private notater også?
+
+Ja. Valgt (Kjetil, 24.09): **egen del som aldri vises og aldri sendes.** Det du holder om en annen
+person får to skuffer: *grunnlaget* — navn, adresse, hvor fra — som invitasjonen bruker og som
+personen ser og kan rette (formål C og G); og *private notater* — dine egne, som en notatbok, som
+butleren kan lese inne hos deg, men som aldri kan havne i noe som sendes, og som personen ikke får
+vite finnes. Formål **R**. Én ting følger av det: «lista er nøyaktig det han har — ikke et utdrag» i
+rute 2 hos mottaker betyr «nøyaktig det han har *om deg som grunnlag*». Bildet
+`avsender-forhandsvisning-v2.png` viser skuffen som «sendes ikke»; mottakerbildene er uendret, fordi
+mottakeren ikke skal se at skuffen finnes.
+
+### 0.1f Spørsmål fra Kjetil 2026-09-26: vedlegg og kryptert last i invitert chat
+
+> Er vedlegg og kryptert payload også tilgjengelig i invited chat?
+
+Lest mot origin/main 26.09 (`ChatCell.swift`, `ChatInvitationProofUtility.swift`,
+`AttachmentStreamV1.swift`, `HavenInvitePublication.swift`):
+
+**Kryptert last: ja i modellen, nei i praksis for en invitert fra en annen entitet.** `ChatCell` løser
+mottakere per audiensmodus, og i `invitedIdentities`/`hybrid` er aksepterte inviterte med
+(`invitedRecipientIdentities`). Konvolutten forsegles per mottaker med `chatMessageV1`. Men
+mottakeren må ha en *nøkkelavtale-nøkkel* (`publicKeyAgreementSecureKey`); aksepten
+(`ChatInvitationAcceptance.inviteeIdentity`) bærer bare signeringsnøkkelen, og kontaktforespørselen
+fra landingssiden (`HavenInviteContactRequest.sender`) likeså. Dagens tester bruker én vault der alle
+har begge nøkler, så gapet synes ikke der. For Vegar fra sin egen HAVEN vil avsenderen stå uten
+nøkkel å forsegle til. Formål **T**.
+
+**Vedlegg: nei.** Meldingslasten er tekst (`Data(trimmedBody.utf8)`, text/markdown). Primitivet finnes —
+`ContentCryptoSuite.attachmentStreamV1`, chunket ChaCha20-Poly1305, «key distribution … belongs to the
+enclosing application protocol» — men ingen celle bruker det. Formål **U**, lagt i runde B: det trengs
+ikke for at Kjetil og Vegar skal få en samtale, og det bygger på T.
+
 ### 0.2 Brief-audit
 
 | Påstand i intensjonen / antatt kapabilitet | Audit | Kilde |
@@ -80,6 +163,15 @@ en detalj — og den blir skarpere når verten er DiMy, altså vår egen kommers
 | Import av adressebok skaper entitydata og dermed genesis | **retrieved** — avklart av Kjetil 2026-09-15 | `PDD_entitetsdata-egen-kontroll_2026-09-08/STATUS.md` |
 | Nearby-scanner kan gi en verifiserbar peker uten katalog | **recalled** — finnes i Binding, ikke revidert for dette formålet | må verifiseres i P2 |
 | Det finnes en hjelpechat som kan nås av noen uten HAVEN-konto | **unavailable** — ingen slik flate i dag | — |
+| Det finnes en signert invitasjonsbillett med utløp, og en publiseringsflyt mot scaffold | **retrieved** 23.09 — `HavenInviteTicket` (`expiresAt`, `audienceToken`, `capabilities`, `proof`), `HavenInvitePublication`, `HavenInviteContactRequest`, `HavenInviteLifecycle` (published/opened/accepted/declined/expired/revoked) | `CellProtocol::Sources/CellBase/Invitation/HavenInviteTicket.swift`, `HavenInvitePublication.swift` (origin/main a785dc7) |
+| Binding har en invitasjonscelle med forberedelse, publisering, status og kontaktforespørsler | **retrieved** 23.09 — `BindingInvitationCell`: `invite.prepare/publish/refreshStatus/pullContactRequests/acceptContactRequest/recordDeclined/revoke`; `ttlDays = 14` (1–90); døgngrense `dailyLimit` | `Binding::Cells/InvitationCell.swift` (origin/main 8ce634f6) |
+| Butleren kan foreslå en invitasjon og lage den | **retrieved** 23.09 — `acceptInviteSuggestion` kaller `invite.prepare`; testene `chatInviteDeliversSignedContactRequestAndStoresTicketReceipt`, `chatDropReceiveStagesInviteDraftOnly` | `Binding::Binding/ChatWorkbenchParityCells.swift`, `BindingTests/ChatWorkbenchParityTests.swift` |
+| En mottaker uten HAVEN kan åpne invitasjonen og svare | **retrieved** 23.09 — `GET /invite/:token` (landing) og `POST /invite/:token/reply` (signert kontaktforespørsel); et svar uten `resultingEntityRef` regnes som `declined`; rate-sperre 15/30 min; `maxContactRequests` ≤ 20 | `CellScaffold::Sources/App/Controllers/VaporInviteLanding.swift`, `Models/InviteLandingRecords.swift` (origin/main 77a922bc) |
+| Gravstein / «aldri mer» finnes | **contradicted** 23.09 — landingen registrerer `declined`, men ingenting hindrer en ny billett til samme endepunkt; ingen gravstein i Binding eller scaffold | samme filer |
+| Chat kan invitere og akseptere med signerte artefakter | **retrieved** 23.09 — `ChatInvitationArtifact`/`ChatInvitationAcceptance` med `invitedIdentities`-audiensmodus; 48 tester | `CellProtocol::Sources/CellBase/Cells/Chat/ChatCell.swift`, `Tests/CellBaseTests/ChatCellTests.swift` |
+| HAVEN-appen lager en ny entitet ved første oppstart | **retrieved** — `EntityGenesisTrigger.onboarding` og forsegling ved første eierbeviste persist ligger i runde 1 av entitetsdata (commit ebb0b7f, ikke pushet); at *appen* utløser det ved første oppstart er ikke lest i Binding | `CellProtocol::Sources/CellBase/Identity/EntityGenesis.swift` (branch `pdd/entitetsdata-egen-kontroll`); Binding-siden må verifiseres i P2 |
+| Flytting av entitetsdata mellom scaffolds finnes | **contradicted** — kap. 32 beskriver valg av hjemme-scaffold for en entitet som finnes; ingen handling flytter entitetsdata fra én scaffold til en annen | `Book/32_Cross_Scaffold_Entity_Enrollment.md:54` |
+| Ingen test går fra butler til gruppechat i én kjede | **retrieved** 23.09 — leddene er testet hver for seg; ingen test krysser entitetsgrense (alle «deltakere» i ChatCellTests kommer fra én vault) | `Tests/CellBaseTests/ChatCellTests.swift:180-184` |
 
 ### 0.3 Hva forskningen faktisk sier
 
@@ -142,7 +234,7 @@ tilgangsmodellen, brukt på oppslag.
 | `purpose://contact.introduction` | Contact introduction | `contact.communication` | Eksisterende: introduksjon forberedes/leveres uten å lekke privat kontaktinfo | — | active (gjenbruk) |
 | **A1** `purpose://candidate.invite.only-the-published-is-findable` | Bare det selvpubliserte er finnbart | `contact.communication` | Et oppslag kan aldri avsløre noe om et menneske som ikke selv har lagt det ut. Ingen kilde svarer på medlemskap for et endepunkt som ikke er publisert. | Negativ test: oppslag på et endepunkt som ingen har publisert gir samme svar som et som ikke finnes. | candidate |
 | **A2** `purpose://candidate.invite.register-is-a-host-not-an-owner` | Registeret er vert, ikke eier | `self-determination.data.recipients` | Den som er vert for et register — DiMy eller andre — lærer minst mulig av at oppslag skjer, kan ikke utlede sosiale grafer, og eier ingen av oppføringene. Bulkuthenting er begrenset og synlig. | Inspeksjon av hva verten kan se; ratetest som viser at iterasjon av registeret stanses. | candidate |
-| **A3** `purpose://candidate.invite.introduction-inside-an-agreed-relation` | Introduksjon bare der relasjonen er enig | `contact.introduction` | A kan be C om en vei til B bare når A, B og C er i samme relasjon, og relasjonens avtale sier at den kan brukes til introduksjon. C kan alltid la være å svare, uten at A får vite hvorfor. | Negativ test: samme forespørsel utenfor relasjonen, og i en relasjon uten introduksjonsavtale, avvises begge. | candidate |
+| **A3** `purpose://candidate.invite.introduction-inside-an-agreed-relation` | Introduksjon bare der relasjonen er enig | `contact.introduction` | A kan be C om en vei til B bare når A, B og C er i samme relasjon, og relasjonens avtale sier at den kan brukes til introduksjon. C kan alltid la være å svare, uten at A får vite hvorfor. C ser hvem som spør (A), fordi C skal gå god; B hører ingenting før en invitasjon faktisk kommer, og den sier da at C introduserte (§6.8). | Negativ test: samme forespørsel utenfor relasjonen, og i en relasjon uten introduksjonsavtale, avvises begge. | candidate |
 | **A4** `purpose://candidate.invite.ask-instead-of-keep` | Spør heller enn å lagre | `self-determination.data.duration` | Metadata om andre hentes ved behov og synkroniseres mot kilden, i stedet for å kopieres inn i egne entitetsdata. Det som likevel må lagres har en utløpsdato. | Test: en relasjon uten lokal kopi virker; en lokal kopi har utløp og hentes på nytt. | candidate |
 | **A6** `purpose://candidate.invite.overlap-is-inferred-inside` | Overlappet regnes ut inne i entiteten | `candidate.invite.only-the-published-is-findable` | «Tolv av kontaktene dine er allerede her» kommer av at en modell *eieren eier og kjører innenfor egen entitet* sammenligner det eieren allerede har med registre eieren har tilgang til. Ingen tjeneste blir spurt hvem som er medlem. Resonneringen kan aldri lese ut av en celle en annen eier — men den kan be om tilgang til å spørre. | `test.invite.overlap-is-local`, `test.invite.no-read-from-foreign-cell`, `test.invite.access-request-is-visible` | candidate |
 | **A5** `purpose://candidate.invite.minimum-both-ways` | Minst mulig begge veier | `self-determination.data.scope` | Hver forespørsel bærer ett formål og navngir feltene den trenger. Svaret inneholder bare de feltene. En forespørsel uten formål besvares ikke. | Negativ test: forespørsel uten `purpose://`, og forespørsel om felt utenfor formålet, avvises begge. Svaret telles felt for felt. | candidate |
@@ -150,10 +242,20 @@ tilgangsmodellen, brukt på oppslag.
 | **C** `purpose://candidate.invite.claim-about-another` | Invitasjonen er en påstand om en annen | `self-determination.data` | Kontaktdata jeg holder om en ikke-medlem er merket som min uverifiserte påstand, med opphav, og kan kreves, rettes eller slettes av personen når de får egen entitet. | Importert post har `unconfirmed` + opphav; en kravflyt retter eller sletter den og etterlater spor. | candidate |
 | **D** `purpose://candidate.invite.minimum-for-the-send` | Minste datamengde invitasjonen trenger | `self-determination.data.scope` | Import for invitasjon persisterer bare det invitasjonen faktisk sendes til. Resten av adresseboken forlater aldri enheten. | Negativ test: fil med mange kolonner gir bare de feltene invitasjonen bruker i entitydata. | candidate |
 | **E** `purpose://candidate.invite.no-automatic-reminders` | Én melding, ingen automatiske purringer | `contact.followup` | En invitasjon sendes én gang. Purring krever en ny, bevisst handling fra avsenderen, og mottakeren kan stanse den for alltid. | Negativ test: ingen jobb, timer eller regel kan sende melding nr. 2. «Aldri mer» setter en gravstein som overlever ny import. | candidate |
-| **F** `purpose://candidate.invite.decline-without-account` | Nei uten å registrere seg | `human-agency` | Avslag og «aldri mer» er tilgjengelig uten å opprette noe som helst, og virker hos avsenderen. | Avslagsveien fullføres uten entitet; avsenderens neste import kan ikke invitere samme person på nytt. | candidate |
+| **F** `purpose://candidate.invite.decline-without-account` | Nei uten å registrere seg | `human-agency` | Avslag og «aldri mer» er tilgjengelig uten å opprette noe som helst, og virker hos avsenderen. Avsenderen ser bare «besvart — ikke nå», uten skille mellom avslag og aldri mer (§6.5). | Avslagsveien fullføres uten entitet; avsenderens neste import kan ikke invitere samme person på nytt; avsenderens tilstand er den samme for begge svar. | candidate |
 | **G** `purpose://candidate.invite.recipient-sees-what-is-held` | Mottakeren ser hva som holdes om dem | `self-determination.data.verifiability` | Invitasjonen viser de faktiske feltene avsenderen har om mottakeren — ikke en generell formulering — før mottakeren svarer. | Feltene som vises er nøyaktig de som er persistert; testen sammenligner de to listene. | candidate |
 | **H** `purpose://candidate.invite.acceptance-is-bilateral` | Aksept blir en tosidig signert avtale | `contact.introduction` | Et ja gir én `entity.batchPersist`-konvolutt per entitet, med signert avtalepost, relasjon og chronicle — som kapittel 18 fase 4. | Aksept produserer to konvolutter; ingen av dem skrives uten eierbevis. | candidate |
 | **I** `purpose://candidate.invite.help-chat-cannot-send` | Hjelpechat som forklarer, ikke handler | `human-agency` | Hjelpechat finnes på begge sider, også for mottakere uten HAVEN, og kan forklare og slå opp — men aldri sende, akseptere eller avslå på vegne av noen. | Negativ test: chattens handlingskeypaths inneholder ingen send/aksept/avslag. | candidate |
+| **K** `purpose://candidate.invite.lookup-carries-an-agreement-not-a-name` | Oppslaget bærer en avtale, ikke et navn | `candidate.invite.register-is-a-host-not-an-owner` | Et oppslag mot et register legitimeres av et avtalebevis, ikke av den spørrendes identitet. Verten ser at *en gyldig avtale* spurte, ikke hvem, og ikke om hvem i klartekst. Verten kan derfor ikke bygge en sosial graf av loggen sin. | Inspeksjon av det verten faktisk persisterer per oppslag: avtale-id og tidspunkt, ingen identitet, ingen klartekstnøkkel. Negativ test: oppslag uten avtalebevis avvises. | candidate (§6.6) |
+| **L** `purpose://candidate.invite.register-key-is-derived-per-register` | Registernøkkelen er avledet per register | `candidate.invite.only-the-published-is-findable` | Det man publiserer er en verdi avledet av endepunktet *og* registeret. Finnbar bare for den som allerede har endepunktet; to registre kan ikke kobles mot hverandre. Klartekst publiseres aldri. | Test: samme endepunkt gir ulik verdi i to registre; en verdi kan ikke føres tilbake til endepunktet uten å ha det; negativ: klartekst i en publisering avvises. | candidate (§6.7) |
+| **M** `purpose://candidate.invite.sender-is-the-domain-identity` | Avsender er domenets identitet | `candidate.invite.one-object-two-deliveries` | En invitasjon sendes fra identiteten i det identityDomain relasjonen skal leve i. Mottakeren lærer ett pseudonym. Chat og avtale bindes til samme identitet. | Test: billettens `issuer` er domenets identitet; en billett fra en annen domeneidentitet til samme relasjon avvises i aksept. | candidate (§6.2) |
+| **N** `purpose://candidate.invite.direct-reply-creates-a-sealed-entity-at-sender` | Svar direkte mot avsenders scaffold lager en forseglet entitet der | `candidate.invite.acceptance-is-bilateral` | Et ja gitt gjennom et grensesnitt som går direkte mot avsenderens scaffold (landingssiden) oppretter nykommerens entitet *der*, med genesis forseglet til nykommerens nøkkel — ikke til avsenderen eller scaffold-admin. Et ja gitt gjennom HAVEN-appen gjør ikke dette: appen lager sin egen entitet ved første oppstart, og avsenders scaffold får ingen. | Test A (direkte): etter landing-svar finnes en anchor på avsenders scaffold forseglet til nykommerens nøkkel; avsender og admin nektes lesing, skriving og handlinger. Test B (app): etter aksept i app finnes ingen ny anchor på avsenders scaffold; nykommerens anchor ligger i appen. | candidate (§6.3, rettet 23.09) |
+| **P** `purpose://candidate.invite.temporary-entity-can-move-home` | En midlertidig entitet kan flytte hjem | `self-determination.data.locality` | En entitet som ble til på avsenders scaffold — eller et fragment av entitetsdata som ligger der — kan tas med til det scaffoldet der personen er representert, som én handling nykommeren utfører selv. Etter flytting er det som ligger igjen hos avsender enten borte eller en peker, og chatten og relasjonen følger med. | Test: opprett entitet via landing, flytt til en app-entitet med egen vault; anchor hos avsender er tom/peker; relasjon og chat-medlemskap er bundet til den nye identiteten; avsender kan fortsatt ikke lese noe. Flytt-handlingen er i `reachableActionKeypaths`. | candidate (nytt 23.09) |
+| **R** `purpose://candidate.invite.private-notes-never-leave` | Private notater forlater aldri entiteten | `self-determination.data.recipients` | Det eieren holder om en annen person har to deler. Grunnlaget (navn, endepunkt, opphav) er det invitasjonen bruker og det personen ser (C, G). Private notater er eierens egne: lesbare for eieren og for modeller som kjører inne i entiteten, aldri en del av noe som sendes, aldri synlige for personen, og ikke tellende når mottakeren ser «hva som holdes». | Negativ test: billett, forhåndsvisning og kontaktforespørsel bygget fra en post med private notater inneholder ingen byte fra notatet; «shown-equals-held» sammenligner mot grunnlaget, ikke hele posten; en modell med sendevei har ikke lesetilgang til notatfeltet. | candidate (24.09) |
+| **T** `purpose://candidate.invite.acceptance-carries-the-key-to-seal-to` | Aksepten bærer nøkkelen man kan forsegle til | `candidate.invite.acceptance-is-bilateral` | Et ja — fra app eller fra landingssiden — bærer mottakerens nøkkelavtale-nøkkel ved siden av signeringsnøkkelen, slik at avsenderen kan forsegle meldinger til mottakeren fra første melding. Ingen melding sendes i klartekst fordi nøkkelen manglet. | Test med to vaults: etter aksept kan A `prepareDraftEnvelope` til B (`hasKeyAgreementKey: true`), B `openEnvelope`; en aksept uten nøkkelavtale-nøkkel gir «kan ikke forsegle», ikke klartekst. | candidate (26.09) |
+| **U** `purpose://candidate.invite.attachments-sealed-per-recipient` | Vedlegg forsegles per mottaker | `candidate.invite.acceptance-carries-the-key-to-seal-to` | En melding kan bære et vedlegg. Vedlegget krypteres med `attachmentStreamV1`, og innholdsnøkkelen pakkes inn i meldingskonvolutten per mottaker — samme mottakerliste, samme regel. Ingen vedleggsbyte ligger ukryptert hos noen vert. | Test: A sender vedlegg til B; B åpner; C (ikke medlem) får ikke nøkkelen; verten ser bare chiffertekst. **Runde B.** | candidate (26.09) |
+| **Q** `purpose://candidate.invite.the-flow-reads-as-one-trustworthy-path` | Flyten leses som én tillitvekkende stripe | `pkg.std.gui-surface` | Fra butlerens forslag til første melding i chatten er det én sammenhengende, enkel stripe på begge sider: hvert skjermbilde har ett hovedvalg, sier i klartekst hvem som ser hva, og bruker ingen ord mottakeren må slå opp. Mottakeren uten HAVEN ser den samme stripen som den med. | Bildene i §3 (G1-GUI) er beviset; Kjetil dømmer. Målbart i tillegg: ett primærvalg per bilde, «hvem ser dette»-linje på hvert bilde, samme trinnrekke på begge sider, null ord fra ordlisten i §3 sin forbudtliste. | candidate (nytt 23.09) |
+| **O** `purpose://candidate.invite.expires-by-itself` | Invitasjonen tar slutt av seg selv | `contact.followup` | En invitasjon har en utløpsdato i selve billetten: 14 dager som standard, aldri over 90. Etter utløp gjør landing, svar og aksept ingenting, og avsenderens oversikt viser `expired`. | Test: billett med `expiresAt` i fortiden avvises på landing, reply og aksept; standardbillett har 14 dager; forsøk på 91 klippes til 90. | candidate (§6.4) |
 | **J** `purpose://gui.ways-in-are-reachable` | Flaten skjuler ikke sine egne veier inn | `pkg.std.gui-surface` | Hver invitasjonsflate viser veiene inn i tom tilstand. | `SkeletonReachabilityAudit`. | active (gjenbruk) |
 
 Regler: nye noder er `purpose://candidate.…` og navngis her. A–I er forslag; navnene er mine og kan
@@ -170,6 +272,9 @@ endres av deg uten at innholdet endres.
 - Ikke betaling, verving mot belønning eller noen form for vekstmekanikk. Alt som ligner må gjennom
   `dimy-payment-regulatory-guardrails` først.
 - Ikke en global HAVEN-katalog. Se §0.1 — det er tvert imot det formål A finnes for å hindre.
+- Ikke simulerte entiteter i swarm. Det er et eget scaffold og en egen PDD (Kjetil 23.09); denne
+  oppgaven tester mellom to ekte entiteter, Kjetil og Vegar.
+- Ikke correspondence. Kjeden er butler → invite → chat (Kjetil 23.09).
 
 | Kapabilitet | Kilde | Avgrensning | Må virke før test? |
 |---|---|---|---|
@@ -180,7 +285,12 @@ endres av deg uten at innholdet endres.
 | Nearby-scanner | Binding | Gir en peker uten oppslag — kandidat til vei (a) i formål A. Ikke revidert for dette. | Verifiseres i P2 |
 | `SkeletonReachabilityAudit` | CellProtocol | Finner elementer som aldri kan sees. Sier ikke om handlingen gjør riktig ting. | Ja — formål J |
 | Signerte avslag / gravsteiner | **finnes ikke** | — | Ja — formål E, F |
-| Flate som kan brukes uten HAVEN-konto | **finnes ikke** | Alt i Binding forutsetter en identitet i dag. | Ja — formål F, I |
+| Flate som kan brukes uten HAVEN-konto | CellScaffold `VaporInviteLanding` (landing + reply) | Finnes for svar; ingen hjelpechat, ingen gravstein, ingen «hva som holdes om deg». | Ja — formål F, G, I |
+| Signert invitasjonsbillett med utløp | `HavenInviteTicket.expiresAt`, `ttlDays` i Binding | Finnes; ikke testet at utløp håndheves på landing/reply/aksept. | Ja — formål O |
+| Døgngrense på utsending | `BindingInvitationCell.dailyCapMessage` | Beskytter avsenderen mot seg selv, ikke registeret mot iterasjon. | Nei — formål A2 trenger sin egen |
+| Grønne bygg i Binding og CellScaffold mot CellProtocol main | `PDD_entitetsdata-egen-kontroll/TESTRESULT.md#build` (22.09: begge røde av ytre grunner) | — | Ja — før Kjetil–Vegar-testen |
+| Flytting av entitetsdata mellom scaffolds | **finnes ikke** (kap. 32 har valget, ikke flyttingen) | — | Ja — formål P |
+| Entitetsdata runde 2 (`admin-cannot-enter-foreign-cell`) | `PDD_entitetsdata-egen-kontroll/PLAN.md` WP4 | Formål N sin negative test er den samme testen. | Ja — formål N |
 
 ## 3. Forventningskontrakt — «Det du kommer til å se»
 
@@ -189,15 +299,21 @@ listen er en del av det du godkjenner.
 
 | Leveranse | Type | Hvor | Referanse | Godkjent |
 |---|---|---|---|---|
-| Invitasjonen sett fra avsender: velg person, se hva jeg holder om dem, se hva som sendes | bilde | `images/` | `avsender-forhandsvisning-v1.png` | nei |
-| Invitasjonen sett fra en mottaker **uten** HAVEN | bilde | `images/` | `mottaker-uten-haven-v1.png` | nei |
-| Samme invitasjon sett fra en mottaker **med** HAVEN | bilde | `images/` | `mottaker-med-haven-v1.png` | nei |
-| Avslag uten konto, og «aldri mer» | bilde | `images/` | `avslag-uten-konto-v1.png` | nei |
-| Hjelpechat på mottakersiden, med det den ikke kan gjøre synlig | bilde | `images/` | `hjelpechat-mottaker-v1.png` | nei |
-| Avsenderens oversikt: sendt, besvart, avslått, gravsteiner | bilde | `images/` | `avsender-oversikt-v1.png` | nei |
-| Hva dagens skeleton ikke kan rendre av bildene | fil | `images/README.md` | — | nei |
+| Invitasjonen sett fra avsender: velg person, se hva jeg holder om dem, se hva som sendes — v2 viser skuffen «private notater — sendes ikke» | bilde | `images/` | `avsender-forhandsvisning-v2.png` (v1 godkjent 24.09; v2 venter) | v1 ja · v2 nei |
+| Invitasjonen sett fra en mottaker **uten** HAVEN | bilde | `images/` | `mottaker-uten-haven-v1.png` | ja 24.09 |
+| Samme invitasjon sett fra en mottaker **med** HAVEN | bilde | `images/` | `mottaker-med-haven-v1.png` | ja 24.09 |
+| Avslag uten konto, og «aldri mer» | bilde | `images/` | `avslag-uten-konto-v1.png` | ja 24.09 |
+| Hjelpechat på mottakersiden, med det den ikke kan gjøre synlig | bilde | `images/` | `hjelpechat-mottaker-v1.png` | ja 24.09 |
+| Avsenderens oversikt: sendt, besvart, avslått, gravsteiner | bilde | `images/` | `avsender-oversikt-v1.png` | ja 24.09 |
+| Hele stripen avsender: butler-forslag → forhåndsvisning → sendt → «besvart» → chat | bilde (én stripe, 5 ruter) | `images/` | `stripe-avsender-v1.png` | ja 24.09 |
+| Hele stripen mottaker uten HAVEN: landing → hva som holdes om meg → ja/nei/aldri → chat i nettleser → «ta med deg dataene» | bilde (én stripe, 5 ruter) | `images/` | `stripe-mottaker-uten-v1.png` | ja 24.09 |
+| Hele stripen mottaker med HAVEN: invitasjon i app → hva som holdes om meg → ja/nei/aldri → chat | bilde (én stripe, 4 ruter) | `images/` | `stripe-mottaker-med-v1.png` | ja 24.09 |
+| Flytt-hjem: midlertidig entitet på avsenders scaffold tar med seg data til appen | bilde | `images/` | `flytt-hjem-v1.png` | ja 24.09 |
+| Forbudtliste for ord i flaten (scaffold, entitet, anchor, keypath, artefakt, envelope, genesis …) og hva de erstattes med | fil | `images/ORDLISTE.md` | — | ja 24.09 |
+| Hva dagens skeleton ikke kan rendre av bildene | fil | `images/README.md` | — | ja 24.09 |
 | Negative tester: ingen katalog, ingen automatisk purring, chat kan ikke sende | testutdata | `TESTRESULT.md#negative` | — | nei |
-| Kjørende flate: invitere én person fra bokprosjektimporten og få den besvart | kjørende flate | Binding, Relasjoner | — | nei |
+| Kjørende flate: Kjetil inviterer Vegar via butler → invite; Vegar svarer på landing eller i egen HAVEN; en chat mellom dem opprettes via chat-invitasjon — ingen correspondence | kjørende flate | Binding (Kjetil) + Binding/landing (Vegar) + scaffold | `TESTRESULT.md#kjetil-vegar` med skjermbilder fra begge sider | nei |
+| Samme kjede med to vaults i én prosess (forløper til swarm) | testutdata | `TESTRESULT.md#two-vaults` | — | nei |
 | Chronicle-spor per invitasjon, aksept og avslag | testutdata | `TESTRESULT.md#trace` | — | nei |
 
 ## 4. Tilknyttede formålspakker og lærdommer (auto fra purpose_dev.py lookup)
@@ -335,9 +451,23 @@ listen er en del av det du godkjenner.
 | `test.invite.overlap-is-local` | command | Overlappberegningen gjør ingen forespørsel som spør om medlemskap; alt den bruker er data eieren allerede har tilgang til. | Nettverks- og resolverfelle rundt beregningen. | A6 | `TESTRESULT.md#negative` |
 | `test.invite.no-read-from-foreign-cell` | command | Modellen når ikke inn i en celle eid av en identitet i en annen entitet, heller ikke via omveier. | Negativ XCTest med to entiteter. | A6 | `TESTRESULT.md#negative` |
 | `test.invite.access-request-is-visible` | command | En forespørsel om å få gjøre spørringer er en synlig handling som kan avslås, ikke et stille oppslag. | XCTest + flatetest. | A6 | `TESTRESULT.md#invite` |
-| `test.invite.shown-equals-held` | command | Feltlisten mottakeren ser er nøyaktig den som er persistert. | XCTest sammenligner to lister. | G | `TESTRESULT.md#claim` |
+| `test.invite.shown-equals-held` | command | Feltlisten mottakeren ser er nøyaktig grunnlaget som er persistert — ikke mer, ikke mindre, og uten private notater. | XCTest sammenligner to lister. | G, R | `TESTRESULT.md#claim` |
+| `test.invite.private-notes-never-leave` | command | Billett, forhåndsvisning og kontaktforespørsel bygget fra en post med private notater inneholder ingen byte fra notatet; en modell med sendevei kan ikke lese notatfeltet. | Negativ XCTest med sentinel-streng i notatet; søk i alle utgående artefakter; autorisasjonssjekk mot AIGateway-rute med egress. | R | `TESTRESULT.md#negative` |
 | `test.invite.acceptance-two-envelopes` | command | Aksept gir én `entity.batchPersist` per entitet, ingen skriving uten eierbevis. | XCTest som kap. 18 fase 4. | H | `TESTRESULT.md#trace` |
 | `test.invite.chat-cannot-act` | inspection | Hjelpechattens handlingskeypaths inneholder ingen send, aksept eller avslag. | `SkeletonReachabilityAudit.reachableActionKeypaths` + kontraktsinspeksjon. | I | `ACCEPT.md#help-chat` |
+| `test.invite.lookup-needs-agreement` | command | Oppslag uten avtalebevis avvises; med bevis persisterer verten kun avtale-id og tidspunkt. | Negativ XCTest mot registercellen + inspeksjon av vertens lagring. | K | `TESTRESULT.md#negative` |
+| `test.invite.register-key-unlinkable` | command | Samme endepunkt gir ulik verdi i to registre; klartekst avvises. | XCTest på avledningen. | L | `TESTRESULT.md#invite` |
+| `test.invite.sender-is-domain-identity` | command | Billettens `issuer` er domenets identitet; fremmed domeneidentitet avvises i aksept. | XCTest. | M | `TESTRESULT.md#invite` |
+| `test.invite.direct-reply-anchor-is-theirs` | command | Etter landing-svar: anchor på avsenders scaffold forseglet til nykommer; avsender og admin nektes lesing, skriving og handlinger. | XCTest med to vaults (tilfeldige UUID-er). | N | `TESTRESULT.md#negative` |
+| `test.invite.app-reply-leaves-nothing-at-sender` | command | Etter aksept i app: ingen ny anchor hos avsender; nykommerens anchor i appen. | XCTest: tell anchors på scaffold før/etter. | N | `TESTRESULT.md#invite` |
+| `test.invite.move-home-carries-everything` | command | Flytt fra midlertidig til app-entitet: anchor hos avsender tom/peker; relasjon + chat-medlemskap bundet til ny identitet; avsender leser fortsatt ingenting. | XCTest med to vaults + `SkeletonReachabilityAudit` på flytt-handlingen. | P | `TESTRESULT.md#invite` |
+| `test.invite.one-primary-action-per-screen` | inspection | Hvert bilde i stripene har ett primærvalg, en «hvem ser dette»-linje, og ingen ord fra ORDLISTE.md. | Sjekkliste mot hvert bilde i `images/`, ført i ACCEPT.md. | Q | `ACCEPT.md#flow` |
+| `test.invite.expired-is-dead` | command | Utløpt billett avvises på landing, reply og aksept; standard 14 d; 91 klippes til 90. | XCTest. | O | `TESTRESULT.md#invite` |
+| `test.invite.sender-sees-answered-only` | command | Avslag og «aldri mer» gir samme tilstand hos avsender. | XCTest sammenligner de to tilstandene felt for felt. | E, F | `TESTRESULT.md#invite` |
+| `test.invite.introducer-sees-asker` | command | C ser A; B får ingen hendelse før invitasjon; invitasjonen bærer «introdusert av C». | XCTest med tre vaults. | A3 | `TESTRESULT.md#invite` |
+| `test.invite.kjetil-vegar-chain` | inspection | Hele kjeden butler → invite → chat mellom to ekte entiteter, begge veier (Vegar med og uten HAVEN fra før). | Kjøres av Kjetil og Vegar etter at §2 er grønn; skjermbilder + chronicle-spor fra begge sider. | B, H, M, N | `TESTRESULT.md#kjetil-vegar` |
+| `test.invite.sealed-to-invitee` | command | Etter aksept fra en annen entitet: `prepareDraftEnvelope` til den inviterte lykkes og `openEnvelope` hos den inviterte gir klartekst; uten nøkkelavtale-nøkkel nektes forsegling — aldri klartekst. | XCTest med to vaults. | T | `TESTRESULT.md#invite` |
+| `test.invite.attachment-sealed` | command | Vedlegg fra A åpnes av B, ikke av C; vertens lager har ingen klartekstbyte. | XCTest, sentinel i vedlegget. | U | `TESTRESULT.md#negative` |
 | `test.skeleton.no-unreachable-elements` | command | Ingen invitasjonsflate skjuler sine egne veier inn. | `testNoLocalSurfaceHidesItsOwnWaysIn`. | J | `TESTRESULT.md#reachability` |
 | `test.build`, `test.regression` | command | `pkg.std.everything-works`. | xcodebuild + swift test. | — | `TESTRESULT.md#build` |
 
@@ -374,46 +504,21 @@ Tre ting følger som må håndheves, ikke bare skrives:
 
 Nytt formål A6. §6.6–6.8 står fortsatt.
 
-**6.2 Hvilken identitet sender invitasjonen?**
-Kapittel 33 sier at domenebundne identiteter er pseudonymene. En invitasjon til en adressebokkontakt
-knytter den identiteten til det mennesket permanent. Skal invitasjoner sendes fra en identitet per
-identityDomain, fra én stabil «personlig» identitet, eller fra en ny per invitasjon? Dette henger
-sammen med ditt eget åpne spørsmål om flere identiteter i samme identityDomain.
+**6.2–6.8 — besvart 2026-09-23** (Kjetil, via valg i Cowork). Hvert svar er blitt et formål eller en
+setning i et formål, så det håndheves i §5 og ikke bare huskes her:
 
-**6.3 Hvor lander en som sier ja og ikke har HAVEN fra før?**
-Kapittel 32 beskriver hjemme-scaffold-valg for en entitet som allerede finnes. En nykommer har
-ingen. Skal avsenderens scaffold være midlertidig vert — slik du åpnet for ved scanner-invitasjon —
-eller skal nykommeren velge først og svare etterpå? Det første er enklere og mer innbydende; det
-andre unngår at noen sin første entitet blir til på en annens scaffold.
+| § | Spørsmål | Kjetils valg | Hvor det bor nå |
+|---|---|---|---|
+| 6.2 | Hvilken identitet sender? | Én per identityDomain — den relasjonen skal leve i | Formål **M** |
+| 6.3 | Hvor lander en nykommer som sier ja? | Avhenger av veien inn (rettet 23.09): direkte mot avsenders scaffold → entitet der, forseglet til nykommeren; via app → appen lager egen entitet ved første oppstart. Flytting hjem som egen handling. | Formål **N**, **P** |
+| 6.4 | Utløper en invitasjon? | Ja — 14 dager standard, aldri over 90 (det koden allerede har) | Formål **O** |
+| 6.5 | Hva ser avsender ved avslag? | «Besvart — ikke nå», uten skille mellom nei og aldri mer | Formål **E**/**F**, `test.invite.sender-sees-answered-only` |
+| 6.6 | Hva ser registerverten? | Bare at en gyldig avtale spurte — ikke hvem, ikke om hvem | Formål **K** |
+| 6.7 | Hva publiserer man? | Avledet verdi per register; aldri klartekst | Formål **L** |
+| 6.8 | Hva ser C når A spør om B? | C ser A; B hører først når en invitasjon kommer, og den sier at C introduserte | Formål **A3**, `test.invite.introducer-sees-asker` |
 
-**6.4 Utløper en invitasjon?**
-Hvis «det skjer ingenting hvis du lar den ligge» skal være bokstavelig sant, må den ta slutt av seg
-selv. Jeg vil foreslå en oppgitt dato i selve invitasjonen. Hvor lenge er ditt valg.
-
-**6.5 Skal et avslag fortelle avsenderen noe som helst?**
-Et avslag som er synlig for avsenderen røper at endepunktet er i bruk og at noen leste. Et avslag som
-er usynlig gjør at avsenderen purrer. Jeg heller mot at avsenderen ser «besvart — ikke nå», uten
-skille mellom «avslått» og «aldri mer», og at gravsteinen virker i det stille.
-
-**6.6 Hva skal registerverten kunne se?**
-Dette er det viktigste nye spørsmålet, og det er skarpt fordi DiMy skal tjene penger på å være vert.
-Et register som besvarer oppslag ser hvem som spør om hva. Gjør den det over tid, har den den sosiale
-grafen — altså akkurat det HAVEN finnes for at ingen skal ha. Det finnes flere veier: verten ser
-bare at *noen med gyldig avtale* spurte og ikke hvem; oppslaget logges symmetrisk så den oppslåtte
-ser det like godt som verten; eller matchingen gjøres slik at verten ikke ser klartekst i det hele
-tatt. De koster ulikt, og det er et produkt- og forretningsvalg like mye som et teknisk. Jeg vil ikke
-foreslå én løsning før du har sagt hva verten skal ha lov til å vite.
-
-**6.7 Hva publiserer man egentlig om seg selv i et register?**
-E-postadressen i klartekst gjør deg finnbar for alle som gjetter den. En stabil, avledet verdi gjør
-deg finnbar bare for den som allerede har adressen. Et pseudonym per register gjør registrene
-ukoblbare fra hverandre. De tre gir helt ulik personvernprofil, og valget bør tas én gang og gjelde
-alle registre.
-
-**6.8 Hva ser C når A spør om B?**
-Kjetils vilkår sier at relasjonen må være enig. Men selve spørsmålet er også informasjon: at A leter
-etter B. Skal C se hvem som spør, eller bare at noen i relasjonen ber om en introduksjon? Og skal B
-få vite at A lette — enten straks, eller når en invitasjon faktisk kommer?
+Det som gjenstår er ikke spørsmål, men avhengigheter (§2): grønne bygg nedstrøms og runde 2 i
+entitetsdata. Ingen åpne spørsmål endrer treet.
 
 ## 7. Revisjonslogg
 
@@ -422,6 +527,23 @@ få vite at A lette — enten straks, eller når en invitasjon faktisk kommer?
 - 2026-09-18, iterasjon 3: §6.1 besvart. Overlappet regnes ut inne i entiteten av en modell eieren
   eier — aldri ved å spørre en tjeneste, og aldri ut av en celle andre eier, men det er lov å be om
   tilgang til å spørre. Nytt formål A6 med tre negative tester.
+- 2026-09-26, iterasjon 7: G2 godkjent. Kjetil spurte om vedlegg og kryptert last i invitert chat;
+  svar lest fra koden (§0.1f): kryptert last virker for inviterte bare når nøkkelavtale-nøkkelen er
+  kjent — den følger ikke aksepten i dag (formål T, runde A/WP7); vedlegg finnes ikke i chat, bare
+  primitivet (formål U, runde B).
+- 2026-09-24, iterasjon 6: G1 godkjent («De fem setningene er bra»). G1-GUI godkjent på v1-bildene.
+  Kjetil la til private notater: formål R (aldri vises, aldri sendes), én ny test, og
+  `avsender-forhandsvisning-v2.png` som viser skuffen «sendes ikke» — venter på godkjenning for den ene.
+- 2026-09-23, iterasjon 5: Kjetil rettet N — hvor nykommeren lander avhenger av veien inn (direkte
+  mot avsenders scaffold: entitet der, forseglet til nykommeren; via app: appen lager egen entitet ved
+  første oppstart). Nytt formål P: midlertidig entitet/fragment kan flytte hjem. Nytt formål Q:
+  invite→chat er én ren, tillitvekkende stripe — avgjøres av bildene. §3 har fått tre stripebilder,
+  ett flytt-hjem-bilde og en ordliste. Fire nye/erstattede tester.
+- 2026-09-23, iterasjon 4: §6.2–6.8 besvart av Kjetil; fem nye formål K–O og sju nye tester. Brief-
+  audit oppdatert mot origin/main 23.09 (billett, landing, butler-forslag, chat-invitasjon finnes;
+  gravstein finnes ikke; ingen test krysser entitetsgrense). Kjetil 23.09: ende-til-ende-testen
+  kjøres mellom Kjetil og Vegar over invite + chat, ikke correspondence; simulerte entiteter i
+  swarm er et eget scaffold og en egen PDD senere. §3 «kjørende flate» byttet ut deretter.
 - 2026-09-17, iterasjon 2: Kjetil rettet oppdagelsesmodellen. Formål A erstattet av A1–A5: bare det
   selvpubliserte er finnbart; registeret er vert og ikke eier; introduksjon bare innenfor en relasjon
   som er enig; spør heller enn å lagre; minst mulig begge veier. §6.1 bortfaller, tre nye åpne

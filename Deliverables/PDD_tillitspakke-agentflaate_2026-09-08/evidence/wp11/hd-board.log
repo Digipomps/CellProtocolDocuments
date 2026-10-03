@@ -1,0 +1,60 @@
+HAVEN-Deploy queue board  (2026-09-09T05:01:03Z)
+
+== PREPARING (11)
+  -- owner: claude
+    HD-0003  4d14h  Pensjoner recreate3.sh (7 hardkodede -f76de5a mount-stier) til fordel for --env-only
+             blocked-by: file:CellScaffold/Documentation/Operations/formaal-testberedskap-20260827/recreate3.sh (need)
+  -- owner: codex
+    HD-0002  4d14h  Commit haven-ghcr-prefetch og -production (untracked, men i sudoers/install.sh)
+             blocked-by: file:CellScaffold/scripts/production/haven-ghcr-prefetch (need)
+             blocked-by: file:CellScaffold/scripts/production/haven-ghcr-prefetch-production (need)
+    HD-0004  4d14h  Pin-koherens: CellScaffold origin/main → DiMyMicropayments 1b31aec finnes bare på unmerged branch
+             blocked-by: pin:cellprotocol=8c09560 (need)
+             blocked-by: pin:dimymicropayments=1b31aec-on-main (need)
+  -- owner: kjetil
+    HD-0005  4d14h  Staging: 38/105 konfigurasjoner 422 not-runtime-ready for kjetil2 (blokkerer Arendalsuka-demo)
+             blocked-by: approval:kjetil-role-bootstrap (need)
+             blocked-by: file:staging-logs (need)
+    HD-0006  4d14h  Korrespondanse-invitasjoner: rotasjon via haven-deploy --env-only i stedet for recreate
+             blocked-by: script:DiMyMicropayments/preflight-formaal.sh (need)
+             blocked-by: secret:HAVEN_ASSISTANT_CORRESPONDENCE_INVITES_BASE64 (need)
+    HD-0007  4d14h  Mac-disk under kapasitetsport: 47 GB / 4.9 % ledig (krav 40 GiB og 10 %)
+             blocked-by: disk:/Users/kjetil (need)
+    HD-0008  21h59m Rollback-retensjon på staging: 5 rollback-containere (R-C18 sier nøyaktig én)
+             blocked-by: approval:kjetil (need)
+             blocked-by: coordination:89.167.90.101 (need)
+             blocked-by: script:CellScaffold/scripts/production/haven-deploy (need)
+    HD-0010  4d08h  Rydd failed haven-deploy@-units (systemctl reset-failed) så 'ingen aktiv unit'-sjekken er ren
+             blocked-by: approval:kjetil (need)
+             blocked-by: coordination:89.167.90.101 (need)
+    HD-0012  21h59m PalazzoScaffold «husk det jeg sa»: staging-image bygges og e2e kjøres mot container
+             blocked-by: approval:kjetil-commit-palazzoscaffold (need)
+             blocked-by: image:palazzo-scaffold:staging (need)
+             blocked-by: secret:PALAZZO_GATEWAY_TOKEN (need)
+    HD-0016  21h58m Opprydding: PR-er, grener, worktrees og rollback-containere
+             blocked-by: approval:kjetil ser inventarlista før noe slettes (need)
+             blocked-by: script:_handoff/OPPRYDDING/KJOR-SELV-4-inventar.sh (need)
+             blocked-by: HD-0008 (upstream)
+    HD-0017  7h18m  AgentTrustPackage + WebFetch-ceiling til staging (PDD_tillitspakke-agentflaate)
+             blocked-by: approval:kjetil-godkjenner-kandidatgren (need)
+             blocked-by: coordination:89.167.90.101 (need)
+             blocked-by: file:CellProtocolDocuments/Deliverables/PDD_tillitspakke-agentflaate_2026-09-08/TESTRESULT.md#webfetch (need)
+             blocked-by: image:ghcr.io/digipomps/cellscaffold-web:sha-kandidat (need)
+             blocked-by: pin:cellprotocol-med-AgentTrustPackage.swift (need)
+             blocked-by: HD-0004 (upstream)
+
+== COMMITTED_VERIFIED (3)
+  -- owner: codex
+    HD-0009  4d08h  Undersøk 5 feilede haven-deploy@-units, inkl. production-3a4cc2b7 (read-only journalctl)
+    HD-0011  23h51m CI steg 20 'Thursday demo P0 browser proof' gjør main og 6 PR-er røde — finn rotårsak, ikke rerun
+  -- owner: kjetil
+    HD-0001  4d08h  Installer haven-deploy --env-only (#159) på verten
+             blocked-by: coordination:89.167.90.101 (need)
+             blocked-by: script:CellScaffold/scripts/production/haven-deploy (need)
+             blocked-by: script:CellScaffold/scripts/production/install.sh (need)
+
+== ARBEIDSJOBBER (3)
+  ID       UTFØRER       STATUS               ALDER  TITTEL
+  HD-0013  codex         HANDOFF_REQUIRED     1d08h  WP3 ekte Codex read-only røykprøve
+  HD-0014  claude-local  HANDOFF_REQUIRED     1d08h  WP4 ekte Claude dato-røykprøve
+  HD-0015  cell          HANDOFF_REQUIRED     1d08h  WP5 celleadapter tekst-røykprøve

@@ -7,7 +7,7 @@ Tallene under er kopiert fra loggene, ikke skrevet fra hukommelsen.
 
 ## #build
 
-**CellProtocol** (worktreet, gren `pdd/entitetsdata-egen-kontroll`, commit `ebb0b7f` på `origin/main` 473357c):
+**CellProtocol** (worktreet, gren `pdd/entitetsdata-egen-kontroll`, commit `e66b7f1` — tabellen under sa `ebb0b7f`, se rettelse 24.09 — på `origin/main` 473357c):
 `swift build` → **Build: OK**. Hele `CellBaseTests` → **1244 tester, 0 feil** (1 hoppet over, som før).
 
 **Nedstrøms**, bygget i rene worktrees under `~/Build/pdd-check/` med CellProtocol pekt lokalt, først
@@ -29,6 +29,38 @@ Første kjøring av nedstrøms-skriptet var ugyldig og er forkastet: `/usr/local
 x86-binær uten Rosetta («Bad CPU type»), så pbxproj-byttet til lokal pakke skjedde ikke og Binding
 bygde mot GitHub-pinnen sin (b5b7282) — «BUILD SUCCEEDED» der sa ingenting om endringen. Skriptet
 bruker nå `/usr/bin/perl`, og logger om byttet faktisk skjedde.
+
+### #build — oppdatert 2026-09-24: alt grønt, og branchen er pushet
+
+Kjetil 24.09: «Fiks det som blokker. Er ikke pdd/entitetsdata-egen-kontroll pushet så må den det.»
+
+**Tre rettelser til tabellen over, alle målt på nytt (logger i `handoff/runde1/`):**
+
+1. **Commiten var `e66b7f1`, ikke `ebb0b7f`.** `commit.sh` laget en ny commit-hash; tabellen over
+   siterer den gamle. Branchen var *ikke* pushet (ingen remote-tracking ref).
+2. **CellScaffold-rød var skriptets feil, ikke prosjektets.** `downstream.sh` hardkodet DiMyMint
+   `1718fda` (swift-crypto 3.x). CellScaffold main pinner `af41630`, som løser swift-crypto 4.5.2 —
+   `Package.resolved` på origin/main sier det. Skriptet leser nå pinnene fra CellScaffold sin egen
+   `Package.swift`. Med riktig pin: **Build complete** mot CellProtocol main (172 s) og mot branchen.
+   Lærdom: `lesson.downstream-pin-must-come-from-the-consumer`.
+3. **Binding-rød var to ting oppå hverandre.** (a) pdd-check-worktreet satt fast på `72f6a6c9` fordi
+   pbxproj-byttet fra forrige kjøring blokkerte `checkout` — skriptet gjør nå `reset --hard` og fjerner
+   `Package.resolved` før byttet. (b) Mot Binding `8ce634f6` manglet branchen typene fra CellProtocol
+   #45 (`DatabaseOwnerApprovalPackage`, `AppleDatabaseSecretHandle`) fordi den sto på 473357c.
+   `sync-main.sh` flettet origin/main (60bcf1d) inn: rent merge, `swift build` OK, runde 1-testene
+   16/16, hele CellBaseTests **1248 tester, 0 feil** (2 hoppet over), pushet som `94a4bed`.
+
+| Prosjekt | Baseline (CellProtocol @ main 60bcf1d) | Endringen (@ 94a4bed) | Logg |
+|---|---|---|---|
+| CellProtocol | — | Build OK · 16/16 runde 1 · **1248/1248** CellBaseTests | `sync-20260924-133148.log`, `.full.log.alle` |
+| CellScaffold @ 6c70a592 (DiMyMint af41630, Micro 836ba8e) | **Build complete** (75,6 s) | **Build complete** (78,6 s) | `downstream-20260924-134224.log` |
+| Binding @ 8ce634f6 | **BUILD SUCCEEDED** | **BUILD SUCCEEDED** | samme |
+
+Pushet: `origin/pdd/entitetsdata-egen-kontroll` = `94a4bed` (e66b7f1 + merge av main). Utkast-PR
+[#47](https://github.com/Digipomps/CellProtocol/pull/47) er åpnet for CI — ikke merget; det er
+Kjetils ord. `push-20260924-131712.log`. De fire «switch must be exhaustive» fra 22.09 er borte på
+Binding main 8ce634f6 — de var Binding `72f6a6c9` sin sak, ikke CellProtocol sin, og de ucommitterte
+SkeletonEditor-filene i Kjetils utsjekk er ikke rørt.
 
 ## #genesis
 
@@ -149,3 +181,42 @@ Hele `CellBaseTests`: **Executed 1244 tests, with 1 test skipped and 0 failures 
    `CellBase.persistedCellMasterKey`. To runder gikk med før feilmeldingen ble synlig — testen
    sammenlignet bare `status`. Rettet: hjelperen `expectOK` viser meldingen.
 4. **`try XCTUnwrap(await …)`** kompilerer ikke. Sju forekomster, én årsak.
+
+## #runde2 — WP3–WP5 (2026-09-26)
+
+Branch `pdd/entitetsdata-runde2` = `d9bd69f` (399f6d2 + fix), fra origin/main 33ad8d7 (etter #47).
+Utkast-PR [#50](https://github.com/Digipomps/CellProtocol/pull/50). Logger: `handoff/runde2/`.
+Alle tester kjører **to ganger**: mot `CellApple.EntityAnchorCell` (appen — personlig scaffold) og
+`CellVapor.EntityAnchorCell` (skyscaffold). Ett svar på begge (FORMAALSSPEC §2A.1).
+
+| testRef | Test | Apple | Vapor | Bevis |
+|---|---|---|---|---|
+| `test.entitet.read-without-proof-refused` | `testReadWithoutProofRefused` — person, relations, proofs, agreements, identityLinks, chronicle, trace: eier leser; annen entitet nektes; nøkkelløs kopi av eierens deskriptor nektes | ✓ | ✓ | `fix1-20260926-024311.full.log.new` |
+| `test.entitet.auth-negative` (1/5 feil identitet) | `testWrongIdentityCannotWriteOrAct` — skriving til person/relations, handlingene genesis/revoke/reloadStorage | ✓ | ✓ | samme |
+| `test.entitet.auth-negative` (2/5 usignert forslag) | `testUnsignedProposalIsRefused` — signatur nullet ut → `request_signature_invalid`; ingenting skrevet, ingen sporpost | ✓ | ✓ | samme |
+| `test.entitet.auth-negative` (3/5 revokert modell) | — | **blocked** | **blocked** | Modelltillit er WP12 (runde 4). Finnes ikke å revokere ennå. |
+| `test.entitet.auth-negative` (4/5 ukjent formål) | `testUnknownPurposeFailsClosed` — `purpose://prompt.unknown` i signert commit og i løs metadata → `failed`, ingenting skrevet | ✓ | ✓ | samme |
+| `test.entitet.auth-negative` (5/5 direkte skriving utenom batch) | `testDirectWriteOutsideBatchPathRequiresOwnerProof` — fremmed kan verken `attach` eller `absorbFlow`; eierens egen direkte skriving går, og etterlater én sporpost | ✓ | ✓ | samme |
+| `test.entitet.admin-cannot-enter-foreign-cell` | `testScaffoldAdminCannotEnterForeignCell` — identiteten prosessen kjører som (eier av admin-planet) nektes lesing av 10 keypaths, skriving, genesis/revoke/reloadStorage, attach og absorbFlow; `debugValidateAccessForEverything` bekreftet av | ✓ | ✓ | samme |
+| `test.entitet.agreement-grants-exactly-what-it-says` | `testAgreementGrantsExactlyWhatItSays` — avtale «r--- person» gir B lesing av person (`signedContract`), ikke relations/identityLinks, ikke skriving, ikke handlinger; B sin andre identitet arver ingenting | ✓ | ✓ | samme |
+| `test.entitet.genesis-once` (første persist) | `testFirstPersistSealsAnchorToOwner` — batchPersist gjennom eierens feed forsegler ankeret, `trigger: firstPersist`. **Var blocked i runde 1.** | ✓ | ✓ | samme |
+| `test.entitet.trace` | `testEachAcceptedBatchLeavesOneTraceEntry` — én post per batch (to felt = én post), signert-av, nøkkelfingeravtrykk, keypaths, purposeRef, modelRef, kvittering (entryHash + signatur som verifiserer); idempotent replay gir ingen ny post; sporet overlever restart fra disk | ✓ | ✓ | samme |
+
+Regresjon: `EntityRelationHostParityTests` + runde 1 = 20/20. Hele CellBaseTests: **1262 tester, 0 feil**
+(2 hoppet over, som før). Nedstrøms (CellScaffold, Binding) mot denne branchen: **ikke målt** —
+kjøres når #50 skal merges.
+
+**Én designavgjørelse tatt underveis, og den må du se:** sporet ligger på sitt eget rot-keypath
+`trace`, ikke inne i `chronicle`. Første utkast la det i chronicle-listen; det knakk
+`EntityRelationHostParityTests`, som sammenligner chronicle-listen post for post som en wire-kontrakt
+mellom verter. Sporet er ankerets egen bok over hva det tok imot, og må aldri endre det en batch
+skrev. FORMAALSSPEC sier «i chronicle» — det står nå som avvik i STATUS til du sier hva du vil.
+
+**Tre ting som gikk galt i kjøringen, og som står her fordi de er sanne:**
+1. `399f6d2` ble pushet rød (4 feil). Skriptets grønn-port grep'et etter «Executed … with 0 failures»
+   og traff en *tidligere* suites linje. Rettet: bare siste linje teller, og mønsteret er
+   « 0 failures (0 unexpected)» — sluttlinjen sier «with 2 tests skipped and 0 failures».
+   Lærdom `lesson.green-gate-must-read-the-last-summary-line`.
+2. `echo "$X" | grep -q` under `pipefail` ga rød på grønt tre (SIGPIPE). Rettet til POSIX `case`.
+3. To kompileringsrunder på kjente ting: `await` inne i XCTAssert-autoclosure (lesson fra runde 1,
+   ikke fulgt), og `CellApple`/`CellVapor` er både modul- og typenavn — løst med to typealias-filer.

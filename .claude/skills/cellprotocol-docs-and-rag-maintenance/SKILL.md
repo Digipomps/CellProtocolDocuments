@@ -85,6 +85,9 @@ If code behavior changed, inspect the actual source before editing docs.
 5. Add "current limitation" language when behavior is partial.
 6. Avoid marketing claims unless `haven-claim-review` is also applicable.
 7. Validate links/paths and run any local catalog checks if present.
+8. If the change also alters how agents should work (a skill, prompt or
+   entrypoint), record it with `CellScaffold/scripts/haven_learn.py capture`
+   and update that target too (skill `haven-learning-capture`).
 
 ## RAG Hygiene
 

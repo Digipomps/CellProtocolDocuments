@@ -1,0 +1,118 @@
+{
+  "role": "hus",
+  "principal": "house",
+  "note": "Andre og huset. Huset eier menyen, personallisten og innholdet — og skal ikke nå gjestens entitet uten avtale.",
+  "purposes": [
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.hus.own-staff-list",
+      "title": "Huset leser sin egen personalliste",
+      "calibration": "positive",
+      "action": {
+        "method": "GET",
+        "path": "/api/house/staff"
+      },
+      "expect": {
+        "access": "allowed",
+        "state": {
+          "path": "value",
+          "op": "ne",
+          "value": null
+        }
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.hus.guest-insight-without-agreement",
+      "title": "Huset leser en gjests innsikt uten avtale",
+      "calibration": "null",
+      "action": {
+        "method": "POST",
+        "path": "/api/insight/query",
+        "json": {
+          "value": {
+            "subject": "{guest_cell}",
+            "keypaths": [
+              "entity.constraints.current"
+            ]
+          }
+        }
+      },
+      "expect": {
+        "access": "denied"
+      },
+      "why": "Riktig stopp: huset ber om spørretilgang, det arver den ikke."
+    },
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.hus.add-staff",
+      "title": "Huset legger til en ansatt",
+      "action": {
+        "method": "POST",
+        "path": "/api/house/staff",
+        "json": {
+          "value": {
+            "identity": "{staff_id}",
+            "name": "Rollesimulering"
+          }
+        }
+      },
+      "expect": {
+        "access": "allowed",
+        "state": {
+          "path": "value",
+          "op": "ne",
+          "value": null
+        }
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.hus.publish-content",
+      "title": "Huset publiserer en artikkel",
+      "action": {
+        "method": "POST",
+        "path": "/api/content/publish",
+        "json": {
+          "value": {}
+        }
+      },
+      "expect": {
+        "access": "allowed",
+        "state": {
+          "path": "value",
+          "op": "ne",
+          "value": null
+        }
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.hus.remember-list",
+      "title": "Huset ser hva gjester har latt det huske",
+      "action": {
+        "method": "GET",
+        "path": "/api/house/remember/list"
+      },
+      "expect": {
+        "access": "allowed",
+        "state": {
+          "path": "value",
+          "op": "ne",
+          "value": null
+        }
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.hus.content-signals",
+      "title": "Huset ser hvilke signaler innholdet gir",
+      "action": {
+        "method": "GET",
+        "path": "/api/content/signals"
+      },
+      "expect": {
+        "access": "allowed",
+        "state": {
+          "path": "value",
+          "op": "ne",
+          "value": null
+        }
+      }
+    }
+  ]
+}
