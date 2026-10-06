@@ -1,0 +1,229 @@
+{
+ "contract": "apns_invite_v1",
+ "version": "1.2.0-draft",
+ "status": "delvis implementert 06.10 på grener (CellProtocol pdd/testmatrise-apns, CellScaffold pdd/testmatrise-apns-dev) — ikke merget; T5.5 (ekte sending) blokkert på Kjetil",
+ "purposeRefs": [
+  "purpose://candidate.testmatrise.apns.token-belongs-to-an-entity",
+  "purpose://candidate.testmatrise.apns.payload-carries-no-content",
+  "purpose://candidate.testmatrise.apns.only-who-was-invited-is-pushed",
+  "purpose://candidate.testmatrise.apns.tap-opens-the-invitation"
+ ],
+ "notes": [
+  "Et varsel sier at noe finnes. Det bærer aldri innhold: ingen avsendernavn, ingen meldingstekst, ingen grunnlagsfelt.",
+  "Avsenderen får aldri vite om et varsel ble sendt, levert eller trykket på. Avsenderoversikten viser bare published / answered / expired / revoked (jf. HavenInviteSenderView). Utfallet av en sending er scaffoldets interne logg.",
+  "ticketID-mønsteret er antatt (1–64 tegn, apns-collapse-id tåler maks 64 byte) og verifiseres i WP1 mot invite.prepare.",
+  "Planbytte 06.10: en invitasjon er adressert til en endepunkt-hash (ticket.audienceToken), ikke til en entitet. Push går derfor bare når invitasjonscellen har *løst opp* mottakeren til en entitet (egne relasjoner, eller registre i andres scaffolds), og avsenderen har navngitt den entiteten i den signerte publiseringen (audienceEntity). Entiteten står ikke i billetten/lenken. Uten oppslag: ingen push — mottakeren får veien inn i HAVEN via landing (eksisterende flyt).",
+  "Endret 1.2.0 (06.10, etter implementasjon): push.register bærer signer (offentlig nøkkel) + proof i stedet for ett signature-felt, fordi scaffolden ikke kjenner entitetens nøkkel på forhånd. Første nøkkel scaffolden ser for en entitet pinnes; en annen nøkkel for samme entitet avvises (key_changed). ticketID-mønsteret er verifisert mot invite.prepare (inv- + UUID med små bokstaver, 40 byte) og tillater punktum. Internt utfall ticket_invalid lagt til."
+ ],
+ "endpoints": {
+  "push.register": {
+   "direction": "app -> scaffold",
+   "requester": "entiteten selv (signert med entitetens egen nøkkel)",
+   "request": {
+    "required": [
+     "schema",
+     "entity",
+     "environment",
+     "bundleId",
+     "token",
+     "issuedAt",
+     "signer",
+     "proof"
+    ],
+    "additional": false,
+    "fields": {
+     "entity": {
+      "type": "string",
+      "pattern": "^[0-9A-Fa-f-]{36}$",
+      "meaning": "entitetens identitet (UUID)"
+     },
+     "environment": {
+      "type": "string",
+      "enum": [
+       "sandbox",
+       "production"
+      ]
+     },
+     "bundleId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9.-]{3,155}$"
+     },
+     "token": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64,200}$",
+      "meaning": "APNs enhets-token, hex, ugjennomsiktig"
+     },
+     "issuedAt": {
+      "type": "integer",
+      "meaning": "sekunder siden epoch; mer enn 600 s fra scaffoldets klokke avvises (stale)"
+     },
+     "schema": {
+      "type": "string",
+      "const": "haven.push.register.v1"
+     },
+     "signer": {
+      "type": "object",
+      "required": [
+       "uuid",
+       "publicKey",
+       "algorithm",
+       "curveType"
+      ],
+      "optional": [
+       "displayName"
+      ],
+      "meaning": "entitetens offentlige nøkkel; signer.uuid må være entity (ikke lagret av scaffolden — bare nøkkelen pinnes)"
+     },
+     "proof": {
+      "type": "object",
+      "required": [
+       "ty",
+       "by",
+       "al",
+       "cv",
+       "sg"
+      ],
+      "meaning": "detached signatur (HavenSignatureProof) over kanonisk JSON av alle andre felt; by må være entity"
+     }
+    }
+   },
+   "response": {
+    "registrationID": "string",
+    "stores": [
+     "entity",
+     "environment",
+     "bundleId",
+     "token",
+     "issuedAt"
+    ],
+    "doesNotStore": [
+     "navn",
+     "e-post",
+     "telefon",
+     "kontaktliste"
+    ]
+   },
+   "denies": [
+    "unsigned",
+    "signature_does_not_match_entity",
+    "bad_entity",
+    "bad_token_format",
+    "bad_bundle_id",
+    "stale",
+    "key_changed",
+    "unknown_environment"
+   ]
+  },
+  "push.revoke": {
+   "direction": "app -> scaffold",
+   "request": {
+    "required": [
+     "schema",
+     "entity",
+     "registrationID",
+     "issuedAt",
+     "signer",
+     "proof"
+    ],
+    "additional": false
+   },
+   "effect": "trukket token får aldri varsel; ingen oppføring beholdes utover tidspunkt for trekking",
+   "denies": [
+    "unsigned",
+    "signature_does_not_match_entity",
+    "bad_entity",
+    "stale",
+    "unknown_registration",
+    "not_the_owner_of_registration"
+   ]
+  },
+  "invite.push": {
+   "direction": "scaffold internt (utløses når en billett er publisert)",
+   "input": [
+    "ticketID",
+    "audienceEntity (identitets-UUID fra den signerte publiseringen; ikke fra billetten, ikke oppgitt av telefonen)"
+   ],
+   "decision": {
+    "pushes_only_if": [
+     "publiseringen navngir en entitet (audienceEntity) som invitasjonscellen har løst opp fra navn/endepunkt",
+     "billetten er publisert og gyldig (HavenInviteVerifier: ikke utløpt, ikke trukket)",
+     "audience har en aktiv registrering (push.register, ikke trukket)",
+     "ingen gravstein (HavenInviteTombstoneLedger) fra samme utsteder til samme audience"
+    ],
+    "internalOutcomes": [
+     "sent",
+     "no_audience_entity",
+     "no_registration",
+     "wrong_audience",
+     "token_revoked",
+     "ticket_expired",
+     "ticket_revoked",
+     "ticket_invalid",
+     "tombstoned",
+     "transport_refused"
+    ],
+    "visibleToSender": false
+   },
+   "apns": {
+    "host": {
+     "sandbox": "api.sandbox.push.apple.com",
+     "production": "api.push.apple.com"
+    },
+    "headers": {
+     "apns-push-type": "alert",
+     "apns-priority": "10",
+     "apns-topic": "<bundleId fra registreringen>",
+     "apns-collapse-id": "<ticketID>",
+     "apns-expiration": "<min(billettens utløp, nå + 14 dager)>"
+    },
+    "payload": {
+     "required": [
+      "aps",
+      "haven"
+     ],
+     "additional": false,
+     "aps": {
+      "required": [
+       "alert"
+      ],
+      "additional": false,
+      "alert": {
+       "required": [
+        "title",
+        "body"
+       ],
+       "additional": false,
+       "title": "HAVEN",
+       "bodyNb": "Du har en invitasjon å svare på."
+      },
+      "note": "ingen sound-, badge- eller thread-id-nøkler i v1"
+     },
+     "haven": {
+      "required": [
+       "k",
+       "id"
+      ],
+      "additional": false,
+      "k": "invite",
+      "id": "<ticketID>"
+     },
+     "maxBytes": 256
+    }
+   }
+  },
+  "push.tap": {
+   "direction": "app",
+   "input": "haven.k = invite, haven.id = ticketID",
+   "does": [
+    "henter billetten fra scaffoldet (GET, samme vei som landing)",
+    "verifiserer den med HavenInviteVerifier",
+    "viser invitasjonsflaten med avsenders navn og grunnlag, hentet fra den verifiserte billetten"
+   ],
+   "doesNot": [
+    "aksepterer automatisk",
+    "viser noe fra payload utover at en invitasjon finnes",
+    "åpner noe ved ugyldig billett — feilflate, ikke invitasjon"
+   ]
+  }
+ }
+}
