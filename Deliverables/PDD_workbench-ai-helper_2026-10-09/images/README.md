@@ -11,7 +11,7 @@ Referansebilder: `<flate>-<tilstand>-v<n>.png`. Bare bilder Kjetil har godkjent 
 
 Kilde: `mock.html?state=tom|fylt|feil|rediger`, rendret med Playwright (Chromium) i 1440×860, skala 2.
 
-## Renderingserklæring
+## RENDERINGSERKLÆRING
 
 Bildene er mockups i HTML, ikke Porthole-preview fra skjelett-JSON. Det skjelettet ikke kan rendre i dag:
 
