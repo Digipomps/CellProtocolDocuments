@@ -34,6 +34,15 @@ Goal:
   visible, tested affordance that lets the authenticated owner reach their own
   entity/Co-Pilot context or a shell-provided equivalent.
 
+Sibling purpose (candidate, 2026-10-09):
+
+- `purpose://candidate.butler.always-reachable`: every surface and every
+  assistant has a visible, working way to Butler (the Co-Pilot Chat
+  configuration, `cell:///PersonalChatHub`), so the owner can reach everything
+  else from where they are. A product surface that hides the Porthole toolbar
+  must carry its own Butler button. Source:
+  `Deliverables/PDD_workbench-ai-helper_2026-10-09/`.
+
 ## 1. Encoding Rule (All Elements)
 
 Each element is encoded as a **single-key object** where the key is the element type and the value is that element’s payload.
