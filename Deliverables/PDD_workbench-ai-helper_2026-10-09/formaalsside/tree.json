@@ -1,0 +1,473 @@
+{
+  "id": "workbench-ai-helper-2026-10-09",
+  "title": "AI-hjelper i Developer Workbench",
+  "pdd": "PDD_workbench-ai-helper_2026-10-09",
+  "gate": "G1",
+  "lede": "Developer Workbench får en AI-hjelper med flere sett instruksjoner du kan redigere selv, og Butler er alltid ett klikk unna.",
+  "approverName": "Digipomps",
+  "anchorRef": "purpose://candidate.workbench-assistant.root",
+  "anchorLabel": "Spillverkstedet, gren B: arbeidsbenk-assistenten (G1 godkjent)",
+  "anchorNote": "Hjelperen er Developer Workbench sin bruk av arbeidsbenk-assistent-mønsteret. Løkken (forstå, avklar, foreslå, vis, bestem, utfør, lær) og regelen om at modellen bare foreslår, er allerede godkjent der.",
+  "rootRef": "purpose://candidate.workbench-ai-helper.root",
+  "next": [
+    "Bilder av hjelperpanelet og redigering av sett til G1-GUI (tom, fylt, feil).",
+    "Profilkontrakten fra spillverkstedet utvides med instruksjonstekst og versjoner.",
+    "Plan med arbeidspakker per bladformål til G2, med de manglende celle-handlingene (flytt mange, bildetekst, dokumentoppdatering) som egne pakker."
+  ],
+  "nodes": [
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.root",
+      "parentRef": null,
+      "code": "R",
+      "title": "Developer Workbench har en AI-hjelper som gjør jobben med deg",
+      "composition": "allOf",
+      "outcome": "Fra Developer Workbench kan eieren be hjelperen om en endring i et vanlig språk, se forslaget, godta det med ett klikk og se resultatet, i fire ulike typer oppgaver.",
+      "signals": [
+        "De fire eksemplene til Kjetil fungerer fra start til slutt",
+        "Ingen endring skjer uten et klikk fra eieren"
+      ],
+      "verifier": "T-R: Playwright-kjøring av de fire eksemplene mot staging",
+      "status": "candidate",
+      "phase": "Fase 1",
+      "reused": "purpose://candidate.workbench-assistant.root",
+      "why": "Developer Workbench har i dag ingen hjelper og ingen vei til Butler i selve flaten (DeveloperWorkbenchConfiguration.swift)."
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.instructions",
+      "parentRef": "purpose://candidate.workbench-ai-helper.root",
+      "code": "A",
+      "title": "Du styrer hva hjelperen gjør og hvordan den svarer",
+      "composition": "allOf",
+      "outcome": "Eieren har flere navngitte sett med instruksjoner og prompts, kan redigere dem i flaten, og kan se og angre endringer.",
+      "signals": [
+        "Fire sett finnes fra start",
+        "Et redigert sett brukes i neste svar uten ny deploy"
+      ],
+      "verifier": "T-A",
+      "status": "candidate",
+      "phase": "Fase 1",
+      "why": "I dag er hjelperne hardkodet (PersonalCopilotCloudStore.swift:1081-1194) og ingen prompt kan redigeres og lagres."
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.instructions.editable",
+      "parentRef": "purpose://candidate.workbench-ai-helper.instructions",
+      "code": "A1",
+      "title": "Instruksjoner og prompts kan redigeres i flaten",
+      "outcome": "Eieren åpner et sett, endrer instruksjonsteksten og lagrer. Neste svar fra det settet følger den nye teksten.",
+      "signals": [
+        "Endringen er lagret etter omstart",
+        "Svaret etter endringen følger den nye instruksen i en testsamtale"
+      ],
+      "verifier": "T-A1: celletest + Playwright",
+      "status": "candidate",
+      "phase": "Fase 1"
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.instructions.multiple-sets",
+      "parentRef": "purpose://candidate.workbench-ai-helper.instructions",
+      "code": "A2",
+      "title": "Flere sett, og du velger hvilket du snakker med",
+      "outcome": "Eieren velger mellom settene «Flater og GUI», «Denne flaten», «Dokumentasjon» og «Idéer til oppgaver», og kan lage nye.",
+      "signals": [
+        "Valgt sett vises i panelet",
+        "Et nytt sett kan lages fra et eksisterende"
+      ],
+      "verifier": "T-A2",
+      "status": "candidate",
+      "phase": "Fase 1",
+      "reused": "purpose://candidate.workbench-assistant.reusable-profile"
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.instructions.versioned",
+      "parentRef": "purpose://candidate.workbench-ai-helper.instructions",
+      "code": "A3",
+      "title": "Endringer i et sett kan sammenlignes og angres",
+      "outcome": "Hvert lagret sett får en versjon. Eieren ser forskjellen mot forrige versjon og kan gå tilbake.",
+      "signals": [
+        "Tre lagringer gir tre versjoner",
+        "Angre gir forrige tekst tilbake"
+      ],
+      "verifier": "T-A3",
+      "status": "candidate",
+      "phase": "Fase 1"
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.instructions.limits-per-set",
+      "parentRef": "purpose://candidate.workbench-ai-helper.instructions",
+      "code": "A4",
+      "title": "Teksten i et sett gir aldri mer tilgang",
+      "outcome": "Hvert sett har en fast liste over tillatte handlinger og et eskaleringstak. Instruksjonsteksten kan ikke utvide dem, og målcellen sjekker tilgang på hver handling.",
+      "signals": [
+        "En instruks som ber om en handling utenfor lista gir et forslag som avvises med grunn",
+        "Eskaleringstaket gjelder per sett"
+      ],
+      "verifier": "T-A4: celletest med fiendtlig instruks",
+      "status": "candidate",
+      "phase": "Fase 1",
+      "reused": "purpose://candidate.workbench-assistant.propose-human-decides"
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.gui",
+      "parentRef": "purpose://candidate.workbench-ai-helper.root",
+      "code": "B",
+      "title": "Lage og endre flater med ord",
+      "composition": "anyOf",
+      "outcome": "Eieren beskriver en endring eller en ny flate, ser den i forhåndsvisning og godtar den. Flaten lagres som ny versjon.",
+      "signals": [
+        "Sindres to eksempler virker",
+        "Forslaget vises før det lagres"
+      ],
+      "verifier": "T-B",
+      "status": "candidate",
+      "phase": "Fase 1",
+      "reused": "purpose://candidate.workbench-assistant.preview-before-change"
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.gui.change-existing",
+      "parentRef": "purpose://candidate.workbench-ai-helper.gui",
+      "code": "B1",
+      "title": "Endre en flate som finnes",
+      "outcome": "«Lag tiles av bildene og sett underteksten til 9 pkt farge #CCCCCC» og «sett underteksten til Slumbering Stones til …» gir et forslag, en forhåndsvisning og en lagret endring.",
+      "signals": [
+        "Begge eksemplene gir riktig resultat på Sindres side",
+        "Endringen kan angres"
+      ],
+      "verifier": "T-B1: Playwright mot /pub/sindre-hustveit/verk i staging",
+      "status": "candidate",
+      "phase": "Fase 2",
+      "why": "I dag finnes ingen handling for bildetekst på et publisert verk eller for tiles-oppsett (Publication, ArtistSales og MediaCollection har bare utkast-felt). Det må bygges."
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.gui.create-new",
+      "parentRef": "purpose://candidate.workbench-ai-helper.gui",
+      "code": "B2",
+      "title": "Lage en ny flate fra en beskrivelse",
+      "outcome": "En beskrivelse gir et skjelett-utkast som vises i Porthole-editoren og kan lagres som ny konfigurasjon.",
+      "signals": [
+        "Utkastet bruker bare skjelettelementer som finnes",
+        "Lagret flate åpnes fra Library"
+      ],
+      "verifier": "T-B2",
+      "status": "candidate",
+      "phase": "Fase 1"
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.gui.test-other-surface",
+      "parentRef": "purpose://candidate.workbench-ai-helper.gui",
+      "code": "B3",
+      "title": "Teste GUI i andre flater",
+      "outcome": "Eieren ber hjelperen sjekke en flate. Hjelperen åpner den, går gjennom det som ble bedt om, og rapporterer hva som virket og ikke, med bilder.",
+      "signals": [
+        "Rapporten har ett bilde per steg",
+        "En kjent feil blir funnet"
+      ],
+      "verifier": "T-B3",
+      "status": "candidate",
+      "phase": "Fase 2",
+      "reused": "purpose://gui.quality.functional-accessible"
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.gui.say-what-is-impossible",
+      "parentRef": "purpose://candidate.workbench-ai-helper.gui",
+      "code": "B4",
+      "title": "Sier fra når flaten ikke kan det du ber om",
+      "outcome": "Når skjelettformatet eller cellen ikke støtter ønsket, sier hjelperen det og hva som mangler, i stedet for å lage noe som ser riktig ut og ikke virker.",
+      "signals": [
+        "Et ønske om noe skjelettet ikke kan, gir en forklaring og ingen knapp"
+      ],
+      "verifier": "T-B4",
+      "status": "candidate",
+      "phase": "Fase 1"
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.surface",
+      "parentRef": "purpose://candidate.workbench-ai-helper.root",
+      "code": "C",
+      "title": "Hjelp i flaten du står i",
+      "composition": "anyOf",
+      "outcome": "Hjelperen kjenner flaten eieren står i og kan gjøre flatens egne handlinger for henne, etter et klikk.",
+      "signals": [
+        "«Flytt alt fra inbox til triage» virker i Developer Workbench"
+      ],
+      "verifier": "T-C",
+      "status": "candidate",
+      "phase": "Fase 1",
+      "reused": "purpose://candidate.workbench-assistant.understand-intent"
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.surface.act-on-many",
+      "parentRef": "purpose://candidate.workbench-ai-helper.surface",
+      "code": "C1",
+      "title": "Gjør samme handling på mange elementer",
+      "outcome": "«Flytt alt fra inbox til triage» viser hvilke elementer som flyttes, utføres etter ett klikk, og kan angres.",
+      "signals": [
+        "Alle nye oppgaver står i triage etterpå",
+        "Rapporten lister hvert element"
+      ],
+      "verifier": "T-C1: celletest mot WorkItem",
+      "status": "candidate",
+      "phase": "Fase 1",
+      "why": "WorkItem har setStatus per element, men ingen handling for mange (WorkItemCell.swift:929)."
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.surface.knows-context",
+      "parentRef": "purpose://candidate.workbench-ai-helper.surface",
+      "code": "C2",
+      "title": "Vet hvilken flate og hvilket utvalg du har",
+      "outcome": "Hjelperen får flatens handlingskontrakt og det som er valgt, og viser hva den bruker. Ingenting sendes i det skjulte.",
+      "signals": [
+        "Panelet viser hvilken flate og hvilke elementer som er med"
+      ],
+      "verifier": "T-C2",
+      "status": "candidate",
+      "phase": "Fase 1"
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.surface.describe-what-to-make",
+      "parentRef": "purpose://candidate.workbench-ai-helper.surface",
+      "code": "C3",
+      "title": "Beskriv hva du vil lage, så spør hjelperen bare om det som mangler",
+      "outcome": "I en flate som spillverkstedet beskriver brukeren et spill. Hjelperen stiller bare spørsmål som endrer resultatet.",
+      "signals": [
+        "Maks to oppklaringsspørsmål i testsettet"
+      ],
+      "verifier": "T-C3",
+      "status": "candidate",
+      "phase": "Fase 2",
+      "reused": "purpose://candidate.workbench-assistant.understand-intent"
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.docs",
+      "parentRef": "purpose://candidate.workbench-ai-helper.root",
+      "code": "D",
+      "title": "Finne og oppdatere dokumentasjon",
+      "composition": "sequence",
+      "outcome": "Hjelperen finner riktig dokument og foreslår oppdateringer som eieren godtar.",
+      "signals": [
+        "Svar har lenke til fil og linje"
+      ],
+      "verifier": "T-D",
+      "status": "candidate",
+      "phase": "Fase 2"
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.docs.find",
+      "parentRef": "purpose://candidate.workbench-ai-helper.docs",
+      "code": "D1",
+      "title": "Finner svaret i dokumentasjonen og viser hvor",
+      "outcome": "Et spørsmål gir svar med lenke til Book-kapittel eller dokument, fra utvikler-RAG-en. Er kilden nede, sier hjelperen det.",
+      "signals": [
+        "Hvert svar har minst én kilde",
+        "Nede kilde gir beskjed, ikke gjetting"
+      ],
+      "verifier": "T-D1",
+      "status": "candidate",
+      "phase": "Fase 2",
+      "why": "Chat-hjelperen docs-rag i dag søker bare i synlige dokumenter og kjører ingen RAG-spørring (PersonalCopilotCloudStore.swift:2933)."
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.docs.propose-update",
+      "parentRef": "purpose://candidate.workbench-ai-helper.docs",
+      "code": "D2",
+      "title": "Foreslår endringer i dokumentasjonen som en PR",
+      "outcome": "Hjelperen viser endringen som diff. Godtar eieren, blir den en gren og en PR, aldri en direkte endring på main.",
+      "signals": [
+        "Godtatt forslag gir en PR-lenke"
+      ],
+      "verifier": "T-D2",
+      "status": "candidate",
+      "phase": "Fase 3"
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.ideas",
+      "parentRef": "purpose://candidate.workbench-ai-helper.root",
+      "code": "E",
+      "title": "Fra idéer til oppgaver som kjører",
+      "composition": "sequence",
+      "outcome": "«Evaluer disse idéene, lag tasks og start dem» gir en vurdering, oppgaver i Workbench og agentjobber som kjører, med godkjenning før hver del.",
+      "signals": [
+        "Hele kjeden virker for tre idéer"
+      ],
+      "verifier": "T-E",
+      "status": "candidate",
+      "phase": "Fase 2"
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.ideas.evaluate",
+      "parentRef": "purpose://candidate.workbench-ai-helper.ideas",
+      "code": "E1",
+      "title": "Vurderer idéene mot formålene",
+      "outcome": "Hver idé får en kort vurdering: hvilket formål den tjener, hva som mangler, og en anbefaling.",
+      "signals": [
+        "Vurderingen viser formålsref per idé"
+      ],
+      "verifier": "T-E1",
+      "status": "candidate",
+      "phase": "Fase 2",
+      "reused": "purpose://analysis.decision-support"
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.ideas.create-tasks",
+      "parentRef": "purpose://candidate.workbench-ai-helper.ideas",
+      "code": "E2",
+      "title": "Lager oppgaver i Workbench",
+      "outcome": "Godtatte idéer blir oppgaver med lenke til idéen og formålet.",
+      "signals": [
+        "Oppgavene vises i inbox med kilde"
+      ],
+      "verifier": "T-E2",
+      "status": "candidate",
+      "phase": "Fase 2"
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.ideas.start-work",
+      "parentRef": "purpose://candidate.workbench-ai-helper.ideas",
+      "code": "E3",
+      "title": "Starter arbeidet hos agentene",
+      "outcome": "Eieren godkjenner og arbeidet startes som jobb hos HavenAgentD. Workbench viser status, AgentD eier kjøringen.",
+      "signals": [
+        "Jobben vises med status i Workbench",
+        "Uten godkjenning starter ingenting"
+      ],
+      "verifier": "T-E3",
+      "status": "candidate",
+      "phase": "Fase 3",
+      "why": "AgentRunCell er bare projeksjon og har ingen startknapp. Eneste vei i dag er agent-review i Butler (PersonalCopilotCloudStore.swift:7711)."
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.butler",
+      "parentRef": "purpose://candidate.workbench-ai-helper.root",
+      "code": "F",
+      "title": "Butler er alltid innen rekkevidde",
+      "composition": "allOf",
+      "outcome": "Fra hjelperen og fra hver flate kommer eieren til Butler i ett steg, og gjennom Butler til alt annet.",
+      "signals": [
+        "Butler-knappen finnes i hjelperpanelet",
+        "Ingen flate uten vei til Butler blir publisert"
+      ],
+      "verifier": "T-F",
+      "status": "candidate",
+      "phase": "Fase 1",
+      "reused": "purpose://skeleton.owner-entity-access"
+    },
+    {
+      "ref": "purpose://candidate.butler.always-reachable",
+      "parentRef": "purpose://candidate.workbench-ai-helper.butler",
+      "code": "F1",
+      "title": "Ett klikk til Butler, fra hvor som helst",
+      "outcome": "Hver flate og hver hjelper har en synlig vei til Butler som virker. Det skal stå i Book 23 som eget formål ved siden av «egen entitet alltid nåbar».",
+      "signals": [
+        "Validering av konfigurasjoner melder fra når veien mangler",
+        "Veien virker i web og app"
+      ],
+      "verifier": "T-F1: validering i CI + Playwright",
+      "status": "candidate",
+      "phase": "Fase 1",
+      "why": "I dag er eneste vei Butler-knappen i Porthole-verktøylinjen (porthole-webo.js:5159). Den finnes ikke i app eller i flater som skjuler verktøylinjen."
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.butler.handoff",
+      "parentRef": "purpose://candidate.workbench-ai-helper.butler",
+      "code": "F2",
+      "title": "Hjelperen gir saken videre til Butler når den ikke kan selv",
+      "outcome": "Ber eieren om noe settet ikke dekker, tilbyr hjelperen å sende samtalen og flaten videre til Butler, som ruter til riktig verktøy.",
+      "signals": [
+        "Butler får samtalen med kontekst og svarer i samme tråd"
+      ],
+      "verifier": "T-F2",
+      "status": "candidate",
+      "phase": "Fase 2"
+    },
+    {
+      "ref": "purpose://candidate.workbench-ai-helper.butler.never-lose-entity",
+      "parentRef": "purpose://candidate.workbench-ai-helper.butler",
+      "code": "F3",
+      "title": "En flate kan ikke låse deg ute fra din egen entitet",
+      "outcome": "Flater som hjelperen lager eller endrer, får ikke lagres uten vei tilbake til egen entitet og Butler.",
+      "signals": [
+        "Et forslag som fjerner veien blir avvist med grunn"
+      ],
+      "verifier": "T-F3",
+      "status": "candidate",
+      "phase": "Fase 1",
+      "reused": "purpose://skeleton.owner-entity-access"
+    }
+  ],
+  "analysis": {
+    "sections": [
+      {
+        "title": "Kort fortalt",
+        "items": [
+          "Hjelperen bygger på arbeidsbenk-assistenten fra spillverkstedet, som allerede er godkjent. Det nye er redigerbare sett, fire bruksområder og Butler-regelen.",
+          "Ingenting i dag lagrer prompts per hjelper. Butler-hjelperne er hardkodet, og AIGateway har bare ett midlertidig utkast.",
+          "Flere eksempler krever nye handlinger i cellene: flytt mange oppgaver, bildetekst og tiles på publiserte verk, oppdatering av dokumenter og oppstart av agentjobber."
+        ]
+      },
+      {
+        "title": "Hva finnes, og hva mangler",
+        "table": {
+          "head": [
+            "Behov",
+            "Finnes",
+            "Mangler"
+          ],
+          "rows": [
+            [
+              "Redigerbare sett",
+              "PersonalAssistantProfile (én profil per eier)",
+              "Sett per hjelper, versjoner, tillatte handlinger"
+            ],
+            [
+              "Bekreft før utfør",
+              "GroundedActionPlan, acceptSuggestion",
+              "Ingenting"
+            ],
+            [
+              "Flytt inbox til triage",
+              "WorkItem setStatus per element",
+              "Handling for mange elementer"
+            ],
+            [
+              "Bildetekst og tiles",
+              "Publication setSiteTheme, layout-preset",
+              "Tekst på publisert verk, tiles-oppsett"
+            ],
+            [
+              "Ny flate",
+              "Porthole-editoren (editor.working.setSkeleton)",
+              "Kall fra hjelperen i stedet for fra editoren"
+            ],
+            [
+              "Dokumentasjon",
+              "docs-rag i Butler (bare synlige dokumenter)",
+              "RAG-spørring og skriving via PR"
+            ],
+            [
+              "Start agentjobber",
+              "agent-review i Butler, HavenAgentD",
+              "Start fra Workbench"
+            ],
+            [
+              "Butler alltid nåbar",
+              "Knapp i Porthole-verktøylinjen",
+              "Knapp i panelet, validering, app"
+            ]
+          ]
+        }
+      },
+      {
+        "title": "Spørsmål som kan endre treet",
+        "ordered": true,
+        "items": [
+          "Skal Butler-regelen (F1) inn i Book 23 som eget formål, eller utvide «egen entitet alltid nåbar»? Jeg foreslår eget formål ved siden av.",
+          "Skal settene være dine alene, eller kan de deles med Victoria, Vegar og Sindre? Jeg foreslår dine nå, deling senere.",
+          "Er rekkefølgen fase 1 (sett, flaten du står i, ny flate, Butler), fase 2 (Sindres eksempler, dokumentasjon, idéer) riktig?"
+        ]
+      }
+    ]
+  },
+  "notify": {
+    "sessionId": "session_01J3x24PaQowsSj3iKTi8UWK",
+    "threadName": "tråden «Formålstre i Developer Workbench»"
+  }
+}
