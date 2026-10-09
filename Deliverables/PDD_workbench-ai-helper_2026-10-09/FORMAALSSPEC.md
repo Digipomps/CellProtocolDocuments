@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — workbench ai helper
 
-Oppgavemappe: `PDD_workbench-ai-helper_2026-10-09` · Opprettet 2026-10-09 · Iterasjon 1 (venter på G1)
+Oppgavemappe: `PDD_workbench-ai-helper_2026-10-09` · Opprettet 2026-10-09 · Iterasjon 1 · G1 godkjent 2026-10-09
 
 > Regel: ingen plan før G1 er godkjent av Kjetil. For GUI: ingen implementering før G1-GUI (rendret bilde) er godkjent.
 > Et dokument om leveransen teller aldri som leveransen.
@@ -81,8 +81,8 @@ Hva dette IKKE er:
 
 | Leveranse | Type | Hvor | Referanse | Godkjent |
 |---|---|---|---|---|
-| Hjelperpanel i Developer Workbench (tom, fylt, feil) | bilde | `images/` | `hjelperpanel-{tom,fylt,feil}-v1.png` | nei |
-| Redigering av et sett med versjoner | bilde | `images/` | `sett-rediger-v1.png` | nei |
+| Hjelperpanel i Developer Workbench (tom, fylt, feil) | bilde | `images/` | `hjelperpanel-{tom,fylt,feil}-v1.png` | venter (lagt fram 2026-10-09) |
+| Redigering av et sett med versjoner | bilde | `images/` | `sett-rediger-v1.png` | venter (lagt fram 2026-10-09) |
 | «Flytt alt fra inbox til triage» fra start til slutt | kjørende flate + testutdata | staging, `TESTRESULT.md#c1` | | nei |
 | Sindres to eksempler | kjørende flate | `/pub/sindre-hustveit/verk` i staging | | nei |
 | Butler-knapp i panelet og validering i CI | kjørende flate + testutdata | CI-logg | | nei |
@@ -93,8 +93,10 @@ Hva dette IKKE er:
 2. Skal settene være eierens alene, eller delbare med Victoria, Vegar og Sindre? Forslag: eierens nå, deling senere.
 3. Er fasene riktige: fase 1 sett, flaten du står i, ny flate og Butler; fase 2 Sindres eksempler, dokumentasjon og idéer; fase 3 PR for dokumenter og oppstart av agentjobber?
 
+Ikke besvart ved G1 (2026-10-09). Standardsvarene gjelder til Kjetil sier noe annet: (1) eget formål i Book 23, (2) settene er eierens alene, (3) fasene som foreslått.
+
 ## 7. Iterasjoner
-- 1 (2026-10-09): første tre, 6 grener og 19 bladformål.
+- 1 (2026-10-09): første tre, 6 grener og 19 bladformål. G1 godkjent 13:44Z.
 
 ## 4. Tilknyttede formålspakker og lærdommer (auto fra purpose_dev.py lookup)
 

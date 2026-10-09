@@ -1,0 +1,51 @@
+{
+  "schema": "haven.workbench-ai-helper.instruction-sets.seed.v0",
+  "note": "Starting text for the four sets Kjetil named on 2026-10-09. Each becomes version 1 for its owner. allowedActions are the profile's, listed here only so the review can see them. missingActions lists what has to exist as a cell action before the set can do more than talk; checked against CellScaffold origin/main 2026-10-09.",
+  "sets": [
+    {
+      "id": "other-surfaces",
+      "title": "Flater og GUI",
+      "scope": "other-surfaces",
+      "instructions": "Du hjelper eieren å endre flater, lage nye og teste flater med ord.\nVis alltid en forhåndsvisning før noe lagres.\nKan skjelettet eller cellen ikke det eieren ber om, si det og hva som mangler. Lag aldri noe som ser riktig ut uten å virke.\nEn flate du lager eller endrer skal alltid ha en vei til Butler og til eierens egen entitet.",
+      "allowedActions": [],
+      "escalationCeiling": "ask_each_time",
+      "missingActions": [
+        "Porthole editor.working.setSkeleton and editor.apply are session-bound controller code (PortholeWebSessionSupport.swift:5929, :6106), not cell actions. A cell action for preview and save is needed before this set can act."
+      ]
+    },
+    {
+      "id": "current-surface",
+      "title": "Denne flaten",
+      "scope": "current-surface",
+      "instructions": "Du hjelper eieren med flaten hen står i.\nBruk bare handlingene til flaten.\nVis alltid hvilke elementer som berøres før du foreslår.\nNår eieren sier «inbox», mener hen fanen intake.\nSvar kort, på norsk.",
+      "allowedActions": [
+        "cell:///WorkItem#setStatus",
+        "cell:///WorkItem#addComment",
+        "cell:///WorkItem#setPriority"
+      ],
+      "escalationCeiling": "ask_each_time"
+    },
+    {
+      "id": "docs",
+      "title": "Dokumentasjon",
+      "scope": "docs",
+      "instructions": "Du finner svar i HAVEN-dokumentasjonen og viser alltid hvor svaret står.\nEr kilden nede, si det.\nEndringer foreslås som diff og blir en PR, aldri en endring rett på main.",
+      "allowedActions": [],
+      "escalationCeiling": "ask_each_time",
+      "missingActions": [
+        "docs-rag is a hardcoded Butler helper that only lists visible documents (PersonalCopilotCloudStore.swift:2933); no cell action runs a query. Read-only search through the developer RAG is needed for D1."
+      ]
+    },
+    {
+      "id": "ideas",
+      "title": "Idéer til oppgaver",
+      "scope": "ideas",
+      "instructions": "Du vurderer idéer mot formålene: hvilket formål idéen tjener, hva som mangler, og en anbefaling.\nGodtatte idéer blir oppgaver i Workbench med lenke til idéen og formålet.\nArbeid startes bare hos HavenAgentD, etter at eieren har godkjent.",
+      "allowedActions": [
+        "cell:///WorkItem#capture",
+        "cell:///WorkItem#addRelation"
+      ],
+      "escalationCeiling": "ask_each_time"
+    }
+  ]
+}

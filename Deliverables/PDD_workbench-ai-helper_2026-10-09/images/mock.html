@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="nb"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI-hjelper skisse</title>
+<style>
+:root{--bg:#f4f1ea;--panel:#fff;--ink:#1d2330;--mute:#667085;--line:#e3ddd0;--acc:#2f6fed;--ok:#1f8a4c;--warn:#b54708;--err:#c0362c;--soft:#eef3ff;--gold:#ffcc4d;--add:#e8f6ec;--del:#fdecea}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--panel)}
+header b{font-size:17px}.who{font-size:13px;color:var(--mute)}
+.butler{margin-left:auto;display:flex;align-items:center;gap:6px;border:1.5px solid var(--ink);border-radius:999px;padding:5px 12px;font-size:14px;background:#fff}
+.tabs{display:flex;gap:2px;padding:0 18px;background:var(--panel);border-bottom:1px solid var(--line)}
+.tabs span{padding:9px 12px;font-size:14px;color:var(--mute);border-bottom:2px solid transparent}.tabs span.on{color:var(--ink);border-color:var(--acc);font-weight:600}
+.tabs .n{font-size:11.5px;background:var(--line);border-radius:8px;padding:0 6px;margin-left:4px;color:var(--ink)}
+main{display:grid;grid-template-columns:1fr 400px;gap:14px;padding:14px;height:calc(100vh - 92px)}
+main.edit{grid-template-columns:260px 1fr 340px}
+section{background:var(--panel);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+h2{margin:0;padding:12px 14px;font-size:14px;letter-spacing:.02em;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
+h2 small{margin-left:auto;font-weight:400;color:var(--mute)}
+.body{padding:12px 14px;overflow:auto;flex:1}
+.item{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:start;padding:10px 4px;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border:0}.box{width:16px;height:16px;border:1.5px solid var(--mute);border-radius:4px;margin-top:3px}
+.item.sel{background:#f6f9ff;box-shadow:inset 3px 0 0 var(--acc)}.item.sel .box{background:var(--acc);border-color:var(--acc)}
+.st{font-size:12px;border-radius:6px;padding:2px 7px;background:#f2efe8;color:var(--mute);white-space:nowrap}
+.st.to{background:var(--soft);color:var(--acc)}
+.v{font-size:12.5px;color:var(--mute)}
+.ctx{display:flex;flex-wrap:wrap;gap:6px;padding:8px 14px;border-bottom:1px solid var(--line);font-size:12.5px;background:#fbfaf7}
+.chip{border:1px solid var(--line);border-radius:999px;padding:2px 9px;background:#fff}.chip b{font-weight:600}
+.set{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.sel-set{flex:1;border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-weight:600;display:flex;justify-content:space-between}
+.msg{max-width:92%;padding:9px 12px;border-radius:12px;margin:0 0 10px}.me{margin-left:auto;background:var(--soft)}.ai{background:#f7f5f0}
+.prop{border:1.5px solid var(--acc);border-radius:12px;padding:10px 12px;margin:4px 0 10px;background:#fbfcff}
+.prop .t{font-weight:600;margin-bottom:4px}.prop ul{margin:4px 0 8px 18px;padding:0;font-size:14px}
+.why{font-size:13px;color:var(--mute);border-left:3px solid var(--gold);padding-left:8px;margin:6px 0}
+code,.mono{font:12.5px ui-monospace,Menlo,monospace}
+.btns{display:flex;gap:8px;flex-wrap:wrap}.b{border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 11px;font:inherit;font-size:14px}
+.b.p{background:var(--acc);border-color:var(--acc);color:#fff}.b.k{border-color:var(--ink)}
+.in{border-top:1px solid var(--line);padding:10px;display:flex;gap:8px}.in div{flex:1;border:1px solid var(--line);border-radius:10px;padding:8px 10px;color:var(--mute)}
+.empty{color:var(--mute);text-align:center;padding:18px 10px;font-size:14px}.empty big{display:block;font-size:30px;margin-bottom:6px}
+.sugg{display:flex;flex-direction:column;gap:6px;margin-top:6px}.sugg .b{text-align:left}
+.err{border:1.5px solid var(--err);background:#fff6f5;border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:14px}
+.err .t{color:var(--err);font-weight:600;margin-bottom:4px}
+.missing{font-size:13px;margin:6px 0;padding-left:18px}
+.foot{font-size:12px;color:var(--mute);padding:0 14px 10px}
+.list .row{padding:9px 10px;border-radius:9px;margin-bottom:4px;font-size:14px}.list .row.on{background:var(--soft);font-weight:600}
+.list .row .v{font-weight:400}
+label{display:block;font-size:12.5px;color:var(--mute);margin:12px 0 4px}
+.ta{border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:13.5px/1.55 ui-monospace,Menlo,monospace;white-space:pre-wrap;background:#fffefb}
+.ta .add{background:var(--add)}
+.lock{border:1px dashed var(--line);border-radius:10px;padding:8px 10px;font-size:13px;background:#faf9f6}
+.lock div{padding:2px 0}
+.ver{border-bottom:1px dashed var(--line);padding:8px 0;font-size:14px}.ver:last-child{border:0}
+.diff{font:12.5px/1.6 ui-monospace,Menlo,monospace;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:8px}
+.diff div{padding:1px 10px}.diff .a{background:var(--add)}.diff .d{background:var(--del);text-decoration:line-through;color:#7a2a24}
+</style></head><body>
+<header><b>🧰 Developer Workbench</b><span class="who">Kjetil · Prosjektene dine. Arbeidet ditt. Ett sted å fortsette.</span>
+<span class="butler">🛎️ Butler</span></header>
+<div class="tabs" id="tabs"></div>
+<main id="main"></main>
+<script>
+const S=new URLSearchParams(location.search).get("state")||"fylt";
+const $=id=>document.getElementById(id);
+const tabs=(on,counts)=>["prosjekter","formål","intake","board","all","triage","active","done","arbeidsflyt"]
+  .map(t=>`<span class="${t===on?"on":""}">${t}${counts[t]!=null?`<span class="n">${counts[t]}</span>`:""}</span>`).join("");
+const items=[["Bildetekst på publiserte verk","Sindre · 09.10"],["Butler-knapp mangler i Formål-fanen","Kjetil · 09.10"],["Invitasjoner fra CellScaffold","Kjetil · 09.10"],
+["Fornye skills-pakken til Victoria","Kjetil · 09.10"],["Lyd når figuren hopper","Sverre · 09.10"],["Paritet purposeTree i Binding","Kjetil · 08.10"],["Lastetid Relasjoner over 5 s","Vegar · 07.10"]];
+const list=(sel,to)=>items.map(([t,m])=>`<div class="item ${sel?"sel":""}"><span class="box"></span><div><b>${t}</b><div class="v">${m}</div></div>
+<span class="st ${to?"to":""}">${to?"ny → triage":"ny"}</span></div>`).join("");
+const center=(sel,to,sub)=>`<section><h2>📥 Intake <small>${sub}</small></h2><div class="body">${list(sel,to)}</div></section>`;
+const helperHead=(set,ctx)=>`<h2>✨ Hjelper <small>foreslår, du bestemmer</small></h2>
+<div class="set"><div class="sel-set">${set}<span>▾</span></div><button class="b">✏️ Rediger</button><button class="b k">🛎️ Butler</button></div>
+<div class="ctx">${ctx}</div>`;
+const ctxChips=(sel)=>`<span class="v">Hjelperen ser:</span><span class="chip">flate <b>Developer Workbench</b></span><span class="chip">fane <b>intake</b></span>
+<span class="chip">valgt <b>${sel}</b></span><span class="chip">handlinger <b>3</b></span>`;
+const input=`<div class="in"><div>Skriv hva du vil ha gjort …</div><button class="b p">Send</button></div>`;
+const D={
+tom:{tab:{intake:7,triage:2},main:`${center(false,false,"7 nye")}
+<section>${helperHead("Denne flaten",ctxChips("ingenting"))}
+<div class="body"><div class="empty"><big>✨</big>Jeg kan gjøre det denne flaten kan, for deg.<br>Du ser alltid forslaget før noe endres.</div>
+<div class="v">Prøv for eksempel:</div><div class="sugg"><button class="b">Flytt alt fra intake til triage</button><button class="b">Sorter intake etter hvem som meldte</button><button class="b">Hva er det eldste som venter?</button></div>
+<div class="v" style="margin-top:14px">Andre sett: <b>Flater og GUI</b> · <b>Dokumentasjon</b> · <b>Idéer til oppgaver</b></div></div>${input}
+<div class="foot">Kan ikke dette settet det du vil? Butler når alt annet.</div></section>`},
+fylt:{tab:{intake:7,triage:2},main:`${center(true,true,"7 valgt av hjelperen · ikke flyttet ennå")}
+<section>${helperHead("Denne flaten",ctxChips("7 elementer"))}
+<div class="body"><div class="msg me">Flytt alt fra inbox over til triage</div>
+<div class="msg ai">Jeg tolker «inbox» som fanen <b>intake</b>. Her er forslaget. Elementene er markert til venstre.</div>
+<div class="prop"><div class="t">Forslag: 7 elementer fra ny til triage</div>
+<ul><li>7 elementer i intake får status <b>triage</b></li><li>Ingen andre felt endres</li><li>Du kan angre alle 7 i ett steg</li></ul>
+<div class="why">Hvorfor: flaten har handlingen <code>setStatus</code>, og overgangen ny → triage er lov. Den kjøres én gang per element, og WorkItem sjekker tilgangen din hver gang.</div>
+<div class="btns"><button class="b p">Utfør 7</button><button class="b">Endre utvalget</button><button class="b">Forkast</button></div></div></div>${input}
+<div class="foot">Sett «Denne flaten» versjon 3 · kan bare bruke flatens egne handlinger</div></section>`},
+feil:{tab:{intake:7,triage:2},main:`${center(false,false,"7 nye")}
+<section>${helperHead("Flater og GUI",`<span class="v">Hjelperen ser:</span><span class="chip">flate <b>/pub/sindre-hustveit/verk</b></span><span class="chip">verk <b>Slumbering Stones</b></span>`)}
+<div class="body"><div class="msg me">Sett underteksten til bildet av Slumbering Stones til «Lorem ipsum …»</div>
+<div class="err"><div class="t">Dette kan ikke gjøres i dag</div>Et publisert verk har ingen undertekst som kan endres. Jeg lager ikke noe som ser riktig ut uten å virke.
+<div class="v" style="margin-top:6px">Det som mangler:</div><ul class="missing"><li>Et tekstfelt for verk i <code>PublicationCell</code></li><li>En handling som setter det, med tilgangssjekk</li></ul>
+<div class="btns"><button class="b">Lag oppgave på det som mangler</button><button class="b k">🛎️ Gi saken til Butler</button></div></div>
+<div class="msg ai">Vil du at jeg heller endrer utkastet i ArtistSales? Det har en tekst som kan settes.</div></div>${input}
+<div class="foot">Butler får samtalen og hvilken flate du står i, ikke noe mer.</div></section>`},
+rediger:{tab:{},edit:true,main:`<section><h2>📚 Sett <small>dine</small></h2><div class="body list">
+<div class="row">Flater og GUI<div class="v">versjon 2 · 6 handlinger</div></div>
+<div class="row on">Denne flaten<div class="v">versjon 3 · 3 handlinger</div></div>
+<div class="row">Dokumentasjon<div class="v">versjon 1 · 2 handlinger</div></div>
+<div class="row">Idéer til oppgaver<div class="v">versjon 1 · 4 handlinger</div></div>
+<button class="b" style="margin-top:8px;width:100%">+ Nytt sett</button></div></section>
+<section><h2>✏️ Denne flaten <small>utkast til versjon 4, ikke lagret</small></h2><div class="body">
+<label>Instruksjoner</label><div class="ta">Du hjelper eieren med flaten hen står i.
+Bruk bare handlingene til flaten.
+Vis alltid hvilke elementer som berøres før du foreslår.
+<span class="add">Når eieren sier «inbox», mener hen fanen intake.</span>
+<span class="add">Svar kort, på norsk.</span></div>
+<label>Tillatte handlinger (styres av flaten, teksten kan ikke utvide dem)</label>
+<div class="lock"><div>🔒 <span class="mono">cell:///WorkItem#setStatus</span></div><div>🔒 <span class="mono">cell:///WorkItem#addComment</span></div><div>🔒 <span class="mono">cell:///WorkItem#setPriority</span></div>
+<div class="v" style="margin-top:4px">Eskalering: spør hver gang · Målcellen sjekker tilgang på hver handling</div></div>
+<div class="btns" style="margin-top:14px"><button class="b p">Lagre som versjon 4</button><button class="b">Prøv i flaten</button><button class="b">Forkast</button></div></div></section>
+<section><h2>🕘 Versjoner</h2><div class="body">
+<div class="ver"><b>Versjon 3</b> · i bruk<div class="v">09.10 14:02 · Kjetil</div></div>
+<div class="ver"><b>Versjon 2</b><div class="v">09.10 11:40 · Kjetil</div><button class="b" style="margin-top:4px">↶ Gå tilbake hit</button></div>
+<div class="ver"><b>Versjon 1</b><div class="v">09.10 10:15 · fra malen</div></div>
+<div class="v" style="margin-top:10px">Utkast mot versjon 3:</div>
+<div class="diff"><div>Vis alltid hvilke elementer som</div><div>berøres før du foreslår.</div><div class="a">+ Når eieren sier «inbox», mener</div><div class="a">+ hen fanen intake.</div><div class="d">- Svar utfyllende.</div><div class="a">+ Svar kort, på norsk.</div></div>
+</div></section>`}};
+const d=D[S];$("tabs").innerHTML=tabs(d.edit?"":"intake",d.tab);if(d.edit){$("tabs").innerHTML='<span class="on">Hjelper › Rediger sett</span>';$("main").className="edit"}
+$("main").innerHTML=d.main;
+</script></body></html>

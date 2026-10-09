@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "haven.workbench-ai-helper.instruction-set.v0",
+  "title": "Workbench AI helper instruction set (v0, draft)",
+  "description": "One named, versioned instruction set for the Developer Workbench AI helper. Extends haven.workbench-assistant-profile.v0 (PDD_spillverksted_2026-10-09/contract) with editable instruction text and versions. Purposes: purpose://candidate.workbench-ai-helper.instructions.editable, .multiple-sets, .versioned, .limits-per-set. The instruction text never grants access: allowedActions and escalationCeiling are not derived from it, and the target cell re-checks access on every call.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "id", "title", "owner", "profile", "instructions", "version", "versions", "butler"],
+  "properties": {
+    "schema": { "const": "haven.workbench-ai-helper.instruction-set.v0" },
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$", "description": "Stable ASCII id, English, e.g. current-surface." },
+    "title": { "type": "string", "description": "Display title in the owner's language, e.g. «Denne flaten»." },
+    "owner": {
+      "type": "string",
+      "description": "Identity uuid of the owner. Sets are owner-only in v0 (FORMAALSSPEC §6 question 2, default answer). Only the owner may read, edit or revert."
+    },
+    "profile": {
+      "$ref": "https://haven.digipomps.org/schemas/haven.workbench-assistant-profile.v0",
+      "description": "The workbench-assistant profile this set runs under. allowedActions, escalationCeiling and audience come from here and are fixed by the surface, not by the instruction text."
+    },
+    "scope": {
+      "enum": ["current-surface", "other-surfaces", "docs", "ideas"],
+      "description": "Which of the four kinds of work the set is for (branches C, B, D, E)."
+    },
+    "instructions": {
+      "type": "string",
+      "maxLength": 8000,
+      "description": "Editable instruction and prompt text. Sent to the model as guidance only. Never parsed for actions, endpoints or permissions."
+    },
+    "version": { "type": "integer", "minimum": 1, "description": "Version currently in use. Every save creates a new version." },
+    "versions": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Append-only history. Reverting creates a new version whose text equals an earlier one; nothing is deleted.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["n", "createdAt", "author", "instructions"],
+        "properties": {
+          "n": { "type": "integer", "minimum": 1 },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "author": { "type": "string", "description": "Identity uuid. In v0 always the owner." },
+          "instructions": { "type": "string", "maxLength": 8000 },
+          "revertedFrom": { "type": "integer", "minimum": 1, "description": "Set when this version restores an earlier one." },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "butler": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reachable", "handoff"],
+      "description": "purpose://candidate.butler.always-reachable and purpose://candidate.workbench-ai-helper.butler.handoff. Cannot be switched off by the owner or the text.",
+      "properties": {
+        "reachable": { "const": true },
+        "handoff": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sends"],
+          "properties": {
+            "sends": {
+              "type": "array",
+              "items": { "enum": ["conversation", "surface", "selection"] },
+              "uniqueItems": true,
+              "description": "What Butler gets when the owner hands a case over. Shown to the owner before sending."
+            }
+          }
+        }
+      }
+    }
+  }
+}
