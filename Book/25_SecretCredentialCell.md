@@ -2,7 +2,7 @@
 
 Status: implemented database-key profile; broader API/provider Cell contract remains draft.
 
-Last updated: 2026-09-22.
+Last updated: 2026-09-23.
 
 `SecretCredentialCell` is the entity-scoped credential boundary for HAVEN. It
 stores or references provider credentials without exposing raw secrets to
@@ -36,7 +36,7 @@ Apple references:
 - <https://developer.apple.com/documentation/security/keychain-services>
 - <https://developer.apple.com/documentation/security/keychain-items>
 
-## Implemented database-key profile (2026-09-22)
+## Implemented database-key profile (2026-09-23)
 
 The database-key profile implements a narrower owner-controlled contract beside
 the API/provider credential draft below. See the [implementation and runbook](../../CellScaffold/Documentation/Cell_Database_Key_Custody.md).
@@ -81,14 +81,30 @@ Implemented source contracts:
 - Explicit migration preserves the original random 32-byte root and v1 HKDF;
   both primary and recovery recipients are verified. A private encrypted
   checkpoint precedes publication so lost replies can resume without new keys.
-  Legacy source keys are retained. Root-compromise rotation across database
-  files and unattended service delegation are separate later profiles.
+  Legacy source keys are retained. `CellDatabaseRootRotation` stages every file under
+  the new cell root, verifies recovery and SQLCipher integrity, publishes the next
+  signed version, then atomically selects the complete generation. A durable pending
+  journal blocks normal opens and supports resuming after copied files or a lost
+  publication response. Lifetime file locks reject rotation with live handles.
+- `DatabaseServiceRequest` / `DatabaseServiceGrant` implement explicit delegated
+  execution: owner approval binds runtime identity, cell/domain, filename, purpose,
+  read/write action, audience, nonce, ephemeral recipient, versions and expiry.
+  HPKE releases only one derived file key, never the root. Consumption is one-time
+  against a pinned pending challenge. Renewal requires fresh approval. A hostile
+  recipient can retain released keys/data; TTL is not cryptographic revocation.
+- Binding's native **Private celledata** window provisions a Keychain recipient,
+  imports a typed signed request, displays its complete scope, obtains fresh local
+  user authorization, and exports the recipient-encrypted grant. Version pins survive
+  restart; missing handles never create replacement keys. Generic Cell/Flow/LLM
+  surfaces cannot approve, export or retrieve keys. Unattended delegation remains
+  an explicit future custodian profile, never an automatic fallback.
 
 Platform and acceptance boundaries: Apple's HPKE needs macOS 14/iOS 17 or newer;
-older systems fail unavailable. The Keychain adapter has been compiled, but
-real user-presence/restart behavior in a signed Binding app has not been tested
-by these synthetic contract/database tests. HTTP fixtures with separate roots
-do not establish independent administration of two deployed scaffolds. See the
+older systems fail unavailable. The native app is built with signing. Real Keychain user-presence acceptance must
+be reported separately from synthetic tests; an opt-in signed-host test uses unique
+synthetic items. Two independently configured HTTPS test servers cover trust-chain
+validation, proof/replay and network failure. They do not establish independent
+administration of production hosts. See the
 runbook's evidence link for executed tests and remaining deployment checks.
 
 The rest of this chapter remains the broader API/provider credential draft.
