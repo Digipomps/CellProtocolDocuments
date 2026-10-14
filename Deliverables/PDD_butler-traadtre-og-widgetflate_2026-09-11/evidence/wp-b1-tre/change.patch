@@ -1,0 +1,210 @@
+diff --git a/Sources/App/Cells/PersonalCopilot/PersonalCopilotCells+HelperTree.swift b/Sources/App/Cells/PersonalCopilot/PersonalCopilotCells+HelperTree.swift
+index 777d95ea..f6939888 100644
+--- a/Sources/App/Cells/PersonalCopilot/PersonalCopilotCells+HelperTree.swift
++++ b/Sources/App/Cells/PersonalCopilot/PersonalCopilotCells+HelperTree.swift
+@@ -69,6 +69,9 @@ extension PersonalCopilotHelperTree {
+         for key in ["id", "title", "kind", "countText", "rowState", "tone", "kindSummary", "disclosureGlyph"] { row[key] = string }
+         row["parentID"] = ExploreContract.oneOfSchema(options: [string, ExploreContract.schema(type: "null")])
+         row["visualDepth"] = integer
++        row["level"] = integer
++        row["leadingInset"] = integer
++        row["rowBackground"] = string
+         row["hasChildren"] = bool
+         row["expanded"] = bool
+         row["selectionPayload"] = actionSchema("selectNode")
+diff --git a/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore+HelperTree.swift b/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore+HelperTree.swift
+index 6fd34528..81850a52 100644
+--- a/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore+HelperTree.swift
++++ b/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore+HelperTree.swift
+@@ -207,6 +207,12 @@ struct PersonalCopilotHelperTree: Codable, Equatable {
+             row["kindSummary"] = .string(node.id == Self.rootID ? "" : "gren")
+             row["hasChildren"] = .bool(!children.isEmpty)
+             row["expanded"] = .bool(node.expanded)
++            // WP-B1: strukturfeltene Tree-elementet leser. level er semantisk
++            // (rot = 1, ukappet); leadingInset og rowBackground er visuelle og
++            // følger mockupens tre dybder og tre radtilstander.
++            row["level"] = .integer(depth + 1)
++            row["leadingInset"] = .integer([3, 11, 27][min(2, max(0, depth - 1))])
++            row["rowBackground"] = .string(node.id == selected.id ? "#e8f1f9" : (inScope.contains(node.id) ? "#f3f8fc" : "#ffffff"))
+             row["disclosureGlyph"] = .string(children.isEmpty ? "" : (node.expanded ? "▾" : "▸"))
+             row["selectionPayload"] = .object(["nodeID": .string(node.id)])
+             row["expansionPayload"] = .object(["nodeID": .string(node.id), "expanded": .bool(!node.expanded)])
+diff --git a/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory+HelperTree.swift b/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory+HelperTree.swift
+index 6f673d96..16103734 100644
+--- a/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory+HelperTree.swift
++++ b/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory+HelperTree.swift
+@@ -16,7 +16,10 @@ extension PersonalCopilotConfigurationFactory {
+         var scrollModifiers = SkeletonModifiers()
+         scrollModifiers.height = 216
+         scrollModifiers.maxWidthInfinity = true
+-        var rows = SkeletonScrollView(axis: "vertical", elements: [rail.elements[2]])
++        // WP-B1: Tree erstatter List-raden med ni dybde-/tilstandsvarianter
++        // (rail.elements[2] i referansekandidaten). Cellen leverer allerede
++        // ordnede synlige rader; Tree gir tastatur, aria og bekreftet utbretting.
++        var rows = SkeletonScrollView(axis: "vertical", elements: [try helperTreeRows()])
+         rows.modifiers = scrollModifiers
+         let close = SkeletonElement.Button(SkeletonButton(keypath: "chatHub.ui.helperTree.close", label: "Lukk tre", payload: .object([:])))
+         // Scope controls belong to the rail, not an extra row above the conversation.
+@@ -67,6 +70,30 @@ extension PersonalCopilotConfigurationFactory {
+         return .List(list)
+     }
+ 
++    /// WP-B1: hjelpertreet som Tree. Én radmal; dybde og tilstand kommer fra
++    /// cellens raddata (leadingInset, rowBackground, rowState), ikke fra
++    /// ni synlighetsvarianter.
++    static func helperTreeRows() throws -> SkeletonElement {
++        try JSONDecoder().decode(SkeletonElement.self, from: Data(helperTreeRowsJSON.utf8))
++    }
++
++    private static let helperTreeRowsJSON = #"""
++{"Tree":{"keypath":"chatHub.state.ui.helperTree.visibleRows","idKeypath":"id","parentIDKeypath":"parentID","levelKeypath":"level","leadingInsetKeypath":"leadingInset","hasChildrenKeypath":"hasChildren","expandedKeypath":"expanded","selectedIDStateKeypath":"chatHub.state.ui.helperTree.scope.nodeID","selectionActionKeypath":"chatHub.ui.helperTree.selectNode","expansionActionKeypath":"chatHub.ui.helperTree.setExpanded",
++"rowSkeleton":{"VStack":{"elements":[{"HStack":{"elements":[
++{"VStack":{"elements":[],"spacing":0,"modifiers":{"width":7,"height":7,"cornerRadius":3.5,"background":"#d5e0eb","visibility":{"when":{"scope":"item","keypath":"tone","equals":"neutral"}}}}},
++{"VStack":{"elements":[],"spacing":0,"modifiers":{"width":7,"height":7,"cornerRadius":3.5,"background":"#0f8a61","visibility":{"when":{"scope":"item","keypath":"tone","equals":"branchA"}}}}},
++{"VStack":{"elements":[],"spacing":0,"modifiers":{"width":7,"height":7,"cornerRadius":3.5,"background":"#7a4fbf","visibility":{"when":{"scope":"item","keypath":"tone","equals":"branchB"}}}}},
++{"VStack":{"elements":[],"spacing":0,"modifiers":{"width":7,"height":7,"cornerRadius":3.5,"background":"#ef7c2d","visibility":{"when":{"scope":"item","keypath":"tone","equals":"declined"}}}}},
++{"Text":{"keypath":"title","modifiers":{"fontSize":14,"fontWeight":"400","foregroundColor":"#17212b","lineLimit":1,"maxWidthInfinity":true,"visibility":{"when":{"scope":"item","keypath":"rowState","notEquals":"selected"}}}}},
++{"Text":{"keypath":"title","modifiers":{"fontSize":14,"fontWeight":"600","foregroundColor":"#17212b","lineLimit":1,"maxWidthInfinity":true,"visibility":{"when":{"scope":"item","keypath":"rowState","equals":"selected"}}}}},
++{"Text":{"keypath":"kindSummary","modifiers":{"fontSize":11,"fontWeight":"400","foregroundColor":"#556273","padding":0,"height":15,"borderWidth":1,"borderColor":"#d5e0eb","cornerRadius":4,"visibility":{"when":{"scope":"item","keypath":"kindSummary","notEquals":""}}}}},
++{"Text":{"keypath":"countText","modifiers":{"fontSize":12,"fontWeight":"400","foregroundColor":"#556273"}}}
++],"spacing":7,"modifiers":{"maxWidthInfinity":true}}}],"spacing":0}},
++"disclosureModifiers":{"fontSize":10,"foregroundColor":"#556273","width":14},
++"rowModifiers":{"padding":5,"cornerRadius":7,"background":"#ffffff","backgroundKeypath":"rowBackground","maxWidthInfinity":true,"interactionStyles":{"hover":{"background":"#f3f8fc"}}},
++"modifiers":{"accessibilityLabel":"Tråder","maxWidthInfinity":true}}}
++"""#
++
+     private static let helperTreeCandidateJSON = #"""
+ {"VStack":{"elements":[{"HStack":{"elements":[{"Button":{"label":"Tråder","keypath":"chatHub.ui.helperTree.open","modifiers":{"fontSize":12,
+ "fontWeight":"400","foregroundColor":"#556273","padding":3,"borderWidth":1,"borderColor":"#d5e0eb","cornerRadius":7,"background":"#ffffff"},
+diff --git a/Sources/App/Support/ButlerBuiltInConfigurationUpgrade.swift b/Sources/App/Support/ButlerBuiltInConfigurationUpgrade.swift
+index a5b92320..f00ed180 100644
+--- a/Sources/App/Support/ButlerBuiltInConfigurationUpgrade.swift
++++ b/Sources/App/Support/ButlerBuiltInConfigurationUpgrade.swift
+@@ -11,6 +11,10 @@ enum ButlerBuiltInConfigurationUpgrade {
+     // Verified against two independent former-production factory invocations.
+     // Source commit and both factory blob hashes are recorded beside the fixture.
+     static let previousSkeletonDigest = "209580a0b368a84e942c54ee893679864c6b623007126787f885f948e26f4ccd"
++    // WP-B1: factory output just before the helper tree became a Tree element
++    // (CellScaffold f851df49 with CellProtocol d810720f). See ButlerBuiltIn-pretree.md.
++    static let preTreeSkeletonDigest = "1af1ca3a94310791f7f63eb384639c2b4065fb1f3efc8fb9a9b6695bd71b0bdb"
++    static let formerSkeletonDigests: Set<String> = [previousSkeletonDigest, preTreeSkeletonDigest]
+ 
+     static func upgraded(
+         _ configuration: CellConfiguration,
+@@ -21,8 +25,8 @@ enum ButlerBuiltInConfigurationUpgrade {
+               current.discovery?.sourceCellEndpoint == PersonalChatHubContract.endpoint,
+               let skeleton = configuration.skeleton,
+               let currentSkeleton = current.skeleton,
+-              fingerprint(skeleton) == previousSkeletonDigest,
+-              fingerprint(currentSkeleton) != previousSkeletonDigest,
++              let savedDigest = fingerprint(skeleton), formerSkeletonDigests.contains(savedDigest),
++              let currentDigest = fingerprint(currentSkeleton), !formerSkeletonDigests.contains(currentDigest),
+               let chat = configuration.cellReferences?.first(where: { $0.label == "chatHub" }),
+               [PersonalChatHubContract.endpoint, PersonalChatHubAccountCompatibility.endpoint].contains(chat.endpoint)
+         else { return nil }
+diff --git a/Tests/AppTests/ButlerBuiltInConfigurationUpgradeTests.swift b/Tests/AppTests/ButlerBuiltInConfigurationUpgradeTests.swift
+index 674688c2..d72669a3 100644
+--- a/Tests/AppTests/ButlerBuiltInConfigurationUpgradeTests.swift
++++ b/Tests/AppTests/ButlerBuiltInConfigurationUpgradeTests.swift
+@@ -25,6 +25,22 @@ final class ButlerBuiltInConfigurationUpgradeTests: IsolatedCellTestCase {
+         return try encoder.encode(value)
+     }
+ 
++    func testPreTreeFactoryUpgradesToTreeHelperRailAndIsIdempotent() throws {
++        let url = try XCTUnwrap(Bundle.module.url(
++            forResource: "ButlerBuiltIn-pretree", withExtension: "json", subdirectory: "Fixtures"
++        ))
++        var old = try JSONDecoder().decode(CellConfiguration.self, from: Data(contentsOf: url))
++        old.uuid = "preserved-workspace-id"
++        XCTAssertEqual(ButlerBuiltInConfigurationUpgrade.fingerprint(try XCTUnwrap(old.skeleton)),
++                       ButlerBuiltInConfigurationUpgrade.preTreeSkeletonDigest)
++        let published = try current()
++        let upgraded = try XCTUnwrap(ButlerBuiltInConfigurationUpgrade.upgraded(old, using: published))
++        XCTAssertEqual(upgraded.uuid, old.uuid)
++        XCTAssertEqual(try bytes(upgraded.cellReferences), try bytes(old.cellReferences))
++        XCTAssertTrue(String(decoding: try bytes(upgraded.skeleton), as: UTF8.self).contains("\"Tree\""))
++        XCTAssertNil(ButlerBuiltInConfigurationUpgrade.upgraded(upgraded, using: published))
++    }
++
+     func testExactFormerFactoryUpgradesOnlySkeletonAndIsIdempotent() throws {
+         var old = try legacy()
+         old.uuid = "preserved-workspace-id"
+diff --git a/Tests/AppTests/PersonalCopilotHelperTreeReachabilityTests.swift b/Tests/AppTests/PersonalCopilotHelperTreeReachabilityTests.swift
+index 8705bbc1..a84af7d0 100644
+--- a/Tests/AppTests/PersonalCopilotHelperTreeReachabilityTests.swift
++++ b/Tests/AppTests/PersonalCopilotHelperTreeReachabilityTests.swift
+@@ -15,7 +15,7 @@ final class PersonalCopilotHelperTreeReachabilityTests: XCTestCase {
+               case let .VStack(chat) = layout.elements[1],
+               case let .VStack(rail) = try PersonalCopilotConfigurationFactory.helperTreeCandidate(),
+               case let .ScrollView(rows) = rail.elements[2],
+-              case let .List(visibleRows)? = rows.elements.first else {
++              case let .Tree(visibleRows)? = rows.elements.first else {
+             return XCTFail("Expected a rail beside the conversation with a bounded row scroller")
+         }
+         XCTAssertEqual(layout.modifiers?.styleRole, "butler-helper-tree-layout")
+@@ -30,6 +30,10 @@ final class PersonalCopilotHelperTreeReachabilityTests: XCTestCase {
+         XCTAssertEqual(rows.axis, "vertical")
+         XCTAssertEqual(rows.modifiers?.height, 216)
+         XCTAssertEqual(visibleRows.keypath, "chatHub.state.ui.helperTree.visibleRows")
++        XCTAssertEqual(visibleRows.selectionActionKeypath, "chatHub.ui.helperTree.selectNode")
++        XCTAssertEqual(visibleRows.expansionActionKeypath, "chatHub.ui.helperTree.setExpanded")
++        XCTAssertEqual(visibleRows.selectedIDStateKeypath, "chatHub.state.ui.helperTree.scope.nodeID")
++        XCTAssertEqual(visibleRows.levelKeypath, "level")
+         XCTAssertTrue(HelperTreeSkeletonReachabilityAudit.reachableActionKeypaths(.VStack(rail)).contains("chatHub.ui.helperTree.setScopeMode"))
+     }
+ 
+@@ -58,10 +62,15 @@ final class PersonalCopilotHelperTreeReachabilityTests: XCTestCase {
+         let expected: Set<String> = ["selectNode", "setExpanded", "setScopeMode", "open", "close"].reduce(into: []) {
+             $0.insert("chatHub.ui.helperTree.\($1)")
+         }
+-        let reachable = HelperTreeSkeletonReachabilityAudit.reachableActionKeypaths(skeleton)
++        // WP-B1: the test-support copy predates Tree; CellBase's own audit
++        // walks Tree rows and their selection/expansion actions (T-F2).
++        // Unqualified on purpose: CellBase also declares `struct CellBase`, so
++        // `CellBase.SkeletonReachabilityAudit` would name the struct, not the module.
++        let reachable = SkeletonReachabilityAudit.reachableActionKeypaths(skeleton)
+         XCTAssertTrue(expected.isSubset(of: reachable), "Missing actions: \(expected.subtracting(reachable).sorted())")
+-        let lost = HelperTreeSkeletonReachabilityAudit.audit(skeleton).flatMap(\.lostActionKeypaths)
++        let lost = SkeletonReachabilityAudit.audit(skeleton).flatMap(\.lostActionKeypaths)
+         XCTAssertTrue(Set(lost).intersection(expected).isEmpty)
+-        XCTAssertTrue(HelperTreeSkeletonReachabilityAudit.audit(try PersonalCopilotConfigurationFactory.helperTreeCandidate()).isEmpty)
++        let candidateLost = SkeletonReachabilityAudit.audit(try PersonalCopilotConfigurationFactory.helperTreeCandidate()).flatMap(\.lostActionKeypaths)
++        XCTAssertTrue(Set(candidateLost).intersection(expected).isEmpty, "Lost: \(candidateLost)")
+     }
+ }
+diff --git a/Tests/AppTests/PersonalCopilotHelperTreeTests.swift b/Tests/AppTests/PersonalCopilotHelperTreeTests.swift
+index e2bd9877..4137b4bf 100644
+--- a/Tests/AppTests/PersonalCopilotHelperTreeTests.swift
++++ b/Tests/AppTests/PersonalCopilotHelperTreeTests.swift
+@@ -35,6 +35,31 @@ final class PersonalCopilotHelperTreeTests: IsolatedCellTestCase {
+     }
+ 
+     // §5 test.tree-model: stable root, three levels, shared tool, transactional cycle rejection.
++    func testTreeRowsCarryLevelInsetAndStateBackground() throws {
++        var tree = PersonalCopilotHelperTree.migrating(helperRows: [
++            ["id": .string("docs-rag"), "title": .string("Kilder")]
++        ])
++        XCTAssertNil(tree.apply(action: "open", payload: .object([:])))
++        guard case let .object(projected)? = tree.project(into: [:])["helperTree"],
++              case let .list(rows)? = projected["visibleRows"] else {
++            return XCTFail("Expected visibleRows")
++        }
++        let objects = rows.compactMap { value -> Object? in if case let .object(row) = value { return row }; return nil }
++        XCTAssertEqual(objects.count, rows.count)
++        XCTAssertFalse(objects.isEmpty)
++        for row in objects {
++            guard case let .integer(level)? = row["level"], case let .integer(visualDepth)? = row["visualDepth"],
++                  case let .integer(inset)? = row["leadingInset"], case let .string(background)? = row["rowBackground"],
++                  case let .string(state)? = row["rowState"] else {
++                return XCTFail("Missing Tree fields in \(row)")
++            }
++            XCTAssertGreaterThanOrEqual(level, 1)
++            XCTAssertEqual(inset, [3, 11, 27][visualDepth])
++            XCTAssertEqual(background, ["selected": "#e8f1f9", "inscope": "#f3f8fc", "normal": "#ffffff"][state])
++        }
++        XCTAssertEqual(objects.first?["level"], .integer(1), "Root is level 1")
++    }
++
+     func testTreeModelThreeLevelsSharedReferenceAndCycleRejection() throws {
+         var tree = PersonalCopilotHelperTree.migrating(helperRows: [])
+         let originalRoot = tree.nodes[0]

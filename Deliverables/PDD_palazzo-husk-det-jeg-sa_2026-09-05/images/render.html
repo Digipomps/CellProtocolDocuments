@@ -1,0 +1,95 @@
+<!doctype html><html lang="no"><head><meta charset="utf-8">
+<style>
+:root{--olive:#556b3f;--terra:#832c03;--sand:#dacab9;--yellow:#f0bd41;--navy:#213963;--cold:#e6eaf0;--paper:#f8f5f2;--ink:#2b2b2b}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:Futura,"Jost","Century Gothic",sans-serif;font-size:15px;line-height:1.35}
+.phone{width:390px;height:844px;background:var(--paper);position:relative;overflow:hidden}
+.pad{padding:18px}
+.section{margin-bottom:18px}
+.section>h2{font-family:"Playfair Display","Noe Display",Georgia,serif;font-weight:600;color:var(--olive);font-size:20px;margin:0 0 8px;padding-bottom:6px;border-bottom:1px solid var(--olive);box-shadow:0 2px 0 var(--paper),0 3px 0 var(--olive)}
+.vstack{display:flex;flex-direction:column}.hstack{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center}
+.t-title2{font-family:"Playfair Display",Georgia,serif;font-size:22px;color:var(--olive)}
+.t-headline{font-weight:600;font-size:16px;color:var(--olive)}
+.t-body{font-size:15px}.t-caption{font-size:12.5px;color:#5c5c5c}
+.b{font-weight:700}
+button{font:inherit;font-size:14px;padding:8px 12px;border-radius:999px;border:1.5px solid var(--olive);background:transparent;color:var(--olive);display:inline-flex;gap:6px;align-items:center}
+button.primary{background:var(--olive);color:var(--paper)}
+button.danger{border-color:var(--terra);color:var(--terra)}
+.pz-match-card{background:var(--cold);color:var(--navy);border-left:4px solid var(--navy)}
+.pz-match-card .t-headline,.pz-match-card .t-caption{color:var(--navy)}
+.pz-match-expired{background:#efe9e3;color:#6b6b6b;border-left-color:#b8ada0}.pz-match-expired *{color:#6b6b6b!important}
+.pz-shared-card{background:var(--cold);color:var(--navy)}.pz-shared-card .t-headline{color:var(--navy)}
+.pz-tag-card{background:#fff;border:1px solid var(--sand)}
+.pz-remembered{background:var(--cold);color:var(--navy)}
+.pz-guest-mode{background:#fff;border:1px solid var(--sand)}
+input{font:inherit;width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--sand);border-radius:8px;background:#fff}
+textarea{font:inherit;width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--sand);border-radius:10px;background:#fff;min-height:56px}
+hr{border:0;border-top:1px solid var(--sand);margin:4px 0}
+.backdrop{position:absolute;inset:0;background:rgba(43,43,43,.45)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--paper);border-radius:18px 18px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.2)}
+.topbar{display:flex;justify-content:space-between;font-size:12px;padding:10px 18px 0;color:#777}
+.hero{background:var(--olive);color:var(--paper);padding:16px 18px 14px;margin:0 -18px 14px}
+.hero .name{font-family:"Playfair Display",Georgia,serif;color:var(--yellow);font-size:26px;letter-spacing:.5px}
+.hero .sub{font-size:12.5px;opacity:.9}
+.staff .hero{background:var(--navy)}
+</style></head><body>
+<div id="root"></div>
+<script>
+const params=new URLSearchParams(location.search);const view=params.get('view');
+function el(t,c,txt){const e=document.createElement(t);if(c)e.className=c;if(txt!=null)e.textContent=txt;return e}
+function get(data,kp){if(kp==null)return '';if(kp in data)return data[kp];const parts=kp.split('.');let v=data;for(const p of parts){if(v==null)return '';v=v[p]}return v==null?'':v}
+function mods(node,m){if(!m)return;if(m.padding)node.style.padding=m.padding+'px';if(m.cornerRadius)node.style.borderRadius=m.cornerRadius+'px';if(m.maxWidthInfinity)node.style.width='100%';if(m.styleClasses)m.styleClasses.forEach(c=>node.classList.add(c));if(m.hAlignment==='leading')node.style.alignItems='flex-start';node.style.boxSizing='border-box'}
+function render(sk,data){
+ const [k,v]=Object.entries(sk)[0];
+ switch(k){
+  case 'Section':{const s=el('div','section');s.appendChild(Object.assign(el('h2'),{textContent:v.header.Text.text}));const c=el('div','vstack');c.style.gap='8px';v.content.forEach(x=>c.appendChild(render(x,data)));s.appendChild(c);return s}
+  case 'VStack':{const s=el('div','vstack');s.style.gap=(v.spacing||0)+'px';mods(s,v.modifiers);v.elements.forEach(x=>s.appendChild(render(x,data)));return s}
+  case 'HStack':{const s=el('div','hstack');s.style.gap=(v.spacing||0)+'px';mods(s,v.modifiers);v.elements.forEach(x=>s.appendChild(render(x,data)));return s}
+  case 'Text':{const m=v.modifiers||{};const t=el('div','t-'+(m.fontStyle||'body')+(m.fontWeight==='bold'?' b':''),v.text!=null?v.text:String(get(data,v.keypath)));return t}
+  case 'Button':{const b=el('button',null,v.label);if(/Denne gangen|Se og svar|Godkjenn tagger|Publiser/.test(v.label))b.classList.add('primary');if(/Nei|Trekk tilbake|Fjern/.test(v.label))b.classList.add('danger');b.title=v.keypath;return b}
+  case 'List':{const s=el('div','vstack');s.style.gap='10px';const rows=get(data,v.keypath)||[];rows.forEach(r=>s.appendChild(render(v.flowElementSkeleton,r)));return s}
+  case 'Divider':return el('hr');
+  case 'TextField':{const i=el('input');i.value=get(data,v.sourceKeypath)||'';i.placeholder=v.placeholder||'';return i}
+  case 'TextArea':{const i=el('textarea');i.placeholder=v.placeholder||'';return i}
+  default:return el('div',null,'[?'+k+']')
+ }
+}
+async function load(n){const j=await (await fetch('skeleton/'+n+'.json')).json();return j.skeleton}
+const guestHead=()=>{const h=el('div','hero');h.appendChild(el('div','name','Palazzo Comunale'));h.appendChild(el('div','sub','cibo, vino e libertà · Grønland, Oslo'));return h};
+const staffHead=()=>{const h=el('div','hero');h.appendChild(el('div','name','Palazzo · kelner'));h.appendChild(el('div','sub','På vakt: Sara, Mattia · 14 bookinger · 41 kuverter'));return h};
+function guestRest(root){
+ root.appendChild(render({Section:{header:{Text:{text:'Slik kan kvelden se ut'}},content:[{List:{keypath:'modes',flowElementSkeleton:{VStack:{spacing:4,modifiers:{padding:12,cornerRadius:12,maxWidthInfinity:true,styleClasses:['pz-guest-mode']},elements:[{Text:{keypath:'title',modifiers:{fontStyle:'headline'}}},{Text:{keypath:'subtitle'}},{Text:{keypath:'badge',modifiers:{fontStyle:'caption'}}}]}}}}]}},{modes:[{title:'Middag ved bordet',subtitle:'Bestill fra egen telefon, kelneren kommer',badge:'17–23'},{title:'Aperitivo i baren',subtitle:'Uten booking',badge:'16–19'}]}));
+ root.appendChild(render({Section:{header:{Text:{text:'Din egen entitet'}},content:[{Text:{text:'Alt du legger inn her blir liggende hos deg. Palazzo får bare svar på det du sier ja til.'}},{Text:{text:'3 poster',modifiers:{fontStyle:'caption'}}},{TextArea:{placeholder:'Hva er anledningen i kveld?'}}]}},{}));
+}
+(async()=>{
+ const root=document.getElementById('root');const phone=el('div','phone');root.appendChild(phone);
+ const pad=el('div','pad');
+ const match={id:'m1',signalTitle:'Ny på menyen: Chambre — geitost fra Piemonte',explanation:'Fordi du skrev «vil prøve chambre neste gang» 14. mars',stateLabel:'Ikke delt. Palazzo vet ingenting om dette ennå.'};
+ if(view==='treffkort-fylt'||view==='treffkort-tom'||view==='treffkort-feil'||view==='delt'){
+  pad.appendChild(guestHead());
+  if(view==='treffkort-fylt'){pad.appendChild(render(await load('gjest-treffkort'),{entity:{match:{pending:[match]}}}))}
+  if(view==='treffkort-feil'){pad.appendChild(render(await load('gjest-treffkort-feil'),{entity:{match:{pending:[{...match,stateLabel:'Utløpt 4. sept. før du svarte. Ingenting ble delt.'}]}}}))}
+  if(view==='delt'){pad.appendChild(render(await load('gjest-delt'),{entity:{match:{shared:[{id:'m1',signalTitle:'Ny på menyen: Chambre — geitost fra Piemonte',explanation:'Fordi du skrev «vil prøve chambre neste gang» 14. mars',grantsLabel:'Innsyn: alltid · Handling: denne gangen (sitting 5. sept.)',issuedAtLabel:'Delt 5. sept. 2026 · signert av deg'}]}}}))}
+  guestRest(pad);phone.appendChild(pad);
+ }
+ if(view==='samtykke'){
+  pad.appendChild(guestHead());pad.appendChild(render(await load('gjest-treffkort'),{entity:{match:{pending:[match]}}}));guestRest(pad);phone.appendChild(pad);
+  phone.appendChild(el('div','backdrop'));const sheet=el('div','sheet');
+  const sk=await load('gjest-samtykke-to-grants');sk.VStack.modifiers.presentation=undefined;sk.VStack.spacing=8;sk.VStack.modifiers.padding=14;
+  sheet.appendChild(render(sk,{entity:{consent:{prompt:{match:{signalTitle:match.signalTitle,explanation:match.explanation}}}}}));phone.appendChild(sheet);
+ }
+ if(view==='hus-tagger'){
+  phone.classList.add('staff');const hh=el('div','hero');hh.appendChild(el('div','name','Palazzo · huset'));hh.appendChild(el('div','sub','Utkast til meny · 1 ny rett'));pad.appendChild(hh);
+  pad.appendChild(render(await load('hus-tagger'),{content:{draft:{tags:{pending:[{id:'d7',dishTitle:'Chambre',dishDescription:'Geitost fra Piemonte, honning, valnøtt',proposedTagsText:'chambre, geitost, piemonte, ost, honning, valnøtt'}]}}}}));
+  phone.appendChild(pad);
+ }
+ if(view==='kelner'){
+  phone.classList.add('staff');pad.appendChild(staffHead());
+  pad.appendChild(render({Section:{header:{Text:{text:'Bord 7 · 2 · 19:30'}},content:[{Text:{text:'Anledning: bursdag — fra gjesten',modifiers:{fontStyle:'body'}}},{Text:{text:'Språk: norsk',modifiers:{fontStyle:'caption'}}}]}},{}));
+  pad.appendChild(render({Section:{header:{Text:{text:'Delt av gjesten'}},content:[{Text:{text:'Dette har gjesten selv valgt å dele med huset.',modifiers:{fontStyle:'caption'}}},{Text:{text:'Besøk: 3. gang · sist 14. mars'}}]}},{}));
+  pad.appendChild(render(await load('kelner-husker'),{staff:{state:{lastBrief:{remembered:[{line:'«vil prøve chambre neste gang» — 14. mars → Chambre er på menyen i kveld',actionLabel:'Gjesten har sagt ja til at du gjør noe med det. Signert, verifisert.'}]}}}}));
+  pad.appendChild(render({Section:{header:{Text:{text:'Ikke delt'}},content:[{Text:{text:'Dette har gjesten ikke delt. Det er et gyldig svar — ikke et hull som skal fylles med gjetning.',modifiers:{fontStyle:'caption'}}},{Text:{text:'Interesser, hensyn'}}]}},{}));
+  phone.appendChild(pad);
+ }
+ document.title='ready';
+})();
+</script></body></html>

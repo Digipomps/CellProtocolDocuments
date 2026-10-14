@@ -1,0 +1,269 @@
+{
+  "schemaVersion": "proposal.workbench.v1",
+  "status": "design-only-not-runtime-API",
+  "scope": "Workbench integration; no global Meddle or FlowElement shape change implied",
+  "operations": [
+    "selectPerspective",
+    "savePackage",
+    "selectModel",
+    "sendMessage",
+    "cancelTurn",
+    "proposeAction",
+    "executeProposal",
+    "shareSelection",
+    "searchHistory"
+  ],
+  "draftOperations": [
+    "savePackage",
+    "sendMessage",
+    "searchHistory"
+  ],
+  "contracts": {
+    "command": {
+      "required": [
+        "schemaVersion",
+        "commandID",
+        "sessionID",
+        "expectedRevision",
+        "operation",
+        "input"
+      ],
+      "rule": "Requester is resolved from authenticated context, never trusted from input. Duplicate commandID with different canonical payload hash is rejected. Mutations revalidate current authority."
+    },
+    "mountContext": {
+      "required": [
+        "sourceCellEndpoint",
+        "instanceID",
+        "componentID",
+        "revision"
+      ],
+      "rule": "Separate authenticated host/transport context, not Meddle payload or authority. Server validates binding to session/source. Unsupported bridge fails closed."
+    },
+    "event": {
+      "required": [
+        "schemaVersion",
+        "eventID",
+        "aggregateID",
+        "revision",
+        "correlationID",
+        "causationID",
+        "occurredAt",
+        "purposeRefs",
+        "audience",
+        "type",
+        "payloadRef"
+      ],
+      "rule": "Persist before publish. Emitter identity is verified through runtime source and authenticated envelope; a claimed event field is insufficient."
+    },
+    "commitReceipt": {
+      "required": [
+        "commandID",
+        "aggregateID",
+        "revision",
+        "eventIDs",
+        "durabilityStatus"
+      ],
+      "rule": "Only committed means authoritative storage accepted. Chronicle/index projection cursors remain separate. Failure or unknown is not success."
+    },
+    "outbox": {
+      "required": [
+        "eventID",
+        "aggregateID",
+        "revision",
+        "deliveryState"
+      ],
+      "rule": "Durable alongside authoritative commit or derived idempotently from journal. At-least-once delivery, deduplicate by eventID."
+    },
+    "eventNotification": {
+      "required": [
+        "eventID",
+        "aggregateID",
+        "revision",
+        "type"
+      ],
+      "rule": "Flow may carry only a permitted minimal notice. Fetching payload requires same authorization. Do not broadcast private content/counts to shared listeners."
+    },
+    "snapshotCursor": {
+      "required": [
+        "aggregateID",
+        "revision",
+        "cursor",
+        "schemaVersion"
+      ],
+      "rule": "Subscribe then snapshot and reconcile buffered events. eventsSince returns explicit gap/snapshot-required when history compacted; cursor opaque and scoped."
+    },
+    "packageRevision": {
+      "required": [
+        "packageID",
+        "revision",
+        "ownerRef",
+        "purposeRefs",
+        "instructionsRef",
+        "skillRefs",
+        "contextRefs",
+        "audience"
+      ],
+      "rule": "Immutable published revision. Skills and context refs include version/hash. Package selection adds no grants."
+    },
+    "turnBinding": {
+      "required": [
+        "turnID",
+        "sessionID",
+        "packageID",
+        "packageRevision",
+        "routeID",
+        "providerID",
+        "modelID",
+        "inputManifestRef",
+        "purposeRefs",
+        "budgetRef"
+      ],
+      "rule": "Immutable after dispatch; actual provider/model recorded in result, no silent fallback. Revocation checked before dispatch. Credentials remain protected references outside prompt."
+    },
+    "invocationReceipt": {
+      "required": [
+        "turnID",
+        "attemptID",
+        "state",
+        "sourceReceiptRef"
+      ],
+      "rule": "State accepted/running/completed/failed/cancelRequested/cancelled/unknown must come from actual provider/adapter. Late response keeps original binding."
+    },
+    "actionProposal": {
+      "required": [
+        "proposalID",
+        "revision",
+        "proposalHash",
+        "actionKind",
+        "resourceBinding",
+        "requiredCapabilityRefs",
+        "inputSummary",
+        "purposeRefs"
+      ],
+      "rule": "Preview is not approval. Bind target IDs/environment/PR SHAs; revalidate authority and fresh target at execution. Source/proposal text untrusted."
+    },
+    "effectAttempt": {
+      "required": [
+        "attemptID",
+        "commandID",
+        "proposalID",
+        "proposalHash",
+        "executorRef",
+        "state"
+      ],
+      "rule": "Reserve durably before external await; allowed state transitions documented below. Query same ID after uncertainty; replay never dispatches."
+    },
+    "effectReceipt": {
+      "required": [
+        "attemptID",
+        "executorRef",
+        "sourceReceiptRef",
+        "state",
+        "resourceBinding"
+      ],
+      "rule": "Only validated executor receipt may claim queue/running/merge/deploy outcome. No receipt from model prose or an imported generic done status."
+    },
+    "shareProjection": {
+      "required": [
+        "shareID",
+        "sourceRefs",
+        "selectedPayloadRef",
+        "audience",
+        "retentionPolicyRef"
+      ],
+      "rule": "Explicit minimal copy with distinct ID/audience. Does not change private originals; revocation/deletion semantics explicit for this copy."
+    },
+    "query": {
+      "required": [
+        "scope",
+        "queryMode",
+        "query",
+        "limit"
+      ],
+      "rule": "Authorized corpus before ranking/count/snippets, actual requester server-side. Modes text/purpose. Cursor/filter bound to same scope and grant epoch."
+    },
+    "historyResult": {
+      "required": [
+        "eventID",
+        "sourceRef",
+        "occurredAt",
+        "audience",
+        "projectionCursor"
+      ],
+      "rule": "Only authorized payload/snippet. Open/model use revalidates. Index lag distinct from empty results; cached count/snippet/embedding inherits same boundary."
+    },
+    "migrationReceipt": {
+      "required": [
+        "migrationID",
+        "sourceRevision",
+        "targetSchemaVersion",
+        "mappingRef",
+        "checkpoint",
+        "inventoryDigest"
+      ],
+      "rule": "Idempotent per source ID/revision. Private exports not in Git; legacy gaps explicitly marked, no invented text."
+    },
+    "releaseIntent": {
+      "required": [
+        "releaseID",
+        "artifactDigest",
+        "sourceSHA",
+        "environment",
+        "mandateRef",
+        "verificationRefs",
+        "rollbackRef"
+      ],
+      "rule": "Only Admin/canonical deploy queue executor. Fresh claim/capacity check and staging evidence; a merged commit alone is not deployed."
+    }
+  },
+  "commandRules": {
+    "schemaVersion": 1,
+    "expectedRevision": "nonnegative integer",
+    "draftSnapshot": "Required for draft operations: mountInstanceID, fieldSequence, fieldKey, text; captured at button event, not inferred from global active state. Server validates against mountContext; package persistence has its own expectedPackageRevision.",
+    "legacyCompatibility": "Existing v0 callers remain behind explicit versioned adapter. Never infer a mounted caller session from legacy global selected state. Unknown wire version fails closed."
+  },
+  "effectTransitions": {
+    "reserved": [
+      "dispatched",
+      "denied",
+      "failed"
+    ],
+    "dispatched": [
+      "accepted",
+      "unknown",
+      "failed"
+    ],
+    "accepted": [
+      "running",
+      "completed",
+      "failed",
+      "cancelRequested",
+      "unknown"
+    ],
+    "running": [
+      "completed",
+      "failed",
+      "cancelRequested",
+      "unknown"
+    ],
+    "cancelRequested": [
+      "cancelled",
+      "completed",
+      "failed",
+      "unknown"
+    ],
+    "unknown": [
+      "accepted",
+      "running",
+      "completed",
+      "failed",
+      "cancelled"
+    ],
+    "completed": [],
+    "denied": [],
+    "failed": [],
+    "cancelled": []
+  },
+  "effectTransitionRule": "Transitions require authoritative evidence, including resolution from unknown. Replay reconstructs state only and never starts an attempt. A new attempt after terminal failure is separate, authorized and linked.",
+  "retentionContract": "retention.json"
+}

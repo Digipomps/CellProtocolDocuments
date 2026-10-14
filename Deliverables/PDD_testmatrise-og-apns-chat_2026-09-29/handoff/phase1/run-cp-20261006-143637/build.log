@@ -1,0 +1,99 @@
+warning: 'cellprotocol': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/Build/pdd-check/impl/CellProtocol/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/Build/pdd-check/impl/CellProtocol/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/Build/pdd-check/impl/CellProtocol/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Provisioning 10 / 166]
+[Using on-disk description]
+[7 / 261]
+[7 / 137] NIOHTTP2
+[11 / 30] CellBase
+[15 / 34] CellBase
+/Users/kjetil/Build/pdd-check/impl/CellProtocol/Sources/CellBase/PersistingCells/EntityRelationRecordV1.swift:321:16: [1;33mwarning: [1;39mstored property 'entityRepresentation' of 'Sendable'-conforming struct 'EntityRelationRecord' contains non-Sendable type 'EntityRepresentation'; this is an error in the Swift 6 language mode[0;0m
+ [0;36m319 |[0;0m     /// Canonical owner-held knowledge when present. The legacy subject/tags/
+ [0;36m320 |[0;0m     /// purposeRefs remain readable for existing clients and import adapters.
+ [0;36m321 |[0;0m     public var entityRepresentation: EntityRepresentation?
+     [0;36m|[0;0m                `- [1;33mwarning: [1;39mstored property 'entityRepresentation' of 'Sendable'-conforming struct 'EntityRelationRecord' contains non-Sendable type 'EntityRepresentation'; this is an error in the Swift 6 language mode[0;0m
+ [0;36m322 |[0;0m 
+ [0;36m323 |[0;0m     public init(
+
+/Users/kjetil/Build/pdd-check/impl/CellProtocol/Sources/CellBase/PurposeAndInterest/EntityRepresentation.swift:61:14: [1;39mnote: [1;39mclass 'EntityRepresentation' does not conform to the 'Sendable' protocol[0;0m
+ [0;36m59 |[0;0m 
+ [0;36m60 |[0;0m 
+ [0;36m61 |[0;0m public class EntityRepresentation:  PerspectiveNodeImpl {
+    [0;36m|[0;0m              `- [1;39mnote: [1;39mclass 'EntityRepresentation' does not conform to the 'Sendable' protocol[0;0m
+ [0;36m62 |[0;0m 
+ [0;36m63 |[0;0m     var fulfilled: Fullfilled = Fullfilled() // Until Interests and Purposes are moved
+
+/Users/kjetil/Build/pdd-check/impl/CellProtocol/Sources/CellBase/PurposeAndInterest/ClaimComposition.swift:36:16: [1;33mwarning: [1;39mstored property 'composition' of 'Sendable'-conforming struct 'ClaimCounter' has non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode[0;0m
+ [0;36m34 |[0;0m public struct ClaimCounter: Codable, Equatable, Sendable {
+ [0;36m35 |[0;0m     public var role: ClaimCounterRole
+ [0;36m36 |[0;0m     public var composition: ClaimComposition
+    [0;36m|[0;0m                `- [1;33mwarning: [1;39mstored property 'composition' of 'Sendable'-conforming struct 'ClaimCounter' has non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode[0;0m
+ [0;36m37 |[0;0m 
+ [0;36m38 |[0;0m     public init(role: ClaimCounterRole, composition: ClaimComposition) {
+    [0;36m:[0;0m
+[0;36m187 |[0;0m }
+[0;36m188 |[0;0m 
+[0;36m189 |[0;0m public indirect enum ClaimComposition: Codable, Equatable {
+    [0;36m|[0;0m                      `- [1;39mnote: [1;39mconsider making enum 'ClaimComposition' conform to the 'Sendable' protocol[0;0m
+[0;36m190 |[0;0m     case claim(ClaimCompositionLeaf)
+[0;36m191 |[0;0m     // allOf: linked premises, weakest link decides the score.
+
+/Users/kjetil/Build/pdd-check/impl/CellProtocol/Sources/CellBase/PurposeAndInterest/ClaimDefinition.swift:91:16: [1;33mwarning: [1;39mstored property 'composition' of 'Sendable'-conforming struct 'ClaimDefinition' contains non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode[0;0m
+ [0;36m89 |[0;0m     public var goalID: String?
+ [0;36m90 |[0;0m     public var supports: [ClaimSupportNode]
+ [0;36m91 |[0;0m     public var composition: ClaimComposition?
+    [0;36m|[0;0m                `- [1;33mwarning: [1;39mstored property 'composition' of 'Sendable'-conforming struct 'ClaimDefinition' contains non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode[0;0m
+ [0;36m92 |[0;0m     public var tags: [String]
+ [0;36m93 |[0;0m 
+
+/Users/kjetil/Build/pdd-check/impl/CellProtocol/Sources/CellBase/PurposeAndInterest/ClaimComposition.swift:189:22: [1;39mnote: [1;39mconsider making enum 'ClaimComposition' conform to the 'Sendable' protocol[0;0m
+[0;36m187 |[0;0m }
+[0;36m188 |[0;0m 
+[0;36m189 |[0;0m public indirect enum ClaimComposition: Codable, Equatable {
+    [0;36m|[0;0m                      `- [1;39mnote: [1;39mconsider making enum 'ClaimComposition' conform to the 'Sendable' protocol[0;0m
+[0;36m190 |[0;0m     case claim(ClaimCompositionLeaf)
+[0;36m191 |[0;0m     // allOf: linked premises, weakest link decides the score.
+
+/Users/kjetil/Build/pdd-check/impl/CellProtocol/Sources/CellBase/PurposeAndInterest/PerspectiveEntityProjection.swift:30:16: [1;33mwarning: [1;39mstored property 'entities' of 'Sendable'-conforming struct 'PerspectiveEntityProjection' contains non-Sendable type 'Weight<EntityRepresentation>'; this is an error in the Swift 6 language mode[0;0m
+ [0;36m28 |[0;0m     /// delayed write cannot resurrect entities a newer one removed.
+ [0;36m29 |[0;0m     public let epoch: Int
+ [0;36m30 |[0;0m     public let entities: [Weight<EntityRepresentation>]
+    [0;36m|[0;0m                `- [1;33mwarning: [1;39mstored property 'entities' of 'Sendable'-conforming struct 'PerspectiveEntityProjection' contains non-Sendable type 'Weight<EntityRepresentation>'; this is an error in the Swift 6 language mode[0;0m
+ [0;36m31 |[0;0m 
+ [0;36m32 |[0;0m     public init(source: String, epoch: Int, entities: [Weight<EntityRepresentation>]) {
+
+/Users/kjetil/Build/pdd-check/impl/CellProtocol/Sources/CellBase/PurposeAndInterest/Weight.swift:13:15: [1;39mnote: [1;39mconsider making generic struct 'Weight' conform to the 'Sendable' protocol[0;0m
+ [0;36m11 |[0;0m import Foundation
+ [0;36m12 |[0;0m 
+ [0;36m13 |[0;0m public struct Weight<T: PerspectiveNode & Codable> :  Weighted, Codable {
+    [0;36m|[0;0m               `- [1;39mnote: [1;39mconsider making generic struct 'Weight' conform to the 'Sendable' protocol[0;0m
+ [0;36m14 |[0;0m     
+ [0;36m15 |[0;0m     
+
+/Users/kjetil/Build/pdd-check/impl/CellProtocol/Sources/CellBase/PurposeAndInterest/RelationalLearningModels.swift:95:16: [1;33mwarning: [1;39mstored property 'payload' of 'Sendable'-conforming struct 'RelationalLearningEventEnvelope' contains non-Sendable type 'ValueType'; this is an error in the Swift 6 language mode[0;0m
+ [0;36m93 |[0;0m     public var schemaVersion: String
+ [0;36m94 |[0;0m     public var emittedAt: TimeInterval
+ [0;36m95 |[0;0m     public var payload: Object
+    [0;36m|[0;0m                `- [1;33mwarning: [1;39mstored property 'payload' of 'Sendable'-conforming struct 'RelationalLearningEventEnvelope' contains non-Sendable type 'ValueType'; this is an error in the Swift 6 language mode[0;0m
+ [0;36m96 |[0;0m 
+ [0;36m97 |[0;0m     public init(eventType: RelationalLearningEventType,
+
+/Users/kjetil/Build/pdd-check/impl/CellProtocol/Sources/CellBase/ValueTypes/ValueType.swift:11:22: [1;39mnote: [1;39mconsider making enum 'ValueType' conform to the 'Sendable' protocol[0;0m
+  [0;36m9 |[0;0m #endif
+ [0;36m10 |[0;0m 
+ [0;36m11 |[0;0m public indirect enum ValueType: Codable {
+    [0;36m|[0;0m                      `- [1;39mnote: [1;39mconsider making enum 'ValueType' conform to the 'Sendable' protocol[0;0m
+ [0;36m12 |[0;0m     case flowElement(FlowElement)
+ [0;36m13 |[0;0m     case bool(Bool)
+[20 / 30] CellBase
+[21 / 30] CellBase
+[27 / 27] CellBase-product
+[27 / 27] CellVapor-product
+[27 / 28] haven-commons-product
+[28 / 28] CellRuntimeBenchmarks-product
+[30 / 30] CellRuntimeBenchmarks-product
+[32 / 32] ReferenceLoadBenchmark-product
+Build complete! (9,01 sek)

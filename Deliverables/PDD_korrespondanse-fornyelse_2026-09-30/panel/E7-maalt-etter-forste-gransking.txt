@@ -1,0 +1,39 @@
+Målt på Kjetils Mac 02.10.2026 kl. 12:18–12:26Z, etter at Fabel leverte første gransking. Utdrag av jobbloggene 251, 252 og 253, og av filer i arbeidstreet.
+
+== K7: diffen 415ea3d2 -> 06f32050 (kilder), hele
+@@ AssistantCorrespondenceCell.swift
+-  /// En tilgang venter på fornyelse bare når den er utløpt og verken tilgangen eller
+-  /// principalen er tilbakekalt. ...
++  static let renewalWindow: TimeInterval = 7 * 24 * 60 * 60
+   static func grantAwaitsRenewal(...)
+-    return expiresAt <= now
++    return expiresAt <= now.addingTimeInterval(renewalWindow)
+(pluss endrede kommentarer; ingen andre kodeendringer)
+Og i diffen feec2372 -> 415ea3d2: `grantAwaitsRenewal` returnerer `expiresAt <= now`; `renewsGrantID` kom med 415ea3d2.
+
+== K4: hvordan tilstanden lagres
+Cellen har egen `init(from decoder:)` med nøklet container og dekoder `[String: AssistantCorrespondenceAccessRequestRecord]`. Record-typen har syntetisert Codable. Den har flere valgfrie felt lagt til tidligere på samme måte (`notificationDiagnostic: String? = nil`, `notificationAttemptedAt`, `decisionChannel` m.fl.), og `renewsGrantID: String? = nil` er lagt til sist. Ingen test leser ny tilstand med en eldre utgivelse.
+
+== K9: jobbskriptet 239 (02.10)
+/usr/bin/arch -arm64 swift build --build-tests > …full.log
+/usr/bin/arch -arm64 swift test --skip-build --filter "AssistantCorrespondence" > …full.log
+(ingen `scripts/run_swift_bounded.sh`, ingen kapasitetsvakt)
+
+== Victoria
+TESTRESULT.md linje 56 (skrevet 30.09): «Sending til Victoria: `message.send` til `victoria-lille-robot` ga `recipient_not_allowed`.»
+
+== Klienten
+`haven-correspondence-mcp --help` lister: setup, activate, doctor, identity, serve.
+`identity --profile kjetil-vegar-d` gir bl.a. nøklene: deviceID, principalID, profile, status, accessRequestID, accessProof.expiresAt, accessProof.credentialID.
+
+== PR 277
+mergeable MERGEABLE, mergeStateStatus CLEAN, sjekken «Focused control-plane gates» COMPLETED SUCCESS (kjøring 36998795184, hode d83d9f6b). Image-bygget for 06f32050 (36998313078) pågår fortsatt.
+
+== Kjetils valg 01.10 om bcd45de
+På spørsmålet «Vegar vil ha bcd45de … Hva vil du?» valgte Kjetil «Start en PDD (anbefalt)»: først sjekke om bygget faktisk feiler mot den pinnede utgivelsen, så formålsspesifikasjon og tester før noe går til main i CellProtocol.
+
+== Det Losen har endret etter granskingen (filer i ../pdd-korr/handoff/)
+- KOORDINERING-tillegg-20261002.md: teksten som foreslås lagt til i _losen-queue/KOORDINERING.md. Den legges ikke inn før Kjetil har sagt ja, fordi fila tilhører kø-tråden og ligger utenfor mappene denne tråden har.
+- RAD-koordinert-20261002.txt: én rad til tabellen «Tråder som har koordinert».
+- VEGAR-svar-utkast-v2.md: nytt utkast til svar.
+- A0-rekkefolge-valg.md: valget som legges fram for Kjetil.

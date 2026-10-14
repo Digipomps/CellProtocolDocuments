@@ -1,0 +1,3191 @@
+diff --git a/.github/workflows/admin-scaffold-image.yml b/.github/workflows/admin-scaffold-image.yml
+index 8c8e55a6..e3f2a3d9 100644
+--- a/.github/workflows/admin-scaffold-image.yml
++++ b/.github/workflows/admin-scaffold-image.yml
+@@ -273,6 +273,7 @@ jobs:
+           npm ci
+           npm run test:workbench-shared-access-verify-existing
+           npm run test:staging-conference-message-contract
++          npm run test:arendalsuka-action-state
+           npx playwright install --with-deps chromium
+           npm run test:admin-web
+           npx playwright test --config=playwright.config.js playwright/rich-document.spec.js playwright/porthole-skeleton-atomic-swap.spec.js playwright/porthole-skeleton-localization.spec.js playwright/skeleton-localization.spec.js
+@@ -329,6 +330,7 @@ jobs:
+           PORTHOLE_CHAT_BASE_URL=http://127.0.0.1:9089 \
+           PORTHOLE_CHAT_PASSWORD='LocalButlerExplicitHelper!2026' \
+           ARENDALSUKA_DEMO_BASE_URL=http://127.0.0.1:9089 \
++          ARENDALSUKA_PROFILE_BASE_URL=http://127.0.0.1:9089 \
+           ARENDALSUKA_DEMO_PASSWORD='LocalArendalsukaUserProof!2026' \
+           ARENDALSUKA_EXPECTED_REVISION="$GITHUB_SHA" \
+             npx playwright test --config=playwright.config.js \
+@@ -336,6 +338,7 @@ jobs:
+               playwright/skeleton-workbench-autoscroll.spec.js \
+               playwright/cellconfiguration-studio-upload.smoke.spec.js \
+               playwright/arendalsuka-onboarding-matching.smoke.spec.js \
++              playwright/arendalsuka-participant-profile.spec.js \
+               playwright/butterpop-queue.spec.js \
+               playwright/butterpop-mix-tidy.spec.js \
+               playwright/skeleton-tabs-optimistic-hold.spec.js
+diff --git a/Public/js/porthole-webo.js b/Public/js/porthole-webo.js
+index 029d8428..e20dfbd3 100644
+--- a/Public/js/porthole-webo.js
++++ b/Public/js/porthole-webo.js
+@@ -9285,7 +9285,12 @@ function startSilentFieldAction(entry) {
+   entry.promise = (async () => {
+     try {
+       const actionResult = await postJSON(actionURL, { keypath: entry.keypath, payload: entry.payload });
+-      applyActionResultState(entry.keypath, actionResult, entry.payload, entry.actionSeq);
++      if (applyActionResultState(entry.keypath, actionResult, entry.payload, entry.actionSeq)) {
++        // A field can commit state used by other controls (for example a
++        // position label also changes the sharing mode). Keep the mounted
++        // inputs/focus while showing the acknowledged state immediately.
++        render({ preserveSkeletonDOM: true });
++      }
+     } catch (_ignore) {
+       // Keep draft syncing silent to avoid banner churn while typing.
+     } finally {
+diff --git a/Sources/App/Cells/Arendalsuka/ArendalsukaConnectionHubCell.swift b/Sources/App/Cells/Arendalsuka/ArendalsukaConnectionHubCell.swift
+index 26838c09..90bbcb0b 100644
+--- a/Sources/App/Cells/Arendalsuka/ArendalsukaConnectionHubCell.swift
++++ b/Sources/App/Cells/Arendalsuka/ArendalsukaConnectionHubCell.swift
+@@ -22,6 +22,7 @@ final class ArendalsukaConnectionHubCell: ConferenceConnectionHubCell {
+     override class var allowsSharedMessages: Bool { false }
+     override class var requiresExplicitParticipantDirectoryVisibility: Bool { true }
+     override class var supportsInterestMatching: Bool { true }
++    override class var supportsRichParticipantProfile: Bool { true }
+     override class var maximumMeetingMessageLength: Int? { 500 }
+     override class var projectsCompleteMeetingRequestPackage: Bool { true }
+     override class var unregisteredParticipantDisplayName: String { "Arendalsuka-deltaker" }
+diff --git a/Sources/App/Cells/Arendalsuka/ArendalsukaEventAtlasCell.swift b/Sources/App/Cells/Arendalsuka/ArendalsukaEventAtlasCell.swift
+index 097dddd2..4fd92e82 100644
+--- a/Sources/App/Cells/Arendalsuka/ArendalsukaEventAtlasCell.swift
++++ b/Sources/App/Cells/Arendalsuka/ArendalsukaEventAtlasCell.swift
+@@ -28,7 +28,8 @@ enum ArendalsukaAtlasImportAccessContract {
+         "atlas.ingestParticipantSource",
+         "atlas.resetParticipantSources",
+         "atlas.ingestOSMPOIs",
+-        "atlas.ingestSpeakerSnapshot"
++        "atlas.ingestSpeakerSnapshot",
++        "atlas.ingestStands"
+     ]
+ 
+     static func resource() -> CapabilityInvitationResource {
+@@ -512,7 +513,8 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+             "atlas.fetchParticipantSource",
+             "atlas.resetParticipantSources",
+             "atlas.ingestOSMPOIs",
+-            "atlas.ingestSpeakerSnapshot"
++            "atlas.ingestSpeakerSnapshot",
++            "atlas.ingestStands"
+         ].forEach {
+             ensureGrant("rw--", for: $0)
+         }
+@@ -623,6 +625,21 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+                 return await self.applyAction(keypath: keypath, value: value, requester: requester)
+             })
+         }
++        await registerSet(
++            key: "atlas.ingestStands", owner: owner,
++            input: ExploreContract.objectSchema(properties: [
++                "stands": ExploreContract.listSchema(item: ExploreContract.objectSchema()),
++                "sourceID": ExploreContract.schema(type: "string"),
++                "importAccess": ExploreContract.objectSchema()
++            ], requiredKeys: ["stands", "importAccess"]),
++            returns: ExploreContract.oneOfSchema(options: [ExploreContract.objectSchema(), ExploreContract.schema(type: "string")]),
++            permissions: ["rw--"],
++            flowEffects: [ExploreContract.flowEffect(trigger: .set, topic: "arendalsuka.event-atlas", contentType: "object")],
++            description: .string("Import source-backed public stands after signed import authorization; acknowledge only after journaling, preserving claimed actors.")
++        ) { [weak self] requester, payload in
++            guard let self else { return .null }
++            return await self.applyAction(keypath: "atlas.ingestStands", value: payload, requester: requester)
++        }
+         await registerSet(key: "atlas.fetchParticipantSource", owner: owner) { [weak self] requester, payload in
+             guard let self else { return .null }
+             guard await self.validateAccess("rw--", at: "atlas.fetchParticipantSource", for: requester) else { return .string("denied") }
+@@ -1044,7 +1061,7 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+                     let entry = try decoder.decode(LocalDataImportJournalEntry.self, from: data)
+                     entryCount += 1
+                     switch entry.action {
+-                    case "addLocalActor", "addOffer", "ingestOSMPOIs", "upsertLocalActors":
++                    case "addLocalActor", "addOffer", "ingestOSMPOIs", "upsertLocalActors", "ingestStands":
+                         for actor in entry.localActors {
+                             localActorsByID[actor.id] = actor
+                         }
+@@ -1208,6 +1225,8 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+             return ingestOSMPOIs(payload: payload, requester: requester)
+         case "atlas.ingestSpeakerSnapshot":
+             return ingestSpeakerSnapshot(payload: payload, requester: requester)
++        case "atlas.ingestStands":
++            return ingestStands(payload: payload, requester: requester)
+         default:
+             return .string("unsupported")
+         }
+@@ -1942,6 +1961,120 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+         return stateValue(requester: requester)
+     }
+ 
++    /// Ingests exhibitor stands from the `stand` source-of-truth table (see
++    /// `arendalsuka-data-pipeline` skill's `references/schema.md`) — deduplicated
++    /// exhibitor stands with coordinates from Arendalsuka's own public stands
++    /// GeoJSON API. Mirrors `ingestOSMPOIs`'s shape and dedup/claim-protection
++    /// behavior; stands become `ArendalsukaLocalActorRecord`s with `kind: .stand`
++    /// alongside OSM-imported venues/restaurants/bars/shops.
++    private func ingestStands(payload: Object, requester: Identity) -> ValueType {
++        let now = Date()
++        let sourceID = EventPlatformValueDecoding.string(payload["sourceID"]) ?? "source-arendalsuka-stands"
++        let standValues = EventPlatformValueDecoding.list(payload["stands"])
++        var candidates: [ArendalsukaLocalActorRecord] = []
++        var skippedUnnamed = 0
++
++        for value in standValues {
++            let object = EventPlatformValueDecoding.object(value)
++            guard let actor = Self.localActorRecord(fromStand: object, sourceID: sourceID, importedAt: now) else {
++                skippedUnnamed += 1
++                continue
++            }
++            candidates.append(actor)
++        }
++
++        var created = 0
++        var updated = 0
++        var skippedClaimedDuplicates = 0
++        var skippedDuplicateRows: [Object] = []
++        var importedRows: [Object] = []
++        var importedActors: [ArendalsukaLocalActorRecord] = []
++
++        var importFailed = false
++        stateQueue.sync {
++            var draftActors = localActorsByID
++            var draftSelectedActorID = selectedActorID
++            for candidate in candidates {
++                if let existingSource = draftActors.values.first(where: { $0.source == candidate.source || $0.externalSourceID == candidate.externalSourceID }) {
++                    if Self.actorIsClaimed(existingSource) {
++                        skippedClaimedDuplicates += 1
++                        skippedDuplicateRows.append(Self.duplicateRow(candidate: candidate, existing: existingSource, reason: "external_source_matches_claimed_actor"))
++                        continue
++                    }
++                    let merged = Self.mergedSourceImportedActor(existing: existingSource, candidate: candidate)
++                    draftActors[existingSource.id] = merged
++                    updated += 1
++                    importedActors.append(merged)
++                    importedRows.append(merged.rowObject)
++                    continue
++                }
++
++                if let duplicate = Self.bestDuplicate(for: candidate, in: Array(draftActors.values)) {
++                    if Self.actorIsClaimed(duplicate) {
++                        skippedClaimedDuplicates += 1
++                        skippedDuplicateRows.append(Self.duplicateRow(candidate: candidate, existing: duplicate, reason: "name_or_nearby_match_claimed_actor"))
++                        continue
++                    }
++                    let merged = Self.mergedSourceImportedActor(existing: duplicate, candidate: candidate)
++                    draftActors[duplicate.id] = merged
++                    updated += 1
++                    importedActors.append(merged)
++                    importedRows.append(merged.rowObject)
++                    continue
++                }
++
++                draftActors[candidate.id] = candidate
++                if draftSelectedActorID == nil {
++                    draftSelectedActorID = candidate.id
++                }
++                created += 1
++                importedActors.append(candidate)
++                importedRows.append(candidate.rowObject)
++            }
++
++            if importedActors.isEmpty == false {
++                let journal = Self.appendLocalDataImportJournalEntry(LocalDataImportJournalEntry(
++                    action: "ingestStands", source: sourceID, recordedAt: now, localActors: importedActors
++                ))
++                localDataJournalStatus = journal.status
++                localDataJournalPath = journal.path
++                localDataJournalEntryCount += journal.entryDelta
++                localDataJournalLoadedAt = journal.recordedAt
++                guard journal.status == "journal_appended" else {
++                    lastStatus = "Stand import failed: local data journal could not be written."
++                    importFailed = true
++                    return
++                }
++            }
++            localActorsByID = draftActors
++            selectedActorID = draftSelectedActorID
++
++            lastImportReport = [
++                "source": .string(sourceID),
++                "sourceKind": .string("arendalsuka_stands_geojson_api"),
++                "importedAt": .string(ArendalsukaEventAtlasFormatting.isoString(now)),
++                "received": .integer(standValues.count),
++                "candidateCount": .integer(candidates.count),
++                "created": .integer(created),
++                "updated": .integer(updated),
++                "skippedUnnamed": .integer(skippedUnnamed),
++                "skippedClaimedDuplicates": .integer(skippedClaimedDuplicates),
++                "duplicateRows": .list(skippedDuplicateRows.map(ValueType.object)),
++                "importedRows": .list(importedRows.map(ValueType.object)),
++                "claimPolicy": .string("Stand actors are unclaimed-source-import pages and never overwrite claimed actor pages."),
++                "licenseBoundary": .string("Location label (e.g. \"Torvet - 135\") is Arendalsuka's own internal zone/number scheme, not a real street address.")
++            ]
++            lastStatus = "Imported stands: \(created) created, \(updated) updated, \(skippedClaimedDuplicates) claimed duplicate(s) skipped, \(skippedUnnamed) unnamed skipped."
++        }
++
++        guard importFailed == false else {
++            return .string("error: stand import was not committed because journal persistence failed")
++        }
++
++        emit(kind: "arendalsuka.stands.ingested", payload: lastImportReportValue(), requester: requester)
++        return stateValue(requester: requester)
++    }
++
+     /// Ingests speaker identities, per-session appearances and/or resolved
+     /// enrichment facts from the `speaker`/`speaker_appearances`/
+     /// `speaker_enrichment_resolved` source-of-truth tables. Every key
+@@ -3452,6 +3585,66 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+         )
+     }
+ 
++    /// Builds a local actor from one row of the `stand` source-of-truth table
++    /// (fields match its JSON export verbatim: `organization`, `stand_location`,
++    /// `stand_description`, `latitude`, `longitude`, `occupant_entry_id`, `status`).
++    /// `stand_location` is Arendalsuka's own internal zone/number label (e.g.
++    /// "Torvet - 135"), not a real street address - stored as-is in `address`.
++    private static func localActorRecord(
++        fromStand object: Object,
++        sourceID: String,
++        importedAt: Date
++    ) -> ArendalsukaLocalActorRecord? {
++        guard let name = EventPlatformValueDecoding.string(object["organization"]), name.isEmpty == false else {
++            return nil
++        }
++        let location = EventPlatformValueDecoding.string(object["stand_location"]) ?? ""
++        let description = EventPlatformValueDecoding.string(object["stand_description"]) ?? ""
++        let latitude = ArendalsukaEventAtlasFormatting.double(object["latitude"])
++        let longitude = ArendalsukaEventAtlasFormatting.double(object["longitude"])
++        let occupantEntryID = EventPlatformValueDecoding.int(object["occupant_entry_id"]).map(String.init)
++            ?? EventPlatformValueDecoding.string(object["occupant_entry_id"])
++        let externalSourceID = "arendalsuka-stand:\(occupantEntryID ?? "\(normalizedActorName(name))-\(normalizedActorName(location))")"
++        let status = EventPlatformValueDecoding.string(object["status"]) ?? "booked"
++        let summary = description.isEmpty ? "Stand: \(location)" : description
++        let derived = ArendalsukaPurposeClassifier.classify(
++            title: name,
++            category: ArendalsukaActorKind.stand.rawValue,
++            format: "",
++            tags: ["arendalsuka-stand", status],
++            rawText: summary
++        )
++        let purposeRefs = ArendalsukaEventAtlasFormatting.normalizedUnique(
++            coordinationPurposeRefs(for: .stand) + derived.purposeRefs
++        )
++        let interests = ArendalsukaEventAtlasFormatting.normalizedUnique(
++            ["arendalsuka", "stand"] + derived.interests
++        )
++        return ArendalsukaLocalActorRecord(
++            id: "actor-stand-\(occupantEntryID ?? normalizedActorName(name))",
++            kind: .stand,
++            name: name,
++            summary: summary,
++            address: location,
++            latitude: latitude,
++            longitude: longitude,
++            openingHours: "",
++            claimStatus: "unclaimed-source-import",
++            ownerContact: "",
++            source: externalSourceID,
++            sourceURL: nil,
++            sourceProvenance: "Imported from Arendalsuka's own public stands GeoJSON API via \(sourceID); location label is an internal Arendalsuka zone/number scheme, not a real street address.",
++            licenseNote: nil,
++            externalSourceID: externalSourceID,
++            duplicateOfActorID: nil,
++            purposeRefs: purposeRefs,
++            interests: interests,
++            offers: [],
++            liveStatus: "source-imported",
++            updatedAt: importedAt
++        )
++    }
++
+     private static func actorKind(amenity: String?, shop: String?) -> ArendalsukaActorKind {
+         if shop?.isEmpty == false {
+             return .shop
+diff --git a/Sources/App/Cells/Arendalsuka/ArendalsukaParticipantProfileCell.swift b/Sources/App/Cells/Arendalsuka/ArendalsukaParticipantProfileCell.swift
+new file mode 100644
+index 00000000..d75c2297
+--- /dev/null
++++ b/Sources/App/Cells/Arendalsuka/ArendalsukaParticipantProfileCell.swift
+@@ -0,0 +1,514 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++
++import Foundation
++import CellBase
++
++enum ArendalsukaParticipantProfileContract {
++    static let cellName = "ArendalsukaParticipantProfile"
++    static let endpoint = "cell:///ArendalsukaParticipantProfile"
++
++    static let stateKeypath = "state"
++    static let skeletonConfigurationKeypath = "skeletonConfiguration"
++    static let setDisplayNameOverrideKeypath = "profile.setDisplayNameOverride"
++    static let setStillingKeypath = "profile.setStilling"
++    static let setPhotoKeypath = "profile.setPhoto"
++    /// Named to match its own state-read field (`state.favoritesSharingEnabled`),
++    /// not a `profile.` action-style name: SkeletonToggle uses one `keypath`
++    /// for both dispatching the write and (via resolveKeypath against the
++    /// referenced state) reflecting the live isOn value back into the
++    /// checkbox, so the two must be the same path - see
++    /// ArendalsukaParticipantProgramCell.setMeetingVisibilityKeypath for the
++    /// established precedent of this convention.
++    static let setFavoritesSharingKeypath = "state.favoritesSharingEnabled"
++    static let setPositionSharingKeypath = "profile.setPositionSharing"
++    /// Single-value convenience wrappers around setPositionSharing, shaped for
++    /// a plain TextField/Picker submission (one field, one write) rather than
++    /// the multi-field composite payload setPositionSharing itself expects -
++    /// the skeleton form can't compose several live field values into one
++    /// action payload at submit time.
++    static let setManualPositionLabelKeypath = "profile.setManualPositionLabel"
++    static let setCheckedInVenueKeypath = "profile.setCheckedInVenue"
++}
++
++/// Owns the write-path for a participant's *self-controlled* Arendalsuka
++/// profile - name override, stilling, photo, favorites sharing, and position
++/// sharing. Distinct from `ArendalsukaProfileCell` (interests/purpose/matching
++/// consent) and from medvirkerprofil (an organizer-generated, read-only
++/// speaker bio card reached by tapping a name on a session) - this is the
++/// participant's own, participant-controlled surface. Holds no persisted
++/// state of its own: a thin, per-identity proxy in front of
++/// `ArendalsukaConnectionHubCell`, the same pattern `ArendalsukaProfileCell`
++/// already uses.
++///
++/// `isVerified` is deliberately not writable here. It is reserved for a
++/// future BankID/Vipps-backed identity verification flow (not yet scoped)
++/// and always reads as `false` in the meantime - never a stand-in claim of
++/// verification.
++final class ArendalsukaParticipantProfileCell: GeneralCell, PortholeRuntimeBindingEnsuring {
++    static let cellName = ArendalsukaParticipantProfileContract.cellName
++
++    required init(owner: Identity) async {
++        await super.init(owner: owner)
++        self.identityDomain = "ArendalsukaParticipant"
++        try? await ensureRuntimeReady()
++    }
++
++    required init(from decoder: Decoder) throws {
++        try super.init(from: decoder)
++    }
++
++    override func installCellRuntimeBindingsForAccess() async throws {
++        await setupPermissions(owner: storedOwnerIdentity)
++        await setupRuntime(owner: storedOwnerIdentity)
++    }
++
++    func ensurePortholeRuntimeBindings(requester: Identity) async {
++        try? await ensureRuntimeReady()
++    }
++
++    private func setupPermissions(owner: Identity) async {
++        agreementTemplate.addGrant("r---", for: ArendalsukaParticipantProfileContract.stateKeypath)
++        agreementTemplate.addGrant("r---", for: ArendalsukaParticipantProfileContract.skeletonConfigurationKeypath)
++        [
++            ArendalsukaParticipantProfileContract.setDisplayNameOverrideKeypath,
++            ArendalsukaParticipantProfileContract.setStillingKeypath,
++            ArendalsukaParticipantProfileContract.setPhotoKeypath,
++            ArendalsukaParticipantProfileContract.setFavoritesSharingKeypath,
++            ArendalsukaParticipantProfileContract.setPositionSharingKeypath,
++            ArendalsukaParticipantProfileContract.setManualPositionLabelKeypath,
++            ArendalsukaParticipantProfileContract.setCheckedInVenueKeypath
++        ].forEach {
++            agreementTemplate.addGrant("rw--", for: $0)
++        }
++    }
++
++    // This proxy returns the updated projection. Observable changes are emitted
++    // by the shared hub on its existing conference-connections flow; the proxy
++    // does not advertise separate events it never emits.
++    private func setupRuntime(owner: Identity) async {
++        await registerGet(
++            key: ArendalsukaParticipantProfileContract.stateKeypath,
++            owner: owner,
++            returns: Self.stateSchema,
++            permissions: ["r---"],
++            description: .string("Read this participant's self-controlled Arendalsuka profile: name override, stilling, photo, favorites sharing and position sharing.")
++        ) { [weak self] requester in
++            guard let self else { return .null }
++            guard await self.validateAccess("r---", at: ArendalsukaParticipantProfileContract.stateKeypath, for: requester) else { return .string("denied") }
++            return await self.stateValue(requester: requester)
++        }
++
++        await registerGet(
++            key: ArendalsukaParticipantProfileContract.skeletonConfigurationKeypath,
++            owner: owner,
++            returns: ExploreContract.schema(type: "cellConfiguration"),
++            permissions: ["r---"],
++            description: .string("Read the Arendalsuka Min Profil CellConfiguration.")
++        ) { requester in
++            guard await self.validateAccess("r---", at: ArendalsukaParticipantProfileContract.skeletonConfigurationKeypath, for: requester) else { return .string("denied") }
++            return .cellConfiguration(ArendalsukaParticipantProfileConfigurationFactory.makeCellConfiguration())
++        }
++
++        await registerSet(
++            key: ArendalsukaParticipantProfileContract.setDisplayNameOverrideKeypath,
++            owner: owner,
++            input: Self.scalarOrFieldSchema("displayNameOverride", type: "string", description: "Overrides the display name shown to other participants. An empty string falls back to the account's own display name."),
++            returns: Self.actionResultSchema,
++            permissions: ["rw--"],
++            description: .string("Set a display-name override for this conference, without changing the account's own display name.")
++        ) { [weak self] requester, payload in
++            guard let self else { return .null }
++            guard await self.validateAccess("rw--", at: ArendalsukaParticipantProfileContract.setDisplayNameOverrideKeypath, for: requester) else { return .string("denied") }
++            return await self.setDisplayNameOverride(value: payload, requester: requester)
++        }
++
++        await registerSet(
++            key: ArendalsukaParticipantProfileContract.setStillingKeypath,
++            owner: owner,
++            input: Self.scalarOrFieldSchema("stilling", type: "string", description: "Replaces this participant's stilling (job title / role description)."),
++            returns: Self.actionResultSchema,
++            permissions: ["rw--"],
++            description: .string("Set this participant's stilling.")
++        ) { [weak self] requester, payload in
++            guard let self else { return .null }
++            guard await self.validateAccess("rw--", at: ArendalsukaParticipantProfileContract.setStillingKeypath, for: requester) else { return .string("denied") }
++            return await self.setStilling(value: payload, requester: requester)
++        }
++
++        await registerSet(
++            key: ArendalsukaParticipantProfileContract.setPhotoKeypath,
++            owner: owner,
++            input: ExploreContract.oneOfSchema(options: [
++                Self.scalarOrFieldSchema("photoDataURI", type: "string", description: "A small data:image/...;base64,... photo; an empty string clears it."),
++                ExploreContract.objectSchema(
++                    properties: ["mimeType": ExploreContract.schema(type: "string"), "dataBase64": ExploreContract.schema(type: "string")],
++                    requiredKeys: ["mimeType", "dataBase64"],
++                    description: "Native FileUpload payload."
++                ),
++                ExploreContract.objectSchema(
++                    properties: [
++                        "kind": ExploreContract.schema(type: "string"),
++                        "fieldID": ExploreContract.schema(type: "string"),
++                        "temporaryPayload": ExploreContract.objectSchema(properties: [
++                            "mimeType": ExploreContract.schema(type: "string"),
++                            "dataBase64": ExploreContract.schema(type: "string")
++                        ], requiredKeys: ["mimeType", "dataBase64"])
++                    ], requiredKeys: ["kind", "fieldID"],
++                    description: "Web FileUpload envelope; opening the picker without a temporary payload does not mutate the photo."
++                )
++            ]),
++            returns: Self.actionResultSchema,
++            permissions: ["rw--"],
++            description: .string("Set or clear this participant's profile photo.")
++        ) { [weak self] requester, payload in
++            guard let self else { return .null }
++            guard await self.validateAccess("rw--", at: ArendalsukaParticipantProfileContract.setPhotoKeypath, for: requester) else { return .string("denied") }
++            return await self.setPhoto(value: payload, requester: requester)
++        }
++
++        await registerSet(
++            key: ArendalsukaParticipantProfileContract.setFavoritesSharingKeypath,
++            owner: owner,
++            input: Self.scalarOrFieldSchema("isEnabled", type: "boolean", description: "Enables or disables sharing this participant's saved/favorited sessions on their profile."),
++            returns: Self.actionResultSchema,
++            permissions: ["rw--"],
++            description: .string("Enable or disable favorites sharing. When enabling, snapshots the participant's currently saved sessions from ArendalsukaParticipantProgramCell.")
++        ) { [weak self] requester, payload in
++            guard let self else { return .null }
++            guard await self.validateAccess("rw--", at: ArendalsukaParticipantProfileContract.setFavoritesSharingKeypath, for: requester) else { return .string("denied") }
++            return await self.setFavoritesSharing(value: payload, requester: requester)
++        }
++
++        await registerSet(
++            key: ArendalsukaParticipantProfileContract.setPositionSharingKeypath,
++            owner: owner,
++            input: ExploreContract.objectSchema(
++                properties: [
++                    "mode": ExploreContract.schema(type: "string"),
++                    "manualLabel": ExploreContract.schema(type: "string"),
++                    "checkedInVenueFeatureID": ExploreContract.schema(type: "string"),
++                    "checkedInVenueLabel": ExploreContract.schema(type: "string"),
++                    "latitude": Self.coordinateSchema,
++                    "longitude": Self.coordinateSchema
++                ],
++                requiredKeys: ["mode"],
++                description: "Sets the participant's position-sharing mode: off, live (device coordinates, reported periodically by the client), manual (a free-text label the participant wrote), or checkin (a venue featureID from the program map)."
++            ),
++            returns: Self.actionResultSchema,
++            permissions: ["rw--"],
++            description: .string("Set this participant's position-sharing mode and its mode-specific data.")
++        ) { [weak self] requester, payload in
++            guard let self else { return .null }
++            guard await self.validateAccess("rw--", at: ArendalsukaParticipantProfileContract.setPositionSharingKeypath, for: requester) else { return .string("denied") }
++            return await self.setPositionSharing(value: payload, requester: requester)
++        }
++
++        await registerSet(
++            key: ArendalsukaParticipantProfileContract.setManualPositionLabelKeypath,
++            owner: owner,
++            input: ExploreContract.schema(type: "string"),
++            returns: Self.actionResultSchema,
++            permissions: ["rw--"],
++            description: .string("Single-field convenience for setting position sharing to manual mode with this label - a thin wrapper over profile.setPositionSharing for plain form fields.")
++        ) { [weak self] requester, payload in
++            guard let self else { return .null }
++            guard await self.validateAccess("rw--", at: ArendalsukaParticipantProfileContract.setManualPositionLabelKeypath, for: requester) else { return .string("denied") }
++            return await self.setPositionSharing(
++                value: .object(["mode": .string("manual"), "manualLabel": payload ?? .string("")]),
++                requester: requester
++            )
++        }
++
++        await registerSet(
++            key: ArendalsukaParticipantProfileContract.setCheckedInVenueKeypath,
++            owner: owner,
++            input: ExploreContract.objectSchema(
++                properties: [
++                    "featureID": ExploreContract.schema(type: "string"),
++                    "label": ExploreContract.schema(type: "string")
++                ],
++                description: "A venue featureID/label pair, e.g. one selected from the program map's venue list."
++            ),
++            returns: Self.actionResultSchema,
++            permissions: ["rw--"],
++            description: .string("Single-field convenience for setting position sharing to checkin mode at this venue - a thin wrapper over profile.setPositionSharing for a Picker's selected item.")
++        ) { [weak self] requester, payload in
++            guard let self else { return .null }
++            guard await self.validateAccess("rw--", at: ArendalsukaParticipantProfileContract.setCheckedInVenueKeypath, for: requester) else { return .string("denied") }
++            // Accepts either the profile's own {featureID, label} shape, a row
++            // object straight from ArendalsukaParticipantProgramCell's mapRows
++            // (EventPlatformStateRows: {id, title, ...}), or the Picker's own
++            // selection envelope ({selectionMode, trigger, selectedIndex,
++            // selected: {id, title, ...}}) that skeleton-runtime.js's
++            // SkeletonPicker actually dispatches for selectionPayloadMode
++            // "item" - the real row lives under "selected", not top-level.
++            let container = Self.object(payload)
++            let venue = container["selected"].map(Self.object) ?? container
++            let featureID = venue["featureID"] ?? venue["id"] ?? .string("")
++            let label = venue["label"] ?? venue["title"] ?? .string("")
++            return await self.setPositionSharing(
++                value: .object([
++                    "mode": .string("checkin"),
++                    "checkedInVenueFeatureID": featureID,
++                    "checkedInVenueLabel": label
++                ]),
++                requester: requester
++            )
++        }
++    }
++
++    // MARK: - Proxying to ArendalsukaConnectionHubCell
++
++    private func resolveHub(requester: Identity) async -> Meddle? {
++        guard let resolver = CellBase.defaultCellResolver else { return nil }
++        return try? await resolver.cellAtEndpoint(
++            endpoint: ArendalsukaParticipantProgramContract.meetingHubEndpoint,
++            requester: requester
++        ) as? Meddle
++    }
++
++    private func setDisplayNameOverride(value: ValueType?, requester: Identity) async -> ValueType {
++        guard let hub = await resolveHub(requester: requester) else {
++            return .string("error: profile service is unavailable")
++        }
++        guard let override = Self.string(Self.object(value)["displayNameOverride"]) ?? Self.string(value) else {
++            return .string("error: display name override requires a string value")
++        }
++        let result = try? await hub.set(keypath: "setDisplayNameOverride", value: .string(override), requester: requester)
++        if let errorText = Self.string(result), errorText.hasPrefix("error") || errorText == "denied" {
++            return .string(errorText)
++        }
++        guard case .object? = result else {
++            return .string("error: profile update was not acknowledged")
++        }
++        return await stateValue(requester: requester)
++    }
++
++    private func setStilling(value: ValueType?, requester: Identity) async -> ValueType {
++        guard let hub = await resolveHub(requester: requester) else {
++            return .string("error: profile service is unavailable")
++        }
++        guard let stilling = Self.string(Self.object(value)["stilling"]) ?? Self.string(value) else {
++            return .string("error: stilling requires a string value")
++        }
++        let result = try? await hub.set(keypath: "setStilling", value: .string(stilling), requester: requester)
++        if let errorText = Self.string(result), errorText.hasPrefix("error") || errorText == "denied" {
++            return .string(errorText)
++        }
++        guard case .object? = result else {
++            return .string("error: profile update was not acknowledged")
++        }
++        return await stateValue(requester: requester)
++    }
++
++    /// Accepts either a ready `photoDataURI` string (programmatic callers) or
++    /// the FileUpload skeleton element's native upload payload
++    /// (`mimeType` + `dataBase64`, no data-URI prefix - see
++    /// `filesToTemporaryAttachmentPayload` in skeleton-runtime.js), which this
++    /// proxy assembles into a `data:image/...;base64,...` URI before handing
++    /// it to the hub. The hub's own representation stays a single
++    /// self-describing string either way.
++    private func setPhoto(value: ValueType?, requester: Identity) async -> ValueType {
++        guard let hub = await resolveHub(requester: requester) else {
++            return .string("error: profile service is unavailable")
++        }
++        let outer = Self.object(value)
++        if outer["kind"] == .string("pick"), outer["temporaryPayload"] == nil,
++           Self.string(outer["fieldID"])?.isEmpty == false {
++            return await stateValue(requester: requester)
++        }
++        let payload = outer["temporaryPayload"].map(Self.object) ?? outer
++        let photo: String
++        if let explicit = Self.string(payload["photoDataURI"]) ?? Self.string(value) {
++            photo = explicit
++        } else if let mimeType = Self.string(payload["mimeType"]), mimeType.hasPrefix("image/"),
++                  let base64 = Self.string(payload["dataBase64"]), base64.isEmpty == false {
++            photo = "data:\(mimeType);base64,\(base64)"
++        } else {
++            return .string("error: photo requires a data URI or image upload")
++        }
++        let result = try? await hub.set(keypath: "setPhoto", value: .string(photo), requester: requester)
++        if let errorText = Self.string(result), errorText.hasPrefix("error") || errorText == "denied" {
++            return .string(errorText)
++        }
++        guard case .object? = result else {
++            return .string("error: profile update was not acknowledged")
++        }
++        return await stateValue(requester: requester)
++    }
++
++    /// When enabling, reads the participant's own saved sessions from
++    /// `ArendalsukaParticipantProgramCell` and snapshots them into the hub.
++    /// The hub itself deliberately knows nothing about that cell - this proxy
++    /// is where that cross-cell read belongs.
++    private func setFavoritesSharing(value: ValueType?, requester: Identity) async -> ValueType {
++        guard let hub = await resolveHub(requester: requester) else {
++            return .string("error: profile service is unavailable")
++        }
++        guard let isEnabled = Self.boolValue(Self.object(value)["isEnabled"]) ?? Self.boolValue(value) else {
++            return .string("error: favorites sharing requires a boolean value")
++        }
++
++        var sessionIds: [String] = []
++        if isEnabled {
++            guard let resolver = CellBase.defaultCellResolver,
++                  let program = try? await resolver.cellAtEndpoint(
++                      endpoint: ArendalsukaParticipantProgramContract.endpoint,
++                      requester: requester
++                  ) as? Meddle,
++                  let programState = try? await program.get(keypath: ArendalsukaParticipantProgramContract.stateKeypath, requester: requester),
++                  case let .object(state) = programState,
++                  case let .object(agenda)? = state["agenda"],
++                  let savedIDs = Self.stringListValue(agenda["savedSessionIDs"]) else {
++                return .string("error: saved sessions could not be read; favorites sharing was not changed")
++            }
++            sessionIds = savedIDs
++        }
++
++        let result = try? await hub.set(
++            keypath: "setFavoritesSharing",
++            value: .object(["isEnabled": .bool(isEnabled), "sessionIds": .list(sessionIds.map(ValueType.string))]),
++            requester: requester
++        )
++        if let errorText = Self.string(result), errorText.hasPrefix("error") || errorText == "denied" {
++            return .string(errorText)
++        }
++        guard case .object? = result else {
++            return .string("error: profile update was not acknowledged")
++        }
++        return await stateValue(requester: requester)
++    }
++
++    private func setPositionSharing(value: ValueType?, requester: Identity) async -> ValueType {
++        guard let hub = await resolveHub(requester: requester) else {
++            return .string("error: profile service is unavailable")
++        }
++        let payload = Self.object(value)
++        guard let mode = payload["mode"] else {
++            return .string("error: position sharing requires an explicit mode")
++        }
++        var forwarded: Object = ["mode": mode]
++        for key in ["manualLabel", "checkedInVenueFeatureID", "checkedInVenueLabel", "latitude", "longitude"] {
++            if let fieldValue = payload[key] {
++                forwarded[key] = fieldValue
++            }
++        }
++        let result = try? await hub.set(keypath: "setPositionSharing", value: .object(forwarded), requester: requester)
++        if let errorText = Self.string(result), errorText.hasPrefix("error") || errorText == "denied" {
++            return .string(errorText)
++        }
++        guard case .object? = result else {
++            return .string("error: profile update was not acknowledged")
++        }
++        return await stateValue(requester: requester)
++    }
++
++    private func stateValue(requester: Identity) async -> ValueType {
++        guard let hub = await resolveHub(requester: requester),
++              let raw = try? await hub.get(keypath: "state", requester: requester),
++              case let .object(hubState) = raw else {
++            return .object([
++                "source": .string("ArendalsukaParticipantProfileCell"),
++                "isAvailable": .bool(false),
++                "isMatchingConsentGranted": .bool(false),
++                "displayNameOverride": .string(""),
++                "stilling": .string(""),
++                "photoDataURI": .null,
++                "photoStatus": .string("Ingen profilbilde lagret"),
++                "isVerified": .bool(false),
++                "favoritesSharingEnabled": .bool(false),
++                "sharedFavoriteSessionIds": .list([]),
++                "positionSharing": .object(["mode": .string("off")])
++            ])
++        }
++        return .object([
++            "source": .string("ArendalsukaParticipantProfileCell"),
++            "isAvailable": .bool(true),
++            "isMatchingConsentGranted": hubState["isMatchingConsentGranted"] ?? .bool(false),
++            "displayNameOverride": hubState["myDisplayNameOverride"] ?? .string(""),
++            "stilling": hubState["myStilling"] ?? .string(""),
++            "photoDataURI": hubState["myPhotoDataURI"] ?? .null,
++            "photoStatus": .string(Self.string(hubState["myPhotoDataURI"])?.isEmpty == false ? "Profilbilde lagret" : "Ingen profilbilde lagret"),
++            "isVerified": .bool(false),
++            "favoritesSharingEnabled": hubState["myFavoritesSharingEnabled"] ?? .bool(false),
++            "sharedFavoriteSessionIds": hubState["mySharedFavoriteSessionIds"] ?? .list([]),
++            "positionSharing": hubState["myPositionSharing"] ?? .object(["mode": .string("off")])
++        ])
++    }
++
++    private static func scalarOrFieldSchema(_ field: String, type: String, description: String) -> ValueType {
++        ExploreContract.oneOfSchema(options: [
++            ExploreContract.schema(type: type),
++            ExploreContract.objectSchema(
++                properties: [field: ExploreContract.schema(type: type)], requiredKeys: [field]
++            )
++        ], description: description)
++    }
++
++    private static var coordinateSchema: ValueType {
++        ExploreContract.oneOfSchema(options: [ExploreContract.schema(type: "float"), ExploreContract.schema(type: "integer")])
++    }
++
++    private static func nullableSchema(type: String) -> ValueType {
++        ExploreContract.oneOfSchema(options: [ExploreContract.schema(type: type), ExploreContract.schema(type: "null")])
++    }
++
++    private static var actionResultSchema: ValueType {
++        ExploreContract.oneOfSchema(options: [stateSchema, ExploreContract.schema(type: "string", description: "Explicit error or access denial.")])
++    }
++
++    private static var stateSchema: ValueType {
++        ExploreContract.objectSchema(
++            properties: [
++                "source": ExploreContract.schema(type: "string"),
++                "isAvailable": ExploreContract.schema(type: "boolean"),
++                "isMatchingConsentGranted": ExploreContract.schema(type: "boolean"),
++                "displayNameOverride": ExploreContract.schema(type: "string"),
++                "stilling": ExploreContract.schema(type: "string"),
++                "photoDataURI": Self.nullableSchema(type: "string"),
++                "photoStatus": ExploreContract.schema(type: "string"),
++                "isVerified": ExploreContract.schema(type: "boolean"),
++                "favoritesSharingEnabled": ExploreContract.schema(type: "boolean"),
++                "sharedFavoriteSessionIds": ExploreContract.listSchema(item: ExploreContract.schema(type: "string")),
++                "positionSharing": ExploreContract.objectSchema(
++                    properties: [
++                        "mode": ExploreContract.schema(type: "string"),
++                        "manualLabel": Self.nullableSchema(type: "string"),
++                        "checkedInVenueFeatureID": Self.nullableSchema(type: "string"),
++                        "checkedInVenueLabel": Self.nullableSchema(type: "string"),
++                        "latitude": ExploreContract.oneOfSchema(options: [Self.coordinateSchema, ExploreContract.schema(type: "null")]),
++                        "longitude": ExploreContract.oneOfSchema(options: [Self.coordinateSchema, ExploreContract.schema(type: "null")]),
++                        "updatedAt": Self.nullableSchema(type: "string")
++                    ], requiredKeys: ["mode"]
++                )
++            ],
++            requiredKeys: ["source", "isAvailable", "isMatchingConsentGranted", "isVerified"],
++            description: "This participant's self-controlled Arendalsuka profile."
++        )
++    }
++
++    private static func object(_ value: ValueType?) -> Object {
++        guard case let .object(object)? = value else { return [:] }
++        return object
++    }
++
++    private static func string(_ value: ValueType?) -> String? {
++        guard case let .string(string)? = value else { return nil }
++        return string
++    }
++
++    private static func boolValue(_ value: ValueType?) -> Bool? {
++        guard case let .bool(bool)? = value else { return nil }
++        return bool
++    }
++
++    private static func stringListValue(_ value: ValueType?) -> [String]? {
++        guard case let .list(list)? = value else { return nil }
++        return list.compactMap { element -> String? in
++            guard case let .string(text) = element else { return nil }
++            let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
++            return trimmed.isEmpty ? nil : trimmed
++        }
++    }
++}
+diff --git a/Sources/App/Cells/Arendalsuka/ArendalsukaParticipantProfileConfigurationFactory.swift b/Sources/App/Cells/Arendalsuka/ArendalsukaParticipantProfileConfigurationFactory.swift
+new file mode 100644
+index 00000000..917a18b8
+--- /dev/null
++++ b/Sources/App/Cells/Arendalsuka/ArendalsukaParticipantProfileConfigurationFactory.swift
+@@ -0,0 +1,235 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++
++import Foundation
++import CellBase
++
++/// "Min profil": the participant's own, participant-controlled Arendalsuka
++/// profile - name override, stilling, photo, favorites sharing, and position
++/// sharing. Distinct from medvirkerprofil (organizer-generated, read-only
++/// speaker bio) and from ArendalsukaMatching's "For Deg" surface (which only
++/// *reads* interests/purpose this profile's sibling cell, ArendalsukaProfileCell,
++/// captures).
++///
++/// Live GPS sharing is exposed on the backend contract
++/// (`profile.setPositionSharing` with `mode: "live"`) but has no button here:
++/// continuously reading the device's coordinates and posting them
++/// periodically needs bespoke client-side JavaScript (the browser Geolocation
++/// API), which is renderer work beyond what a CellConfiguration/skeleton can
++/// express - same category of gap as `FileUpload`'s bespoke upload handling
++/// in skeleton-runtime.js. That wiring is a deliberate follow-up, not done
++/// here.
++enum ArendalsukaParticipantProfileConfigurationFactory {
++    static func makeCellConfiguration() -> CellConfiguration {
++        var configuration = CellConfiguration(name: "Arendalsuka Min Profil")
++        configuration.description = "Deltakerens egen, deltakerstyrte Arendalsuka-profil: navn, stilling, bilde, delte favoritter og posisjonsdeling."
++        configuration.discovery = CellConfigurationDiscovery(
++            sourceCellEndpoint: ArendalsukaParticipantProfileContract.endpoint,
++            sourceCellName: "ArendalsukaParticipantProfileCell",
++            purpose: "Arendalsuka deltakerprofil",
++            purposeDescription: "La en deltaker style navn, stilling, profilbilde, delte favoritter og posisjonsdeling for seg selv.",
++            interests: [
++                "arendalsuka",
++                "profil",
++                "deltaker",
++                "posisjon",
++                "favoritter",
++                "purposeRef=arendalsuka.social-networking.meet"
++            ],
++            menuSlots: ["lowerMid"]
++        )
++        var profileReference = CellReference(endpoint: ArendalsukaParticipantProfileContract.endpoint, label: "arendalsukaParticipantProfile")
++        profileReference.setKeysAndValues = [KeyValue(key: ArendalsukaParticipantProfileContract.stateKeypath, value: nil)]
++        configuration.addReference(profileReference)
++        var programReference = CellReference(endpoint: ArendalsukaParticipantProgramContract.endpoint, label: "arendalsukaParticipant")
++        programReference.setKeysAndValues = [KeyValue(key: ArendalsukaParticipantProgramContract.stateKeypath, value: nil)]
++        configuration.addReference(programReference)
++        configuration.skeleton = .VStack(makeSkeleton())
++        return configuration
++    }
++
++    private static func makeSkeleton() -> SkeletonVStack {
++        SkeletonVStack(elements: [
++            styledSection("Min profil", background: "#f4f4ef", border: "#c1c9bf", content: [
++                styledLabel("Navnet og stillingen din vises til andre deltakere først når du skrur på matching-samtykke i formål/interesser-innstillingene.", fontSize: 12, weight: "regular", color: "#64748B"),
++                fieldLabel("Navn (valgfritt, overstyrer kontonavnet ditt her)"),
++                labeledTextField(
++                    sourceKeypath: "arendalsukaParticipantProfile.state.displayNameOverride",
++                    targetKeypath: "arendalsukaParticipantProfile.\(ArendalsukaParticipantProfileContract.setDisplayNameOverrideKeypath)",
++                    placeholder: "F.eks. Cissi"
++                ),
++                fieldLabel("Stilling"),
++                labeledTextField(
++                    sourceKeypath: "arendalsukaParticipantProfile.state.stilling",
++                    targetKeypath: "arendalsukaParticipantProfile.\(ArendalsukaParticipantProfileContract.setStillingKeypath)",
++                    placeholder: "F.eks. Rådgiver, digital politikk"
++                )
++            ]),
++            styledSection("Profilbilde", background: "#f4f4ef", border: "#c1c9bf", content: [
++                // No live preview: SkeletonImage only supports a static url/name,
++                // not a runtime keypath binding, so an uploaded data URI can't be
++                // rendered back here with today's skeleton format.
++                fileUpload(),
++                styledKeyText("arendalsukaParticipantProfile.state.photoStatus", fontSize: 13, weight: "regular", color: "#316342"),
++                contextButton("arendalsukaParticipantProfile.\(ArendalsukaParticipantProfileContract.setPhotoKeypath)", label: "Fjern profilbilde", payload: .string(""))
++            ]),
++            styledSection("Del favoritter", background: "#f4f4ef", border: "#c1c9bf", content: [
++                styledLabel("Vis programmet du har lagret i din agenda på profilen din for deltakere du deler matching med.", fontSize: 12, weight: "regular", color: "#64748B"),
++                .Toggle(favoritesToggle())
++            ]),
++            styledSection("Del posisjon", background: "#f4f4ef", border: "#c1c9bf", content: [
++                styledLabel("Velg én måte å dele hvor du er på - eller la det stå av.", fontSize: 12, weight: "regular", color: "#64748B"),
++                styledKeyText("arendalsukaParticipantProfile.state.positionSharing.mode", fontSize: 13, weight: "semibold", color: "#316342"),
++                contextButton(
++                    "arendalsukaParticipantProfile.\(ArendalsukaParticipantProfileContract.setPositionSharingKeypath)",
++                    label: "Av",
++                    payload: .object(["mode": .string("off")])
++                ),
++                fieldLabel("Skriv inn hvor du er"),
++                labeledTextField(
++                    sourceKeypath: "arendalsukaParticipantProfile.state.positionSharing.manualLabel",
++                    targetKeypath: "arendalsukaParticipantProfile.\(ArendalsukaParticipantProfileContract.setManualPositionLabelKeypath)",
++                    placeholder: "F.eks. Ved Torvscenen"
++                ),
++                fieldLabel("Sjekk inn et sted fra programkartet"),
++                .Picker(checkinPicker())
++            ])
++        ], spacing: 16)
++    }
++
++    // MARK: - Field builders
++
++    private static func labeledTextField(sourceKeypath: String, targetKeypath: String, placeholder: String) -> SkeletonElement {
++        var field = SkeletonTextField(
++            sourceKeypath: sourceKeypath,
++            targetKeypath: targetKeypath,
++            placeholder: placeholder
++        )
++        field.modifiers = compactControlModifiers()
++        return .TextField(field)
++    }
++
++    private static func fieldLabel(_ text: String) -> SkeletonElement {
++        styledLabel(text, fontSize: 12, weight: "semibold", color: "#1a1c19")
++    }
++
++    private static func fileUpload() -> SkeletonElement {
++        var upload = SkeletonFileUpload(
++            title: "Last opp profilbilde",
++            helperText: "PNG, JPEG eller WebP, maks 320 KB.",
++            actionKeypath: "arendalsukaParticipantProfile.\(ArendalsukaParticipantProfileContract.setPhotoKeypath)",
++            acceptedContentTypes: ["image/png", "image/jpeg", "image/webp"],
++            allowsMultiple: false,
++            supportsDrop: true,
++            maxSizeBytes: 320 * 1_024,
++            uploadMode: "base64",
++            submitOnSelection: true
++        )
++        upload.modifiers = compactControlModifiers()
++        return .FileUpload(upload)
++    }
++
++    private static func favoritesToggle() -> SkeletonToggle {
++        SkeletonToggle(
++            label: "Del mine lagrede arrangementer",
++            keypath: "arendalsukaParticipantProfile.\(ArendalsukaParticipantProfileContract.setFavoritesSharingKeypath)"
++        )
++    }
++
++    private static func checkinPicker() -> SkeletonPicker {
++        var picker = SkeletonPicker(
++            placeholder: "Velg et sted",
++            keypath: "arendalsukaParticipant.state.mapRows",
++            optionLabelKeypath: "title",
++            selectionActionKeypath: "arendalsukaParticipantProfile.\(ArendalsukaParticipantProfileContract.setCheckedInVenueKeypath)",
++            selectionPayloadMode: .item,
++            allowsEmptySelection: true
++        )
++        picker.modifiers = compactControlModifiers()
++        return picker
++    }
++
++    // MARK: - Shared styling (mirrors ArendalsukaEventAtlasConfigurationFactory's Summer Solstice palette)
++
++    private static func styledSection(
++        _ title: String,
++        background: String,
++        border: String,
++        content: SkeletonElementList
++    ) -> SkeletonElement {
++        var header = SkeletonText(text: title)
++        header.modifiers = headingModifiers()
++        var section = SkeletonSection(header: .Text(header), content: content)
++        section.modifiers = containerModifiers(background: background, border: border)
++        return .Section(section)
++    }
++
++    private static func styledKeyText(_ keypath: String, fontSize: Double, weight: String, color: String) -> SkeletonElement {
++        var modifiers = SkeletonModifiers()
++        modifiers.fontSize = fontSize
++        modifiers.fontWeight = weight
++        modifiers.foregroundColor = color
++        var text = SkeletonText(keypath: keypath)
++        text.modifiers = modifiers
++        return .Text(text)
++    }
++
++    private static func styledLabel(_ literalText: String, fontSize: Double, weight: String, color: String) -> SkeletonElement {
++        var modifiers = SkeletonModifiers()
++        modifiers.fontSize = fontSize
++        modifiers.fontWeight = weight
++        modifiers.foregroundColor = color
++        var text = SkeletonText(text: literalText)
++        text.modifiers = modifiers
++        return .Text(text)
++    }
++
++    private static func headingModifiers() -> SkeletonModifiers {
++        var modifiers = SkeletonModifiers()
++        modifiers.fontSize = 18
++        modifiers.fontWeight = "bold"
++        modifiers.foregroundColor = "#1a1c19"
++        return modifiers
++    }
++
++    private static func compactControlModifiers() -> SkeletonModifiers {
++        var modifiers = SkeletonModifiers()
++        modifiers.foregroundColor = "#1a1c19"
++        modifiers.background = "#ffffff"
++        modifiers.borderColor = "#316342"
++        modifiers.borderWidth = 1
++        modifiers.cornerRadius = 12
++        modifiers.padding = 8
++        return modifiers
++    }
++
++    private static func secondaryButtonModifiers() -> SkeletonModifiers {
++        var modifiers = SkeletonModifiers()
++        modifiers.background = "#ffffff"
++        modifiers.borderColor = "#316342"
++        modifiers.borderWidth = 1.5
++        modifiers.cornerRadius = 12
++        modifiers.padding = 10
++        modifiers.fontSize = 12
++        modifiers.fontWeight = "semibold"
++        modifiers.foregroundColor = "#316342"
++        return modifiers
++    }
++
++    private static func contextButton(_ keypath: String, label: String, payload: ValueType) -> SkeletonElement {
++        var button = SkeletonButton(keypath: keypath, label: label, payload: payload)
++        button.modifiers = secondaryButtonModifiers()
++        return .Button(button)
++    }
++
++    private static func containerModifiers(background: String, border: String) -> SkeletonModifiers {
++        var modifiers = SkeletonModifiers()
++        modifiers.background = background
++        modifiers.borderColor = border
++        modifiers.borderWidth = 1
++        modifiers.cornerRadius = 16
++        modifiers.padding = 16
++        modifiers.maxWidthInfinity = true
++        return modifiers
++    }
++}
+diff --git a/Sources/App/Cells/ConferenceMVP/Cells/ConferenceConnectionHubCell.swift b/Sources/App/Cells/ConferenceMVP/Cells/ConferenceConnectionHubCell.swift
+index d63d7543..9250f129 100644
+--- a/Sources/App/Cells/ConferenceMVP/Cells/ConferenceConnectionHubCell.swift
++++ b/Sources/App/Cells/ConferenceMVP/Cells/ConferenceConnectionHubCell.swift
+@@ -2,7 +2,7 @@
+ // SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
+ 
+ import Foundation
+-import CellBase
++@_spi(HAVENRuntime) import CellBase
+ 
+ private actor ConferenceConnectionHubMutationLock {
+     private var isLocked = false
+@@ -56,6 +56,18 @@ class ConferenceConnectionHubCell: GeneralCell, PortholeRuntimeBindingEnsuring {
+         /// unchanged. Only populated/consumed when `supportsInterestMatching`.
+         var interests: [String]
+         var purpose: String
++        /// Rich-profile fields default only when absent from legacy snapshots.
++        /// Malformed persisted fields must fail decoding rather than erase consent. Only populated/consumed when
++        /// `supportsRichParticipantProfile`. `displayNameOverride`, when
++        /// non-empty, is what `displayName` above should read as to other
++        /// participants - kept separate from `displayName` itself so the
++        /// underlying Identity's own name is never silently overwritten.
++        var displayNameOverride: String
++        var stilling: String
++        var photoDataURI: String?
++        var favoritesSharingEnabled: Bool
++        var sharedFavoriteSessionIds: [String]
++        var positionSharing: ParticipantPositionSharing
+ 
+         init(
+             participantId: String,
+@@ -66,7 +78,13 @@ class ConferenceConnectionHubCell: GeneralCell, PortholeRuntimeBindingEnsuring {
+             role: ConferenceParticipantRole,
+             registeredAt: Date,
+             interests: [String] = [],
+-            purpose: String = ""
++            purpose: String = "",
++            displayNameOverride: String = "",
++            stilling: String = "",
++            photoDataURI: String? = nil,
++            favoritesSharingEnabled: Bool = false,
++            sharedFavoriteSessionIds: [String] = [],
++            positionSharing: ParticipantPositionSharing = ParticipantPositionSharing()
+         ) {
+             self.participantId = participantId
+             self.requesterUUID = requesterUUID
+@@ -77,10 +95,17 @@ class ConferenceConnectionHubCell: GeneralCell, PortholeRuntimeBindingEnsuring {
+             self.registeredAt = registeredAt
+             self.interests = interests
+             self.purpose = purpose
++            self.displayNameOverride = displayNameOverride
++            self.stilling = stilling
++            self.photoDataURI = photoDataURI
++            self.favoritesSharingEnabled = favoritesSharingEnabled
++            self.sharedFavoriteSessionIds = sharedFavoriteSessionIds
++            self.positionSharing = positionSharing
+         }
+ 
+         private enum CodingKeys: CodingKey {
+             case participantId, requesterUUID, requesterSigningKeyFingerprint, displayName, company, role, registeredAt, interests, purpose
++            case displayNameOverride, stilling, photoDataURI, favoritesSharingEnabled, sharedFavoriteSessionIds, positionSharing
+         }
+ 
+         init(from decoder: Decoder) throws {
+@@ -94,6 +119,12 @@ class ConferenceConnectionHubCell: GeneralCell, PortholeRuntimeBindingEnsuring {
+             registeredAt = try container.decode(Date.self, forKey: .registeredAt)
+             interests = (try? container.decodeIfPresent([String].self, forKey: .interests)) ?? []
+             purpose = (try? container.decodeIfPresent(String.self, forKey: .purpose)) ?? ""
++            displayNameOverride = try container.decodeIfPresent(String.self, forKey: .displayNameOverride) ?? ""
++            stilling = try container.decodeIfPresent(String.self, forKey: .stilling) ?? ""
++            photoDataURI = try container.decodeIfPresent(String.self, forKey: .photoDataURI)
++            favoritesSharingEnabled = try container.decodeIfPresent(Bool.self, forKey: .favoritesSharingEnabled) ?? false
++            sharedFavoriteSessionIds = try container.decodeIfPresent([String].self, forKey: .sharedFavoriteSessionIds) ?? []
++            positionSharing = try container.decodeIfPresent(ParticipantPositionSharing.self, forKey: .positionSharing) ?? ParticipantPositionSharing()
+         }
+ 
+         func encode(to encoder: Encoder) throws {
+@@ -107,7 +138,32 @@ class ConferenceConnectionHubCell: GeneralCell, PortholeRuntimeBindingEnsuring {
+             try container.encode(registeredAt, forKey: .registeredAt)
+             try container.encode(interests, forKey: .interests)
+             try container.encode(purpose, forKey: .purpose)
+-        }
++            try container.encode(displayNameOverride, forKey: .displayNameOverride)
++            try container.encode(stilling, forKey: .stilling)
++            try container.encodeIfPresent(photoDataURI, forKey: .photoDataURI)
++            try container.encode(favoritesSharingEnabled, forKey: .favoritesSharingEnabled)
++            try container.encode(sharedFavoriteSessionIds, forKey: .sharedFavoriteSessionIds)
++            try container.encode(positionSharing, forKey: .positionSharing)
++        }
++    }
++
++    /// A participant's own position-sharing choice. Exactly one mode is active
++    /// at a time; switching modes clears the fields owned by the previous mode
++    /// so a stale live position can never leak after switching to `.manual`.
++    struct ParticipantPositionSharing: Codable, Equatable, Sendable {
++        enum Mode: String, Codable, Sendable {
++            case off, live, manual, checkin
++        }
++        var mode: Mode = .off
++        /// Free text the participant wrote themselves, e.g. "Ved Torvscenen". Only meaningful when `mode == .manual`.
++        var manualLabel: String = ""
++        /// A venue `featureID` from `ArendalsukaMapFeatureSupport` plus its display label, captured at check-in time so readers never need a second resolve. Only meaningful when `mode == .checkin`.
++        var checkedInVenueFeatureID: String?
++        var checkedInVenueLabel: String?
++        /// Coarse device coordinates the participant's own client reports periodically while `mode == .live`. Never populated server-side.
++        var liveLatitude: Double?
++        var liveLongitude: Double?
++        var liveUpdatedAt: Date?
+     }
+ 
+     private struct SharedParticipantPersistenceRecord: Codable, Equatable, Sendable {
+@@ -124,10 +180,7 @@ class ConferenceConnectionHubCell: GeneralCell, PortholeRuntimeBindingEnsuring {
+     }
+ 
+     private struct ParticipantProfileDurabilitySnapshot: Equatable, Sendable {
+-        var requesterUUID: String
+-        var requesterSigningKeyFingerprint: String
+-        var interests: [String]
+-        var purpose: String
++        var profile: SharedParticipantProfile
+         var isDirectoryVisible: Bool
+         var isMatchingConsentGranted: Bool
+     }
+@@ -165,6 +218,13 @@ class ConferenceConnectionHubCell: GeneralCell, PortholeRuntimeBindingEnsuring {
+     /// only governs plain name/company/role visibility in the meeting directory.
+     /// Being directory-visible does not imply matching consent, and vice versa.
+     class var supportsInterestMatching: Bool { false }
++    /// Gates a richer, participant-controlled profile (display-name override,
++    /// stilling/job title, a small profile photo, position sharing, and
++    /// favorite-session sharing) on top of `supportsInterestMatching`. Shown
++    /// to another participant under the exact same `setMatchingConsent` gate
++    /// as interests/purpose - one consent bucket, not a growing pile of
++    /// separate toggles the owner has to manage.
++    class var supportsRichParticipantProfile: Bool { false }
+     class var maximumMeetingMessageLength: Int? { nil }
+     class var maximumSharedMessageBytes: Int { 4_096 }
+     class var maximumSharedMessageIDBytes: Int { 256 }
+@@ -180,6 +240,7 @@ class ConferenceConnectionHubCell: GeneralCell, PortholeRuntimeBindingEnsuring {
+     private let stateQueue = DispatchQueue(label: "ConferenceConnectionHubCell.State")
+     private let messageMutationLock = ConferenceConnectionHubMutationLock()
+     private let profileMutationLock = ConferenceConnectionHubMutationLock()
++    private var emitRichProfileChange: ((FlowElement) -> Void)?
+     private let organizerOwnerUUID: String
+     private var participantProfilesByRequesterUUID: [String: SharedParticipantProfile]
+     private var directoryVisibleRequesterUUIDs: Set<String>
+@@ -299,6 +360,13 @@ class ConferenceConnectionHubCell: GeneralCell, PortholeRuntimeBindingEnsuring {
+             agreementTemplate.addGrant("rw--", for: "setInterests")
+             agreementTemplate.addGrant("rw--", for: "setPurpose")
+         }
++        if Self.supportsRichParticipantProfile {
++            agreementTemplate.addGrant("rw--", for: "setDisplayNameOverride")
++            agreementTemplate.addGrant("rw--", for: "setStilling")
++            agreementTemplate.addGrant("rw--", for: "setPhoto")
++            agreementTemplate.addGrant("rw--", for: "setFavoritesSharing")
++            agreementTemplate.addGrant("rw--", for: "setPositionSharing")
++        }
+         if Self.allowsRescheduling {
+             agreementTemplate.addGrant("rw--", for: "rescheduleMeeting")
+         }
+@@ -355,6 +423,12 @@ class ConferenceConnectionHubCell: GeneralCell, PortholeRuntimeBindingEnsuring {
+              ("-w--", "setInterests"),
+              ("-w--", "setPurpose"):
+             allowed = Self.supportsInterestMatching
++        case ("-w--", "setDisplayNameOverride"),
++             ("-w--", "setStilling"),
++             ("-w--", "setPhoto"),
++             ("-w--", "setFavoritesSharing"),
++             ("-w--", "setPositionSharing"):
++            allowed = Self.supportsRichParticipantProfile
+         case ("-w--", "rescheduleMeeting"):
+             allowed = Self.allowsRescheduling
+         case ("-w--", "postSharedMessage"):
+@@ -381,6 +455,9 @@ class ConferenceConnectionHubCell: GeneralCell, PortholeRuntimeBindingEnsuring {
+     }
+ 
+     private func setupKeys(owner: Identity) async {
++        if Self.supportsRichParticipantProfile {
++            emitRichProfileChange = await makeCellOwnedFlowEmitterForRuntimeBinding(requester: owner)
++        }
+         await addInterceptForGet(requester: owner, key: "state", getValueIntercept: { [weak self] _, requester in
+             guard let self else { return .string("failure") }
+             guard await self.authorizeSharedConferenceRead(requester: requester) else { return .string("denied") }
+@@ -427,6 +504,78 @@ class ConferenceConnectionHubCell: GeneralCell, PortholeRuntimeBindingEnsuring {
+             })
+         }
+ 
++        if Self.supportsRichParticipantProfile {
++            await registerSet(
++                key: "setDisplayNameOverride",
++                owner: owner,
++                input: ExploreContract.oneOfSchema(options: [ExploreContract.schema(type: "string"), ExploreContract.objectSchema(properties: ["displayNameOverride": ExploreContract.schema(type: "string")], requiredKeys: ["displayNameOverride"])]),
++                returns: ExploreContract.oneOfSchema(options: [ExploreContract.schema(type: "object"), ExploreContract.schema(type: "string")]),
++                permissions: ["-w--"],
++                flowEffects: [ExploreContract.flowEffect(trigger: .set, topic: "conference-connections", contentType: "object")],
++                description: .string("Update the authenticated participant's own profile; acknowledge only after local snapshot verification.")
++            ) { [weak self] requester, value in
++                guard let self else { return .string("failure") }
++                guard await self.authorizeSharedConferenceWrite(requester: requester) else { return .string("denied") }
++                return await self.setDisplayNameOverride(value: value, requester: requester)
++            }
++
++            await registerSet(
++                key: "setStilling",
++                owner: owner,
++                input: ExploreContract.oneOfSchema(options: [ExploreContract.schema(type: "string"), ExploreContract.objectSchema(properties: ["stilling": ExploreContract.schema(type: "string")], requiredKeys: ["stilling"])]),
++                returns: ExploreContract.oneOfSchema(options: [ExploreContract.schema(type: "object"), ExploreContract.schema(type: "string")]),
++                permissions: ["-w--"],
++                flowEffects: [ExploreContract.flowEffect(trigger: .set, topic: "conference-connections", contentType: "object")],
++                description: .string("Update the authenticated participant's own profile; acknowledge only after local snapshot verification.")
++            ) { [weak self] requester, value in
++                guard let self else { return .string("failure") }
++                guard await self.authorizeSharedConferenceWrite(requester: requester) else { return .string("denied") }
++                return await self.setStilling(value: value, requester: requester)
++            }
++
++            await registerSet(
++                key: "setPhoto",
++                owner: owner,
++                input: ExploreContract.oneOfSchema(options: [ExploreContract.schema(type: "string"), ExploreContract.objectSchema(properties: ["photoDataURI": ExploreContract.schema(type: "string")], requiredKeys: ["photoDataURI"])]),
++                returns: ExploreContract.oneOfSchema(options: [ExploreContract.schema(type: "object"), ExploreContract.schema(type: "string")]),
++                permissions: ["-w--"],
++                flowEffects: [ExploreContract.flowEffect(trigger: .set, topic: "conference-connections", contentType: "object")],
++                description: .string("Update the authenticated participant's own profile; acknowledge only after local snapshot verification.")
++            ) { [weak self] requester, value in
++                guard let self else { return .string("failure") }
++                guard await self.authorizeSharedConferenceWrite(requester: requester) else { return .string("denied") }
++                return await self.setPhoto(value: value, requester: requester)
++            }
++
++            await registerSet(
++                key: "setFavoritesSharing",
++                owner: owner,
++                input: ExploreContract.objectSchema(properties: ["isEnabled": ExploreContract.schema(type: "boolean"), "sessionIds": ExploreContract.listSchema(item: ExploreContract.schema(type: "string"))], requiredKeys: ["isEnabled"]),
++                returns: ExploreContract.oneOfSchema(options: [ExploreContract.schema(type: "object"), ExploreContract.schema(type: "string")]),
++                permissions: ["-w--"],
++                flowEffects: [ExploreContract.flowEffect(trigger: .set, topic: "conference-connections", contentType: "object")],
++                description: .string("Update the authenticated participant's own profile; acknowledge only after local snapshot verification.")
++            ) { [weak self] requester, value in
++                guard let self else { return .string("failure") }
++                guard await self.authorizeSharedConferenceWrite(requester: requester) else { return .string("denied") }
++                return await self.setFavoritesSharing(value: value, requester: requester)
++            }
++
++            await registerSet(
++                key: "setPositionSharing",
++                owner: owner,
++                input: ExploreContract.objectSchema(properties: ["mode": ExploreContract.schema(type: "string"), "manualLabel": ExploreContract.schema(type: "string"), "checkedInVenueFeatureID": ExploreContract.schema(type: "string"), "checkedInVenueLabel": ExploreContract.schema(type: "string"), "latitude": ExploreContract.oneOfSchema(options: [ExploreContract.schema(type: "float"), ExploreContract.schema(type: "integer")]), "longitude": ExploreContract.oneOfSchema(options: [ExploreContract.schema(type: "float"), ExploreContract.schema(type: "integer")])], requiredKeys: ["mode"]),
++                returns: ExploreContract.oneOfSchema(options: [ExploreContract.schema(type: "object"), ExploreContract.schema(type: "string")]),
++                permissions: ["-w--"],
++                flowEffects: [ExploreContract.flowEffect(trigger: .set, topic: "conference-connections", contentType: "object")],
++                description: .string("Update the authenticated participant's own profile; acknowledge only after local snapshot verification.")
++            ) { [weak self] requester, value in
++                guard let self else { return .string("failure") }
++                guard await self.authorizeSharedConferenceWrite(requester: requester) else { return .string("denied") }
++                return await self.setPositionSharing(value: value, requester: requester)
++            }
++        }
++
+         if Self.allowsRescheduling {
+             await addInterceptForSet(requester: owner, key: "rescheduleMeeting", setValueIntercept: { [weak self] _, value, requester in
+                 guard let self else { return .string("failure") }
+@@ -609,33 +758,38 @@ class ConferenceConnectionHubCell: GeneralCell, PortholeRuntimeBindingEnsuring {
+             matchingConsentRequesterUUIDs.contains(requesterUUID)
+         }
+ 
+-        var state: Object = [
+-            "source": .string(Self.stateSource),
+-            "conferenceId": .string(Self.conferenceId),
+-            "headline": .string("Delte møter og chatrelasjoner"),
+-            "intro": .string("Forespørsler, bekreftede møter og oppfølgingschat ligger i en delt konferanserelasjon i stedet for bare lokal deltakerstate."),
+-            "participantSummary": .string(participantSummary),
+-            "accessSummary": .string("Synlig for involverte deltakere gjennom deltakerflaten. Arrangør/admin skal bruke avledede visninger, ikke rå privat samtalestate."),
+-            "agreementBoundary": .string(agreementBoundary),
+-            "agreementPersistenceSummary": .string("\(persistedCount) eldre relasjon(er), \(partialCount) lokale aksept(er) med Contract ventende, \(failedCount) feilet."),
+-            "connectionSummary": .string(Self.countText(snapshot.connections.count, singular: "delt relasjon synlig", plural: "delte relasjoner synlige")),
+-            "requestSummary": .string(Self.countText(snapshot.requests.count, singular: "møteforespørsel synlig", plural: "møteforespørsler synlige")),
+-            "meetingSummary": .string(Self.countText(snapshot.meetings.count, singular: "bekreftet møte synlig", plural: "bekreftede møter synlige")),
+-            "chatSummary": .string(Self.countText(snapshot.messages.count, singular: "delt melding synlig", plural: "delte meldinger synlige")),
+-            "isDirectoryVisible": .bool(isDirectoryVisible),
+-            "isMatchingConsentGranted": .bool(isMatchingConsentGranted),
+-            "myInterests": .list(snapshot.actor.interests.map(ValueType.string)),
+-            "myPurpose": .string(snapshot.actor.purpose),
+-            "connections": .list(snapshot.connections.map { .object(connectionRow($0, actor: snapshot.actor)) }),
+-            "requests": .list(snapshot.requests.map { .object(requestRow($0, actor: snapshot.actor)) }),
+-            "confirmedMeetings": .list(snapshot.meetings.map { .object(meetingRow($0, actor: snapshot.actor)) }),
+-            "recentMessages": .list(snapshot.messages.map { .object(messageRow($0, actor: snapshot.actor)) }),
+-            "participantDirectory": .list(snapshot.directory.map { .object(participantRow($0, actor: snapshot.actor)) }),
+-            "agreementPersistence": .list(snapshot.persistence.map { .object(persistenceRow($0, actor: snapshot.actor)) }),
+-            "eventCount": .integer(snapshot.requests.count + snapshot.meetings.count + snapshot.messages.count),
+-            "receiptSummary": .string(Self.countText(receipts.count, singular: "møtekvittering synlig", plural: "møtekvitteringer synlige")),
+-            "receipts": .list(receipts.map(ValueType.object))
+-        ]
++        var state: Object = [:]
++        state["source"] = .string(Self.stateSource)
++        state["conferenceId"] = .string(Self.conferenceId)
++        state["headline"] = .string("Delte møter og chatrelasjoner")
++        state["intro"] = .string("Forespørsler, bekreftede møter og oppfølgingschat ligger i en delt konferanserelasjon i stedet for bare lokal deltakerstate.")
++        state["participantSummary"] = .string(participantSummary)
++        state["accessSummary"] = .string("Synlig for involverte deltakere gjennom deltakerflaten. Arrangør/admin skal bruke avledede visninger, ikke rå privat samtalestate.")
++        state["agreementBoundary"] = .string(agreementBoundary)
++        state["agreementPersistenceSummary"] = .string("\(persistedCount) eldre relasjon(er), \(partialCount) lokale aksept(er) med Contract ventende, \(failedCount) feilet.")
++        state["connectionSummary"] = .string(Self.countText(snapshot.connections.count, singular: "delt relasjon synlig", plural: "delte relasjoner synlige"))
++        state["requestSummary"] = .string(Self.countText(snapshot.requests.count, singular: "møteforespørsel synlig", plural: "møteforespørsler synlige"))
++        state["meetingSummary"] = .string(Self.countText(snapshot.meetings.count, singular: "bekreftet møte synlig", plural: "bekreftede møter synlige"))
++        state["chatSummary"] = .string(Self.countText(snapshot.messages.count, singular: "delt melding synlig", plural: "delte meldinger synlige"))
++        state["isDirectoryVisible"] = .bool(isDirectoryVisible)
++        state["isMatchingConsentGranted"] = .bool(isMatchingConsentGranted)
++        state["myInterests"] = .list(snapshot.actor.interests.map(ValueType.string))
++        state["myPurpose"] = .string(snapshot.actor.purpose)
++        state["myDisplayNameOverride"] = .string(snapshot.actor.displayNameOverride)
++        state["myStilling"] = .string(snapshot.actor.stilling)
++        state["myPhotoDataURI"] = snapshot.actor.photoDataURI.map(ValueType.string) ?? .null
++        state["myFavoritesSharingEnabled"] = .bool(snapshot.actor.favoritesSharingEnabled)
++        state["mySharedFavoriteSessionIds"] = .list(snapshot.actor.sharedFavoriteSessionIds.map(ValueType.string))
++        state["myPositionSharing"] = .object(positionSharingObject(snapshot.actor.positionSharing))
++        state["connections"] = .list(snapshot.connections.map { .object(connectionRow($0, actor: snapshot.actor)) })
++        state["requests"] = .list(snapshot.requests.map { .object(requestRow($0, actor: snapshot.actor)) })
++        state["confirmedMeetings"] = .list(snapshot.meetings.map { .object(meetingRow($0, actor: snapshot.actor)) })
++        state["recentMessages"] = .list(snapshot.messages.map { .object(messageRow($0, actor: snapshot.actor)) })
++        state["participantDirectory"] = .list(snapshot.directory.map { .object(participantRow($0, actor: snapshot.actor)) })
++        state["agreementPersistence"] = .list(snapshot.persistence.map { .object(persistenceRow($0, actor: snapshot.actor)) })
++        state["eventCount"] = .integer(snapshot.requests.count + snapshot.meetings.count + snapshot.messages.count)
++        state["receiptSummary"] = .string(Self.countText(receipts.count, singular: "møtekvittering synlig", plural: "møtekvitteringer synlige"))
++        state["receipts"] = .list(receipts.map(ValueType.object))
+         if includesOrganizerData {
+             state["organizerProjection"] = .object([
+                 "participants": .list(snapshot.directory.map { .object(organizerParticipantObject($0)) }),
+@@ -935,6 +1089,232 @@ class ConferenceConnectionHubCell: GeneralCell, PortholeRuntimeBindingEnsuring {
+         return response
+     }
+ 
++    /// Serialize, persist and read back the full profile before acknowledging.
++    /// A failed write restores the prior in-memory profile and emits no success.
++    private func updateRichParticipantProfile(
++        requester: Identity,
++        eventTitle: String,
++        mutation: (inout SharedParticipantProfile) -> Void
++    ) async -> ValueType {
++        guard let bindingKey = identityBindingKey(for: requester) else {
++            return .string("error: identity is not bound")
++        }
++        guard let emitRichProfileChange else {
++            return .string("error: profile change notification runtime is unavailable")
++        }
++        await profileMutationLock.acquire()
++        _ = await ensureParticipantProfile(for: requester)
++        let previous = stateQueue.sync { () -> SharedParticipantProfile? in
++            guard var profile = participantProfilesByRequesterUUID[bindingKey] else { return nil }
++            let original = profile
++            mutation(&profile)
++            participantProfilesByRequesterUUID[bindingKey] = profile
++            return original
++        }
++        guard previous != nil,
++              await persistParticipantProfileSnapshotIfNeeded(
++                  bindingKey: bindingKey,
++                  requesterUUID: requester.uuid
++              ) else {
++            stateQueue.sync { participantProfilesByRequesterUUID[bindingKey] = previous }
++            await profileMutationLock.release()
++            return .string("error: local resolver snapshot persistence failed")
++        }
++        // This shared feed carries only an invalidation. Profile values and
++        // requester identifiers must remain in the authorized state projection.
++        var event = FlowElement(title: "conference.connection.\(eventTitle)",
++                                content: .object(["refresh": .bool(true)]),
++                                properties: FlowElement.Properties(type: .event, contentType: .object))
++        event.topic = "conference-connections"
++        emitRichProfileChange(event)
++        let response = await stateValue(requester: requester)
++        await profileMutationLock.release()
++        return response
++    }
++
++    /// Overrides the display name shown to other participants in this
++    /// conference, without touching the underlying Identity's own
++    /// `displayName` (which may be reused across other, unrelated contexts).
++    /// An empty override falls back to the Identity's own display name.
++    private func setDisplayNameOverride(
++        value: ValueType?,
++        requester: Identity
++    ) async -> ValueType {
++        guard Self.supportsRichParticipantProfile,
++              let override = rawStringValue(value) ?? rawStringValue(objectValue(value)["displayNameOverride"]) else {
++            return .string("error: display name override requires a string value")
++        }
++        let trimmed = override.trimmingCharacters(in: .whitespacesAndNewlines)
++        guard trimmed.utf8.count <= 120 else {
++            return .string("error: display name override must be at most 120 UTF-8 bytes")
++        }
++
++        return await updateRichParticipantProfile(
++            requester: requester,
++            eventTitle: "participant_display_name_override_changed"
++        ) { profile in
++            profile.displayNameOverride = trimmed
++        }
++    }
++
++    private func setStilling(
++        value: ValueType?,
++        requester: Identity
++    ) async -> ValueType {
++        guard Self.supportsRichParticipantProfile,
++              let stilling = rawStringValue(value) ?? rawStringValue(objectValue(value)["stilling"]) else {
++            return .string("error: stilling requires a string value")
++        }
++        let trimmed = stilling.trimmingCharacters(in: .whitespacesAndNewlines)
++        guard trimmed.utf8.count <= 160 else {
++            return .string("error: stilling must be at most 160 UTF-8 bytes")
++        }
++
++        return await updateRichParticipantProfile(
++            requester: requester,
++            eventTitle: "participant_stilling_changed"
++        ) { profile in
++            profile.stilling = trimmed
++        }
++    }
++
++    /// Accepts a small profile photo as a `data:image/...;base64,...` URI.
++    /// Capped well below `PersonalPagePublisherCell`'s general media-library
++    /// limit - this is a single small thumbnail stored inline on the shared
++    /// profile snapshot, not a general-purpose media store. An empty string
++    /// clears the photo.
++    private static let maximumPhotoBytes = 320 * 1_024
++
++    private func setPhoto(
++        value: ValueType?,
++        requester: Identity
++    ) async -> ValueType {
++        guard Self.supportsRichParticipantProfile,
++              let photo = rawStringValue(value) ?? rawStringValue(objectValue(value)["photoDataURI"]) else {
++            return .string("error: photo requires a string value")
++        }
++        let trimmed = photo.trimmingCharacters(in: .whitespacesAndNewlines)
++        if trimmed.isEmpty == false {
++            guard trimmed.hasPrefix("data:image/") else {
++                return .string("error: photo must be a data:image/... URI")
++            }
++            guard trimmed.utf8.count <= ((Self.maximumPhotoBytes + 2) / 3) * 4 + 32 else {
++                return .string("error: photo must be at most \(Self.maximumPhotoBytes / 1_024) KB")
++            }
++            let parts = trimmed.split(separator: ",", maxSplits: 1, omittingEmptySubsequences: false)
++            guard parts.count == 2,
++                  ["data:image/png;base64", "data:image/jpeg;base64", "data:image/webp;base64"].contains(String(parts[0])),
++                  let bytes = Data(base64Encoded: String(parts[1])), bytes.isEmpty == false else {
++                return .string("error: photo requires a base64 PNG, JPEG or WebP image")
++            }
++            guard bytes.count <= Self.maximumPhotoBytes else {
++                return .string("error: photo must be at most \(Self.maximumPhotoBytes / 1_024) KB")
++            }
++        }
++
++        return await updateRichParticipantProfile(
++            requester: requester,
++            eventTitle: "participant_photo_changed"
++        ) { profile in
++            profile.photoDataURI = trimmed.isEmpty ? nil : trimmed
++        }
++    }
++
++    private static let maximumSharedFavoriteSessionIds = 50
++
++    /// The caller (a thin per-domain proxy cell, e.g. ArendalsukaParticipantProfileCell)
++    /// resolves the participant's own saved-session list and passes it here -
++    /// this shared base class deliberately knows nothing about any specific
++    /// program/agenda cell. Disabling sharing always clears the stored list,
++    /// regardless of what `sessionIds` was passed.
++    private func setFavoritesSharing(
++        value: ValueType?,
++        requester: Identity
++    ) async -> ValueType {
++        guard Self.supportsRichParticipantProfile,
++              let isEnabled = boolValue(objectValue(value)["isEnabled"]) else {
++            return .string("error: favorites sharing requires an isEnabled boolean value")
++        }
++        let sessionIds = isEnabled
++            ? Array((stringListValue(objectValue(value)["sessionIds"]) ?? []).prefix(Self.maximumSharedFavoriteSessionIds))
++            : []
++
++        return await updateRichParticipantProfile(
++            requester: requester,
++            eventTitle: "participant_favorites_sharing_changed"
++        ) { profile in
++            profile.favoritesSharingEnabled = isEnabled
++            profile.sharedFavoriteSessionIds = sessionIds
++        }
++    }
++
++    /// Exactly one mode is active at a time; switching modes always resets
++    /// every mode-specific field first, so a stale live position can never
++    /// leak after switching to `.manual`, and a stale manual label can never
++    /// leak after switching to `.checkin`.
++    private func setPositionSharing(
++        value: ValueType?,
++        requester: Identity
++    ) async -> ValueType {
++        guard Self.supportsRichParticipantProfile else {
++            return .string("error: rich participant profile is not supported")
++        }
++        let payload = objectValue(value)
++        guard let modeRaw = stringValue(payload["mode"]),
++              let mode = ParticipantPositionSharing.Mode(rawValue: modeRaw) else {
++            return .string("error: mode must be one of off, live, manual, checkin")
++        }
++
++        var sharing = ParticipantPositionSharing(mode: mode)
++        switch mode {
++        case .off:
++            break
++        case .manual:
++            let label = (stringValue(payload["manualLabel"]) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
++            guard label.isEmpty == false, label.utf8.count <= 120 else {
++                return .string("error: manualLabel must be 1-120 UTF-8 bytes")
++            }
++            sharing.manualLabel = label
++        case .checkin:
++            guard let featureID = stringValue(payload["checkedInVenueFeatureID"]),
++                  featureID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false else {
++                return .string("error: checkedInVenueFeatureID is required for checkin mode")
++            }
++            sharing.checkedInVenueFeatureID = featureID
++            sharing.checkedInVenueLabel = stringValue(payload["checkedInVenueLabel"])
++        case .live:
++            guard let latitude = doubleValue(payload["latitude"]),
++                  let longitude = doubleValue(payload["longitude"]),
++                  (-90...90).contains(latitude), (-180...180).contains(longitude) else {
++                return .string("error: live mode requires valid latitude/longitude")
++            }
++            sharing.liveLatitude = latitude
++            sharing.liveLongitude = longitude
++            sharing.liveUpdatedAt = Date()
++        }
++
++        return await updateRichParticipantProfile(
++            requester: requester,
++            eventTitle: "participant_position_sharing_changed"
++        ) { profile in
++            profile.positionSharing = sharing
++        }
++    }
++
++    private func doubleValue(_ value: ValueType?) -> Double? {
++        guard let value else { return nil }
++        switch value {
++        case .float(let number):
++            return number
++        case .integer(let integer), .number(let integer):
++            return Double(integer)
++        case .string(let string):
++            return Double(string)
++        default:
++            return nil
++        }
++    }
++
+     private func respondMeetingRequest(
+         value: ValueType?,
+         requester: Identity,
+@@ -1445,10 +1825,7 @@ class ConferenceConnectionHubCell: GeneralCell, PortholeRuntimeBindingEnsuring {
+                 return nil
+             }
+             return ParticipantProfileDurabilitySnapshot(
+-                requesterUUID: profile.requesterUUID,
+-                requesterSigningKeyFingerprint: profile.requesterSigningKeyFingerprint,
+-                interests: profile.interests,
+-                purpose: profile.purpose,
++                profile: profile,
+                 isDirectoryVisible: directoryVisibleRequesterUUIDs.contains(requesterUUID),
+                 isMatchingConsentGranted: matchingConsentRequesterUUIDs.contains(requesterUUID)
+             )
+@@ -2546,11 +2923,41 @@ class ConferenceConnectionHubCell: GeneralCell, PortholeRuntimeBindingEnsuring {
+             if hasMatchingConsent || participant.participantId == actor.participantId {
+                 row["interests"] = .list(participant.interests.map(ValueType.string))
+                 row["purpose"] = .string(participant.purpose)
++                if Self.supportsRichParticipantProfile {
++                    if participant.displayNameOverride.isEmpty == false {
++                        row["displayName"] = .string(participant.displayNameOverride)
++                        row["title"] = .string(participant.displayNameOverride)
++                    }
++                    row["stilling"] = .string(participant.stilling)
++                    row["photoDataURI"] = participant.photoDataURI.map(ValueType.string) ?? .null
++                    if participant.favoritesSharingEnabled {
++                        row["sharedFavoriteSessionIds"] = .list(participant.sharedFavoriteSessionIds.map(ValueType.string))
++                    }
++                    row["positionSharing"] = .object(positionSharingObject(participant.positionSharing))
++                }
+             }
+         }
+         return row
+     }
+ 
++    private func positionSharingObject(_ sharing: ParticipantPositionSharing) -> Object {
++        var object: Object = ["mode": .string(sharing.mode.rawValue)]
++        switch sharing.mode {
++        case .off:
++            break
++        case .manual:
++            object["manualLabel"] = .string(sharing.manualLabel)
++        case .checkin:
++            object["checkedInVenueFeatureID"] = sharing.checkedInVenueFeatureID.map(ValueType.string) ?? .null
++            object["checkedInVenueLabel"] = sharing.checkedInVenueLabel.map(ValueType.string) ?? .null
++        case .live:
++            object["latitude"] = sharing.liveLatitude.map(ValueType.float) ?? .null
++            object["longitude"] = sharing.liveLongitude.map(ValueType.float) ?? .null
++            object["updatedAt"] = sharing.liveUpdatedAt.map { .string(Self.isoFormatter.string(from: $0)) } ?? .null
++        }
++        return object
++    }
++
+     private func organizerParticipantObject(_ participant: SharedParticipantProfile) -> Object {
+         [
+             "participantId": .string(participant.participantId),
+@@ -2660,6 +3067,14 @@ class ConferenceConnectionHubCell: GeneralCell, PortholeRuntimeBindingEnsuring {
+         }
+     }
+ 
++    /// Like `stringValue`, but an empty string is a present, meaningful value
++    /// (e.g. "clear this field") rather than "absent" - only an actual
++    /// non-string payload is `nil`.
++    private func rawStringValue(_ value: ValueType?) -> String? {
++        guard case let .string(text)? = value else { return nil }
++        return text
++    }
++
+     private func stringListValue(_ value: ValueType?) -> [String]? {
+         guard case let .list(list)? = value else { return nil }
+         return list.compactMap { element -> String? in
+diff --git a/Sources/App/Cells/ConfigurationCatalog/ConfigurationCatalogCell.swift b/Sources/App/Cells/ConfigurationCatalog/ConfigurationCatalogCell.swift
+index bf37fb7d..cfb9da59 100644
+--- a/Sources/App/Cells/ConfigurationCatalog/ConfigurationCatalogCell.swift
++++ b/Sources/App/Cells/ConfigurationCatalog/ConfigurationCatalogCell.swift
+@@ -195,6 +195,7 @@ final class ConfigurationCatalogCell: GeneralCell, PortholeRuntimeBindingEnsurin
+         "cell:///ArendalsukaEventAtlas",
+         "cell:///ArendalsukaConfigurationPublisher",
+         "cell:///ArendalsukaParticipantProgram",
++        "cell:///ArendalsukaParticipantProfile",
+         "cell:///ArendalsukaMatching",
+         "cell:///Chat",
+         "cell:///CellConfigurationStudio",
+@@ -1613,6 +1614,7 @@ final class ConfigurationCatalogCell: GeneralCell, PortholeRuntimeBindingEnsurin
+         let arendalsukaEventAtlasConfig = ArendalsukaEventAtlasConfigurationFactory.makeCellConfiguration()
+         let kallimachosArendalsukaDemoConfig = KallimachosArendalsukaDemoConfigurationFactory.makeCellConfiguration()
+         let kallimachosAdvisorConfig = KallimachosAdvisorConfigurationFactory.makeCellConfiguration()
++        let arendalsukaParticipantProfileConfig = ArendalsukaParticipantProfileConfigurationFactory.makeCellConfiguration()
+         let aiGatewayConfig = AIGatewayConfigurationFactory.makeWorkspaceConfiguration()
+         let ragConfig = RAGGatewayConfigurationFactory.makeWorkspaceConfiguration()
+         let ragPromptAdminConfig = RAGPromptAdminConfigurationFactory.makeCellConfiguration()
+@@ -1970,6 +1972,15 @@ final class ConfigurationCatalogCell: GeneralCell, PortholeRuntimeBindingEnsurin
+                 fallbackInterests: ["arendalsuka", "conference", "program", "agenda", "matching", "local-commerce", "map", "lost-found", "notifications", "actor-packages"],
+                 fallbackMenuSlots: [.upperMid, .lowerMid, .lowerRight]
+             ),
++            scaffoldTemplate(
++                configuration: arendalsukaParticipantProfileConfig,
++                fallbackSourceCellEndpoint: ArendalsukaParticipantProfileContract.endpoint,
++                fallbackSourceCellName: "ArendalsukaParticipantProfileCell",
++                fallbackPurpose: "Arendalsuka min profil",
++                fallbackPurposeDescription: "Deltagerstyrt profil: navn, stilling, profilbilde, deling av favoritter og posisjon (live/manuell/innsjekking).",
++                fallbackInterests: ["arendalsuka", "participant", "profile", "ordinary-user", "position-sharing", "favorites"],
++                fallbackMenuSlots: [.lowerMid]
++            ),
+             scaffoldTemplate(
+                 configuration: conferenceDemoLauncherConfig,
+                 fallbackSourceCellEndpoint: "cell:///ConfigurationCatalog",
+diff --git a/Sources/App/Cells/PersonalCopilot/GuidedOnboardingCell.swift b/Sources/App/Cells/PersonalCopilot/GuidedOnboardingCell.swift
+index eb12da3c..1cb72dec 100644
+--- a/Sources/App/Cells/PersonalCopilot/GuidedOnboardingCell.swift
++++ b/Sources/App/Cells/PersonalCopilot/GuidedOnboardingCell.swift
+@@ -1474,6 +1474,51 @@ final class GuidedOnboardingCell: GeneralCell {
+         ]
+     )
+ 
++    /// "Min profil": the participant's own name-override and stilling, on
++    /// `ArendalsukaParticipantProfileCell` - a separate cell/script from
++    /// `arendalsukaParticipantScript` above (interests/purpose/matching
++    /// consent, on `ArendalsukaProfileCell`) because a script's steps can
++    /// only ever act on the one cell its `targetCellEndpoint` names. Photo,
++    /// favorites sharing and position sharing are deliberately not chat
++    /// onboarding steps - they belong on the dedicated "Min profil" screen
++    /// (`ArendalsukaParticipantProfileConfigurationFactory`), not a
++    /// conversational flow.
++    private static let arendalsukaParticipantProfileScript = GuidedOnboardingScript(
++        scriptID: "arendalsuka-participant-profile-v1",
++        actorID: "digipomps.arendalsuka",
++        signature: "digipomps-guided-onboarding-v1",
++        audience: "arendalsuka-participant",
++        purposeRefs: ["personal.entity.enrich.arendalsuka-profile"],
++        interests: ["arendalsuka", "profil", "deltaker"],
++        targetCellEndpoint: ArendalsukaParticipantProfileContract.endpoint,
++        steps: [
++            GuidedOnboardingStep(
++                id: "arendalsuka_profile_display_name",
++                title: "Navn",
++                required: true,
++                readKeypath: "displayNameOverride",
++                targetAction: ArendalsukaParticipantProfileContract.setDisplayNameOverrideKeypath,
++                payloadSchema: "arendalsuka.profile.display-name.v1",
++                promptTemplate: "Vil du vise et annet navn til andre deltakere enn kontonavnet ditt? La stå tomt for å bruke kontonavnet.",
++                confirmationMode: "explicit",
++                consentTextRef: nil,
++                visibilityDefault: "private"
++            ),
++            GuidedOnboardingStep(
++                id: "arendalsuka_profile_stilling",
++                title: "Stilling",
++                required: true,
++                readKeypath: "stilling",
++                targetAction: ArendalsukaParticipantProfileContract.setStillingKeypath,
++                payloadSchema: "arendalsuka.profile.stilling.v1",
++                promptTemplate: "Hva er stillingen eller rollen din? Vises på profilen din for deltakere du deler matching med.",
++                confirmationMode: "explicit",
++                consentTextRef: nil,
++                visibilityDefault: "private"
++            )
++        ]
++    )
++
+     private static let aiGatewaySetupScript = GuidedOnboardingScript(
+         scriptID: "ai-gateway-provider-setup-v1",
+         actorID: "digipomps.ai-gateway",
+@@ -1665,6 +1710,7 @@ final class GuidedOnboardingCell: GeneralCell {
+         havenFoundationScript,
+         conferenceParticipantScript,
+         arendalsukaParticipantScript,
++        arendalsukaParticipantProfileScript,
+         aiGatewaySetupScript,
+         connectLanguageModelScript,
+         userResearchQuestionnaireScript
+@@ -1676,7 +1722,8 @@ final class GuidedOnboardingCell: GeneralCell {
+         "cell:///AIGateway",
+         QuestionnaireResponseContract.endpoint,
+         PersonalAssistantProfileContract.endpoint,
+-        ArendalsukaProfileContract.endpoint
++        ArendalsukaProfileContract.endpoint,
++        ArendalsukaParticipantProfileContract.endpoint
+     ]
+     private static let allowedReads: Set<String> = [
+         "person.conference.profile.role",
+@@ -1701,7 +1748,9 @@ final class GuidedOnboardingCell: GeneralCell {
+         "responses.user-research-questionnaire-v1.research_payment_willingness",
+         "purpose",
+         "interests",
+-        "isMatchingConsentGranted"
++        "isMatchingConsentGranted",
++        "displayNameOverride",
++        "stilling"
+     ]
+     private static let allowedPairs: Set<String> = [
+         "cell:///ConferenceOnboarding#upsertProfile",
+@@ -1727,7 +1776,9 @@ final class GuidedOnboardingCell: GeneralCell {
+         "\(QuestionnaireResponseContract.endpoint)#\(QuestionnaireResponseContract.submitAnswerKeypath)",
+         "\(ArendalsukaProfileContract.endpoint)#\(ArendalsukaProfileContract.setPurposeKeypath)",
+         "\(ArendalsukaProfileContract.endpoint)#\(ArendalsukaProfileContract.setInterestsKeypath)",
+-        "\(ArendalsukaProfileContract.endpoint)#\(ArendalsukaProfileContract.setMatchingConsentKeypath)"
++        "\(ArendalsukaProfileContract.endpoint)#\(ArendalsukaProfileContract.setMatchingConsentKeypath)",
++        "\(ArendalsukaParticipantProfileContract.endpoint)#\(ArendalsukaParticipantProfileContract.setDisplayNameOverrideKeypath)",
++        "\(ArendalsukaParticipantProfileContract.endpoint)#\(ArendalsukaParticipantProfileContract.setStillingKeypath)"
+     ]
+ 
+     private static let serviceAssociations = [
+diff --git a/Sources/App/Support/ChatPurposeResourceRouter.swift b/Sources/App/Support/ChatPurposeResourceRouter.swift
+index cec3de48..203b83c8 100644
+--- a/Sources/App/Support/ChatPurposeResourceRouter.swift
++++ b/Sources/App/Support/ChatPurposeResourceRouter.swift
+@@ -2036,7 +2036,9 @@ enum ChatPurposeResourceRouter {
+             "apne ",
+             "åpne ",
+             "start ",
+-            "ta meg til"
++            "ta meg til",
++            "vis meg ",
++            "show me "
+         ]) {
+             return true
+         }
+diff --git a/Sources/App/configure.swift b/Sources/App/configure.swift
+index b93d30b3..a04dd199 100644
+--- a/Sources/App/configure.swift
++++ b/Sources/App/configure.swift
+@@ -1259,6 +1259,7 @@ public func configure(_ app: Application) async throws {
+                 try await addCellResolveIfNeeded(name: ArendalsukaParticipantProgramContract.cellName, cellScope: .identityUnique, persistency: .persistant, type: ArendalsukaParticipantProgramCell.self)
+                 try await addCellResolveIfNeeded(name: ArendalsukaConnectionHubCell.cellName, cellScope: .scaffoldUnique, persistency: .persistant, identityDomain: ArendalsukaConnectionHubCell.identityDomainName, type: ArendalsukaConnectionHubCell.self)
+                 try await addCellResolveIfNeeded(name: ArendalsukaProfileContract.cellName, cellScope: .identityUnique, persistency: .persistant, type: ArendalsukaProfileCell.self)
++                try await addCellResolveIfNeeded(name: ArendalsukaParticipantProfileContract.cellName, cellScope: .identityUnique, persistency: .persistant, type: ArendalsukaParticipantProfileCell.self)
+                 try await addCellResolveIfNeeded(name: ArendalsukaMatchingContract.cellName, cellScope: .identityUnique, persistency: .persistant, type: ArendalsukaMatchingCell.self)
+                 try await addCellResolveIfNeeded(name: "AIAssistantThread", cellScope: .template, type: AIAssistantThreadCell.self)
+                 try await addCellResolveIfNeeded(name: "LocalLLM", cellScope: .identityUnique, persistency: .persistant, type: LocalLLMGatewayCell.self)
+@@ -1420,6 +1421,7 @@ public func configure(_ app: Application) async throws {
+             try await addCellResolveIfNeeded(name: ArendalsukaParticipantProgramContract.cellName, cellScope: .identityUnique, persistency: .persistant, type: ArendalsukaParticipantProgramCell.self)
+             try await addCellResolveIfNeeded(name: ArendalsukaConnectionHubCell.cellName, cellScope: .scaffoldUnique, persistency: .persistant, identityDomain: ArendalsukaConnectionHubCell.identityDomainName, type: ArendalsukaConnectionHubCell.self)
+             try await addCellResolveIfNeeded(name: ArendalsukaProfileContract.cellName, cellScope: .identityUnique, persistency: .persistant, type: ArendalsukaProfileCell.self)
++            try await addCellResolveIfNeeded(name: ArendalsukaParticipantProfileContract.cellName, cellScope: .identityUnique, persistency: .persistant, type: ArendalsukaParticipantProfileCell.self)
+             try await addCellResolveIfNeeded(name: ArendalsukaMatchingContract.cellName, cellScope: .identityUnique, persistency: .persistant, type: ArendalsukaMatchingCell.self)
+             try await addCellResolveIfNeeded(name: "RAGIngestMedia", cellScope: .identityUnique, persistency: .persistant, type: RAGIngestMediaCell.self)
+             try await addCellResolveIfNeeded(name: "RAGPromptAdmin", cellScope: .identityUnique, persistency: .persistant, type: RAGPromptAdminCell.self)
+diff --git a/Tests/AppTests/ArendalsukaEventAtlasCellTests.swift b/Tests/AppTests/ArendalsukaEventAtlasCellTests.swift
+index 2badc5cf..24732421 100644
+--- a/Tests/AppTests/ArendalsukaEventAtlasCellTests.swift
++++ b/Tests/AppTests/ArendalsukaEventAtlasCellTests.swift
+@@ -2922,6 +2922,125 @@ final class ArendalsukaEventAtlasCellTests: IsolatedCellTestCase {
+         XCTAssertGreaterThanOrEqual(asInt(value(in: searched, keypath: "search.actorResultCount")) ?? 0, 2)
+     }
+ 
++    func testStandsImportCreatesUnclaimedActorPagesAndDedupesClaimedActors() async throws {
++        let previousDebugAccess = CellBase.debugValidateAccessForEverything
++        CellBase.debugValidateAccessForEverything = true
++        defer { CellBase.debugValidateAccessForEverything = previousDebugAccess }
++
++        try await withTemporaryLocalDataJournal { _ in
++        let owner = await makeCellProtocolTestIdentity("arendalsuka-atlas-stands-owner", displayName: "Arendalsuka Stands Owner")
++        let cell = await ArendalsukaEventAtlasCell(owner: owner)
++
++        _ = try await cell.set(
++            keypath: "atlas.addLocalActor",
++            value: try await importAccessPayload([
++                "id": .string("actor-claimed-als-norge"),
++                "kind": .string("stand"),
++                "name": .string("ALS Norge"),
++                "summary": .string("Claimed stand page."),
++                "latitude": .float(58.461376),
++                "longitude": .float(8.766092),
++                "claimStatus": .string("claimed"),
++                "source": .string("claimed-actor")
++            ], actionKeypath: "atlas.addLocalActor", issuer: owner),
++            requester: owner
++        )
++
++        let importValue = try await cell.set(
++            keypath: "atlas.ingestStands",
++            value: try await importAccessPayload([
++                "sourceID": .string("source-arendalsuka-stands"),
++                "stands": .list([
++                    .object([
++                        "organization": .string("ALS Norge"),
++                        "stand_description": .string("Helse, forskning, spre budskap, dele informasjon."),
++                        "stand_location": .string("Strandgaten - 151"),
++                        "latitude": .float(58.461376),
++                        "longitude": .float(8.766092),
++                        "occupant_entry_id": .integer(71784),
++                        "status": .string("booked")
++                    ]),
++                    .object([
++                        "organization": .string("Kristelig Folkeparti"),
++                        "stand_description": .string(""),
++                        "stand_location": .string("Sam Eydes plass - 10"),
++                        "latitude": .float(58.460011),
++                        "longitude": .float(8.767717),
++                        "occupant_entry_id": .integer(70134),
++                        "status": .string("booked")
++                    ]),
++                    .object([
++                        "organization": .string(""),
++                        "stand_location": .string("Torvet - 199")
++                    ])
++                ])
++            ], actionKeypath: "atlas.ingestStands", issuer: owner),
++            requester: owner
++        )
++        let importedState = try XCTUnwrap(asObject(importValue))
++        XCTAssertEqual(asInt(value(in: importedState, keypath: "import.lastReport.created")), 1)
++        XCTAssertEqual(asInt(value(in: importedState, keypath: "import.lastReport.skippedClaimedDuplicates")), 1)
++        XCTAssertEqual(asInt(value(in: importedState, keypath: "import.lastReport.skippedUnnamed")), 1)
++        XCTAssertEqual(asString(value(in: importedState, keypath: "import.lastReport.claimPolicy")), "Stand actors are unclaimed-source-import pages and never overwrite claimed actor pages.")
++
++        let actors = listObjects(value(in: importedState, keypath: "actorRecords"))
++        let krf = try XCTUnwrap(actors.first { asString($0["id"]) == "actor-stand-70134" })
++        XCTAssertEqual(asString(krf["kind"]), "stand")
++        XCTAssertEqual(asString(krf["claimStatus"]), "unclaimed-source-import")
++        XCTAssertEqual(asString(krf["source"]), "arendalsuka-stand:70134")
++        XCTAssertEqual(asString(krf["address"]), "Sam Eydes plass - 10")
++        XCTAssertTrue((asString(krf["sourceProvenance"]) ?? "").contains("not a real street address"))
++        XCTAssertTrue(asStringList(krf["purposeRefs"]).contains("arendalsuka.meeting-place.agree"))
++        XCTAssertTrue(asStringList(krf["interests"]).contains("stand"))
++
++        let claimed = try XCTUnwrap(actors.first { asString($0["id"]) == "actor-claimed-als-norge" })
++        XCTAssertEqual(asString(claimed["claimStatus"]), "claimed")
++        XCTAssertNil(actors.first { asString($0["id"]) == "actor-stand-71784" })
++        }
++    }
++
++    func testStandImportRequiresProofAndDurableWriteBeforePublishingActors() async throws {
++        let previousDebugAccess = CellBase.debugValidateAccessForEverything
++        CellBase.debugValidateAccessForEverything = false
++        defer { CellBase.debugValidateAccessForEverything = previousDebugAccess }
++        try await withTemporaryLocalDataJournal { journalPath in
++            let owner = await makeCellProtocolTestIdentity("stand-durability-owner", displayName: "Stand Owner")
++            let cell = await ArendalsukaEventAtlasCell(owner: owner)
++            let fields: Object = ["sourceID": .string("source-test-stands"), "stands": .list([
++                .object(["organization": .string("Synthetic Stand"), "occupant_entry_id": .integer(99201),
++                         "stand_location": .string("Test zone - 1"), "status": .string("booked")])
++            ])]
++            let deniedValue = try await cell.set(keypath: "atlas.ingestStands", value: .object(fields), requester: owner)
++            let denied = try XCTUnwrap(asObject(deniedValue))
++            XCTAssertEqual(asString(value(in: denied, keypath: "decision.code")), "import_access_vc_missing")
++            XCTAssertFalse(FileManager.default.fileExists(atPath: journalPath))
++
++            // A directory at the journal path deterministically rejects the
++            // append, even when this test runs as root inside the CI container.
++            try FileManager.default.createDirectory(atPath: journalPath, withIntermediateDirectories: false)
++            let signed = try await importAccessPayload(fields, actionKeypath: "atlas.ingestStands", issuer: owner)
++            let failed = try await cell.set(keypath: "atlas.ingestStands", value: signed, requester: owner)
++            XCTAssertTrue(asString(failed)?.contains("journal persistence failed") == true)
++            let failedStateValue = try await cell.get(keypath: "state", requester: owner)
++            let failedState = try XCTUnwrap(asObject(failedStateValue))
++            XCTAssertFalse(listObjects(value(in: failedState, keypath: "actorRecords")).contains {
++                asString($0["id"]) == "actor-stand-99201"
++            })
++            try FileManager.default.removeItem(atPath: journalPath)
++
++            let committedValue = try await cell.set(keypath: "atlas.ingestStands", value: signed, requester: owner)
++            let committed = try XCTUnwrap(asObject(committedValue))
++            XCTAssertEqual(asInt(value(in: committed, keypath: "import.lastReport.created")), 1)
++            let restored = await ArendalsukaEventAtlasCell(owner: owner)
++            let restoredValue = try await restored.get(keypath: "state", requester: owner)
++            let restoredState = try XCTUnwrap(asObject(restoredValue))
++            let actors = listObjects(value(in: restoredState, keypath: "actorRecords"))
++            let actor = try XCTUnwrap(actors.first { asString($0["id"]) == "actor-stand-99201" })
++            XCTAssertEqual(asString(actor["claimStatus"]), "unclaimed-source-import")
++            XCTAssertEqual(asString(actor["name"]), "Synthetic Stand")
++        }
++    }
++
+     func testAtlasBuildsPortableMapAndSelectsMapFeatures() async throws {
+         let previousDebugAccess = CellBase.debugValidateAccessForEverything
+         CellBase.debugValidateAccessForEverything = true
+diff --git a/Tests/AppTests/ArendalsukaParticipantConversationTests.swift b/Tests/AppTests/ArendalsukaParticipantConversationTests.swift
+new file mode 100644
+index 00000000..c6e8f940
+--- /dev/null
++++ b/Tests/AppTests/ArendalsukaParticipantConversationTests.swift
+@@ -0,0 +1,239 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++
++@testable import App
++import XCTest
++@_spi(Testing) import CellBase
++import CellVapor
++
++final class ArendalsukaParticipantConversationTests: IsolatedCellTestCase {
++    func testConfirmedMeetingConversationIsSharedAcrossBothParticipantsEvenWithSeparateVaults() async throws {
++        let previousDebugAccess = CellBase.debugValidateAccessForEverything
++        let previousResolver = CellBase.defaultCellResolver
++        let previousVault = CellBase.defaultIdentityVault
++        let previousTypedCellUtility = CellBase.typedCellUtility
++        CellBase.debugValidateAccessForEverything = false
++        defer {
++            CellBase.debugValidateAccessForEverything = previousDebugAccess
++            CellBase.defaultCellResolver = previousResolver
++            CellBase.defaultIdentityVault = previousVault
++            CellBase.typedCellUtility = previousTypedCellUtility
++        }
++
++        let resolver = CellResolver.sharedInstance
++        CellBase.defaultCellResolver = resolver
++        let typedCellUtility = TypedCellUtility(storage: LargeStackCellStorage())
++        resolver.tcUtility = typedCellUtility
++        CellBase.typedCellUtility = typedCellUtility
++
++        // Mirror production: each participant's browser session owns its OWN
++        // identity vault instance, not a shared one. If conversationRequester's
++        // domain->identity derivation is not actually deterministic across
++        // separate vault instances, the two participants will silently resolve
++        // to two different ChatCell instances.
++        let aliceVault = BrowserClientIdentityVault(identityDomain: "arendalsuka-chat-alice-\(UUID().uuidString)")
++        let bobVault = BrowserClientIdentityVault(identityDomain: "arendalsuka-chat-bob-\(UUID().uuidString)")
++        CellBase.defaultIdentityVault = aliceVault
++
++        try await registerResolveIfNeeded(
++            resolver,
++            name: "EntityAnchor",
++            type: EntityAnchorCell.self,
++            cellScope: .identityUnique,
++            persistency: .ephemeral,
++            identityDomain: "private"
++        )
++        try await registerResolveIfNeeded(
++            resolver,
++            name: "Chat",
++            type: ChatCell.self,
++            cellScope: .identityUnique,
++            persistency: .persistant
++        )
++        try await registerResolveIfNeeded(
++            resolver,
++            name: ArendalsukaConnectionHubCell.cellName,
++            type: ArendalsukaConnectionHubCell.self,
++            cellScope: .scaffoldUnique,
++            persistency: .persistant,
++            identityDomain: ArendalsukaConnectionHubCell.identityDomainName
++        )
++
++        guard let alice = await aliceVault.identity(for: "arendalsuka-conversation-alice-\(UUID().uuidString)", makeNewIfNotFound: true),
++              let bob = await bobVault.identity(for: "arendalsuka-conversation-bob-\(UUID().uuidString)", makeNewIfNotFound: true) else {
++            return XCTFail("Expected signable participant identities from two separate vaults")
++        }
++        alice.displayName = "Ada Nord"
++        bob.displayName = "Bjørn Sør"
++
++        guard let hub = try await resolver.cellAtEndpoint(
++            endpoint: ArendalsukaParticipantProgramContract.meetingHubEndpoint,
++            requester: alice
++        ) as? Meddle else {
++            return XCTFail("Expected to resolve the shared Arendalsuka connection hub")
++        }
++
++        _ = try await hub.set(keypath: "setParticipantDirectoryVisibility", value: .bool(true), requester: alice)
++        _ = try await hub.set(keypath: "setParticipantDirectoryVisibility", value: .bool(true), requester: bob)
++
++        _ = try await hub.set(
++            keypath: "createMeetingRequest",
++            value: .object([
++                "counterpartRequesterUUID": .string(bob.uuid),
++                "counterpartDisplayName": .string(bob.displayName),
++                "purposeRef": .string(ArendalsukaParticipantProgramContract.meetingPurposeRef),
++                "message": .string("Skal vi møtes etter debatten?")
++            ]),
++            requester: alice
++        )
++
++        let aliceOutgoingState = try await hub.get(keypath: "state", requester: alice)
++        guard case let .object(aliceOutgoingObject) = aliceOutgoingState,
++              let persistedRequestID = firstListObjectValue(in: aliceOutgoingObject, keypath: "requests", field: "id") else {
++            return XCTFail("Expected a persisted outgoing meeting request id")
++        }
++
++        _ = try await hub.set(
++            keypath: "respondMeetingRequest",
++            value: .object([
++                "requestId": .string(persistedRequestID),
++                "status": .string("accepted"),
++                "actorRequesterUUID": .string(alice.uuid)
++            ]),
++            requester: bob
++        )
++
++        let aliceHubState = try await hub.get(keypath: "state", requester: alice)
++        let bobHubState = try await hub.get(keypath: "state", requester: bob)
++        guard case let .object(aliceHubObject) = aliceHubState,
++              case let .object(bobHubObject) = bobHubState,
++              let meetingId = firstListObjectValue(in: aliceHubObject, keypath: "confirmedMeetings", field: "id"),
++              let bobMeetingId = firstListObjectValue(in: bobHubObject, keypath: "confirmedMeetings", field: "id") else {
++            return XCTFail("Expected both participants to see one confirmed meeting")
++        }
++        XCTAssertEqual(meetingId, bobMeetingId)
++
++        let aliceCell = await ArendalsukaParticipantProgramCell(owner: alice)
++        let bobCell = await ArendalsukaParticipantProgramCell(owner: bob)
++
++        let aliceAfterSelect = try await aliceCell.set(
++            keypath: ArendalsukaParticipantProgramContract.selectConversationKeypath,
++            value: .string(meetingId),
++            requester: alice
++        )
++        guard case let .object(aliceAfterSelectObject) = aliceAfterSelect,
++              let aliceConversation = Self.object(aliceAfterSelectObject["conversation"]) else {
++            return XCTFail("Expected Alice's state to include an open conversation after selection")
++        }
++        XCTAssertEqual(Self.bool(aliceConversation["isOpen"]), true)
++        XCTAssertEqual(Self.bool(aliceConversation["isAvailable"]), true, "Alice's conversation should resolve to an available ChatCell backend")
++
++        _ = try await aliceCell.set(
++            keypath: ArendalsukaParticipantProgramContract.setConversationDraftKeypath,
++            value: .string("Hei fra Alice!"),
++            requester: alice
++        )
++        _ = try await aliceCell.set(
++            keypath: ArendalsukaParticipantProgramContract.sendConversationMessageKeypath,
++            value: .object([:]),
++            requester: alice
++        )
++
++        let bobAfterSelect = try await bobCell.set(
++            keypath: ArendalsukaParticipantProgramContract.selectConversationKeypath,
++            value: .string(meetingId),
++            requester: bob
++        )
++        guard case let .object(bobAfterSelectObject) = bobAfterSelect,
++              let bobConversation = Self.object(bobAfterSelectObject["conversation"]) else {
++            return XCTFail("Expected Bob's state to include an open conversation after selection")
++        }
++        XCTAssertEqual(Self.bool(bobConversation["isOpen"]), true)
++        XCTAssertEqual(Self.bool(bobConversation["isAvailable"]), true, "Bob's conversation should resolve to an available ChatCell backend")
++
++        let bobMessages = Self.list(bobConversation["messages"]).compactMap(Self.object)
++        XCTAssertEqual(
++            bobMessages.count,
++            1,
++            "Bob should see Alice's message in the shared per-pair conversation, not an empty thread"
++        )
++        XCTAssertEqual(bobMessages.first.flatMap { Self.string($0["text"]) }, "Hei fra Alice!")
++        XCTAssertEqual(bobMessages.first.flatMap { Self.bool($0["isMine"]) }, false)
++
++        // And Alice, re-reading her own state, should see her own message too.
++        let aliceState = try await aliceCell.get(keypath: "state", requester: alice)
++        guard case let .object(aliceStateObject) = aliceState,
++              let aliceConversationAfterSend = Self.object(aliceStateObject["conversation"]) else {
++            return XCTFail("Expected Alice's refreshed state to include the conversation")
++        }
++        let aliceMessages = Self.list(aliceConversationAfterSend["messages"]).compactMap(Self.object)
++        XCTAssertEqual(aliceMessages.count, 1)
++        XCTAssertEqual(aliceMessages.first.flatMap { Self.bool($0["isMine"]) }, true)
++    }
++
++    private static func object(_ value: ValueType?) -> Object? {
++        guard case let .object(object)? = value else { return nil }
++        return object
++    }
++
++    private static func list(_ value: ValueType?) -> [ValueType] {
++        guard case let .list(list)? = value else { return [] }
++        return list
++    }
++
++    private static func string(_ value: ValueType?) -> String? {
++        guard case let .string(string)? = value else { return nil }
++        return string
++    }
++
++    private static func bool(_ value: ValueType?) -> Bool? {
++        guard case let .bool(bool)? = value else { return nil }
++        return bool
++    }
++
++    private func registerResolveIfNeeded(
++        _ resolver: CellResolver,
++        name: String,
++        type: GeneralCell.Type,
++        cellScope: CellUsageScope = .identityUnique,
++        persistency: Persistancy = .ephemeral,
++        identityDomain: String = "scaffold"
++    ) async throws {
++        do {
++            try await resolver.addCellResolve(
++                name: name,
++                cellScope: cellScope,
++                persistency: persistency,
++                identityDomain: identityDomain,
++                type: type
++            )
++        } catch {
++            guard String(describing: error) == "duplicatedEndpointName" else {
++                throw error
++            }
++        }
++    }
++
++    private func firstListObjectValue(in object: Object, keypath: String, field: String) -> String? {
++        guard let value = valueAt(in: object, keypath: keypath),
++              case let .list(list) = value,
++              case let .object(first)? = list.first,
++              case let .string(string)? = first[field] else {
++            return nil
++        }
++        return string
++    }
++
++    private func valueAt(in object: Object, keypath: String) -> ValueType? {
++        let parts = keypath.split(separator: ".").map(String.init)
++        var current: ValueType = .object(object)
++        for part in parts {
++            guard case let .object(currentObject) = current,
++                  let next = currentObject[part] else {
++                return nil
++            }
++            current = next
++        }
++        return current
++    }
++}
+diff --git a/Tests/AppTests/ArendalsukaParticipantProfileCellTests.swift b/Tests/AppTests/ArendalsukaParticipantProfileCellTests.swift
+new file mode 100644
+index 00000000..eb535348
+--- /dev/null
++++ b/Tests/AppTests/ArendalsukaParticipantProfileCellTests.swift
+@@ -0,0 +1,671 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++
++@testable import App
++import XCTest
++import CellBase
++import CellVapor
++#if canImport(Combine)
++import Combine
++#else
++import OpenCombine
++#endif
++
++final class ArendalsukaParticipantProfileCellTests: IsolatedCellTestCase {
++    func testRendererPayloadsAndRuntimeResultsMatchContractsAndHubFlow() async throws {
++        let previousDebugAccess = CellBase.debugValidateAccessForEverything
++        CellBase.debugValidateAccessForEverything = false
++        defer { CellBase.debugValidateAccessForEverything = previousDebugAccess }
++        let resolver = CellResolver.sharedInstance
++        CellBase.defaultCellResolver = resolver
++        let vault = BrowserClientIdentityVault(identityDomain: "profile-contract-\(UUID().uuidString)")
++        CellBase.defaultIdentityVault = vault
++        try await resolver.addCellResolve(
++            name: "EntityAnchor", cellScope: .identityUnique, persistency: .ephemeral,
++            identityDomain: "private", type: EntityAnchorCell.self
++        )
++        try await resolver.addCellResolve(
++            name: ArendalsukaConnectionHubCell.cellName, cellScope: .scaffoldUnique,
++            persistency: .ephemeral, identityDomain: ArendalsukaConnectionHubCell.identityDomainName,
++            type: ArendalsukaConnectionHubCell.self
++        )
++        let owner = await makeCellProtocolTestIdentity("profile-contract-owner", in: vault)
++        let profile = await ArendalsukaParticipantProfileCell(owner: owner)
++        _ = try await profile.get(keypath: "state", requester: owner)
++        let resolved = try await resolver.cellAtEndpoint(
++            endpoint: ArendalsukaParticipantProgramContract.meetingHubEndpoint, requester: owner
++        )
++        let hub = try XCTUnwrap(resolved as? ArendalsukaConnectionHubCell)
++        let changed = expectation(description: "hub emits acknowledged profile change")
++        let feed = try await hub.flow(requester: owner)
++        var observed: FlowElement?
++        let subscription = feed.sink(receiveCompletion: { _ in }, receiveValue: { event in
++            guard event.title == "conference.connection.participant_stilling_changed" else { return }
++            observed = event
++            changed.fulfill()
++        })
++        let cases: [(String, ValueType)] = [
++            ("profile.setDisplayNameOverride", .string("Ada")),
++            ("profile.setStilling", .object(["stilling": .string("Deltaker")])),
++            ("profile.setPhoto", .object(["mimeType": .string("image/png"), "dataBase64": .string("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a7p8AAAAASUVORK5CYII=")])),
++            ("profile.setPhoto", .string("")),
++            ("profile.setPhoto", .object(["kind": .string("pick"), "fieldID": .string("profile-photo")])),
++            ("profile.setPhoto", .object(["kind": .string("pick"), "fieldID": .string("profile-photo"), "temporaryPayload": .object(["mimeType": .string("image/png"), "dataBase64": .string("aGVsbG8=")])])),
++            ("state.favoritesSharingEnabled", .bool(false)),
++            ("profile.setManualPositionLabel", .string("Ved kaien")),
++            ("profile.setPositionSharing", .object(["mode": .string("live"), "latitude": .float(58.46), "longitude": .float(8.77)])),
++            ("profile.setCheckedInVenue", .object(["selected": .object(["id": .string("venue-1"), "title": .string("Torget")])])),
++            ("profile.setPositionSharing", .object(["mode": .string("off")])),
++            ("profile.setPhoto", .string("https://invalid.example/photo.png"))
++        ]
++        for (key, payload) in cases {
++            let contract = try await profile.contract(for: key, method: .set, requester: owner)
++            let fields = try XCTUnwrap(ExploreContract.object(from: contract))
++            let input = ExploreContractValidator.validate(value: payload, against: fields[ExploreContract.Field.input])
++            XCTAssertTrue(input.ok, "\(key) input: \(input.issues)")
++            let result = try await profile.set(keypath: key, value: payload, requester: owner)
++            if payload == .string("https://invalid.example/photo.png") {
++                XCTAssertTrue(asStringValue(result)?.hasPrefix("error:") == true)
++            } else {
++                let updated = try XCTUnwrap(ExploreContract.object(from: result), "\(key) must return the updated profile")
++                XCTAssertEqual(asBool(updated, "isAvailable"), true)
++            }
++            let output = ExploreContractValidator.validate(value: result, against: fields[ExploreContract.Field.returns])
++            XCTAssertTrue(output.ok, "\(key) output: \(output.issues)")
++            XCTAssertTrue(ExploreContract.flowEffects(from: contract).isEmpty, "The proxy must not promise hub events on its own feed")
++        }
++        await fulfillment(of: [changed], timeout: 2)
++        withExtendedLifetime(subscription) {}
++        let event = try XCTUnwrap(observed)
++        guard case let .object(eventPayload) = event.content else {
++            return XCTFail("Expected a value-free profile invalidation")
++        }
++        XCTAssertEqual(Set(eventPayload.keys), ["refresh"], "Shared invalidations must not carry private profile values")
++        XCTAssertEqual(eventPayload["refresh"], .bool(true))
++        let canInjectFeed = await hub.validateAccess("-w--", at: "feed", for: owner)
++        XCTAssertFalse(canInjectFeed, "Profile actions must not grant arbitrary feed injection")
++        let hubContract = try await hub.contract(for: "setStilling", method: .set, requester: owner)
++        let topics = ExploreContract.flowEffects(from: hubContract).compactMap {
++            ExploreContract.string(from: $0[ExploreContract.Field.topic])
++        }
++        XCTAssertEqual(topics, [event.topic])
++
++        // A missing agenda cannot be represented as successful sharing of an
++        // empty list. The user's consent setting must remain unchanged.
++        let unavailable = try await profile.set(keypath: "state.favoritesSharingEnabled", value: .bool(true), requester: owner)
++        XCTAssertTrue(asStringValue(unavailable)?.hasPrefix("error:") == true)
++        let state = try await profile.get(keypath: "state", requester: owner)
++        let stateFields = try XCTUnwrap(ExploreContract.object(from: state))
++        XCTAssertEqual(asBool(stateFields, "favoritesSharingEnabled"), false)
++        let readContract = try await profile.contract(for: "state", method: .get, requester: owner)
++        let readFields = try XCTUnwrap(ExploreContract.object(from: readContract))
++        XCTAssertTrue(ExploreContractValidator.validate(value: state, against: readFields[ExploreContract.Field.returns]).ok)
++    }
++
++    private func makeParticipant(_ label: String, vault: BrowserClientIdentityVault) async -> Identity? {
++        await vault.identity(for: "\(label)-\(UUID().uuidString)", makeNewIfNotFound: true)
++    }
++
++    func testSetDisplayNameOverrideStillingAndPhotoProxyToTheConnectionHub() async throws {
++        let previousDebugAccess = CellBase.debugValidateAccessForEverything
++        let previousResolver = CellBase.defaultCellResolver
++        let previousVault = CellBase.defaultIdentityVault
++        CellBase.debugValidateAccessForEverything = false
++        defer {
++            CellBase.debugValidateAccessForEverything = previousDebugAccess
++            CellBase.defaultCellResolver = previousResolver
++            CellBase.defaultIdentityVault = previousVault
++        }
++
++        let resolver = CellResolver.sharedInstance
++        CellBase.defaultCellResolver = resolver
++        let vault = BrowserClientIdentityVault(identityDomain: "arendalsuka-participant-profile-\(UUID().uuidString)")
++        CellBase.defaultIdentityVault = vault
++        try await resolver.addCellResolve(
++            name: "EntityAnchor",
++            cellScope: .identityUnique,
++            persistency: .ephemeral,
++            identityDomain: "private",
++            type: EntityAnchorCell.self
++        )
++        try await resolver.addCellResolve(
++            name: ArendalsukaConnectionHubCell.cellName,
++            cellScope: .scaffoldUnique,
++            persistency: .ephemeral,
++            identityDomain: ArendalsukaConnectionHubCell.identityDomainName,
++            type: ArendalsukaConnectionHubCell.self
++        )
++
++        guard let participant = await makeParticipant("arendalsuka-participant-profile-owner", vault: vault) else {
++            return XCTFail("Expected a signable participant identity")
++        }
++        participant.displayName = "Cecilie Fjord"
++
++        let profile = await ArendalsukaParticipantProfileCell(owner: participant)
++
++        let emptyState = try await profile.get(keypath: "state", requester: participant)
++        guard case let .object(emptyObject) = emptyState else {
++            return XCTFail("Expected initial profile state")
++        }
++        XCTAssertEqual(asString(emptyObject, "displayNameOverride"), "")
++        XCTAssertEqual(asBool(emptyObject, "isVerified"), false)
++
++        _ = try await profile.set(
++            keypath: "profile.setDisplayNameOverride",
++            value: .object(["displayNameOverride": .string("Cissi")]),
++            requester: participant
++        )
++        _ = try await profile.set(
++            keypath: "profile.setStilling",
++            value: .object(["stilling": .string("Rådgiver, digital politikk")]),
++            requester: participant
++        )
++        let afterPhoto = try await profile.set(
++            keypath: "profile.setPhoto",
++            value: .object(["photoDataURI": .string("data:image/png;base64,aGVsbG8=")]),
++            requester: participant
++        )
++        guard let afterPhoto, case let .object(afterPhotoObject) = afterPhoto else {
++            return XCTFail("Expected profile state after setting a photo")
++        }
++        XCTAssertEqual(asString(afterPhotoObject, "displayNameOverride"), "Cissi")
++        XCTAssertEqual(asString(afterPhotoObject, "stilling"), "Rådgiver, digital politikk")
++        XCTAssertEqual(asString(afterPhotoObject, "photoDataURI"), "data:image/png;base64,aGVsbG8=")
++        XCTAssertEqual(asBool(afterPhotoObject, "isVerified"), false)
++
++        // Proves this cell holds no state of its own - a second instance for the
++        // same owner reads the same data straight through from the hub.
++        let secondInstance = await ArendalsukaParticipantProfileCell(owner: participant)
++        let rereadValue = try await secondInstance.get(keypath: "state", requester: participant)
++        guard case let .object(reread) = rereadValue else {
++            return XCTFail("Expected profile state from a fresh instance")
++        }
++        XCTAssertEqual(asString(reread, "stilling"), "Rådgiver, digital politikk")
++
++        // An authenticated key with the same UUID is not the owner.
++        let forgedVault = EphemeralIdentityVault()
++        var forged = Identity(participant.uuid, displayName: "Forged", identityVault: forgedVault)
++        await forgedVault.addIdentity(identity: &forged, for: "forged-profile-owner")
++        let forgedRead = try? await profile.get(keypath: "state", requester: forged)
++        XCTAssertNil(forgedRead)
++        let forgedWrite = try? await profile.set(
++            keypath: "profile.setStilling", value: .string("Forged title"), requester: forged
++        )
++        XCTAssertNil(forgedWrite)
++        let outsiderCandidate = await makeParticipant("outsider", vault: vault)
++        let outsider = try XCTUnwrap(outsiderCandidate)
++        let outsiderRead = try? await profile.get(keypath: "state", requester: outsider)
++        XCTAssertNil(outsiderRead)
++        let outsiderWrite = try? await profile.set(
++            keypath: "profile.setDisplayNameOverride", value: .string("Not yours"), requester: outsider
++        )
++        XCTAssertNil(outsiderWrite)
++
++        // Malformed input cannot silently clear a previously committed field.
++        for key in ["profile.setDisplayNameOverride", "profile.setStilling", "profile.setPhoto", "state.favoritesSharingEnabled", "profile.setPositionSharing"] {
++            let rejected = try await profile.set(keypath: key, value: .null, requester: participant)
++            XCTAssertTrue(rejected?.string?.hasPrefix("error:") == true, key)
++        }
++        let afterDenied = try await profile.get(keypath: "state", requester: participant)
++        guard case let .object(unchanged) = afterDenied else { return XCTFail("Expected owner state") }
++        XCTAssertEqual(asString(unchanged, "displayNameOverride"), "Cissi")
++        XCTAssertEqual(asString(unchanged, "stilling"), "Rådgiver, digital politikk")
++        XCTAssertEqual(asString(unchanged, "photoDataURI"), "data:image/png;base64,aGVsbG8=")
++
++        // Clearing the photo (empty string) removes it rather than leaving stale bytes.
++        let cleared = try await profile.set(
++            keypath: "profile.setPhoto",
++            value: .object(["photoDataURI": .string("")]),
++            requester: participant
++        )
++        guard let cleared, case let .object(clearedObject) = cleared else {
++            return XCTFail("Expected profile state after clearing the photo")
++        }
++        XCTAssertNil(clearedObject["photoDataURI"].flatMap { value -> String? in
++            guard case let .string(text) = value, text.isEmpty == false else { return nil }
++            return text
++        })
++    }
++
++    func testSetPhotoRejectsWrongPrefixAndOversizedPayload() async throws {
++        let previousDebugAccess = CellBase.debugValidateAccessForEverything
++        let previousResolver = CellBase.defaultCellResolver
++        let previousVault = CellBase.defaultIdentityVault
++        CellBase.debugValidateAccessForEverything = false
++        defer {
++            CellBase.debugValidateAccessForEverything = previousDebugAccess
++            CellBase.defaultCellResolver = previousResolver
++            CellBase.defaultIdentityVault = previousVault
++        }
++
++        let resolver = CellResolver.sharedInstance
++        CellBase.defaultCellResolver = resolver
++        let vault = BrowserClientIdentityVault(identityDomain: "arendalsuka-participant-profile-photo-\(UUID().uuidString)")
++        CellBase.defaultIdentityVault = vault
++        try await resolver.addCellResolve(
++            name: "EntityAnchor",
++            cellScope: .identityUnique,
++            persistency: .ephemeral,
++            identityDomain: "private",
++            type: EntityAnchorCell.self
++        )
++        try await resolver.addCellResolve(
++            name: ArendalsukaConnectionHubCell.cellName,
++            cellScope: .scaffoldUnique,
++            persistency: .ephemeral,
++            identityDomain: ArendalsukaConnectionHubCell.identityDomainName,
++            type: ArendalsukaConnectionHubCell.self
++        )
++
++        guard let participant = await makeParticipant("arendalsuka-participant-profile-photo-owner", vault: vault) else {
++            return XCTFail("Expected a signable participant identity")
++        }
++        let profile = await ArendalsukaParticipantProfileCell(owner: participant)
++
++        let wrongPrefix = try await profile.set(
++            keypath: "profile.setPhoto",
++            value: .object(["photoDataURI": .string("not-a-data-uri")]),
++            requester: participant
++        )
++        XCTAssertEqual(asStringValue(wrongPrefix), "error: photo must be a data:image/... URI")
++
++        let boundaryPhoto = "data:image/png;base64," + Data(repeating: 0, count: 320 * 1_024).base64EncodedString()
++        let accepted = try await profile.set(keypath: "profile.setPhoto", value: .string(boundaryPhoto), requester: participant)
++        XCTAssertEqual(ExploreContract.object(from: accepted)?["photoDataURI"], .string(boundaryPhoto), "The limit describes uploaded bytes, not base64 expansion")
++        let openedPicker = try await profile.set(keypath: "profile.setPhoto", value: .object(["kind": .string("pick"), "fieldID": .string("photo")]), requester: participant)
++        XCTAssertEqual(ExploreContract.object(from: openedPicker)?["photoDataURI"], .string(boundaryPhoto), "Opening or cancelling the file picker must preserve the photo")
++        let malformed = try await profile.set(keypath: "profile.setPhoto", value: .string("data:image/png;base64,not base64"), requester: participant)
++        XCTAssertTrue(asStringValue(malformed)?.hasPrefix("error:") == true)
++        let oversized = "data:image/png;base64," + Data(repeating: 0, count: 320 * 1_024 + 1).base64EncodedString()
++        let tooLarge = try await profile.set(
++            keypath: "profile.setPhoto",
++            value: .object(["photoDataURI": .string(oversized)]),
++            requester: participant
++        )
++        guard let tooLargeText = asStringValue(tooLarge) else {
++            return XCTFail("Expected an error string for an oversized photo")
++        }
++        XCTAssertTrue(tooLargeText.hasPrefix("error: photo must be at most"))
++    }
++
++    func testPositionSharingModesAreExclusiveAndValidated() async throws {
++        let previousDebugAccess = CellBase.debugValidateAccessForEverything
++        let previousResolver = CellBase.defaultCellResolver
++        let previousVault = CellBase.defaultIdentityVault
++        CellBase.debugValidateAccessForEverything = false
++        defer {
++            CellBase.debugValidateAccessForEverything = previousDebugAccess
++            CellBase.defaultCellResolver = previousResolver
++            CellBase.defaultIdentityVault = previousVault
++        }
++
++        let resolver = CellResolver.sharedInstance
++        CellBase.defaultCellResolver = resolver
++        let vault = BrowserClientIdentityVault(identityDomain: "arendalsuka-participant-profile-position-\(UUID().uuidString)")
++        CellBase.defaultIdentityVault = vault
++        try await resolver.addCellResolve(
++            name: "EntityAnchor",
++            cellScope: .identityUnique,
++            persistency: .ephemeral,
++            identityDomain: "private",
++            type: EntityAnchorCell.self
++        )
++        try await resolver.addCellResolve(
++            name: ArendalsukaConnectionHubCell.cellName,
++            cellScope: .scaffoldUnique,
++            persistency: .ephemeral,
++            identityDomain: ArendalsukaConnectionHubCell.identityDomainName,
++            type: ArendalsukaConnectionHubCell.self
++        )
++
++        guard let participant = await makeParticipant("arendalsuka-participant-profile-position-owner", vault: vault) else {
++            return XCTFail("Expected a signable participant identity")
++        }
++        let profile = await ArendalsukaParticipantProfileCell(owner: participant)
++
++        // Manual mode requires a non-empty label.
++        let emptyManual = try await profile.set(
++            keypath: "profile.setPositionSharing",
++            value: .object(["mode": .string("manual")]),
++            requester: participant
++        )
++        XCTAssertEqual(asStringValue(emptyManual), "error: manualLabel must be 1-120 UTF-8 bytes")
++
++        let manualSet = try await profile.set(
++            keypath: "profile.setPositionSharing",
++            value: .object(["mode": .string("manual"), "manualLabel": .string("Ved Torvscenen")]),
++            requester: participant
++        )
++        guard let manualSet, case let .object(manualObject) = manualSet,
++              case let .object(manualPosition)? = manualObject["positionSharing"] else {
++            return XCTFail("Expected position sharing state after setting manual mode")
++        }
++        XCTAssertEqual(asString(manualPosition, "mode"), "manual")
++        XCTAssertEqual(asString(manualPosition, "manualLabel"), "Ved Torvscenen")
++
++        // Switching to checkin clears the stale manual label.
++        let checkinSet = try await profile.set(
++            keypath: "profile.setPositionSharing",
++            value: .object([
++                "mode": .string("checkin"),
++                "checkedInVenueFeatureID": .string("venue-torvscenen-abc12345"),
++                "checkedInVenueLabel": .string("Torvscenen")
++            ]),
++            requester: participant
++        )
++        guard let checkinSet, case let .object(checkinObject) = checkinSet,
++              case let .object(checkinPosition)? = checkinObject["positionSharing"] else {
++            return XCTFail("Expected position sharing state after checking in")
++        }
++        XCTAssertEqual(asString(checkinPosition, "mode"), "checkin")
++        XCTAssertEqual(asString(checkinPosition, "checkedInVenueFeatureID"), "venue-torvscenen-abc12345")
++        XCTAssertNil(checkinPosition["manualLabel"])
++
++        // checkin requires a featureID.
++        let missingFeatureID = try await profile.set(
++            keypath: "profile.setPositionSharing",
++            value: .object(["mode": .string("checkin")]),
++            requester: participant
++        )
++        XCTAssertEqual(asStringValue(missingFeatureID), "error: checkedInVenueFeatureID is required for checkin mode")
++
++        // Live mode requires valid coordinates and clears the stale check-in.
++        let liveSet = try await profile.set(
++            keypath: "profile.setPositionSharing",
++            value: .object(["mode": .string("live"), "latitude": .float(58.4595), "longitude": .float(8.7660)]),
++            requester: participant
++        )
++        guard let liveSet, case let .object(liveObject) = liveSet,
++              case let .object(livePosition)? = liveObject["positionSharing"] else {
++            return XCTFail("Expected position sharing state after enabling live mode")
++        }
++        XCTAssertEqual(asString(livePosition, "mode"), "live")
++        XCTAssertNil(livePosition["checkedInVenueFeatureID"])
++        guard case let .float(latitude)? = livePosition["latitude"] else {
++            return XCTFail("Expected a float latitude")
++        }
++        XCTAssertEqual(latitude, 58.4595, accuracy: 0.0001)
++
++        let invalidLatitude = try await profile.set(
++            keypath: "profile.setPositionSharing",
++            value: .object(["mode": .string("live"), "latitude": .float(9999), "longitude": .float(8.766)]),
++            requester: participant
++        )
++        XCTAssertEqual(asStringValue(invalidLatitude), "error: live mode requires valid latitude/longitude")
++
++        // Turning sharing off clears everything.
++        let offSet = try await profile.set(
++            keypath: "profile.setPositionSharing",
++            value: .object(["mode": .string("off")]),
++            requester: participant
++        )
++        guard let offSet, case let .object(offObject) = offSet,
++              case let .object(offPosition)? = offObject["positionSharing"] else {
++            return XCTFail("Expected position sharing state after turning sharing off")
++        }
++        XCTAssertEqual(asString(offPosition, "mode"), "off")
++        XCTAssertNil(offPosition["latitude"])
++    }
++
++    func testFavoritesSharingSyncsFromParticipantProgramAndClearsWhenDisabled() async throws {
++        let previousDebugAccess = CellBase.debugValidateAccessForEverything
++        let previousResolver = CellBase.defaultCellResolver
++        let previousVault = CellBase.defaultIdentityVault
++        CellBase.debugValidateAccessForEverything = true
++        setenv(ArendalsukaPublishedProgramAccessContract.releaseEnvironmentKey, "1", 1)
++        defer {
++            CellBase.debugValidateAccessForEverything = previousDebugAccess
++            CellBase.defaultCellResolver = previousResolver
++            CellBase.defaultIdentityVault = previousVault
++            unsetenv(ArendalsukaPublishedProgramAccessContract.releaseEnvironmentKey)
++        }
++
++        let resolver = CellResolver.sharedInstance
++        CellBase.defaultCellResolver = resolver
++        let vault = BrowserClientIdentityVault(identityDomain: "arendalsuka-participant-profile-favorites-\(UUID().uuidString)")
++        CellBase.defaultIdentityVault = vault
++        try await resolver.addCellResolve(
++            name: "EntityAnchor",
++            cellScope: .identityUnique,
++            persistency: .ephemeral,
++            identityDomain: "private",
++            type: EntityAnchorCell.self
++        )
++        try await resolver.addCellResolve(
++            name: "ArendalsukaEventAtlas",
++            cellScope: .scaffoldUnique,
++            persistency: .ephemeral,
++            identityDomain: "arendalsuka-public-landing",
++            type: ArendalsukaEventAtlasCell.self
++        )
++        try await resolver.addCellResolve(
++            name: ArendalsukaConnectionHubCell.cellName,
++            cellScope: .scaffoldUnique,
++            persistency: .ephemeral,
++            identityDomain: ArendalsukaConnectionHubCell.identityDomainName,
++            type: ArendalsukaConnectionHubCell.self
++        )
++        try await resolver.addCellResolve(
++            name: ArendalsukaParticipantProgramContract.cellName,
++            cellScope: .identityUnique,
++            persistency: .ephemeral,
++            identityDomain: "ArendalsukaParticipant",
++            type: ArendalsukaParticipantProgramCell.self
++        )
++
++        guard let importer = await CellBase.defaultIdentityVault?.identity(for: "arendalsuka-public-landing", makeNewIfNotFound: true) else {
++            return XCTFail("Expected an owner identity for the arendalsuka-public-landing domain")
++        }
++        guard let atlas = try await resolver.cellAtEndpoint(endpoint: "cell:///ArendalsukaEventAtlas", requester: importer) as? Meddle else {
++            return XCTFail("Expected the atlas cell to resolve")
++        }
++        _ = try await atlas.set(
++            keypath: "atlas.ingestProgramSnapshot",
++            value: try await importAccessPayload([
++                "source": .string("https://www.arendalsuka.no/program"),
++                "sessions": .list([
++                    .object([
++                        "id": .string("arendalsuka-event-favorites-test"),
++                        "sourceURL": .string("https://www.arendalsuka.no/program/arendalsuka-event-favorites-test"),
++                        "title": .string("Testarrangement for delte favoritter"),
++                        "organizer": .string("Testarrangør"),
++                        "startsAt": .string("2026-08-12T09:00:00+02:00"),
++                        "endsAt": .string("2026-08-12T09:45:00+02:00"),
++                        "timeText": .string("12. august 09:00-09:45"),
++                        "venueName": .string("Torvscenen"),
++                        "address": .string("Sam Eydes plass, Arendal"),
++                        "category": .string("Arbeidsliv"),
++                        "format": .string("Panelsamtale"),
++                        "tags": .list([]),
++                        "rawText": .string("Et testarrangement.")
++                    ])
++                ])
++            ], actionKeypath: "atlas.ingestProgramSnapshot", issuer: importer),
++            requester: importer
++        )
++
++        guard let participant = await makeParticipant("arendalsuka-participant-profile-favorites-owner", vault: vault) else {
++            return XCTFail("Expected a signable participant identity")
++        }
++
++        guard let program = try await resolver.cellAtEndpoint(endpoint: ArendalsukaParticipantProgramContract.endpoint, requester: participant) as? Meddle else {
++            return XCTFail("Expected the participant program cell to resolve")
++        }
++        // Primes syncFromAtlasIfNeeded so the freshly-imported session is
++        // known to this program cell before toggling it as saved.
++        let primedStateValue = try await program.get(keypath: ArendalsukaParticipantProgramContract.stateKeypath, requester: participant)
++        guard case let .object(primedState) = primedStateValue,
++              case let .list(primedSessionRecords)? = primedState["sessionRecords"] else {
++            return XCTFail("Expected an initial program state with sessionRecords")
++        }
++        XCTAssertFalse(primedSessionRecords.isEmpty, "expected the imported session to be visible to the program cell")
++        _ = try await program.set(
++            keypath: ArendalsukaParticipantProgramContract.toggleSavedSessionKeypath,
++            value: .object(["sessionID": .string("arendalsuka-event-favorites-test")]),
++            requester: participant
++        )
++        let programStateValue = try await program.get(keypath: ArendalsukaParticipantProgramContract.stateKeypath, requester: participant)
++        guard case let .object(programState) = programStateValue,
++              case let .object(agenda)? = programState["agenda"] else {
++            return XCTFail("Expected program state with an agenda section after toggling a saved session")
++        }
++        XCTAssertEqual(asStringList(agenda, "savedSessionIDs"), ["arendalsuka-event-favorites-test"], "toggleSavedSession itself did not save the session")
++
++        let profile = await ArendalsukaParticipantProfileCell(owner: participant)
++        let enabled = try await profile.set(
++            keypath: "state.favoritesSharingEnabled",
++            value: .object(["isEnabled": .bool(true)]),
++            requester: participant
++        )
++        guard let enabled, case let .object(enabledObject) = enabled else {
++            return XCTFail("Expected profile state after enabling favorites sharing")
++        }
++        XCTAssertEqual(asBool(enabledObject, "favoritesSharingEnabled"), true)
++        XCTAssertEqual(asStringList(enabledObject, "sharedFavoriteSessionIds"), ["arendalsuka-event-favorites-test"])
++
++        let disabled = try await profile.set(
++            keypath: "state.favoritesSharingEnabled",
++            value: .object(["isEnabled": .bool(false)]),
++            requester: participant
++        )
++        guard let disabled, case let .object(disabledObject) = disabled else {
++            return XCTFail("Expected profile state after disabling favorites sharing")
++        }
++        XCTAssertEqual(asBool(disabledObject, "favoritesSharingEnabled"), false)
++        XCTAssertEqual(asStringList(disabledObject, "sharedFavoriteSessionIds"), [])
++    }
++
++    func testRichProfileFieldsAreOnlyExposedToOthersOnceMatchingConsentIsGranted() async throws {
++        let previousDebugAccess = CellBase.debugValidateAccessForEverything
++        let previousResolver = CellBase.defaultCellResolver
++        let previousVault = CellBase.defaultIdentityVault
++        CellBase.debugValidateAccessForEverything = false
++        defer {
++            CellBase.debugValidateAccessForEverything = previousDebugAccess
++            CellBase.defaultCellResolver = previousResolver
++            CellBase.defaultIdentityVault = previousVault
++        }
++
++        let resolver = CellResolver.sharedInstance
++        CellBase.defaultCellResolver = resolver
++        let vault = BrowserClientIdentityVault(identityDomain: "arendalsuka-participant-profile-consent-\(UUID().uuidString)")
++        CellBase.defaultIdentityVault = vault
++        try await resolver.addCellResolve(
++            name: "EntityAnchor",
++            cellScope: .identityUnique,
++            persistency: .ephemeral,
++            identityDomain: "private",
++            type: EntityAnchorCell.self
++        )
++        try await resolver.addCellResolve(
++            name: ArendalsukaConnectionHubCell.cellName,
++            cellScope: .scaffoldUnique,
++            persistency: .ephemeral,
++            identityDomain: ArendalsukaConnectionHubCell.identityDomainName,
++            type: ArendalsukaConnectionHubCell.self
++        )
++
++        guard let participantOne = await makeParticipant("arendalsuka-participant-profile-consent-p1", vault: vault),
++              let participantTwo = await makeParticipant("arendalsuka-participant-profile-consent-p2", vault: vault) else {
++            return XCTFail("Expected signable participant identities")
++        }
++        participantOne.displayName = "Ada Nord"
++        participantTwo.displayName = "Bjørn Sør"
++
++        guard let hub = try await resolver.cellAtEndpoint(endpoint: ArendalsukaParticipantProgramContract.meetingHubEndpoint, requester: participantOne) as? Meddle else {
++            return XCTFail("Expected the connection hub to resolve")
++        }
++        _ = try await hub.set(keypath: "setParticipantDirectoryVisibility", value: .bool(true), requester: participantOne)
++        _ = try await hub.set(keypath: "setParticipantDirectoryVisibility", value: .bool(true), requester: participantTwo)
++
++        let profileTwo = await ArendalsukaParticipantProfileCell(owner: participantTwo)
++        _ = try await profileTwo.set(
++            keypath: "profile.setStilling",
++            value: .object(["stilling": .string("Fylkespolitiker")]),
++            requester: participantTwo
++        )
++
++        // Before consent: directory shows Bjørn but not his stilling.
++        let beforeConsentValue = try await hub.get(keypath: "state", requester: participantOne)
++        guard case let .object(beforeConsentState) = beforeConsentValue,
++              case let .list(beforeDirectory)? = beforeConsentState["participantDirectory"] else {
++            return XCTFail("Expected a participant directory")
++        }
++        let beforeRow = beforeDirectory.compactMap { entry -> Object? in
++            guard case let .object(row) = entry, asString(row, "displayName") == "Bjørn Sør" else { return nil }
++            return row
++        }.first
++        guard let beforeRow else {
++            return XCTFail("Expected to find Bjørn in the directory")
++        }
++        XCTAssertNil(beforeRow["stilling"])
++
++        _ = try await profileTwo.set(
++            keypath: "profile.setDisplayNameOverride",
++            value: .object(["displayNameOverride": .string("")]),
++            requester: participantTwo
++        )
++        _ = try await hub.set(keypath: "setMatchingConsent", value: .bool(true), requester: participantTwo)
++
++        let afterConsentValue = try await hub.get(keypath: "state", requester: participantOne)
++        guard case let .object(afterConsentState) = afterConsentValue,
++              case let .list(afterDirectory)? = afterConsentState["participantDirectory"] else {
++            return XCTFail("Expected a participant directory after consent")
++        }
++        let afterRow = afterDirectory.compactMap { entry -> Object? in
++            guard case let .object(row) = entry, asString(row, "displayName") == "Bjørn Sør" else { return nil }
++            return row
++        }.first
++        guard let afterRow else {
++            return XCTFail("Expected to still find Bjørn in the directory")
++        }
++        XCTAssertEqual(asString(afterRow, "stilling"), "Fylkespolitiker")
++    }
++
++    private func importAccessPayload(
++        _ payload: Object,
++        actionKeypath: String,
++        issuer: Identity,
++        subject: Identity? = nil
++    ) async throws -> ValueType {
++        var secured = payload
++        let artifact = try await CapabilityInvitationProofSupport.generateArtifact(
++            invitationID: "arendalsuka-import-\(UUID().uuidString)",
++            resource: ArendalsukaAtlasImportAccessContract.resource(),
++            actionKeypath: actionKeypath,
++            capabilities: [ArendalsukaAtlasImportAccessContract.capabilityRef],
++            purpose: ArendalsukaAtlasImportAccessContract.purposeRef,
++            issuer: issuer,
++            subject: subject ?? issuer
++        )
++        secured["importAccess"] = .object([
++            "proofArtifact": CapabilityInvitationProofSupport.valueType(from: artifact)
++        ])
++        return .object(secured)
++    }
++
++    private func asInt(_ object: Object, _ key: String) -> Int? {
++        guard case let .integer(value)? = object[key] else { return nil }
++        return value
++    }
++
++    private func asBool(_ object: Object, _ key: String) -> Bool? {
++        guard case let .bool(value)? = object[key] else { return nil }
++        return value
++    }
++
++    private func asString(_ object: Object, _ key: String) -> String? {
++        guard case let .string(value)? = object[key] else { return nil }
++        return value
++    }
++
++    private func asStringList(_ object: Object, _ key: String) -> [String]? {
++        guard case let .list(values)? = object[key] else { return nil }
++        return values.compactMap { if case let .string(text) = $0 { text } else { nil } }
++    }
++
++    private func asStringValue(_ value: ValueType?) -> String? {
++        guard case let .string(text)? = value else { return nil }
++        return text
++    }
++}
+diff --git a/Tests/AppTests/ChatPurposeResourceRouterTests.swift b/Tests/AppTests/ChatPurposeResourceRouterTests.swift
+index 4adf5427..64bbf7d3 100644
+--- a/Tests/AppTests/ChatPurposeResourceRouterTests.swift
++++ b/Tests/AppTests/ChatPurposeResourceRouterTests.swift
+@@ -474,6 +474,24 @@ final class ChatPurposeResourceRouterTests: IsolatedCellTestCase {
+         XCTAssertGreaterThanOrEqual(first.score, 0.42)
+     }
+ 
++    func testExplicitArendalsukaProgramRequestUsesPublishedParticipantSurface() throws {
++        for text in ["vis meg Arendalsuka-programmet", "show me the Arendalsuka program"] {
++            XCTAssertTrue(ChatPurposeResourceRouter.isExplicitSurfaceLoadRequest(text))
++            let matches = ChatPurposeResourceRouter.route(
++                text: text,
++                configurations: [
++                    ArendalsukaEventAtlasConfigurationFactory.makeParticipantProgramConfiguration(),
++                    ArendalsukaEventAtlasConfigurationFactory.makeCellConfiguration(),
++                    ArendalsukaEventAtlasConfigurationFactory.makeMatchingConfiguration(),
++                    ArendalsukaParticipantProfileConfigurationFactory.makeCellConfiguration()
++                ], ragCases: nil, agentActions: []
++            )
++            let first = try XCTUnwrap(matches.first)
++            XCTAssertEqual(first.sourceCellEndpoint, ArendalsukaConfigurationPublisherContract.endpoint)
++        }
++        XCTAssertFalse(ChatPurposeResourceRouter.isExplicitSurfaceLoadRequest("Hva er Arendalsuka?"))
++    }
++
+     func testRoutesShortArendalsukaWhatHappensPromptWithTypoToParticipantProgram() throws {
+         let matches = ChatPurposeResourceRouter.route(
+             text: "Hva skjer i Arendasuka?",
+diff --git a/Tests/AppTests/ConferenceConnectionHubCellTests.swift b/Tests/AppTests/ConferenceConnectionHubCellTests.swift
+index ee903a3b..b79f33ac 100644
+--- a/Tests/AppTests/ConferenceConnectionHubCellTests.swift
++++ b/Tests/AppTests/ConferenceConnectionHubCellTests.swift
+@@ -1025,6 +1025,11 @@ final class ConferenceConnectionHubCellTests: IsolatedCellTestCase {
+             return true
+         })
+ 
++        for (key, value) in richProfileMutations {
++            let result = try await sourceHub.set(keypath: key, value: value, requester: participant)
++            guard case .object? = result else { return XCTFail("Expected durable success for \(key)") }
++        }
++
+         let restartedResolver = CellResolver.makeIsolatedForTesting()
+         let restartedUtility = TypedCellUtility(storage: LargeStackCellStorage())
+         restartedResolver.tcUtility = restartedUtility
+@@ -1052,6 +1057,7 @@ final class ConferenceConnectionHubCellTests: IsolatedCellTestCase {
+         XCTAssertEqual(asStringList(in: restoredState, keypath: "myInterests"), interests)
+         XCTAssertEqual(asBool(in: restoredState, keypath: "isMatchingConsentGranted"), true)
+         XCTAssertEqual(asBool(in: restoredState, keypath: "isDirectoryVisible"), true)
++        assertRichProfile(restoredState, isSaved: true)
+     }
+ 
+     func testArendalsukaProfileMutationsReportStorageFailureAndRollBack() async throws {
+@@ -1123,6 +1129,11 @@ final class ConferenceConnectionHubCellTests: IsolatedCellTestCase {
+             XCTAssertFalse(privateInterests.contains(where: error.contains))
+         }
+ 
++        for (key, value) in richProfileMutations {
++            let result = try await hub.set(keypath: key, value: value, requester: participant)
++            XCTAssertEqual(result?.string, "error: local resolver snapshot persistence failed", key)
++        }
++
+         let stateValue = try await hub.get(keypath: "state", requester: participant)
+         guard case let .object(state) = stateValue else {
+             return XCTFail("Expected participant state after failed mutations")
+@@ -1131,6 +1142,31 @@ final class ConferenceConnectionHubCellTests: IsolatedCellTestCase {
+         XCTAssertEqual(asString(in: state, keypath: "myPurpose"), "")
+         XCTAssertEqual(asBool(in: state, keypath: "isMatchingConsentGranted"), false)
+         XCTAssertEqual(asBool(in: state, keypath: "isDirectoryVisible"), false)
++        assertRichProfile(state, isSaved: false)
++    }
++
++    private var richProfileMutations: [(String, ValueType)] {
++        [
++            ("setDisplayNameOverride", .string("Testdeltaker")),
++            ("setStilling", .string("Utvikler")),
++            ("setPhoto", .string("data:image/png;base64,aGVsbG8=")),
++            ("setFavoritesSharing", .object([
++                "isEnabled": .bool(true), "sessionIds": .list([.string("test-session")])
++            ])),
++            ("setPositionSharing", .object([
++                "mode": .string("manual"), "manualLabel": .string("Teststed")
++            ]))
++        ]
++    }
++
++    private func assertRichProfile(_ state: Object, isSaved: Bool, file: StaticString = #filePath, line: UInt = #line) {
++        XCTAssertEqual(asString(in: state, keypath: "myDisplayNameOverride"), isSaved ? "Testdeltaker" : "", file: file, line: line)
++        XCTAssertEqual(asString(in: state, keypath: "myStilling"), isSaved ? "Utvikler" : "", file: file, line: line)
++        XCTAssertEqual(state["myPhotoDataURI"], isSaved ? .string("data:image/png;base64,aGVsbG8=") : .null, file: file, line: line)
++        XCTAssertEqual(asBool(in: state, keypath: "myFavoritesSharingEnabled"), isSaved, file: file, line: line)
++        XCTAssertEqual(asStringList(in: state, keypath: "mySharedFavoriteSessionIds"), isSaved ? ["test-session"] : [], file: file, line: line)
++        XCTAssertEqual(asString(in: state, keypath: "myPositionSharing.mode"), isSaved ? "manual" : "off", file: file, line: line)
++        XCTAssertEqual(asString(in: state, keypath: "myPositionSharing.manualLabel"), isSaved ? "Teststed" : nil, file: file, line: line)
+     }
+ 
+     private func registerResolveIfNeeded(
+diff --git a/ci/test-filter.txt b/ci/test-filter.txt
+index 086de4f7..786b1c1a 100644
+--- a/ci/test-filter.txt
++++ b/ci/test-filter.txt
+@@ -452,3 +452,7 @@ ChatAIGatewayRequestTests
+ 
+ # Existing users must receive the current built-in Butler UI without losing custom layouts.
+ ButlerBuiltInConfigurationUpgradeTests
++
++ArendalsukaParticipantProfileCellTests
++
++ArendalsukaParticipantConversationTests
+diff --git a/playwright/arendalsuka-participant-profile.spec.js b/playwright/arendalsuka-participant-profile.spec.js
+new file mode 100644
+index 00000000..191d4be5
+--- /dev/null
++++ b/playwright/arendalsuka-participant-profile.spec.js
+@@ -0,0 +1,100 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++const { test, expect } = require('@playwright/test');
++
++test('participant edits persist through reload on desktop and 375 px', async ({ page }, testInfo) => {
++  test.setTimeout(180_000);
++  const baseURL = process.env.ARENDALSUKA_PROFILE_BASE_URL || 'http://127.0.0.1:9094';
++  expect(['127.0.0.1', 'localhost', '[::1]']).toContain(new URL(baseURL).hostname);
++  const username = `profile-proof-${Date.now()}`;
++  const registration = await page.request.post(new URL('/auth/register', baseURL).href, {
++    data: { username, password: 'LocalSyntheticProfileProof!2026' },
++  });
++  expect(registration.ok(), await registration.text()).toBe(true);
++  const url = new URL('/browserhead/webo', baseURL);
++  url.searchParams.set('configurationName', 'Arendalsuka Min Profil');
++  url.searchParams.set('configurationEndpoint', 'cell:///ArendalsukaParticipantProfile');
++  const active = page.locator('[data-active-configuration="Arendalsuka Min Profil"]');
++  const name = page.getByPlaceholder('F.eks. Cissi', { exact: true });
++  const role = page.getByPlaceholder('F.eks. Rådgiver, digital politikk', { exact: true });
++  const position = page.getByPlaceholder('F.eks. Ved Torvscenen', { exact: true });
++  const favorites = page.getByLabel('Del mine lagrede arrangementer', { exact: true });
++  const action = async (suffix, perform) => {
++    const responsePromise = page.waitForResponse(response => {
++      if (!response.url().includes('/browserhead/porthole/action') || response.request().method() !== 'POST') return false;
++      return response.request().postDataJSON()?.keypath === `arendalsukaParticipantProfile.${suffix}`;
++    }, { timeout: 30_000 });
++    responsePromise.catch(() => {});
++    await perform();
++    const response = await responsePromise;
++    expect(response.ok()).toBe(true);
++    const envelope = await response.json();
++    const result = envelope.result ?? envelope;
++    expect(result, 'Profile writes must acknowledge an available persisted state.').toMatchObject({ isAvailable: true });
++    await expect(active).toBeVisible();
++    return result;
++  };
++  await page.setViewportSize({ width: 1280, height: 900 });
++  await page.goto(url.href, { waitUntil: 'domcontentloaded', timeout: 90_000 });
++  await expect(active).toBeVisible({ timeout: 45_000 });
++  await expect(name).toBeVisible();
++  await expect(name).toHaveCSS('color', 'rgb(26, 28, 25)');
++  const updatedName = await action('profile.setDisplayNameOverride', () => name.fill('Syntetisk deltaker'));
++  expect(updatedName.displayNameOverride).toBe('Syntetisk deltaker');
++  const updatedRole = await action('profile.setStilling', () => role.fill('Test av deltakerprofil'));
++  expect(updatedRole.stilling).toBe('Test av deltakerprofil');
++  const manual = await action('profile.setManualPositionLabel', () => position.fill('Ved testscenen'));
++  expect(manual.positionSharing).toMatchObject({ mode: 'manual', manualLabel: 'Ved testscenen' });
++  await expect(page.getByText('manual', { exact: true })).toBeVisible();
++  await expect(favorites).not.toBeChecked();
++  const shared = await action('state.favoritesSharingEnabled', () => favorites.click());
++  expect(shared.favoritesSharingEnabled).toBe(true);
++  await expect(favorites).toBeChecked();
++  const png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6dS8AAAAASUVORK5CYII=';
++  const photo = await action('profile.setPhoto', () => page.locator('input[type=file]').setInputFiles({
++    name: 'synthetic-profile.png', mimeType: 'image/png', buffer: Buffer.from(png, 'base64'),
++  }));
++  expect(photo.photoDataURI).toBe(`data:image/png;base64,${png}`);
++  await expect(page.locator('.skeleton-fileupload-status')).toHaveText('File sent to cell.');
++  await expect(page.getByText('Profilbilde lagret', { exact: true })).toBeVisible();
++  await page.reload({ waitUntil: 'domcontentloaded' });
++  await expect(active).toBeVisible();
++  await expect(name).toHaveValue('Syntetisk deltaker');
++  await expect(page.getByText('Profilbilde lagret', { exact: true })).toBeVisible();
++  await expect(role).toHaveValue('Test av deltakerprofil');
++  await expect(position).toHaveValue('Ved testscenen');
++  await expect(favorites).toBeChecked();
++  const desktopScreenshot = testInfo.outputPath('profile-desktop.png');
++  await page.screenshot({ path: desktopScreenshot, fullPage: true });
++  await testInfo.attach('profile-desktop', { path: desktopScreenshot, contentType: 'image/png' });
++  await page.setViewportSize({ width: 375, height: 812 });
++  await expect(name).toBeVisible();
++  await expect(favorites).toBeChecked();
++  const disabled = await action('state.favoritesSharingEnabled', () => favorites.click());
++  expect(disabled.favoritesSharingEnabled).toBe(false);
++  await page.reload({ waitUntil: 'domcontentloaded' });
++  await expect(active).toBeVisible();
++  await expect(favorites).not.toBeChecked();
++  await expect(name).toHaveValue('Syntetisk deltaker');
++  const checkedIn = await action('profile.setCheckedInVenue', () => page.getByRole('combobox').selectOption({ label: 'Syntetisk testarena' }));
++  expect(checkedIn.positionSharing).toMatchObject({ mode: 'checkin', checkedInVenueLabel: 'Syntetisk testarena' });
++  await expect(page.getByText('checkin', { exact: true })).toBeVisible();
++  const off = await action('profile.setPositionSharing', () => page.getByRole('button', { name: 'Av', exact: true }).click());
++  expect(off.positionSharing.mode).toBe('off');
++  await expect(page.getByText('off', { exact: true })).toBeVisible();
++  await page.reload({ waitUntil: 'domcontentloaded' });
++  await expect(active).toBeVisible();
++  await expect(page.getByText('off', { exact: true })).toBeVisible();
++  await expect(position).toHaveValue('');
++  const removedPhoto = await action('profile.setPhoto', () => page.getByRole('button', { name: 'Fjern profilbilde', exact: true }).click());
++  expect(removedPhoto.photoDataURI).toBeNull();
++  await expect(page.getByText('Ingen profilbilde lagret', { exact: true })).toBeVisible();
++  await page.reload({ waitUntil: 'domcontentloaded' });
++  await expect(page.getByText('Ingen profilbilde lagret', { exact: true })).toBeVisible();
++  const dimensions = await page.evaluate(() => ({ viewport: innerWidth, width: document.documentElement.scrollWidth }));
++  expect(dimensions.width).toBe(dimensions.viewport);
++  await expect(page.locator('body')).not.toContainText(/Something went wrong|Noe gikk galt|\bUnavailable\b|\bdenied\b/);
++  const mobileScreenshot = testInfo.outputPath('profile-375.png');
++  await page.screenshot({ path: mobileScreenshot, fullPage: true });
++  await testInfo.attach('profile-375', { path: mobileScreenshot, contentType: 'image/png' });
++});
+diff --git a/scripts/porthole-arendalsuka-action-state.test.js b/scripts/porthole-arendalsuka-action-state.test.js
+index d2ebb3ab..0222c5d3 100644
+--- a/scripts/porthole-arendalsuka-action-state.test.js
++++ b/scripts/porthole-arendalsuka-action-state.test.js
+@@ -39,6 +39,7 @@ function runtimeContext(options = {}) {
+     fetch: async () => {
+       throw new Error("unexpected network access");
+     },
++    requestAnimationFrame() { return 1; },
+     setTimeout,
+     window,
+   });
+@@ -443,7 +444,7 @@ test("refresh, websocket, and heartbeat shell renders keep hostChanged at zero",
+     portholeWebState.bootstrap = bootstrap;
+     const originalRoot = document.getElementById("porthole-skeleton-root");
+     portholeWebState.rendererRoot = originalRoot;
+-    portholeWebState.skeletonSignature = JSON.stringify({
++    portholeWebState.skeletonSignature = skeletonRenderSignature({
+       currentConfigurationName: "Stable skeleton",
+       renderedSkeleton: bootstrap.configuration.skeleton,
+     });
+@@ -510,6 +511,34 @@ test("prompt.submit payload always carries the composer value visible in the ren
+   assert.equal(result.helperID, "central");
+ });
+ 
++test("committed text-field state refreshes dependent controls without replacing their host", async () => {
++  const context = runtimeContext();
++  context.profileState = {
++    source: "ArendalsukaParticipantProfileCell",
++    isAvailable: true,
++    positionSharing: { mode: "manual", manualLabel: "Ved testscenen" },
++  };
++  vm.runInContext(`
++    portholeWebState.bootstrap = {
++      state: { arendalsukaParticipantProfile: { state: { positionSharing: { mode: "off" } } } }
++    };
++    globalThis.rendered = [];
++    render = options => rendered.push({
++      options,
++      mode: portholeWebState.bootstrap.state.arendalsukaParticipantProfile.state.positionSharing.mode,
++    });
++    postJSON = async () => ({ result: profileState });
++  `, context);
++  await vm.runInContext(`startSilentFieldAction({
++    keypath: "arendalsukaParticipantProfile.profile.setManualPositionLabel",
++    payload: "Ved testscenen", actionSeq: 1, promise: null,
++  })`, context);
++  const rendered = vm.runInContext('rendered', context);
++  assert.equal(rendered.length, 1);
++  assert.equal(rendered[0].mode, "manual");
++  assert.equal(rendered[0].options.preserveSkeletonDOM, true);
++});
++
+ test("flushPendingFieldActions waits for an already-started composer POST", async () => {
+   const context = runtimeContext();
+   let timerCallback = null;

@@ -1,0 +1,58 @@
+== fetch ==
+origin/main: 33ad8d7
+== worktree /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata-r2 @ pdd/entitetsdata-runde2 ==
+HEAD: 33ad8d7
+== patch (dry-run) ==
+patch lagt på
+ M Sources/CellApple/Cells/EntityAnchorCell.swift
+ M Sources/CellVapor/Cells/EntityAnchorCell.swift
+ M Tests/CellBaseTests/EntityAnchorGenesisTests.swift
+?? Sources/CellBase/PersistingCells/EntityChangeTrace.swift
+?? Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift
+?? Tests/CellBaseTests/TestSupport/SimulatedEntity.swift
+== swift build ==
+Build: OK
+== nye tester ==
+error: SwiftCompile normal arm64 /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata-r2/Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift failed with a nonzero exit code. Command line:     cd /Users/kjetil/Build/Digipomps/HAVEN
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata-r2/Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift:72:49: [1;31merror: [1;39mtype 'CellApple' has no member 'EntityAnchorCell'[0;0m
+    [0;36m|[0;0m                                                 `- [1;31merror: [1;39mtype 'CellApple' has no member 'EntityAnchorCell'[0;0m
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata-r2/Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift:73:49: [1;31merror: [1;39mtype 'CellVapor' has no member 'EntityAnchorCell'[0;0m
+    [0;36m|[0;0m                                                 `- [1;31merror: [1;39mtype 'CellVapor' has no member 'EntityAnchorCell'[0;0m
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata-r2/Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift:130:32: [1;31merror: [1;39m'async' call in an autoclosure that does not support concurrency[0;0m
+[0;36m130 |[0;0m             XCTAssertNil(await read(anchor, "person.nickname", as: a.owner), tag)
+    [0;36m|[0;0m                                `- [1;31merror: [1;39m'async' call in an autoclosure that does not support concurrency[0;0m
+[0;36m132 |[0;0m             XCTAssertFalse(decision.allowed, tag)
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata-r2/Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift:139:41: [1;31merror: [1;39m'async' call in an autoclosure that does not support concurrency[0;0m
+    [0;36m|[0;0m                                         `- [1;31merror: [1;39m'async' call in an autoclosure that does not support concurrency[0;0m
+[0;36m141 |[0;0m         XCTAssertTrue(await adminPlane.requesterProvesOwnership(admin), "admin must be a real owner of its own cell")
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata-r2/Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift:141:29: [1;31merror: [1;39m'async' call in an autoclosure that does not support concurrency[0;0m
+[0;36m141 |[0;0m         XCTAssertTrue(await adminPlane.requesterProvesOwnership(admin), "admin must be a real owner of its own cell")
+    [0;36m|[0;0m                             `- [1;31merror: [1;39m'async' call in an autoclosure that does not support concurrency[0;0m
+[0;36m142 |[0;0m         XCTAssertFalse(CellBase.debugValidateAccessForEverything, "the debug bypass must be off for this test to mean anything")
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata-r2/Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift:170:38: [1;31merror: [1;39m'async' call in an autoclosure that does not support concurrency[0;0m
+[0;36m170 |[0;0m             XCTAssertEqual(try await anchor.get(keypath: "person.nickname", requester: a.owner), .string("Ada"), tag)
+    [0;36m|[0;0m                                      `- [1;31merror: [1;39m'async' call in an autoclosure that does not support concurrency[0;0m
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata-r2/Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift:192:38: [1;31merror: [1;39m'async' call in an autoclosure that does not support concurrency[0;0m
+[0;36m192 |[0;0m             XCTAssertEqual(try await anchor.get(keypath: "person.nickname", requester: b.owner), .string("Ada"), "\(tag) B reads person under agreement")
+    [0;36m|[0;0m                                      `- [1;31merror: [1;39m'async' call in an autoclosure that does not support concurrency[0;0m
+[0;36m194 |[0;0m             XCTAssertTrue(allowed.allowed, tag)
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata-r2/Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift:202:38: [1;31merror: [1;39m'async' call in an autoclosure that does not support concurrency[0;0m
+[0;36m200 |[0;0m             await XCTAssertRefusedSet(anchor, "person.nickname", .string("Bob"), requester: b.owner, "\(tag) B wrote person with a read-only agreement")
+[0;36m201 |[0;0m             await XCTAssertRefusedSet(anchor, "identityLinks.genesis", .string("onboarding"), requester: b.owner, "\(tag) B acted under a read agreement")
+[0;36m202 |[0;0m             XCTAssertEqual(try await anchor.get(keypath: "person.nickname", requester: a.owner), .string("Ada"), tag)
+    [0;36m|[0;0m                                      `- [1;31merror: [1;39m'async' call in an autoclosure that does not support concurrency[0;0m
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata-r2/Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift:231:38: [1;31merror: [1;39m'async' call in an autoclosure that does not support concurrency[0;0m
+[0;36m229 |[0;0m             XCTAssertEqual(seal["trigger"], .string("firstPersist"), tag)
+[0;36m230 |[0;0m             XCTAssertEqual(seal["initiatorIdentityUUID"], .string(a.owner.uuid), tag)
+[0;36m231 |[0;0m             XCTAssertEqual(try await anchor.get(keypath: "person.headline", requester: a.owner), .string("first"), tag)
+    [0;36m|[0;0m                                      `- [1;31merror: [1;39m'async' call in an autoclosure that does not support concurrency[0;0m
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata-r2/Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift:248:32: [1;31merror: [1;39m'async' call in an autoclosure that does not support concurrency[0;0m
+[0;36m246 |[0;0m             XCTAssertEqual(response["status"], .string("failed"), "\(tag) \(response)")
+[0;36m247 |[0;0m             XCTAssertEqual(response["errorCode"], .string("request_signature_invalid"), tag)
+[0;36m248 |[0;0m             XCTAssertNil(await read(anchor, "person.headline", as: a.owner), "\(tag) forged write landed")
+    [0;36m|[0;0m                                `- [1;31merror: [1;39m'async' call in an autoclosure that does not support concurrency[0;0m
+[0;36m249 |[0;0m             XCTAssertTrue(EntityChangeTrace.entries(in: try await anchor.get(keypath: "chronicle", requester: a.owner)).isEmpty, "\(tag) a refused change left a trace")
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol-pdd-entitetsdata-r2/Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift:249:67: [1;31merror: [1;39m'async' call in an autoclosure that does not support concurrency[0;0m
+== runde 1-tester ==
+== hele CellBaseTests ==
+RØDT — committer IKKE. Se /Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/PDD_entitetsdata-egen-kontroll_2026-09-08/handoff/runde2/runde2-20260926-021425.full.log.new og /Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/PDD_entitetsdata-egen-kontroll_2026-09-08/handoff/runde2/runde2-20260926-021425.full.log.alle

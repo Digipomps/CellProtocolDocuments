@@ -1,0 +1,493 @@
+{
+  "componentID": "haven.lists.checklist",
+  "revision": "1",
+  "sourceCellEndpoint": "cell:///Lists",
+  "skeleton": {
+    "VStack": {
+      "spacing": 10,
+      "elements": [
+        {
+          "HStack": {
+            "spacing": 8,
+            "elements": [
+              {
+                "TextField": {
+                  "sourceKeypath": "title",
+                  "targetKeypath": "lists.list.rename",
+                  "placeholder": "Listenavn",
+                  "modifiers": {
+                    "fontStyle": "title2",
+                    "fontWeight": "semibold"
+                  }
+                }
+              },
+              {
+                "Spacer": {}
+              },
+              {
+                "Text": {
+                  "keypath": "summaryText",
+                  "modifiers": {
+                    "fontStyle": "caption",
+                    "foregroundColor": "#8E8E93"
+                  }
+                }
+              },
+              {
+                "Button": {
+                  "keypath": "lists.list.remove",
+                  "label": "",
+                  "icon": "trash",
+                  "payloadKeypath": "removeListPayload",
+                  "modifiers": {
+                    "controlStyle": "plain",
+                    "foregroundColor": "#8E8E93",
+                    "accessibilityLabel": "Slett listen"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "TextField": {
+            "targetKeypath": "lists.item.add",
+            "placeholder": "Legg til …",
+            "modifiers": {
+              "maxWidthInfinity": true
+            }
+          }
+        },
+        {
+          "List": {
+            "keypath": "items",
+            "flowElementSkeleton": {
+              "VStack": {
+                "elements": [
+                  {
+                    "HStack": {
+                      "spacing": 8,
+                      "elements": [
+                        {
+                          "Button": {
+                            "keypath": "lists.item.toggle",
+                            "label": "○",
+                            "payloadKeypath": "togglePayload",
+                            "modifiers": {
+                              "controlStyle": "plain",
+                              "fontSize": 22,
+                              "foregroundColor": "#8E8E93",
+                              "accessibilityLabel": "Merk som utført",
+                              "width": 28,
+                              "visibility": {
+                                "when": {
+                                  "scope": "item",
+                                  "keypath": "done",
+                                  "equals": false
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "Button": {
+                            "keypath": "lists.item.toggle",
+                            "label": "",
+                            "icon": "checkmark.circle.fill",
+                            "payloadKeypath": "togglePayload",
+                            "modifiers": {
+                              "controlStyle": "plain",
+                              "fontSize": 22,
+                              "foregroundColor": "#007AFF",
+                              "accessibilityLabel": "Merk som ikke utført",
+                              "width": 28,
+                              "visibility": {
+                                "when": {
+                                  "scope": "item",
+                                  "keypath": "done",
+                                  "equals": true
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "Text": {
+                            "keypath": "title",
+                            "modifiers": {
+                              "fontStyle": "body",
+                              "foregroundColorKeypath": "titleColor"
+                            }
+                          }
+                        },
+                        {
+                          "Spacer": {}
+                        },
+                        {
+                          "Button": {
+                            "keypath": "lists.item.move",
+                            "label": "",
+                            "icon": "chevron.up",
+                            "payloadKeypath": "moveUpPayload",
+                            "modifiers": {
+                              "controlStyle": "plain",
+                              "foregroundColor": "#8E8E93",
+                              "accessibilityLabel": "Flytt opp",
+                              "layoutVariants": [
+                                {
+                                  "requiresCapability": [
+                                    "drag"
+                                  ],
+                                  "hidden": true
+                                }
+                              ],
+                              "visibility": {
+                                "when": {
+                                  "scope": "item",
+                                  "keypath": "done",
+                                  "equals": false
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "Button": {
+                            "keypath": "lists.item.move",
+                            "label": "",
+                            "icon": "chevron.down",
+                            "payloadKeypath": "moveDownPayload",
+                            "modifiers": {
+                              "controlStyle": "plain",
+                              "foregroundColor": "#8E8E93",
+                              "accessibilityLabel": "Flytt ned",
+                              "layoutVariants": [
+                                {
+                                  "requiresCapability": [
+                                    "drag"
+                                  ],
+                                  "hidden": true
+                                }
+                              ],
+                              "visibility": {
+                                "when": {
+                                  "scope": "item",
+                                  "keypath": "done",
+                                  "equals": false
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "Button": {
+                            "keypath": "lists.item.remove",
+                            "label": "",
+                            "icon": "trash",
+                            "payloadKeypath": "removePayload",
+                            "modifiers": {
+                              "controlStyle": "plain",
+                              "foregroundColor": "#8E8E93",
+                              "accessibilityLabel": "Fjern"
+                            }
+                          }
+                        }
+                      ],
+                      "modifiers": {
+                        "draggableRole": "list-item",
+                        "dragPayloadKeypath": "dragPayload",
+                        "dropTargetRole": "list-item-slot",
+                        "acceptedDragRoles": [
+                          "list-item"
+                        ],
+                        "dropTargetPayloadKeypath": "dropPayload",
+                        "dropActionKeypath": "lists.item.move",
+                        "accessibilityDragLabel": "Dra for å flytte",
+                        "paddingInsets": {
+                          "top": 6,
+                          "bottom": 6,
+                          "leading": 0,
+                          "trailing": 0
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "modifiers": {
+              "itemSpacing": 0,
+              "rowDecoration": "none"
+            }
+          }
+        },
+        {
+          "List": {
+            "keypath": "emptyRows",
+            "flowElementSkeleton": {
+              "VStack": {
+                "elements": [
+                  {
+                    "Text": {
+                      "keypath": "text",
+                      "modifiers": {
+                        "fontStyle": "callout",
+                        "foregroundColor": "#8E8E93"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "List": {
+            "keypath": "doneRows",
+            "flowElementSkeleton": {
+              "VStack": {
+                "elements": [
+                  {
+                    "HStack": {
+                      "elements": [
+                        {
+                          "Spacer": {}
+                        },
+                        {
+                          "Button": {
+                            "keypath": "lists.list.clearDone",
+                            "label": "Fjern utførte",
+                            "payloadKeypath": "clearDonePayload",
+                            "modifiers": {
+                              "controlStyle": "plain",
+                              "foregroundColor": "#007AFF",
+                              "fontStyle": "callout"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "item": {
+    "id": "l-handle",
+    "title": "Handleliste",
+    "kind": "shopping",
+    "isActive": true,
+    "openCount": 4,
+    "doneCount": 2,
+    "summaryText": "4 igjen · 2 utført",
+    "items": [
+      {
+        "id": "i1",
+        "title": "Melk",
+        "done": false,
+        "togglePayload": {
+          "listId": "l-handle",
+          "itemId": "i1"
+        },
+        "moveUpPayload": {
+          "listId": "l-handle",
+          "itemId": "i1",
+          "direction": "up"
+        },
+        "moveDownPayload": {
+          "listId": "l-handle",
+          "itemId": "i1",
+          "direction": "down"
+        },
+        "removePayload": {
+          "listId": "l-handle",
+          "itemId": "i1"
+        },
+        "dragPayload": {
+          "listId": "l-handle",
+          "itemId": "i1"
+        },
+        "dropPayload": {
+          "listId": "l-handle",
+          "itemId": "i1"
+        }
+      },
+      {
+        "id": "i2",
+        "title": "Brød",
+        "done": false,
+        "togglePayload": {
+          "listId": "l-handle",
+          "itemId": "i2"
+        },
+        "moveUpPayload": {
+          "listId": "l-handle",
+          "itemId": "i2",
+          "direction": "up"
+        },
+        "moveDownPayload": {
+          "listId": "l-handle",
+          "itemId": "i2",
+          "direction": "down"
+        },
+        "removePayload": {
+          "listId": "l-handle",
+          "itemId": "i2"
+        },
+        "dragPayload": {
+          "listId": "l-handle",
+          "itemId": "i2"
+        },
+        "dropPayload": {
+          "listId": "l-handle",
+          "itemId": "i2"
+        }
+      },
+      {
+        "id": "i3",
+        "title": "Egg",
+        "done": false,
+        "togglePayload": {
+          "listId": "l-handle",
+          "itemId": "i3"
+        },
+        "moveUpPayload": {
+          "listId": "l-handle",
+          "itemId": "i3",
+          "direction": "up"
+        },
+        "moveDownPayload": {
+          "listId": "l-handle",
+          "itemId": "i3",
+          "direction": "down"
+        },
+        "removePayload": {
+          "listId": "l-handle",
+          "itemId": "i3"
+        },
+        "dragPayload": {
+          "listId": "l-handle",
+          "itemId": "i3"
+        },
+        "dropPayload": {
+          "listId": "l-handle",
+          "itemId": "i3"
+        }
+      },
+      {
+        "id": "i4",
+        "title": "Kaffe",
+        "done": false,
+        "togglePayload": {
+          "listId": "l-handle",
+          "itemId": "i4"
+        },
+        "moveUpPayload": {
+          "listId": "l-handle",
+          "itemId": "i4",
+          "direction": "up"
+        },
+        "moveDownPayload": {
+          "listId": "l-handle",
+          "itemId": "i4",
+          "direction": "down"
+        },
+        "removePayload": {
+          "listId": "l-handle",
+          "itemId": "i4"
+        },
+        "dragPayload": {
+          "listId": "l-handle",
+          "itemId": "i4"
+        },
+        "dropPayload": {
+          "listId": "l-handle",
+          "itemId": "i4"
+        }
+      },
+      {
+        "id": "i5",
+        "title": "Smør",
+        "done": true,
+        "togglePayload": {
+          "listId": "l-handle",
+          "itemId": "i5"
+        },
+        "moveUpPayload": {
+          "listId": "l-handle",
+          "itemId": "i5",
+          "direction": "up"
+        },
+        "moveDownPayload": {
+          "listId": "l-handle",
+          "itemId": "i5",
+          "direction": "down"
+        },
+        "removePayload": {
+          "listId": "l-handle",
+          "itemId": "i5"
+        },
+        "dragPayload": {
+          "listId": "l-handle",
+          "itemId": "i5"
+        },
+        "dropPayload": {
+          "listId": "l-handle",
+          "itemId": "i5"
+        },
+        "titleColor": "#8E8E93"
+      },
+      {
+        "id": "i6",
+        "title": "Pasta",
+        "done": true,
+        "togglePayload": {
+          "listId": "l-handle",
+          "itemId": "i6"
+        },
+        "moveUpPayload": {
+          "listId": "l-handle",
+          "itemId": "i6",
+          "direction": "up"
+        },
+        "moveDownPayload": {
+          "listId": "l-handle",
+          "itemId": "i6",
+          "direction": "down"
+        },
+        "removePayload": {
+          "listId": "l-handle",
+          "itemId": "i6"
+        },
+        "dragPayload": {
+          "listId": "l-handle",
+          "itemId": "i6"
+        },
+        "dropPayload": {
+          "listId": "l-handle",
+          "itemId": "i6"
+        },
+        "titleColor": "#8E8E93"
+      }
+    ],
+    "emptyRows": [],
+    "doneRows": [
+      {
+        "id": "clear"
+      }
+    ],
+    "removeListPayload": {
+      "listId": "l-handle"
+    },
+    "clearDonePayload": {
+      "listId": "l-handle"
+    },
+    "selectPayload": {
+      "listId": "l-handle"
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digipomps.org/haven/contracts/scheduled-job-control-v1.schema.json",
+  "title": "HAVEN scheduled job control v1 (styring)",
+  "description": "State/ScheduledJobs/<id>.control.json. Pause, fortsett og stopp. Skrives bare av ScheduledJobControlService.set, under samme lås som bestillingene, som en hel fil byttet på plass. Mangler fila, er tilstanden active. Overgangene: active til paused eller stopped, paused til active eller stopped. stopped er endelig. For en fast hendelse i config.json brukes bare active og paused.",
+  "type": "object",
+  "required": [
+    "schema",
+    "id",
+    "state",
+    "changedAt",
+    "changedVia"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "haven.scheduled-job-control.v1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+    },
+    "state": {
+      "enum": [
+        "active",
+        "paused",
+        "stopped"
+      ]
+    },
+    "changedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "changedVia": {
+      "enum": [
+        "mcp",
+        "cli",
+        "bridge"
+      ]
+    }
+  }
+}

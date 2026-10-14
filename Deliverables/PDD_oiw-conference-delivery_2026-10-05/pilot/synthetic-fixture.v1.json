@@ -1,0 +1,105 @@
+{
+  "schema": "haven.oiw-pilot-fixture.v1",
+  "status": "specification_not_executed",
+  "syntheticOnly": true,
+  "id": "oiw-six-actors-v1",
+  "seed": 20261005,
+  "clock": "2026-10-19T08:00:00Z",
+  "timeZone": "Europe/Oslo",
+  "runNamespaceRequired": true,
+  "actors": [
+    {
+      "alias": "organizer-a",
+      "role": "publisher",
+      "event": "materials-workshop"
+    },
+    {
+      "alias": "organizer-b",
+      "role": "publisher",
+      "event": "knowledge-workshop"
+    },
+    {
+      "alias": "participant-a",
+      "offers": [
+        "materialdata"
+      ],
+      "needs": [
+        "prototyping"
+      ],
+      "discoverable": true
+    },
+    {
+      "alias": "participant-b",
+      "offers": [
+        "prototyping"
+      ],
+      "needs": [
+        "materialdata"
+      ],
+      "discoverable": true
+    },
+    {
+      "alias": "participant-c",
+      "offers": [
+        "materialdata"
+      ],
+      "needs": [
+        "prototyping"
+      ],
+      "discoverable": false
+    },
+    {
+      "alias": "participant-d",
+      "offers": [
+        "materialdata"
+      ],
+      "needs": [
+        "prototyping"
+      ],
+      "availability": "no-overlap"
+    },
+    {
+      "alias": "participant-e",
+      "offers": [
+        "gardening"
+      ],
+      "needs": [
+        "compost"
+      ],
+      "discoverable": true
+    },
+    {
+      "alias": "participant-f",
+      "offers": [
+        "materialdata"
+      ],
+      "needs": [
+        "prototyping"
+      ],
+      "companyRepresentation": "expires-during-run"
+    }
+  ],
+  "identityPolicy": {
+    "keys": "generated inside isolated run, never derived from seed",
+    "replay": "protected fixture manifest required; seed alone is not key replay",
+    "namespace": "run-specific",
+    "cleanup": "verify no remaining run-owned Entity, publisher, event, meeting or contribution before ack"
+  },
+  "requiredAssertions": [
+    "independent-publisher-denial",
+    "affiliation-is-not-editor-grant",
+    "opt-out-hidden",
+    "no-time-overlap-no-match",
+    "old-opt-in-cannot-restore-discovery",
+    "double-booking-denied",
+    "single-consent-insufficient",
+    "changed-review-invalidates-all-consents",
+    "private-note-not-in-commons-or-company",
+    "expired-representation-denied",
+    "retained-contribution-restart-readback",
+    "lost-ack-does-not-duplicate",
+    "revoked-grant-stops-new-effect",
+    "run-cleanup-has-no-owned-records"
+  ],
+  "cleanupStatus": "not_executed"
+}

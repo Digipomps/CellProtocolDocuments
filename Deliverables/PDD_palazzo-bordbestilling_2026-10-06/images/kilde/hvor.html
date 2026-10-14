@@ -1,0 +1,44 @@
+<!doctype html><html lang="nb"><head><meta charset="utf-8"><link rel="stylesheet" href="felles.css">
+<style>
+.tre { display: grid; grid-template-columns: 1fr 1.25fr 1fr; gap: 22px; align-items: stretch; }
+.sone { border-radius: 14px; padding: 18px 18px 20px; }
+.sone.gjest { background: #e9eef5; } .sone.hus { background: var(--cream); } .sone.kelner { background: #e8ede2; }
+.sone > h2 { font-size: 22px; } .sone .eier { font-size: 14px; color: var(--slate); margin: -6px 0 12px; }
+.boks { background: #fff; border: 1.5px solid var(--ink); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; }
+.boks b { font-weight: 600; } .boks .hva { font-size: 15px; margin-top: 4px; }
+.boks ul { margin: 6px 0 0; padding-left: 18px; font-size: 15px; } .boks li { margin: 1px 0; }
+.ikke { background: #fff; border: 1.5px dashed var(--terracotta); border-radius: 10px; padding: 10px 14px; font-size: 15px; color: var(--terracotta); }
+.steg { margin-top: 22px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; counter-reset: s; }
+.steg div { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px 12px 46px; position: relative; font-size: 15.5px; }
+.steg div::before { counter-increment: s; content: counter(s); position: absolute; left: 12px; top: 11px; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: #fff; font-weight: 600; font-size: 14px; display: grid; place-items: center; }
+</style></head><body><div class="ark">
+<div class="topp"><div><h1>Hvor bestillingen ligger</h1>
+<p>Det som er bygget natt til 7. oktober 2026: celler og ruter for husets egen bordbestilling. Tegningen viser hvem som eier hva, og hva som ikke lagres.</p></div>
+<div class="merke bygget">Bygget og testet<small>på en egen gren, ikke satt ut</small></div></div>
+<div class="tre">
+  <div class="sone gjest"><h2>Gjesten</h2><div class="eier">Eier sin egen entitet</div>
+    <div class="boks"><b>Gjestens entitet</b><div class="hva">Bestillingen som gjestens egen post, skrevet av gjesten selv:</div>
+      <ul><li>referansen</li><li>tidspunktet</li><li>antallet</li><li>statusen da den ble bestilt</li><li>stedet</li></ul><div class="hva">Posten oppdateres ikke når bestillingen endres eller avbestilles.</div></div>
+    <div class="boks"><b>Det gjesten kan gjøre</b><ul><li>se ledige tider</li><li>bestille</li><li>se sine egne bestillinger slik huset har dem, og om huset har pekeren</li><li>endre og avbestille fram til fristen</li><li>stå på venteliste</li></ul></div>
+  </div>
+  <div class="sone hus"><h2>Huset</h2><div class="eier">Eier cellen, regnearket og loggen</div>
+    <div class="boks"><b>Bordbestillingen</b><div class="hva">Planen (bord, områder, seteplaner) og hver bestilling:</div>
+      <ul><li>referanse, dato, klokkeslett, antall</li><li>bord, status, og en kanal fra sju faste ord</li><li>identiteten som bestilte, og en peker til gjestens entitet, når gjesten har bestilt selv</li></ul></div>
+    <div class="boks"><b>Husets regneark</b><div class="hva">Én rad per bestilling, uten pekeren. Huset kan spørre: «hvor mange kuverter på lørdag?»</div></div>
+    <div class="boks"><b>Husets logg</b><div class="hva">Én linje når en gjest som har bestilt selv, bestiller, endrer, avbestiller eller får bord fra ventelisten.</div></div>
+    <div class="ikke"><b>Lagres ikke hos huset:</b> navn, telefon, e-post, notat, allergi. Ingen fri tekst. Sender en forside slike felt med, blir de ikke lest, og svaret på en bestilling som går gjennom, sier hvilke.</div>
+  </div>
+  <div class="sone kelner"><h2>Kelneren</h2><div class="eier">Må stå på husets ansattliste</div>
+    <div class="boks"><b>«Bookinger» på kelnerflaten</b><div class="hva">Teller husets egne bestillinger sammen med dem som er importert fra GastroPlanner.</div></div>
+    <div class="boks"><b>Briefen</b><div class="hva">Kelneren skriver inn referansen. Briefen finner gjestens entitet fra pekeren og spør gjesten. Den viser bare det gjesten har delt.</div></div>
+    <div class="boks"><b>Det en ansatt kan gjøre</b><ul><li>føre en bestilling, også på et bestemt bord</li><li>sette walk-in</li><li>føre ankommet, ferdig, ikke møtt</li><li>gi bord fra ventelisten</li><li>åpne og stenge områder, se dagen</li></ul></div>
+  </div>
+</div>
+<div class="steg">
+  <div>Gjesten bestiller. Reglene velger det minste bordet som passer, og gir aldri samme bord til to.</div>
+  <div>Huset lagrer bestillingen og fører én linje i loggen. Ruten for bestilling skriver den i gjestens entitet, som gjesten.</div>
+  <div>Kelneren ser bestillingen i tallet for kvelden, og kan hente briefen med referansen.</div>
+  <div>Briefen spør gjesten om det den trenger. Uten ja fra gjesten kommer ingenting tilbake.</div>
+</div>
+<div class="note"><b>Ikke bygget:</b> flatene for gjest og hus (se de to skissene), beskjed på SMS eller e-post, betaling, navn på bestilling, bordkart. <b>Ikke rørt:</b> importen fra GastroPlanner, og conciergen, som fortsatt viser til GastroPlanner for bordbestilling.</div>
+</div></body></html>

@@ -1,0 +1,88 @@
+{
+  "status": "design-draft-not-runtime-schema",
+  "version": 0,
+  "project": {
+    "id": "UUID",
+    "ownerIdentity": "IdentityRef",
+    "revision": "monotonic integer",
+    "schemaVersion": 1,
+    "tempoBPM": "fixed per project; fixture 90",
+    "timeSignature": [
+      4,
+      4
+    ],
+    "key": "optional musical key; fixture A minor",
+    "lengthBars": "8|16|32 proposed pilot bounds",
+    "tracks": "exactly 4: id,name,gainDB,mute,clips[]",
+    "clip": "id,assetID,startBeat,sourceOffsetFrames,durationBeats,repeatCount",
+    "asset": "id,sha256,relativePath,sourceFormat,decodedSampleRate,channels,frames,bpm,key,bars,provider,providerAssetID,sourceURL,licenseRef,acquiredAt,redistributionPolicy"
+  },
+  "commands": [
+    "project.create",
+    "clip.insert",
+    "clip.move",
+    "clip.repeat",
+    "clip.remove",
+    "track.setGain",
+    "track.setMute",
+    "project.undo",
+    "project.redo"
+  ],
+  "envelope": [
+    "commandID",
+    "projectID",
+    "baseRevision",
+    "requester",
+    "purposeRef"
+  ],
+  "readModels": [
+    "project.snapshot",
+    "loop.query.result",
+    "transport.status",
+    "export.progress",
+    "export.result"
+  ],
+  "events": [
+    "asset.import",
+    "asset.ready",
+    "asset.error",
+    "render.plan",
+    "asset.read",
+    "export.request",
+    "project.save",
+    "save.receipt"
+  ],
+  "failures": [
+    "revisionConflict",
+    "unauthorized",
+    "unknownPurpose",
+    "assetMissing",
+    "invalidAudio",
+    "incompatibleLoop",
+    "overlap",
+    "storageFailure",
+    "exportFailure",
+    "redistributionDenied"
+  ],
+  "uiOnly": [
+    "mode: utforsk|bygg|studio",
+    "soloTrackIDs",
+    "playhead",
+    "selection"
+  ],
+  "export": {
+    "formats": [
+      "mix-wav",
+      "stems-wav",
+      "logic-aaf",
+      "project-zip"
+    ],
+    "snapshot": "immutable project revision + asset hashes",
+    "pcm": "48kHz stereo PCM24 no dither",
+    "solo": "ignored for normal export; disclosed in UI",
+    "aafGain": "unprocessed audio; restore track gainDB manually in Logic from manifest; automate only after verified support",
+    "completeOnlyAfter": "all expected files and hashes verified",
+    "aafMute": "unprocessed audio retained regardless of mute/solo/gain=0; restore track mute manually in Logic from manifest before mix comparison"
+  },
+  "authorization": "Owner-scoped; purpose cannot grant; cross-owner denied. Exact runtime keypaths to be implemented and tested."
+}

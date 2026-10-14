@@ -1,0 +1,107 @@
+diff --git a/Tests/AppTests/ConferenceEntityDiscoveryCellTests.swift b/Tests/AppTests/ConferenceEntityDiscoveryCellTests.swift
+index edc44549..ac3e9f40 100644
+--- a/Tests/AppTests/ConferenceEntityDiscoveryCellTests.swift
++++ b/Tests/AppTests/ConferenceEntityDiscoveryCellTests.swift
+@@ -35,7 +35,7 @@ final class ConferenceEntityDiscoveryCellTests: IsolatedCellTestCase {
+         try await registerResolveIfNeeded(resolver, name: "ConferenceRecommendation", type: ConferenceRecommendationCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceConnectionHub", type: ConferenceConnectionHubCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferencePublicProfile", type: ConferencePublicProfileCell.self)
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceChatLaunch", type: ConferenceChatLaunchCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceProofChatLaunch", type: ConferenceProofChatLaunchCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceEntityDiscovery", type: ConferenceEntityDiscoveryCell.self)
+@@ -141,7 +141,7 @@ final class ConferenceEntityDiscoveryCellTests: IsolatedCellTestCase {
+         try await registerResolveIfNeeded(resolver, name: "ConferenceRecommendation", type: ConferenceRecommendationCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceConnectionHub", type: ConferenceConnectionHubCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferencePublicProfile", type: ConferencePublicProfileCell.self)
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceChatLaunch", type: ConferenceChatLaunchCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceProofChatLaunch", type: ConferenceProofChatLaunchCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceEntityDiscovery", type: ConferenceEntityDiscoveryCell.self)
+@@ -238,7 +238,7 @@ final class ConferenceEntityDiscoveryCellTests: IsolatedCellTestCase {
+         try await registerResolveIfNeeded(resolver, name: "ConferenceRecommendation", type: ConferenceRecommendationCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceConnectionHub", type: ConferenceConnectionHubCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferencePublicProfile", type: ConferencePublicProfileCell.self)
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceChatLaunch", type: ConferenceChatLaunchCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceProofChatLaunch", type: ConferenceProofChatLaunchCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceEntityDiscovery", type: ConferenceEntityDiscoveryCell.self)
+@@ -327,7 +327,7 @@ final class ConferenceEntityDiscoveryCellTests: IsolatedCellTestCase {
+         )
+         try await registerResolveIfNeeded(resolver, name: "ConferenceRegistration", type: ConferenceRegistrationCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceOnboarding", type: ConferenceOnboardingCell.self)
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceChatLaunch", type: ConferenceChatLaunchCell.self)
+ 
+         guard let owner = await vault.identity(for: "conference-chat-launch-owner-\(UUID().uuidString)", makeNewIfNotFound: true) else {
+@@ -429,7 +429,7 @@ final class ConferenceEntityDiscoveryCellTests: IsolatedCellTestCase {
+         )
+         try await registerResolveIfNeeded(resolver, name: "ConferenceRegistration", type: ConferenceRegistrationCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceOnboarding", type: ConferenceOnboardingCell.self)
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceChatLaunch", type: ConferenceChatLaunchCell.self)
+ 
+         guard let owner = await vault.identity(for: "conference-chat-member-owner-\(UUID().uuidString)", makeNewIfNotFound: true) else {
+@@ -546,7 +546,7 @@ final class ConferenceEntityDiscoveryCellTests: IsolatedCellTestCase {
+         )
+         try await registerResolveIfNeeded(resolver, name: "ConferenceRegistration", type: ConferenceRegistrationCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceOnboarding", type: ConferenceOnboardingCell.self)
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceChatLaunch", type: ConferenceChatLaunchCell.self)
+ 
+         guard let owner = await vault.identity(for: "conference-chat-bare-owner-\(UUID().uuidString)", makeNewIfNotFound: true) else {
+@@ -620,7 +620,7 @@ final class ConferenceEntityDiscoveryCellTests: IsolatedCellTestCase {
+         CellBase.defaultIdentityVault = centralVault
+         try await registerResolveIfNeeded(resolver, name: "ConferenceRegistration", type: ConferenceRegistrationCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceOnboarding", type: ConferenceOnboardingCell.self)
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+ 
+         let ownerContext = "conference-chat-owner-\(UUID().uuidString)"
+         guard let owner = await ownerVault.identity(for: ownerContext, makeNewIfNotFound: true) else {
+@@ -691,7 +691,7 @@ final class ConferenceEntityDiscoveryCellTests: IsolatedCellTestCase {
+         CellBase.defaultIdentityVault = centralVault
+         try await registerResolveIfNeeded(resolver, name: "ConferenceRegistration", type: ConferenceRegistrationCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceOnboarding", type: ConferenceOnboardingCell.self)
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+ 
+         guard let owner = await ownerVault.identity(
+             for: "conference-chat-proof-owner-\(UUID().uuidString)",
+@@ -748,7 +748,7 @@ final class ConferenceEntityDiscoveryCellTests: IsolatedCellTestCase {
+         CellBase.defaultIdentityVault = centralVault
+         try await registerResolveIfNeeded(resolver, name: "ConferenceRegistration", type: ConferenceRegistrationCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceOnboarding", type: ConferenceOnboardingCell.self)
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+ 
+         guard let owner = await ownerVault.identity(
+             for: "conference-chat-legacy-owner-\(UUID().uuidString)",
+diff --git a/Tests/AppTests/ConferenceShellCellsTests.swift b/Tests/AppTests/ConferenceShellCellsTests.swift
+index 9ade8a91..16f7e0e3 100644
+--- a/Tests/AppTests/ConferenceShellCellsTests.swift
++++ b/Tests/AppTests/ConferenceShellCellsTests.swift
+@@ -1340,7 +1340,7 @@ final class ConferenceShellCellsTests: IsolatedCellTestCase {
+         try await registerResolveIfNeeded(resolver, name: "ConferenceRecommendation", type: ConferenceRecommendationCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceScheduling", type: ConferenceSchedulingCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceConnectionHub", type: ConferenceConnectionHubCell.self)
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+         try await registerConferenceStoryCellsIfNeeded(resolver)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceParticipantShell", type: ConferenceParticipantShellCell.self)
+ 
+@@ -4815,7 +4815,7 @@ final class ConferenceShellCellsTests: IsolatedCellTestCase {
+     }
+ 
+     private func registerConferenceStoryCellsIfNeeded(_ resolver: CellResolver) async throws {
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceConcierge", type: ConferenceConciergeCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceLocationShare", type: ConferenceLocationShareCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceConnectionHubShared", type: ConferenceConnectionHubSharedCell.self, cellScope: .identityUnique)

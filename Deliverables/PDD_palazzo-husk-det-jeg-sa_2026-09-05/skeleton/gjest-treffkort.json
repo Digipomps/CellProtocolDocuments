@@ -1,0 +1,35 @@
+{
+  "name": "Palazzo Gjest",
+  "_note": "Utsnitt: ny seksjon «Palazzo husker» settes inn i eksisterende PalazzoGuestConfigurationFactory mellom houseSection og visitSection. Seksjonen skjules når entity.match.pending er tom (cellen avgjør; ingen plassholdertekst).",
+  "cellReferences": [
+    { "endpoint": "cell:///PalazzoGuestShell", "subscribeFeed": true, "label": "guest" },
+    { "endpoint": "cell:///PalazzoEntity", "subscribeFeed": true, "label": "entity" }
+  ],
+  "skeleton": {
+    "Section": {
+      "header": { "Text": { "text": "Palazzo husker" } },
+      "content": [
+        { "Text": { "text": "Noe nytt på menyen traff noe du selv har skrevet. Ingenting er delt ennå.", "modifiers": { "fontStyle": "caption" } } },
+        { "List": {
+          "keypath": "entity.match.pending",
+          "flowElementSkeleton": { "VStack": {
+            "spacing": 6,
+            "modifiers": { "padding": 14, "cornerRadius": 12, "maxWidthInfinity": true, "hAlignment": "leading", "styleClasses": ["pz-match-card"] },
+            "elements": [
+              { "Text": { "keypath": "signalTitle", "modifiers": { "fontStyle": "headline", "fontWeight": "bold" } } },
+              { "Text": { "keypath": "explanation", "modifiers": { "fontStyle": "body" } } },
+              { "Text": { "keypath": "stateLabel", "modifiers": { "fontStyle": "caption" } } },
+              { "HStack": { "spacing": 10, "elements": [
+                { "Button": { "keypath": "entity.match.open", "label": "Se og svar", "payload": { "matchID": "$id" }, "icon": "hand.raised" } },
+                { "Button": { "keypath": "entity.match.dismiss", "label": "Ikke nå", "payload": { "matchID": "$id" }, "icon": "xmark" } }
+              ] } }
+            ]
+          } }
+        } }
+      ]
+    }
+  },
+  "_verify_in_porthole": [
+    "Button inne i List-rad med payload som refererer radens id ($id) — må verifiseres; fallback er List med selectionMode single + selectionActionKeypath entity.match.open og selectionPayloadMode item_id."
+  ]
+}

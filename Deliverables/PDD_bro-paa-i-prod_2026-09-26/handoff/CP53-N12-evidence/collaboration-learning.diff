@@ -1,0 +1,16 @@
+--- before-learning
++++ after-learning
+@@ -473,3 +473,13 @@
+ 3. Desktop ZIP bundles for upload
+ 4. `codex-local` as MCP in Claude Desktop and Claude Code
+ 5. `codex-collaboration` as the bridging skill
++
++## CI visibility during queued runs (verified 2026-09-29)
++
++A workflow run can exist before its job appears in a PR's `statusCheckRollup`.
++During CP53 N12, the runtime-capacity check appeared later on the same head after
++an initial rollup showed only four checks. Absence from that first list did not
++mean path filtering had excluded the workflow. Check run-level state when a job
++is missing, keep the provider watcher bounded, and compare the final complete
++check set against the exact head before calling CI green. Do not infer the
++workflow's trigger behavior solely from the last commit's file list.

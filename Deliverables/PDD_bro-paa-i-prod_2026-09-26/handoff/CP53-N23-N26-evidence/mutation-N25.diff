@@ -1,0 +1,20 @@
+--- BridgeChannelTransport
++++ BridgeChannelTransport-mutant
+@@ -434,6 +434,7 @@
+             try session.recheckBeforeActivation()
+             let acknowledgement = try session.activate()
+             let result = try await factory(self, session)
++            try session.check() // MUTATION: throw before taking cleanup ownership
+             try await adoptFactoryResult(result, peer: false)
+             try await sendAuth("channelAuthAccepted", acknowledgement)
+         case (false, "channelAuthChallenge"):
+--- BridgeMultiplexing
++++ BridgeMultiplexing-mutant
+@@ -1064,6 +1064,7 @@
+             try channelSession.check(identity: identity, requiresIdentity: true)
+             guard let principal = channelSession.publicIdentity?.makeIdentity() else { throw BridgeChannelAuthentication.Failure.closed }
+             let delegate = try await channelFactory(targetEndpoint, principal, channelTransport)
++            try channelSession.check() // MUTATION: unowned late result
+             // Own cleanup immediately, including a throwing session check.
+             let record = ChannelRecord(delegate: delegate, transport: channelTransport, quota: quota)
+             result = record

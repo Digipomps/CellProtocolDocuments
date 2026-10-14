@@ -1,0 +1,12 @@
+Du er Codex-utfører for PDD «tillitspakke for agentflåte». Oppgavemappe (P): `CellProtocolDocuments/Deliverables/PDD_tillitspakke-agentflaate_2026-09-08/` (relativt HAVEN-roten, som er cwd).
+
+Dette er **WP9b — resten av WP9**. WP9 leverte CellProtocol-delen (signert `ActionDecisionReceipt` med `ReceiptSignature`, `EffectReceipt`-modell, 12 nye grønne tester, Book 04 §8 oppdatert). Celleutstedelsen i CellScaffold ble blokkert fordi arbeidstreet manglet WP2–WP7-koden (post 0-feilen, nå rettet av post 0b). Les `P/handoff/README.md` (regel 9, **10**, **11**), `P/TESTRESULT.md#receipt` (hva WP9 faktisk leverte) og `P/PLAN.md` (WP9).
+
+**Forhåndssjekk (regel 11), gjør denne først:** `ls CellScaffold/Sources/App/Cells/AgentTrustPackage/` skal vise 6 filer og `ls CellScaffold/Tests/AppTests/WebFetchCeilingTests.swift` skal finnes, og `cd CellScaffold && git branch --show-current` skal si `pdd/tillitspakke-agentflaate`. Mangler noe av dette: **stopp umiddelbart**, skriv én linje i `P/STATUS.md` om at slicen er blocked på manglende arbeidstre, og ikke bygg eller kjør tester (ikke bruk 15 minutter på en full bundle med 0 tester).
+
+Gjør deretter punkt 2 og 3 fra WP9-prompten (`P/handoff/prompts/wp09.prompt.md`), altså **bare CellScaffold-delen**:
+1. `WebFetchCell` utsteder én signert `EffectReceipt` per `web.fetch` (både allowed og denied), i et append-only lager per instans: GET `webFetch.receipts` (r---, kun eier). Aldri sti/query/innhold — bare vert, metode, bytes, credentialsUsed, decisionStatus, reason, bindings (ceiling-digest, pakke-digest når bundet).
+2. `PurposeBoundAIGatewayCell` signerer `ActionDecisionReceipt` ved retur og legger den i `ai.receipts` (samme regler).
+3. Tester `CellScaffold/Tests/AppTests/EffectReceiptTests.swift`: denied og allowed fetch gir hver sin signerte kvittering; verify OK; manipulert felt → verify feiler; skann kvitteringen for sti/query/innhold (skal være tomt); annen requester enn eier kan ikke lese `webFetch.receipts`.
+4. Bygg/test etter regel 10: `cd CellScaffold && swift build --disable-sandbox --build-tests`, så `-XCTest AppTests.EffectReceiptTests`, `-XCTest AppTests.WebFetchCeilingTests`, `-XCTest AppTests.AgentTrustPackageApprovalTests`. Full bundle ikke påkrevd (si det). Lim `Executed`-linjer under `## Kvittering <a id="receipt"></a>` i `P/TESTRESULT.md` (legg til, ikke erstatt WP9s CellProtocol-utdata).
+5. Én linje i `P/STATUS.md`. Ingen git. Sluttmelding `## WP9b — sluttmelding` nederst i `P/TESTRESULT.md`. **Bli stående på `pdd/tillitspakke-agentflaate`.**

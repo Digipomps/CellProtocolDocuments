@@ -1,0 +1,55 @@
+<!doctype html><html lang="no"><head><meta charset="utf-8"><title>Formålstre E — plangrafen</title>
+<style>
+body{margin:0;background:#f3f7fb;font:14px/1.35 "Avenir Next","Segoe UI",system-ui,sans-serif;color:#17212b}
+#stage{position:relative;width:1900px;height:840px}
+.box{position:absolute;background:#fff;border:1.5px solid #d5e0eb;border-radius:10px;padding:10px 13px;box-shadow:0 1px 2px rgba(16,32,48,.06)}
+.box b{display:block;font-size:13px;margin-bottom:4px}
+.box span{color:#556273;font-size:12px;display:block}
+.box .ref{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:#0f4c81;margin-top:5px}
+.root{border-color:#0f4c81;border-width:2.5px;background:#eef4fa;width:420px}
+.leaf{width:290px}
+.no{border-color:#9a4a12;background:#fff7f0}
+.reuse{border-style:dashed;background:#f8fbfe;width:250px}
+.reuse b{color:#556273}
+.q{position:absolute;left:1180px;top:580px;width:660px;background:#fff7f0;border:2.5px solid #ef7c2d;border-radius:12px;padding:12px 16px}
+.q h3{margin:0 0 8px;font-size:14px;color:#9a4a12}
+.q p{margin:6px 0;font-size:12.5px}
+.q i{font-style:normal;color:#556273}
+.legend{position:absolute;left:20px;bottom:14px;font-size:12px;color:#556273}
+svg{position:absolute;left:0;top:0;pointer-events:none}
+h1{position:absolute;left:24px;top:14px;margin:0;font-size:16px;font-weight:600}
+h1 small{font-weight:400;color:#556273;font-size:12.5px;margin-left:10px}
+</style></head><body><div id="stage">
+<h1>Formålstre, gren E — plangrafen i utviklerbenken <small>PDD_utviklerbenk-oppgavegraf · iterasjon 2 · til G1</small></h1>
+
+<div class="box root" id="root" style="left:740px;top:70px"><b>E · Plangrafen er visning og handlingsflate over oppgaven</b><span>Planen <em>er</em> oppgaven med arbeidsflyt (gren C); grafen er en projeksjon (gren B). Ingen ny lagring, ingen ny kø.</span><div class="ref">purpose://candidate.utviklerbenk.plangraf</div></div>
+
+<div class="box leaf" id="e1" style="left:40px;top:260px"><b>E1 · Visning</b><span>Lanes per gren, én boks per arbeidspakke, utfører, status og piler — samme graf i web og app. «Mine handlinger» er et filter.</span><div class="ref">…plangraf.visning</div></div>
+<div class="box leaf" id="e2" style="left:360px;top:260px"><b>E2 · Drilldown</b><span>En boks åpner purposeRef, gjør, tester, artefakter, eier og status med bevis — hvert felt peker på fil:linje.</span><div class="ref">…plangraf.drilldown</div></div>
+<div class="box leaf" id="e3" style="left:680px;top:260px"><b>E3 · Mine handlinger utførbare</b><span>Boks med deg som utfører har knappen. Nettleser-handlinger direkte; maskin-handlinger bare via verifisert HAVEN Agent-bro. Ingen knapp som later som.</span><div class="ref">…plangraf.mine-handlinger-utforbare</div></div>
+<div class="box leaf" id="e4" style="left:1000px;top:260px"><b>E4 · Forklaring ved siden av</b><span>«Forklar» på hvert punkt gir AI-forklaring i sidepanel/overlay, med kilder; aldri i chatloggen; kan festes (Butler B-mønster).</span><div class="ref">…plangraf.forklaring-ved-siden-av</div></div>
+<div class="box leaf" id="e5" style="left:1320px;top:260px"><b>E5 · Aldri utdatert</b><span>Grafen er en versjonert projeksjon av PLAN/STATUS/TESTRESULT. Ingen boks blir grønn uten bevis; ingen egen grafstatus.</span><div class="ref">…plangraf.aldri-utdatert</div></div>
+<div class="box leaf no" id="e6" style="left:1580px;top:70px;width:280px"><b>E6 · Skal ikke: ny inngang</b><span>Grafen lever i den eksisterende benken; antall toppnivåinnganger øker ikke.</span><div class="ref">…plangraf.ingen-niende-inngang</div></div>
+
+<div class="box reuse" id="rB" style="left:60px;top:470px"><b>Gjenbruk B · graf er projeksjon</b><span>…oppgave.graf-er-projeksjon, …typede-kilder</span></div>
+<div class="box reuse" id="rC" style="left:380px;top:470px"><b>Gjenbruk C · arbeidsflyt</b><span>…arbeidsflyt.sekvens, …utforer-per-steg, …menneskelige-porter, …steg-har-bevis</span></div>
+<div class="box reuse" id="rD" style="left:700px;top:470px"><b>Gjenbruk D · én benk</b><span>…linser.netto-null-flater, …linser.valgt-binder</span></div>
+<div class="box reuse" id="rBut" style="left:1020px;top:470px"><b>Gjenbruk Butler B</b><span>løsrivbart element: …detachable.owned-and-persisted, …live-binding</span></div>
+
+<div class="q"><h3>Det du avgjør ved G1 (tre spørsmål som endrer treet)</h3>
+<p><b>Q7</b> Maskinhandlinger (KJØR-SELV-skript, deploy) via HAVEN Agent.app-broen, eller «kopier kommando + marker gjort med bevis» i første leveranse? <i>Forslag: broen; uten bro vises knappen blokkert med grunn.</i></p>
+<p><b>Q8</b> Er PDD-mappens filer datakilden, eller skal PLAN/STATUS bli celler først? <i>Forslag: filer først, normalisert lesing og kontrollert tilbakeføring av beslutning og bevis.</i></p>
+<p><b>Q9</b> Eier Butler (formålsmatching) forklaringsoverlayet, eller benken? <i>Forslag: benken eier åpning, kontekst og feste; Butler-hjelperen gjenbrukes, aldri chatloggen.</i></p>
+<p><i>Q1–Q3, Q5, Q6 fra iterasjon 1 (idétre, arbeidsflyt, kilder) står åpne, men stopper ikke E.</i></p></div>
+
+<div class="legend">Etter G1: 11 bildepar (web/app) til G1-GUI før noe bygges · 14 tester i §5 · staging-leveranse i eksisterende benk</div>
+<svg id="arrows" width="1900" height="840"></svg>
+</div>
+<script>
+const E=[["root","e1"],["root","e2"],["root","e3"],["root","e4"],["root","e5"],["root","e6"],["e1","rB"],["e2","rB"],["e3","rC"],["e5","rC"],["e1","rD"],["e4","rBut"]];
+const svg=document.getElementById('arrows'); svg.innerHTML='<defs><marker id="m" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#556273"/></marker></defs>';
+const st=document.getElementById('stage').getBoundingClientRect();
+const r=id=>{const b=document.getElementById(id).getBoundingClientRect();return{l:b.left-st.left,t:b.top-st.top,r:b.right-st.left,b:b.bottom-st.top,cx:(b.left+b.right)/2-st.left,cy:(b.top+b.bottom)/2-st.top}};
+for(const [a,b] of E){const A=r(a),B=r(b);let d; if(b==='e6') d=`M${A.r},${A.cy} L${B.l},${B.cy}`; else d=`M${A.cx},${A.b} C${A.cx},${(A.b+B.t)/2} ${B.cx},${(A.b+B.t)/2} ${B.cx},${B.t}`;
+const p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',d);p.setAttribute('fill','none');p.setAttribute('stroke','#556273');p.setAttribute('stroke-width','1.5');p.setAttribute('marker-end','url(#m)');if(b.startsWith('r'))p.setAttribute('stroke-dasharray','4 4');svg.appendChild(p)}
+</script></body></html>

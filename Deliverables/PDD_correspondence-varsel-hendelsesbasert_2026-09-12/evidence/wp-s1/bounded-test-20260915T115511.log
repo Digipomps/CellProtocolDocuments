@@ -1,0 +1,141 @@
+Build capacity: 130,1 GiB free (14%); reserving 10 GiB leaves 120,1 GiB (12%).
+[haven-swiftpm] running swift test with cache 28516ddea851
+[0/1] Planning build
+Building for debugging...
+[0/25] Write sources
+[1/25] Write swift-version--58304C5D6DBC2206.txt
+[3/5] Emitting module AppTests
+/Users/kjetil/Build/Digipomps/HAVEN/_worktrees/cellscaffold-corr-varsel-s1/Tests/AppTests/ConferenceConnectionHubCellTests.swift:724:14: warning: concurrently-executed local function 'resolveAndMakeVisible(ownerContext:displayName:)' must be marked as '@Sendable'; this is an error in the Swift 6 language mode
+ 722 |         let endpoint = "cell:///\(ArendalsukaConnectionHubCell.cellName)"
+ 723 | 
+ 724 |         func resolveAndMakeVisible(ownerContext: String, displayName: String) async -> Result<Bool, Error> {
+     |              `- warning: concurrently-executed local function 'resolveAndMakeVisible(ownerContext:displayName:)' must be marked as '@Sendable'; this is an error in the Swift 6 language mode
+ 725 |             do {
+ 726 |                 guard let requester = await vault.identity(for: ownerContext, makeNewIfNotFound: true) else {
+
+/Users/kjetil/Build/Digipomps/HAVEN/_worktrees/cellscaffold-corr-varsel-s1/Tests/AppTests/EventPlatformRoutesTests.swift:14:13: warning: stored property 'payload' of 'Sendable'-conforming struct 'EventActionRequest' contains non-Sendable type 'ValueType'; this is an error in the Swift 6 language mode
+ 12 |     private struct EventActionRequest: Content {
+ 13 |         var keypath: String
+ 14 |         var payload: ValueType?
+    |             `- warning: stored property 'payload' of 'Sendable'-conforming struct 'EventActionRequest' contains non-Sendable type 'ValueType'; this is an error in the Swift 6 language mode
+ 15 |     }
+ 16 | 
+
+/private/tmp/haven-swiftpm-bounded/caches/28516ddea851c0a34e66587bfbc5148e7d1c2675e48e01c064089a936ae5d4fd/checkouts/CellProtocol/Sources/CellBase/ValueTypes/ValueType.swift:11:22: note: enum 'ValueType' does not conform to the 'Sendable' protocol
+  9 | #endif
+ 10 | 
+ 11 | public indirect enum ValueType: Codable {
+    |                      `- note: enum 'ValueType' does not conform to the 'Sendable' protocol
+ 12 |     case flowElement(FlowElement)
+ 13 |     case bool(Bool)
+
+/Users/kjetil/Build/Digipomps/HAVEN/_worktrees/cellscaffold-corr-varsel-s1/Tests/AppTests/EventPlatformRoutesTests.swift:9:1: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase'
+  7 | import Fluent
+  8 | import Vapor
+  9 | import CellBase
+    | `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase'
+ 10 | 
+ 11 | final class EventPlatformRoutesTests: IsolatedCellTestCase {
+[4/5] Compiling AppTests AssistantCorrespondenceCellTests.swift
+[4/6] Write Objects.LinkFileList
+[5/6] Linking CellsContainerPackageTests
+Build complete! (14.36s)
+Test Suite 'Selected tests' started at 2026-09-15 11:55:31.812.
+Test Suite 'CellsContainerPackageTests.xctest' started at 2026-09-15 11:55:31.814.
+Test Suite 'AssistantCorrespondenceCellTests' started at 2026-09-15 11:55:31.814.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testActiveGrantReceivesOwnSendFromSenderWithoutFeedWriteAccess]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testActiveGrantReceivesOwnSendFromSenderWithoutFeedWriteAccess]' passed (0.024 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testAFailedApprovalNotificationCarriesItsReasonAllTheWayToTheOwnerSurface]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testAFailedApprovalNotificationCarriesItsReasonAllTheWayToTheOwnerSurface]' passed (0.009 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testApprovedGrantEnrollmentBehaviorRemainsUnchanged]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testApprovedGrantEnrollmentBehaviorRemainsUnchanged]' passed (0.010 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testDedicatedApprovalOutboxAndBridgeIssueHumanAccessProof]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testDedicatedApprovalOutboxAndBridgeIssueHumanAccessProof]' passed (0.016 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testDeniedAdministrativeReadIsDistinguishableFromAnEmptyList]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testDeniedAdministrativeReadIsDistinguishableFromAnEmptyList]' passed (0.007 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testExpiredOrRevokedGrantDeniesNewFeedAndStopsExistingSubscription]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testExpiredOrRevokedGrantDeniesNewFeedAndStopsExistingSubscription]' passed (0.027 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testExpiredRequestCannotReplayEnrollmentNonceWithFreshInvite]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testExpiredRequestCannotReplayEnrollmentNonceWithFreshInvite]' passed (0.009 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testExpiredRequestCannotReuseItsConsumedInvite]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testExpiredRequestCannotReuseItsConsumedInvite]' passed (0.007 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testFeedRejectsSameUUIDWithWrongKeyAndIdentityWithoutKeyControl]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testFeedRejectsSameUUIDWithWrongKeyAndIdentityWithoutKeyControl]' passed (0.011 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testFeedWithoutGrantOrWithPendingApprovalThrowsStreamStateDenied]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testFeedWithoutGrantOrWithPendingApprovalThrowsStreamStateDenied]' passed (0.011 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testFreshInviteCreatesNewRequestAfterMatchingRequestExpires]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testFreshInviteCreatesNewRequestAfterMatchingRequestExpires]' passed (0.008 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testFreshInviteRejectsPrincipalBindingCollisions]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testFreshInviteRejectsPrincipalBindingCollisions]' passed (0.010 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testInboxListAndMessageReadNeverReachRecipientFeed]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testInboxListAndMessageReadNeverReachRecipientFeed]' passed (0.015 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testLiveMatchingEnrollmentRequestRemainsIdempotent]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testLiveMatchingEnrollmentRequestRemainsIdempotent]' passed (0.007 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testNonOwnerCannotInvokeAdministrativeDecisionActions]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testNonOwnerCannotInvokeAdministrativeDecisionActions]' passed (0.004 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testOwnerAdministrativeApprovalIssuesOnlyDeviceBoundMessageProof]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testOwnerAdministrativeApprovalIssuesOnlyDeviceBoundMessageProof]' passed (0.013 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testOwnerAdministrativeRejectionDerivesAuditEmitsFlowAndIsIdempotent]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testOwnerAdministrativeRejectionDerivesAuditEmitsFlowAndIsIdempotent]' passed (0.008 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testOwnerKeepsAllOperationEventsAndNoFeedEventContainsMessageContent]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testOwnerKeepsAllOperationEventsAndNoFeedEventContainsMessageContent]' passed (0.017 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testPendingAccessStatusRetriesUnavailableApprovalNotification]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testPendingAccessStatusRetriesUnavailableApprovalNotification]' passed (0.009 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testRecipientBoundOnboardingPackageRequiresOwnerAndValidSingleUseSecret]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testRecipientBoundOnboardingPackageRequiresOwnerAndValidSingleUseSecret]' passed (0.008 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testRecipientFeedAndCellOwnedEmissionSurviveRuntimeRebindingAfterDecode]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testRecipientFeedAndCellOwnedEmissionSurviveRuntimeRebindingAfterDecode]' passed (0.015 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testRecipientFeedExcludesAdministrativeTopicAndMalformedEvents]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testRecipientFeedExcludesAdministrativeTopicAndMalformedEvents]' passed (0.013 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testRecipientFeedExcludesOtherRecipientsSendAndAck]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testRecipientFeedExcludesOtherRecipientsSendAndAck]' passed (0.016 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testSignedEnrollmentSendListReadAckReplayAndPersistence]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testSignedEnrollmentSendListReadAckReplayAndPersistence]' passed (0.022 seconds).
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testWrongKeyCannotReadAnotherPrincipalInbox]' started.
+Test Case '-[AppTests.AssistantCorrespondenceCellTests testWrongKeyCannotReadAnotherPrincipalInbox]' passed (0.008 seconds).
+Test Suite 'AssistantCorrespondenceCellTests' passed at 2026-09-15 11:55:32.119.
+	 Executed 25 tests, with 0 failures (0 unexpected) in 0.304 (0.305) seconds
+Test Suite 'CellsContainerPackageTests.xctest' passed at 2026-09-15 11:55:32.119.
+	 Executed 25 tests, with 0 failures (0 unexpected) in 0.304 (0.305) seconds
+Test Suite 'Selected tests' passed at 2026-09-15 11:55:32.119.
+	 Executed 25 tests, with 0 failures (0 unexpected) in 0.304 (0.307) seconds
+**** Creating BrowserClientIdentityVault for identitydDomain: assistant-correspondence-notification-diagnostic-99E95728-7209-46BE-9137-06C6AB90A268
+Generating VaultIdentity from Identity...
+**** Creating BrowserClientIdentityVault for identitydDomain: assistant-correspondence-approved-grant-AB6DABDD-C1EB-4694-B07D-1CA3C122684B
+Generating VaultIdentity from Identity...
+**** Creating BrowserClientIdentityVault for identitydDomain: assistant-correspondence-dedicated-approval-8E8C02AF-F69E-4952-A508-F66753CE0713
+Generating VaultIdentity from Identity...
+**** Creating BrowserClientIdentityVault for identitydDomain: assistant-correspondence-denied-read-E8D2E2A4-790A-45F9-8E0E-F668ECF4F9FE
+Generating VaultIdentity from Identity...
+Generating VaultIdentity from Identity...
+**** Creating BrowserClientIdentityVault for identitydDomain: assistant-correspondence-enrollment-replay-658E8619-0C3C-4DBF-82A9-531AB2792B26
+Generating VaultIdentity from Identity...
+**** Creating BrowserClientIdentityVault for identitydDomain: assistant-correspondence-consumed-reenrollment-844677A4-5180-49EC-B7DF-D30256AC8D8E
+Generating VaultIdentity from Identity...
+**** Creating BrowserClientIdentityVault for identitydDomain: assistant-correspondence-expired-reenrollment-79B9A8FB-5539-41F9-AE02-A8B37BB8F240
+Generating VaultIdentity from Identity...
+**** Creating BrowserClientIdentityVault for identitydDomain: assistant-correspondence-binding-collision-F3A62285-854E-4969-944A-9164D747EB25
+Generating VaultIdentity from Identity...
+**** Creating BrowserClientIdentityVault for identitydDomain: assistant-correspondence-live-idempotence-CD33C148-056D-4301-A2CD-9D254537AC9A
+Generating VaultIdentity from Identity...
+**** Creating BrowserClientIdentityVault for identitydDomain: assistant-correspondence-admin-denial-EF4A794F-4359-4712-A4EC-1199F780EA9B
+Generating VaultIdentity from Identity...
+Generating VaultIdentity from Identity...
+**** Creating BrowserClientIdentityVault for identitydDomain: assistant-correspondence-owner-admin-F41304E7-17C1-4AB6-B6A0-243FE5DE22EF
+Generating VaultIdentity from Identity...
+**** Creating BrowserClientIdentityVault for identitydDomain: assistant-correspondence-owner-reject-07F14783-7180-420D-B219-883C813EBAF8
+Generating VaultIdentity from Identity...
+**** Creating BrowserClientIdentityVault for identitydDomain: assistant-correspondence-notification-retry-275D9529-22F0-4811-A527-DC114B2AE431
+Generating VaultIdentity from Identity...
+**** Creating BrowserClientIdentityVault for identitydDomain: assistant-correspondence-onboarding-E683507C-6B4D-4025-A374-475AF80F3463
+Generating VaultIdentity from Identity...
+Generating VaultIdentity from Identity...
+**** Creating BrowserClientIdentityVault for identitydDomain: assistant-correspondence-tests
+Generating VaultIdentity from Identity...
+**** Creating BrowserClientIdentityVault for identitydDomain: assistant-correspondence-wrong-key
+Generating VaultIdentity from Identity...
+􀟈  Test run started.
+􀄵  Testing Library Version: 1501
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.
+Build disk result: cache=8302776 KiB (delta=+18592 KiB), available delta=-21580 KiB, status=0.

@@ -1,0 +1,231 @@
+[haven-swiftpm] running swift test with cache 78c2e52a5799
+warning: 'cellprotocol': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Using on-disk description]
+[1 / 2] swift-nio-ssl_NIOSSL
+[1 / 85] SwiftASN1
+[1 / 283] NIOCore
+[1 / 176] CellNearbyTests-product
+[2 / 27] CellBase
+[4 / 29] CellBase
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellBase/PersistingCells/EntityRelationRecordV1.swift:321:16: warning: stored property 'entityRepresentation' of 'Sendable'-conforming struct 'EntityRelationRecord' contains non-Sendable type 'EntityRepresentation'; this is an error in the Swift 6 language mode
+ 319 |     /// Canonical owner-held knowledge when present. The legacy subject/tags/
+ 320 |     /// purposeRefs remain readable for existing clients and import adapters.
+ 321 |     public var entityRepresentation: EntityRepresentation?
+     |                `- warning: stored property 'entityRepresentation' of 'Sendable'-conforming struct 'EntityRelationRecord' contains non-Sendable type 'EntityRepresentation'; this is an error in the Swift 6 language mode
+ 322 | 
+ 323 |     public init(
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellBase/PurposeAndInterest/EntityRepresentation.swift:61:14: note: class 'EntityRepresentation' does not conform to the 'Sendable' protocol
+ 59 | 
+ 60 | 
+ 61 | public class EntityRepresentation:  PerspectiveNodeImpl {
+    |              `- note: class 'EntityRepresentation' does not conform to the 'Sendable' protocol
+ 62 | 
+ 63 |     var fulfilled: Fullfilled = Fullfilled() // Until Interests and Purposes are moved
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellBase/PurposeAndInterest/ClaimComposition.swift:36:16: warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimCounter' has non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 34 | public struct ClaimCounter: Codable, Equatable, Sendable {
+ 35 |     public var role: ClaimCounterRole
+ 36 |     public var composition: ClaimComposition
+    |                `- warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimCounter' has non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 37 | 
+ 38 |     public init(role: ClaimCounterRole, composition: ClaimComposition) {
+    :
+187 | }
+188 | 
+189 | public indirect enum ClaimComposition: Codable, Equatable {
+    |                      `- note: consider making enum 'ClaimComposition' conform to the 'Sendable' protocol
+190 |     case claim(ClaimCompositionLeaf)
+191 |     // allOf: linked premises, weakest link decides the score.
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellBase/PurposeAndInterest/ClaimDefinition.swift:91:16: warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimDefinition' contains non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 89 |     public var goalID: String?
+ 90 |     public var supports: [ClaimSupportNode]
+ 91 |     public var composition: ClaimComposition?
+    |                `- warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimDefinition' contains non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 92 |     public var tags: [String]
+ 93 | 
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellBase/PurposeAndInterest/ClaimComposition.swift:189:22: note: consider making enum 'ClaimComposition' conform to the 'Sendable' protocol
+187 | }
+188 | 
+189 | public indirect enum ClaimComposition: Codable, Equatable {
+    |                      `- note: consider making enum 'ClaimComposition' conform to the 'Sendable' protocol
+190 |     case claim(ClaimCompositionLeaf)
+191 |     // allOf: linked premises, weakest link decides the score.
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellBase/PurposeAndInterest/PerspectiveEntityProjection.swift:30:16: warning: stored property 'entities' of 'Sendable'-conforming struct 'PerspectiveEntityProjection' contains non-Sendable type 'Weight<EntityRepresentation>'; this is an error in the Swift 6 language mode
+ 28 |     /// delayed write cannot resurrect entities a newer one removed.
+ 29 |     public let epoch: Int
+ 30 |     public let entities: [Weight<EntityRepresentation>]
+    |                `- warning: stored property 'entities' of 'Sendable'-conforming struct 'PerspectiveEntityProjection' contains non-Sendable type 'Weight<EntityRepresentation>'; this is an error in the Swift 6 language mode
+ 31 | 
+ 32 |     public init(source: String, epoch: Int, entities: [Weight<EntityRepresentation>]) {
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellBase/PurposeAndInterest/Weight.swift:13:15: note: consider making generic struct 'Weight' conform to the 'Sendable' protocol
+ 11 | import Foundation
+ 12 | 
+ 13 | public struct Weight<T: PerspectiveNode & Codable> :  Weighted, Codable {
+    |               `- note: consider making generic struct 'Weight' conform to the 'Sendable' protocol
+ 14 |     
+ 15 |     
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellBase/PurposeAndInterest/RelationalLearningModels.swift:95:16: warning: stored property 'payload' of 'Sendable'-conforming struct 'RelationalLearningEventEnvelope' contains non-Sendable type 'ValueType'; this is an error in the Swift 6 language mode
+ 93 |     public var schemaVersion: String
+ 94 |     public var emittedAt: TimeInterval
+ 95 |     public var payload: Object
+    |                `- warning: stored property 'payload' of 'Sendable'-conforming struct 'RelationalLearningEventEnvelope' contains non-Sendable type 'ValueType'; this is an error in the Swift 6 language mode
+ 96 | 
+ 97 |     public init(eventType: RelationalLearningEventType,
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellBase/ValueTypes/ValueType.swift:11:22: note: consider making enum 'ValueType' conform to the 'Sendable' protocol
+  9 | #endif
+ 10 | 
+ 11 | public indirect enum ValueType: Codable {
+    |                      `- note: consider making enum 'ValueType' conform to the 'Sendable' protocol
+ 12 |     case flowElement(FlowElement)
+ 13 |     case bool(Bool)
+[9 / 28] CellBase
+[10 / 28] CellBase
+[15 / 26] CellBase-product
+[15 / 26] CellVapor-product
+[18 / 29] haven-commons-product
+[18 / 29] CellRuntimeBenchmarks-product
+[18 / 29] CellApple
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:255:9: warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+253 | struct SkeletonBorderShape: Shape {
+254 |     let radius: CGFloat
+255 |     let edges: [SkeletonEdge]?
+    |         `- warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+256 |     let rtl: Bool
+257 |     func path(in rect: CGRect) -> Path {
+
+CellBase.SkeletonEdge:1:13: note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+1 | public enum SkeletonEdge : String, Codable {
+  |             `- note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+2 |     case top
+3 |     case leading
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:5:1: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  3 | 
+  4 | import SwiftUI
+  5 | import CellBase
+    | `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  6 | #if os(macOS)
+  7 | import AppKit
+
+[#AddPreconcurrencyImport]: <https://docs.swift.org/compiler/documentation/diagnostics/add-preconcurrency-import>
+[24 / 32] CellApple
+[26 / 31] CellBaseTests-product
+[28 / 33] CellBaseTests-product/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/PerspectiveContextTests.swift:137:89: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+135 |         let config = ContextConfiguration(sources: [.init(sourceID: "place", endpoint: "cell:///place")], rules: [.init(id: "home", definition: definition, label: "home", purposeWeights: [purpose.reference: 0])])
+136 |         let response = try await cell.set(keypath: "perspective.context.configure", value: ContextCodec.encode(config), requester: owner)
+137 |         guard case let .object(object) = response else { return XCTFail("bad response \(response)") }
+    |                                                                                         |- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+    |                                                                                         |- note: use a default value parameter to avoid this warning
+    |                                                                                         |- note: provide a default value to avoid this warning
+    |                                                                                         `- note: use 'String(describing:)' to silence this warning
+138 |         guard case let .string(status)? = object["status"] else { return XCTFail("missing status \(response)") }
+139 |         XCTAssertEqual(status, "ok", "\(response)")
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/PerspectiveContextTests.swift:138:100: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+136 |         let response = try await cell.set(keypath: "perspective.context.configure", value: ContextCodec.encode(config), requester: owner)
+137 |         guard case let .object(object) = response else { return XCTFail("bad response \(response)") }
+138 |         guard case let .string(status)? = object["status"] else { return XCTFail("missing status \(response)") }
+    |                                                                                                    |- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+    |                                                                                                    |- note: use a default value parameter to avoid this warning
+    |                                                                                                    |- note: provide a default value to avoid this warning
+    |                                                                                                    `- note: use 'String(describing:)' to silence this warning
+139 |         XCTAssertEqual(status, "ok", "\(response)")
+140 |         let changed = expectation(description: "home context")
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/PerspectiveContextTests.swift:139:41: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+137 |         guard case let .object(object) = response else { return XCTFail("bad response \(response)") }
+138 |         guard case let .string(status)? = object["status"] else { return XCTFail("missing status \(response)") }
+139 |         XCTAssertEqual(status, "ok", "\(response)")
+    |                                         |- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+    |                                         |- note: use a default value parameter to avoid this warning
+    |                                         |- note: provide a default value to avoid this warning
+    |                                         `- note: use 'String(describing:)' to silence this warning
+140 |         let changed = expectation(description: "home context")
+141 |         let departed = expectation(description: "departure context")
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/PerspectiveContextTests.swift:238:108: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+236 |         do {
+237 |             let response = try await perspective.set(keypath: "perspective.context.configure", value: ContextCodec.encode(ContextConfiguration()), requester: outsider)
+238 |             guard case .string("denied") = response else { return XCTFail("Unprivileged config accepted: \(response)") }
+    |                                                                                                            |- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+    |                                                                                                            |- note: use a default value parameter to avoid this warning
+    |                                                                                                            |- note: provide a default value to avoid this warning
+    |                                                                                                            `- note: use 'String(describing:)' to silence this warning
+239 |         } catch { /* Existing runtime may reject before the registered handler. */ }
+240 |         let value = try await perspective.get(keypath: "perspective.context.configuration", requester: owner)
+
+[33 / 37] CellBaseTests-product
+[34 / 37] CellBaseTests-product
+[35 / 37] CellBaseTests-product
+[38 / 38] CellRuntimeBenchmarks-product
+Build complete! (12,54 sek)
+Test Suite 'Selected tests' started at 2026-10-12 11:43:25.941.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-10-12 11:43:25.942.
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-10-12 11:43:25.942.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-12 11:43:25.942.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-12 11:43:26.014.
+Test Suite 'CellNearbyTests.xctest' started at 2026-10-12 11:43:26.014.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-10-12 11:43:26.015.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-12 11:43:26.015.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-12 11:43:26.089.
+Test Suite 'CellBaseTests.xctest' started at 2026-10-12 11:43:26.089.
+Test Suite 'PerspectiveContextFlowTests' started at 2026-10-12 11:43:26.089.
+Test Case '-[CellBaseTests.PerspectiveContextFlowTests testRealSubscriptionChangesEffectivePurposesAndDepartureRestoresBaseline]' started.
+Test Case '-[CellBaseTests.PerspectiveContextFlowTests testRealSubscriptionChangesEffectivePurposesAndDepartureRestoresBaseline]' passed (0.017 seconds).
+Test Suite 'PerspectiveContextFlowTests' passed at 2026-10-12 11:43:26.106.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.017 (0.017) seconds
+Test Suite 'PerspectiveContextIntegrationTests' started at 2026-10-12 11:43:26.106.
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testConfigurationRejectsNonOwnerWithoutDebugBypass]' started.
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testConfigurationRejectsNonOwnerWithoutDebugBypass]' passed (0.006 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testDurableContextReadAfterFreshCellDecodeAndDetachPersists]' started.
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testDurableContextReadAfterFreshCellDecodeAndDetachPersists]' passed (0.007 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testResolverLoadedPortholeInputFiltersContentAndConsumesControlEvents]' started.
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testResolverLoadedPortholeInputFiltersContentAndConsumesControlEvents]' passed (1.021 seconds).
+Test Suite 'PerspectiveContextIntegrationTests' passed at 2026-10-12 11:43:27.141.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 1.034 (1.034) seconds
+Test Suite 'PerspectiveContextTests' started at 2026-10-12 11:43:27.141.
+Test Case '-[CellBaseTests.PerspectiveContextTests testDepartureDuplicateDelayedAndConflictingEvents]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testDepartureDuplicateDelayedAndConflictingEvents]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testExpiryAndRestartRequireFreshSnapshotEvenAtSameRevision]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testExpiryAndRestartRequireFreshSnapshotEvenAtSameRevision]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testFiltersIntersectWithinBaseAndUseBaseWhenUnknownOrExpired]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testFiltersIntersectWithinBaseAndUseBaseWhenUnknownOrExpired]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testMalformedConfigurationAndEventsAreRejected]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testMalformedConfigurationAndEventsAreRejected]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testMorningNeedsTimeAndHomeOrFamilyAndKnownEmptySources]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testMorningNeedsTimeAndHomeOrFamilyAndKnownEmptySources]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testPrioritySupportsLowerWeightsAndDeactivationAndStableTies]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testPrioritySupportsLowerWeightsAndDeactivationAndStableTies]' passed (0.001 seconds).
+Test Suite 'PerspectiveContextTests' passed at 2026-10-12 11:43:27.146.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.005 (0.005) seconds
+Test Suite 'CellBaseTests.xctest' passed at 2026-10-12 11:43:27.146.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 1.056 (1.057) seconds
+Test Suite 'Selected tests' passed at 2026-10-12 11:43:27.146.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 1.056 (1.057) seconds
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-73666/CellsContainer/2214FF30-E613-4BA9-9509-5F6AF6245058/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-73666/CellsContainer/2214FF30-E613-4BA9-9509-5F6AF6245058/Perspective.json, NSUnderlyingError=0x7818899da0 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-73666/CellsContainer/A4FD5ABC-D386-4655-869D-6B5AA8F53F83/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-73666/CellsContainer/A4FD5ABC-D386-4655-869D-6B5AA8F53F83/Perspective.json, NSUnderlyingError=0x7818b34630 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-73666/CellsContainer/CD0D4ACC-373F-46A0-895E-68DF38554676/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-73666/CellsContainer/CD0D4ACC-373F-46A0-895E-68DF38554676/Perspective.json, NSUnderlyingError=0x7818b30330 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-73666/CellsContainer/CD0D4ACC-373F-46A0-895E-68DF38554676/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-73666/CellsContainer/CD0D4ACC-373F-46A0-895E-68DF38554676/Perspective.json, NSUnderlyingError=0x7818b30c60 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-73666/CellsContainer/15834FE4-0086-478A-98A2-A5165730B367/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-73666/CellsContainer/15834FE4-0086-478A-98A2-A5165730B367/Perspective.json, NSUnderlyingError=0x7818b345d0 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}

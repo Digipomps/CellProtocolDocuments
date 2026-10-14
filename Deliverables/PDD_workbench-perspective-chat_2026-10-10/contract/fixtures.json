@@ -1,0 +1,237 @@
+{
+  "status": "synthetic-design-examples-not-backend-tests",
+  "cases": [
+    {
+      "name": "typed-send-mounted",
+      "command": {
+        "schemaVersion": 1,
+        "commandID": "example-command-a",
+        "sessionID": "example-session-a",
+        "expectedRevision": 8,
+        "operation": "sendMessage",
+        "input": {
+          "draftSnapshot": {
+            "mountInstanceID": "mount-a",
+            "fieldSequence": 3,
+            "fieldKey": "message",
+            "text": "Eksempel fra montering A"
+          },
+          "packageID": "ideas",
+          "packageRevision": 2
+        }
+      },
+      "mountContext": {
+        "sourceCellEndpoint": "cell://localhost/example-helper",
+        "instanceID": "mount-a",
+        "componentID": "workbench.helper",
+        "revision": "v1"
+      },
+      "valid": true,
+      "expectedError": null
+    },
+    {
+      "name": "second-mount-own-text",
+      "command": {
+        "schemaVersion": 1,
+        "commandID": "example-command-b",
+        "sessionID": "example-session-a",
+        "expectedRevision": 8,
+        "operation": "sendMessage",
+        "input": {
+          "draftSnapshot": {
+            "mountInstanceID": "mount-b",
+            "fieldSequence": 4,
+            "fieldKey": "message",
+            "text": "Eksempel B"
+          },
+          "packageID": "ideas",
+          "packageRevision": 2
+        }
+      },
+      "mountContext": {
+        "sourceCellEndpoint": "cell://localhost/example-helper",
+        "instanceID": "mount-b",
+        "componentID": "workbench.helper",
+        "revision": "v1"
+      },
+      "valid": true,
+      "expectedError": null
+    },
+    {
+      "name": "missing-latest-text",
+      "command": {
+        "schemaVersion": 1,
+        "commandID": "example-command-a",
+        "sessionID": "example-session-a",
+        "expectedRevision": 8,
+        "operation": "sendMessage",
+        "input": {
+          "packageID": "ideas",
+          "packageRevision": 2
+        }
+      },
+      "mountContext": {
+        "sourceCellEndpoint": "cell://localhost/example-helper",
+        "instanceID": "mount-a",
+        "componentID": "workbench.helper",
+        "revision": "v1"
+      },
+      "valid": false,
+      "expectedError": "draft_required"
+    },
+    {
+      "name": "wrong-mount",
+      "command": {
+        "schemaVersion": 1,
+        "commandID": "example-command-a",
+        "sessionID": "example-session-a",
+        "expectedRevision": 8,
+        "operation": "sendMessage",
+        "input": {
+          "draftSnapshot": {
+            "mountInstanceID": "mount-a",
+            "fieldSequence": 3,
+            "fieldKey": "message",
+            "text": "Eksempel fra montering A"
+          },
+          "packageID": "ideas",
+          "packageRevision": 2
+        }
+      },
+      "mountContext": {
+        "sourceCellEndpoint": "cell://localhost/example-helper",
+        "instanceID": "mount-b",
+        "componentID": "workbench.helper",
+        "revision": "v1"
+      },
+      "valid": false,
+      "expectedError": "draft_mount_mismatch"
+    },
+    {
+      "name": "negative-revision",
+      "command": {
+        "schemaVersion": 1,
+        "commandID": "example-command-a",
+        "sessionID": "example-session-a",
+        "expectedRevision": -1,
+        "operation": "sendMessage",
+        "input": {
+          "draftSnapshot": {
+            "mountInstanceID": "mount-a",
+            "fieldSequence": 3,
+            "fieldKey": "message",
+            "text": "Eksempel fra montering A"
+          },
+          "packageID": "ideas",
+          "packageRevision": 2
+        }
+      },
+      "mountContext": {
+        "sourceCellEndpoint": "cell://localhost/example-helper",
+        "instanceID": "mount-a",
+        "componentID": "workbench.helper",
+        "revision": "v1"
+      },
+      "valid": false,
+      "expectedError": "revision"
+    },
+    {
+      "name": "unknown-operation",
+      "command": {
+        "schemaVersion": 1,
+        "commandID": "example-command-a",
+        "sessionID": "example-session-a",
+        "expectedRevision": 8,
+        "operation": "runArbitraryShell",
+        "input": {
+          "draftSnapshot": {
+            "mountInstanceID": "mount-a",
+            "fieldSequence": 3,
+            "fieldKey": "message",
+            "text": "Eksempel fra montering A"
+          },
+          "packageID": "ideas",
+          "packageRevision": 2
+        }
+      },
+      "mountContext": {
+        "sourceCellEndpoint": "cell://localhost/example-helper",
+        "instanceID": "mount-a",
+        "componentID": "workbench.helper",
+        "revision": "v1"
+      },
+      "valid": false,
+      "expectedError": "operation"
+    },
+    {
+      "name": "package-needs-own-revision",
+      "command": {
+        "schemaVersion": 1,
+        "commandID": "example-command-a",
+        "sessionID": "example-session-a",
+        "expectedRevision": 8,
+        "operation": "savePackage",
+        "input": {
+          "draftSnapshot": {
+            "mountInstanceID": "mount-a",
+            "fieldSequence": 3,
+            "fieldKey": "message",
+            "text": "Eksempel fra montering A"
+          },
+          "packageID": "ideas",
+          "packageRevision": 2
+        }
+      },
+      "mountContext": {
+        "sourceCellEndpoint": "cell://localhost/example-helper",
+        "instanceID": "mount-a",
+        "componentID": "workbench.helper",
+        "revision": "v1"
+      },
+      "valid": false,
+      "expectedError": "package_revision"
+    },
+    {
+      "name": "explicit-package-save",
+      "command": {
+        "schemaVersion": 1,
+        "commandID": "example-command-a",
+        "sessionID": "example-session-a",
+        "expectedRevision": 8,
+        "operation": "savePackage",
+        "input": {
+          "draftSnapshot": {
+            "mountInstanceID": "mount-a",
+            "fieldSequence": 3,
+            "fieldKey": "message",
+            "text": "Eksempel fra montering A"
+          },
+          "packageID": "ideas",
+          "packageRevision": 2,
+          "expectedPackageRevision": 2
+        }
+      },
+      "mountContext": {
+        "sourceCellEndpoint": "cell://localhost/example-helper",
+        "instanceID": "mount-a",
+        "componentID": "workbench.helper",
+        "revision": "v1"
+      },
+      "valid": true,
+      "expectedError": null
+    }
+  ],
+  "runtimeOnlyCases": [
+    "unknown-command-id-reused-with-different-hash",
+    "revoked-requester",
+    "forged-emitter",
+    "write-applied-but-nil-return",
+    "duplicate-outbox-after-crash",
+    "provider-late-response",
+    "same-session-revision-race",
+    "replay-no-external-effects",
+    "search-count-and-snippet-cross-owner",
+    "stale-PR-head",
+    "unknown-submit-query-same-id"
+  ]
+}

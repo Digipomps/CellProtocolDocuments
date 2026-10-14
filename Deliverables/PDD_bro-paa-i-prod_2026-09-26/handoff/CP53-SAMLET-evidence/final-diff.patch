@@ -1,0 +1,1379 @@
+diff --git a/.github/workflows/cellprotocol-swift-linux.yml b/.github/workflows/cellprotocol-swift-linux.yml
+index abf36ca..7b51593 100644
+--- a/.github/workflows/cellprotocol-swift-linux.yml
++++ b/.github/workflows/cellprotocol-swift-linux.yml
+@@ -96,7 +96,7 @@ jobs:
+           for suite in AgreementSecurityTests FileCryptoSecurityTests \
+             FeedAuthorizationRegistryTests ActiveFeedAuthorizationTests \
+             BridgeIdentityProofAuthorizationTests BridgeIdentityBoundaryTests \
+-            BridgeDescriptionConcurrencyTests BridgePeerRecordLayerTests BridgePeerV3Tests BridgePeerFlowControlTests BridgeCanonicalKeyQuotaTests \
++            PublisherAsyncLifetimeTests BridgeDescriptionConcurrencyTests BridgePeerRecordLayerTests BridgePeerV3Tests BridgePeerFlowControlTests BridgeCanonicalKeyQuotaTests \
+             BridgeResponseLifetimeTests BridgeFactoryLifetimeTests BridgeSigningLifetimeTests BridgeMuxSendLifetimeTests \
+             BridgeDiagnosticPrivacyTests IdentityLinkGenesisClassificationTests \
+             FlowElementPusherSecurityTests EntityRelationRecordV1Tests \
+diff --git a/.github/workflows/security-regression-macos.yml b/.github/workflows/security-regression-macos.yml
+index 21e5646..546c5c5 100644
+--- a/.github/workflows/security-regression-macos.yml
++++ b/.github/workflows/security-regression-macos.yml
+@@ -30,7 +30,7 @@ jobs:
+           swift --version
+           swift test --disable-automatic-resolution --jobs 4
+           git diff --exit-code -- Package.swift Package.resolved Sources Tests commons
+-      - name: Verify bridge descriptions, EntityScanner and NI consumers with Thread Sanitizer
++      - name: Verify peer, Scanner, EntityScanner, record and mux lifetimes with Thread Sanitizer
+         shell: bash
+         env:
+           TSAN_OPTIONS: halt_on_error=1
+@@ -39,9 +39,9 @@ jobs:
+           # Each invocation starts a fresh test process. The first rebuilds the
+           # pinned package with instrumentation; later invocations reuse it.
+           for attempt in 1 2 3; do
+-            echo "Bridge description, Scanner and NI consumer Thread Sanitizer pass ${attempt}/3"
++            echo "Peer, Scanner, consumer, record and mux Thread Sanitizer pass ${attempt}/3"
+             swift test --disable-automatic-resolution --jobs 2 \
+-              --sanitize thread --filter 'BridgeDescriptionConcurrencyTests|EntityScannerConsumerSecurityTests|ScannerNearbyInteractionTests'
++              --sanitize thread --filter 'PublisherAsyncLifetimeTests|BridgeDescriptionConcurrencyTests|EntityScannerConsumerSecurityTests|ScannerNearbyInteractionTests|ScannerPeerAuthenticationTests|ScannerServiceInvitationTests|ScannerAdmissionTests|BridgePeerV3Tests|BridgePeerRecordLayerTests|BridgePeerFlowControlTests|BridgeMultiplexingTests|BridgeMuxSendLifetimeTests|BridgeResponseLifetimeTests|BridgeFactoryLifetimeTests|BridgeSigningLifetimeTests'
+           done
+           git diff --exit-code -- Package.swift Package.resolved Sources Tests commons
+       - name: Reject a vulnerable downstream transport pin
+diff --git a/Docs/BridgeCachingAndMultiplexing.md b/Docs/BridgeCachingAndMultiplexing.md
+index 4907cfa..a9e95de 100644
+--- a/Docs/BridgeCachingAndMultiplexing.md
++++ b/Docs/BridgeCachingAndMultiplexing.md
+@@ -16,11 +16,18 @@ bounded and exposed through the Cell's `Explore` contract.
+ ## Bridge multiplexing
+ 
+ Protocol v2 can carry multiple logical bridge channels over one physical transport.
++This is the mux envelope version, independent of the
++[peer v3 authentication and record profile](../Documentation/BridgePeerChannelV3.md)
++and the WS authentication profile.
+ `BridgeConnectionPool` shares a physical session only when the session URL, identity
+ UUID, signing-key fingerprint, and home-vault reference all match. Logical channels
+ remain independently addressed by `channelID` and preserve their own command and
+ response routing.
+ 
++Closing a logical channel retains its ID while an admitted physical send is
++outstanding. A late response/factory result cannot publish into a replacement
++channel or connection; see [bridge lifetimes](../Documentation/BridgeLifecycle.md).
++
+ `RemoteCellHostRoute.connectionSharing` defaults to `.dedicated`, preserving the
+ legacy one-connection-per-bridge behavior. Set it to `.multiplexedV2` only for hosts
+ that expose the matching `/<websocketEndpoint>/session` route and install a
+diff --git a/Docs/BridgeIdentitySecurity.md b/Docs/BridgeIdentitySecurity.md
+index b4b0d9f..41fcaaf 100644
+--- a/Docs/BridgeIdentitySecurity.md
++++ b/Docs/BridgeIdentitySecurity.md
+@@ -327,8 +327,8 @@ drain, production TLS/proxy and real consumer deployment remain AP5–AP9b evide
+ 
+ `org.haven.bridge-peer-channel.v3` is separate from the WS profile. The accepted
+ invitation supplies E (both endpoint names, setup UUID and domain). The physical
+-adapter retains its peer/session instance; pending invitation ownership still has
+-the separate N11 limitation. Discovery names and MCSession possession grant no
++adapter and pending/accepted invitation retain their exact peer/session/endpoint
++instance; acceptance is atomic and independent of the discovery index. Discovery names and MCSession possession grant no
+ identity or Cell authority. MCSession encryption remains required.
+ 
+ The identity-free M1 and M2 hello fields bind fresh X25519 keys, nonces, roles,
+@@ -350,11 +350,12 @@ HPC2, ready, plaintext fallback and cross-profile messages are rejected.
+ 
+ The authoritative [v3 wire and security contract](../Documentation/BridgePeerChannelV3.md)
+ defines the five messages, exact encodings, key schedule, disclosure policies,
+-padding, limits and remaining application/resource findings. Local vault signing
++padding and limits, with linked consumer, NI and physical-resource contracts. Local vault signing
+ and Cell authorization remain separate; no remote signer or dependency is added.
+ 
+-`BridgeChannelSession.reserveOpen` consumes the same pending state before public
+-verification for both profiles. Its deadline, absolute expiry, principal binding,
++WS `reserveOpen` consumes its pending challenge before public verification.
++Peer v3 registers its principal only after validating encrypted Auth, identity MAC
++and signature; both profiles retain the same session authority and quota owner. Its deadline, absolute expiry, principal binding,
+ revocation, activation and retained resource accounting are shared. The transport
+ uses the existing tracked-work, send-byte, cancellation and close machinery.
+ Scanner services share one default limits owner; a host may inject its existing
+diff --git a/Docs/ScannerMultipeer.md b/Docs/ScannerMultipeer.md
+index 43a1d31..779598d 100644
+--- a/Docs/ScannerMultipeer.md
++++ b/Docs/ScannerMultipeer.md
+@@ -1,85 +1,108 @@
+ # Scanner Multipeer verification
+ 
+-ScannerService keeps its existing discovery, invitations, MCSession, Lobby and
+-EntityScanner/ConnectRadar composition. The peer gate is installed on the existing
+-ScannerPeerTransport. A contact invitation must carry the explicit peer-profile
+-endpoint and receive the existing user acceptance. Crossed invitations select the
+-lexicographically lower session peer ID as initiator; the winning incoming
+-invitation still requires acceptance. Legacy nil-context invitations cannot set
+-up a bridge. Advertisement exchange remains a separate existing path.
+-
+-Both peers need identities backed by their own local signing vaults. Inbound
+-identities are public proxy identities even if their keys match a local owner.
+-Configure Lobby grants/admission on the host as usual: peer authentication grants
+-no read, write, subscription or owner permissions. Failed attachment is observable
+-through `ConnectServiceDelegate.scannerStatusChanged` and `scanner.status`.
+-The host should inject a common `channelLimits` when sharing budgets with other
+-bridge routes, and call its `revoke(identity:domain:)` for authoritative key
+-revocation (`domain: "nearby"`). The standard channel lifetime is five minutes;
+-renewing a peer connection requires a new invitation/proof.
+-
+-## Automated checks
++The authoritative peer wire description is [Peer channel v3](../Documentation/BridgePeerChannelV3.md).
++It specifies the five handshake messages, encrypted identity disclosure, HPC3
++records and the mandatory receipt framing. Both endpoints must implement the
++current v3 contract. Peer v1/v2, HPC2, plaintext application messages and ready
++are rejected without fallback. WS retains its separate v1/TLS profile.
++
++## Admission, identity and consumers
++
++A contact invitation carries the endpoint (initiator, responder, setupID, domain)
++and requires explicit user acceptance. Crossed invitations choose the
++lexicographically lower session peer ID as initiator; the incoming winner still
++requires acceptance. Nil-context legacy invitations cannot create a bridge.
++Advertisement exchange remains a separate path.
++
++Pending, accepted and outgoing invitations own their immutable physical peer,
++MCSession, endpoint, role and local invitation instance independently of discovery.
++Acceptance is atomic; unfinished setups expire. Discovery loss or another peer
++advertising the same UUID cannot retarget this ownership. Process-wide count,
++byte, rate and TTL limits apply before storing discovery/invitations or scheduling
++work. The [admission and ordering contract](../Documentation/ScannerAdmissionAndOrdering.md)
++defines these limits and their physical-source/Sybil boundary.
++
++Each endpoint signs only through its own local vault. Scanner explicitly permits
++first contact with any proven identity and responder disclosure to an unauthenticated
++initiator. A pure inner-handshake relay cannot read stable identity fields; an
++active initiator learns the responder, and an accepted active responder learns the
++initiator. This does not establish a person, proximity or discovery anonymity.
++Incoming identities use public proxy vaults even when they copy a local owner key.
++
++Base creation, resolver lookup, registration, description and Lobby attachment
++follow proof and Finished validation. Configure Lobby grants/admission separately:
++channel authentication grants no Cell rights. The standard channel lifetime is
++five minutes; renewal requires a new invitation and proof. A host sharing budgets
++with other bridge routes should inject the same `channelLimits`. Its
++`revoke(identity:domain:)` terminates currently registered remote principals
++(`domain: "nearby"`); it is not a persistent key blacklist or local-owner revocation.
++Local owner revocation closes the associated gates; future admission needs host policy.
++
++Ordered application delivery extends beyond record opening through the awaited
++consumer. Origin-signing RPC has a separate scheduling lane so it can answer an
++operation waiting on proof. [EntityScanner consumer security](../Documentation/ScannerConsumerSecurity.md)
++binds work leases and bounded pending contact/detail records to the exact principal,
++physical context and generation. Contact acceptance validates every request/proof
++binding and consumes pending state once before encounter persistence.
++
++## Retirement and resource boundaries
++
++One encrypted MCSession belongs to each physical peer/invitation. Close disconnects
++that exact session and retains transport/send reservations until its local
++`connectedPeers` is empty. A healthy sibling has a separate session. Stream inputs
++are closed and resource Progress objects cancelled at the first callback; these
++side channels are unsupported. [Physical flow control](../Documentation/PeerPhysicalFlowControl.md)
++defines retained wire-byte windows, bounded encrypted receipts and the ten-second
++missing-progress timeout. Successful MC enqueue alone releases no data send quota.
++MC reassembly happens before the Data callback: these app limits do not prove a
++hard preallocation/total-OS-memory ceiling or instantaneous remote disconnect.
++
++Old callbacks captured on a retired adapter cannot affect its replacement.
++Old ciphertext delivered to the **current** adapter, including rewritten generation
++or counter headers, is a terminal error for that gate. Inner `peerGeneration`
++remains mandatory for ordinary peer commands; auth and WS frames omit it.
++[Shared bridge lifetimes](../Documentation/BridgeLifecycle.md) cover response
++publication, mux ID reuse, late factories and signing deadlines for WS and peer.
++
++[NearbyInteraction binding](../Documentation/ScannerNearbyInteraction.md) uses one
++NI session per authenticated physical context. Tokens travel through the same
++encrypted gate to one captured peer and bind the full principal, shared setupID,
++channel and NI generations. Replaced tokens are rejected; close/revoke/stop retire
++NI, and late callbacks cannot affect a new generation. macOS fake-driver tests
++exercise association and lifecycle. Native token archive/decode, iOS compilation
++and physical UWB measurements require separate evidence.
++
++## Repeatable checks
++
++Run the workspace build-capacity guard before Swift commands; use the repository's
++locked dependencies. Deterministic suites include:
+ 
+ ```sh
+-swift test --filter 'ScannerPeerAuthenticationTests|ScannerServiceInvitationTests|EntityScannerCellContractTests'
+-CP53_MULTIPEER_TEST=1 swift test --filter ScannerMultipeerProcessTests/testTwoProcessesUseRealMultipeerInBothInvitationDirections
++swift test --disable-automatic-resolution --filter 'Scanner|EntityScannerConsumerSecurityTests|BridgePeer|BridgeResponseLifetimeTests|BridgeMuxSendLifetimeTests|BridgeFactoryLifetimeTests|BridgeSigningLifetimeTests'
++swift test --disable-automatic-resolution --sanitize thread --filter 'PublisherAsyncLifetimeTests|BridgeDescriptionConcurrencyTests|EntityScannerConsumerSecurityTests|ScannerNearbyInteractionTests|ScannerPeerAuthenticationTests|ScannerServiceInvitationTests|ScannerAdmissionTests|BridgePeerV3Tests|BridgePeerRecordLayerTests|BridgePeerFlowControlTests|BridgeMultiplexingTests|BridgeMuxSendLifetimeTests|BridgeResponseLifetimeTests|BridgeFactoryLifetimeTests|BridgeSigningLifetimeTests'
++CP53_MULTIPEER_TEST=1 swift test --disable-automatic-resolution --filter ScannerMultipeerProcessTests/testTwoProcessesUseRealMultipeerInBothInvitationDirections
+ ```
+ 
+-The second command is macOS-only and opt-in. It starts **two separate XCTest
+-processes** with no mock delivery, waits for real discovery and MCSession, performs
+-the mutual proofs, retrieves Lobby description, attaches using GeneralCell and
+-asserts delivered feed content. It repeats with the opposite inviter. Only
+-synthetic public descriptors and coordination files are exchanged through the
+-artifact directory; each worker creates and retains its own private test key.
+-
+-The test prints `CP53 Multipeer artifacts: <directory>`. Each directory contains
+-`a.log`, `b.log`, public descriptors and completion markers. Success requires both
+-workers to exit zero and both content checks to pass. The worker and parent tests
+-skip in ordinary CI, which does not attest to radio or local-network operation.
+-
+-Verified locally 2026-09-27 with two processes on one Mac, both invitation
+-directions (9.496 seconds, one parent test, zero failures). This does not certify
+-separate physical devices, UWB/NearbyInteraction, iOS, production pairing policy,
+-network transitions or production deployment. Repeat the opt-in test from this
+-checkout for exact-head evidence; the CP53 handoff records the final run.
+-
+-If discovery is blocked, inspect both logs and enable local-network access for
+-the process host. App-hosted runs must declare `NSLocalNetworkUsageDescription`
+-and the `_haven-radar._tcp` Bonjour service as required by
+-[Apple's Multipeer documentation](https://developer.apple.com/documentation/multipeerconnectivity)
+-and [local-network privacy guidance](https://developer.apple.com/documentation/technotes/tn3179-understanding-local-network-privacy).
+-Do not treat a failed run as an authenticated connection.
+-
+-## Physical binding and reconnect fence (N08/N09)
+-
+-Each installed ScannerPeerTransport retains its MCPeerID, MCSession instance,
+-local setup ID and role. Send, callback capture and retirement use this object
+-binding. Pending, accepted and outgoing invitations also retain their original
+-physical peer/session/endpoint independently of discovery. Acceptance is atomic;
+-unfinished setups expire. See [Scanner admission and ordering](../Documentation/ScannerAdmissionAndOrdering.md)
+-for the N10/N11/N16 contract, budgets and Sybil limitation.
+-
+-The active [peer v3 contract](../Documentation/BridgePeerChannelV3.md) protects
+-identity fields against a pure inner-handshake relay and encrypts all subsequent
+-application records. Scanner explicitly accepts first contact with any proven
+-identity; this is not an expected-person policy. Active DH participants have the
+-asymmetric disclosure limits documented in that contract.
+-
+-Ordinary peer commands retain the inner `&peerGeneration` check in addition to
+-HPC3 AEAD. An old callback captured on a retired adapter cannot affect its
+-replacement. Old ciphertext delivered to the **current** adapter, including one
+-whose generation/counter has been rewritten, is a terminal error for that gate.
+-Auth frames and WS frames omit the inner generation field. Both peer ends must
+-run v3; v1/v2/HPC2 and plaintext application frames are rejected. Actual encoded
+-wire bytes, padding and cryptographic overhead count toward send limits.
+-
+-The former N07 application-integrity gap is closed. Consumer ordering now extends through dispatch, with origin-signing RPC
+-progress on a separate scheduling lane. Physical retirement (N15), general delivery backpressure (N18), contact/NI
+-binding and other review findings remain separate work and verification gates.
+-
+-NI discovery tokens use shareDiscoveryTokenData, one gated send per eligible
+-peer. Pending/factory/ack-incomplete, expired and revoked channels are skipped;
+-normal send admission and retained-work/byte limits are rechecked. The macOS
+-suite exercises this same helper using opaque synthetic archived bytes, including
+-an active B plus pending/revoked C and an exceeded byte quota. Creating/decoding
+-NIDiscoveryToken and running NISession/UWB still require iOS verification.
++The macOS opt-in parent runs real MC in both invitation directions, Lobby
++description/attach/feed, and a separate three-process physical isolation workload:
++resource/stream rejection, handshake expiry, authenticated revoke and missing
++receipts while a healthy sibling continues. A further three-process relay places M
++on two separate encrypted outer MC sessions. It uses a test MC adapter around the
++production v3 gate/session/record implementation, verifies both principals and
++ordered application data, and inspects the actual inner wire at M for the five
++strict schemas and fixed-size encrypted identity blocks. It is separate from the
++production Scanner-adapter scenarios. Parent/worker logs and `.passed`
++markers are printed under temporary artifact directories. Each endpoint keeps
++its synthetic private signing key in its own process. Ordinary CI skips the
++existing opt-in parent/worker; it provides no native MC or NI claim.
++
++Read the exact-head results in the CP53 handoff. Deterministic tests, TSAN, native
++processes on one Mac, iOS builds, physical phones and production are distinct
++verification boundaries. No absolute security or production approval follows from
++a green package suite. `ConnectServiceDelegate.scannerStatusChanged` and
++`scanner.status` report attachment failures.
++
++If native discovery fails, inspect both worker logs and the process host's
++local-network access. App hosts need `NSLocalNetworkUsageDescription` and the
++`_haven-radar._tcp` Bonjour service; see [Apple Multipeer documentation](https://developer.apple.com/documentation/multipeerconnectivity)
++and [local-network privacy](https://developer.apple.com/documentation/technotes/tn3179-understanding-local-network-privacy).
+diff --git a/Documentation/BridgePeerChannelV3.md b/Documentation/BridgePeerChannelV3.md
+index 027c1ce..ee17162 100644
+--- a/Documentation/BridgePeerChannelV3.md
++++ b/Documentation/BridgePeerChannelV3.md
+@@ -204,7 +204,14 @@ work leases, pending records and contact-proof validation.
+ sessions, immutable tokens and callback retirement. See the physical flow-control document
+ for measured resource bounds and the remaining MC reassembly limitation.
+ [Shared bridge lifecycle rules](BridgeLifecycle.md) describe the N23–N26 response,
+-mux-send, factory and signing protections. A controlled inner-wire relay is not a three-process MC MITM or a radio/NI device test.
++mux-send, factory and signing protections. The opt-in ScannerMultipeerProcessTests parent also runs a three-process relay
++with M as two real MC endpoints, using a test MC adapter around this production
++gate. Scanner adapter integration has separate direct and physical-isolation
++scenarios. None of these one-Mac process tests is a radio/NI device test.
++BridgePeerV3Tests additionally exercises valid-AEAD field mutations against real
++gates with retained-quota cleanup and healthy sibling delivery, suspended signer
++storms, delayed physical M5 retirement, and stop/disconnect/expiry continuations.
++The macOS TSAN workflow covers peer, record, Scanner, EntityScanner and mux suites.
+ 
+ References: [SIGMA](https://iacr.org/cryptodb/archive/2003/CRYPTO/1495/1495.pdf),
+ [RFC 7748](https://www.rfc-editor.org/rfc/rfc7748),
+diff --git a/Documentation/ScannerAdmissionAndOrdering.md b/Documentation/ScannerAdmissionAndOrdering.md
+index ece32a2..1f80867 100644
+--- a/Documentation/ScannerAdmissionAndOrdering.md
++++ b/Documentation/ScannerAdmissionAndOrdering.md
+@@ -19,10 +19,11 @@ invitations choose one setup without renewing pending deadlines. Discovery loss
+ cannot retarget the binding; the same physical peer cannot change its name in a
+ pending setup. Gate creation transfers the binding and retires invitation state.
+ One service timer expires all invitations, including accepted/outgoing setups
+-that never create a gate. Stop retires the service generation and MCSession.
++that never create a gate. Stop retires the service generation and every owned MCSession.
+ 
+-Timeout calls cancelConnectPeer for unfinished attempts. This is not an assertion
+-that an already connected Multipeer peer has been physically evicted (N15).
++Timeout retires the invitation's dedicated MCSession with disconnect, including
++an unfinished attempt. Physical admission stays charged until its local
++connectedPeers is empty; see [physical lifetime](PeerPhysicalFlowControl.md).
+ A late MC callback has no invitation authority; channel authentication still
+ requires the exact fresh endpoint/setup, proof and Finished. MC callbacks carry
+ no application setup ID; fresh proof, rather than callback arrival, is decisive.
+@@ -41,9 +42,10 @@ heap or Multipeer OS allocation. Count limits also bound object overhead.
+ | Invitations (pending + accepted + outgoing) | 32 / 64 KiB | 1 / 4096 | min(local invitation timeout, 30 s) |
+ | Context/setup work | 16 / 64 KiB | 2 / 8192 | 10 s |
+ | Queued UI notification batches | 64 / 64 KiB | 8 / 8192 | 5 s |
++| Physical MCSession slots | 32 / 8192 | 2 / 512 | Held until physical retirement |
+ 
+ One fixed ten-second rate window permits 256 reservations globally and 24 per
+-MCPeerID, across all four resources. Capacity-rejected attempts consume rate;
++MCPeerID, across all five resources. Capacity-rejected attempts consume rate;
+ oversized inputs are rejected before source bookkeeping. The source table has
+ at most 256 entries and expires idle entries after 60 seconds on its next use.
+ Active reservations keep their bucket alive. Discovery permits at most 32
+diff --git a/Documentation/ScannerNearbyInteraction.md b/Documentation/ScannerNearbyInteraction.md
+index 8b70175..d6facc3 100644
+--- a/Documentation/ScannerNearbyInteraction.md
++++ b/Documentation/ScannerNearbyInteraction.md
+@@ -23,6 +23,8 @@ exactly `niVersion` (integer 1), `userUuid` (channel signer's UUID), `targetSess
+ (receiver's session UUID), `setupID` (accepted shared endpoint), `niGeneration`
+ (canonical uppercase UUID), and `token` (secure archive, 1...16384 bytes). JSON
+ carries token bytes as base64. Legacy unbound token payloads are rejected.
++Generic EntityScanner Cell feeds (including `radar.service` events) have no
++authenticated physical context and cannot install or replace NI tokens.
+ The complete physical context and full principal descriptor come from the gate,
+ not from these wire labels. Ordinary frame/work/send budgets remain in force.
+ 
+@@ -60,7 +62,8 @@ accepted peer cannot forward a token obtained outside this channel.
+ 
+ ## Verification boundaries
+ 
+-`ScannerNearbyInteractionTests` tests concurrent B/C associations, wrong principal/
++`ScannerNearbyInteractionTests` tests generic Cell-feed token rejection,
++concurrent B/C associations, wrong principal/
+ setup/target/version, immutable tokens, queued and late callbacks, reconnect,
+ close/revoke/disconnect/stop, suspension and terminal invalidation with fake drivers.
+ It exercises the real peer-v3 gate and send path; radio and native token creation
+diff --git a/Sources/CellApple/EntityRadar/EntityScannerCell.swift b/Sources/CellApple/EntityRadar/EntityScannerCell.swift
+index 4736373..4a5fffd 100644
+--- a/Sources/CellApple/EntityRadar/EntityScannerCell.swift
++++ b/Sources/CellApple/EntityRadar/EntityScannerCell.swift
+@@ -142,19 +142,9 @@ class EntityScannerCell: GeneralCell, ConnectServiceDelegate {
+         emitScannerEvent = await makeCellOwnedFlowEmitterForRuntimeBinding(requester: owner)
+         await registerContracts(requester: owner)
+ 
+-        await addIntercept(requester: owner, intercept: { @MainActor [weak self] flowElement, requester in
+-            CellBase.diagnosticLog("EntityScannerCell feed item title=\(flowElement.title) topic=\(flowElement.topic)", domain: .flow)
+-
+-            if flowElement.properties?.type == .event && flowElement.topic == "radar.service" {
+-                do {
+-                    try self?.gotSharedDicoveryToken(payload: flowElement.content)
+-                } catch {
+-                    CellBase.diagnosticLog("Handling shared discovery token failed: \(error)", domain: .flow)
+-                }
+-            }
+-
+-            return flowElement
+-        })
++        // NI tokens are consumed only by ScannerService's authenticated
++        // ScannerConsumerContext path. A generic Cell feed has no physical
++        // principal/generation and must never install an NI token.
+ 
+         await addInterceptForGet(requester: owner, key: "verificationMethods", getValueIntercept: { @MainActor [weak self] _, requester in
+             guard let self = self else { return .string("failure") }
+@@ -1697,38 +1687,6 @@ class EntityScannerCell: GeneralCell, ConnectServiceDelegate {
+     func colorChanged(manager: ScannerService, colorString: String) {
+     }
+ 
+-    func setSharedToken() {
+-    }
+-
+-    func getSharedToken() {
+-    }
+-
+-    func gotSharedDicoveryToken(payload: FlowElementValueType) throws {
+-        guard case let .object(paramObject) = payload else {
+-            throw SetValueError.paramErr
+-        }
+-        guard let uuidValue = paramObject["userUuid"] else {
+-            throw SetValueError.noParamValue("userUuid")
+-        }
+-        guard case let .string(userUuid) = uuidValue else {
+-            throw SetValueError.paramErr
+-        }
+-        guard let tokenValue = paramObject["token"] else {
+-            throw SetValueError.noParamValue("token")
+-        }
+-        guard case let .data(tokenData) = tokenValue else {
+-            throw SetValueError.paramErr
+-        }
+-
+-        self.gotSharedDicoveryToken(tokenData, userUuid: userUuid)
+-    }
+-
+-    func gotSharedDicoveryToken(_ tokenData: Data, userUuid: String) {
+-#if os(iOS)
+-        connectService?.peerDidShareDiscoveryToken(tokenData: tokenData, userUuid: userUuid)
+-#endif
+-    }
+-
+     private func perspectiveSnapshot(requester: Identity, context: ScannerConsumerContext? = nil) async -> ValueType {
+         guard let resolver = CellBase.defaultCellResolver,
+               let perspective = try? await resolver.cellAtEndpoint(endpoint: "cell:///Perspective", requester: requester) as? Meddle else {
+diff --git a/Sources/CombineHelpers/Publisher+Async.swift b/Sources/CombineHelpers/Publisher+Async.swift
+index b8abdbf..fe95235 100644
+--- a/Sources/CombineHelpers/Publisher+Async.swift
++++ b/Sources/CombineHelpers/Publisher+Async.swift
+@@ -35,6 +35,27 @@ public enum AsyncError: Error, LocalizedError {
+ private final class AsyncPublisherOneShot<Output> {
+     private let lock = NSLock()
+     private var didResume = false
++    private var cancellable: AnyCancellable?
++    private var timeout: DispatchWorkItem?
++
++    // A publisher may deliver synchronously inside sink, or on another thread
++    // before sink returns. Late installation must cancel, never retain a
++    // subscription after its one-shot result has already completed.
++    func install(_ value: AnyCancellable) {
++        lock.lock()
++        let finished = didResume
++        if !finished { cancellable = value }
++        lock.unlock()
++        if finished { value.cancel() }
++    }
++
++    func installTimeout(_ value: DispatchWorkItem) {
++        lock.lock()
++        let finished = didResume
++        if !finished { timeout = value }
++        lock.unlock()
++        if finished { value.cancel() }
++    }
+ 
+     func resume(
+         _ continuation: CheckedContinuation<Output, Error>,
+@@ -46,8 +67,14 @@ private final class AsyncPublisherOneShot<Output> {
+             return false
+         }
+         didResume = true
++        let subscription = cancellable, timer = timeout
++        cancellable = nil; timeout = nil
+         lock.unlock()
+ 
++        // Cancellation can call back synchronously; do not hold the state lock.
++        timer?.cancel()
++        subscription?.cancel()
++
+         switch result {
+         case .success(let output):
+             continuation.resume(returning: output)
+@@ -62,40 +89,23 @@ public extension Publisher {
+     func getOneWithTimeout(_ timeout: Int = 30) async throws -> Output {
+         try await withCheckedThrowingContinuation { continuation in
+             let oneShot = AsyncPublisherOneShot<Output>()
+-            var cancellable: AnyCancellable?
+-
+             let timeoutWorkItem = DispatchWorkItem {
+-                if oneShot.resume(continuation, with: .failure(AsyncError.timeout)) {
+-                    cancellable?.cancel()
+-                    cancellable = nil
+-                }
++                _ = oneShot.resume(continuation, with: .failure(AsyncError.timeout))
+             }
+-
+-            cancellable = first().sink(
++            oneShot.installTimeout(timeoutWorkItem)
++            oneShot.install(first().sink(
+                 receiveCompletion: { completion in
+                     switch completion {
+                     case .finished:
+-                        if oneShot.resume(continuation, with: .failure(AsyncError.finishedWithoutValue)) {
+-                            timeoutWorkItem.cancel()
+-                            cancellable?.cancel()
+-                            cancellable = nil
+-                        }
++                        _ = oneShot.resume(continuation, with: .failure(AsyncError.finishedWithoutValue))
+                     case .failure(let error):
+-                        if oneShot.resume(continuation, with: .failure(AsyncError.other(error))) {
+-                            timeoutWorkItem.cancel()
+-                            cancellable?.cancel()
+-                            cancellable = nil
+-                        }
++                        _ = oneShot.resume(continuation, with: .failure(AsyncError.other(error)))
+                     }
+                 },
+                 receiveValue: { output in
+-                    if oneShot.resume(continuation, with: .success(output)) {
+-                        timeoutWorkItem.cancel()
+-                        cancellable?.cancel()
+-                        cancellable = nil
+-                    }
++                    _ = oneShot.resume(continuation, with: .success(output))
+                 }
+-            )
++            ))
+ 
+             DispatchQueue.global().asyncAfter(
+                 deadline: .now() + .seconds(timeout),
+@@ -107,30 +117,19 @@ public extension Publisher {
+     func getOneWithoutTimeout() async throws -> Output {
+         try await withCheckedThrowingContinuation { continuation in
+             let oneShot = AsyncPublisherOneShot<Output>()
+-            var cancellable: AnyCancellable?
+-
+-            cancellable = first().sink(
++            oneShot.install(first().sink(
+                 receiveCompletion: { completion in
+                     switch completion {
+                     case .finished:
+-                        if oneShot.resume(continuation, with: .failure(AsyncError.finishedWithoutValue)) {
+-                            cancellable?.cancel()
+-                            cancellable = nil
+-                        }
++                        _ = oneShot.resume(continuation, with: .failure(AsyncError.finishedWithoutValue))
+                     case .failure(let error):
+-                        if oneShot.resume(continuation, with: .failure(AsyncError.other(error))) {
+-                            cancellable?.cancel()
+-                            cancellable = nil
+-                        }
++                        _ = oneShot.resume(continuation, with: .failure(AsyncError.other(error)))
+                     }
+                 },
+                 receiveValue: { output in
+-                    if oneShot.resume(continuation, with: .success(output)) {
+-                        cancellable?.cancel()
+-                        cancellable = nil
+-                    }
++                    _ = oneShot.resume(continuation, with: .success(output))
+                 }
+-            )
++            ))
+         }
+     }
+ }
+diff --git a/Tests/CellBaseTests/BridgePeerV3Tests.swift b/Tests/CellBaseTests/BridgePeerV3Tests.swift
+index 7e6bd21..0504346 100644
+--- a/Tests/CellBaseTests/BridgePeerV3Tests.swift
++++ b/Tests/CellBaseTests/BridgePeerV3Tests.swift
+@@ -171,6 +171,8 @@ private final class V3Transport: BridgeTransportProtocol, @unchecked Sendable {
+     var submitted: (@Sendable (Data) -> Void)?
+     var beforeFirstSubmission: (@Sendable () async -> Void)?
+     var afterFirstSubmission: (@Sendable () async -> Void)?
++    var beforeClose: (@Sendable () async -> Void)?
++    func close() async { await beforeClose?() }
+     func setDelegate(_ delegate: BridgeDelegateProtocol) { gate = delegate as? BridgeChannelTransport }
+     func setup(_ endpointURL: URL, identity: Identity) async throws {}
+     func sendData(_ data: Data) async throws {
+@@ -801,3 +803,420 @@ extension BridgePeerV3Tests {
+         await pair.stop(startup)
+     }
+ }
++
++// A real gate faces a legitimate DH participant with a known *test-owned*
++// ephemeral key. This lets mutations have valid AEAD/MAC and reach context,
++// signature and Finished checks instead of stopping at a bad tag.
++private final class V3AdversarialGate {
++    typealias P = BridgePeerChannelAuthentication
++    typealias A = BridgeChannelAuthentication
++    let pair: V3GatePair, gate: BridgeChannelTransport, physical: V3Transport
++    let operation: P.Operation, privateKey = Curve25519.KeyAgreement.PrivateKey()
++    let vault: V3Vault, owner: Identity, role: P.Role
++    let sent = V3Wire()
++    var history: [Int: Data] = [:]
++    var start: Task<Void, Error>?
++    init(step: Int, limits: BridgeChannelLimits) throws {
++        pair = try V3GatePair(limits: limits)
++        role = step.isMultiple(of: 2) ? .responder : .initiator
++        gate = role == .responder ? pair.i : pair.r
++        physical = role == .responder ? pair.it : pair.rt
++        vault = role == .responder ? pair.rv : pair.iv
++        owner = role == .responder ? pair.ro : pair.io
++        operation = try P.Operation(owner: owner, endpoint: gate.session.peerEndpoint!, role: role,
++            generation: UUID().uuidString, policy: .anyProvenIdentity(allowUnauthenticatedInitiator: true),
++            wallClock: pair.clock.date, monotonic: pair.clock.uptime, ephemeral: privateKey)
++    }
++    func advance(to step: Int) async throws {
++        await (role == .responder ? pair.r : pair.i).close() // unused opposite gate
++        start = Task { try await gate.startPeer() }
++        if role == .initiator { history[1] = try await operation.begin(live: {}) }
++        else {
++            for _ in 0..<1000 { if physical.wire.last != nil { break }; await Task.yield() }
++            history[1] = try XCTUnwrap(physical.wire.last)
++        }
++        for previous in 1..<step {
++            if previous.isMultiple(of: 2) == step.isMultiple(of: 2) {
++                try await physical.receive(history[previous]!); history[previous+1] = try XCTUnwrap(physical.wire.last)
++            } else {
++                _ = try await operation.receive(history[previous]!, live: {}, authenticate: { _,_ in }, recheck: {}, send: { try self.sent.append($0) })
++                history[previous+1] = try XCTUnwrap(sent.last)
++            }
++        }
++    }
++    func mutated(_ step: Int, field: String) async throws -> Data {
++        func object(_ data: Data) throws -> [String: Any] { try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any]) }
++        func encode(_ value: [String: Any]) throws -> Data { try JSONSerialization.data(withJSONObject: value, options: [.sortedKeys,.withoutEscapingSlashes]) }
++        if field.hasPrefix("hello.") {
++            var outer = try object(history[step]!), body = try object(Data((outer["&string"] as! String).utf8))
++            var hello = step == 1 ? body : body["hello"] as! [String: Any]
++            let name = String(field.dropFirst(6))
++            switch name {
++            case "profile": hello[name] = "org.haven.bridge-peer-channel.v2"
++            case "role": hello[name] = role == .initiator ? "responder" : "initiator"
++            case "ephemeralPublicKey", "nonce": hello[name] = Data(repeating: 0, count: 31).base64EncodedString()
++            case "lowOrder": hello["ephemeralPublicKey"] = Data(repeating: 0, count: 32).base64EncodedString()
++            case "negativeTime": hello["issuedAtMilliseconds"] = Int64.min
++            case "expiredTime": hello["issuedAtMilliseconds"] = Int64(pair.clock.date().timeIntervalSince1970 * 1000) - 10_000
++            case "futureTime": hello["issuedAtMilliseconds"] = Int64(pair.clock.date().timeIntervalSince1970 * 1000) + 5_001
++            case "generation": hello[name] = gate.session.generation
++            case "issuedAtMilliseconds": hello[name] = Int64.max
++            case "missing": hello.removeValue(forKey: "nonce")
++            default: hello["identity"] = "forbidden-cleartext"
++            }
++            if step == 1 { body = hello } else { body["hello"] = hello }
++            outer["&string"] = String(decoding: try encode(body), as: UTF8.self)
++            return try encode(outer)
++        }
++        if field.hasPrefix("envelope.") {
++            var outer = try object(history[step]!)
++            switch String(field.dropFirst(9)) {
++            case "ready": outer["cmd"] = "ready"
++            case "legacy": outer["cmd"] = "channelAuthPeerHello"
++            case "ws": outer["cmd"] = "channelAuthHello"
++            case "cid": outer["cid"] = 1
++            case "extra": outer["unknown"] = true
++            case "trailing": return history[step]! + Data([0])
++            default: return Data("HPC2".utf8) + Data(repeating: 0, count: 90)
++            }
++            return try encode(outer)
++        }
++        let ih = try A.decode(P.Hello.self, from: Data(P.decodeEnvelope(history[1]!).body.utf8))
++        let rbody = try A.decode(P.ResponderAuth.self, from: Data(P.decodeEnvelope(history[2]!).body.utf8)), rh = rbody.hello
++        let t0 = P.hash(P.framed("clear-2", P.hash(P.framed("wire-1", history[1]!)), try A.encode(rh)))
++        var transcript = t0, transcripts: [Int: Data] = [1:t0]
++        for n in 2..<step { transcript = P.hash(P.framed("wire-\(n)", transcript, history[n]!)); transcripts[n] = transcript }
++        let prk = try P.extract(privateKey, remote: role == .initiator ? rh.ephemeralPublicKey : ih.ephemeralPublicKey, salt: t0)
++        let key = P.key(prk, "handshake-key", role, t0), nonce = try P.nonce(step < 4 ? 0 : 1)
++        let aad = P.framed("handshake-aead", Data(String(step).utf8), transcript)
++        var outer = try object(history[step]!), body = try object(Data((outer["&string"] as! String).utf8))
++        let sealed = Data(base64Encoded: body["sealed"] as! String)!
++        let plain = try ChaChaPoly.open(.init(nonce: nonce, ciphertext: sealed.dropLast(16), tag: sealed.suffix(16)), using: key, authenticating: aad)
++        let size = step < 4 ? 8192 : 1024, count = plain.prefix(4).reduce(0) { ($0 << 8) | Int($1) }
++        var value = try object(Data(plain.dropFirst(4).prefix(count)))
++        let path = field.split(separator: ".").map(String.init)
++        if path[0] == "selfConsistentEndpoint" {
++            var endpoint = value["endpoint"] as! [String: Any]
++            endpoint[path[1]] = UUID().uuidString
++            let changed = try A.decode(P.Endpoint.self, from: encode(endpoint))
++            let challenge = try P.challenge(endpoint: changed, identity: A.PublicIdentity(owner), signer: role,
++                local: operation.hello, remote: role == .initiator ? rh : ih, t0: t0, t2: transcripts[2],
++                responder: role == .initiator ? A.PublicIdentity(pair.ro) : nil)
++            let signature = try await vault.signMessageForIdentity(messageData: challenge.signingData, identity: owner)
++            value["endpoint"] = endpoint
++            value["proof"] = ["sessionID":changed.setupID,"generation":challenge.generation,"signature":signature.base64EncodedString()]
++        } else if path[0] == "signed" {
++            let signed = await vault.signedBytes
++            var challenge = try object(XCTUnwrap(signed))
++            let name = path[1]
++            if name == "nonce" { challenge[name] = Data(repeating: 9, count: 32).base64EncodedString() }
++            else if name == "issuedAt" || name == "expiresAt" { challenge[name] = (challenge[name] as! Double) + 1 }
++            else { challenge[name] = "wrong-" + String(describing: challenge[name]!) }
++            var proof = value["proof"] as! [String: Any]
++            proof["signature"] = try await vault.signMessageForIdentity(messageData: encode(challenge), identity: owner).base64EncodedString()
++            value["proof"] = proof
++        } else if path[0] == "badMAC" || path[0] == "badFinished" {
++            let isAuth = step < 4, name = isAuth ? "identityMAC" : "verifyData"
++            switch path[1] {
++            case "missing": value.removeValue(forKey: name)
++            case "truncated": value[name] = Data(repeating: 0, count: 31).base64EncodedString()
++            default:
++                let other: P.Role = role == .initiator ? .responder : .initiator
++                let chosenRole = path[1] == "direction" ? other : role
++                let context = isAuth ? t0 : transcripts[3]!
++                let chosenKey = path[1] == "key" ? SymmetricKey(size: .bits256) : P.key(prk, isAuth ? "identity-mac-key" : "finished-key", chosenRole, context)
++                let bound = isAuth ? try encode(["endpoint":value["endpoint"]!,"identity":value["identity"]!,"proof":value["proof"]!]) : try encode(value["ack"] as! [String: Any])
++                let contextBytes = path[1] == "transcript" ? Data(repeating: 9, count: 32) : transcript
++                value[name] = P.mac(chosenKey, P.framed(isAuth ? "identity-mac" : "finished", Data((isAuth ? chosenRole.rawValue : String(step)).utf8), contextBytes, bound)).base64EncodedString()
++            }
++        } else if path.count == 2 {
++            var object = value[path[0]] as! [String: Any]
++            let name = path[1]
++            if name == "publicKey" { object[name] = Data(repeating: 7, count: 32).base64EncodedString() }
++            else if name == "signature" { object[name] = Data(repeating: 7, count: 64).base64EncodedString() }
++            else { object[name] = UUID().uuidString }
++            value[path[0]] = object
++        } else if field == "identityMAC" || field == "verifyData" { value[field] = Data(repeating: 0, count: 32).base64EncodedString() }
++        else if field == "extra" { value["unexpected"] = ["nested": true] }
++        if step < 4 && field != "identityMAC" && !field.hasPrefix("badMAC.") {
++            let core = ["endpoint":value["endpoint"]!,"identity":value["identity"]!,"proof":value["proof"]!]
++            value["identityMAC"] = P.mac(P.key(prk,"identity-mac-key",role,t0), P.framed("identity-mac",Data(role.rawValue.utf8),transcript,try encode(core))).base64EncodedString()
++        }
++        if step >= 4 && field.hasPrefix("ack.") {
++            // Correct Finished HMAC over the wrong ack still must not match the
++            // locally expected session/generation/transcript claim.
++            value["verifyData"] = P.mac(P.key(prk,"finished-key",role,transcripts[3]!), P.framed("finished",Data(String(step).utf8),transcript,try encode(value["ack"] as! [String: Any]))).base64EncodedString()
++        }
++        var encoded = try encode(value)
++        if field == "duplicateJSON" { encoded = Data("{\"extra\":1,\"extra\":1,".utf8) + encoded.dropFirst() }
++        var padded = P.integer(UInt32(encoded.count)) + encoded + Data(repeating: 0, count: size-4-encoded.count)
++        if field == "padding" { padded[padded.count-1] = 1 }
++        if field == "jsonLength" { padded.replaceSubrange(0..<4, with: P.integer(UInt32(size))) }
++        if field == "paddingLength" { padded.removeLast() }
++        let box = try ChaChaPoly.seal(padded, using: key, nonce: field == "nonce" ? P.nonce(7) : nonce, authenticating: aad)
++        var replacement = box.ciphertext + box.tag
++        if field == "sealedLength" { replacement.removeLast() }
++        if field == "ciphertext" { replacement[replacement.startIndex] ^= 1 }
++        if field == "tag" { replacement[replacement.index(before: replacement.endIndex)] ^= 1 }
++        body["sealed"] = replacement.base64EncodedString(); outer["&string"] = String(decoding: try encode(body), as: UTF8.self)
++        return try encode(outer)
++    }
++    func stop() async { await gate.close(); await operation.cancel(); if let start { _ = try? await start.value } }
++}
++
++extension BridgePeerV3Tests {
++    func testValidAEADInnerMutationsCloseRealGateReleaseQuotaAndPreserveHealthySibling() async throws {
++        let quotaClock = V3Clock(), limits = BridgeChannelLimits(monotonic: quotaClock.uptime)
++        let sibling = try V3GatePair(limits: limits), healthy = try await sibling.start()
++        for step in 1...5 { try await sibling.step(step) }; try await healthy.value
++        let baseline = limits.retainedConnectionCount
++        for step in 1...5 {
++            let helloFields = ["profile","role","ephemeralPublicKey","lowOrder","nonce","generation","issuedAtMilliseconds","negativeTime","expiredTime","futureTime","missing","extra"].map { "hello." + $0 }
++            let envelopeFields = ["ready","legacy","ws","cid","extra","trailing","HPC2"].map { "envelope." + $0 }
++            let encryptionFields = ["paddingLength","duplicateJSON","nonce","sealedLength","ciphertext"]
++            let fields = envelopeFields + (step == 1 ? helloFields : encryptionFields + (step == 2 ? helloFields : []) + (step < 4 ? ["endpoint.initiator","endpoint.responder","endpoint.setupID","endpoint.domain",
++                "identity.uuid","identity.algorithm","identity.curve","identity.publicKey","proof.sessionID","proof.generation","proof.signature",
++                "signed.resource","signed.audience","signed.domain","signed.nonce","signed.issuedAt","signed.expiresAt","signed.action",
++                "identityMAC","badMAC.missing","badMAC.truncated","badMAC.direction","badMAC.key","badMAC.transcript","extra","padding","jsonLength","tag",
++                "selfConsistentEndpoint.initiator","selfConsistentEndpoint.responder","selfConsistentEndpoint.setupID","selfConsistentEndpoint.domain"]
++                : ["ack.sessionID","ack.generation","ack.transcriptDigest","verifyData","badFinished.missing","badFinished.truncated","badFinished.direction","badFinished.key","badFinished.transcript","extra","padding","jsonLength","tag"]))
++            for field in fields {
++                quotaClock.advance(mono: 60) // isolate field validation from the separately tested rate window
++                print("V3 gate mutation M\(step)/\(field)")
++                let attacker = try V3AdversarialGate(step: step, limits: limits)
++                try await attacker.advance(to: step)
++                let changed = try await attacker.mutated(step, field: field)
++                do { try await attacker.physical.receive(changed); XCTFail("Accepted M\(step)/\(field)") } catch {}
++                XCTAssertFalse(attacker.gate.canSendPeerData, field)
++                XCTAssertFalse(attacker.gate.hasDelegate, field)
++                XCTAssertEqual(attacker.pair.id.counts.factory + attacker.pair.rd.counts.factory, 0, field)
++                XCTAssertEqual(attacker.pair.id.counts.delivery + attacker.pair.rd.counts.delivery, 0, field)
++                XCTAssertEqual(attacker.gate.session.state, .closed, field)
++                if let start = attacker.start { _ = try? await start.value }
++                // Observe automatic error cleanup before the fixture can close
++                // anything itself; otherwise this assertion could hide a leak.
++                XCTAssertEqual(limits.retainedConnectionCount, baseline, field)
++                await attacker.stop()
++                XCTAssertEqual(limits.outstandingWorkCount, 0, field)
++                let previous = sibling.rd.counts.delivery
++                try await sibling.i.sendData(A.encode(BridgeCommand(cmd: "response", payload: .string("healthy"), cid: 1)))
++                try await sibling.rt.receive(XCTUnwrap(sibling.it.wire.last))
++                try await sibling.it.receive(XCTUnwrap(sibling.rt.wire.last)) // bounded receipt
++                XCTAssertEqual(sibling.rd.counts.delivery, previous + 1, field)
++            }
++        }
++        await sibling.stop(healthy)
++        XCTAssertEqual(limits.retainedConnectionCount, 0)
++    }
++}
++
++extension BridgePeerV3Tests {
++    func testWrongHandshakeStateAndMalformedRecordsRetireOnlyOffendingGate() async throws {
++        let clock = V3Clock(), limits = BridgeChannelLimits(monotonic: clock.uptime)
++        let sibling = try V3GatePair(limits: limits), healthy = try await sibling.start()
++        for step in 1...5 { try await sibling.step(step) }; try await healthy.value
++        let baseline = limits.retainedConnectionCount, vectors = try Self.vectors()
++        func checkSibling() async throws {
++            let before = sibling.rd.counts.delivery
++            try await sibling.i.sendData(A.encode(BridgeCommand(cmd: "response", payload: .string("healthy"), cid: 1)))
++            try await sibling.rt.receive(XCTUnwrap(sibling.it.wire.last))
++            try await sibling.it.receive(XCTUnwrap(sibling.rt.wire.last))
++            XCTAssertEqual(sibling.rd.counts.delivery, before + 1)
++        }
++        for step in 1...5 {
++            for wrong in 1...5 where step != wrong {
++                clock.advance(mono: 60)
++                let attacker = try V3AdversarialGate(step: step, limits: limits)
++                try await attacker.advance(to: step)
++                do { try await attacker.physical.receive(vectors["W\(wrong)"]!); XCTFail("M\(wrong) accepted at M\(step)") } catch {}
++                XCTAssertEqual(attacker.gate.session.state, .closed)
++                if let start = attacker.start { _ = try? await start.value }
++                XCTAssertEqual(limits.retainedConnectionCount, baseline)
++                XCTAssertEqual(limits.outstandingWorkCount, 0)
++                XCTAssertEqual(attacker.pair.id.counts.factory + attacker.pair.rd.counts.factory, 0)
++                await attacker.stop(); try await checkSibling()
++            }
++        }
++        for initiator in [true, false] {
++            for field in ["magic", "generation", "direction", "counter", "tag", "ciphertext", "empty", "oversize", "replay", "gap", "reflection", "oldCipherNewHeader", "authAfterActive", "plaintext"] {
++                clock.advance(mono: 60)
++                let pair = try V3GatePair(limits: limits), start = try await pair.start()
++                for step in 1...5 { try await pair.step(step) }; try await start.value
++                let sender = initiator ? pair.i : pair.r, sending = initiator ? pair.it : pair.rt
++                let victim = initiator ? pair.r : pair.i, receiving = initiator ? pair.rt : pair.it
++                let delegate = initiator ? pair.rd : pair.id
++                let body = try A.encode(BridgeCommand(cmd: "response", payload: .string("private"), cid: 1))
++                try await sender.sendData(body)
++                var bad = Data(try XCTUnwrap(sending.wire.last))
++                switch field {
++                case "magic": bad[0] ^= 1
++                case "generation": bad.replaceSubrange(4..<40, with: Data(UUID().uuidString.utf8))
++                case "direction": bad[40] ^= 1
++                case "counter": bad[48] ^= 1
++                case "tag": bad[bad.count-1] ^= 1
++                case "ciphertext": bad[49] ^= 1
++                case "empty": bad = Data()
++                case "oversize": bad = Data(repeating: 0, count: BridgePeerRecordLayer.maximumPlaintext + BridgePeerRecordLayer.overhead + 1)
++                case "replay": try await receiving.receive(bad)
++                case "gap": try await sender.sendData(body); bad = Data(try XCTUnwrap(sending.wire.last))
++                case "reflection": try await victim.sendData(body); bad = Data(try XCTUnwrap(receiving.wire.last))
++                case "oldCipherNewHeader":
++                    let old = try V3GatePair(limits: limits), oldStart = try await old.start()
++                    for step in 1...5 { try await old.step(step) }; try await oldStart.value
++                    try await old.i.sendData(body)
++                    var oldWire = Data(try XCTUnwrap(old.it.wire.last))
++                    oldWire.replaceSubrange(0..<49, with: bad.prefix(49)); bad = oldWire
++                    await old.stop(oldStart)
++                case "authAfterActive": bad = vectors["W1"]!
++                default: bad = body
++                }
++                let before = delegate.counts.delivery
++                do { try await receiving.receive(bad); XCTFail("Accepted \(field), initiator=\(initiator)") } catch {}
++                XCTAssertEqual(victim.session.state, .closed, field)
++                XCTAssertEqual(delegate.counts.delivery, before, field)
++                XCTAssertFalse(victim.hasDelegate, field)
++                XCTAssertEqual(limits.retainedConnectionCount, baseline + 1, field)
++                await pair.stop(start)
++                XCTAssertEqual(limits.retainedConnectionCount, baseline, field)
++                XCTAssertEqual(limits.outstandingWorkCount, 0, field)
++                try await checkSibling()
++            }
++        }
++        await sibling.stop(healthy)
++    }
++
++    func testFinalFinishedReservationSurvivesHeldPhysicalClose() async throws {
++        var config = BridgeChannelLimits.Configuration()
++        config.maximumPendingSendBytes = 40_000
++        let limits = BridgeChannelLimits(configuration: config), pair = try V3GatePair(limits: limits)
++        let start = try await pair.start()
++        for step in 1...5 { try await pair.step(step) }; try await start.value
++        let retained = try XCTUnwrap(pair.it.wire.last).count
++        let barrier = V3Barrier(); pair.it.beforeClose = { await barrier.wait() }
++        let closing = Task { await pair.i.close() }
++        await barrier.reached()
++        XCTAssertFalse(pair.i.canSendPeerData)
++        XCTAssertEqual(limits.retainedConnectionCount, 2)
++        // Borrow all remaining bytes from the healthy responder. The old M5 is
++        // still charged even after authority has ended and close has started.
++        try pair.r.session.acquireSend(bytes: config.maximumPendingSendBytes - retained)
++        XCTAssertThrowsError(try pair.r.session.acquireSend(bytes: 1))
++        await barrier.release(); await closing.value
++        try pair.r.session.acquireSend(bytes: retained)
++        pair.r.session.releaseSend(bytes: config.maximumPendingSendBytes)
++        await pair.stop(start)
++        XCTAssertEqual(limits.retainedConnectionCount, 0)
++    }
++
++    func testSuspendedSignerStormKeepsWorkUntilReturnAndRejectsLimitPlusOne() async throws {
++        var config = BridgeChannelLimits.Configuration(); config.maximumOutstandingWork = 2
++        let limits = BridgeChannelLimits(configuration: config)
++        var blocked: [(V3GatePair, V3Barrier, Task<Void, Error>, Task<Void, Error>)] = []
++        for _ in 0..<2 {
++            let pair = try V3GatePair(limits: limits), barrier = V3Barrier()
++            await pair.rv.setBarriers(sign: { await barrier.wait() })
++            let start = try await pair.start(), pending = Task { try await pair.step(1) }
++            await barrier.reached(); await pair.r.close(); await pair.i.close()
++            blocked.append((pair, barrier, start, pending))
++        }
++        XCTAssertEqual(limits.outstandingWorkCount, 2)
++        let retained = limits.retainedConnectionCount
++        for _ in 0..<32 {
++            let refused = try V3GatePair(limits: limits)
++            do { try await refused.i.startPeer(); XCTFail("Unbounded signer work admitted") } catch {}
++            XCTAssertEqual(refused.it.wire.count, 0)
++            let calls = await refused.iv.signCount; XCTAssertEqual(calls, 0)
++            await refused.i.close(); await refused.r.close()
++            XCTAssertEqual(limits.outstandingWorkCount, 2)
++            XCTAssertEqual(limits.retainedConnectionCount, retained)
++        }
++        for (pair, barrier, start, pending) in blocked {
++            await barrier.release(); _ = try? await pending.value; await pair.stop(start)
++            XCTAssertEqual(pair.rt.wire.count, 0)
++        }
++        XCTAssertEqual(limits.outstandingWorkCount, 0); XCTAssertEqual(limits.retainedConnectionCount, 0)
++        let fresh = try V3GatePair(limits: limits), start = try await fresh.start()
++        for step in 1...5 { try await fresh.step(step) }; try await start.value
++        XCTAssertTrue(fresh.i.canSendPeerData); await fresh.stop(start)
++    }
++
++    func testSuspendedPolicySendAndFactoryExpireForBothRolesWithoutLatePublication() async throws {
++        for role in [P.Role.initiator, .responder] {
++            for stage in ["policy", "send", "factory"] {
++                let barrier = V3Barrier()
++                let pair = try V3GatePair(factoryBarrier: stage == "factory" ? barrier : nil, factoryRole: role,
++                    responderRecheck: { _ in if stage == "policy" && role == .responder { await barrier.wait() } },
++                    recheck: { _ in if stage == "policy" && role == .initiator { await barrier.wait() } })
++                let physical = role == .initiator ? pair.it : pair.rt, gate = role == .initiator ? pair.i : pair.r
++                let heldStep = stage == "factory" ? (role == .initiator ? 4 : 5) : (role == .initiator ? 2 : 3)
++                if stage == "send" {
++                    physical.beforeSubmission = { data in
++                        let command = try? P.decodeEnvelope(data).cmd
++                        if command == (role == .initiator ? .initiatorAuth : .responderFinished) { await barrier.wait() }
++                    }
++                }
++                let start = try await pair.start()
++                for step in 1..<heldStep { try await pair.step(step) }
++                let pending = Task { try await pair.step(heldStep) }
++                await barrier.reached()
++                let before = physical.wire.count
++                pair.clock.advance(wall: stage == "factory" ? 301 : 31, mono: stage == "factory" ? 301 : 11)
++                await barrier.release()
++                do { try await pending.value; XCTFail("Expired \(role)/\(stage) continued") } catch {}
++                XCTAssertFalse(gate.canSendPeerData); XCTAssertFalse(gate.hasDelegate)
++                XCTAssertEqual(physical.wire.count, before)
++                if stage == "factory" { XCTAssertEqual((role == .initiator ? pair.id : pair.rd).counts.close, 1) }
++                await pair.stop(start); XCTAssertEqual(pair.limits.outstandingWorkCount, 0)
++            }
++        }
++    }
++}
++
++#if os(macOS)
++@testable import CellApple
++extension BridgePeerV3Tests {
++    func testScannerStopDisconnectAndOwnerCloseDiscardSuspendedSignerInBothRoles() async throws {
++        for initiator in [true, false] {
++            for existence in [true, false] {
++                for reason in ["stop", "disconnect", "ownerClose"] {
++                    let v = try Self.vectors(), barrier = V3Barrier(), suffix = UUID().uuidString
++                    let identity = try A.decode(A.PublicIdentity.self, from: v[initiator ? "identity0" : "identity1"]!)
++                    let vault = try V3Vault(identity: identity, seed: v[initiator ? "seed0" : "seed1"]!)
++                    let owner = identity.makeIdentity(); owner.identityVault = vault
++                    let pair = try await ScannerPair(ownerA: initiator ? owner : nil, ownerB: initiator ? nil : owner, sessionSuffix: suffix)
++                    if existence { await vault.setBarriers(exist: { await barrier.wait() }) }
++                    else { await vault.setBarriers(sign: { await barrier.wait() }) }
++                    let tasks = pair.start()
++                    if initiator { try await pair.deliverNext() }
++                    let pending = Task { try await pair.deliverNext() }
++                    await barrier.reached()
++                    let service = initiator ? pair.a : pair.b, physical = initiator ? pair.pa : pair.pb
++                    let sent = pair.wire.history.count
++                    switch reason {
++                    case "stop": service.stop()
++                    case "disconnect": service.session(physical.mcSession, peer: physical.peerID, didChange: .notConnected)
++                    default: await physical.gate.close() // explicit local-owner revocation contract
++                    }
++                    await physical.gate.close()
++                    XCTAssertGreaterThan(service.channelLimits.outstandingWorkCount, 0)
++                    let fresh = try await ScannerPair(ownerA: pair.a.owner, ownerB: pair.b.owner, sessionSuffix: suffix)
++                    // Reusing the same local vault would deliberately suspend
++                    // the new signer too. Clear only future barriers; the old
++                    // invocation has already captured its non-cancellable wait.
++                    await vault.setBarriers()
++                    try await fresh.finish(fresh.start())
++                    await barrier.release()
++                    do { try await pending.value; XCTFail("Retired Scanner signer continued") } catch {}
++                    XCTAssertEqual(pair.wire.history.count, sent)
++                    let count = await vault.signCount
++                    XCTAssertEqual(count, existence ? 1 : 2, "Only the fresh channel may sign after retirement")
++                    XCTAssertTrue(fresh.pa.gate.canSendPeerData); XCTAssertTrue(fresh.pb.gate.canSendPeerData)
++                    pair.stop(); fresh.stop()
++                    await pair.pa.gate.close(); await pair.pb.gate.close()
++                    _ = try? await tasks.0.value; _ = try? await tasks.1.value
++                }
++            }
++        }
++    }
++}
++#endif
+diff --git a/Tests/CellBaseTests/PublisherAsyncLifetimeTests.swift b/Tests/CellBaseTests/PublisherAsyncLifetimeTests.swift
+new file mode 100644
+index 0000000..148cec5
+--- /dev/null
++++ b/Tests/CellBaseTests/PublisherAsyncLifetimeTests.swift
+@@ -0,0 +1,53 @@
++import Foundation
++import XCTest
++import CombineHelpers
++#if canImport(Combine)
++import Combine
++#else
++import OpenCombine
++#endif
++
++final class PublisherAsyncLifetimeTests: XCTestCase {
++    func testSynchronousAndConcurrentFirstDeliveryWhileSubscriptionIsInstalled() async throws {
++        for timed in [false, true] {
++            let immediate = timed ? try await Just(42).getOneWithTimeout(1) : try await Just(42).getOneWithoutTimeout()
++            XCTAssertEqual(immediate, 42)
++            try await withThrowingTaskGroup(of: Int.self) { group in
++                for value in 0..<256 {
++                    group.addTask {
++                        let publisher = Future<Int, Error> { promise in
++                            DispatchQueue.global().async { promise(.success(value)) }
++                        }
++                        return timed ? try await publisher.getOneWithTimeout(5) : try await publisher.getOneWithoutTimeout()
++                    }
++                }
++                var delivered = Set<Int>()
++                for try await value in group { XCTAssertTrue(delivered.insert(value).inserted) }
++                XCTAssertEqual(delivered, Set(0..<256))
++            }
++        }
++    }
++
++    func testEmptyFailureAndTimeoutCompleteOnceAndCancelUpstream() async throws {
++        for timed in [false, true] {
++            do {
++                let empty = Empty<Int, Error>()
++                _ = timed ? try await empty.getOneWithTimeout(1) : try await empty.getOneWithoutTimeout()
++                XCTFail("Empty publisher returned a value")
++            } catch AsyncError.finishedWithoutValue {} catch { XCTFail("Unexpected \(error)") }
++            do {
++                let failed = Fail<Int, Error>(error: CancellationError())
++                _ = timed ? try await failed.getOneWithTimeout(1) : try await failed.getOneWithoutTimeout()
++                XCTFail("Failed publisher returned a value")
++            } catch AsyncError.other(let error) { XCTAssertTrue(error is CancellationError) }
++        }
++        let cancelled = expectation(description: "timed out subscription cancelled exactly once")
++        cancelled.assertForOverFulfill = true
++        do {
++            _ = try await Empty<Int, Error>(completeImmediately: false)
++                .handleEvents(receiveCancel: { cancelled.fulfill() }).getOneWithTimeout(0)
++            XCTFail("Never publisher returned a value")
++        } catch AsyncError.timeout {} catch { XCTFail("Unexpected \(error)") }
++        await fulfillment(of: [cancelled], timeout: 1)
++    }
++}
+diff --git a/Tests/CellBaseTests/ScannerMultipeerProcessTests.swift b/Tests/CellBaseTests/ScannerMultipeerProcessTests.swift
+index d2de94b..c875857 100644
+--- a/Tests/CellBaseTests/ScannerMultipeerProcessTests.swift
++++ b/Tests/CellBaseTests/ScannerMultipeerProcessTests.swift
+@@ -43,10 +43,15 @@ final class ScannerMultipeerProcessTests: XCTestCase {
+             }
+         }
+         try await runPhysicalIsolationProcesses()
++        try await runRelayProcesses()
+     }
+ 
+     func testMultipeerWorker() async throws {
+         let env = ProcessInfo.processInfo.environment
++        if let role = env["CP53_RELAY_ROLE"], let path = env["CP53_PEER_DIRECTORY"] {
++            try await runRelayWorker(role: role, folder: URL(fileURLWithPath: path))
++            return
++        }
+         if let role = env["CP53_ISOLATION_ROLE"], let path = env["CP53_PEER_DIRECTORY"] {
+             try await runPhysicalIsolationWorker(role: role, folder: URL(fileURLWithPath: path))
+             return
+diff --git a/Tests/CellBaseTests/ScannerNearbyInteractionTests.swift b/Tests/CellBaseTests/ScannerNearbyInteractionTests.swift
+index a88cae3..92a4cb0 100644
+--- a/Tests/CellBaseTests/ScannerNearbyInteractionTests.swift
++++ b/Tests/CellBaseTests/ScannerNearbyInteractionTests.swift
+@@ -1,6 +1,7 @@
+ // SPDX-License-Identifier: Apache-2.0
+ // SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
+ import Foundation
++import Combine
+ import MultipeerConnectivity
+ import XCTest
+ @testable import CellApple
+@@ -10,6 +11,33 @@ import NearbyInteraction
+ #endif
+ 
+ final class ScannerNearbyInteractionTests: XCTestCase {
++    @MainActor func testGenericCellFeedCannotInstallOrReplaceNearbyToken() async throws {
++        let f = try await NIFixture(); defer { f.pair.stop() }
++        let owner = f.pair.a.owner
++        let cell = await EntityScannerCell(owner: owner)
++        cell.connectService = f.pair.a
++        defer { cell.connectService = nil; cell.detach(label: "generic-token-feed", requester: owner) }
++        let source = FlowElementPusherCell(owner: owner)
++        _ = try await cell.attach(emitter: source, label: "generic-token-feed", requester: owner)
++        try await cell.absorbFlow(label: "generic-token-feed", requester: owner)
++        for connected in [false, true] {
++            if connected { try await f.connect(f.pair.b) }
++            let delivered = expectation(description: "Generic event passed through Cell intercepts")
++            let subscription = try await cell.flow(requester: owner).sink(receiveCompletion: { _ in }, receiveValue: {
++                if $0.title == "unbound-token" { delivered.fulfill() }
++            })
++            var flow = FlowElement(title: "unbound-token", content: .object([
++                "userUuid": .string(f.pair.b.mySessionUUID), "token": .data(Data("unbound-token".utf8))
++            ]), properties: .init(type: .event, contentType: .object))
++            flow.topic = "radar.service"
++            source.pushFlowElement(flow, requester: owner)
++            await fulfillment(of: [delivered], timeout: 5)
++            subscription.cancel()
++            XCTAssertEqual(f.aDrivers.count, connected ? 1 : 0)
++            if connected { XCTAssertEqual(f.aDrivers[0].runs, [f.bDrivers[0].token]) }
++        }
++    }
++
+     @MainActor func testConcurrentPeersKeepTokensSessionsAndResultsOnTheirAuthenticatedPeer() async throws {
+         let f = try await NIFixture(third: true); defer { f.pair.stop() }
+         try await f.connect(f.pair.b)
+diff --git a/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift b/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift
+index 594e093..8d650e9 100644
+--- a/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift
++++ b/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift
+@@ -937,14 +937,14 @@ final class ScannerPair {
+     var c: ScannerService?
+     var cPeer = MCPeerID(displayName: "test-c")
+     var ac: ScannerPeerTransport?, pc: ScannerPeerTransport?
+-    init(limits: BridgeChannelLimits = BridgeChannelLimits(), ownerA: Identity? = nil, ownerB: Identity? = nil, reverse: Bool = false, admissionA: ScannerAdmission = ScannerAdmission()) async throws {
++    init(limits: BridgeChannelLimits = BridgeChannelLimits(), ownerA: Identity? = nil, ownerB: Identity? = nil, reverse: Bool = false, admissionA: ScannerAdmission = ScannerAdmission(), sessionSuffix: String = UUID().uuidString) async throws {
+         let resolvedOwnerA: Identity
+         if let ownerA { resolvedOwnerA = ownerA }
+         else { resolvedOwnerA = await Self.owner() }
+         let resolvedOwnerB: Identity
+         if let ownerB { resolvedOwnerB = ownerB }
+         else { resolvedOwnerB = await Self.owner() }
+-        let suffix = UUID().uuidString
++        let suffix = sessionSuffix
+         a = ScannerService(admission: admissionA, owner: resolvedOwnerA, sessionUUID: (reverse ? "second-" : "first-") + suffix)
+         b = ScannerService(admission: ScannerAdmission(), owner: resolvedOwnerB, sessionUUID: (reverse ? "first-" : "second-") + suffix)
+         a.channelLimits = limits; b.channelLimits = limits
+diff --git a/Tests/CellBaseTests/ScannerPhysicalIsolationTests.swift b/Tests/CellBaseTests/ScannerPhysicalIsolationTests.swift
+index 757e5f9..2c98663 100644
+--- a/Tests/CellBaseTests/ScannerPhysicalIsolationTests.swift
++++ b/Tests/CellBaseTests/ScannerPhysicalIsolationTests.swift
+@@ -79,6 +79,12 @@ extension ScannerMultipeerProcessTests {
+                 try await isolationWait { observer.connected && isolationExists(folder, "host-ready-" + phase) }
+                 let peer = try XCTUnwrap(service.foundPeersDict[prefix + "a"])
+                 let session = try service.sessionForPeer(peer), ignored = IsolationIgnoringReceiver()
++                let physical = try service.capturePeerTransport(session: session, peerID: peer)
++                // Both full Scanner setups must drain their application records
++                // before B stops receipts. Otherwise a startup record can occupy
++                // one of the 32 slots and make the host's 32nd load send wait
++                // until the production ten-second deadline correctly closes it.
++                try await isolationWait { physical.gate.peerOutstandingUsage.dataRecords == 0 && isolationExists(folder, "host-drained-" + phase) }
+                 session.delegate = ignored // deliberately stops app receipt/close processing
+                 try isolationMark(folder, phase + ".ready", "authenticated; ignoring app traffic")
+                 let waitStarted = ProcessInfo.processInfo.systemUptime
+@@ -144,10 +150,13 @@ extension ScannerMultipeerProcessTests {
+                 try isolationMark(folder, "\(phase).checked", "physical=1; siblingFlows=\(observer.flows); rss=\(isolationRSS()); baselineRSS=\(baseline); cancelledResources=\(observer.cancelledResources); closedStreams=\(observer.closedStreams)")
+             }
+             for phase in ["revoke", "blocked"] {
+-                try await isolationWait { isolationExists(folder, phase + ".ready") }
++                try await isolationWait { isolationExists(folder, "host-ready-" + phase) }
+                 let before = observer.flows
+                 let peer = try XCTUnwrap(service.foundPeersDict[prefix + "b" + phase])
+                 let physical = try service.capturePeerTransport(session: service.sessionForPeer(peer), peerID: peer)
++                try await isolationWait { physical.gate.peerOutstandingUsage.dataRecords == 0 }
++                try isolationMark(folder, "host-drained-" + phase, "startup application records receipted")
++                try await isolationWait { isolationExists(folder, phase + ".ready") }
+                 if phase == "revoke" {
+                     service.channelLimits.revoke(identity: try XCTUnwrap(physical.gate.session.publicIdentity), domain: "nearby")
+                 } else {
+diff --git a/Tests/CellBaseTests/ScannerRelayProcessTests.swift b/Tests/CellBaseTests/ScannerRelayProcessTests.swift
+new file mode 100644
+index 0000000..da91867
+--- /dev/null
++++ b/Tests/CellBaseTests/ScannerRelayProcessTests.swift
+@@ -0,0 +1,206 @@
++#if os(macOS)
++import Foundation
++import MultipeerConnectivity
++import XCTest
++@testable import CellApple
++@testable import CellBase
++
++// Real outer MC endpoints, with the production v3 gate/session/record/receipt
++// implementation at each end. M has no gate, vault, identity proof or DH secret.
++// This test adapter is separate from the production Scanner adapter exercised
++// by the direct two-process and physical-isolation scenarios in the same parent.
++extension ScannerMultipeerProcessTests {
++    func runRelayProcesses() async throws {
++        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("cp53-relay-\(UUID())")
++        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
++        print("CP53 three-process relay artifacts: \(folder.path)")
++        let endpoint = try BridgePeerChannelAuthentication.Endpoint(initiator: "I", responder: "R", setupID: UUID().uuidString, domain: "nearby")
++        try BridgeChannelAuthentication.encode(endpoint).write(to: folder.appendingPathComponent("endpoint.json"))
++        var children: [(Process, FileHandle)] = []
++        defer { for (child, file) in children { if child.isRunning { child.terminate() }; try? file.close() } }
++        for role in ["m", "i", "r"] {
++            let log = folder.appendingPathComponent("\(role).log")
++            FileManager.default.createFile(atPath: log.path, contents: nil)
++            let file = try FileHandle(forWritingTo: log), child = Process()
++            child.executableURL = URL(fileURLWithPath: "/usr/bin/xcrun")
++            child.arguments = ["xctest", "-XCTest", "CellBaseTests.ScannerMultipeerProcessTests/testMultipeerWorker", Bundle(for: Self.self).bundlePath]
++            var env = ProcessInfo.processInfo.environment
++            env["CP53_RELAY_ROLE"] = role; env["CP53_PEER_DIRECTORY"] = folder.path
++            child.environment = env; child.standardOutput = file; child.standardError = file
++            try child.run(); children.append((child, file))
++        }
++        try await relayWait(seconds: 55) { children.allSatisfy { !$0.0.isRunning } }
++        for (child, file) in children { try file.synchronize(); XCTAssertEqual(child.terminationStatus, 0, folder.path) }
++        for role in ["m", "i", "r"] { XCTAssertTrue(relayExists(folder, role + ".passed"), folder.path) }
++    }
++
++    func runRelayWorker(role: String, folder: URL) async throws {
++        let tag = folder.lastPathComponent
++        if role == "m" {
++            let left = RelayMCLink(tag: tag, side: "i", relay: true), right = RelayMCLink(tag: tag, side: "r", relay: true)
++            let observed = RelayObservation(folder: folder)
++            left.receive = { data in try observed.capture(data, side: "i"); try right.sendRaw(data) }
++            right.receive = { data in try observed.capture(data, side: "r"); try left.sendRaw(data) }
++            left.start(); right.start(); defer { left.stop(); right.stop() }
++            try await relayWait { left.connected && right.connected }
++            try Data().write(to: folder.appendingPathComponent("relay-ready"))
++            try await relayWait { relayExists(folder, "i.passed") && relayExists(folder, "r.passed") }
++            XCTAssertEqual(left.errors + right.errors, [])
++            try observed.verify()
++            try Data("two independent encrypted MC sessions; M forwarded exact inner bytes; no signing or DH keys; five strict envelopes; encrypted application traffic both directions\n".utf8).write(to: folder.appendingPathComponent("m.passed"))
++            return
++        }
++        let vault = MockIdentityVault()
++        var owner = Identity("relay-secret-identity-\(role)-\(UUID())", displayName: "synthetic", identityVault: vault)
++        await vault.addIdentity(identity: &owner, for: "relay")
++        let descriptor = try BridgeChannelAuthentication.PublicIdentity(owner)
++        try BridgeChannelAuthentication.encode(descriptor).write(to: folder.appendingPathComponent(role + ".public"))
++        let link = RelayMCLink(tag: tag, side: role, relay: false), consumer = RelayConsumer()
++        link.start(); defer { link.stop() }
++        try await relayWait { link.connected && relayExists(folder, "relay-ready") }
++        let endpoint = try BridgeChannelAuthentication.decode(BridgePeerChannelAuthentication.Endpoint.self, from: Data(contentsOf: folder.appendingPathComponent("endpoint.json")))
++        let gate = try BridgeChannelTransport(underlying: link, peerEndpoint: endpoint, role: role == "i" ? .initiator : .responder,
++            owner: owner, limits: BridgeChannelLimits(), source: role,
++            disclosurePolicy: .anyProvenIdentity(allowUnauthenticatedInitiator: true)) { _, _ in consumer }
++        try Data().write(to: folder.appendingPathComponent(role + ".gate"))
++        try await relayWait { relayExists(folder, "i.gate") && relayExists(folder, "r.gate") }
++        try await gate.startPeer()
++        let other = role == "i" ? "r" : "i"
++        let expected = try BridgeChannelAuthentication.decode(BridgeChannelAuthentication.PublicIdentity.self, from: Data(contentsOf: folder.appendingPathComponent(other + ".public")))
++        XCTAssertEqual(gate.session.publicIdentity, expected)
++        for n in 0..<8 {
++            try await gate.sendData(BridgeChannelAuthentication.encode(BridgeCommand(cmd: "response", payload: .string("relay-private-application-\(role)-\(n)"), cid: n + 1)))
++        }
++        try await relayWait { consumer.values.count == 8 }
++        XCTAssertEqual(consumer.values, (0..<8).map { "relay-private-application-\(other)-\($0)" })
++        XCTAssertTrue(gate.canSendPeerData); XCTAssertEqual(link.errors, [])
++        try Data("proved remote principal; ordered private data in both directions; 8 values; physical MC session\n".utf8).write(to: folder.appendingPathComponent(role + ".passed"))
++        try await relayWait { relayExists(folder, "m.passed") }
++        await gate.close()
++    }
++}
++
++private func relayExists(_ folder: URL, _ name: String) -> Bool { FileManager.default.fileExists(atPath: folder.appendingPathComponent(name).path) }
++private func relayWait(seconds: Double = 20, _ condition: () -> Bool) async throws {
++    let until = ProcessInfo.processInfo.systemUptime + seconds
++    while !condition() && ProcessInfo.processInfo.systemUptime < until { try await Task.sleep(nanoseconds: 10_000_000) }
++    guard condition() else { throw NSError(domain: "CP53 real relay timeout", code: 1) }
++}
++
++private final class RelayMCLink: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate, MCSessionDelegate, BridgeTransportProtocol {
++    let session: MCSession
++    private let browser: MCNearbyServiceBrowser, advertiser: MCNearbyServiceAdvertiser
++    private let tag: String, side: String, relay: Bool
++    private let lock = NSLock(), sendLock = NSLock()
++    private var invited = false, failures: [String] = [], tail: Task<Void, Never>?
++    private weak var gate: BridgeChannelTransport?
++    var receive: ((Data) throws -> Void)? // configured before start
++    init(tag: String, side: String, relay: Bool) {
++        self.tag = tag; self.side = side; self.relay = relay
++        let id = MCPeerID(displayName: "relay-\(relay ? "m" : "end")-\(side)-\(UUID().uuidString.prefix(6))")
++        session = MCSession(peer: id, securityIdentity: nil, encryptionPreference: .required)
++        browser = MCNearbyServiceBrowser(peer: id, serviceType: "cp53-relay")
++        advertiser = MCNearbyServiceAdvertiser(peer: id, discoveryInfo: ["tag":tag,"side":side], serviceType: "cp53-relay")
++        super.init(); session.delegate = self; browser.delegate = self; advertiser.delegate = self
++    }
++    var connected: Bool { session.connectedPeers.count == 1 }
++    var errors: [String] { lock.withLock { failures } }
++    func start() { if relay { advertiser.startAdvertisingPeer() } else { browser.startBrowsingForPeers() } }
++    func stop() { advertiser.stopAdvertisingPeer(); browser.stopBrowsingForPeers(); session.disconnect() }
++    func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String: String]?) {
++        guard info?["tag"] == tag, info?["side"] == side,
++              lock.withLock({ if invited { return false }; invited = true; return true }) else { return }
++        browser.invitePeer(peerID, to: session, withContext: nil, timeout: 10)
++    }
++    func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {}
++    func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) { invitationHandler(true, session) }
++    func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {}
++    func session(_ session: MCSession, didReceive data: Data, fromPeer: MCPeerID) {
++        lock.withLock {
++            let prior = tail, captured = gate
++            tail = Task {
++                await prior?.value
++                do {
++                    if let receive { try receive(data); return }
++                    guard let captured else { throw BridgeChannelAuthentication.Failure.unavailable }
++                    let plain = try captured.openPeerFrame(data)
++                    if plain.isEmpty { return }
++                    try captured.validateInboundPayload(plain)
++                    try sendLock.withLock { try captured.submitPeerReceipts { try sendRaw($0) } }
++                    let command = try JSONDecoder().decode(BridgeCommand.self, from: plain)
++                    if command.command == .response { try await captured.consumeResponse(command: command) }
++                    else { try await captured.consumeCommand(command: command) }
++                } catch { lock.withLock { failures.append(String(describing: error)) }; await captured?.close() }
++            }
++        }
++    }
++    func session(_ session: MCSession, didReceive stream: InputStream, withName: String, fromPeer: MCPeerID) { stream.close() }
++    func session(_ session: MCSession, didStartReceivingResourceWithName: String, fromPeer: MCPeerID, with progress: Progress) { progress.cancel() }
++    func session(_ session: MCSession, didFinishReceivingResourceWithName: String, fromPeer: MCPeerID, at: URL?, withError: Error?) {}
++    func sendRaw(_ data: Data) throws {
++        let peers = session.connectedPeers
++        guard peers.count == 1 else { throw BridgeChannelAuthentication.Failure.unavailable }
++        try session.send(data, toPeers: peers, with: .reliable)
++    }
++    func setDelegate(_ delegate: BridgeDelegateProtocol) { lock.withLock { gate = delegate as? BridgeChannelTransport } }
++    func setup(_ endpointURL: URL, identity: Identity) async throws {}
++    func sendData(_ data: Data) async throws {
++        let gate = try XCTUnwrap(lock.withLock { self.gate })
++        try sendLock.withLock { try gate.submitPeerFrame(data) { try sendRaw($0) } }
++    }
++    func close() async { session.disconnect(); try? await relayWait { session.connectedPeers.isEmpty } }
++    func identityVault(for identity: Identity?) async -> IdentityVaultProtocol { BridgeIdentityVault() }
++    static func new() -> BridgeTransportProtocol { fatalError("Configured test MC endpoint required") }
++}
++
++private final class RelayConsumer: BridgeDelegateProtocol {
++    let uuid = UUID().uuidString
++    private let lock = NSLock(); private var received: [String] = []
++    var values: [String] { lock.withLock { received } }
++    func consumeCommand(command: BridgeCommand) async throws { try await consumeResponse(command: command) }
++    func consumeResponse(command: BridgeCommand) async throws { if case .string(let value) = command.payload { lock.withLock { received.append(value) } } }
++    func sendCommand(command: Command, identity: Identity, payload: ValueType?) async {}
++    func sendSetValueState(for requestedKey: String, setValueState: SetValueState) async {}
++    func pushError(errorMessage: String?, error: Error?) async {}
++    func ready() async throws {}
++}
++
++private final class RelayObservation {
++    let folder: URL
++    private let lock = NSLock(); private var frames: [(String, Data)] = []
++    init(folder: URL) { self.folder = folder }
++    func capture(_ data: Data, side: String) throws {
++        try lock.withLock {
++            guard frames.count < 128 else { throw BridgeChannelAuthentication.Failure.capacity }
++            frames.append((side, data))
++            try data.write(to: folder.appendingPathComponent("wire-\(frames.count)-\(side).bin"))
++        }
++    }
++    func verify() throws {
++        let frames = lock.withLock { frames }
++        var commands: [String] = [], records: [String: Int] = [:]
++        let helloKeys: Set<String> = ["profile","role","ephemeralPublicKey","nonce","generation","issuedAtMilliseconds"]
++        var forbidden = ["relay-private-application-", "relay-secret-identity-"]
++        for side in ["i","r"] {
++            let identity = try BridgeChannelAuthentication.decode(BridgeChannelAuthentication.PublicIdentity.self, from: Data(contentsOf: folder.appendingPathComponent(side + ".public")))
++            forbidden += [identity.uuid, identity.publicKey.base64EncodedString()]
++        }
++        for (side, data) in frames {
++            for marker in forbidden { XCTAssertNil(data.range(of: Data(marker.utf8))); XCTAssertNil(data.range(of: Data(Data(marker.utf8).base64EncodedString().utf8))) }
++            if data.starts(with: Data("HPC3".utf8)) { records[side, default: 0] += 1; continue }
++            let outer = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
++            XCTAssertEqual(Set(outer.keys), ["&string","cid","cmd"])
++            let name = try XCTUnwrap(outer["cmd"] as? String); commands.append(name)
++            let body = try XCTUnwrap(JSONSerialization.jsonObject(with: Data((outer["&string"] as! String).utf8)) as? [String: Any])
++            if name.hasSuffix("Hello") { XCTAssertEqual(Set(body.keys), helloKeys) }
++            else {
++                XCTAssertEqual(Set(body.keys), name.hasSuffix("ResponderAuth") ? ["hello","sealed"] : ["profile","sealed"])
++                if let hello = body["hello"] as? [String: Any] { XCTAssertEqual(Set(hello.keys), helloKeys) }
++                XCTAssertEqual(Data(base64Encoded: body["sealed"] as! String)?.count, name.hasSuffix("Auth") ? 8208 : 1040)
++            }
++        }
++        XCTAssertEqual(commands, ["Hello","ResponderAuth","InitiatorAuth","ResponderFinished","InitiatorFinished"].map { "channelAuthPeerV3" + $0 })
++        XCTAssertGreaterThanOrEqual(records["i", default: 0], 8); XCTAssertGreaterThanOrEqual(records["r", default: 0], 8)
++    }
++}
++#endif

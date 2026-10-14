@@ -1,0 +1,23 @@
+# Handoff til Codex (Astra) — Conciergen native i PalazzoScaffold, /palazzo servert derfra
+
+Du er Astra (Codex). Arbeidskatalog er HAVEN-roten; stier under er relative til den. Ingen git. Ingen endringer i `CellProtocol/` eller `CellScaffold/` (du LESER derfra og porterer). Ingen `pkill -f`. Ingen nettverk. Rapporter «skrevet, verifisert med full regresjon» eller «skrevet, ikke verifisert» — aldri «levert».
+
+## Les først
+1. `CellProtocolDocuments/Deliverables/PDD_palazzo-concierge-native-web_2026-09-14/FORMAALSSPEC.md` (§0–§3, §5) og `…/PLAN.md` (WP0–WP4 er dine; WP5 er Kjetils).
+2. Kilden som skal porteres: `CellScaffold/Sources/App/Controllers/VaporPalazzoCommunale.swift` (ruter, middleware, rate-limit 30/10 min, body 4096, `AskRequest {query}`), `CellScaffold/Sources/App/Cells/Restaurant/PalazzoCommunaleServiceCell.swift` (konvolutten `haven.palazzo.communale.guest-concierge.v1` og `state`-feltene), `CellScaffold/Resources/Views/palazzo_communale.leaf`, `CellScaffold/Public/js/palazzo-communale.js`, `CellScaffold/Public/css/palazzo-communale.css`, `CellScaffold/Public/css/themes/palazzo/` (bare filene leaf/CSS faktisk refererer).
+3. Målet: `PalazzoScaffold/Sources/App/routes.swift` (concierge-rutene ≈ 535–560 og `respond`-hjelperen), `PalazzoScaffold/Sources/App/Support/PalazzoScaffoldContract.swift` (`Concierge.*` keypaths), `PalazzoScaffold/Sources/App/Cells/PalazzoConciergeCorpusCell.swift` (svarformatet fra `concierge.knowledge.query`), `PalazzoScaffold/Sources/App/Services/PalazzoPrincipalGateway.swift` (token/principal), `PalazzoScaffold/Tests/AppTests/PalazzoConciergeTests.swift` og `TestSupport.swift` (hvordan tester starter appen), `PalazzoScaffold/README.md`.
+4. Demo-spørsmålene som skal treffe korpuset: `PalazzoComunaleScaffold/docs/Demo_Huskeliste_Andre_2026-09-01.md` (spørsmål 1, 5, 6, 7).
+
+## Lever (WP0–WP4)
+- WP0: `swift build --disable-sandbox` og `swift test --disable-sandbox` i `PalazzoScaffold` FØR endring; rå utdata → `…/evidence/wp0-*.log`; tall som «forventet ≈ 105 (2026-09-08)».
+- WP1: ny controller (f.eks. `PalazzoScaffold/Sources/App/Controllers/PalazzoCommunaleFacade.swift`) som registrerer `GET /palazzo/api/{configuration,state}` og `POST /palazzo/api/{ask,menu,beverages}` og kaller `PalazzoConciergeCorpus` via `PalazzoCellAccess` som fasadens/husets principal (finn hvilken principal concierge-rutene bruker i dag og gjenbruk den — ikke lag ny identitet). Pakk cellens svar i konvolutten med nøyaktig feltsettet i FORMAALSSPEC §0 (inkl. `reason_code` og `route: "native"`). `state` skal ha `remoteMode: "PalazzoConciergeCorpus (native)"`, `serviceStatus` fra korpuset, `serviceMessage` som ærlig sier at korpuset er datert (les `last_verified` fra korpuset). Alle brukersynlige tekster på norsk — også «vet ikke»/«ikke bekreftet».
+- WP2: fasaden ligger i en route group som IKKE går gjennom gateway-token-kravet (`PalazzoPrincipalGateway`); gjesteprincipal for fasaden er anonym/fast per fasade, aldri lest fra header. Rate-limit 30 forsøk / 10 min per klient (bruk `X-Forwarded-For` første verdi hvis satt, ellers remote address — kommenter hvorfor), `maxBodyBytes 4096` → 413. Resten av API-et uendret; en test skal vise at `/api/cell/get` fortsatt avvises uten token i produksjonsmodus.
+- WP3: `PalazzoScaffold/Public/palazzo/index.html` (leaf-malen gjort statisk; `apiBase` og `configurationName` som `data-`-attributter på `<body>`; JS-en leser dem), `Public/js/palazzo-communale.js`, `Public/css/palazzo-communale.css`, `Public/css/themes/palazzo/<bare det som refereres>`. Registrer `FileMiddleware` for `Public/` hvis det ikke finnes, og `GET /palazzo` → index. Ikke endre utseende; bare det som må til for å bli statisk.
+- WP4: tester i `PalazzoScaffold/Tests/AppTests/PalazzoCommunaleFacadeTests.swift`: test.public-ask, test.envelope, test.auth-boundary, test.leaf, test.refusal (se FORMAALSSPEC §5). Deretter full `swift build`/`swift test`. README-avsnitt «Offentlig concierge (/palazzo)» med `Last verified against code: 2026-09-14`. Skriv `…/TESTRESULT.md` (ankre `#build #regression #public-ask #envelope #auth #leaf #refusal #files`), `…/ACCEPT.md` for alt unntatt standalone/parity, en logglinje i `…/STATUS.md`, filliste med SHA-256 i `…/evidence/files.json`.
+
+## Stoppregler
+- Får du ikke bygget/testet i sandkassen: skriv ferdig, marker `blocked` med eksakt feil, legg `…/handoff/KJOR-SELV-build.sh` (`--dry-run` default, `--go`).
+- Ikke svekk allergen-vaktene eller nekt-semantikken; ikke fjern tester.
+- Ny rød i baseline: kjør én gang til før du konkluderer.
+
+Ferdigmarkør: siste linje i TESTRESULT.md skal være `<!-- PZ2 FERDIG -->`.

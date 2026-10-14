@@ -1,0 +1,11 @@
+--- run.py.before
++++ run.py
+@@ -83,7 +83,7 @@
+  env.update(PATH='/usr/bin:/bin:/usr/sbin:/sbin', LC_ALL='C')
+  for key in ('CELLPROTOCOL_LOCAL_PACKAGE_PATH','DIMYMINT_LOCAL_PACKAGE_PATH','DIMYMICROPAYMENTS_LOCAL_PACKAGE_PATH','CELLPROTOCOL_PUBLISHED_API','HAVEN_SWIFTPM_CACHE_KEY','TEST_ISOLATION','CELL_SCAFFOLD_TEST_ISOLATION'):
+   env.pop(key,None)
+- env.update(HAVEN_BUILD_MIN_FREE_PERCENT='10',HAVEN_BUILD_MIN_FREE_GIB='40',HAVEN_BUILD_RESERVE_GIB='10',HAVEN_SWIFTPM_JOBS='2',HAVEN_SWIFTPM_RUNNER=str(HERE/'report-only-swiftpm.sh'),HAVEN_SWIFTPM_WAIT_SECONDS='60',HAVEN_SWIFTPM_CACHE_ROOT='/private/tmp/haven-swiftpm-bounded')
++ env.update(HAVEN_BUILD_MIN_FREE_PERCENT='5',HAVEN_BUILD_MIN_FREE_GIB='40',HAVEN_BUILD_RESERVE_GIB='10',HAVEN_SWIFTPM_JOBS='2',HAVEN_SWIFTPM_RUNNER=str(HERE/'report-only-swiftpm.sh'),HAVEN_SWIFTPM_WAIT_SECONDS='60',HAVEN_SWIFTPM_CACHE_ROOT='/private/tmp/haven-swiftpm-bounded')
+  # Admission and capacity precede consumption of the single test attempt.
+  subprocess.run(['/bin/bash',str(CS/'scripts/check_build_capacity.sh'),str(CS)],env=env,check=True)
+  (HERE/'attempt-started').mkdir()

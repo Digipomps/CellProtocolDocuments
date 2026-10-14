@@ -1,0 +1,33 @@
+{
+  "name": "palazzo.public-concierge-facade",
+  "version": 1,
+  "lastVerifiedAgainstCode": "2026-09-14",
+  "purposeRefs": ["purpose://candidate.palazzo-concierge-native-web.root.public-facade", "purpose://candidate.palazzo-concierge-native-web.root.no-secret-in-browser", "purpose://candidate.palazzo-concierge-native-web.root.refuses-to-guess"],
+  "routes": {
+    "GET /palazzo": "statisk index.html fra Public/palazzo/",
+    "GET /palazzo/api/state": "state-objekt",
+    "GET /palazzo/api/configuration": "konfigurasjonsnavn/metadata som i dag",
+    "POST /palazzo/api/ask": {"body": {"query": "string ≤ 1200 tegn"}, "limits": {"bodyBytes": 4096, "rate": "30 forsøk / 10 min per klient"}},
+    "POST /palazzo/api/menu": "menyutdrag",
+    "POST /palazzo/api/beverages": "drikkeutdrag"
+  },
+  "auth": "ingen Authorization for /palazzo/*; PALAZZO_GATEWAY_TOKEN gjelder uendret for /api/*",
+  "askEnvelope": {
+    "schema": "haven.palazzo.communale.guest-concierge.v1",
+    "answer": "string (norsk)", "audience": "guest", "citations": "array", "citation_count": "int", "citation_summary": "string",
+    "confidence": "high|medium|low|blocked", "needs_human_review": "bool", "last_verified": "ISO-dato eller tom", "route": "native",
+    "status": "ok|unavailable|blocked", "reason_code": "string|null", "warnings": "array of string"
+  },
+  "stateFields": ["remoteMode", "serviceStatus", "serviceMessage", "privacyBoundary", "retention", "safetySummary", "responseCount", "lastConfidence", "lastNeedsHumanReview", "lastOperation", "remoteReadinessScope", "schema"],
+  "fixtures": {
+    "positive": [{"query": "Hvilke pizzaer har dere?", "expect": {"status": 200, "citation_count_gte": 1, "route": "native"}}],
+    "negative": [
+      {"query": "Er Pizza Margherita trygg for en med alvorlig nøtteallergi?", "expect": {"confidence": "blocked", "needs_human_review": true}},
+      {"query": "Hva er i Busiate Månelys?", "expect": {"needs_human_review": true, "answerLanguage": "nb"}},
+      {"body": {"question": "x"}, "expect": {"status": 400}},
+      {"bodyBytes": 5000, "expect": {"status": 413}},
+      {"attempt": 31, "expect": {"status": 429}}
+    ]
+  },
+  "observed_2026-09-14": {"prod": {"status": 503, "answer": "Concierge er midlertidig utilgjengelig…", "note": "slått av i denne kjøringen"}, "staging": {"status": 503, "reason_code": "remote-transport-unavailable"}}
+}

@@ -1,0 +1,329 @@
+# WP-R4 — CI-filter: faktisk kjørte kommandoer og resultater
+
+Filter, bolkdeling og fem skip-regler er fra uendret `ci/run-tests.sh`. Wrapperen legger bare til `--disable-sandbox`, kjører kapasitetskontrollen og registrerer kommando/exit.
+
+| Bolk | Exit | Startet | Bestått | Feilet | Skippet | Avbrutt | Signal |
+|---|---:|---:|---:|---:|---:|---:|---|
+| 1 | 1 | 131 | 130 | 0 | 0 | 1 | 10 |
+| 2 | 1 | 2 | 1 | 0 | 0 | 1 | 10 |
+| 3 | 0 | 136 | 135 | 0 | 1 | 0 |  |
+| 4 | 1 | 23 | 22 | 0 | 0 | 1 | 10 |
+| 5 | 1 | 78 | 77 | 0 | 0 | 1 | 10 |
+| 6 | 1 | 21 | 20 | 0 | 0 | 1 | 10 |
+| 7 | 1 | 120 | 119 | 0 | 0 | 1 | 10 |
+| 8 | 1 | 43 | 42 | 0 | 0 | 1 | 10 |
+| 9 | 1 | 52 | 51 | 0 | 0 | 1 | 10 |
+| 10 | 1 | 27 | 26 | 0 | 0 | 1 | 10 |
+| 11 | 0 | 12 | 12 | 0 | 0 | 0 |  |
+| 12 | 1 | 1 | 0 | 0 | 0 | 1 | 10 |
+| 13 | 0 | 17 | 17 | 0 | 0 | 0 |  |
+| 14 | 0 | 3 | 3 | 0 | 0 | 0 |  |
+| 15 | 0 | 12 | 12 | 0 | 0 | 0 |  |
+| 16 | 1 | 3 | 2 | 0 | 0 | 1 | 10 |
+| 17 | 0 | 119 | 119 | 0 | 0 | 0 |  |
+| 18 | 1 | 5 | 4 | 0 | 0 | 1 | 10 |
+| 19 | 1 | 19 | 18 | 0 | 0 | 1 | 10 |
+| 20 | 1 | 12 | 11 | 0 | 0 | 1 | 10 |
+| 21 | 1 | 48 | 47 | 0 | 0 | 1 | 10 |
+| 22 | 1 | 10 | 9 | 0 | 0 | 1 | 10 |
+| 23 | 1 | 116 | 112 | 2 | 2 | 0 |  |
+| 24 | 1 | 33 | 31 | 0 | 1 | 1 | 10 |
+| 25 | 1 | 6 | 5 | 0 | 0 | 1 | 10 |
+| 26 | 0 | 35 | 35 | 0 | 0 | 0 |  |
+| 27 | 1 | 1 | 0 | 0 | 0 | 1 | 10 |
+| 28 | 1 | 130 | 129 | 0 | 0 | 1 | 10 |
+| 29 | 1 | 4 | 3 | 0 | 0 | 1 | 10 |
+| 30 | 0 | 13 | 13 | 0 | 0 | 0 |  |
+
+Tallene teller XCTest-statuslinjer fra hver bolk, uten duplikater fra samleloggens feilekko. Avbrutt = startet uten bestått/feilet/skippet før prosessavslutning. Tester som ikke rakk å starte i en krasjet bolk er ikke talt som kjørt.
+
+## Bolk 1
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'AdminBridgeHandshakeAuthenticationTests|AdminControlPlaneRoutingTests|AdminScaffoldRuntimeTests|AdminCredentialPolicyTests|AdminCredentialRevocationTests|AdminScaffoldBootstrapTests|AdminOperationsMetricsTests|AdminScaffoldSnapshotIngestTests|AdminNodeFleetCellTests|AdminEntityProofPersistenceSupportTests|AdminCatalogRoutesTests|AdminWorkspaceConfigurationFactoryTests|AssistantCorrespondenceCellTests|AssistantCorrespondenceOnboardingRoutesTests|DevelopmentStatusSnapshotTests|DevelopmentStatusRoutesTests|ArendalsukaPersistedAtlasRecoveryTests|WorkbenchAccessGrantConfigurationTests|PortholeWebSessionPersonaTests'
+```
+
+Exit: 1.
+
+Avbrutt: `-[AppTests.PortholeWebSessionPersonaTests testBootstrapConfigurationListsAreLightweightSummaries]`.
+
+## Bolk 2
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter PortholeIdentityContinuityRoutesTests
+```
+
+Exit: 1.
+
+Avbrutt: `-[AppTests.PortholeIdentityContinuityRoutesTests testCoPilotChatLoadsWhileUnprovenHistoricalAuxiliariesRemainUntouched]`.
+
+## Bolk 3
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'PortholeBootstrapProjectionTests|CellProtocolIdentityProofTests|BrowserClientIdentityVaultTests|ConferencePlaywrightIdentityVaultTests|ProductionOwnerIdentityContinuityTests|TopUpCheckoutTests|PaymentGateCellTests|PaymentGateCreditIssuerTests|CellScaffoldServiceIdentityRegistryTests|CellScaffoldServiceIdentityManifestTests|CellScaffoldRuntimeIdentityRegistryTests.testDefaultProductionProfileHasExactBindingSet|CellScaffoldRuntimeIdentityRegistryTests.testProvisioningAndPhaseSetsAreExactAndPrivateIsNeverProvisionable|CellScaffoldRuntimeIdentityRegistryTests.testCanonicalEncodingHasStableSHA256GoldenAndNoSecretsOrPaths|CellScaffoldRuntimeIdentityProvisionerTests.testAdoptionAcceptsPreexistingRegistryDeclaredBinding|CellScaffoldRuntimeIdentityProvisionerTests.testAdoptionStillRefusesBindingTheRegistryDoesNotDeclare|CellScaffoldRuntimeIdentityProvisionerTests.testAdoptionRefusesWhenAnOwnerSignedManifestAlreadyExists|CellScaffoldRuntimeIdentityProvisionerTests.testFirstEnrollmentRejectsPreexistingUnhistoricalBindingBeforeVaultCAS|CellScaffoldRuntimeIdentityProvisionerTests.testUnknownCentralVaultBindingFailsClosedUsingCompleteInventory|CellScaffoldRuntimeIdentityProvisionerTests.testProvisionerCreatesOnlyOfflineAllowedBindingsAndWritesOwnerSignedManifest|CellScaffoldRuntimeIdentityProvisionerTests.testRetiredContextPresenceFailsClosed'
+```
+
+Exit: 0.
+
+## Bolk 4
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'CellScaffoldRuntimeIdentityProvisionerTests.testFeatureInactiveContextPresenceFailsClosed|BrowserClientIdentityReconciliationTests|ConferencePreviewWrapperResolverSupportTests|EntityCellGraphCellTests|AccessRequirementPromptCellTests|AccessSensitiveRuntimeReadinessTests|NodeAdminAgentDeliveryTests|NodeAdminAgentSnapshotBuilderTests|NodeAdminDockerCollectorTests|PalazzoCommunaleRoutesTests|WorkItemCellTests|ProjectPortfolioCellTests|GitHubWorkSyncCellTests|HavenWorkbenchConfigurationTests|WorkbenchOwnerSetupCellTests|ProjectOperationsTests|AdminCopilotWorkspaceConfigurationTests|ChatAuthTokenManagerTests|ChatCellTests|RichDocumentCellTests'
+```
+
+Exit: 1.
+
+Avbrutt: `-[AppTests.AdminCopilotWorkspaceConfigurationTests testAdminOperationsWorkspaceBootstrapHydratesNodeFleetDashboard]`.
+
+## Bolk 5
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'ChatInterpreterEscalationCeilingTests|ChatMVPLoginScopingTests|ChatMVPRoutesTests|ChatPurposeResourceRouterTests|ChatScopedAIProviderRouterTests|CommonsLibrarianCellTests|ConferenceProofChatLaunchCellTests|KallimachosArendalsukaDemoCellTests|KallimachosAdvisorCellTests|PersonalChatHubAccountCompatibilityTests|PersonalChatPromptEvaluationTests|PersonalCopilotCollaborationInviteTests|PersonalCopilotV1Tests|TodoPlannerCopilotConfigurationTests|UsageMeterRecorderTests|ValueFlowViewerCellTests'
+```
+
+Exit: 1.
+
+Avbrutt: `-[AppTests.ChatPurposeResourceRouterTests testScaffoldEntityAtlasDedupeRuntimeDuplicateByEndpointAndName]`.
+
+## Bolk 6
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'AgentRunCellTests|AgentRunWorkbenchWiringTests|WorkItemsExploreContractTests|ArendalsukaEventAtlasCellTests.testMatchingCellKeepsEventRecommendationsPrivateAndRequiresBilateralPeopleConsentAndVisibility|ArendalsukaEventAtlasCellTests.testMatchingCellExposesAResolvableSkeletonConfiguration|ConferenceConnectionHubCellTests.testArendalsukaProfileMutationsSurviveFreshResolverAndStorageReload|ConferenceConnectionHubCellTests.testArendalsukaProfileMutationsReportStorageFailureAndRollBack|ConfigurationCatalogCellTests.testRemoteEventConfigurationsAreAgreementGatedUntilPublicRelease|ConfigurationCatalogCellTests.testDefaultCatalogConfigurationsNowExposeExpandedDiscoverySet|ConfigurationCatalogCellTests.testCatalogContractsExposeSharedContractShapeAndParityFixtures|PortholeConfigurationLoadingTests.testBootstrapUsesChatWorkbenchAsDefaultWhenCurrentConfigurationHasNoSkeleton'
+```
+
+Exit: 1.
+
+Avbrutt: `-[AppTests.ConfigurationCatalogCellTests testCatalogContractsExposeSharedContractShapeAndParityFixtures]`.
+
+## Bolk 7
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'AdminEntryRemoteBridgeLoopbackTests|AdminFundingCellTests|AdminPersistedRuntimeReadinessTests|AdminRoleEnrollmentCellTests|AdminSecurityPolicyCellTests|AgeProofDoorCellTests|AgentActionCapabilityCatalogV1Tests|AgentConversationInboxCellTests|ArendalsukaConfigurationPublisherAuthorizationRoutesTests|AdminScaffoldBridgeMultiplexRouteTests|ArendalsukaConfigurationPublisherCellTests|AgreementWorkbenchCellTests|AgreementWorkbenchConfigurationFactoryTests|DocumentationWorkbenchRoutesTests|SecurityWorkbenchCellTests|AIGatewayCellTests|AIGatewayConfigurationFactoryTests|AdminAccessRequestCellTests|AdminAuthenticatedVaporBridgeTransportTests|AdminDeploymentSupervisorCellTests'
+```
+
+Exit: 1.
+
+Avbrutt: `-[AppTests.ArendalsukaConfigurationPublisherCellTests testPortholeCommitRuntimePersistsOfficialSkeletonAcrossFreshSession]`.
+
+## Bolk 8
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter ConferenceShellCellsTests
+```
+
+Exit: 1.
+
+Avbrutt: `-[AppTests.ConferenceShellCellsTests testPortholeSessionDetailPreparesLiveThreadForSelectedPreviewSession]`.
+
+## Bolk 9
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'HostRoutedBridgeTransportTests|PalazzoCommunaleUnavailableReasonTests|CorrespondenceApprovalConfigurationFactoryTests|PortholeMenuFallbackTests|PortholeRuntimeBindingEnsuringTests|PortholeWebActionStateSourceTests|PortholeWebEditorSupportTests|PortholeWebPayloadTests|AssistantCorrespondenceAdminRoutesTests|CellScaffoldRuntimeIdentityManifestTests|StrictIdentityVaultReadinessMonitorTests|BrowserClientIdentityVaultKeyAgreementTests|DeviceIngressIdentityLinkHandshakeContractTests|PaymentGateOwnerIdentitySupportTests|MusicPublishingConfigurationFactoryTests|MusicPublishingMVPRoutesTests|ButterpopPilotReadinessTests|InviteLandingRetentionTests'
+```
+
+Exit: 1.
+
+Avbrutt: `-[AppTests.PortholeMenuFallbackTests testDefaultCatalogBuildsOnceWithinRequestScope]`.
+
+## Bolk 10
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'PurposeCellTests|ChatAssistantDegradationTests|ButlerLatencyCachingTests'
+```
+
+Exit: 1.
+
+Avbrutt: `-[AppTests.PurposeCellTests testPalazzoFixtureDecodesLosslesslyIntoPurposeModelAndConfigurationIsPublished]`.
+
+## Bolk 11
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter AdminSkeletonContractTests
+```
+
+Exit: 0.
+
+## Bolk 12
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter CellConfigurationStudioImportTests
+```
+
+Exit: 1.
+
+Avbrutt: `-[AppTests.CellConfigurationStudioImportTests testDecodedStudioInstallsPrivateImportRuntimeBindingBeforeStateRead]`.
+
+## Bolk 13
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'PublicationCellTests|PublicationPublicSurfaceTests'
+```
+
+Exit: 0.
+
+## Bolk 14
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter SkeletonParityStrictVaultRequesterTests
+```
+
+Exit: 0.
+
+## Bolk 15
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter MixTidyPolicyTests
+```
+
+Exit: 0.
+
+## Bolk 16
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'ArendalsukaKnowledgeDisabledRouteTests|ButlerSignalMatcherTests'
+```
+
+Exit: 1.
+
+Avbrutt: `-[AppTests.ButlerSignalMatcherTests testAnalysePromptNowReachesTheAdvisoryReportHelper]`.
+
+## Bolk 17
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'IdentityLinkRendezvousStoreTests|IdentityLinkRoutesTests|ArendalsukaEventAtlasCellTests|ArendalsukaFavoritesImportCodeParserTests|ArendalsukaInterestTaxonomyBuilderTests|ArendalsukaKnowledgeCellTests|ArendalsukaKnowledgeSQLiteStoreTests|ArendalsukaProfileCellTests|ArendalsukaPublicSurfaceRouteTests|ArtistSalesChannelCellTests|AssociatedDomainsRouteTests|CalendarSurfaceConfigurationTests|CellScaffoldRuntimeIdentityMigrationCandidateCommandTests|CellScaffoldRuntimeIdentityMigrationPlannerTests|CellScaffoldRuntimeStorageRootTests|CodableTests|ConciergeKnowledgeCorpusCellTests|ConferenceAIAssistantConfigurationTests|ConferenceAgendaCellTests|ConferenceAudienceDiscoveryCellTests'
+```
+
+Exit: 0.
+
+## Bolk 18
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'ConferenceBroadcastStudioCellTests|ConferenceConfigurationCatalogTests|ConferenceConnectionHubCellTests|ConferenceDemoStoryCellTests|ConferenceInsightAggregateCellTests|ConferenceInterestTaxonomyBuilderTests|ConferenceLiveInteractionShellBridgeTests|ConferenceMVPSkeletonTests|ConferenceMessageExchangeAcceptanceTests|ConferenceOnboardingCellTests|ConferencePublicProfileCellTests|ConferencePublicShellReadinessTests|ConferenceRecommendationCellTests|ConferenceRegistrationCellTests|ConferenceShellConfigurationFactoryTests|ConferenceSimulationClockCellTests|ConferenceSimulationPlaybackCellTests|ConferenceSimulationPopulationCellTests|ConferenceSimulationStudioCellTests|ConfigurationArchitectWorkspaceTests'
+```
+
+Exit: 1.
+
+Avbrutt: `-[AppTests.ConferenceConfigurationCatalogTests testConferenceCatalogConfigurationsLoadAsWorkspaces]`.
+
+## Bolk 19
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'ConfigurationCatalogCellTests|ConfigurationCatalogClientTests|ConfigurationCatalogSkeletonParityTests|ContactEndpointCellTests|ContactRegistryCellTests|ContextTransitionPayloadFactoryTests|DevelopmentStatusSnapshotProducerTests|DeviceCallbackCapabilityServerTests|DeviceIngressCallbackRuntimeTests|DeviceRegistrationReadinessTests|EntityAnchorDataV1ContractTests|EntityAtlasRoutesTests|EntityGraphStorageTests|EntityMergePolicyRegistryV0Tests|EntityOperationEnvelopeV0Tests|EntityScaffoldEnrollmentCellTests|EntityStudioCellTests|EntityStudioConfigurationFactoryTests|EventPlatformRoutesTests|EventPublisherRegistryCellTests'
+```
+
+Exit: 1.
+
+Avbrutt: `-[AppTests.ConfigurationCatalogCellTests testCatalogBootstrapsRAGGatewayEntryAndExposesMenuConfiguration]`.
+
+## Bolk 20
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'ExactStagingDeviceIngressPilotTests|ExecutablePurposeGroundingCellTests|FlowDebugProbeCellTests|FundingEntitlementAgreementTests|GraphStoreCellTests|GuidedOnboardingCellTests|HAVENAgentCapabilityBrokerCellTests|IdeaTaskWorkspaceTests|JWTAuthRoutesTests|LeadVaultCellTests|LeadVaultRoutesTests|LiveInteractionCellTests|LocalLLMGatewayCellTests|MVPAdminAccessTests|MarkdownRendererCellTests|MediaCollectionCellTests|MermaidRendererCellTests|MicropaymentsAuditRoutesTests|MintClientBootstrapTests|MultilevelCodableTests'
+```
+
+Exit: 1.
+
+Avbrutt: `-[AppTests.ExecutablePurposeGroundingCellTests testAdvisoryPanelPromptWithoutSubjectReportsMissingContext]`.
+
+## Bolk 21
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'NativeLocalModelBridgeTests|NotificationPushProviderTests|NotificationRuntimeReadinessTests|ObjectStorageAdapterCellTests|ObsidianAIWorkspaceConfigurationTests|OrchestratorPersistenceTests|PalazzoCommunaleServiceTests|ParticipationHubCellTests|ParticipationHubConfigurationFactoryTests|PaymentAccessCredentialStoreLifecycleTests|PaymentProofDoorCellTests|PersistedRuntimeReadinessTests|PersonalAIProviderPolicyTests|PersonalAssistantProfileCellTests|PersonalDataTrustPackageCellTests|PersonalEntityActivityDashboardConfigurationTests|PersonalPagePublisherCellTests|PersonalPagePublisherConfigurationTests|PersonlogProjectionCellTests|PerspectiveCellTests'
+```
+
+Exit: 1.
+
+Avbrutt: `-[AppTests.OrchestratorPersistenceTests testLegacyPortholeSnapshotRecoversConfigurationFromSidecar]`.
+
+## Bolk 22
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'ProductionRuntimeAdmissionMiddlewareTests|ProductionSkeletonBindingIntegrityTests|ProofDoorMVPRouteSecurityTests|PublishedConfigurationCatalogCellTests|PurposeQualityMonitorCellTests|QuestionnaireCampaignCellTests|QuestionnaireCampaignRoutesTests|QuestionnaireResponseCellTests|RAGCellAccessSecurityTests|RAGGatewayCellTests|RAGGatewayConfigTests|RAGGatewayConfigurationFactoryTests|RAGGatewayHTTPClientTests|RAGIngestionCellTests|RAGMVPRoutesTests|RAGPersistedRuntimeReadinessTests|RAGPromptAdminCellTests|RAGPromptAdminConfigurationFactoryTests|RestaurantExperiencePlanCellTests|RestaurantOnboardingCellTests'
+```
+
+Exit: 1.
+
+Avbrutt: `-[AppTests.ProductionSkeletonBindingIntegrityTests testArendalsukaEventAtlasPortholeTabsAndDetailsDoNotReturnNotFound]`.
+
+## Bolk 23
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'RestaurantPublishedContentCellTests|RestaurantShellCellsTests|RestaurantSurfaceRoutesTests|RestaurantVisitContextCellTests|SMIAgreementSettlementCellTests|SalesWorkspaceCellTests|ScaffoldLaunchRegistryCellTests|ScaffoldNotificationContractsTests|ScaffoldOwnerAdminRoutesTests|ScaffoldSetupCellTests|ScaffoldSurfaceGatePolicyTests|ScaffoldTruthSourceCatalogTests|SecureDevelopmentStatusSnapshotFileTests|SkeletonElementParityMatrixTests|SkeletonParityRoutesTests|SkeletonPortableModelTests|SkeletonRuntimeDecoderTests|SpatialCellsTests|SpatialRegistryRemoteIntegrationTests|SproutBridgeDiscoveryRoutesTests'
+```
+
+Exit: 1.
+
+Feilet: `-[AppTests.SkeletonElementParityMatrixTests testMatrixRevisionMatchesPackagePin]`.
+
+Feilet: `-[AppTests.SkeletonElementParityMatrixTests testNamedCorpusMatchesPinnedSkeletonElementEnumAndRoundTrips]`.
+
+```text
+/Users/kjetil/Build/Digipomps/HAVEN/CellScaffold/_wt-skjellettelementer-web-20260919/Tests/AppTests/SkeletonElementParityMatrixTests.swift:125: error: -[AppTests.SkeletonElementParityMatrixTests testMatrixRevisionMatchesPackagePin] : XCTAssertEqual failed: ("c81a39799c3f664d77afa5f5de131ddac70f3c9c") is not equal to ("533b42d5dc25cf1453cbe5ad08f523d47d5d32e9") - local CellProtocol candidate does not match the parity-matrix provenance
+/Users/kjetil/Build/Digipomps/HAVEN/CellScaffold/_wt-skjellettelementer-web-20260919/Tests/AppTests/SkeletonElementParityMatrixTests.swift:87: error: -[AppTests.SkeletonElementParityMatrixTests testNamedCorpusMatchesPinnedSkeletonElementEnumAndRoundTrips] : XCTAssertEqual failed: ("c81a39799c3f664d77afa5f5de131ddac70f3c9c") is not equal to ("533b42d5dc25cf1453cbe5ad08f523d47d5d32e9") - resolved CellProtocol checkout does not match the parity-matrix provenance
+```
+
+## Bolk 24
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'SproutExecutableCatalogRoutesTests|SproutResolverRoutesTests|SwarmIdentityAdmissionCellTests|TodoCellConfigurationTests|TranscriptStoreCellTests|TrustPacketConfigurationFactoryTests|UserSimulationScaffoldTests|VaultMVPRoutesTests|VaultStudioWorkspaceTests|WebKnowledgeCellsTests'
+```
+
+Exit: 1.
+
+Avbrutt: `-[AppTests.SwarmIdentityAdmissionCellTests testAdminObserverCatalogIncludesSwarmAdmissionOnlyForProvedRequester]`.
+
+## Bolk 25
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'PersonalCopilotHelperTreeTests|PersonalCopilotHelperTreeReachabilityTests'
+```
+
+Exit: 1.
+
+Avbrutt: `-[AppTests.PersonalCopilotHelperTreeTests testPromptSubmitRecordsSelectedNodeThroughProductionAppendPath]`.
+
+## Bolk 26
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'ArendalsukaPublisherBootstrapTests|PersonEntityLinkEvidenceStoreTests|EncryptedEntityAuthorityReplicaPersistenceTests|EntityReplicaProcessTests|EntityPersonBridgeProcessTests|EntityDataGatewayCellTests|PersonEntityLinkCompletionTests'
+```
+
+Exit: 0.
+
+## Bolk 27
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter PersonalCopilotWidgetCanvasTests
+```
+
+Exit: 1.
+
+Avbrutt: `-[AppTests.PersonalCopilotWidgetCanvasTests testCancelWithoutDropLeavesTheCellAndDiskUnchanged]`.
+
+## Bolk 28
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'AIGatewayProviderToolsOffTests|AgentTrustPackageAdjustTests|AgentTrustPackageAntiPurposeTests|AgentTrustPackageApprovalTests|AgentTrustPackageAuditTests|AgentTrustPackageCellTests|AgentTrustPackageE2ETests|AgentTrustPackageReachTests|ChatAIGatewayDiscoveryCacheTests|ChatScopedAIProviderRegistryPersistenceTests|CredentialSealingTests|EffectReceiptTests|OwnerScopedCredentialCellTests|OwnerScopedCredentialStoreTests|PortholeWebRemoteConfigurationTests|RemoteBridgeheadAccessTests|SkeletonStyleParityCSSDriftTests|VaporProductControlDurabilityTests|WebFetchCeilingTests'
+```
+
+Exit: 1.
+
+Avbrutt: `-[AppTests.PortholeWebRemoteConfigurationTests testBuiltInAdminNavigationResolvesLocalFactoryBeforeRemoteExportAdmission]`.
+
+## Bolk 29
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'EntityPurposeLibrarySetupContractTests|EntityPurposeLibrarySetupCellTests|PerspectiveRuntimeBindingTests|PerspectiveLibraryProjectionTests|PersonalCopilotPerspectiveBoundaryTests|ScaffoldAdministratorRegistryTests|ScaffoldMandateTests|ScaffoldRoleIsNotAuthorityTests|ScaffoldAdministratorProvisionerTests|ChatAIGatewayRequestTests|ButlerBuiltInConfigurationUpgradeTests'
+```
+
+Exit: 1.
+
+Avbrutt: `-[AppTests.ButlerBuiltInConfigurationUpgradeTests testNormalBootstrapAndSameSurfaceLoadPersistThreadControls]`.
+
+## Bolk 30
+
+```sh
+swift test --disable-sandbox --force-resolved-versions --jobs 2 --skip PersonalCopilotV1Tests/testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota --skip PersonalCopilotV1Tests/testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation --skip PersonalCopilotV1Tests/testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision --skip PersonalCopilotV1Tests/testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault --skip ConferenceShellCellsTests/testParticipantPreviewShellCanLaunchDiscoveryChatAndShowMessageFeedback --filter 'ConferencePublicConfigurationPolicyTests|PortholeComponentSourceActionTests'
+```
+
+Exit: 0.

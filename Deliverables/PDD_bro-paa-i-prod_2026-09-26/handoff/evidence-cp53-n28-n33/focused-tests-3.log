@@ -1,0 +1,245 @@
+COMMAND=swift test --disable-sandbox --disable-automatic-resolution --cache-path /private/tmp/bro-swift-cache --jobs 4 --filter ScannerRetainedStateTests|EntityScannerConsumerSecurityTests
+warning: /Users/kjetil/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/kjetil/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: '_wt-bro-kanal-auth-20260927': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Using on-disk description]
+[1 / 85] CellNearby
+[1 / 177] HavenCommonsTests-product
+[1 / 56] X509
+[2 / 13] CellApple
+[5 / 16] CellApple
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/EntityRadar/EntityScannerCell.swift:194:25: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 192 |             guard let self, self.isAdvertisementOwner(requester),
+ 193 |                   await self.validateAccess("r---", at: "advertisement", for: requester) else { return .string("denied") }
+ 194 |             let value = await self.advertisementExchange.currentPublication
+     |                         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 195 |             return value.flatMap { self.valueType(from: $0) } ?? .null
+ 196 |         })
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/EntityRadar/EntityScannerCell.swift:203:17: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 201 |             try ad.validate()
+ 202 |             if self.connectService == nil { try await self.startConnectService(requester: requester) }
+ 203 |             try await self.advertisementExchange.publish(ad)
+     |                 `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 204 |             self.pushScannerEvent(topic: "scanner.advertisement.changed", title: "Nearby Sharing Changed",
+ 205 |                 payload: ["active": .bool(true)], requesterOverride: requester)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/EntityRadar/EntityScannerCell.swift:211:17: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 209 |             guard let self, self.isAdvertisementOwner(requester),
+ 210 |                   await self.validateAccess("-w--", at: "withdrawAdvertisement", for: requester) else { return .string("denied") }
+ 211 |             try await self.advertisementExchange.publish(nil)
+     |                 `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 212 |             self.pushScannerEvent(topic: "scanner.advertisement.changed", title: "Nearby Sharing Changed",
+ 213 |                 payload: ["active": .bool(false)], requesterOverride: requester)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/EntityRadar/EntityScannerCell.swift:532:9: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 530 | 
+ 531 |     func stopConnectService(requester: Identity) async {
+ 532 |         await advertisementExchange.stop()
+     |         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 533 |         let service = connectService
+ 534 |         connectService = nil
+
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+[8 / 19] CellApple
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:255:9: warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+253 | struct SkeletonBorderShape: Shape {
+254 |     let radius: CGFloat
+255 |     let edges: [SkeletonEdge]?
+    |         `- warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+256 |     let rtl: Bool
+257 |     func path(in rect: CGRect) -> Path {
+
+CellBase.SkeletonEdge:1:13: note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+1 | public enum SkeletonEdge : String, Codable {
+  |             `- note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+2 |     case top
+3 |     case leading
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:5:1: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  3 | 
+  4 | import SwiftUI
+  5 | import CellBase
+    | `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  6 | #if os(macOS)
+  7 | import AppKit
+
+[#AddPreconcurrencyImport]: <https://docs.swift.org/compiler/documentation/diagnostics/add-preconcurrency-import>
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift:341:56: warning: '20.0' is not a valid version number for watchOS
+339 |         try await registerEntityScannerResolve(on: resolver)
+340 | 
+341 |         if #available(macOS 26.0, iOS 27.0, tvOS 27.0, watchOS 20.0, *) {
+    |                                                        `- warning: '20.0' is not a valid version number for watchOS
+342 |             try await registerResolve(
+343 |                 on: resolver,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift:385:36: warning: conformance of 'CellType' to protocol 'Emit' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+383 |         do {
+384 |             if let persistency {
+385 |                 try await resolver.addCellResolve(
+    |                                    `- warning: conformance of 'CellType' to protocol 'Emit' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+386 |                     name: name,
+387 |                     cellScope: cellScope,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift:385:36: warning: conformance of 'CellType' to protocol 'OwnerInstantiable' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+383 |         do {
+384 |             if let persistency {
+385 |                 try await resolver.addCellResolve(
+    |                                    `- warning: conformance of 'CellType' to protocol 'OwnerInstantiable' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+386 |                     name: name,
+387 |                     cellScope: cellScope,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift:393:36: warning: conformance of 'CellType' to protocol 'Emit' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+391 |                 )
+392 |             } else {
+393 |                 try await resolver.addCellResolve(
+    |                                    `- warning: conformance of 'CellType' to protocol 'Emit' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+394 |                     name: name,
+395 |                     cellScope: cellScope,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift:393:36: warning: conformance of 'CellType' to protocol 'OwnerInstantiable' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+391 |                 )
+392 |             } else {
+393 |                 try await resolver.addCellResolve(
+    |                                    `- warning: conformance of 'CellType' to protocol 'OwnerInstantiable' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+394 |                     name: name,
+395 |                     cellScope: cellScope,
+
+[#IsolatedConformances]: <https://docs.swift.org/compiler/documentation/diagnostics/isolated-conformances>
+[14 / 22] CellApple
+[16 / 21] CellApple-product
+[16 / 21] CellBaseTests-product
+[21 / 32] CellBaseTests-product
+[22 / 32] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:172:31: warning: capture of 'service' with non-Sendable type 'ScannerService' in a '@Sendable' closure [#SendableClosureCaptures]
+170 |             service.duringInvitationAcceptance = { entered.fulfill(); _ = release.wait(timeout: .now() + 3) }
+171 |             DispatchQueue.global().async {
+172 |                 XCTAssertTrue(service.respondToInvitation(remoteUUID: "remote", accept: true)); accepted.fulfill()
+    |                               `- warning: capture of 'service' with non-Sendable type 'ScannerService' in a '@Sendable' closure [#SendableClosureCaptures]
+173 |             }
+174 |             await fulfillment(of: [entered], timeout: 2)
+
+CellApple.ScannerService:1:16: note: class 'ScannerService' does not conform to the 'Sendable' protocol
+ 1 | internal class ScannerService : NSObject, ObservableObject {
+   |                `- note: class 'ScannerService' does not conform to the 'Sendable' protocol
+ 2 |     @MainActor internal var advertisementExchange: CellApple.NearbyAdvertisementExchange?
+ 3 |     internal func readAdvertisement(remoteUUID: String) async -> CellApple.NearbyAdvertisement?
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:4:11: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellApple' [#AddPreconcurrencyImport]
+  2 | import Foundation
+  3 | import XCTest
+  4 | @testable import CellApple
+    |           `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellApple' [#AddPreconcurrencyImport]
+  5 | @testable import CellBase
+  6 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:177:42: warning: capture of 'service' with non-Sendable type 'ScannerService' in a '@Sendable' closure [#SendableClosureCaptures]
+175 |             DispatchQueue.global().async {
+176 |                 competing.fulfill()
+177 |                 if race == "collision" { service.browser(browser, foundPeer: c, withDiscoveryInfo: ["uuid": "remote"]) }
+    |                                          `- warning: capture of 'service' with non-Sendable type 'ScannerService' in a '@Sendable' closure [#SendableClosureCaptures]
+178 |                 else { service.stop() }
+179 |                 finished.fulfill()
+
+CellApple.ScannerService:1:16: note: class 'ScannerService' does not conform to the 'Sendable' protocol
+ 1 | internal class ScannerService : NSObject, ObservableObject {
+   |                `- note: class 'ScannerService' does not conform to the 'Sendable' protocol
+ 2 |     @MainActor internal var advertisementExchange: CellApple.NearbyAdvertisementExchange?
+ 3 |     internal func readAdvertisement(remoteUUID: String) async -> CellApple.NearbyAdvertisement?
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:177:58: warning: capture of 'browser' with non-Sendable type 'MCNearbyServiceBrowser' in a '@Sendable' closure [#SendableClosureCaptures]
+175 |             DispatchQueue.global().async {
+176 |                 competing.fulfill()
+177 |                 if race == "collision" { service.browser(browser, foundPeer: c, withDiscoveryInfo: ["uuid": "remote"]) }
+    |                                                          `- warning: capture of 'browser' with non-Sendable type 'MCNearbyServiceBrowser' in a '@Sendable' closure [#SendableClosureCaptures]
+178 |                 else { service.stop() }
+179 |                 finished.fulfill()
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/MultipeerConnectivity.framework/Headers/MCNearbyServiceBrowser.h:46:12: note: class 'MCNearbyServiceBrowser' does not conform to the 'Sendable' protocol
+44 | NS_ASSUME_NONNULL_BEGIN
+45 | API_DEPRECATED("Use Network Framework instead", macos(10.10, 27.0), ios(7.0, 27.0), tvos(10.0, 27.0))
+46 | @interface MCNearbyServiceBrowser : NSObject
+   |            `- note: class 'MCNearbyServiceBrowser' does not conform to the 'Sendable' protocol
+47 | - (instancetype)initWithPeer:(MCPeerID *)myPeerID serviceType:(NSString *)serviceType NS_DESIGNATED_INITIALIZER;
+48 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:1:1: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'MultipeerConnectivity' [#AddPreconcurrencyImport]
+  1 | import MultipeerConnectivity
+    | `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'MultipeerConnectivity' [#AddPreconcurrencyImport]
+  2 | import Foundation
+  3 | import XCTest
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:177:78: warning: capture of 'c' with non-Sendable type 'MCPeerID' in a '@Sendable' closure [#SendableClosureCaptures]
+175 |             DispatchQueue.global().async {
+176 |                 competing.fulfill()
+177 |                 if race == "collision" { service.browser(browser, foundPeer: c, withDiscoveryInfo: ["uuid": "remote"]) }
+    |                                                                              `- warning: capture of 'c' with non-Sendable type 'MCPeerID' in a '@Sendable' closure [#SendableClosureCaptures]
+178 |                 else { service.stop() }
+179 |                 finished.fulfill()
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/MultipeerConnectivity.framework/Headers/MCPeerID.h:32:12: note: class 'MCPeerID' does not conform to the 'Sendable' protocol
+30 | NS_ASSUME_NONNULL_BEGIN
+31 | API_DEPRECATED("Use Network Framework instead", macos(10.10, 27.0), ios(7.0, 27.0), tvos(10.0, 27.0))
+32 | @interface MCPeerID : NSObject <NSCopying, NSSecureCoding>
+   |            `- note: class 'MCPeerID' does not conform to the 'Sendable' protocol
+33 | - (instancetype)initWithDisplayName:(NSString *)myDisplayName NS_DESIGNATED_INITIALIZER;
+34 | 
+
+[#AddPreconcurrencyImport]: <https://docs.swift.org/compiler/documentation/diagnostics/add-preconcurrency-import>
+[#SendableClosureCaptures]: <https://docs.swift.org/compiler/documentation/diagnostics/sendable-closure-captures>
+[23 / 32] CellBaseTests-product
+error: SwiftCompile normal arm64 /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerRetainedStateTests.swift failed with a nonzero exit code. Command line:     cd /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol
+    builtin-SwiftPerFileCompile ScannerRetainedStateTests.swift
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerRetainedStateTests.swift:89:17: error: 'setupScheduled' is inaccessible due to 'fileprivate' protection level
+ 87 |         pair.a.deferEventDrainForTesting = true
+ 88 |         defer { pair.a.radarDelegate = nil; cell.connectService = nil }
+ 89 |         pair.pa.setupScheduled = true; pair.ac!.setupScheduled = true
+    |                 `- error: 'setupScheduled' is inaccessible due to 'fileprivate' protection level
+ 90 |         let bSession = pair.pa.mcSession, cSession = pair.ac!.mcSession
+ 91 |         pair.a.session(bSession, peer: pair.bPeer, didChange: .connected)
+
+CellApple.ScannerPeerTransport.setupScheduled:2:17: note: 'setupScheduled' declared here
+1 | class ScannerPeerTransport {
+2 | fileprivate var setupScheduled: Bool}
+  |                 `- note: 'setupScheduled' declared here
+3 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerRetainedStateTests.swift:89:49: error: 'setupScheduled' is inaccessible due to 'fileprivate' protection level
+ 87 |         pair.a.deferEventDrainForTesting = true
+ 88 |         defer { pair.a.radarDelegate = nil; cell.connectService = nil }
+ 89 |         pair.pa.setupScheduled = true; pair.ac!.setupScheduled = true
+    |                                                 `- error: 'setupScheduled' is inaccessible due to 'fileprivate' protection level
+ 90 |         let bSession = pair.pa.mcSession, cSession = pair.ac!.mcSession
+ 91 |         pair.a.session(bSession, peer: pair.bPeer, didChange: .connected)
+
+CellApple.ScannerPeerTransport.setupScheduled:2:17: note: 'setupScheduled' declared here
+1 | class ScannerPeerTransport {
+2 | fileprivate var setupScheduled: Bool}
+  |                 `- note: 'setupScheduled' declared here
+3 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerRetainedStateTests.swift:103:17: error: 'setupScheduled' is inaccessible due to 'fileprivate' protection level
+101 |         let fresh = try pair.prepareReconnect()
+102 |         try await pair.authenticateTransports(fresh.0, fresh.1)
+103 |         fresh.0.setupScheduled = true
+    |                 `- error: 'setupScheduled' is inaccessible due to 'fileprivate' protection level
+104 |         let beforeHeldCallback = observer.connections.count
+105 |         pair.a.session(fresh.0.mcSession, peer: pair.bPeer, didChange: .connected)
+
+CellApple.ScannerPeerTransport.setupScheduled:2:17: note: 'setupScheduled' declared here
+1 | class ScannerPeerTransport {
+2 | fileprivate var setupScheduled: Bool}
+  |                 `- note: 'setupScheduled' declared here
+3 | 
+Failed frontend command:
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift-frontend -frontend -c -filelist /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/CellProtocol.build/Debug/CellBaseTests-p.build/Objects-normal/arm64/sources-1 -primary-file /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerRetainedStateTests.swift -emit-dependencies-path /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/CellProtocol.build/Debug/CellBaseTests-p.build/Objects-normal/arm64/ScannerRetainedStateTests.d -emit-const-values-path /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/CellProtocol.build/Debug/CellBaseTests-p.build/Objects-normal/arm64/ScannerRetainedStateTests.swiftconstvalues -emit-reference-dependencies-path /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/CellProtocol.build/Debug/CellBaseTests-p.build/Objects-normal/arm64/ScannerRetainedStateTests.swiftdeps -serialize-diagnostics-path /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/CellProtocol.build/Debug/CellBaseTests-p.build/Objects-normal/arm64/ScannerRetainedStateTests.dia -target arm64-apple-macos14.0 -module-can-import-version AppKit 2775.10.103.1 2775.10.103 -module-can-import CellVapor -module-can-import-version Combine 3023 0 -module-can-import-version Compression 18 0 -module-can-import-version CryptoKit 383.1.1 0 -module-can-import-version Darwin 428.0.10 0 -module-can-import-version FoundationModels 2.0.68.1 0 -module-can-import-version JavaScriptCore 625.1.29 625.1.29 -module-can-import-version Security 62460.1.2 62460.1.2 -module-can-import-version Testing 2084 0 -module-can-import-version XCTest 25228 0 -disable-cross-import-overlay-search -swift-module-cross-import Darwin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/Darwin.swiftcrossimport/xlocale.swiftoverlay -swift-module-cross-import Testing /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/Testing.framework/Modules/Testing.swiftcrossimport/AppKit.swiftoverlay -swift-module-cross-import Testing /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/Testing.framework/Modules/Testing.swiftcrossimport/CoreGraphics.swiftoverlay -swift-module-cross-import Testing /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/Testing.framework/Modules/Testing.swiftcrossimport/CoreImage.swiftoverlay -swift-module-cross-import Testing /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/Testing.framework/Modules/Testing.swiftcrossimport/CoreTransferable.swiftoverlay -swift-module-cross-import Testing /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks/Testing.framework/Modules/Testing.swiftcrossimport/Foundation.swiftoverlay -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libFoundationMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#FoundationMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libFoundationModelsMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#FoundationModelsMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libObservationMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#ObservationMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libPreviewsMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#PreviewsMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libSwiftMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#SwiftMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libSwiftUIMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#SwiftUIMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing/libTestingMacros.dylib\#\#TestingMacros -disable-implicit-swift-modules -Xcc -fno-implicit-modules -Xcc -fno-implicit-module-maps -explicit-swift-module-map-file /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/CellProtocol.build/Debug/CellBaseTests-p.build/Objects-normal/arm64/CellBaseTests-dependencies-1.json -Xllvm -aarch64-use-tbi -enable-objc-interop -stack-check -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -I /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Products/Debug -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -F /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Products/Debug/PackageFrameworks -F /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Products/Debug -F /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -module-cache-path /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/SwiftExplicitPrecompiledModules -no-color-diagnostics -Xcc -fno-color-diagnostics -enable-testing -g -debug-info-format\=dwarf -dwarf-version\=4 -swift-version 5 -Onone -D SWIFT_PACKAGE -D DEBUG -D Xcode -serialize-debugging-options -enable-experimental-feature DebugDescriptionMacro -empty-abi-descriptor -validate-clang-modules-once -clang-build-session-file /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/ModuleCache.noindex/Session.modulevalidation -disable-sandbox -Xcc -working-directory -Xcc /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol -enable-anonymous-context-mangled-names -file-compilation-dir /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/GeneratedModuleMaps/COpenCombineHelpers.modulemap -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/GeneratedModuleMaps/CFileUtils.modulemap -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/GeneratedModuleMaps/CAsyncHTTPClient.modulemap -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/GeneratedModuleMaps/CNIOExtrasZlib.modulemap -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/GeneratedModuleMaps/CNIOSHA1.modulemap -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-numerics/Sources/_NumericsShims/include/module.modulemap -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-system/Sources/CSystem/include/module.modulemap -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-crypto/Sources/CCryptoBoringSSLShims/include/module.modulemap -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-crypto/Sources/CCryptoBoringSSL/include/module.modulemap -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/vapor/Sources/CVaporBcrypt/include/module.modulemap -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/GeneratedModuleMaps/CNIOBoringSSLShims.modulemap -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-nio-ssl/Sources/CNIOBoringSSL/include/module.modulemap -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/GeneratedModuleMaps/CNIOLLHTTP.modulemap -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/GeneratedModuleMaps/CNIOPosix.modulemap -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/GeneratedModuleMaps/CNIOWASI.modulemap -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-nio/Sources/CNIOWindows/include/module.modulemap -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/GeneratedModuleMaps/CNIOLinux.modulemap -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/GeneratedModuleMaps/CNIODarwin.modulemap -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/GeneratedModuleMaps/CNIOFreeBSD.modulemap -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/GeneratedModuleMaps/CNIOOpenBSD.modulemap -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/GeneratedModuleMaps/CNIOAtomics.modulemap -Xcc -fmodule-map-file\=/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-atomics/Sources/_AtomicsShims/include/module.modulemap -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -Xcc -ivfsstatcache -Xcc /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/SDKStatCaches.noindex/macosx27.0-26A425-a0facfad118c1a7a18f0aad9463f65497231f6df4def33e022ae2eb8f782df1a.sdkstatcache -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/OpenCombine/Sources/COpenCombineHelpers/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/FileUtils-c/Sources/CFileUtils/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/async-http-client/Sources/CAsyncHTTPClient/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-nio-extras/Sources/CNIOExtrasZlib/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-nio/Sources/CNIOSHA1/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-numerics/Sources/_NumericsShims/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-system/Sources/CSystem/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-crypto/Sources/CCryptoBoringSSLShims/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-crypto/Sources/CCryptoBoringSSL/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/vapor/Sources/CVaporBcrypt/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-nio-ssl/Sources/CNIOBoringSSLShims/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-nio-ssl/Sources/CNIOBoringSSL/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-nio/Sources/CNIOLLHTTP/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-nio/Sources/CNIOPosix/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-nio/Sources/CNIOWASI/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-nio/Sources/CNIOWindows/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-nio/Sources/CNIOLinux/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-nio/Sources/CNIODarwin/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-nio/Sources/CNIOFreeBSD/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-nio/Sources/CNIOOpenBSD/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-nio/Sources/CNIOAtomics/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/swift-atomics/Sources/_AtomicsShims/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Products/Debug/include -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/CellProtocol.build/Debug/CellBaseTests-p.build/DerivedSources-normal/arm64 -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/CellProtocol.build/Debug/CellBaseTests-p.build/DerivedSources/arm64 -Xcc -I/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/CellProtocol.build/Debug/CellBaseTests-p.build/DerivedSources -Xcc -DSWIFT_PACKAGE -Xcc -DDEBUG\=1 -no-auto-bridging-header-chaining -module-name CellBaseTests -const-gather-protocols-file /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/CellProtocol.build/Debug/CellBaseTests-p.build/Objects-normal/arm64/CellBaseTests_const_extract_protocols.json -disable-clang-spi -clang-target arm64-apple-macos27.0 -target-sdk-version 27.0 -target-sdk-name macosx27.0 -in-process-plugin-server-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/libSwiftInProcPluginServer.dylib -parse-as-library -o /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/CellProtocol.build/Debug/CellBaseTests-p.build/Objects-normal/arm64/ScannerRetainedStateTests.o -debug-module-path /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out/Intermediates.noindex/CellProtocol.build/Debug/CellBaseTests-p.build/Objects-normal/arm64/CellBaseTests.swiftmodule -index-unit-output-path /CellProtocol.build/Debug/CellBaseTests-p.build/Objects-normal/arm64/ScannerRetainedStateTests.o -index-store-path /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/out -index-system-modules
+[26 / 32] CellBaseTests-product
+error: Build failed
+error: fatalError
+
+COMMAND_EXIT=1

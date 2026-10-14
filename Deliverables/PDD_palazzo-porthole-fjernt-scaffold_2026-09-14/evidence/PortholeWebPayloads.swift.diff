@@ -1,0 +1,70 @@
+--- before/CellScaffold/Sources/App/Controllers/PortholeWebPayloads.swift
++++ CellScaffold/Sources/App/Controllers/PortholeWebPayloads.swift
+@@ -9,6 +9,8 @@
+         let uuid: String?
+         let name: String?
+         let sourceCellEndpoint: String?
++        // purposeRef: purpose://candidate.palazzo-porthole-fjernt-scaffold.remote-lookup
++        var keypath: String? = nil
+ 
+         var hasIdentity: Bool {
+             uuid != nil || name != nil || sourceCellEndpoint != nil
+@@ -141,10 +143,16 @@
+         let sourceCellEndpoint = stringValue(object["sourceCellEndpoint"])
+             ?? stringValue(object["endpoint"])
+ 
++        // purposeRef: purpose://candidate.palazzo-porthole-fjernt-scaffold.remote-lookup
++        // Remote publisher names and keypaths are case-sensitive. Keep the
++        // existing normalization for local catalogue lookups.
++        let source = trimmedLookupToken(sourceCellEndpoint)
++        let hasRemoteAuthority = source.flatMap { URL(string: $0)?.host }?.isEmpty == false
+         let lookup = CellConfigurationLookup(
+             uuid: normalizedLookupToken(uuid),
+             name: normalizedLookupToken(name),
+-            sourceCellEndpoint: normalizedLookupToken(sourceCellEndpoint)
++            sourceCellEndpoint: hasRemoteAuthority ? source : normalizedLookupToken(sourceCellEndpoint),
++            keypath: trimmedLookupToken(stringValue(object["keypath"]))
+         )
+ 
+         return lookup.hasIdentity ? lookup : nil
+@@ -162,9 +170,39 @@
+     }
+ 
+     private static func normalizedLookupToken(_ value: String?) -> String? {
++        trimmedLookupToken(value)?.lowercased()
++    }
++
++    // purposeRef: purpose://candidate.palazzo-porthole-fjernt-scaffold.remote-lookup
++    private static func trimmedLookupToken(_ value: String?) -> String? {
+         guard let value else { return nil }
+         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+         guard trimmed.isEmpty == false else { return nil }
+-        return trimmed.lowercased()
++        return trimmed
++    }
++
++    // purposeRef: purpose://candidate.palazzo-porthole-fjernt-scaffold.reference-rewrite
++    // Only references owned by this configuration are rebased; skeleton,
++    // subscriptions, setup values and already remote endpoints stay intact.
++    static func rewritingLocalReferences(
++        _ configuration: CellConfiguration,
++        toHost host: String,
++        port: Int
++    ) -> CellConfiguration {
++        let authorityHost = host.contains(":") && !host.hasPrefix("[") ? "[\(host)]" : host
++        func rewrite(_ endpoint: String) -> String {
++            guard endpoint.hasPrefix("cell:///"), endpoint.count > "cell:///".count else { return endpoint }
++            return "cell://\(authorityHost):\(port)/" + endpoint.dropFirst("cell:///".count)
++        }
++        var result = configuration
++        if let source = result.discovery?.sourceCellEndpoint {
++            result.discovery?.sourceCellEndpoint = rewrite(source)
++        }
++        result.cellReferences = result.cellReferences?.map { reference in
++            var result = reference
++            result.endpoint = rewrite(reference.endpoint)
++            return result
++        }
++        return result
+     }
+ }

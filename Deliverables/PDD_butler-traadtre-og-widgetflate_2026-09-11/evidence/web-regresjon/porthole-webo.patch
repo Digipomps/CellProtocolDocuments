@@ -1,0 +1,192 @@
+diff --git a/Public/js/porthole-webo.js b/Public/js/porthole-webo.js
+index 029d8428..b9bd9e86 100644
+--- a/Public/js/porthole-webo.js
++++ b/Public/js/porthole-webo.js
+@@ -223,6 +223,7 @@ window.addEventListener("pageshow", handlePortholePageShow);
+ window.addEventListener("online", handlePortholePageShow);
+ document.addEventListener("visibilitychange", handlePortholeVisibilityChange);
+ window.addEventListener("resize", () => {
++  refreshSkeletonLayoutContext();
+   scheduleChatViewportLayout();
+   const compactMenusActive = usesCompactConvenienceMenus();
+   const compactModeChanged = compactMenusActive !== portholeWebState.compactMenusActive;
+@@ -3139,13 +3140,13 @@ function looksLikeCellConfiguration(value) {
+   return typeof value.uuid === "string" && value.uuid.trim().length > 0;
+ }
+ 
+-function resolveActionFeedback(keypath, payload, actionResult) {
++function resolveActionFeedback(keypath, payload, actionResult, { sourceAction = false } = {}) {
+   const normalizedKeypath = String(keypath || "").trim();
+-  const isChatHubAction = normalizedKeypath.startsWith("chatHub.");
+-  if (normalizedKeypath.endsWith(".navigation.setActiveTab")) {
++  const isChatHubAction = !sourceAction && normalizedKeypath.startsWith("chatHub.");
++  if (!sourceAction && normalizedKeypath.endsWith(".navigation.setActiveTab")) {
+     return { notice: null, error: null };
+   }
+-  if (isFastParticipantAgendaMutation(normalizedKeypath, payload)) {
++  if (!sourceAction && isFastParticipantAgendaMutation(normalizedKeypath, payload)) {
+     const normalizedResult = normalizeActionResultValue(
+       resolveFastParticipantAgendaResult(normalizedKeypath, actionResult, payload)
+     );
+@@ -3166,7 +3167,7 @@ function resolveActionFeedback(keypath, payload, actionResult) {
+       : actionResult
+   );
+ 
+-  if (isMermaidRenderKeypath(normalizedKeypath)) {
++  if (!sourceAction && isMermaidRenderKeypath(normalizedKeypath)) {
+     const mermaidFeedback = resolveMermaidActionFeedback(normalizedResult);
+     if (mermaidFeedback) {
+       return mermaidFeedback;
+@@ -3199,6 +3200,10 @@ function resolveActionFeedback(keypath, payload, actionResult) {
+     }
+   }
+ 
++  if (sourceAction) {
++    return { notice: "Handlingen er utført.", error: null };
++  }
++
+   if (isChatHubAction) {
+     return { notice: null, error: null };
+   }
+@@ -8240,6 +8245,7 @@ function renderSkeletonCanvas() {
+     }
+     root.innerHTML = references.length > 0 ? renderReferenceWorkspace(references) : "";
+     portholeWebState.renderer = null;
++    portholeWebState.skeletonLayoutObserver?.disconnect();
+     portholeWebState.rendererRoot = null;
+     portholeWebState.skeletonSignature = null;
+     renderSelectionOutline();
+@@ -8267,12 +8273,16 @@ function renderSkeletonCanvas() {
+       candidateRenderer = skeletonRuntime.createRenderer({
+         rootElement: root,
+         skeleton: renderedSkeleton,
++        layoutContext: declaredSkeletonLayoutContext(root),
+         currentConfigurationName,
+         localization: configuration?.localization || null,
+         localizationContext: portholeLocalizationContext(bootstrap),
+         deferMount: true,
+         onAction: async (keypath, payload, meta) => {
+           const routedAction = resolveRendererActionRoute(keypath, payload, meta);
++          if (routedAction.mount) {
++            return runComponentSourceAction(routedAction);
++          }
+           if (meta && meta.trigger === "document") {
+             const result = await requestActionPayload(routedAction.keypath, routedAction.payload, 30000);
+             return normalizeActionResultValue(actionResultPayload(result));
+@@ -8307,6 +8317,7 @@ function renderSkeletonCanvas() {
+     }
+     portholeWebState.renderer = candidateRenderer;
+     portholeWebState.rendererRoot = root;
++    observeSkeletonLayoutHost(root);
+     portholeWebState.skeletonSignature = signature;
+     portholeWebState.localizationSignature = JSON.stringify(configuration?.localization || null);
+     clearSkeletonValidationDiagnostic();
+@@ -8318,6 +8329,7 @@ function renderSkeletonCanvas() {
+     portholeWebState.renderer.setLocalization?.(portholeLocalizationContext(bootstrap),
+       localizationChanged ? configuration?.localization || null : undefined);
+     portholeWebState.localizationSignature = localizationSignature;
++    refreshSkeletonLayoutContext();
+     portholeWebState.renderer.update(state);
+     clearSkeletonValidationDiagnostic();
+   } catch (error) {
+@@ -8333,6 +8345,29 @@ function renderSkeletonCanvas() {
+   scheduleChatViewportLayout();
+ }
+ 
++// V3-A: one measured host boundary; descendants only use declared layout.
++function declaredSkeletonLayoutContext(root) {
++  const capabilities = ["keyboard", "drag"];
++  if (window.matchMedia("(pointer: fine)").matches) capabilities.push("pointer");
++  if (window.matchMedia("(hover: hover)").matches) capabilities.push("hover");
++  if (navigator.maxTouchPoints > 0) capabilities.push("touch");
++  return { availableWidth: root.clientWidth, availableHeight: root.parentElement?.clientHeight, capabilities };
++}
++
++function refreshSkeletonLayoutContext() {
++  const root = portholeWebState.rendererRoot;
++  if (root) portholeWebState.renderer?.setLayoutContext?.(declaredSkeletonLayoutContext(root));
++}
++
++function observeSkeletonLayoutHost(root) {
++  portholeWebState.skeletonLayoutObserver?.disconnect();
++  if (typeof ResizeObserver !== "function") return;
++  const observer = new ResizeObserver(refreshSkeletonLayoutContext);
++  observer.observe(root);
++  if (root.parentElement) observer.observe(root.parentElement);
++  portholeWebState.skeletonLayoutObserver = observer;
++}
++
+ let chatViewportLayoutFrame = null;
+ function scheduleChatViewportLayout() {
+   if (chatViewportLayoutFrame !== null) return;
+@@ -8824,6 +8859,18 @@ function reapplyPersistentFieldValues() {
+ }
+ 
+ function resolveRendererActionRoute(keypath, payload, meta) {
++  if (meta && (meta.sourceCellEndpoint !== undefined || meta.mount !== undefined)) {
++    const mount = meta.mount;
++    if (typeof meta.sourceCellEndpoint !== "string" || !meta.sourceCellEndpoint.trim()
++      || !mount || !["instanceID", "componentID", "revision"].every((key) => typeof mount[key] === "string" && mount[key].trim())) {
++      const message = "Komponentens kildehandling mangler endepunkt eller monteringsmetadata.";
++      portholeWebState.error = message;
++      renderSkeletonValidationDiagnostic(message);
++      throw new Error(message);
++    }
++    return { keypath, payload, sourceCellEndpoint: meta.sourceCellEndpoint,
++      mount: { instanceID: mount.instanceID, componentID: mount.componentID, revision: mount.revision } };
++  }
+   const trigger = meta && typeof meta.trigger === "string" ? meta.trigger : "";
+   const binding = meta && meta.binding && meta.binding.element ? meta.binding : null;
+   const sourceKeypath = binding && typeof binding.sourceKeypath === "string" ? binding.sourceKeypath.trim() : "";
+@@ -8846,6 +8893,26 @@ function resolveRendererActionRoute(keypath, payload, meta) {
+   return { keypath, payload };
+ }
+ 
++async function runComponentSourceAction(action) {
++  portholeWebState.error = null;
++  portholeWebState.notice = null;
++  try {
++    const response = await requestActionPayload(action.keypath, action.payload, 30000, action);
++    const feedback = resolveActionFeedback(action.keypath, action.payload, response, { sourceAction: true });
++    if (feedback.error) throw new Error(feedback.error);
++    // A source keypath may have the same name as a host navigation/editor action.
++    // Do not apply its result or optimistic state to the host's keypath namespace.
++    portholeWebState.notice = feedback.notice;
++    render({ forceShell: true, preserveSkeletonDOM: true });
++    return normalizeActionResultValue(actionResultPayload(response));
++  } catch (error) {
++    portholeWebState.error = error instanceof Error ? error.message : String(error);
++    render({ forceShell: true, preserveSkeletonDOM: true });
++    renderSkeletonValidationDiagnostic(portholeWebState.error);
++    throw error;
++  }
++}
++
+ function resolveRendererActionPayload({ keypath, payload, meta, state }) {
+   const activeBinding = meta && meta.binding && meta.binding.element ? meta.binding : null;
+   const trigger = meta && typeof meta.trigger === "string" ? meta.trigger : "";
+@@ -9874,8 +9941,13 @@ async function requestBootstrapPayload({ shellOnly = false } = {}) {
+   return fetchJSON(requestURL, { timeoutMs });
+ }
+ 
+-async function requestActionPayload(keypath, payload, timeoutMs) {
+-  const decoratedPayload = decorateActionPayloadForTransport(keypath, payload);
++async function requestActionPayload(keypath, payload, timeoutMs, sourceAction = null) {
++  const decoratedPayload = sourceAction ? payload : decorateActionPayloadForTransport(keypath, payload);
++  const request = { keypath, payload: decoratedPayload ?? null };
++  if (sourceAction) {
++    request.sourceCellEndpoint = sourceAction.sourceCellEndpoint;
++    request.mount = sourceAction.mount;
++  }
+   // Web Porthole keeps websocket for live refresh signals, but actions go over HTTP so
+   // button feedback does not depend on a websocket response frame arriving in time.
+   const timeoutMessage = isModelBackedActionKeypath(keypath)
+@@ -9883,7 +9955,7 @@ async function requestActionPayload(keypath, payload, timeoutMs) {
+     : null;
+   return postJSON(
+     actionURL,
+-    { keypath, payload: decoratedPayload ?? null },
++    request,
+     { timeoutMs, timeoutMessage }
+   );
+ }

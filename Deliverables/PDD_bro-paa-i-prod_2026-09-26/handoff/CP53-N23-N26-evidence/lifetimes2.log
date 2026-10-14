@@ -1,0 +1,399 @@
+warning: /Users/kjetil/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/kjetil/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: '_wt-bro-kanal-auth-20260927': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Provisioning 1 / 169]
+[Pre-planning 1 / 3614]
+[Planning 1557 / 3614]
+[Planning deferred tasks]
+[Constructing 2761 / 8669]
+[1 / 200] Atomics
+[20 / 31] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeResponseLifetimeTests.swift:87:154: warning: left side of nil coalescing operator '??' has non-optional type 'String', so the right side is never used
+ 85 |         await bridge.channelDidClose(try XCTUnwrap(oldWire.channelSession))
+ 86 |         let freshWire = try await install(bridge, owner: owner), received = ResponseLifetimeValues()
+ 87 |         let newSubscription = try await bridge.flow(requester: owner).sink(receiveCompletion: { _ in }, receiveValue: { received.append(.string($0.title ?? "")) })
+    |                                                                                                                                                          `- warning: left side of nil coalescing operator '??' has non-optional type 'String', so the right side is never used
+ 88 |         let fresh = try XCTUnwrap(freshWire.commands.last { $0.command == .feed })
+ 89 |         await barrier.release()
+[25 / 42] CellBaseTests-product
+[27 / 42] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:268:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+266 |         // concerns A's physical route, and preserves the receive sequence.
+267 |         _ = try pair.pb.gate.openPeerFrame(heldRequest.data)
+268 |         let pendingCommand = await bridge.auditor.loadBridgeCommandForCommandId(1)
+    |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+269 |         XCTAssertNotNil(pendingCommand)
+270 |         let forged = BridgeCommand(cmd: "response", payload: .string("from-c"), cid: 1,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:274:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+272 |         try await pc.gate.sendData(A.encode(forged))
+273 |         try await pair.deliverNext()
+274 |         let stillPending = await bridge.auditor.loadBridgeCommandForCommandId(1)
+    |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+275 |         XCTAssertNotNil(stillPending, "C's response must not consume B's pending cid")
+276 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:300:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+298 |             await pair.pb.bridge!.sendCommand(command: .description, identity: pair.b.owner, payload: nil)
+299 |             let oldCommand = try await pair.next(), captured = try pair.receiver(oldCommand)
+300 |             let firstCID = await pair.pb.bridge!.auditor.loadBridgeCommandForCommandId(1)
+    |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+301 |             XCTAssertEqual(firstCID?.cid, 1)
+302 |             try await pair.deliver(oldCommand)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:309:26: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+307 |             await fresh.1.bridge!.sendCommand(command: .description, identity: pair.b.owner, payload: nil)
+308 |             let newCommand = try await pair.next()
+309 |             let newCID = await fresh.1.bridge!.auditor.loadBridgeCommandForCommandId(1)
+    |                          `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+310 |             XCTAssertEqual(firstCID?.cid, newCID?.cid, "Actual Base cid reuse")
+311 |             // A callback already captured by an old transport cannot close the new one.
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:628:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+626 |                 XCTAssertNotEqual(oldKey, freshKey)
+627 |                 let request = BridgeCommand(cmd: "description", identity: pair.a.owner.publicIdentitySnapshot(), payload: nil, cid: 1)
+628 |                 let stored = await fresh.0.bridge!.auditor.storeBridgeCommand(request, for: 1)
+    |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+629 |                 XCTAssertTrue(stored)
+630 |                 // M knows the public new generation and the expected counter.
+
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+[29 / 41] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeDescriptionConcurrencyTests.swift:42:25: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 40 | 
+ 41 |     private static func deliver(_ payload: ValueType, to bridge: BridgeBase) async throws {
+ 42 |         let commandID = await bridge.auditor.getNewCommandId()
+    |                         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 43 |         await bridge.auditor.storeBridgeCommand(
+ 44 |             BridgeCommand(cmd: Command.description.rawValue, payload: nil, cid: commandID),
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeDescriptionConcurrencyTests.swift:43:9: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 41 |     private static func deliver(_ payload: ValueType, to bridge: BridgeBase) async throws {
+ 42 |         let commandID = await bridge.auditor.getNewCommandId()
+ 43 |         await bridge.auditor.storeBridgeCommand(
+    |         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 44 |             BridgeCommand(cmd: Command.description.rawValue, payload: nil, cid: commandID),
+ 45 |             for: commandID
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeDescriptionConcurrencyTests.swift:105:23: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+103 |             try await group.waitForAll()
+104 |         }
+105 |         let pending = await bridge.auditor.pendingCommandCount()
+    |                       `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+106 |         XCTAssertEqual(pending, 0)
+107 |         Self.assertCoherent(try await bridge.advertise(for: owner))
+
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeMuxSendLifetimeTests.swift:45:21: warning: result of call to 'fulfillment(of:timeout:enforceOrder:)' is unused [#NoUsage]
+43 |     try await submit(lifecycleMuxCommand("openChannel", owner, "sibling", target: "healthy", cid: 7))
+44 |     let old = Task { try await submit(lifecycleMuxCommand("get", owner, "reused", cid: 1)) }
+45 |     await XCTWaiter.fulfillment(of: [hold.entered], timeout: 2)
+   |                     `- warning: result of call to 'fulfillment(of:timeout:enforceOrder:)' is unused [#NoUsage]
+46 |     try await submit(lifecycleMuxCommand("closeChannel", owner, "reused"))
+47 |     XCTAssertEqual(stats.snapshot.retired, 1)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:18:14: warning: concurrently-executed local function 'data' must be marked as '@Sendable'; this is an error in the Swift 6 language mode
+ 16 |     private func checkFullVector(_ name: String) async throws {
+ 17 |         let v = try Self.vectors(name)
+ 18 |         func data(_ name: String) -> Data { v[name]! }
+    |              `- warning: concurrently-executed local function 'data' must be marked as '@Sendable'; this is an error in the Swift 6 language mode
+ 19 |         let endpoint = try A.decode(P.Endpoint.self, from: data("endpoint"))
+ 20 |         let ih = try A.decode(P.Hello.self, from: data("hello0")), rh = try A.decode(P.Hello.self, from: data("hello1"))
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:246:54: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+244 |         i = try BridgeChannelTransport(underlying: it, peerEndpoint: endpoint, role: .initiator, owner: io,
+245 |             limits: limits, source: UUID().uuidString, disclosurePolicy: policy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+246 |             recheckPolicy: recheck, wallClock: clock.date, monotonic: clock.uptime) { [id] gate, session in
+    |                                                      `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+247 |                 if let factory, factoryRole == .initiator { return try await factory(gate, session) }
+248 |                 id.created(); gate.setDelegate(id)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:246:77: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+244 |         i = try BridgeChannelTransport(underlying: it, peerEndpoint: endpoint, role: .initiator, owner: io,
+245 |             limits: limits, source: UUID().uuidString, disclosurePolicy: policy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+246 |             recheckPolicy: recheck, wallClock: clock.date, monotonic: clock.uptime) { [id] gate, session in
+    |                                                                             `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+247 |                 if let factory, factoryRole == .initiator { return try await factory(gate, session) }
+248 |                 id.created(); gate.setDelegate(id)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:254:63: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+252 |         r = try BridgeChannelTransport(underlying: rt, peerEndpoint: endpoint, role: .responder, owner: ro,
+253 |             limits: limits, source: UUID().uuidString, disclosurePolicy: responderPolicy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+254 |             recheckPolicy: responderRecheck, wallClock: clock.date, monotonic: clock.uptime) { [rd] gate, session in
+    |                                                               `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+255 |                 if let factory, factoryRole == .responder { return try await factory(gate, session) }
+256 |                 rd.created(); gate.setDelegate(rd)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:254:86: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+252 |         r = try BridgeChannelTransport(underlying: rt, peerEndpoint: endpoint, role: .responder, owner: ro,
+253 |             limits: limits, source: UUID().uuidString, disclosurePolicy: responderPolicy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+254 |             recheckPolicy: responderRecheck, wallClock: clock.date, monotonic: clock.uptime) { [rd] gate, session in
+    |                                                                                      `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+255 |                 if let factory, factoryRole == .responder { return try await factory(gate, session) }
+256 |                 rd.created(); gate.setDelegate(rd)
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[35 / 41] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeTests.swift:315:9: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 313 |         )
+ 314 | 
+ 315 |         await auditor.storeBridgeCommand(command, for: 1, now: now)
+     |         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 316 | 
+ 317 |         let initialPendingCount = await auditor.pendingCommandCount(now: now.addingTimeInterval(0.5))
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeTests.swift:317:35: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 315 |         await auditor.storeBridgeCommand(command, for: 1, now: now)
+ 316 | 
+ 317 |         let initialPendingCount = await auditor.pendingCommandCount(now: now.addingTimeInterval(0.5))
+     |                                   `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 318 |         let takenCommand = await auditor.takeBridgeCommandForCommandId(1, now: now.addingTimeInterval(0.5))
+ 319 |         let pendingCountAfterTake = await auditor.pendingCommandCount(now: now.addingTimeInterval(0.5))
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeTests.swift:318:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 316 | 
+ 317 |         let initialPendingCount = await auditor.pendingCommandCount(now: now.addingTimeInterval(0.5))
+ 318 |         let takenCommand = await auditor.takeBridgeCommandForCommandId(1, now: now.addingTimeInterval(0.5))
+     |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 319 |         let pendingCountAfterTake = await auditor.pendingCommandCount(now: now.addingTimeInterval(0.5))
+ 320 |         XCTAssertEqual(initialPendingCount, 1)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeTests.swift:319:37: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 317 |         let initialPendingCount = await auditor.pendingCommandCount(now: now.addingTimeInterval(0.5))
+ 318 |         let takenCommand = await auditor.takeBridgeCommandForCommandId(1, now: now.addingTimeInterval(0.5))
+ 319 |         let pendingCountAfterTake = await auditor.pendingCommandCount(now: now.addingTimeInterval(0.5))
+     |                                     `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 320 |         XCTAssertEqual(initialPendingCount, 1)
+ 321 |         XCTAssertEqual(takenCommand?.cid, 1)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeTests.swift:324:9: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 322 |         XCTAssertEqual(pendingCountAfterTake, 0)
+ 323 | 
+ 324 |         await auditor.storeBridgeCommand(command, for: 2, now: now)
+     |         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 325 | 
+ 326 |         let expiredCommand = await auditor.loadBridgeCommandForCommandId(2, now: now.addingTimeInterval(2))
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeTests.swift:326:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 324 |         await auditor.storeBridgeCommand(command, for: 2, now: now)
+ 325 | 
+ 326 |         let expiredCommand = await auditor.loadBridgeCommandForCommandId(2, now: now.addingTimeInterval(2))
+     |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 327 |         let pendingCountAfterExpiry = await auditor.pendingCommandCount(now: now.addingTimeInterval(2))
+ 328 |         XCTAssertNil(expiredCommand)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeTests.swift:327:39: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 325 | 
+ 326 |         let expiredCommand = await auditor.loadBridgeCommandForCommandId(2, now: now.addingTimeInterval(2))
+ 327 |         let pendingCountAfterExpiry = await auditor.pendingCommandCount(now: now.addingTimeInterval(2))
+     |                                       `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 328 |         XCTAssertNil(expiredCommand)
+ 329 |         XCTAssertEqual(pendingCountAfterExpiry, 0)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeTests.swift:507:35: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 505 |         XCTAssertEqual(resolvedFirst, firstExpected)
+ 506 |         XCTAssertEqual(resolvedSecond, secondExpected)
+ 507 |         let pendingCommandCount = await bridge.auditor.pendingCommandCount()
+     |                                   `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 508 |         XCTAssertEqual(pendingCommandCount, 0)
+ 509 |     }
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeTests.swift:536:35: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 534 |             XCTAssertTrue(String(describing: error).contains("timeout"))
+ 535 |         }
+ 536 |         let pendingCommandCount = await bridge.auditor.pendingCommandCount()
+     |                                   `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 537 |         XCTAssertEqual(pendingCommandCount, 0)
+ 538 |     }
+
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+[36 / 42] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeDiagnosticPrivacyTests.swift:40:23: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 38 |         for (request, code) in [(Command.description, "description"), (.admit, "connect"), (.connectEmitter, "connect"),
+ 39 |                                 (.agreement, "contract"), (.feed, "flow")] {
+ 40 |             let cid = await bridge.auditor.getNewCommandId()
+    |                       `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 41 |             await bridge.auditor.storeBridgeCommand(.init(cmd: request.rawValue, payload: nil, cid: cid), for: cid)
+ 42 |             let count = logs.lines.count
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeDiagnosticPrivacyTests.swift:41:13: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 39 |                                 (.agreement, "contract"), (.feed, "flow")] {
+ 40 |             let cid = await bridge.auditor.getNewCommandId()
+ 41 |             await bridge.auditor.storeBridgeCommand(.init(cmd: request.rawValue, payload: nil, cid: cid), for: cid)
+    |             `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 42 |             let count = logs.lines.count
+ 43 |             try await bridge.consumeResponse(command: .init(cmd: "response", payload: .string(marker), cid: cid))
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeDiagnosticPrivacyTests.swift:71:23: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 69 |         XCTAssertTrue(logs.lines.contains { $0.contains("code=get_failed cid=73") })
+ 70 |         await bridge.sendCommand(command: .description, identity: owner, payload: .string(marker))
+ 71 |         let request = await bridge.auditor.getNewCommandId()
+    |                       `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 72 |         await bridge.auditor.storeBridgeCommand(.init(cmd: marker, payload: .string(marker), cid: request), for: request)
+ 73 |         try await bridge.consumeResponse(command: .init(cmd: "response", payload: .string(marker), cid: request))
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeDiagnosticPrivacyTests.swift:72:9: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 70 |         await bridge.sendCommand(command: .description, identity: owner, payload: .string(marker))
+ 71 |         let request = await bridge.auditor.getNewCommandId()
+ 72 |         await bridge.auditor.storeBridgeCommand(.init(cmd: marker, payload: .string(marker), cid: request), for: request)
+    |         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 73 |         try await bridge.consumeResponse(command: .init(cmd: "response", payload: .string(marker), cid: request))
+ 74 |         XCTAssertTrue(logs.lines.contains { $0.contains("Response did not match request type=none") })
+
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeIdentityBoundaryTests.swift:371:75: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+369 |             XCTAssertEqual(admission, .signed)
+370 |             let localDecision = await cell.authorizationDecision(requestedAccess: "r---", at: "feed", for: identity)
+371 |             XCTAssertTrue(localDecision.allowed, "Fresh local contract: \(localDecision.reasonCode)")
+    |                                                                           |             |- note: provide a default value to avoid this warning
+    |                                                                           |             `- note: use 'String(describing:)' to silence this warning
+    |                                                                           `- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+372 |             let outgoing = PairedTransport()
+373 |             let incoming = PairedTransport()
+[38 / 42] CellBaseTests-product
+[40 / 42] CellBaseTests-product
+[41 / 41] ReferenceLoadBenchmark-product
+[43 / 43] haven-commons-product
+[45 / 45] CellRuntimeBenchmarks-product
+Build complete! (6,76 sek)
+Test Suite 'Selected tests' started at 2026-09-29 03:19:24.760.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-09-29 03:19:24.761.
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-09-29 03:19:24.761.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 03:19:24.761.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 03:19:24.817.
+Test Suite 'CellNearbyTests.xctest' started at 2026-09-29 03:19:24.817.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-09-29 03:19:24.817.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 03:19:24.817.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 03:19:24.875.
+Test Suite 'CellBaseTests.xctest' started at 2026-09-29 03:19:24.876.
+Test Suite 'BridgeFactoryLifetimeTests' started at 2026-09-29 03:19:24.876.
+Test Case '-[CellBaseTests.BridgeFactoryLifetimeTests testMuxLateFactoryRetiresResultWhenSessionCheckThrowsOrLogicalOpenIsCancelled]' started.
+Test Case '-[CellBaseTests.BridgeFactoryLifetimeTests testMuxLateFactoryRetiresResultWhenSessionCheckThrowsOrLogicalOpenIsCancelled]' passed (0.004 seconds).
+Test Case '-[CellBaseTests.BridgeFactoryLifetimeTests testWSLateFactoryBoundBeforeOrAfterCloseRetiresSubscriptionExactlyOnce]' started.
+Test Case '-[CellBaseTests.BridgeFactoryLifetimeTests testWSLateFactoryBoundBeforeOrAfterCloseRetiresSubscriptionExactlyOnce]' passed (0.004 seconds).
+Test Suite 'BridgeFactoryLifetimeTests' passed at 2026-09-29 03:19:24.883.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.007 (0.008) seconds
+Test Suite 'BridgeMultiplexingTests' started at 2026-09-29 03:19:24.883.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testBridgeCommandV2MetadataRoundTripsWithoutChangingLegacyDefaults]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testBridgeCommandV2MetadataRoundTripsWithoutChangingLegacyDefaults]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testClientSessionBoundsIssuedChannelsAndReleasesReservationOnClose]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testClientSessionBoundsIssuedChannelsAndReleasesReservationOnClose]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testClientSessionRejectsResponseBeforeChannelIsOpened]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testClientSessionRejectsResponseBeforeChannelIsOpened]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testClientSessionReportsDetectedGapButStillDeliversFollowingFrame]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testClientSessionReportsDetectedGapButStillDeliversFollowingFrame]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testConnectionPoolEvictsLeastRecentlyUsedSessionAndClosesItAfterChannelRelease]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testConnectionPoolEvictsLeastRecentlyUsedSessionAndClosesItAfterChannelRelease]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testConnectionPoolRejectsUnboundSecurityKeyBeforeCreatingTransport]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testConnectionPoolRejectsUnboundSecurityKeyBeforeCreatingTransport]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testContinuityTrackerBoundsStreamsAndRejectsOversizedIdentifiers]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testContinuityTrackerBoundsStreamsAndRejectsOversizedIdentifiers]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testContinuityTrackerDetectsGapWithoutClaimingReplay]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testContinuityTrackerDetectsGapWithoutClaimingReplay]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testParallelResolverLookupsShareSuspendedAuthenticatedHandshakeAndPrincipal]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testParallelResolverLookupsShareSuspendedAuthenticatedHandshakeAndPrincipal]' passed (0.404 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testPoolDoesNotSharePhysicalSessionAcrossSecurityIdentities]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testPoolDoesNotSharePhysicalSessionAcrossSecurityIdentities]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testPoolResetForHostRetiresOnlyMatchingRemoteSessions]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testPoolResetForHostRetiresOnlyMatchingRemoteSessions]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testRepeatedChannelReuseBoundsOutboundStreamHistoryAndKeepsSiblingSequence]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testRepeatedChannelReuseBoundsOutboundStreamHistoryAndKeepsSiblingSequence]' passed (0.145 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testRepeatedStreamRemovalBoundsBackingHistoryAndPreservesSiblingWatermark]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testRepeatedStreamRemovalBoundsBackingHistoryAndPreservesSiblingWatermark]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testResolverMultiplexRouteReplacementKeepsNewGenerationSessionUsable]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testResolverMultiplexRouteReplacementKeepsNewGenerationSessionUsable]' passed (0.225 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testResolverMultiplexRouteUsesOneSessionURLForTwoRemoteCells]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testResolverMultiplexRouteUsesOneSessionURLForTwoRemoteCells]' passed (0.160 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionAddsPerStreamSequenceWatermarksToFlowFrames]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionAddsPerStreamSequenceWatermarksToFlowFrames]' passed (0.005 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionEnforcesChannelCapacityWithStableEvent]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionEnforcesChannelCapacityWithStableEvent]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionRejectsIdentityWithoutSigningKeyBeforeCallingFactory]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionRejectsIdentityWithoutSigningKeyBeforeCallingFactory]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionRejectsRemoteTargetAuthorityBeforeCallingFactory]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionRejectsRemoteTargetAuthorityBeforeCallingFactory]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionRemovesInsertedChannelWhenOpenedFrameCannotBeSent]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionRemovesInsertedChannelWhenOpenedFrameCannotBeSent]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testTwoRemoteBridgesShareOnePhysicalSessionAndKeepResponsesOnTheirChannels]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testTwoRemoteBridgesShareOnePhysicalSessionAndKeepResponsesOnTheirChannels]' passed (0.022 seconds).
+Test Suite 'BridgeMultiplexingTests' passed at 2026-09-29 03:19:25.861.
+	 Executed 21 tests, with 0 failures (0 unexpected) in 0.975 (0.978) seconds
+Test Suite 'BridgeMuxSendLifetimeTests' started at 2026-09-29 03:19:25.861.
+Test Case '-[CellBaseTests.BridgeMuxSendLifetimeTests testWSMuxHeldPhysicalSubmissionFencesReusedIDAndCIDWhileSiblingWorks]' started.
+Test Case '-[CellBaseTests.BridgeMuxSendLifetimeTests testWSMuxHeldPhysicalSubmissionFencesReusedIDAndCIDWhileSiblingWorks]' passed (0.006 seconds).
+Test Suite 'BridgeMuxSendLifetimeTests' passed at 2026-09-29 03:19:25.868.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.006 (0.007) seconds
+Test Suite 'BridgePeerV3Tests' started at 2026-09-29 03:19:25.868.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testActiveInitiatorCanReadResponderButUnrelatedRelayDHCannot]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testActiveInitiatorCanReadResponderButUnrelatedRelayDHCannot]' passed (0.009 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testAuthenticatedInnerFieldMutationsRequireMACSignatureAndFrozenContext]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testAuthenticatedInnerFieldMutationsRequireMACSignatureAndFrozenContext]' passed (0.084 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCanonicalEnvelopeAndPaddingRejectEveryAlternativeEncoding]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCanonicalEnvelopeAndPaddingRejectEveryAlternativeEncoding]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCloseAndDirectRevokeWinBeforePhysicalSendAdmission]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCloseAndDirectRevokeWinBeforePhysicalSendAdmission]' passed (0.084 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryHelloFieldAndLegacyProfileFailsBeforeDisclosure]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryHelloFieldAndLegacyProfileFailsBeforeDisclosure]' passed (0.017 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryOutOfOrderHandshakeMessageAndTamperedTagIsTerminal]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryOutOfOrderHandshakeMessageAndTamperedTagIsTerminal]' passed (0.025 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testExplicitDisclosurePolicyRejectsBeforeInitiatorSigning]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testExplicitDisclosurePolicyRejectsBeforeInitiatorSigning]' passed (0.205 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testHandshakeQuotasStayBoundedAndFinalFinishedWaitsForAuthenticatedProgress]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testHandshakeQuotasStayBoundedAndFinalFinishedWaitsForAuthenticatedProgress]' passed (0.014 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentDHLegsCannotSpliceProofOrFinishedEvenWithSameIdentities]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentDHLegsCannotSpliceProofOrFinishedEvenWithSameIdentities]' passed (0.338 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentFullHandshakeAndAllKeyPurposes]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentFullHandshakeAndAllKeyPurposes]' passed (0.037 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLateM1SendCompletionCannotUndoAuthenticatedProgress]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLateM1SendCompletionCannotUndoAuthenticatedProgress]' passed (0.007 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLiveMixedAlgorithmsFixedLengthsAndSameKeyReflection]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLiveMixedAlgorithmsFixedLengthsAndSameKeyReflection]' passed (0.337 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerLateFactoryTransportBindingRetiresSubscriptionAndDeinitializesForBothRoles]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerLateFactoryTransportBindingRetiresSubscriptionAndDeinitializesForBothRoles]' passed (0.093 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerMuxHeldPhysicalSubmissionFencesReusedIDAndCIDWhileSiblingWorks]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerMuxHeldPhysicalSubmissionFencesReusedIDAndCIDWhileSiblingWorks]' passed (0.072 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringEitherFactoryRetiresResultWithoutReady]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringEitherFactoryRetiresResultWithoutReady]' passed (0.066 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringVaultLookupOrSigningStopsDisclosure]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringVaultLookupOrSigningStopsDisclosure]' passed (0.069 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRegisteredRemoteRevocationAndSuspendedPolicyPreventLocalDisclosure]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRegisteredRemoteRevocationAndSuspendedPolicyPreventLocalDisclosure]' passed (0.017 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRetiredSignerCannotAffectFreshChannelWithSameIdentity]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRetiredSignerCannotAffectFreshChannelWithSameIdentity]' passed (0.016 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedFactoryIsRetiredOnceAndNeverPublishesReady]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedFactoryIsRetiredOnceAndNeverPublishesReady]' passed (0.105 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedVaultExistenceAndSignerCannotSurviveCloseRevokeOrExpiry]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedVaultExistenceAndSignerCannotSurviveCloseRevokeOrExpiry]' passed (1.324 seconds).
+Test Suite 'BridgePeerV3Tests' passed at 2026-09-29 03:19:28.793.
+	 Executed 20 tests, with 0 failures (0 unexpected) in 2.922 (2.925) seconds
+Test Suite 'BridgeResponseLifetimeTests' started at 2026-09-29 03:19:28.793.
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorDescriptionCannotReplaceRenewedMetadataOrScope]' started.
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorDescriptionCannotReplaceRenewedMetadataOrScope]' passed (0.005 seconds).
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorFeedCannotPublishIntoRenewedStream]' started.
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorFeedCannotPublishIntoRenewedStream]' passed (0.004 seconds).
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorGetCannotConsumeSameKeypathInRenewedBase]' started.
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorGetCannotConsumeSameKeypathInRenewedBase]' passed (0.006 seconds).
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testTwoConcurrentGetsOnSamePathKeepTheirOwnCommandAndImmediateResult]' started.
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testTwoConcurrentGetsOnSamePathKeepTheirOwnCommandAndImmediateResult]' passed (0.002 seconds).
+Test Suite 'BridgeResponseLifetimeTests' passed at 2026-09-29 03:19:28.810.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.017 (0.017) seconds
+Test Suite 'BridgeSigningLifetimeTests' started at 2026-09-29 03:19:28.810.
+Test Case '-[CellBaseTests.BridgeSigningLifetimeTests testOriginHeldExistenceOrReplayCannotSignExpiredChallengeWithLiveFeedPermit]' started.
+Test Case '-[CellBaseTests.BridgeSigningLifetimeTests testOriginHeldExistenceOrReplayCannotSignExpiredChallengeWithLiveFeedPermit]' passed (0.014 seconds).
+Test Case '-[CellBaseTests.BridgeSigningLifetimeTests testWSHeldExistenceChecksBothClocksAndCancellationBeforeAnySigning]' started.
+Test Case '-[CellBaseTests.BridgeSigningLifetimeTests testWSHeldExistenceChecksBothClocksAndCancellationBeforeAnySigning]' passed (0.003 seconds).
+Test Suite 'BridgeSigningLifetimeTests' passed at 2026-09-29 03:19:28.827.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.017 (0.017) seconds
+Test Suite 'CellBaseTests.xctest' passed at 2026-09-29 03:19:28.827.
+	 Executed 50 tests, with 0 failures (0 unexpected) in 3.945 (3.951) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 03:19:28.827.
+	 Executed 50 tests, with 0 failures (0 unexpected) in 3.945 (3.952) seconds

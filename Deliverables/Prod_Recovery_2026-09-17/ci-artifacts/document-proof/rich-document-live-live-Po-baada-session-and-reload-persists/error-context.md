@@ -1,0 +1,94 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - generic [ref=e7]: Porthole
+          - generic [ref=e8]: Live
+        - generic "Configuration stack" [ref=e9]:
+          - button "Tilbake" [ref=e10] [cursor=pointer]
+          - generic [ref=e12]: Dokument
+      - generic "Porthole-verktøylinje" [ref=e13]:
+        - button "Butler Chat" [ref=e14] [cursor=pointer]
+        - button "Bibliotek (108)" [ref=e15] [cursor=pointer]
+        - group "Modus" [ref=e16]:
+          - button "Vis" [pressed] [ref=e17] [cursor=pointer]
+          - button "Rediger" [ref=e18] [cursor=pointer]
+        - button "Verktøy" [ref=e19] [cursor=pointer]
+        - button "Mer" [ref=e21] [cursor=pointer]
+    - generic [ref=e24]:
+      - generic [ref=e26]:
+        - status [ref=e27]: Skrivehjelp · spørsmål og svar deles i dokumentet
+        - heading "Skrivehjelp" [level=3] [ref=e28]
+        - log [ref=e29]:
+          - paragraph [ref=e30]: Jeg hjelper dere å komme i gang med dokumentet. Skriv i arket, marker tekst for å formatere eller kommentere, og bruk bilde- eller diagramknappen for å sette inn innhold. Spør meg om formatering, kommentarer, samarbeid eller eksport. Denne veiviseren deler bruksråd; den skriver ikke tekst med en språkmodell. Spørsmålene vises til dokumentets deltakere.
+        - generic [ref=e31]:
+          - textbox "Spør skrivehjelpen" [ref=e32]
+          - button "Spør" [ref=e33] [cursor=pointer]
+      - generic [ref=e35]:
+        - status [ref=e36]: Alle endringer er lagret i dokumentcellen
+        - generic [ref=e37]:
+          - heading "Dokument" [level=2] [ref=e38]
+          - generic [ref=e39]: 1 aktive skriveflater
+          - combobox "Eksportformat" [ref=e40]:
+            - option "Word / Pages (.docx)" [selected]
+            - option "PDF"
+            - option "Markdown"
+            - option "Dokumentdefinisjon (JSON)"
+          - button "Last ned" [ref=e41] [cursor=pointer]
+        - generic [ref=e42]:
+          - generic [ref=e43]:
+            - generic [ref=e44]:
+              - button "Sett inn bilde" [ref=e45] [cursor=pointer]
+              - button "Sett inn diagram" [ref=e46] [cursor=pointer]
+            - toolbar [ref=e47]:
+              - generic [ref=e49]:
+                - button "Normal" [ref=e50] [cursor=pointer]:
+                  - text: Normal
+                  - img [ref=e51] [cursor=pointer]
+                - text: Heading 1 Heading 2 Heading 3 Normal
+              - generic [ref=e54]:
+                - button "bold" [ref=e55] [cursor=pointer]:
+                  - img [ref=e56] [cursor=pointer]
+                - button "italic" [ref=e59] [cursor=pointer]:
+                  - img [ref=e60] [cursor=pointer]
+                - button "underline" [ref=e62] [cursor=pointer]:
+                  - img [ref=e63] [cursor=pointer]
+                - button "strike" [ref=e66] [cursor=pointer]:
+                  - img [ref=e67] [cursor=pointer]
+              - generic [ref=e71]:
+                - 'button "list: ordered" [ref=e72] [cursor=pointer]':
+                  - img [ref=e73] [cursor=pointer]
+                - 'button "list: bullet" [ref=e77] [cursor=pointer]':
+                  - img [ref=e78] [cursor=pointer]
+              - generic [ref=e79]:
+                - button "blockquote" [ref=e80] [cursor=pointer]:
+                  - img [ref=e81] [cursor=pointer]
+                - button "link" [ref=e86] [cursor=pointer]:
+                  - img [ref=e87] [cursor=pointer]
+              - button "clean" [ref=e92] [cursor=pointer]:
+                - img [ref=e93] [cursor=pointer]
+            - generic [ref=e98]:
+              - textbox "Dokumenttekst" [ref=e99]:
+                - paragraph [ref=e100]: Samordnet dokument 1789625617883 Bidirectional
+              - text: "Visit URL: EditRemove"
+              - generic:
+                - generic:
+                  - generic: 89BD599C
+          - complementary [ref=e101]:
+            - heading "Kommentarer" [level=3] [ref=e102]
+            - textbox "Kommentar til markert tekst" [ref=e103]
+            - button "Legg til kommentar" [ref=e104] [cursor=pointer]
+            - paragraph [ref=e106]: Marker tekst for å legge til en kommentar.
+      - generic [ref=e108]:
+        - status [ref=e109]: Felles chat for dette dokumentet
+        - heading "Dokumentchat" [level=3] [ref=e110]
+        - log
+        - generic [ref=e111]:
+          - textbox "Chatmelding" [ref=e112]
+          - button "Send melding" [ref=e113] [cursor=pointer]
+  - status [ref=e114]
+```

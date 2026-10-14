@@ -1,0 +1,221 @@
+COMMAND=swift test --disable-sandbox --disable-automatic-resolution --cache-path /private/tmp/bro-swift-cache --jobs 4 --filter ScannerRetainedStateTests|EntityScannerConsumerSecurityTests
+warning: /Users/kjetil/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/kjetil/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: '_wt-bro-kanal-auth-20260927': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Provisioning 146 / 169]
+[Using on-disk description]
+[1 / 240] Metrics
+[1 / 84] NIOHTTP1
+[2 / 13] CellBaseTests-product
+[7 / 24] CellBaseTests-product
+[8 / 24] CellBaseTests-product
+[9 / 24] CellBaseTests-product
+[10 / 24] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:172:31: warning: capture of 'service' with non-Sendable type 'ScannerService' in a '@Sendable' closure [#SendableClosureCaptures]
+170 |             service.duringInvitationAcceptance = { entered.fulfill(); _ = release.wait(timeout: .now() + 3) }
+171 |             DispatchQueue.global().async {
+172 |                 XCTAssertTrue(service.respondToInvitation(remoteUUID: "remote", accept: true)); accepted.fulfill()
+    |                               `- warning: capture of 'service' with non-Sendable type 'ScannerService' in a '@Sendable' closure [#SendableClosureCaptures]
+173 |             }
+174 |             await fulfillment(of: [entered], timeout: 2)
+
+CellApple.ScannerService:1:16: note: class 'ScannerService' does not conform to the 'Sendable' protocol
+ 1 | internal class ScannerService : NSObject, ObservableObject {
+   |                `- note: class 'ScannerService' does not conform to the 'Sendable' protocol
+ 2 |     @MainActor internal var advertisementExchange: CellApple.NearbyAdvertisementExchange?
+ 3 |     internal func readAdvertisement(remoteUUID: String) async -> CellApple.NearbyAdvertisement?
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:4:11: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellApple' [#AddPreconcurrencyImport]
+  2 | import Foundation
+  3 | import XCTest
+  4 | @testable import CellApple
+    |           `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellApple' [#AddPreconcurrencyImport]
+  5 | @testable import CellBase
+  6 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:177:42: warning: capture of 'service' with non-Sendable type 'ScannerService' in a '@Sendable' closure [#SendableClosureCaptures]
+175 |             DispatchQueue.global().async {
+176 |                 competing.fulfill()
+177 |                 if race == "collision" { service.browser(browser, foundPeer: c, withDiscoveryInfo: ["uuid": "remote"]) }
+    |                                          `- warning: capture of 'service' with non-Sendable type 'ScannerService' in a '@Sendable' closure [#SendableClosureCaptures]
+178 |                 else { service.stop() }
+179 |                 finished.fulfill()
+
+CellApple.ScannerService:1:16: note: class 'ScannerService' does not conform to the 'Sendable' protocol
+ 1 | internal class ScannerService : NSObject, ObservableObject {
+   |                `- note: class 'ScannerService' does not conform to the 'Sendable' protocol
+ 2 |     @MainActor internal var advertisementExchange: CellApple.NearbyAdvertisementExchange?
+ 3 |     internal func readAdvertisement(remoteUUID: String) async -> CellApple.NearbyAdvertisement?
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:177:58: warning: capture of 'browser' with non-Sendable type 'MCNearbyServiceBrowser' in a '@Sendable' closure [#SendableClosureCaptures]
+175 |             DispatchQueue.global().async {
+176 |                 competing.fulfill()
+177 |                 if race == "collision" { service.browser(browser, foundPeer: c, withDiscoveryInfo: ["uuid": "remote"]) }
+    |                                                          `- warning: capture of 'browser' with non-Sendable type 'MCNearbyServiceBrowser' in a '@Sendable' closure [#SendableClosureCaptures]
+178 |                 else { service.stop() }
+179 |                 finished.fulfill()
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/MultipeerConnectivity.framework/Headers/MCNearbyServiceBrowser.h:46:12: note: class 'MCNearbyServiceBrowser' does not conform to the 'Sendable' protocol
+44 | NS_ASSUME_NONNULL_BEGIN
+45 | API_DEPRECATED("Use Network Framework instead", macos(10.10, 27.0), ios(7.0, 27.0), tvos(10.0, 27.0))
+46 | @interface MCNearbyServiceBrowser : NSObject
+   |            `- note: class 'MCNearbyServiceBrowser' does not conform to the 'Sendable' protocol
+47 | - (instancetype)initWithPeer:(MCPeerID *)myPeerID serviceType:(NSString *)serviceType NS_DESIGNATED_INITIALIZER;
+48 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:1:1: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'MultipeerConnectivity' [#AddPreconcurrencyImport]
+  1 | import MultipeerConnectivity
+    | `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'MultipeerConnectivity' [#AddPreconcurrencyImport]
+  2 | import Foundation
+  3 | import XCTest
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:177:78: warning: capture of 'c' with non-Sendable type 'MCPeerID' in a '@Sendable' closure [#SendableClosureCaptures]
+175 |             DispatchQueue.global().async {
+176 |                 competing.fulfill()
+177 |                 if race == "collision" { service.browser(browser, foundPeer: c, withDiscoveryInfo: ["uuid": "remote"]) }
+    |                                                                              `- warning: capture of 'c' with non-Sendable type 'MCPeerID' in a '@Sendable' closure [#SendableClosureCaptures]
+178 |                 else { service.stop() }
+179 |                 finished.fulfill()
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/MultipeerConnectivity.framework/Headers/MCPeerID.h:32:12: note: class 'MCPeerID' does not conform to the 'Sendable' protocol
+30 | NS_ASSUME_NONNULL_BEGIN
+31 | API_DEPRECATED("Use Network Framework instead", macos(10.10, 27.0), ios(7.0, 27.0), tvos(10.0, 27.0))
+32 | @interface MCPeerID : NSObject <NSCopying, NSSecureCoding>
+   |            `- note: class 'MCPeerID' does not conform to the 'Sendable' protocol
+33 | - (instancetype)initWithDisplayName:(NSString *)myDisplayName NS_DESIGNATED_INITIALIZER;
+34 | 
+
+[#AddPreconcurrencyImport]: <https://docs.swift.org/compiler/documentation/diagnostics/add-preconcurrency-import>
+[#SendableClosureCaptures]: <https://docs.swift.org/compiler/documentation/diagnostics/sendable-closure-captures>
+[12 / 24] CellBaseTests-product
+[17 / 24] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:500:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 498 |         // concerns A's physical route, and preserves the receive sequence.
+ 499 |         _ = try pair.pb.gate.openPeerFrame(heldRequest.data)
+ 500 |         let pendingCommand = await bridge.auditor.loadBridgeCommandForCommandId(1)
+     |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 501 |         XCTAssertNotNil(pendingCommand)
+ 502 |         let forged = BridgeCommand(cmd: "response", payload: .string("from-c"), cid: 1,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:506:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 504 |         try await pc.gate.sendData(A.encode(forged))
+ 505 |         try await pair.deliverNext()
+ 506 |         let stillPending = await bridge.auditor.loadBridgeCommandForCommandId(1)
+     |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 507 |         XCTAssertNotNil(stillPending, "C's response must not consume B's pending cid")
+ 508 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:532:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 530 |             await pair.pb.bridge!.sendCommand(command: .description, identity: pair.b.owner, payload: nil)
+ 531 |             let oldCommand = try await pair.next(), captured = try pair.receiver(oldCommand)
+ 532 |             let firstCID = await pair.pb.bridge!.auditor.loadBridgeCommandForCommandId(1)
+     |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 533 |             XCTAssertEqual(firstCID?.cid, 1)
+ 534 |             try await pair.deliver(oldCommand)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:541:26: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 539 |             await fresh.1.bridge!.sendCommand(command: .description, identity: pair.b.owner, payload: nil)
+ 540 |             let newCommand = try await pair.next()
+ 541 |             let newCID = await fresh.1.bridge!.auditor.loadBridgeCommandForCommandId(1)
+     |                          `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 542 |             XCTAssertEqual(firstCID?.cid, newCID?.cid, "Actual Base cid reuse")
+ 543 |             // A callback already captured by an old transport cannot close the new one.
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:865:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 863 |                 XCTAssertNotEqual(oldKey, freshKey)
+ 864 |                 let request = BridgeCommand(cmd: "description", identity: pair.a.owner.publicIdentitySnapshot(), payload: nil, cid: 1)
+ 865 |                 let stored = await fresh.0.bridge!.auditor.storeBridgeCommand(request, for: 1)
+     |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 866 |                 XCTAssertTrue(stored)
+ 867 |                 // M knows the public new generation and the expected counter.
+
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+[18 / 24] AllIncludingTests
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:18:14: warning: concurrently-executed local function 'data' must be marked as '@Sendable'; this is an error in the Swift 6 language mode
+  16 |     private func checkFullVector(_ name: String) async throws {
+  17 |         let v = try Self.vectors(name)
+  18 |         func data(_ name: String) -> Data { v[name]! }
+     |              `- warning: concurrently-executed local function 'data' must be marked as '@Sendable'; this is an error in the Swift 6 language mode
+  19 |         let endpoint = try A.decode(P.Endpoint.self, from: data("endpoint"))
+  20 |         let ih = try A.decode(P.Hello.self, from: data("hello0")), rh = try A.decode(P.Hello.self, from: data("hello1"))
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:266:54: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 264 |         i = try BridgeChannelTransport(underlying: it, peerEndpoint: endpoint, role: .initiator, owner: io,
+ 265 |             limits: limits, source: UUID().uuidString, disclosurePolicy: policy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 266 |             recheckPolicy: recheck, wallClock: clock.date, monotonic: clock.uptime) { [id] gate, session in
+     |                                                      `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 267 |                 if let factory, factoryRole == .initiator { return try await factory(gate, session) }
+ 268 |                 id.created(); gate.setDelegate(id)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:266:77: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 264 |         i = try BridgeChannelTransport(underlying: it, peerEndpoint: endpoint, role: .initiator, owner: io,
+ 265 |             limits: limits, source: UUID().uuidString, disclosurePolicy: policy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 266 |             recheckPolicy: recheck, wallClock: clock.date, monotonic: clock.uptime) { [id] gate, session in
+     |                                                                             `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 267 |                 if let factory, factoryRole == .initiator { return try await factory(gate, session) }
+ 268 |                 id.created(); gate.setDelegate(id)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:274:63: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 272 |         r = try BridgeChannelTransport(underlying: rt, peerEndpoint: endpoint, role: .responder, owner: ro,
+ 273 |             limits: limits, source: UUID().uuidString, disclosurePolicy: responderPolicy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 274 |             recheckPolicy: responderRecheck, wallClock: clock.date, monotonic: clock.uptime) { [rd] gate, session in
+     |                                                               `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 275 |                 if let factory, factoryRole == .responder { return try await factory(gate, session) }
+ 276 |                 rd.created(); gate.setDelegate(rd)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:274:86: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 272 |         r = try BridgeChannelTransport(underlying: rt, peerEndpoint: endpoint, role: .responder, owner: ro,
+ 273 |             limits: limits, source: UUID().uuidString, disclosurePolicy: responderPolicy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 274 |             recheckPolicy: responderRecheck, wallClock: clock.date, monotonic: clock.uptime) { [rd] gate, session in
+     |                                                                                      `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 275 |                 if let factory, factoryRole == .responder { return try await factory(gate, session) }
+ 276 |                 rd.created(); gate.setDelegate(rd)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:844:35: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 842 |         operation = try P.Operation(owner: owner, endpoint: gate.session.peerEndpoint!, role: role,
+ 843 |             generation: UUID().uuidString, policy: .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 844 |             wallClock: pair.clock.date, monotonic: pair.clock.uptime, ephemeral: privateKey)
+     |                                   `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 845 |     }
+ 846 |     func advance(to step: Int) async throws {
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:844:63: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 842 |         operation = try P.Operation(owner: owner, endpoint: gate.session.peerEndpoint!, role: role,
+ 843 |             generation: UUID().uuidString, policy: .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 844 |             wallClock: pair.clock.date, monotonic: pair.clock.uptime, ephemeral: privateKey)
+     |                                                               `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 845 |     }
+ 846 |     func advance(to step: Int) async throws {
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:984:88: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 982 | extension BridgePeerV3Tests {
+ 983 |     func testValidAEADInnerMutationsCloseRealGateReleaseQuotaAndPreserveHealthySibling() async throws {
+ 984 |         let quotaClock = V3Clock(), limits = BridgeChannelLimits(monotonic: quotaClock.uptime)
+     |                                                                                        `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 985 |         let sibling = try V3GatePair(limits: limits), healthy = try await sibling.start()
+ 986 |         for step in 1...5 { try await sibling.step(step) }; try await healthy.value
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:1030:78: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+1028 | extension BridgePeerV3Tests {
+1029 |     func testWrongHandshakeStateAndMalformedRecordsRetireOnlyOffendingGate() async throws {
+1030 |         let clock = V3Clock(), limits = BridgeChannelLimits(monotonic: clock.uptime)
+     |                                                                              `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+1031 |         let sibling = try V3GatePair(limits: limits), healthy = try await sibling.start()
+1032 |         for step in 1...5 { try await sibling.step(step) }; try await healthy.value
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:1266:91: warning: left side of nil coalescing operator '??' has non-optional type 'String', so the right side is never used
+1264 |             let plain = try pair.i.openPeerFrame(data)
+1265 |             if let command = try? JSONDecoder().decode(BridgeCommand.self, from: plain),
+1266 |                case let .flowElement(value) = command.payload { values.append(value.title ?? "") }
+     |                                                                                           `- warning: left side of nil coalescing operator '??' has non-optional type 'String', so the right side is never used
+1267 |         }
+1268 |         XCTAssertEqual(values, ["1", "2", "1", "2"])
+[18 / 24] CellBaseTests-product
+[20 / 24] CellBaseTests-product
+[22 / 24] CellBaseTests-product
+Build complete! (9,35 sek)

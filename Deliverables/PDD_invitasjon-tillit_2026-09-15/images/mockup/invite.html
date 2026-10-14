@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<title>Invitasjon → samtale — mockups</title>
+<style>
+  :root{
+    --ink:#14212b; --muted:#5c6b76; --line:#e3e8ec; --bg:#f6f8f9; --card:#ffffff;
+    --accent:#0f6e6a; --accent-ink:#ffffff; --soft:#e6f2f1; --warn:#8a5a00; --warn-bg:#fff6e0;
+    --pill:#eef2f4;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#dfe5e9;font-family:-apple-system,"SF Pro Text","Helvetica Neue",Inter,Arial,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+  .strip{display:flex;gap:28px;padding:36px;background:#dfe5e9;width:max-content}
+  .frame{width:390px;height:800px;background:var(--bg);border-radius:34px;box-shadow:0 12px 40px rgba(0,0,0,.18);position:relative;overflow:hidden;display:flex;flex-direction:column;flex:0 0 auto}
+  .frame.desktop{width:640px}
+  .step{position:absolute;top:-30px;left:0;font-size:13px;color:#3d4a53;font-weight:600;letter-spacing:.2px}
+  .wrap{position:relative;padding-top:30px}
+  .top{padding:22px 22px 8px;font-size:13px;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+  .top b{color:var(--ink);font-weight:600}
+  .body{padding:8px 22px 0;flex:1;overflow:hidden}
+  h1{font-size:24px;line-height:1.2;margin:8px 0 10px;font-weight:700;letter-spacing:-.2px}
+  p{margin:0 0 12px;font-size:15px;line-height:1.45}
+  .muted{color:var(--muted)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:0 0 12px}
+  .card h3{margin:0 0 8px;font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--line);font-size:15px}
+  .row:first-of-type{border-top:0}
+  .row .k{color:var(--muted)}
+  .row .v{text-align:right}
+  .src{font-size:12px;color:var(--muted);display:block}
+  .btn{display:block;width:100%;text-align:center;padding:15px 16px;border-radius:14px;font-size:16px;font-weight:600;margin:0 0 10px;border:1px solid transparent}
+  .btn.primary{background:var(--accent);color:var(--accent-ink)}
+  .btn.secondary{background:var(--card);color:var(--ink);border-color:var(--line)}
+  .btn.tertiary{background:transparent;color:var(--muted);font-weight:500;padding:10px}
+  .foot{padding:12px 22px 22px}
+  .who{display:flex;gap:8px;align-items:flex-start;background:var(--pill);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.35;color:#2e3b45}
+  .who svg{flex:0 0 auto;margin-top:1px}
+  .bubble{max-width:86%;padding:12px 14px;border-radius:18px;font-size:15px;line-height:1.4;margin:0 0 10px}
+  .bubble.them{background:var(--card);border:1px solid var(--line);border-bottom-left-radius:6px}
+  .bubble.me{background:var(--accent);color:#fff;margin-left:auto;border-bottom-right-radius:6px}
+  .bubble.butler{background:var(--soft);border-bottom-left-radius:6px}
+  .tag{display:inline-block;font-size:12px;padding:3px 8px;border-radius:999px;background:var(--pill);color:#2e3b45;margin-right:6px}
+  .tag.ok{background:#e3f4ea;color:#1c6b3a}
+  .tag.wait{background:#fff6e0;color:var(--warn)}
+  .composer{display:flex;gap:8px;align-items:center;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:8px 8px 8px 16px;font-size:15px;color:var(--muted)}
+  .composer span.send{width:36px;height:36px;border-radius:50%;background:var(--accent);display:inline-block;margin-left:auto;flex:0 0 auto}
+  .note{background:var(--warn-bg);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--warn);line-height:1.35;margin:0 0 12px}
+  .list .item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--line);font-size:15px}
+  .list .item:first-child{border-top:0}
+  .list .item .sub{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+  .list .item .st{font-size:13px;text-align:right}
+  .help{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin:0 0 12px}
+  .help .q{font-size:14px;color:var(--muted);margin:0 0 6px}
+  .help .a{font-size:14px;line-height:1.4;margin:0}
+  .banner{background:var(--soft);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.35;margin:0 0 12px}
+  .urlbar{margin:14px 22px 0;background:#e9edf0;border-radius:10px;padding:8px 12px;font-size:12px;color:var(--muted);text-align:center}
+  .kv{font-size:14px;line-height:1.5}
+  .small{font-size:13px}
+  .dots{display:flex;gap:6px;justify-content:center;margin:6px 0 0}
+  .dots i{width:7px;height:7px;border-radius:50%;background:#c6ced4;display:block}
+  .dots i.on{background:var(--accent)}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="eye" viewBox="0 0 24 24"><path fill="none" stroke="#2e3b45" stroke-width="1.8" d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="3" fill="none" stroke="#2e3b45" stroke-width="1.8"/></symbol>
+</svg>
+
+<!-- ================= AVSENDER ================= -->
+<div class="strip" id="stripe-avsender">
+
+  <div class="wrap"><div class="step">1 · Butleren foreslår</div>
+  <div class="frame" id="s1">
+    <div class="top"><b>Butler</b><span>i dag</span></div>
+    <div class="body">
+      <div class="bubble butler">Du nevnte Vegar i går. Vil du invitere ham til å snakke om boka her?</div>
+      <div class="bubble butler">Jeg fant e-postadressen hans i boklisten du la inn 12. sep. Ingenting er sendt, og ingen andre har sett dette.</div>
+      <div class="bubble me">Ja, la meg se først.</div>
+      <div class="bubble butler">Her er det Vegar vil få se, og det du har om ham.</div>
+      <div style="height:18px"></div>
+      <a class="btn primary">Se hva som sendes</a>
+      <a class="btn tertiary">Ikke nå</a>
+    </div>
+    <div class="foot"><div class="who"><svg width="18" height="18"><use href="#eye"/></svg><span><b>Hvem ser dette:</b> bare du. Butleren jobber inne hos deg og sender aldri noe selv.</span></div></div>
+  </div></div>
+
+  <div class="wrap"><div class="step">2 · Se før du sender</div>
+  <div class="frame" id="s2">
+    <div class="top"><span>‹ Tilbake</span><b>Invitasjon til Vegar</b><span></span></div>
+    <div class="body">
+      <div class="card"><h3>Dette har du om Vegar</h3>
+        <div class="row"><span class="k">Navn</span><span class="v">Vegar H.</span></div>
+        <div class="row"><span class="k">E-post</span><span class="v">vegar…@…no</span></div>
+        <div class="row"><span class="k">Hvor fra</span><span class="v">Boklisten, 12. sep.<span class="src">Ditt eget notat — ikke bekreftet av Vegar</span></span></div>
+      </div>
+      <div class="card" style="border-style:dashed"><h3>Private notater — sendes ikke</h3>
+        <p class="kv" style="margin:0 0 4px">Møtte ham på Bokdagen. Skeptisk til kap. 3 — spør om det.</p>
+        <p class="kv muted small" style="margin:0">Bare du og butleren din ser dette. Vegar får aldri vite at det finnes.</p>
+      </div>
+      <div class="card"><h3>Dette får Vegar se</h3>
+        <p class="kv">Navnet ditt: <b>Kjetil</b><br>Hilsen: <i>«Hei Vegar — vil du snakke om boka her?»</i><br>Feltene over, så han kan rette dem.</p>
+        <p class="kv muted small" style="margin:0">Ikke: resten av listen din, eller noe annet du har.</p>
+      </div>
+      <p class="small muted">Sendes én gang. Gyldig til 8. oktober. Ingen purring.</p>
+      <a class="btn primary">Send invitasjonen</a>
+    </div>
+    <div class="foot"><div class="who"><svg width="18" height="18"><use href="#eye"/></svg><span><b>Hvem ser dette:</b> du nå — og Vegar, hvis du sender.</span></div></div>
+  </div></div>
+
+  <div class="wrap"><div class="step">3 · Sendt</div>
+  <div class="frame" id="s3">
+    <div class="top"><span>‹ Invitasjoner</span><b>Vegar</b><span></span></div>
+    <div class="body">
+      <h1>Sendt.</h1>
+      <p>Invitasjonen gikk til <b>vegar…@…no</b> én gang. Den gjelder til 8. oktober og tar slutt av seg selv.</p>
+      <div class="card">
+        <div class="row"><span class="k">Status</span><span class="v"><span class="tag wait">Ikke besvart</span></span></div>
+        <div class="row"><span class="k">Purring</span><span class="v">Aldri automatisk</span></div>
+      </div>
+      <p class="small muted">Får du ikke svar, kan du sende på nytt etter 8. oktober — som en ny, egen handling.</p>
+      <a class="btn primary">Ferdig</a>
+      <a class="btn tertiary">Trekk tilbake invitasjonen</a>
+    </div>
+    <div class="foot"><div class="who"><svg width="18" height="18"><use href="#eye"/></svg><span><b>Hvem ser dette:</b> bare du. Vegar får ikke vite om du ser på statusen.</span></div></div>
+  </div></div>
+
+  <div class="wrap"><div class="step">4 · Oversikten</div>
+  <div class="frame" id="s4">
+    <div class="top"><b>Invitasjoner</b><span>4</span></div>
+    <div class="body">
+      <div class="card list">
+        <div class="item"><span>Vegar H.<span class="sub">Sa ja · 24. sep.</span></span><span class="st"><span class="tag ok">Samtale</span></span></div>
+        <div class="item"><span>Anne B.<span class="sub">Svarte 20. sep.</span></span><span class="st">Besvart — ikke nå</span></div>
+        <div class="item"><span>Ola R.<span class="sub">Sendt 18. sep. · gjelder til 2. okt.</span></span><span class="st"><span class="tag wait">Ikke besvart</span></span></div>
+        <div class="item"><span>Kari S.<span class="sub">Sendt 1. sep.</span></span><span class="st muted">Utløpt</span></div>
+      </div>
+      <p class="small muted">«Besvart — ikke nå» betyr at personen har svart. Du får ikke vite mer enn det, og kan ikke sende igjen uten en ny invitasjon.</p>
+      <a class="btn primary">Ny invitasjon</a>
+    </div>
+    <div class="foot"><div class="who"><svg width="18" height="18"><use href="#eye"/></svg><span><b>Hvem ser dette:</b> bare du.</span></div></div>
+  </div></div>
+
+  <div class="wrap"><div class="step">5 · Samtalen</div>
+  <div class="frame" id="s5">
+    <div class="top"><span>‹</span><b>Vegar</b><span class="small">via invitasjon 24. sep.</span></div>
+    <div class="body">
+      <div class="banner">Dere to er de eneste som kan lese dette. Ikke vi, ikke den som drifter tjenesten.</div>
+      <div class="bubble me">Hei Vegar — vil du snakke om boka her?</div>
+      <div class="bubble them">Hei! Ja, gjerne. Jeg rettet e-posten min, du hadde en gammel.</div>
+      <div class="bubble me">Takk — så den. Kapittel 3 i morgen?</div>
+    </div>
+    <div class="foot">
+      <div class="composer">Skriv til Vegar<span class="send"></span></div>
+    </div>
+  </div></div>
+
+</div>
+
+<!-- ================= MOTTAKER UTEN HAVEN ================= -->
+<div class="strip" id="stripe-mottaker-uten">
+
+  <div class="wrap"><div class="step">1 · Lenken åpnes i nettleseren</div>
+  <div class="frame" id="r1">
+    <div class="urlbar">haven.dimy.no/invite/…</div>
+    <div class="body" style="padding-top:22px">
+      <h1>Kjetil inviterer deg til en samtale.</h1>
+      <p><i>«Hei Vegar — vil du snakke om boka her?»</i></p>
+      <div class="card">
+        <div class="row"><span class="k">Fra</span><span class="v">Kjetil</span></div>
+        <div class="row"><span class="k">Gjelder til</span><span class="v">8. oktober</span></div>
+        <div class="row"><span class="k">Koster</span><span class="v">Ingenting. Ingen konto trengs.</span></div>
+      </div>
+      <a class="btn primary">Se hva Kjetil har om meg</a>
+      <a class="btn tertiary">Hva er dette?</a>
+    </div>
+    <div class="foot"><div class="who"><svg width="18" height="18"><use href="#eye"/></svg><span><b>Hvem ser dette:</b> bare du. Kjetil får ikke beskjed om at du åpnet — bare hvis du svarer.</span></div></div>
+  </div></div>
+
+  <div class="wrap"><div class="step">2 · Hva Kjetil har om deg</div>
+  <div class="frame" id="r2">
+    <div class="urlbar">haven.dimy.no/invite/…</div>
+    <div class="body" style="padding-top:22px">
+      <h1>Dette har Kjetil notert om deg.</h1>
+      <p class="muted">Det er hans egne notater — ikke bekreftet av deg, og ikke delt med andre.</p>
+      <div class="card">
+        <div class="row"><span class="k">Navn</span><span class="v">Vegar H.</span></div>
+        <div class="row"><span class="k">E-post</span><span class="v">vegar…@…no</span></div>
+        <div class="row"><span class="k">Hvor fra</span><span class="v">En liste han la inn 12. sep.</span></div>
+      </div>
+      <p class="small muted">Du kan be om at dette rettes eller slettes — også om du sier nei.</p>
+      <a class="btn primary">Svar Kjetil</a>
+      <a class="btn tertiary">Be om retting eller sletting</a>
+    </div>
+    <div class="foot"><div class="who"><svg width="18" height="18"><use href="#eye"/></svg><span><b>Hvem ser dette:</b> bare du. Lista er nøyaktig det han har — ikke et utdrag.</span></div></div>
+  </div></div>
+
+  <div class="wrap"><div class="step">3 · Ja, ikke nå, eller aldri</div>
+  <div class="frame" id="r3">
+    <div class="urlbar">haven.dimy.no/invite/…</div>
+    <div class="body" style="padding-top:22px">
+      <h1>Hva vil du?</h1>
+      <p class="muted">Nei krever ingen konto. Kjetil får bare vite «besvart — ikke nå», uansett hvilket nei du velger.</p>
+      <a class="btn primary">Ja, la oss snakke</a>
+      <a class="btn secondary">Ikke nå</a>
+      <a class="btn secondary">Aldri — ikke inviter meg igjen</a>
+      <p class="small muted" style="margin-top:8px">«Aldri» virker hos Kjetil for alltid, også om han legger inn lista si på nytt. Du kan ombestemme deg senere ved å ta kontakt selv.</p>
+    </div>
+    <div class="foot"><div class="who"><svg width="18" height="18"><use href="#eye"/></svg><span><b>Hvem ser dette:</b> bare du. Valget ditt sendes signert til Kjetil — ingen andre.</span></div></div>
+  </div></div>
+
+  <div class="wrap"><div class="step">4 · Samtalen i nettleseren</div>
+  <div class="frame" id="r4">
+    <div class="urlbar">haven.dimy.no/…</div>
+    <div class="top" style="padding-top:12px"><span></span><b>Kjetil</b><span></span></div>
+    <div class="body">
+      <div class="banner">Samtalen ligger hos tjenesten Kjetil bruker. Bare du kan åpne det som er ditt — ikke Kjetil, og ikke de som drifter den.</div>
+      <div class="bubble them">Hei Vegar — vil du snakke om boka her?</div>
+      <div class="bubble me">Hei! Ja, gjerne. Jeg rettet e-posten min, du hadde en gammel.</div>
+      <div class="card" style="margin-top:14px"><p class="small" style="margin:0"><b>Vil du ha samtalen med deg?</b> Med HAVEN-appen kan du flytte alt som er ditt hit til deg — én gang, når du vil.</p><a class="btn secondary" style="margin:10px 0 0">Hent HAVEN-appen</a></div>
+    </div>
+    <div class="foot">
+      <div class="composer">Skriv til Kjetil<span class="send"></span></div>
+    </div>
+  </div></div>
+
+  <div class="wrap"><div class="step">5 · Ta det med deg</div>
+  <div class="frame" id="r5">
+    <div class="top"><b>Flytt hit</b><span></span></div>
+    <div class="body">
+      <h1>Ta med deg det som er ditt.</h1>
+      <p class="muted">Dette ligger i dag hos tjenesten Kjetil bruker. Etter flytting ligger bare en peker igjen der, og alt annet er hos deg.</p>
+      <div class="card list">
+        <div class="item"><span>Samtalen med Kjetil<span class="sub">3 meldinger</span></span><span class="st"><span class="tag ok">Flyttes</span></span></div>
+        <div class="item"><span>Kontakten Kjetil<span class="sub">og at du sa ja</span></span><span class="st"><span class="tag ok">Flyttes</span></span></div>
+        <div class="item"><span>Kjetils notater om deg<span class="sub">forblir hans — du får en kopi</span></span><span class="st"><span class="tag">Kopi</span></span></div>
+      </div>
+      <a class="btn primary">Flytt alt hit</a>
+      <a class="btn tertiary">La det ligge</a>
+    </div>
+    <div class="foot"><div class="who"><svg width="18" height="18"><use href="#eye"/></svg><span><b>Hvem ser dette:</b> bare du. Kjetil ser at samtalen fortsetter — ikke hvor den bor.</span></div></div>
+  </div></div>
+
+</div>
+
+<!-- ================= MOTTAKER MED HAVEN ================= -->
+<div class="strip" id="stripe-mottaker-med">
+
+  <div class="wrap"><div class="step">1 · Invitasjonen kommer i appen</div>
+  <div class="frame" id="m1">
+    <div class="top"><b>Invitasjoner</b><span>1 ny</span></div>
+    <div class="body">
+      <div class="card">
+        <p style="margin:0 0 6px"><b>Kjetil</b> inviterer deg til en samtale.</p>
+        <p class="muted small" style="margin:0 0 10px"><i>«Hei Vegar — vil du snakke om boka her?»</i> · gjelder til 8. okt.</p>
+        <span class="tag">Ny</span><span class="tag">Fra en du ikke har fra før</span>
+      </div>
+      <p class="small muted">Kjetil kjenner deg som <b>vegar…@…no</b>. Sier du ja, får han identiteten du bruker privat — ikke de andre.</p>
+      <a class="btn primary">Åpne invitasjonen</a>
+    </div>
+    <div class="foot"><div class="who"><svg width="18" height="18"><use href="#eye"/></svg><span><b>Hvem ser dette:</b> bare du. Kjetil får ikke beskjed om at du åpnet.</span></div></div>
+  </div></div>
+
+  <div class="wrap"><div class="step">2 · Hva Kjetil har om deg</div>
+  <div class="frame" id="m2">
+    <div class="top"><span>‹ Invitasjoner</span><b>Fra Kjetil</b><span></span></div>
+    <div class="body">
+      <h1>Dette har Kjetil notert om deg.</h1>
+      <p class="muted">Hans egne notater — ikke bekreftet av deg.</p>
+      <div class="card">
+        <div class="row"><span class="k">Navn</span><span class="v">Vegar H.</span></div>
+        <div class="row"><span class="k">E-post</span><span class="v">vegar…@…no</span></div>
+        <div class="row"><span class="k">Hvor fra</span><span class="v">En liste han la inn 12. sep.</span></div>
+      </div>
+      <div class="card"><h3>Sier du ja</h3><p class="kv" style="margin:0">Kjetil får: din private identitet og en samtale.<br>Kjetil får ikke: noe annet du har her.</p></div>
+      <a class="btn primary">Svar Kjetil</a>
+      <a class="btn tertiary">Be om retting eller sletting</a>
+    </div>
+    <div class="foot"><div class="who"><svg width="18" height="18"><use href="#eye"/></svg><span><b>Hvem ser dette:</b> bare du.</span></div></div>
+  </div></div>
+
+  <div class="wrap"><div class="step">3 · Ja, ikke nå, eller aldri</div>
+  <div class="frame" id="m3">
+    <div class="top"><span>‹</span><b>Svar til Kjetil</b><span></span></div>
+    <div class="body">
+      <h1>Hva vil du?</h1>
+      <p class="muted">Kjetil får bare vite «besvart — ikke nå», uansett hvilket nei du velger.</p>
+      <a class="btn primary">Ja, la oss snakke</a>
+      <a class="btn secondary">Ikke nå</a>
+      <a class="btn secondary">Aldri — ikke inviter meg igjen</a>
+      <p class="small muted" style="margin-top:8px">Et ja blir en avtale dere begge signerer, lagret hos hver av dere.</p>
+    </div>
+    <div class="foot"><div class="who"><svg width="18" height="18"><use href="#eye"/></svg><span><b>Hvem ser dette:</b> bare du. Svaret går signert til Kjetil — ingen andre.</span></div></div>
+  </div></div>
+
+  <div class="wrap"><div class="step">4 · Samtalen</div>
+  <div class="frame" id="m4">
+    <div class="top"><span>‹</span><b>Kjetil</b><span class="small">via invitasjon 24. sep.</span></div>
+    <div class="body">
+      <div class="banner">Dere to er de eneste som kan lese dette. Samtalen bor hos deg.</div>
+      <div class="bubble them">Hei Vegar — vil du snakke om boka her?</div>
+      <div class="bubble me">Hei! Ja, gjerne. Jeg rettet e-posten min, du hadde en gammel.</div>
+      <div class="bubble them">Takk — så den. Kapittel 3 i morgen?</div>
+    </div>
+    <div class="foot">
+      <div class="composer">Skriv til Kjetil<span class="send"></span></div>
+    </div>
+  </div></div>
+
+</div>
+
+<!-- ================= HJELPECHAT MOTTAKER ================= -->
+<div class="strip" id="stripe-hjelp">
+  <div class="wrap"><div class="step">Hjelp på invitasjonssiden</div>
+  <div class="frame" id="h1">
+    <div class="urlbar">haven.dimy.no/invite/…</div>
+    <div class="top" style="padding-top:12px"><span>‹ Tilbake</span><b>Spør om invitasjonen</b><span></span></div>
+    <div class="body">
+      <div class="help"><p class="q">Du: Hva skjer hvis jeg sier ja?</p><p class="a">Da får Kjetil en samtale med deg, og navnet og e-posten han allerede har. Ikke noe mer. Dere kan begge lukke samtalen når som helst.</p></div>
+      <div class="help"><p class="q">Du: Ser han at jeg har åpnet dette?</p><p class="a">Nei. Han får bare vite noe hvis du svarer — og sier du nei, ser han bare «besvart — ikke nå».</p></div>
+      <div class="help"><p class="q">Du: Kan du svare for meg?</p><p class="a">Nei. Jeg kan forklare og vise. Jeg kan ikke sende noe, si ja eller si nei — det er ditt, og bare ditt.</p></div>
+    </div>
+    <div class="foot">
+      <div class="composer">Spør om hva som helst<span class="send"></span></div>
+      <div class="who" style="margin-top:10px"><svg width="18" height="18"><use href="#eye"/></svg><span><b>Hvem ser dette:</b> bare du. Spørsmålene dine går ikke til Kjetil.</span></div>
+    </div>
+  </div></div>
+</div>
+
+</body>
+</html>

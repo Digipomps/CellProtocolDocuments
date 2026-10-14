@@ -1,0 +1,24 @@
+Utdrag av prosjektminnet for HavenAgentD (skrevet av tidligere økter, ikke målt på nytt 02.10). Bruk det som påstander, ikke som bevis.
+
+== menylinje_og_varsler (10.09–19.09)
+- `6da0299` — `correspondence` som kilde + `CorrespondenceWaiting.swift`: markørkontrakt `haven.correspondence-waiting.v1` i `Inbox/CorrespondenceWaiting/`. Losen kvitterer selv og markerer bare det som krever mennesket; markøren bærer avsender + Losens sammendrag, **aldri meldingsteksten**, filtrert for hemmeligheter. Provideren leser fra disk, uten nettverk eller korrespondansenøkler.
+- **Ikke bygget ennå:** selve pollingen. Kjetil valgte at **daemonen poller correspondence selv** (den får da tilgang til korrespondansen — bevisst valgt), og at **Losen markerer** hva som krever svar. `listInbox` i `CorrespondenceClient` er internal og gjør nettverkskall; profiler og nøkler ligger i `~/Library/Application Support/HAVEN/AssistantCorrespondence/<profil>/`.
+- Varsler: 23.09 ble varselet levert, men dempet av en Fokus-modus på Kjetils Mac. Kjeden agent → menyapp → varselsenter virker.
+- Gotcha: å legge til en kilde i `AgentChallengeSource` brekker `Tests/HavenAgentRuntimeTests/Fixtures/Challenge/*.json` til de utvides.
+
+== agentd_binaer_lwcr (19.09–23.09)
+- macOS drepte nye agentbinærer (Launch Constraint Violation) fordi de var ad-hoc-signert og launchd-tjenesten hadde en cdhash-låst LWCR. Tiltak A gjennomført 20.09: `Scripts/install-agent-dev.sh` (tørrkjøring som standard, `--apply`; `--resign-installed|--source|--build`, `--product haven-agentd|haven-agentd-scheduler|all`; scheduler er en kopi av haven-agentd, ikke eget SwiftPM-produkt) signerer med Developer ID (team 5UT5HQTCV9), og omregistrerer med `bootout` + `bootstrap`.
+- Målt 20.09: `kickstart -k` startet begge tjenestene på 2–8 s uten launch constraint etter Developer ID-signeringen.
+- 22.09: installert origin/main 3a28d65; `/challenges` har `correspondence`-kilden; en testmarkør i `Inbox/CorrespondenceWaiting/losen-test-….json` ga saken «Post fra Losen (test) venter på svar». Markørfelt: schema, id, profile, from, summary (≤200), markedAt, markedBy. «Verktøy for å skrive markører for ekte post finnes ikke ennå.»
+- 23.09: agentd + scheduler kjører binæren fra grenen `claude/testflyt-verktoycelle-20260923`.
+
+== testflyt_verktoycelle (23.09–25.09)
+- Grenen `claude/testflyt-verktoycelle-20260923` (worktree `HavenAgentD/.worktrees/main-20260922`, fra origin/main 3a28d65) er pushet, ikke merget, ingen PR. Den har bl.a. `CorrespondenceWaitingStore.write/remove/removeAll`, test-flow-cellene og `Scripts/install-agent-dev.sh`.
+- 24.09 13:47: agentd + scheduler + menyapp installert fra grenen (commit 902fd70 pushet 25.09).
+- Åpent: paringsmodellen (B10) er ikke avgjort; G3 er ikke gitt.
+
+== Målt 02.10 (jobblogg 2425 og 249)
+- `io.digipomps.haven.agentd.scheduler`: `~/Library/Application Support/HAVENAgent/bin/haven-agentd-scheduler schedule-worker --config …/config.json`, KeepAlive, RunAtLoad, kjører siden 26.09. Miljøet er bare `PATH=/usr/bin:/bin:/usr/sbin:/sbin` og `SSH_AUTH_SOCK`.
+- `config.json` har én gammel hendelse og localTasks `claude-purpose-structures-resume` og `losen-probe`. `agentJobs.enabled` er `true`.
+- `no.digipomps.haven.agent-runner` kjører (pid 4834), hjerteslag `idle`. Siste jobber i `.agent-spool/outbox/` er `haven-learn-sync-…` fra 30.09.
+- Macen har 56 GiB ledig. Diskregelen for lokale Swift-bygg er minst 40 GiB og 5 % ledig etter 10 GiB reserve (ca. 57 GiB).

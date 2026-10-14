@@ -1,0 +1,2802 @@
+diff --git a/.github/workflows/admin-scaffold-image.yml b/.github/workflows/admin-scaffold-image.yml
+index e3f2a3d9..22b713cb 100644
+--- a/.github/workflows/admin-scaffold-image.yml
++++ b/.github/workflows/admin-scaffold-image.yml
+@@ -276,6 +276,7 @@ jobs:
+           npm run test:arendalsuka-action-state
+           npx playwright install --with-deps chromium
+           npm run test:admin-web
++          npx playwright test --config=playwright.config.js playwright/skeleton-navigation.spec.js
+           npx playwright test --config=playwright.config.js playwright/rich-document.spec.js playwright/porthole-skeleton-atomic-swap.spec.js playwright/porthole-skeleton-localization.spec.js playwright/skeleton-localization.spec.js
+ 
+       - name: Run Thursday demo P0 browser proof
+diff --git a/Package.swift b/Package.swift
+index 485c61f5..e51f4603 100644
+--- a/Package.swift
++++ b/Package.swift
+@@ -269,6 +269,7 @@ let package = Package(
+         .executableTarget(name: "NodeAdminAgent", dependencies: [.target(name: "ScaffoldKit")]),
+         .executableTarget(name: "ArendalsukaProgramSeed", dependencies: [.target(name: "App")]),
+         .executableTarget(name: "ArendalsukaSpeakerSeed", dependencies: [.target(name: "App")]),
++        .executableTarget(name: "ArendalsukaMatchTestSeed", dependencies: [.target(name: "App")]),
+         .executableTarget(
+             name: "NodeAdminDockerCollector",
+             dependencies: [.target(name: "NodeAdminDockerCollectorCore")]
+diff --git a/Public/css/porthole-webo.css b/Public/css/porthole-webo.css
+index a92542aa..965e5db6 100644
+--- a/Public/css/porthole-webo.css
++++ b/Public/css/porthole-webo.css
+@@ -2332,12 +2332,34 @@ body.panel-resizing * {
+   padding-bottom: max(7px, env(safe-area-inset-bottom));
+ }
+ 
++/* Every configuration renders inside .skeleton-host, a scrollable box
++ * nested within the bordered .canvas preview card -- "sticky" only pins to
++ * that inner box's edge, not the actual browser window, so on a short page
++ * (e.g. Arendalsuka Matches with few results) the bar floats right below
++ * the last content element instead of sitting flush with the bottom of the
++ * screen. Fixed positioning escapes that nesting entirely and anchors to
++ * the real viewport edge. Scoped to .canvas rather than .canvas.product-view
++ * because NavigationBar is currently Arendalsuka-only (Program/Matches/
++ * Chat) regardless of which configurations porthole-webo.js's
++ * isProductSurfaceConfigurationName() happens to list. */
++.canvas .skeleton-navigation-bar.is-bottom-anchored {
++  position: fixed;
++  left: 0;
++  right: 0;
++  bottom: 0;
++  width: min(1120px, 100%);
++  margin: 0 auto;
++  border-radius: 16px 16px 0 0;
++}
++
+ .skeleton-navigation-bar-item {
+   appearance: none;
+   display: inline-flex;
+   flex: 1 1 0;
++  flex-direction: column;
+   align-items: center;
+   justify-content: center;
++  gap: 2px;
+   min-width: 0;
+   min-height: 44px;
+   box-sizing: border-box;
+@@ -2354,6 +2376,14 @@ body.panel-resizing * {
+   cursor: pointer;
+ }
+ 
++.skeleton-navigation-bar-item-icon {
++  flex: none;
++}
++
++.skeleton-navigation-bar-item.has-icon .skeleton-navigation-bar-item-label {
++  font-size: 12px;
++}
++
+ .skeleton-navigation-bar-item:hover:not(:disabled) {
+   border-color: rgba(127, 214, 208, 0.36);
+   background: rgba(127, 214, 208, 0.08);
+diff --git a/Public/js/skeleton-runtime.js b/Public/js/skeleton-runtime.js
+index c43a7a4d..1093d4e3 100644
+--- a/Public/js/skeleton-runtime.js
++++ b/Public/js/skeleton-runtime.js
+@@ -87,6 +87,7 @@
+     "triangle-alert": "<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\" /><path d=\"M12 9v4\" /><path d=\"M12 17h.01\" />",
+     "upload": "<path d=\"M12 3v12\" /><path d=\"m17 8-5-5-5 5\" /><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" />",
+     "user": "<path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\" /><circle cx=\"12\" cy=\"7\" r=\"4\" />",
++    "users": "<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /><path d=\"M16 3.128a4 4 0 0 1 0 7.744\" /><path d=\"M22 21v-2a4 4 0 0 0-3-3.87\" /><circle cx=\"9\" cy=\"7\" r=\"4\" />",
+     "x": "<path d=\"M18 6 6 18\" /><path d=\"m6 6 12 12\" />",
+   };
+ 
+@@ -100,6 +101,8 @@
+     "person.fill": "user",
+     "person.circle": "circle-user",
+     "person.circle.fill": "circle-user",
++    "person.2": "users",
++    "person.2.fill": "users",
+     "calendar": "calendar",
+     "message": "message-circle",
+     "message.fill": "message-circle",
+@@ -551,7 +554,7 @@
+         if (requiredError) return requiredError;
+         const optionalError = validateOptionalStrings(
+           item,
+-          ["url", "keypathKeypath", "labelKeypath", "payloadKeypath", "activeValue", "activeConfigurationName"],
++          ["url", "keypathKeypath", "labelKeypath", "payloadKeypath", "activeValue", "activeConfigurationName", "icon"],
+           `${path}.items[${index}]`
+         );
+         if (optionalError) return optionalError;
+@@ -2088,6 +2091,19 @@
+     return navigation;
+   }
+ 
++  function appendNavigationBarItemContent(element, label, iconElement) {
++    element.replaceChildren();
++    if (iconElement) {
++      element.classList.add("has-icon");
++      iconElement.classList.add("skeleton-navigation-bar-item-icon");
++      element.appendChild(iconElement);
++    }
++    const labelElement = document.createElement("span");
++    labelElement.className = "skeleton-navigation-bar-item-label";
++    labelElement.textContent = label;
++    element.appendChild(labelElement);
++  }
++
+   function renderNavigationBarBinding(binding, state) {
+     binding.navigation.replaceChildren();
+     binding.itemBindings = [];
+@@ -2159,7 +2175,8 @@
+       }
+ 
+       element.className = "skeleton-navigation-bar-item";
+-      element.textContent = resolved.label;
++      const iconElement = createSkeletonIconElement(spec.icon, { size: 20 });
++      appendNavigationBarItemContent(element, resolved.label, iconElement);
+       element.dataset.navigationBarIndex = String(index);
+       applyElementModifiers(element, spec.modifiers, state, `${binding.path}.items.${index}`, binding.context);
+       binding.navigation.appendChild(element);
+diff --git a/Sources/App/Cells/Arendalsuka/ArendalsukaEventAtlasCell.swift b/Sources/App/Cells/Arendalsuka/ArendalsukaEventAtlasCell.swift
+index 4fd92e82..4ea827ea 100644
+--- a/Sources/App/Cells/Arendalsuka/ArendalsukaEventAtlasCell.swift
++++ b/Sources/App/Cells/Arendalsuka/ArendalsukaEventAtlasCell.swift
+@@ -29,7 +29,8 @@ enum ArendalsukaAtlasImportAccessContract {
+         "atlas.resetParticipantSources",
+         "atlas.ingestOSMPOIs",
+         "atlas.ingestSpeakerSnapshot",
+-        "atlas.ingestStands"
++        "atlas.ingestStands",
++        "atlas.ingestTaxonomy"
+     ]
+ 
+     static func resource() -> CapabilityInvitationResource {
+@@ -264,6 +265,11 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+         case speakersByID
+         case speakerAppearancesByID
+         case speakerEnrichmentsByID
++        case taxonomySubcategoriesByID
++        case eventSeriesByID
++        case sessionSubcategoryLinksByID
++        case sessionEventSeriesLinksByID
++        case taxonomySessionStatusByID
+         case selectedSessionID
+         case selectedActorID
+         case selectedMapFeatureID
+@@ -291,6 +297,11 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+     private var speakersByID: [String: ArendalsukaSpeakerRecord]
+     private var speakerAppearancesByID: [String: ArendalsukaSpeakerAppearanceRecord]
+     private var speakerEnrichmentsByID: [String: ArendalsukaSpeakerEnrichmentRecord]
++    private var taxonomySubcategoriesByID: [String: ArendalsukaTaxonomySubcategoryRecord]
++    private var eventSeriesByID: [String: ArendalsukaEventSeriesRecord]
++    private var sessionSubcategoryLinksByID: [String: ArendalsukaSessionSubcategoryLinkRecord]
++    private var sessionEventSeriesLinksByID: [String: ArendalsukaSessionEventSeriesLinkRecord]
++    private var taxonomySessionStatusByID: [String: Int]
+     private var selectedSessionID: String?
+     private var selectedActorID: String?
+     private var selectedMapFeatureID: String?
+@@ -320,6 +331,11 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+         self.speakersByID = localReplay.speakersByID
+         self.speakerAppearancesByID = localReplay.speakerAppearancesByID
+         self.speakerEnrichmentsByID = localReplay.speakerEnrichmentsByID
++        self.taxonomySubcategoriesByID = localReplay.taxonomySubcategoriesByID
++        self.eventSeriesByID = localReplay.eventSeriesByID
++        self.sessionSubcategoryLinksByID = localReplay.sessionSubcategoryLinksByID
++        self.sessionEventSeriesLinksByID = localReplay.sessionEventSeriesLinksByID
++        self.taxonomySessionStatusByID = localReplay.taxonomySessionStatusByID
+         self.selectedSessionID = replay.sessionsByID.values.sorted { $0.title < $1.title }.first?.id
+         self.selectedActorID = localReplay.localActorsByID.values.sorted { $0.name < $1.name }.first?.id
+         self.selectedMapFeatureID = nil
+@@ -362,6 +378,16 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+         self.speakerAppearancesByID = localReplay.speakerAppearancesByID.merging(decodedSpeakerAppearances) { _, decoded in decoded }
+         let decodedSpeakerEnrichments = (try? container.decode([String: ArendalsukaSpeakerEnrichmentRecord].self, forKey: .speakerEnrichmentsByID)) ?? [:]
+         self.speakerEnrichmentsByID = localReplay.speakerEnrichmentsByID.merging(decodedSpeakerEnrichments) { _, decoded in decoded }
++        let decodedTaxonomySubcategories = try container.decodeIfPresent([String: ArendalsukaTaxonomySubcategoryRecord].self, forKey: .taxonomySubcategoriesByID) ?? [:]
++        self.taxonomySubcategoriesByID = decodedTaxonomySubcategories.merging(localReplay.taxonomySubcategoriesByID) { _, replayed in replayed }
++        let decodedEventSeries = try container.decodeIfPresent([String: ArendalsukaEventSeriesRecord].self, forKey: .eventSeriesByID) ?? [:]
++        self.eventSeriesByID = decodedEventSeries.merging(localReplay.eventSeriesByID) { _, replayed in replayed }
++        let decodedSessionSubcategoryLinks = try container.decodeIfPresent([String: ArendalsukaSessionSubcategoryLinkRecord].self, forKey: .sessionSubcategoryLinksByID) ?? [:]
++        self.sessionSubcategoryLinksByID = decodedSessionSubcategoryLinks.merging(localReplay.sessionSubcategoryLinksByID) { _, replayed in replayed }
++        let decodedSessionEventSeriesLinks = try container.decodeIfPresent([String: ArendalsukaSessionEventSeriesLinkRecord].self, forKey: .sessionEventSeriesLinksByID) ?? [:]
++        self.sessionEventSeriesLinksByID = decodedSessionEventSeriesLinks.merging(localReplay.sessionEventSeriesLinksByID) { _, replayed in replayed }
++        let decodedTaxonomySessionStatus = try container.decodeIfPresent([String: Int].self, forKey: .taxonomySessionStatusByID) ?? [:]
++        self.taxonomySessionStatusByID = decodedTaxonomySessionStatus.merging(localReplay.taxonomySessionStatusByID) { _, replayed in replayed }
+         self.selectedSessionID = try? container.decodeIfPresent(String.self, forKey: .selectedSessionID)
+         self.selectedActorID = try? container.decodeIfPresent(String.self, forKey: .selectedActorID)
+         if let selectedActorID, self.localActorsByID[selectedActorID] == nil {
+@@ -433,7 +459,12 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+                 localDataJournalLoadedAt,
+                 speakersByID,
+                 speakerAppearancesByID,
+-                speakerEnrichmentsByID
++                speakerEnrichmentsByID,
++                taxonomySubcategoriesByID,
++                eventSeriesByID,
++                sessionSubcategoryLinksByID,
++                sessionEventSeriesLinksByID,
++                taxonomySessionStatusByID
+             )
+         }
+         var container = encoder.container(keyedBy: CodingKeys.self)
+@@ -461,6 +492,11 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+         try container.encode(snapshot.21, forKey: .speakersByID)
+         try container.encode(snapshot.22, forKey: .speakerAppearancesByID)
+         try container.encode(snapshot.23, forKey: .speakerEnrichmentsByID)
++        try container.encode(snapshot.24, forKey: .taxonomySubcategoriesByID)
++        try container.encode(snapshot.25, forKey: .eventSeriesByID)
++        try container.encode(snapshot.26, forKey: .sessionSubcategoryLinksByID)
++        try container.encode(snapshot.27, forKey: .sessionEventSeriesLinksByID)
++        try container.encode(snapshot.28, forKey: .taxonomySessionStatusByID)
+     }
+ 
+     func ensurePortholeRuntimeBindings(requester: Identity) async {
+@@ -514,10 +550,12 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+             "atlas.resetParticipantSources",
+             "atlas.ingestOSMPOIs",
+             "atlas.ingestSpeakerSnapshot",
+-            "atlas.ingestStands"
++            "atlas.ingestStands",
++            "atlas.ingestTaxonomy"
+         ].forEach {
+             ensureGrant("rw--", for: $0)
+         }
++        ensureGrant("r---", for: "taxonomySeed")
+     }
+ 
+     private func ensureGrant(_ permission: String, for keypath: String) {
+@@ -640,6 +678,41 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+             guard let self else { return .null }
+             return await self.applyAction(keypath: "atlas.ingestStands", value: payload, requester: requester)
+         }
++        await registerGet(
++            key: "taxonomySeed", owner: owner,
++            returns: ExploreContract.objectSchema(properties: [
++                "schema": ExploreContract.schema(type: "string"),
++                "subcategories": ExploreContract.listSchema(item: ExploreContract.objectSchema()),
++                "eventSeries": ExploreContract.listSchema(item: ExploreContract.objectSchema()),
++                "sessionSubcategoryIDs": ExploreContract.objectSchema(),
++                "sessionSeriesIDs": ExploreContract.objectSchema(),
++                "deliberatelyUntaggedSessionIDs": ExploreContract.listSchema(item: ExploreContract.schema(type: "string"))
++            ]), permissions: ["r---"],
++            description: .string("Read the public, source-backed topic taxonomy used for interest matching.")
++        ) { [weak self] requester in
++            guard let self else { return .null }
++            guard await self.validateAccess("r---", at: "taxonomySeed", for: requester) else { return .string("denied") }
++            return self.taxonomySeedValue()
++        }
++        await registerSet(
++            key: "atlas.ingestTaxonomy", owner: owner,
++            input: ExploreContract.objectSchema(properties: [
++                "subcategories": ExploreContract.listSchema(item: ExploreContract.objectSchema()),
++                "eventSeries": ExploreContract.listSchema(item: ExploreContract.objectSchema()),
++                "sessionSubcategoryLinks": ExploreContract.listSchema(item: ExploreContract.objectSchema()),
++                "sessionEventSeriesLinks": ExploreContract.listSchema(item: ExploreContract.objectSchema()),
++                "sessionStatus": ExploreContract.listSchema(item: ExploreContract.objectSchema()),
++                "source": ExploreContract.schema(type: "string"),
++                "importAccess": ExploreContract.objectSchema()
++            ], requiredKeys: ["importAccess"]),
++            returns: ExploreContract.oneOfSchema(options: [ExploreContract.objectSchema(), ExploreContract.schema(type: "string")]),
++            permissions: ["rw--"],
++            flowEffects: [ExploreContract.flowEffect(trigger: .set, topic: "arendalsuka.event-atlas", contentType: "object")],
++            description: .string("Upsert public taxonomy after signed import authorization; commit the journal before publishing or acknowledging.")
++        ) { [weak self] requester, payload in
++            guard let self else { return .null }
++            return await self.applyAction(keypath: "atlas.ingestTaxonomy", value: payload, requester: requester)
++        }
+         await registerSet(key: "atlas.fetchParticipantSource", owner: owner) { [weak self] requester, payload in
+             guard let self else { return .null }
+             guard await self.validateAccess("rw--", at: "atlas.fetchParticipantSource", for: requester) else { return .string("denied") }
+@@ -755,6 +828,11 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+         var speakers: [ArendalsukaSpeakerRecord]
+         var speakerAppearances: [ArendalsukaSpeakerAppearanceRecord]
+         var speakerEnrichments: [ArendalsukaSpeakerEnrichmentRecord]
++        var taxonomySubcategories: [ArendalsukaTaxonomySubcategoryRecord]
++        var eventSeries: [ArendalsukaEventSeriesRecord]
++        var sessionSubcategoryLinks: [ArendalsukaSessionSubcategoryLinkRecord]
++        var sessionEventSeriesLinks: [ArendalsukaSessionEventSeriesLinkRecord]
++        var taxonomySessionStatus: [String: Int]
+ 
+         init(
+             action: String,
+@@ -764,7 +842,12 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+             participantSources: [ArendalsukaParticipantSourceRecord] = [],
+             speakers: [ArendalsukaSpeakerRecord] = [],
+             speakerAppearances: [ArendalsukaSpeakerAppearanceRecord] = [],
+-            speakerEnrichments: [ArendalsukaSpeakerEnrichmentRecord] = []
++            speakerEnrichments: [ArendalsukaSpeakerEnrichmentRecord] = [],
++            taxonomySubcategories: [ArendalsukaTaxonomySubcategoryRecord] = [],
++            eventSeries: [ArendalsukaEventSeriesRecord] = [],
++            sessionSubcategoryLinks: [ArendalsukaSessionSubcategoryLinkRecord] = [],
++            sessionEventSeriesLinks: [ArendalsukaSessionEventSeriesLinkRecord] = [],
++            taxonomySessionStatus: [String: Int] = [:]
+         ) {
+             self.schema = "haven.arendalsuka.local-data-import-journal-entry.v1"
+             self.action = action
+@@ -775,6 +858,11 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+             self.speakers = speakers
+             self.speakerAppearances = speakerAppearances
+             self.speakerEnrichments = speakerEnrichments
++            self.taxonomySubcategories = taxonomySubcategories
++            self.eventSeries = eventSeries
++            self.sessionSubcategoryLinks = sessionSubcategoryLinks
++            self.sessionEventSeriesLinks = sessionEventSeriesLinks
++            self.taxonomySessionStatus = taxonomySessionStatus
+         }
+ 
+         // Custom decode so journal lines written before speakers/appearances/
+@@ -782,7 +870,9 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+         // instead of being dropped as unparseable lines.
+         enum CodingKeys: CodingKey {
+             case schema, action, source, recordedAt, localActors, participantSources,
+-                 speakers, speakerAppearances, speakerEnrichments
++                 speakers, speakerAppearances, speakerEnrichments,
++                 taxonomySubcategories, eventSeries, sessionSubcategoryLinks,
++                 sessionEventSeriesLinks, taxonomySessionStatus
+         }
+ 
+         init(from decoder: Decoder) throws {
+@@ -796,6 +886,11 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+             self.speakers = (try? container.decode([ArendalsukaSpeakerRecord].self, forKey: .speakers)) ?? []
+             self.speakerAppearances = (try? container.decode([ArendalsukaSpeakerAppearanceRecord].self, forKey: .speakerAppearances)) ?? []
+             self.speakerEnrichments = (try? container.decode([ArendalsukaSpeakerEnrichmentRecord].self, forKey: .speakerEnrichments)) ?? []
++            self.taxonomySubcategories = try container.decodeIfPresent([ArendalsukaTaxonomySubcategoryRecord].self, forKey: .taxonomySubcategories) ?? []
++            self.eventSeries = try container.decodeIfPresent([ArendalsukaEventSeriesRecord].self, forKey: .eventSeries) ?? []
++            self.sessionSubcategoryLinks = try container.decodeIfPresent([ArendalsukaSessionSubcategoryLinkRecord].self, forKey: .sessionSubcategoryLinks) ?? []
++            self.sessionEventSeriesLinks = try container.decodeIfPresent([ArendalsukaSessionEventSeriesLinkRecord].self, forKey: .sessionEventSeriesLinks) ?? []
++            self.taxonomySessionStatus = try container.decodeIfPresent([String: Int].self, forKey: .taxonomySessionStatus) ?? [:]
+         }
+     }
+ 
+@@ -805,6 +900,11 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+         var speakersByID: [String: ArendalsukaSpeakerRecord]
+         var speakerAppearancesByID: [String: ArendalsukaSpeakerAppearanceRecord]
+         var speakerEnrichmentsByID: [String: ArendalsukaSpeakerEnrichmentRecord]
++        var taxonomySubcategoriesByID: [String: ArendalsukaTaxonomySubcategoryRecord]
++        var eventSeriesByID: [String: ArendalsukaEventSeriesRecord]
++        var sessionSubcategoryLinksByID: [String: ArendalsukaSessionSubcategoryLinkRecord]
++        var sessionEventSeriesLinksByID: [String: ArendalsukaSessionEventSeriesLinkRecord]
++        var taxonomySessionStatusByID: [String: Int]
+         var entryCount: Int
+         var skippedLineCount: Int
+         var status: String
+@@ -823,6 +923,10 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+                 "speakerCount": .integer(speakersByID.count),
+                 "speakerAppearanceCount": .integer(speakerAppearancesByID.count),
+                 "speakerEnrichmentCount": .integer(speakerEnrichmentsByID.count),
++                "taxonomySubcategoryCount": .integer(taxonomySubcategoriesByID.count),
++                "eventSeriesCount": .integer(eventSeriesByID.count),
++                "sessionSubcategoryLinkCount": .integer(sessionSubcategoryLinksByID.count),
++                "sessionEventSeriesLinkCount": .integer(sessionEventSeriesLinksByID.count),
+                 "dataBoundary": .string("Replays source-backed/public import data only; participant-owned private anchors are persisted by their owning cells and are not promoted into this shared import journal.")
+             ]
+         }
+@@ -1022,6 +1126,11 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+                 speakersByID: [:],
+                 speakerAppearancesByID: [:],
+                 speakerEnrichmentsByID: [:],
++                taxonomySubcategoriesByID: [:],
++                eventSeriesByID: [:],
++                sessionSubcategoryLinksByID: [:],
++                sessionEventSeriesLinksByID: [:],
++                taxonomySessionStatusByID: [:],
+                 entryCount: 0,
+                 skippedLineCount: 0,
+                 status: "journal_unavailable",
+@@ -1036,6 +1145,11 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+                 speakersByID: [:],
+                 speakerAppearancesByID: [:],
+                 speakerEnrichmentsByID: [:],
++                taxonomySubcategoriesByID: [:],
++                eventSeriesByID: [:],
++                sessionSubcategoryLinksByID: [:],
++                sessionEventSeriesLinksByID: [:],
++                taxonomySessionStatusByID: [:],
+                 entryCount: 0,
+                 skippedLineCount: 0,
+                 status: "journal_missing",
+@@ -1051,6 +1165,11 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+             var speakersByID: [String: ArendalsukaSpeakerRecord] = [:]
+             var speakerAppearancesByID: [String: ArendalsukaSpeakerAppearanceRecord] = [:]
+             var speakerEnrichmentsByID: [String: ArendalsukaSpeakerEnrichmentRecord] = [:]
++            var taxonomySubcategoriesByID: [String: ArendalsukaTaxonomySubcategoryRecord] = [:]
++            var eventSeriesByID: [String: ArendalsukaEventSeriesRecord] = [:]
++            var sessionSubcategoryLinksByID: [String: ArendalsukaSessionSubcategoryLinkRecord] = [:]
++            var sessionEventSeriesLinksByID: [String: ArendalsukaSessionEventSeriesLinkRecord] = [:]
++            var taxonomySessionStatusByID: [String: Int] = [:]
+             var entryCount = 0
+             var skippedLineCount = 0
+ 
+@@ -1081,6 +1200,22 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+                         for enrichment in entry.speakerEnrichments {
+                             speakerEnrichmentsByID[enrichment.id] = enrichment
+                         }
++                    case "ingestTaxonomy":
++                        for subcategory in entry.taxonomySubcategories {
++                            taxonomySubcategoriesByID[subcategory.id] = subcategory
++                        }
++                        for series in entry.eventSeries {
++                            eventSeriesByID[series.id] = series
++                        }
++                        for link in entry.sessionSubcategoryLinks {
++                            sessionSubcategoryLinksByID[link.id] = link
++                        }
++                        for link in entry.sessionEventSeriesLinks {
++                            sessionEventSeriesLinksByID[link.id] = link
++                        }
++                        for (sessionID, count) in entry.taxonomySessionStatus {
++                            taxonomySessionStatusByID[sessionID] = count
++                        }
+                     default:
+                         skippedLineCount += 1
+                     }
+@@ -1103,6 +1238,11 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+                 speakersByID: speakersByID,
+                 speakerAppearancesByID: speakerAppearancesByID,
+                 speakerEnrichmentsByID: speakerEnrichmentsByID,
++                taxonomySubcategoriesByID: taxonomySubcategoriesByID,
++                eventSeriesByID: eventSeriesByID,
++                sessionSubcategoryLinksByID: sessionSubcategoryLinksByID,
++                sessionEventSeriesLinksByID: sessionEventSeriesLinksByID,
++                taxonomySessionStatusByID: taxonomySessionStatusByID,
+                 entryCount: entryCount,
+                 skippedLineCount: skippedLineCount,
+                 status: status,
+@@ -1116,6 +1256,11 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+                 speakersByID: [:],
+                 speakerAppearancesByID: [:],
+                 speakerEnrichmentsByID: [:],
++                taxonomySubcategoriesByID: [:],
++                eventSeriesByID: [:],
++                sessionSubcategoryLinksByID: [:],
++                sessionEventSeriesLinksByID: [:],
++                taxonomySessionStatusByID: [:],
+                 entryCount: 0,
+                 skippedLineCount: 0,
+                 status: "journal_load_failed: \(error.localizedDescription)",
+@@ -1152,6 +1297,9 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+             try handle.close()
+             let rowCount = entry.localActors.count + entry.participantSources.count
+                 + entry.speakers.count + entry.speakerAppearances.count + entry.speakerEnrichments.count
++                + entry.taxonomySubcategories.count + entry.eventSeries.count
++                + entry.sessionSubcategoryLinks.count + entry.sessionEventSeriesLinks.count
++                + entry.taxonomySessionStatus.count
+             return LocalDataImportJournalWriteResult(
+                 status: "journal_appended",
+                 path: url.path,
+@@ -1227,6 +1375,8 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+             return ingestSpeakerSnapshot(payload: payload, requester: requester)
+         case "atlas.ingestStands":
+             return ingestStands(payload: payload, requester: requester)
++        case "atlas.ingestTaxonomy":
++            return ingestTaxonomy(payload: payload, requester: requester)
+         default:
+             return .string("unsupported")
+         }
+@@ -2075,6 +2225,192 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+         return stateValue(requester: requester)
+     }
+ 
++    /// Ingests the curated topic taxonomy — subcategories, event series, and
++    /// their session links — from the `taxonomy_subcategory`/`event_series`/
++    /// `session_subcategory`/`session_event_series`/`taxonomy_generation_status`
++    /// source-of-truth tables (see `arendalsuka-data-pipeline` skill's
++    /// `references/schema.md`). Unlike stands/OSM POIs, the taxonomy is not
++    /// static: it's derived from session content and regenerated whenever the
++    /// program changes, so this is the live update path. The `Bundle.module`
++    /// static resource in `ArendalsukaInterestTaxonomy.swift` remains only a
++    /// fallback seed for fresh environments where nothing has been ingested
++    /// yet — see `taxonomySeedValue()` and `ArendalsukaMatchingCell`'s
++    /// consumption. Every key (`subcategories`/`eventSeries`/
++    /// `sessionSubcategoryLinks`/`sessionEventSeriesLinks`/`sessionStatus`) is
++    /// optional and independently batchable, mirroring `ingestSpeakerSnapshot`.
++    private func ingestTaxonomy(payload: Object, requester: Identity) -> ValueType {
++        let collectionKeys = ["subcategories", "eventSeries", "sessionSubcategoryLinks", "sessionEventSeriesLinks", "sessionStatus"]
++        for key in collectionKeys {
++            if let value = payload[key] {
++                guard case .list = value else { return .string("error: taxonomy collections must be lists") }
++            }
++        }
++        let importedAt = Date()
++        let source = EventPlatformValueDecoding.string(payload["source"]) ?? "arendalsuka-taxonomy-pipeline"
++
++        let subcategoryValues = EventPlatformValueDecoding.list(payload["subcategories"])
++        let eventSeriesValues = EventPlatformValueDecoding.list(payload["eventSeries"])
++        let sessionSubcategoryLinkValues = EventPlatformValueDecoding.list(payload["sessionSubcategoryLinks"])
++        let sessionEventSeriesLinkValues = EventPlatformValueDecoding.list(payload["sessionEventSeriesLinks"])
++        let sessionStatusValues = EventPlatformValueDecoding.list(payload["sessionStatus"])
++
++        let subcategoryCandidates = subcategoryValues.compactMap { value in
++            Self.taxonomySubcategoryRecord(from: EventPlatformValueDecoding.object(value), source: source, importedAt: importedAt)
++        }
++        let eventSeriesCandidates = eventSeriesValues.compactMap { value in
++            Self.eventSeriesRecord(from: EventPlatformValueDecoding.object(value), source: source, importedAt: importedAt)
++        }
++        let sessionSubcategoryLinkCandidates = sessionSubcategoryLinkValues.compactMap { value in
++            Self.sessionSubcategoryLinkRecord(from: EventPlatformValueDecoding.object(value), importedAt: importedAt)
++        }
++        let sessionEventSeriesLinkCandidates = sessionEventSeriesLinkValues.compactMap { value in
++            Self.sessionEventSeriesLinkRecord(from: EventPlatformValueDecoding.object(value), importedAt: importedAt)
++        }
++        guard subcategoryCandidates.count == subcategoryValues.count,
++              eventSeriesCandidates.count == eventSeriesValues.count,
++              sessionSubcategoryLinkCandidates.count == sessionSubcategoryLinkValues.count,
++              sessionEventSeriesLinkCandidates.count == sessionEventSeriesLinkValues.count else {
++            return .string("error: taxonomy import contains an invalid row")
++        }
++        var sessionStatusCandidates: [String: Int] = [:]
++        for value in sessionStatusValues {
++            let object = EventPlatformValueDecoding.object(value)
++            guard let sessionID = EventPlatformValueDecoding.string(object["session_id"]) ?? EventPlatformValueDecoding.string(object["sessionID"]),
++                  let count = EventPlatformValueDecoding.int(object["subcategory_count"]) ?? EventPlatformValueDecoding.int(object["subcategoryCount"]), count >= 0 else {
++                return .string("error: taxonomy session status requires an id and a nonnegative count")
++            }
++            sessionStatusCandidates[sessionID] = count
++        }
++
++        var createdSubcategories = 0, updatedSubcategories = 0
++        var createdEventSeries = 0, updatedEventSeries = 0
++        var createdSessionSubcategoryLinks = 0, updatedSessionSubcategoryLinks = 0
++        var createdSessionEventSeriesLinks = 0, updatedSessionEventSeriesLinks = 0
++        var totalSubcategories = 0, totalEventSeries = 0
++        var totalSessionSubcategoryLinks = 0, totalSessionEventSeriesLinks = 0
++        var totalSessionStatus = 0
++
++        let committed = stateQueue.sync { () -> Bool in
++            let journal = Self.appendLocalDataImportJournalEntry(LocalDataImportJournalEntry(
++                action: "ingestTaxonomy", source: source, recordedAt: importedAt,
++                taxonomySubcategories: subcategoryCandidates, eventSeries: eventSeriesCandidates,
++                sessionSubcategoryLinks: sessionSubcategoryLinkCandidates,
++                sessionEventSeriesLinks: sessionEventSeriesLinkCandidates,
++                taxonomySessionStatus: sessionStatusCandidates
++            ))
++            localDataJournalStatus = journal.status
++            localDataJournalPath = journal.path
++            localDataJournalEntryCount += journal.entryDelta
++            localDataJournalLoadedAt = journal.recordedAt
++            guard journal.status == "journal_appended" else {
++                lastStatus = "Taxonomy import failed: local data journal could not be written."
++                return false
++            }
++            for candidate in subcategoryCandidates {
++                if taxonomySubcategoriesByID[candidate.id] != nil { updatedSubcategories += 1 } else { createdSubcategories += 1 }
++                taxonomySubcategoriesByID[candidate.id] = candidate
++            }
++            for candidate in eventSeriesCandidates {
++                if eventSeriesByID[candidate.id] != nil { updatedEventSeries += 1 } else { createdEventSeries += 1 }
++                eventSeriesByID[candidate.id] = candidate
++            }
++            for candidate in sessionSubcategoryLinkCandidates {
++                if sessionSubcategoryLinksByID[candidate.id] != nil { updatedSessionSubcategoryLinks += 1 } else { createdSessionSubcategoryLinks += 1 }
++                sessionSubcategoryLinksByID[candidate.id] = candidate
++            }
++            for candidate in sessionEventSeriesLinkCandidates {
++                if sessionEventSeriesLinksByID[candidate.id] != nil { updatedSessionEventSeriesLinks += 1 } else { createdSessionEventSeriesLinks += 1 }
++                sessionEventSeriesLinksByID[candidate.id] = candidate
++            }
++            for (sessionID, count) in sessionStatusCandidates {
++                taxonomySessionStatusByID[sessionID] = count
++            }
++            totalSubcategories = taxonomySubcategoriesByID.count
++            totalEventSeries = eventSeriesByID.count
++            totalSessionSubcategoryLinks = sessionSubcategoryLinksByID.count
++            totalSessionEventSeriesLinks = sessionEventSeriesLinksByID.count
++            totalSessionStatus = taxonomySessionStatusByID.count
++
++            lastImportReport = [
++                "source": .string(source),
++                "importedAt": .string(ArendalsukaEventAtlasFormatting.isoString(importedAt)),
++                "subcategoriesReceived": .integer(subcategoryValues.count),
++                "subcategoriesCreated": .integer(createdSubcategories),
++                "subcategoriesUpdated": .integer(updatedSubcategories),
++                "eventSeriesReceived": .integer(eventSeriesValues.count),
++                "eventSeriesCreated": .integer(createdEventSeries),
++                "eventSeriesUpdated": .integer(updatedEventSeries),
++                "sessionSubcategoryLinksReceived": .integer(sessionSubcategoryLinkValues.count),
++                "sessionSubcategoryLinksCreated": .integer(createdSessionSubcategoryLinks),
++                "sessionSubcategoryLinksUpdated": .integer(updatedSessionSubcategoryLinks),
++                "sessionEventSeriesLinksReceived": .integer(sessionEventSeriesLinkValues.count),
++                "sessionEventSeriesLinksCreated": .integer(createdSessionEventSeriesLinks),
++                "sessionEventSeriesLinksUpdated": .integer(updatedSessionEventSeriesLinks),
++                "sessionStatusReceived": .integer(sessionStatusValues.count),
++                "totalSubcategoryCount": .integer(totalSubcategories),
++                "totalEventSeriesCount": .integer(totalEventSeries),
++                "totalSessionSubcategoryLinkCount": .integer(totalSessionSubcategoryLinks),
++                "totalSessionEventSeriesLinkCount": .integer(totalSessionEventSeriesLinks),
++                "totalSessionStatusCount": .integer(totalSessionStatus)
++            ]
++            lastStatus = "Imported taxonomy snapshot batch: \(createdSubcategories) new subcategory(s), \(createdEventSeries) new event series, \(createdSessionSubcategoryLinks) new session-subcategory link(s). Totals: \(totalSubcategories) subcategories, \(totalEventSeries) event series."
++            return true
++        }
++
++        guard committed else {
++            return .string("error: taxonomy import was not committed because journal persistence failed")
++        }
++
++        emit(kind: "arendalsuka.taxonomy.ingested", payload: lastImportReportValue(), requester: requester)
++        return stateValue(requester: requester)
++    }
++
++    private static func taxonomySubcategoryRecord(from object: Object, source: String, importedAt: Date) -> ArendalsukaTaxonomySubcategoryRecord? {
++        guard let id = EventPlatformValueDecoding.string(object["subcategory_id"]) ?? EventPlatformValueDecoding.string(object["subcategoryID"]) else {
++            return nil
++        }
++        guard let topCategory = EventPlatformValueDecoding.string(object["top_category"]) ?? EventPlatformValueDecoding.string(object["topCategory"]) else {
++            return nil
++        }
++        let name = EventPlatformValueDecoding.string(object["name"]) ?? topCategory
++        let topicGroup = EventPlatformValueDecoding.string(object["topic_group"]) ?? EventPlatformValueDecoding.string(object["topicGroup"])
++        let sessionCount = EventPlatformValueDecoding.int(object["session_count"]) ?? EventPlatformValueDecoding.int(object["sessionCount"]) ?? 0
++        return ArendalsukaTaxonomySubcategoryRecord(
++            id: id,
++            topCategory: topCategory,
++            topicGroup: topicGroup,
++            name: name,
++            sessionCount: sessionCount,
++            source: source,
++            updatedAt: importedAt
++        )
++    }
++
++    private static func eventSeriesRecord(from object: Object, source: String, importedAt: Date) -> ArendalsukaEventSeriesRecord? {
++        guard let id = EventPlatformValueDecoding.string(object["series_id"]) ?? EventPlatformValueDecoding.string(object["seriesID"]) else {
++            return nil
++        }
++        guard let name = EventPlatformValueDecoding.string(object["name"]) else { return nil }
++        let organizerHint = EventPlatformValueDecoding.string(object["organizer_hint"]) ?? EventPlatformValueDecoding.string(object["organizerHint"])
++        return ArendalsukaEventSeriesRecord(id: id, name: name, organizerHint: organizerHint, source: source, updatedAt: importedAt)
++    }
++
++    private static func sessionSubcategoryLinkRecord(from object: Object, importedAt: Date) -> ArendalsukaSessionSubcategoryLinkRecord? {
++        guard let sessionID = EventPlatformValueDecoding.string(object["session_id"]) ?? EventPlatformValueDecoding.string(object["sessionID"]),
++              let subcategoryID = EventPlatformValueDecoding.string(object["subcategory_id"]) ?? EventPlatformValueDecoding.string(object["subcategoryID"]) else {
++            return nil
++        }
++        return ArendalsukaSessionSubcategoryLinkRecord(id: "\(sessionID)|\(subcategoryID)", sessionID: sessionID, subcategoryID: subcategoryID, updatedAt: importedAt)
++    }
++
++    private static func sessionEventSeriesLinkRecord(from object: Object, importedAt: Date) -> ArendalsukaSessionEventSeriesLinkRecord? {
++        guard let sessionID = EventPlatformValueDecoding.string(object["session_id"]) ?? EventPlatformValueDecoding.string(object["sessionID"]),
++              let seriesID = EventPlatformValueDecoding.string(object["series_id"]) ?? EventPlatformValueDecoding.string(object["seriesID"]) else {
++            return nil
++        }
++        return ArendalsukaSessionEventSeriesLinkRecord(id: "\(sessionID)|\(seriesID)", sessionID: sessionID, seriesID: seriesID, updatedAt: importedAt)
++    }
++
+     /// Ingests speaker identities, per-session appearances and/or resolved
+     /// enrichment facts from the `speaker`/`speaker_appearances`/
+     /// `speaker_enrichment_resolved` source-of-truth tables. Every key
+@@ -2753,7 +3089,11 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+                 participantSources: participantSourcesByID.values.sorted { $0.id < $1.id },
+                 speakers: speakersByID.values.sorted { $0.id < $1.id },
+                 speakerAppearances: speakerAppearancesByID.values.sorted { $0.id < $1.id },
+-                speakerEnrichments: speakerEnrichmentsByID.values.sorted { $0.id < $1.id }
++                speakerEnrichments: speakerEnrichmentsByID.values.sorted { $0.id < $1.id },
++                taxonomySubcategories: taxonomySubcategoriesByID.values.sorted { $0.id < $1.id },
++                eventSeries: eventSeriesByID.values.sorted { $0.id < $1.id },
++                sessionSubcategoryLinks: sessionSubcategoryLinksByID.values.sorted { $0.id < $1.id },
++                sessionEventSeriesLinks: sessionEventSeriesLinksByID.values.sorted { $0.id < $1.id }
+             )
+         }
+         return .object([
+@@ -2766,7 +3106,47 @@ final class ArendalsukaEventAtlasCell: GeneralCell, PortholeRuntimeBindingEnsuri
+             "participantSources": .list(snapshot.participantSources.map { .object($0.asObject) }),
+             "speakers": .list(snapshot.speakers.map { .object($0.asObject) }),
+             "speakerAppearances": .list(snapshot.speakerAppearances.map { .object($0.asObject) }),
+-            "speakerEnrichments": .list(snapshot.speakerEnrichments.map { .object($0.asObject) })
++            "speakerEnrichments": .list(snapshot.speakerEnrichments.map { .object($0.asObject) }),
++            "taxonomySubcategories": .list(snapshot.taxonomySubcategories.map { .object($0.asObject) }),
++            "eventSeries": .list(snapshot.eventSeries.map { .object($0.asObject) }),
++            "sessionSubcategoryLinks": .list(snapshot.sessionSubcategoryLinks.map { .object($0.asObject) }),
++            "sessionEventSeriesLinks": .list(snapshot.sessionEventSeriesLinks.map { .object($0.asObject) })
++        ])
++    }
++
++    /// Read model for `ArendalsukaMatchingCell` and other cross-cell
++    /// consumers: the ingested taxonomy reshaped into the same
++    /// subcategory/eventSeries/session-link/deliberately-untagged shape as
++    /// the bundled fallback seed (`ArendalsukaInterestTaxonomySeed`), so a
++    /// consumer can prefer this live snapshot and fall back to the bundled
++    /// seed only when nothing has been ingested yet.
++    private func taxonomySeedValue() -> ValueType {
++        let snapshot = stateQueue.sync {
++            (
++                subcategories: taxonomySubcategoriesByID.values.sorted { $0.id < $1.id },
++                eventSeries: eventSeriesByID.values.sorted { $0.id < $1.id },
++                sessionSubcategoryLinks: sessionSubcategoryLinksByID.values.sorted { $0.id < $1.id },
++                sessionEventSeriesLinks: sessionEventSeriesLinksByID.values.sorted { $0.id < $1.id },
++                sessionStatus: taxonomySessionStatusByID
++            )
++        }
++        var sessionSubcategoryIDs: [String: [String]] = [:]
++        for link in snapshot.sessionSubcategoryLinks {
++            sessionSubcategoryIDs[link.sessionID, default: []].append(link.subcategoryID)
++        }
++        var sessionSeriesIDs: [String: [String]] = [:]
++        for link in snapshot.sessionEventSeriesLinks {
++            sessionSeriesIDs[link.sessionID, default: []].append(link.seriesID)
++        }
++        let deliberatelyUntagged = snapshot.sessionStatus.filter { $0.value == 0 }.map(\.key).sorted()
++
++        return .object([
++            "schema": .string("haven.arendalsuka.taxonomy-seed.v1"),
++            "subcategories": .list(snapshot.subcategories.map { .object($0.asObject) }),
++            "eventSeries": .list(snapshot.eventSeries.map { .object($0.asObject) }),
++            "sessionSubcategoryIDs": .object(sessionSubcategoryIDs.mapValues { .list($0.map(ValueType.string)) }),
++            "sessionSeriesIDs": .object(sessionSeriesIDs.mapValues { .list($0.map(ValueType.string)) }),
++            "deliberatelyUntaggedSessionIDs": .list(deliberatelyUntagged.map(ValueType.string))
+         ])
+     }
+ 
+diff --git a/Sources/App/Cells/Arendalsuka/ArendalsukaEventAtlasConfigurationFactory.swift b/Sources/App/Cells/Arendalsuka/ArendalsukaEventAtlasConfigurationFactory.swift
+index 3c76667a..3c3c7157 100644
+--- a/Sources/App/Cells/Arendalsuka/ArendalsukaEventAtlasConfigurationFactory.swift
++++ b/Sources/App/Cells/Arendalsuka/ArendalsukaEventAtlasConfigurationFactory.swift
+@@ -88,11 +88,7 @@ enum ArendalsukaEventAtlasConfigurationFactory {
+         return configuration
+     }
+ 
+-    /// Minimal, functional surface for private event recommendations and
+-    /// consent-and-visibility-gated people matching. Deliberately plain - the
+-    /// actual visual design (tile layout matching the Stitch mockup) is
+-    /// explicitly deferred to a separate design session; this only proves the
+-    /// data contract renders end to end.
++    /// Private event recommendations and consent-gated participant cards.
+     static func makeMatchingConfiguration() -> CellConfiguration {
+         var configuration = CellConfiguration(name: "Arendalsuka Matches")
+         configuration.description = "Private event recommendations from saved interests, plus people matching that requires consent and directory visibility from both participants. Purpose text is not scored in this version."
+@@ -138,39 +134,271 @@ enum ArendalsukaEventAtlasConfigurationFactory {
+                     "Personforslag vises bare når både du og den andre deltakeren har gitt matching-samtykke og er synlige i deltakerkatalogen. Hvis en av dere trekker tilbake samtykke eller synlighet, forsvinner treffet.",
+                     fontSize: 13,
+                     weight: "regular",
+-                    color: "#9c4141"
++                    color: "#414942"
+                 ),
+                 styledLabel(
+                     "Formålsteksten kan være del av profilen din, men denne versjonen bruker den ikke i poengberegningen.",
+-                    fontSize: 13,
+-                    weight: "regular",
+-                    color: "#414942"
++                    fontSize: 13, weight: "regular", color: "#414942"
+                 ),
+-                .List(SkeletonList(
+-                    topic: nil,
+-                    keypath: "arendalsukaMatching.state.recommendedParticipants",
+-                    flowElementSkeleton: SkeletonVStack(elements: [
+-                        styledKeyText("displayName", fontSize: 15, weight: "bold", color: "#1a1c19"),
+-                        styledKeyText("role", fontSize: 12, weight: "semibold", color: "#316342"),
+-                        styledKeyText("company", fontSize: 13, weight: "medium", color: "#414942"),
+-                        styledKeyText("reason", fontSize: 12, weight: "regular", color: "#64748B")
+-                    ], modifiers: cardModifiers(background: "#ffffff", border: "#c1c9bf"))
+-                ))
++                withVisibility(
++                    styledLabel(
++                        "Skru på matching-samtykke for å se og bli foreslått for andre deltakere.",
++                        fontSize: 13,
++                        weight: "regular",
++                        color: "#9c4141"
++                    ),
++                    keypath: "arendalsukaMatching.state.isMatchingConsentGranted",
++                    equals: false
++                ),
++                .List(matchingParticipantList()),
++                matchingUpdateProfileCTA()
+             ]),
+-            matchingBottomNavigation()
++            matchingParticipantDetailModal(),
++            arendalsukaBottomNavigationBar()
+         ]))
+         return configuration
+     }
+ 
+-    private static func matchingBottomNavigation() -> SkeletonElement {
+-        .HStack(SkeletonHStack(
++    private static func matchingParticipantList() -> SkeletonList {
++        SkeletonList(
++            topic: nil,
++            keypath: "arendalsukaMatching.state.recommendedParticipants",
++            flowElementSkeleton: matchingParticipantCardSkeleton()
++        )
++    }
++
++    // Schedule Card per DESIGN.md: "white with a 12px radius... a vertical
++    // Sage Green accent bar on the left edge." SkeletonModifiers has no
++    // per-side border, so the accent bar is a solid-fill zero-content VStack
++    // sized to a fixed width, laid out beside the real content in an HStack -
++    // not a border, but reads the same on screen.
++    //
++    // The mock also shows per-topic pill chips under "Hvorfor match?" on
++    // every tile. That needs a List nested inside this List's own per-item
++    // template (recommendedParticipants[i].topics), a construct with no
++    // working precedent anywhere else in this codebase today - every other
++    // List-of-chips here reads from a single already-selected object, never
++    // from inside another List's row. Rather than gamble a per-item nested
++    // list on an unverified renderer path, the tile shows the same overlap
++    // as a plain sentence (matches what recommendedParticipants.reasons
++    // already carries); the full pill-chip treatment is used in the detail
++    // modal below, where it IS the proven pattern (see matchingDetailInterestChipList).
++    private static func matchingParticipantCardSkeleton() -> SkeletonVStack {
++        var outerModifiers = cardModifiers(background: "#ffffff", border: "#e2e3de")
++        outerModifiers.padding = 0
++        return SkeletonVStack(
+             elements: [
+-                participantNavigationButton(label: "CoPilot", url: "/porthole?configurationName=Co-Pilot%20Chat"),
+-                participantNavigationButton(label: "Program", url: "/porthole?configurationName=Arendalsuka%20Participant%20Program")
++                .HStack(SkeletonHStack(
++                    elements: [
++                        matchingAccentStripe(),
++                        .VStack(SkeletonVStack(elements: [
++                            .HStack(SkeletonHStack(elements: [
++                                matchingAvatarBadge(fontSize: 15, diameter: 44),
++                                .VStack(SkeletonVStack(elements: [
++                                    styledKeyText("displayName", fontSize: 15, weight: "bold", color: "#1a1c19"),
++                                    styledKeyText("role", fontSize: 13, weight: "semibold", color: "#316342"),
++                                    styledKeyText("company", fontSize: 12, weight: "medium", color: "#414942")
++                                ]))
++                            ], spacing: 12)),
++                            .VStack(SkeletonVStack(elements: [
++                                styledLabel("Hvorfor match?", fontSize: 13, weight: "bold", color: "#1a1c19"),
++                                styledKeyText("reasonsText", fontSize: 13, weight: "regular", color: "#414942")
++                            ])),
++                            .HStack(SkeletonHStack(elements: [
++                                .Spacer(SkeletonSpacer()),
++                                contextButton(
++                                    "arendalsukaMatching.matching.selectParticipant",
++                                    label: "Se profil →",
++                                    payloadKeypath: "participantId"
++                                )
++                            ]))
++                        ], modifiers: matchingCardContentModifiers()))
++                    ],
++                    spacing: 0
++                ))
+             ],
+-            spacing: 10,
+-            modifiers: bottomNavigationModifiers()
++            modifiers: outerModifiers
++        )
++    }
++
++    private static func matchingAccentStripe() -> SkeletonElement {
++        var modifiers = SkeletonModifiers()
++        modifiers.background = "#316342"
++        modifiers.width = 6
++        modifiers.maxHeightInfinity = true
++        return .VStack(SkeletonVStack(elements: [], modifiers: modifiers))
++    }
++
++    private static func matchingCardContentModifiers() -> SkeletonModifiers {
++        var modifiers = SkeletonModifiers()
++        modifiers.padding = 16
++        modifiers.maxWidthInfinity = true
++        return modifiers
++    }
++
++    // Circular initials badge, matching the mock's fallback avatar style
++    // (e.g. "AM" on a tinted circle). The mock's primary style is an actual
++    // photo, but SkeletonImage's `url` is a static asset reference with no
++    // keypath binding (see SkeletonImage in SkeletonDescription.swift) - it
++    // cannot bind to a per-participant photoDataURI today, list item or not.
++    // Escalate to Vegar if real per-participant photos are wanted here; this
++    // renders every tile with the initials fallback rather than guess at a
++    // workaround.
++    // `keypath` defaults to the bare list-row-relative field name - only
++    // correct when this is used inside a List's flowElementSkeleton (the
++    // card tile). The detail modal below reuses this same helper OUTSIDE any
++    // list-row context, where a bare "avatarInitials" silently resolves to
++    // nothing (confirmed live: the small card avatar renders its initials
++    // fine, the large modal avatar next to it does not) - it must pass the
++    // full absolute keypath instead.
++    private static func matchingAvatarBadge(
++        fontSize: Double,
++        diameter: Double,
++        keypath: String = "avatarInitials"
++    ) -> SkeletonElement {
++        var modifiers = SkeletonModifiers()
++        modifiers.background = "#e1ffe5"
++        modifiers.cornerRadius = 999
++        modifiers.width = diameter
++        modifiers.height = diameter
++        modifiers.hAlignment = "center"
++        modifiers.vAlignment = "center"
++        var textModifiers = SkeletonModifiers()
++        textModifiers.fontSize = fontSize
++        textModifiers.fontWeight = "bold"
++        textModifiers.foregroundColor = "#1e5031"
++        textModifiers.multilineTextAlignment = "center"
++        var text = SkeletonText(keypath: keypath)
++        text.modifiers = textModifiers
++        return .VStack(SkeletonVStack(elements: [.Text(text)], modifiers: modifiers))
++    }
++
++    // "Vil du ha flere treff?" nudge card at the foot of the list, matching
++    // the mock's dark-green CTA. No button: it would need to open interest
++    // editing, which today only exists behind the guided Butler Chat/Co-Pilot
++    // onboarding dialogue, not a settings-page keypath this configuration can
++    // target. A working cross-configuration link now exists
++    // (SkeletonNavigationBar, see arendalsukaBottomNavigationBar) but it
++    // renders as a full nav bar, not an inline card button - a real fix here
++    // needs either a new in-place editing surface or a proven single-link
++    // button element, neither of which exist yet.
++    private static func matchingUpdateProfileCTA() -> SkeletonElement {
++        var modifiers = SkeletonModifiers()
++        modifiers.background = "#316342"
++        modifiers.cornerRadius = 16
++        modifiers.padding = 20
++        modifiers.maxWidthInfinity = true
++        return .VStack(SkeletonVStack(elements: [
++            styledLabel("Vil du ha flere treff?", fontSize: 16, weight: "bold", color: "#ffffff"),
++            styledLabel(
++                "Oppdater interessene dine i CoPilot-samtalen for å få enda mer presise forslag til hvem du bør møte.",
++                fontSize: 13,
++                weight: "regular",
++                color: "#e1ffe5"
++            )
++        ], modifiers: modifiers))
++    }
++
++    // Tap-through detail view ("Match-detaljer" in the mock), reusing the
++    // exact same visibility+SkeletonPresentation modal pattern already proven
++    // by participantSelectedSpeakerPresentation/participantSelectedActorPresentation
++    // - gated on arendalsukaMatching.state.selectedParticipant.isOpen, which
++    // ArendalsukaMatchingCell derives by re-matching the stored selection id
++    // against the live recommendedParticipants list on every read (so a
++    // revoked-consent or dropped-out match self-closes instead of showing
++    // stale data). Two things from the mock are deliberately left out rather
++    // than faked: a numeric match-score badge (the underlying `score` is an
++    // unbounded rarity-weighted sum, not a calibrated percentage - showing
++    // "95%" would imply precision the model doesn't have) and "Send
++    // melding"/"Foreslå møte" buttons (those belong to the existing meeting-
++    // request flow in ArendalsukaParticipantProgramCell's chat tab, a
++    // different CellConfiguration - wiring them here hits the same
++    // cross-configuration navigation gap as the CTA button above).
++    private static func matchingParticipantDetailModal() -> SkeletonElement {
++        var section = styledSection("Match-detaljer", background: "#ffffff", border: "#316342", content: [
++            matchingAvatarBadge(fontSize: 28, diameter: 72, keypath: "arendalsukaMatching.state.selectedParticipant.avatarInitials"),
++            styledKeyText("arendalsukaMatching.state.selectedParticipant.displayName", fontSize: 22, weight: "bold", color: "#1a1c19"),
++            styledKeyText("arendalsukaMatching.state.selectedParticipant.role", fontSize: 14, weight: "semibold", color: "#316342"),
++            styledKeyText("arendalsukaMatching.state.selectedParticipant.company", fontSize: 14, weight: "regular", color: "#414942"),
++            .VStack(SkeletonVStack(elements: [
++                styledLabel("✨ Hvorfor dere er en match", fontSize: 14, weight: "bold", color: "#1a1c19"),
++                styledKeyText("arendalsukaMatching.state.selectedParticipant.reasonsText", fontSize: 13, weight: "regular", color: "#1e5031")
++            ], modifiers: matchingReasonCardModifiers())),
++            styledLabel("Om", fontSize: 15, weight: "semibold", color: "#1a1c19"),
++            styledKeyText("arendalsukaMatching.state.selectedParticipant.aboutText", fontSize: 14, weight: "regular", color: "#1a1c19"),
++            styledLabel("Interesser dere har til felles", fontSize: 15, weight: "semibold", color: "#1a1c19"),
++            .List(matchingDetailInterestChipList()),
++            // contextButton() sends a nil payload, which the web action
++            // dispatch rejects with a 500 (CellBase.GeneralCell.KeyValueErrors
++            // .notFound) - confirmed live, not a theoretical concern. Every
++            // other close button in this file (closeSessionDetail,
++            // closeActorDetail, closeSpeakerDetail) uses participantButton,
++            // whose default `.bool(true)` payload works fine for an action
++            // that ignores its payload; matching that precedent here too.
++            participantButton(
++                "arendalsukaMatching.matching.closeParticipantDetail",
++                label: "Lukk"
++            )
++        ])
++        var modifiers = SkeletonModifiers()
++        modifiers.visibility = SkeletonVisibilityRule(when: SkeletonCondition(
++            scope: .root,
++            keypath: "arendalsukaMatching.state.selectedParticipant.isOpen",
++            equals: .bool(true)
+         ))
++        modifiers.presentation = SkeletonPresentation(
++            kind: .modal,
++            placement: .center,
++            closeActionKeypath: "arendalsukaMatching.matching.closeParticipantDetail",
++            openStateKeypath: "arendalsukaMatching.state.selectedParticipant.isOpen",
++            dismissOnBackdrop: true,
++            backdropStyle: .dim,
++            escapeKeyBehavior: .closeAction,
++            focusTrap: true,
++            zIndex: 70,
++            mobileFallback: SkeletonPresentationFallback(kind: .sheet, placement: .bottom),
++            accessibilityLabel: "Match-detaljer"
++        )
++        switch section {
++        case .Section(var wrapped):
++            var existing = wrapped.modifiers ?? SkeletonModifiers()
++            existing.visibility = modifiers.visibility
++            existing.presentation = modifiers.presentation
++            existing.maxWidthInfinity = false
++            existing.width = 480
++            wrapped.modifiers = existing
++            section = .Section(wrapped)
++        default:
++            break
++        }
++        return section
++    }
++
++    private static func matchingReasonCardModifiers() -> SkeletonModifiers {
++        var modifiers = SkeletonModifiers()
++        modifiers.background = "#e1ffe5"
++        modifiers.cornerRadius = 12
++        modifiers.padding = 16
++        modifiers.maxWidthInfinity = true
++        return modifiers
++    }
++
++    // Same flowing pill-chip mechanism as participantInterestChipList, applied
++    // to the single already-selected match object rather than a list row -
++    // the proven, precedented shape for this renderer (see the note on
++    // matchingParticipantCardSkeleton for why per-item chips inside the list
++    // tiles themselves are NOT attempted the same way).
++    private static func matchingDetailInterestChipList() -> SkeletonList {
++        var list = SkeletonList(
++            topic: nil,
++            keypath: "arendalsukaMatching.state.selectedParticipant.topics",
++            flowElementSkeleton: participantInterestChipSkeleton()
++        )
++        var modifiers = SkeletonModifiers()
++        modifiers.wrap = true
++        modifiers.styleRole = "arendalsuka-interest-chip-list"
++        list.modifiers = modifiers
++        return list
+     }
+ 
+     /// Guest-readable program surface for the anonymous `/arendalsuka` route.
+@@ -582,66 +810,26 @@ enum ArendalsukaEventAtlasConfigurationFactory {
+             .Tabs(participantTabs()),
+             participantSelectedSessionSection(),
+             participantSelectedSpeakerPresentation(),
+-            participantBottomNavigation()
++            arendalsukaBottomNavigationBar()
+         ])
+     }
+ 
+-    // App-level bottom navigation (CoPilot / Program / Møt folk / Møter), matching the Stitch
+-    // "Summer Solstice" reference nav bar. Known gaps versus that reference, flagged
+-    // to Kjetil rather than worked around: SkeletonButton has no icon field (text-only
+-    // label), there is no sticky/fixed-to-viewport modifier (this renders as the last
+-    // block of page content, not pinned while scrolling), and a plain HStack of Buttons
+-    // has no built-in active-tab highlighting the way the Tabs element does for itself.
+-    private static func participantBottomNavigation() -> SkeletonElement {
+-        .HStack(SkeletonHStack(
+-            elements: [
+-                participantNavigationButton(label: "CoPilot", url: "/porthole?configurationName=Co-Pilot%20Chat"),
+-                participantButton(
+-                    "arendalsukaParticipant.participant.setActiveTab",
+-                    label: "Program",
+-                    payload: .string("program")
+-                ),
+-                participantNavigationButton(
+-                    label: "Møt folk",
+-                    url: "/porthole?configurationName=Arendalsuka%20Matches"
+-                ),
+-                participantButton(
+-                    "arendalsukaParticipant.participant.setActiveTab",
+-                    label: "Møter",
+-                    payload: .string("chat")
+-                )
+-            ],
+-            spacing: 10,
+-            modifiers: bottomNavigationModifiers()
+-        ))
+-    }
+-
+-    // A pure cross-configuration navigation button: empty keypath + url is how
+-    // SkeletonButtonNavigation.isNavigationButton recognizes a "go to this Porthole
+-    // configuration" action instead of an in-cell keypath/payload action.
+-    private static func participantNavigationButton(label: String, url: String) -> SkeletonElement {
+-        var button = SkeletonButton(keypath: "", label: label, url: url)
+-        button.modifiers = bottomNavigationButtonModifiers()
+-        return .Button(button)
+-    }
+-
+-    private static func bottomNavigationModifiers() -> SkeletonModifiers {
+-        var modifiers = SkeletonModifiers()
+-        modifiers.background = "#eeeee9"
+-        modifiers.borderColor = "#c1c9bf"
+-        modifiers.borderWidth = 1
+-        modifiers.cornerRadius = 16
+-        modifiers.padding = 10
+-        modifiers.maxWidthInfinity = true
+-        return modifiers
+-    }
+-
+-    private static func bottomNavigationButtonModifiers() -> SkeletonModifiers {
+-        var modifiers = secondaryButtonModifiers()
+-        modifiers.maxWidthInfinity = true
+-        modifiers.padding = 10
+-        modifiers.fontSize = 12
+-        return modifiers
++    // Shared cross-configuration navigation. Meetings remain in the Program tabs.
++    private static func arendalsukaBottomNavigationBar() -> SkeletonElement {
++        func item(_ label: String, configurationName: String, icon: String) -> SkeletonNavigationBarItem {
++            SkeletonNavigationBarItem(
++                keypath: "",
++                label: label,
++                url: "/porthole?configurationName=\(configurationName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? configurationName)",
++                activeConfigurationName: configurationName,
++                icon: icon
++            )
++        }
++        return .NavigationBar(SkeletonNavigationBar(items: [
++            item("CoPilot", configurationName: "Co-Pilot Chat", icon: "message"),
++            item("Program", configurationName: "Arendalsuka Participant Program", icon: "calendar"),
++            item("Matching", configurationName: "Arendalsuka Matches", icon: "person.2")
++        ]))
+     }
+ 
+     private static func participantHeroSection() -> SkeletonElement {
+diff --git a/Sources/App/Cells/Arendalsuka/ArendalsukaEventAtlasModels.swift b/Sources/App/Cells/Arendalsuka/ArendalsukaEventAtlasModels.swift
+index acc7b8e0..a298fcdc 100644
+--- a/Sources/App/Cells/Arendalsuka/ArendalsukaEventAtlasModels.swift
++++ b/Sources/App/Cells/Arendalsuka/ArendalsukaEventAtlasModels.swift
+@@ -706,6 +706,97 @@ struct ArendalsukaParticipantSourceRecord: Codable, Equatable, Sendable {
+     }
+ }
+ 
++/// One curated topic node ingested from the `taxonomy_subcategory`
++/// source-of-truth table (see `atlas.ingestTaxonomy`). Field shape mirrors
++/// `ArendalsukaTaxonomySubcategory`, the bundled fallback-seed counterpart in
++/// `ArendalsukaInterestTaxonomy.swift` used only when no snapshot has been
++/// ingested yet.
++struct ArendalsukaTaxonomySubcategoryRecord: Codable, Equatable, Sendable {
++    var id: String
++    var topCategory: String
++    var topicGroup: String?
++    var name: String
++    var sessionCount: Int
++    var source: String
++    var updatedAt: Date
++
++    var asObject: Object {
++        var object: Object = [
++            "subcategoryID": .string(id),
++            "topCategory": .string(topCategory),
++            "name": .string(name),
++            "sessionCount": .integer(sessionCount),
++            "source": .string(source),
++            "updatedAt": .string(ArendalsukaEventAtlasFormatting.isoString(updatedAt))
++        ]
++        object["topicGroup"] = topicGroup.map(ValueType.string) ?? .null
++        return object
++    }
++
++    var rowObject: Object {
++        EventPlatformStateRows.row(id: id, title: name, subtitle: topCategory, detail: topicGroup ?? "", note: source)
++    }
++}
++
++/// A curated, high-precision/low-recall recurring event series (e.g.
++/// "Tirsdagsrådet"), ingested from the `event_series` source-of-truth table.
++struct ArendalsukaEventSeriesRecord: Codable, Equatable, Sendable {
++    var id: String
++    var name: String
++    var organizerHint: String?
++    var source: String
++    var updatedAt: Date
++
++    var asObject: Object {
++        var object: Object = [
++            "seriesID": .string(id),
++            "name": .string(name),
++            "source": .string(source),
++            "updatedAt": .string(ArendalsukaEventAtlasFormatting.isoString(updatedAt))
++        ]
++        object["organizerHint"] = organizerHint.map(ValueType.string) ?? .null
++        return object
++    }
++
++    var rowObject: Object {
++        EventPlatformStateRows.row(id: id, title: name, subtitle: organizerHint ?? "", detail: "", note: source)
++    }
++}
++
++/// One session<->subcategory link from the `session_subcategory` join table.
++struct ArendalsukaSessionSubcategoryLinkRecord: Codable, Equatable, Sendable {
++    var id: String
++    var sessionID: String
++    var subcategoryID: String
++    var updatedAt: Date
++
++    var asObject: Object {
++        [
++            "id": .string(id),
++            "sessionID": .string(sessionID),
++            "subcategoryID": .string(subcategoryID),
++            "updatedAt": .string(ArendalsukaEventAtlasFormatting.isoString(updatedAt))
++        ]
++    }
++}
++
++/// One session<->event-series link from the `session_event_series` join table.
++struct ArendalsukaSessionEventSeriesLinkRecord: Codable, Equatable, Sendable {
++    var id: String
++    var sessionID: String
++    var seriesID: String
++    var updatedAt: Date
++
++    var asObject: Object {
++        [
++            "id": .string(id),
++            "sessionID": .string(sessionID),
++            "seriesID": .string(seriesID),
++            "updatedAt": .string(ArendalsukaEventAtlasFormatting.isoString(updatedAt))
++        ]
++    }
++}
++
+ enum ArendalsukaEventAtlasFormatting {
+     static let classifierVersion = "arendalsuka-purpose-classifier.v1"
+ 
+diff --git a/Sources/App/Cells/Arendalsuka/ArendalsukaMatchingCell.swift b/Sources/App/Cells/Arendalsuka/ArendalsukaMatchingCell.swift
+index 8318f8a2..09dc15c2 100644
+--- a/Sources/App/Cells/Arendalsuka/ArendalsukaMatchingCell.swift
++++ b/Sources/App/Cells/Arendalsuka/ArendalsukaMatchingCell.swift
+@@ -10,6 +10,8 @@ enum ArendalsukaMatchingContract {
+     static let stateKeypath = "state"
+     static let skeletonConfigurationKeypath = "skeletonConfiguration"
+     static let eventAtlasEndpoint = "cell:///ArendalsukaEventAtlas"
++    static let selectParticipantKeypath = "matching.selectParticipant"
++    static let closeParticipantDetailKeypath = "matching.closeParticipantDetail"
+ 
+     /// Sessions the taxonomy pass deliberately judged to have no distinct
+     /// topical content (concerts, mingling, quizzes) must never surface as a
+@@ -28,11 +30,22 @@ enum ArendalsukaMatchingContract {
+ /// surfaces `event_series` membership as its own distinct signal rather than
+ /// blending it into ordinary topic overlap. Purpose text is carried through for
+ /// the participant's own context but is not part of either score in this P0
+-/// implementation. Holds no state of its own - a read-only, per-identity compute
+-/// cell over data owned elsewhere.
++/// implementation. Holds only the current per-identity UI selection; profile and
++/// consent data remain owned by the hub.
+ final class ArendalsukaMatchingCell: GeneralCell, PortholeRuntimeBindingEnsuring {
+     static let cellName = ArendalsukaMatchingContract.cellName
+ 
++    // Only piece of state this cell owns for itself: which recommended
++    // participant's match-detail card is currently open. Everything else in
++    // stateValue() is recomputed fresh from ArendalsukaConnectionHubCell on
++    // every read - this is a transient UI-selection flag, not a data cache.
++    private let stateQueue = DispatchQueue(label: "ArendalsukaMatchingCell.State")
++    private var selectedParticipantID: String?
++
++    private enum CodingKeys: String, CodingKey {
++        case selectedParticipantID
++    }
++
+     required init(owner: Identity) async {
+         await super.init(owner: owner)
+         self.identityDomain = "ArendalsukaParticipant"
+@@ -40,9 +53,18 @@ final class ArendalsukaMatchingCell: GeneralCell, PortholeRuntimeBindingEnsuring
+     }
+ 
+     required init(from decoder: Decoder) throws {
++        let container = try decoder.container(keyedBy: CodingKeys.self)
++        self.selectedParticipantID = try? container.decodeIfPresent(String.self, forKey: .selectedParticipantID)
+         try super.init(from: decoder)
+     }
+ 
++    override func encode(to encoder: Encoder) throws {
++        try super.encode(to: encoder)
++        let snapshot = stateQueue.sync { selectedParticipantID }
++        var container = encoder.container(keyedBy: CodingKeys.self)
++        try container.encodeIfPresent(snapshot, forKey: .selectedParticipantID)
++    }
++
+     override func installCellRuntimeBindingsForAccess() async throws {
+         await setupPermissions(owner: storedOwnerIdentity)
+         await setupRuntime(owner: storedOwnerIdentity)
+@@ -55,6 +77,8 @@ final class ArendalsukaMatchingCell: GeneralCell, PortholeRuntimeBindingEnsuring
+     private func setupPermissions(owner: Identity) async {
+         agreementTemplate.addGrant("r---", for: ArendalsukaMatchingContract.stateKeypath)
+         agreementTemplate.addGrant("r---", for: ArendalsukaMatchingContract.skeletonConfigurationKeypath)
++        agreementTemplate.addGrant("rw--", for: ArendalsukaMatchingContract.selectParticipantKeypath)
++        agreementTemplate.addGrant("rw--", for: ArendalsukaMatchingContract.closeParticipantDetailKeypath)
+     }
+ 
+     private func setupRuntime(owner: Identity) async {
+@@ -80,6 +104,62 @@ final class ArendalsukaMatchingCell: GeneralCell, PortholeRuntimeBindingEnsuring
+             guard await self.validateAccess("r---", at: ArendalsukaMatchingContract.skeletonConfigurationKeypath, for: requester) else { return .string("denied") }
+             return .cellConfiguration(ArendalsukaEventAtlasConfigurationFactory.makeMatchingConfiguration())
+         }
++
++        await registerSet(
++            key: ArendalsukaMatchingContract.selectParticipantKeypath,
++            owner: owner,
++            input: ExploreContract.oneOfSchema(options: [
++                ExploreContract.schema(type: "string"),
++                ExploreContract.objectSchema(properties: [
++                    "participantId": ExploreContract.schema(type: "string"),
++                    "id": ExploreContract.schema(type: "string")
++                ])
++            ]),
++            returns: Self.actionResultSchema,
++            permissions: ["rw--"],
++            description: .string("Open the match detail view for one recommended participant.")
++        ) { [weak self] requester, payload in
++            guard let self else { return .null }
++            guard await self.validateAccess("rw--", at: ArendalsukaMatchingContract.selectParticipantKeypath, for: requester) else { return .string("denied") }
++            return await self.selectParticipant(value: payload, requester: requester)
++        }
++
++        await registerSet(
++            key: ArendalsukaMatchingContract.closeParticipantDetailKeypath,
++            owner: owner,
++            input: ExploreContract.oneOfSchema(options: [
++                ExploreContract.schema(type: "boolean"),
++                ExploreContract.objectSchema(description: "Renderer presentation close options.")
++            ]),
++            returns: Self.actionResultSchema,
++            permissions: ["rw--"],
++            description: .string("Close the match detail view.")
++        ) { [weak self] requester, _ in
++            guard let self else { return .null }
++            guard await self.validateAccess("rw--", at: ArendalsukaMatchingContract.closeParticipantDetailKeypath, for: requester) else { return .string("denied") }
++            return await self.closeParticipantDetail(requester: requester)
++        }
++    }
++
++    // MARK: - Match detail selection
++
++    private func selectParticipant(value: ValueType, requester: Identity) async -> ValueType {
++        let object = Self.object(value)
++        guard let id = Self.string(value) ?? Self.string(object["participantId"]) ?? Self.string(object["id"]),
++              id.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false else {
++            return .string("error: participant selection requires an id")
++        }
++        stateQueue.sync {
++            selectedParticipantID = id
++        }
++        return await stateValue(requester: requester)
++    }
++
++    private func closeParticipantDetail(requester: Identity) async -> ValueType {
++        stateQueue.sync {
++            selectedParticipantID = nil
++        }
++        return await stateValue(requester: requester)
+     }
+ 
+     // MARK: - State assembly
+@@ -95,7 +175,7 @@ final class ArendalsukaMatchingCell: GeneralCell, PortholeRuntimeBindingEnsuring
+         let isMatchingConsentGranted = Self.boolValue(hubState["isMatchingConsentGranted"]) ?? false
+         let isDirectoryVisible = Self.boolValue(hubState["isDirectoryVisible"]) ?? false
+ 
+-        guard let seed = Self.cachedTaxonomySeed else {
++        guard let seed = await resolvedTaxonomySeed(requester: requester) else {
+             return Self.unavailableState
+         }
+ 
+@@ -114,6 +194,12 @@ final class ArendalsukaMatchingCell: GeneralCell, PortholeRuntimeBindingEnsuring
+             )
+         }
+ 
++        let selectedID = stateQueue.sync { selectedParticipantID }
++        let selectedParticipant = Self.selectedParticipantObject(
++            id: selectedID,
++            recommendedParticipants: recommendedParticipants
++        )
++
+         return .object([
+             "source": .string("ArendalsukaMatchingCell"),
+             "isAvailable": .bool(true),
+@@ -122,10 +208,24 @@ final class ArendalsukaMatchingCell: GeneralCell, PortholeRuntimeBindingEnsuring
+             "myInterests": .list(myInterests.map(ValueType.string)),
+             "myPurpose": .string(myPurpose),
+             "recommendedSessions": .list(recommendedSessions.map(ValueType.object)),
+-            "recommendedParticipants": .list(recommendedParticipants.map(ValueType.object))
++            "recommendedParticipants": .list(recommendedParticipants.map(ValueType.object)),
++            "selectedParticipant": .object(selectedParticipant)
+         ])
+     }
+ 
++    // Looks the selection up against the SAME list just rendered to the
++    // participant, rather than trusting the stored id blindly - if consent
++    // was revoked or the candidate no longer overlaps, the id self-heals to
++    // "closed" instead of the detail view opening on stale/inaccessible data.
++    private static func selectedParticipantObject(id: String?, recommendedParticipants: [Object]) -> Object {
++        guard let id, let match = recommendedParticipants.first(where: { string($0["participantId"]) == id }) else {
++            return ["isOpen": .bool(false)]
++        }
++        var object = match
++        object["isOpen"] = .bool(true)
++        return object
++    }
++
+     private static var unavailableState: ValueType {
+         .object([
+             "source": .string("ArendalsukaMatchingCell"),
+@@ -135,7 +235,8 @@ final class ArendalsukaMatchingCell: GeneralCell, PortholeRuntimeBindingEnsuring
+             "myInterests": .list([]),
+             "myPurpose": .string(""),
+             "recommendedSessions": .list([]),
+-            "recommendedParticipants": .list([])
++            "recommendedParticipants": .list([]),
++            "selectedParticipant": .object(["isOpen": .bool(false)])
+         ])
+     }
+ 
+@@ -245,9 +346,12 @@ final class ArendalsukaMatchingCell: GeneralCell, PortholeRuntimeBindingEnsuring
+         visibleParticipantDirectory: [ValueType],
+         seed: ArendalsukaInterestTaxonomySeed
+     ) -> [Object] {
+-        let subcategoryWeightByNormalizedLabel = Dictionary(
+-            uniqueKeysWithValues: seed.subcategories.map { ($0.name.lowercased(), 1.0 / Double(max($0.sessionCount, 1))) }
+-        )
++        // Multiple source IDs may legitimately share a label. Keep its strongest
++        // rarity weight without trapping on duplicate normalized dictionary keys.
++        let subcategoryWeightByNormalizedLabel = seed.subcategories.reduce(into: [String: Double]()) { weights, subcategory in
++            let key = subcategory.name.lowercased()
++            weights[key] = max(weights[key] ?? 0, 1.0 / Double(max(subcategory.sessionCount, 1)))
++        }
+ 
+         var scored: [(row: Object, score: Double, overlap: [String])] = []
+         // The connection hub constructs participantDirectory from profiles with
+@@ -273,19 +377,55 @@ final class ArendalsukaMatchingCell: GeneralCell, PortholeRuntimeBindingEnsuring
+             .sorted { $0.score > $1.score }
+             .prefix(ArendalsukaMatchingContract.maximumRecommendedParticipants)
+             .map { entry in
+-                let reason = "Felles interesser: \(entry.overlap.joined(separator: ", "))"
++                let displayName = string(entry.row["displayName"]) ?? ""
++                // "role" here must be the free-text job title ("stilling", e.g.
++                // "Bærekraftsrådgiver") the tile design shows next to the name -
++                // NOT ConferenceConnectionHubCell's coarse attendee/speaker/
++                // organizer category, which is a different field entirely and
++                // was the value this used to (incorrectly) surface.
++                let jobTitle = string(entry.row["stilling"]).flatMap { $0.isEmpty ? nil : $0 } ?? ""
++                let reasonsText = "Felles interesser: \(entry.overlap.joined(separator: ", "))"
+                 return [
+                     "participantId": entry.row["participantId"] ?? .null,
+                     "displayName": entry.row["displayName"] ?? .null,
+                     "company": entry.row["company"] ?? .null,
+-                    "role": entry.row["role"] ?? .null,
++                    "role": .string(jobTitle),
++                    "avatarInitials": .string(initials(from: displayName)),
+                     "score": .float(entry.score),
+-                    "reasons": .list([.string(reason)]),
+-                    "reason": .string(reason)
++                    // Plain-string duplicate of `reasons` for the tile/detail
++                    // skeletons: a Text bound to a list-valued keypath renders
++                    // the list's Swift/JSON literal ("[\"...\"]"), not a joined
++                    // sentence - confirmed live, not a documented renderer
++                    // behavior. `reasons` (list) stays for API parity with
++                    // recommendedSessions' reasons, which genuinely can have
++                    // more than one entry.
++                    "reasonsText": .string(reasonsText),
++                    "reason": .string(reasonsText),
++                    "reasons": .list([reasonsText].map(ValueType.string)),
++                    "topics": .list(entry.overlap.map { topic in
++                        .object(["id": .string(topic), "title": .string(topic)])
++                    }),
++                    // The other participant's own stated purpose text - only
++                    // ever present on this row because matching consent (the
++                    // same gate matching itself requires) is what makes
++                    // ConferenceConnectionHubCell expose it in the first
++                    // place. Doubles as the "Om <navn>" bio in the match
++                    // detail view rather than fabricating a summary.
++                    "aboutText": entry.row["purpose"] ?? .string("")
+                 ]
+             }
+     }
+ 
++    private static func initials(from displayName: String) -> String {
++        let initials = displayName
++            .split { $0.isWhitespace || $0 == "-" || $0 == "_" }
++            .compactMap { $0.first }
++            .prefix(2)
++            .map { String($0).uppercased() }
++            .joined()
++        return initials.isEmpty ? "?" : initials
++    }
++
+     private static func overlappingLabels(left: [String], right: [String]) -> [String] {
+         var overlaps: [String] = []
+         for leftValue in left {
+@@ -308,11 +448,88 @@ final class ArendalsukaMatchingCell: GeneralCell, PortholeRuntimeBindingEnsuring
+ 
+     private static let cachedTaxonomySeed: ArendalsukaInterestTaxonomySeed? = try? ArendalsukaInterestTaxonomySeed.load()
+ 
++    /// Prefers the atlas's live-ingested taxonomy (`atlas.ingestTaxonomy`,
++    /// read via the `taxonomySeed` keypath) over the bundled `Bundle.module`
++    /// fallback seed. The taxonomy is derived from session content and
++    /// regenerated whenever the program changes, so the bundled static
++    /// resource - which only updates on a full rebuild+redeploy - is a
++    /// fresh-environment fallback only, never the primary source once a
++    /// snapshot has been ingested.
++    private func resolvedTaxonomySeed(requester: Identity) async -> ArendalsukaInterestTaxonomySeed? {
++        if let atlas = await resolveCell(endpoint: ArendalsukaMatchingContract.eventAtlasEndpoint, requester: requester) {
++            if let publishedAtlas = atlas as? ArendalsukaEventAtlasCell {
++                await publishedAtlas.ensurePortholeRuntimeBindings(requester: requester)
++            }
++            if let raw = try? await atlas.get(keypath: "taxonomySeed", requester: requester),
++               let ingestedSeed = Self.decodeTaxonomySeed(raw), ingestedSeed.subcategories.isEmpty == false {
++                return ingestedSeed
++            }
++        }
++        return Self.cachedTaxonomySeed
++    }
++
++    private static func decodeTaxonomySeed(_ value: ValueType) -> ArendalsukaInterestTaxonomySeed? {
++        let object = Self.object(value)
++        let subcategories: [ArendalsukaTaxonomySubcategory] = list(object["subcategories"]).compactMap { entry in
++            let row = Self.object(entry)
++            guard let id = string(row["subcategoryID"]),
++                  let topCategory = string(row["topCategory"]),
++                  let name = string(row["name"]) else { return nil }
++            return ArendalsukaTaxonomySubcategory(
++                subcategoryID: id,
++                topCategory: topCategory,
++                topicGroup: string(row["topicGroup"]),
++                name: name,
++                sessionCount: intValue(row["sessionCount"]) ?? 0
++            )
++        }
++        guard subcategories.isEmpty == false else { return nil }
++
++        let eventSeries: [ArendalsukaEventSeries] = list(object["eventSeries"]).compactMap { entry in
++            let row = Self.object(entry)
++            guard let id = string(row["seriesID"]), let name = string(row["name"]) else { return nil }
++            return ArendalsukaEventSeries(seriesID: id, name: name, organizerHint: string(row["organizerHint"]))
++        }
++
++        var sessionSubcategoryIDs: [String: [String]] = [:]
++        if case let .object(rawSessionSubcategoryIDs)? = object["sessionSubcategoryIDs"] {
++            for (sessionID, idsValue) in rawSessionSubcategoryIDs {
++                sessionSubcategoryIDs[sessionID] = stringList(idsValue) ?? []
++            }
++        }
++
++        var sessionSeriesIDs: [String: [String]] = [:]
++        if case let .object(rawSessionSeriesIDs)? = object["sessionSeriesIDs"] {
++            for (sessionID, idsValue) in rawSessionSeriesIDs {
++                sessionSeriesIDs[sessionID] = stringList(idsValue) ?? []
++            }
++        }
++
++        let deliberatelyUntagged = Set(stringList(object["deliberatelyUntaggedSessionIDs"]) ?? [])
++
++        return ArendalsukaInterestTaxonomySeed(
++            subcategories: subcategories,
++            eventSeries: eventSeries,
++            sessionSubcategoryIDs: sessionSubcategoryIDs,
++            sessionSeriesIDs: sessionSeriesIDs,
++            deliberatelyUntaggedSessionIDs: deliberatelyUntagged
++        )
++    }
++
++    private static func intValue(_ value: ValueType?) -> Int? {
++        guard case let .integer(int)? = value else { return nil }
++        return int
++    }
++
+     private func resolveCell(endpoint: String, requester: Identity) async -> Meddle? {
+         guard let resolver = CellBase.defaultCellResolver else { return nil }
+         return try? await resolver.cellAtEndpoint(endpoint: endpoint, requester: requester) as? Meddle
+     }
+ 
++    private static var actionResultSchema: ValueType {
++        ExploreContract.oneOfSchema(options: [stateSchema, ExploreContract.schema(type: "string", description: "Explicit error or denial.")])
++    }
++
+     private static var stateSchema: ValueType {
+         ExploreContract.objectSchema(
+             properties: [
+@@ -323,7 +540,8 @@ final class ArendalsukaMatchingCell: GeneralCell, PortholeRuntimeBindingEnsuring
+                 "myInterests": ExploreContract.listSchema(item: ExploreContract.schema(type: "string")),
+                 "myPurpose": ExploreContract.schema(type: "string"),
+                 "recommendedSessions": ExploreContract.listSchema(item: recommendedSessionSchema),
+-                "recommendedParticipants": ExploreContract.listSchema(item: recommendedParticipantSchema)
++                "recommendedParticipants": ExploreContract.listSchema(item: recommendedParticipantSchema),
++                "selectedParticipant": selectedParticipantSchema
+             ],
+             requiredKeys: [
+                 "source",
+@@ -333,7 +551,8 @@ final class ArendalsukaMatchingCell: GeneralCell, PortholeRuntimeBindingEnsuring
+                 "myInterests",
+                 "myPurpose",
+                 "recommendedSessions",
+-                "recommendedParticipants"
++                "recommendedParticipants",
++                "selectedParticipant"
+             ],
+             description: "Interest-scored Arendalsuka session recommendations and consent-and-visibility-gated participant recommendations. Purpose text is returned for context but is not scored."
+         )
+@@ -356,18 +575,35 @@ final class ArendalsukaMatchingCell: GeneralCell, PortholeRuntimeBindingEnsuring
+ 
+     private static var recommendedParticipantSchema: ValueType {
+         ExploreContract.objectSchema(
+-            properties: [
++            properties: recommendedParticipantProperties,
++            requiredKeys: ["participantId", "displayName", "company", "role", "score", "reasons", "reason", "reasonsText", "avatarInitials", "topics", "aboutText"],
++            description: "A visible participant with matching consent and at least one shared interest."
++        )
++    }
++
++    private static var selectedParticipantSchema: ValueType {
++        var properties = recommendedParticipantProperties
++        properties["isOpen"] = ExploreContract.schema(type: "boolean")
++        return ExploreContract.objectSchema(properties: properties, requiredKeys: ["isOpen"],
++            description: "Current visible match, or only isOpen=false after consent or visibility is revoked.")
++    }
++
++    private static var recommendedParticipantProperties: Object {
++            [
+                 "participantId": ExploreContract.schema(type: "string"),
+                 "displayName": ExploreContract.schema(type: "string"),
+                 "company": ExploreContract.schema(type: "string"),
+                 "role": ExploreContract.schema(type: "string"),
+                 "score": ExploreContract.schema(type: "float"),
+                 "reasons": ExploreContract.listSchema(item: ExploreContract.schema(type: "string")),
+-                "reason": ExploreContract.schema(type: "string")
+-            ],
+-            requiredKeys: ["participantId", "displayName", "company", "role", "score", "reasons", "reason"],
+-            description: "A visible participant with matching consent and at least one shared interest."
+-        )
++                "reason": ExploreContract.schema(type: "string"),
++                "reasonsText": ExploreContract.schema(type: "string"),
++                "avatarInitials": ExploreContract.schema(type: "string"),
++                "aboutText": ExploreContract.schema(type: "string"),
++                "topics": ExploreContract.listSchema(item: ExploreContract.objectSchema(
++                    properties: ["id": ExploreContract.schema(type: "string"), "title": ExploreContract.schema(type: "string")],
++                    requiredKeys: ["id", "title"]))
++            ]
+     }
+ 
+     private static func object(_ value: ValueType?) -> Object {
+diff --git a/Sources/App/Support/ArendalsukaLocalMatchTestSeedRunner.swift b/Sources/App/Support/ArendalsukaLocalMatchTestSeedRunner.swift
+new file mode 100644
+index 00000000..78a406cb
+--- /dev/null
++++ b/Sources/App/Support/ArendalsukaLocalMatchTestSeedRunner.swift
+@@ -0,0 +1,340 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++
++import Foundation
++@_spi(CellRuntimeRecovery) import CellBase
++import CellVapor
++import ScaffoldKit
++
++/// Local developer tool: writes real Arendalsuka matching-profile data
++/// (purpose, interests, matching consent, display-name override, stilling)
++/// for already-registered local test accounts, by driving the exact same
++/// `ArendalsukaProfileCell`/`ArendalsukaParticipantProfileCell` actions the
++/// real guided onboarding chat dialogue (`GuidedOnboardingCell`,
++/// scriptID "arendalsuka-participant-v1"/"arendalsuka-participant-profile-v1")
++/// would call - this is a substitute for walking through that chat flow by
++/// hand, not a different write path.
++///
++/// A test account is identified by its `FidoUser` row's own id and its
++/// already-minted `identity_id` (both readable straight out of `db.sqlite`
++/// after registering via the normal password-registration UI - see
++/// `fido_users.id` / `fido_users.identity_id`). Passing `identityId` directly
++/// lets this script skip Fluent/the database entirely: it mirrors
++/// `FidoUser.userIdentity()` (`BrowserClientIdentityVault(identityDomain:
++/// fidoUserID).identity(for: webUser)`) using a throwaway object, exactly the
++/// identity a live authenticated request for that account would resolve.
++///
++/// Local developer tool only: must run as a plain executable, never under
++/// XCTest (`CellScaffoldRuntimeStorageRoot.isRunningTests` guards this).
++/// Never touches Staging - operates purely on this worktree's local
++/// `~/CellsContainer` (or `CELL_SCAFFOLD_RUNTIME_ROOT` if set).
++public enum ArendalsukaLocalMatchTestSeedRunner {
++    public struct ParticipantSeed: Decodable {
++        public let fidoUserID: String
++        public let identityID: String
++        public let username: String
++        public let displayNameOverride: String?
++        public let stilling: String?
++        public let purpose: String?
++        public let interests: [String]?
++        public let matchingConsent: Bool?
++        // Separate gate from matchingConsent: ConferenceConnectionHubCell only
++        // includes a profile in participantDirectory (what
++        // ArendalsukaMatchingCell.recommendedParticipants reads) once its
++        // requesterUUID is in directoryVisibleRequesterUUIDs -
++        // ArendalsukaConnectionHubCell.requiresExplicitParticipantDirectoryVisibility
++        // is true, so ensureParticipantProfile's implicit auto-visibility
++        // branch never fires here; it needs the explicit
++        // ArendalsukaParticipantProgramCell.setMeetingVisibility(true) call
++        // below, same as the "Vis meg for andre..." toggle in the app.
++        public let meetingVisibility: Bool?
++    }
++
++    public struct ParticipantResult: Sendable {
++        public let username: String
++        public let identityUUID: String
++        public let appliedFields: [String]
++    }
++
++    public enum RunnerError: Error, CustomStringConvertible {
++        case runningUnderTests
++        case fileNotFound(String)
++        case invalidFormat(String)
++        case connectionHubOwnerNotFound(String)
++        case restoreFailed(String)
++        case persistFailed
++        case identityResolutionFailed(String)
++        case actionFailed(String, String)
++        case isolatedTestRuntimeRequired
++
++        public var description: String {
++            switch self {
++            case .isolatedTestRuntimeRequired:
++                return "Requires VAPOR_ENV=testing and an explicit CELL_SCAFFOLD_RUNTIME_ROOT with a .haven-synthetic-test-runtime marker containing haven-synthetic-test-runtime-v1."
++            case .runningUnderTests:
++                return "Refusing to seed real local storage from an XCTest process."
++            case .fileNotFound(let path):
++                return "Input file not found: \(path)"
++            case .invalidFormat(let path):
++                return "\(path) did not decode to the expected participant-seed JSON array shape."
++            case .connectionHubOwnerNotFound(let domain):
++                return "No existing owner identity found for identity domain '\(domain)' in VaporIdentityVault.shared. The live server has not bootstrapped ArendalsukaConnectionHubCell yet."
++            case .restoreFailed(let detail):
++                return "Could not restore the persisted ArendalsukaConnectionHubCell: \(detail)"
++            case .persistFailed:
++                return "Seeding succeeded in memory, but re-persisting the updated ArendalsukaConnectionHubCell snapshot failed."
++            case .identityResolutionFailed(let username):
++                return "Could not resolve a real Identity for test account '\(username)' - check its fidoUserID/identityID in db.sqlite."
++            case .actionFailed(let username, let detail):
++                return "Seeding action failed for '\(username)': \(detail)"
++            }
++        }
++    }
++
++    private final class SeedWebUser: BrowserClientIdentityUser {
++        var username: String
++        var identityId: String?
++        init(username: String, identityId: String) {
++            self.username = username
++            self.identityId = identityId
++        }
++    }
++
++    /// Restores the actual persisted `ArendalsukaConnectionHubCell` singleton
++    /// the live `Run` server holds (scaffoldUnique - one instance for the
++    /// whole app), then for each participant resolves their real per-identity
++    /// `ArendalsukaProfileCell`/`ArendalsukaParticipantProfileCell` proxies
++    /// (identityUnique - created fresh on first access for a brand-new test
++    /// account) and calls their real set* actions, exactly as the guided
++    /// onboarding chat dialogue would. Re-persists the hub afterward.
++    public static func runAgainstPersistedCell(
++        participantsPath: String,
++        connectionHubUUID: String,
++        connectionHubIdentityDomain: String = "Arendalsuka",
++        readOnly: Bool = false
++    ) async throws -> [ParticipantResult] {
++        try requireIsolatedTestRuntime(environment: ProcessInfo.processInfo.environment)
++        guard CellScaffoldRuntimeStorageRoot.isRunningTests == false else {
++            throw RunnerError.runningUnderTests
++        }
++        guard FileManager.default.fileExists(atPath: participantsPath) else {
++            throw RunnerError.fileNotFound(participantsPath)
++        }
++        let data = try Data(contentsOf: URL(fileURLWithPath: participantsPath))
++        let participants: [ParticipantSeed]
++        do {
++            participants = try JSONDecoder().decode([ParticipantSeed].self, from: data)
++        } catch {
++            throw RunnerError.invalidFormat(participantsPath)
++        }
++
++        CellBase.documentRootPath = CellScaffoldRuntimeStorageRoot.cellsDirectory().path
++
++        let resolver = CellResolver.sharedInstance
++        if resolver.tcUtility == nil {
++            resolver.tcUtility = TypedCellUtility(storage: LargeStackCellStorage())
++        }
++        if let existingUtility = resolver.tcUtility {
++            CellBase.typedCellUtility = existingUtility
++        }
++        CellBase.defaultCellResolver = resolver
++
++        let vault = await VaporIdentityVault.shared.initialize()
++        CellBase.defaultIdentityVault = vault
++
++        guard let hubOwner = await vault.identity(for: connectionHubIdentityDomain, makeNewIfNotFound: false) else {
++            throw RunnerError.connectionHubOwnerNotFound(connectionHubIdentityDomain)
++        }
++
++        try await resolver.addCellResolve(
++            name: ArendalsukaConnectionHubCell.cellName,
++            cellScope: .scaffoldUnique,
++            persistency: .persistant,
++            identityDomain: connectionHubIdentityDomain,
++            type: ArendalsukaConnectionHubCell.self
++        )
++        let hubRestoreResult = await resolver.restorePersistedNamedScaffoldCell(
++            uuid: connectionHubUUID,
++            named: ArendalsukaConnectionHubCell.cellName,
++            as: ArendalsukaConnectionHubCell.self,
++            requester: hubOwner,
++            authorization: CellResolverRecoveryAuthorization()
++        )
++        guard case let .restored(restoredEmit) = hubRestoreResult,
++              let hubCell = restoredEmit as? ArendalsukaConnectionHubCell else {
++            throw RunnerError.restoreFailed(String(describing: hubRestoreResult))
++        }
++        await hubCell.ensurePortholeRuntimeBindings(requester: hubOwner)
++
++        try await resolver.addCellResolve(
++            name: ArendalsukaProfileContract.cellName,
++            cellScope: .identityUnique,
++            persistency: .persistant,
++            type: ArendalsukaProfileCell.self
++        )
++        try await resolver.addCellResolve(
++            name: ArendalsukaParticipantProfileContract.cellName,
++            cellScope: .identityUnique,
++            persistency: .persistant,
++            type: ArendalsukaParticipantProfileCell.self
++        )
++        try await resolver.addCellResolve(
++            name: ArendalsukaParticipantProgramContract.cellName,
++            cellScope: .identityUnique,
++            persistency: .persistant,
++            type: ArendalsukaParticipantProgramCell.self
++        )
++
++        var results: [ParticipantResult] = []
++        for participant in participants {
++            let webUser = SeedWebUser(username: participant.username, identityId: participant.identityID)
++            let identityVault = BrowserClientIdentityVault(identityDomain: participant.fidoUserID)
++            let requester: Identity
++            do {
++                requester = try await identityVault.identity(for: webUser)
++            } catch {
++                throw RunnerError.identityResolutionFailed(participant.username)
++            }
++            guard requester.uuid == participant.identityID else {
++                throw RunnerError.identityResolutionFailed(participant.username)
++            }
++
++            if readOnly {
++                let hubState = try? await hubCell.get(keypath: "state", requester: requester)
++                print("--- \(participant.username) (\(requester.uuid)) hub state ---")
++                print(String(describing: hubState))
++                results.append(ParticipantResult(username: participant.username, identityUUID: requester.uuid, appliedFields: ["debug-read-only"]))
++                continue
++            }
++
++            var applied: [String] = []
++
++            guard let profileCell = try await resolver.cellAtEndpoint(
++                endpoint: ArendalsukaProfileContract.endpoint,
++                requester: requester
++            ) as? Meddle else {
++                throw RunnerError.identityResolutionFailed(participant.username)
++            }
++
++            if let purpose = participant.purpose {
++                try await set(
++                    profileCell,
++                    keypath: ArendalsukaProfileContract.setPurposeKeypath,
++                    value: .object(["purpose": .string(purpose)]),
++                    requester: requester,
++                    username: participant.username
++                )
++                applied.append("purpose")
++            }
++            if let interests = participant.interests {
++                try await set(
++                    profileCell,
++                    keypath: ArendalsukaProfileContract.setInterestsKeypath,
++                    value: .object(["interests": .list(interests.map(ValueType.string))]),
++                    requester: requester,
++                    username: participant.username
++                )
++                applied.append("interests")
++            }
++            if let matchingConsent = participant.matchingConsent {
++                try await set(
++                    profileCell,
++                    keypath: ArendalsukaProfileContract.setMatchingConsentKeypath,
++                    value: .object(["isGranted": .bool(matchingConsent)]),
++                    requester: requester,
++                    username: participant.username
++                )
++                applied.append("matchingConsent")
++            }
++
++            guard let participantProfileCell = try await resolver.cellAtEndpoint(
++                endpoint: ArendalsukaParticipantProfileContract.endpoint,
++                requester: requester
++            ) as? Meddle else {
++                throw RunnerError.identityResolutionFailed(participant.username)
++            }
++
++            if let displayNameOverride = participant.displayNameOverride {
++                try await set(
++                    participantProfileCell,
++                    keypath: ArendalsukaParticipantProfileContract.setDisplayNameOverrideKeypath,
++                    value: .object(["displayNameOverride": .string(displayNameOverride)]),
++                    requester: requester,
++                    username: participant.username
++                )
++                applied.append("displayNameOverride")
++            }
++            if let stilling = participant.stilling {
++                try await set(
++                    participantProfileCell,
++                    keypath: ArendalsukaParticipantProfileContract.setStillingKeypath,
++                    value: .object(["stilling": .string(stilling)]),
++                    requester: requester,
++                    username: participant.username
++                )
++                applied.append("stilling")
++            }
++
++            if let meetingVisibility = participant.meetingVisibility {
++                guard let participantProgramCell = try await resolver.cellAtEndpoint(
++                    endpoint: ArendalsukaParticipantProgramContract.endpoint,
++                    requester: requester
++                ) as? Meddle else {
++                    throw RunnerError.identityResolutionFailed(participant.username)
++                }
++                try await set(
++                    participantProgramCell,
++                    keypath: ArendalsukaParticipantProgramContract.setMeetingVisibilityKeypath,
++                    value: .bool(meetingVisibility),
++                    requester: requester,
++                    username: participant.username
++                )
++                applied.append("meetingVisibility")
++            }
++
++            results.append(ParticipantResult(username: participant.username, identityUUID: requester.uuid, appliedFields: applied))
++        }
++
++        let persisted = await resolver.persistCellSnapshot(hubCell)
++        guard persisted else {
++            throw RunnerError.persistFailed
++        }
++
++        return results
++    }
++
++    private static func set(
++        _ cell: Meddle,
++        keypath: String,
++        value: ValueType,
++        requester: Identity,
++        username: String
++    ) async throws {
++        let result = try await cell.set(keypath: keypath, value: value, requester: requester)
++        guard case let .object(state)? = result, case .bool(true)? = state["isAvailable"] else {
++            throw RunnerError.actionFailed(username, "\(keypath) did not acknowledge an available state")
++        }
++    }
++
++    /// Validate the explicit fixture boundary before opening any identity vault.
++    static func requireIsolatedTestRuntime(environment: [String: String]) throws {
++        guard environment["VAPOR_ENV"] == "testing",
++              let path = environment["CELL_SCAFFOLD_RUNTIME_ROOT"], path.hasPrefix("/"),
++              path.trimmingCharacters(in: .whitespacesAndNewlines) == path else {
++            throw RunnerError.isolatedTestRuntimeRequired
++        }
++        let root = URL(fileURLWithPath: path, isDirectory: true).resolvingSymlinksInPath().standardizedFileURL
++        let home = FileManager.default.homeDirectoryForCurrentUser.resolvingSymlinksInPath().standardizedFileURL
++        guard root.path != "/", root.path != home.path,
++              root.path != home.appendingPathComponent("CellsContainer").path else {
++            throw RunnerError.isolatedTestRuntimeRequired
++        }
++        let marker = root.appendingPathComponent(".haven-synthetic-test-runtime")
++        guard let metadata = try? marker.resourceValues(forKeys: [.isRegularFileKey, .isSymbolicLinkKey]),
++              metadata.isRegularFile == true, metadata.isSymbolicLink != true,
++              let contents = try? String(contentsOf: marker, encoding: .utf8),
++              contents == "haven-synthetic-test-runtime-v1\n" else {
++            throw RunnerError.isolatedTestRuntimeRequired
++        }
++    }
++}
+diff --git a/Sources/App/Support/ArendalsukaLocalProgramSeedRunner.swift b/Sources/App/Support/ArendalsukaLocalProgramSeedRunner.swift
+index b4c1d7d3..7924e547 100644
+--- a/Sources/App/Support/ArendalsukaLocalProgramSeedRunner.swift
++++ b/Sources/App/Support/ArendalsukaLocalProgramSeedRunner.swift
+@@ -109,6 +109,122 @@ public enum ArendalsukaLocalProgramSeedRunner {
+         identityDomain: String = "arendalsuka-public-landing",
+         batchSize: Int = 200
+     ) async throws -> [BatchResult] {
++        let (resolver, cell, owner) = try await restorePersistedAtlasCell(restoreUUID: restoreUUID, identityDomain: identityDomain)
++
++        let results = try await ingest(snapshotPath: snapshotPath, batchSize: batchSize, cell: cell, owner: owner)
++
++        let persisted = await resolver.persistCellSnapshot(cell)
++        guard persisted else {
++            throw RunnerError.persistFailed
++        }
++
++        return results
++    }
++
++    /// Ingests a `stand.json`-shaped array (the Arendalsuka data pipeline's
++    /// clean `stand` table export: `organization`/`stand_location`/
++    /// `stand_description`/`latitude`/`longitude`/`occupant_entry_id`/
++    /// `status`) into the actual persisted cell via `atlas.ingestStands`.
++    public static func runStandsAgainstPersistedCell(
++        standsPath: String,
++        restoreUUID: String,
++        identityDomain: String = "arendalsuka-public-landing"
++    ) async throws -> Object {
++        let (resolver, cell, owner) = try await restorePersistedAtlasCell(restoreUUID: restoreUUID, identityDomain: identityDomain)
++
++        guard FileManager.default.fileExists(atPath: standsPath) else {
++            throw RunnerError.snapshotFileNotFound(standsPath)
++        }
++        let data = try Data(contentsOf: URL(fileURLWithPath: standsPath))
++        let decoded = try JSONDecoder().decode(ValueType.self, from: data)
++        guard case let .list(stands) = decoded else {
++            throw RunnerError.invalidSnapshotFormat
++        }
++
++        let artifact = try await CapabilityInvitationProofSupport.generateArtifact(
++            invitationID: "arendalsuka-local-seed-\(UUID().uuidString)",
++            resource: ArendalsukaAtlasImportAccessContract.resource(),
++            actionKeypath: "atlas.ingestStands",
++            capabilities: [ArendalsukaAtlasImportAccessContract.capabilityRef],
++            purpose: ArendalsukaAtlasImportAccessContract.purposeRef,
++            issuer: owner,
++            subject: owner
++        )
++        let payload: Object = [
++            "sourceID": .string("local-seed-stands"),
++            "stands": .list(stands),
++            "importAccess": .object([
++                "proofArtifact": CapabilityInvitationProofSupport.valueType(from: artifact)
++            ])
++        ]
++        let resultValue = try await cell.set(keypath: "atlas.ingestStands", value: .object(payload), requester: owner)
++
++        guard await resolver.persistCellSnapshot(cell) else {
++            throw RunnerError.persistFailed
++        }
++        guard case let .object(root)? = resultValue, case let .object(report)? = root["import"] else {
++            return [:]
++        }
++        return report
++    }
++
++    /// Ingests `speaker.json`/`speaker_appearances.json`-shaped arrays (the
++    /// pipeline's clean `speaker`/`speaker_appearances` table exports) into
++    /// the actual persisted cell via `atlas.ingestSpeakerSnapshot`.
++    public static func runSpeakersAgainstPersistedCell(
++        speakersPath: String,
++        appearancesPath: String,
++        restoreUUID: String,
++        identityDomain: String = "arendalsuka-public-landing"
++    ) async throws -> Object {
++        let (resolver, cell, owner) = try await restorePersistedAtlasCell(restoreUUID: restoreUUID, identityDomain: identityDomain)
++
++        func loadList(_ path: String) throws -> [ValueType] {
++            guard FileManager.default.fileExists(atPath: path) else {
++                throw RunnerError.snapshotFileNotFound(path)
++            }
++            let data = try Data(contentsOf: URL(fileURLWithPath: path))
++            let decoded = try JSONDecoder().decode(ValueType.self, from: data)
++            guard case let .list(values) = decoded else {
++                throw RunnerError.invalidSnapshotFormat
++            }
++            return values
++        }
++        let speakers = try loadList(speakersPath)
++        let appearances = try loadList(appearancesPath)
++
++        let artifact = try await CapabilityInvitationProofSupport.generateArtifact(
++            invitationID: "arendalsuka-local-seed-\(UUID().uuidString)",
++            resource: ArendalsukaAtlasImportAccessContract.resource(),
++            actionKeypath: "atlas.ingestSpeakerSnapshot",
++            capabilities: [ArendalsukaAtlasImportAccessContract.capabilityRef],
++            purpose: ArendalsukaAtlasImportAccessContract.purposeRef,
++            issuer: owner,
++            subject: owner
++        )
++        let payload: Object = [
++            "source": .string("local-seed-speakers"),
++            "speakers": .list(speakers),
++            "appearances": .list(appearances),
++            "importAccess": .object([
++                "proofArtifact": CapabilityInvitationProofSupport.valueType(from: artifact)
++            ])
++        ]
++        let resultValue = try await cell.set(keypath: "atlas.ingestSpeakerSnapshot", value: .object(payload), requester: owner)
++
++        guard await resolver.persistCellSnapshot(cell) else {
++            throw RunnerError.persistFailed
++        }
++        guard case let .object(root)? = resultValue, case let .object(report)? = root["import"] else {
++            return [:]
++        }
++        return report
++    }
++
++    private static func restorePersistedAtlasCell(
++        restoreUUID: String,
++        identityDomain: String
++    ) async throws -> (CellResolver, ArendalsukaEventAtlasCell, Identity) {
+         guard CellScaffoldRuntimeStorageRoot.isRunningTests == false else {
+             throw RunnerError.runningUnderTests
+         }
+@@ -163,14 +279,7 @@ public enum ArendalsukaLocalProgramSeedRunner {
+         // participant sync path makes before touching a resolved atlas cell.
+         await cell.ensurePortholeRuntimeBindings(requester: owner)
+ 
+-        let results = try await ingest(snapshotPath: snapshotPath, batchSize: batchSize, cell: cell, owner: owner)
+-
+-        let persisted = await resolver.persistCellSnapshot(cell)
+-        guard persisted else {
+-            throw RunnerError.persistFailed
+-        }
+-
+-        return results
++        return (resolver, cell, owner)
+     }
+ 
+     private static func ingest(
+diff --git a/Sources/ArendalsukaMatchTestSeed/main.swift b/Sources/ArendalsukaMatchTestSeed/main.swift
+new file mode 100644
+index 00000000..335e1a37
+--- /dev/null
++++ b/Sources/ArendalsukaMatchTestSeed/main.swift
+@@ -0,0 +1,122 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++
++import Foundation
++import App
++
++private let usage = """
++Usage: ArendalsukaMatchTestSeed --participants PATH --connection-hub-uuid UUID [--identity-domain DOMAIN]
++
++Local developer tool: seeds real Arendalsuka matching-profile data (purpose,
++interests, matching consent, display-name override, stilling) for
++already-registered local test accounts, driving the same
++ArendalsukaProfileCell/ArendalsukaParticipantProfileCell actions the guided
++onboarding chat dialogue would call. Requires VAPOR_ENV=testing and an explicit
++CELL_SCAFFOLD_RUNTIME_ROOT containing a .haven-synthetic-test-runtime file whose
++contents are "haven-synthetic-test-runtime-v1" followed by a newline. Use only a
++dedicated synthetic fixture runtime with the local server stopped.
++
++--participants PATH must be a JSON array of objects shaped like:
++  {
++    "fidoUserID": "<fido_users.id>",
++    "identityID": "<fido_users.identity_id>",
++    "username": "<fido_users.username>",
++    "displayNameOverride": "Erik Hansen",
++    "stilling": "Bærekraftsrådgiver",
++    "purpose": "...",
++    "interests": ["...", "..."],
++    "matchingConsent": true
++  }
++Register each test account first via the normal password-registration UI,
++then read its id/identity_id straight out of db.sqlite:
++  sqlite3 db.sqlite "SELECT id, username, identity_id FROM fido_users;"
++
++--connection-hub-uuid UUID  The persisted ArendalsukaConnectionHubCell's UUID,
++                            from the live server's boot log "Named emitters"
++                            list: (ArendalsukaConnectionHub,<uuid>)
++--identity-domain NAME      Identity vault context for the hub's owner,
++                            default "Arendalsuka" (ArendalsukaConnectionHubCell
++                            .identityDomainName)
++"""
++
++private func sanitized(_ value: String?) -> String? {
++    guard let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines),
++          trimmed.isEmpty == false else {
++        return nil
++    }
++    return trimmed
++}
++
++do {
++    var participantsPath: String?
++    var connectionHubUUID: String?
++    var identityDomain = "Arendalsuka"
++    var showHelp = false
++    var readOnly = false
++
++    let arguments = Array(CommandLine.arguments.dropFirst())
++    var index = 0
++    while index < arguments.count {
++        let argument = arguments[index]
++        switch argument {
++        case "-h", "--help":
++            showHelp = true
++        case "--debug-read-only":
++            readOnly = true
++        case "--participants":
++            index += 1
++            guard index < arguments.count else {
++                throw NSError(domain: "ArendalsukaMatchTestSeed", code: 1, userInfo: [NSLocalizedDescriptionKey: "Missing value for --participants"])
++            }
++            participantsPath = arguments[index]
++        case "--connection-hub-uuid":
++            index += 1
++            guard index < arguments.count else {
++                throw NSError(domain: "ArendalsukaMatchTestSeed", code: 1, userInfo: [NSLocalizedDescriptionKey: "Missing value for --connection-hub-uuid"])
++            }
++            connectionHubUUID = arguments[index]
++        case "--identity-domain":
++            index += 1
++            guard index < arguments.count else {
++                throw NSError(domain: "ArendalsukaMatchTestSeed", code: 1, userInfo: [NSLocalizedDescriptionKey: "Missing value for --identity-domain"])
++            }
++            identityDomain = arguments[index]
++        default:
++            throw NSError(domain: "ArendalsukaMatchTestSeed", code: 1, userInfo: [NSLocalizedDescriptionKey: "Unknown argument: \(argument)"])
++        }
++        index += 1
++    }
++
++    if showHelp {
++        print(usage)
++        exit(0)
++    }
++
++    guard let participantsPath = sanitized(participantsPath) else {
++        FileHandle.standardError.write(Data("Missing required --participants PATH\n\n".utf8))
++        FileHandle.standardError.write(Data(usage.utf8))
++        exit(64)
++    }
++    guard let connectionHubUUID = sanitized(connectionHubUUID) else {
++        FileHandle.standardError.write(Data("Missing required --connection-hub-uuid UUID\n\n".utf8))
++        FileHandle.standardError.write(Data(usage.utf8))
++        exit(64)
++    }
++
++    print("Restoring persisted ArendalsukaConnectionHub \(connectionHubUUID) (identity domain \(identityDomain)) and seeding from \(participantsPath)...")
++    let results = try await ArendalsukaLocalMatchTestSeedRunner.runAgainstPersistedCell(
++        participantsPath: participantsPath,
++        connectionHubUUID: connectionHubUUID,
++        connectionHubIdentityDomain: identityDomain,
++        readOnly: readOnly
++    )
++
++    for result in results {
++        print("  \(result.username) (\(result.identityUUID)): applied \(result.appliedFields.joined(separator: ", "))")
++    }
++    print("Done. \(results.count) participant(s) seeded.")
++    print("Restart the local `Run` server (swift run Run ...) so it picks up the updated cell state.")
++} catch {
++    FileHandle.standardError.write(Data("ArendalsukaMatchTestSeed error: \(String(reflecting: error))\n".utf8))
++    exit(64)
++}
+diff --git a/Sources/ArendalsukaProgramSeed/main.swift b/Sources/ArendalsukaProgramSeed/main.swift
+index 42e5754b..c000ea2e 100644
+--- a/Sources/ArendalsukaProgramSeed/main.swift
++++ b/Sources/ArendalsukaProgramSeed/main.swift
+@@ -7,13 +7,31 @@ import App
+ private let usage = """
+ Usage: ArendalsukaProgramSeed --snapshot PATH [--batch-size N]
+        ArendalsukaProgramSeed --snapshot PATH --restore-uuid UUID [--identity-domain DOMAIN] [--batch-size N]
++       ArendalsukaProgramSeed --stands PATH --restore-uuid UUID [--identity-domain DOMAIN]
++       ArendalsukaProgramSeed --speakers PATH --appearances PATH --restore-uuid UUID [--identity-domain DOMAIN]
+ 
+ Local developer tool: seeds the real local ArendalsukaEventAtlasCell program
+-data (under ~/CellsContainer unless CELL_SCAFFOLD_RUNTIME_ROOT is set) from a
+-previously fetched program snapshot JSON file. Self-signs the required import
+-capability proof locally, so no live server or credential exchange is needed.
++data (under ~/CellsContainer unless CELL_SCAFFOLD_RUNTIME_ROOT is set) from
++previously fetched Arendalsuka data-pipeline JSON exports. Self-signs the
++required import capability proof locally, so no live server or credential
++exchange is needed.
+ 
+-Two modes:
++Three independent data kinds, one at a time per invocation:
++
++  --snapshot PATH: sessions/program, via atlas.ingestProgramSnapshot (see
++  below for its fresh vs. --restore-uuid modes).
++
++  --stands PATH: exhibitor stands (organization/stand_location/
++  stand_description/latitude/longitude/occupant_entry_id/status -- the
++  pipeline's clean `stand` table export), via atlas.ingestStands. Always
++  requires --restore-uuid (no fresh/journal-replay mode).
++
++  --speakers PATH --appearances PATH: Medvirkende (speakers) and their
++  per-session appearances -- the pipeline's clean `speaker`/
++  `speaker_appearances` table exports, via atlas.ingestSpeakerSnapshot.
++  Always requires --restore-uuid.
++
++--snapshot has two modes:
+ 
+   Fresh (default): constructs a brand-new cell via journal replay. Only
+   affects a first-ever boot -- if the live server already has a persisted
+@@ -24,16 +42,23 @@ Two modes:
+   --restore-uuid UUID: restores the actual persisted cell the live server
+   boots from (same UUID, same owner identity), ingests into it, and
+   re-persists the updated snapshot so the next server restart sees the
+-  seeded sessions too. Use this once a snapshot already exists.
++  seeded sessions too. Use this once a snapshot already exists. --stands
++  and --speakers always behave this way (no fresh mode exists for them).
+ 
+ Options:
+-  --snapshot PATH        Path to a program-snapshot.v1 JSON file (required)
++  --snapshot PATH        Path to a program-snapshot.v1 JSON file
++  --stands PATH           Path to a stand.json-shaped array
++  --speakers PATH         Path to a speaker.json-shaped array (requires
++                          --appearances)
++  --appearances PATH      Path to a speaker_appearances.json-shaped array
++                          (requires --speakers)
+   --restore-uuid UUID    Restore and update the live persisted cell instead
+                           of constructing a fresh one (see above)
+   --identity-domain NAME Identity vault context for the cell owner, default
+                           "arendalsuka-public-landing" (only used with
+                           --restore-uuid)
+-  --batch-size N          Sessions per ingest batch, default 200
++  --batch-size N          Sessions per ingest batch, default 200 (--snapshot
++                          only)
+   -h, --help               Show this help
+ """
+ 
+@@ -47,6 +72,9 @@ private func sanitized(_ value: String?) -> String? {
+ 
+ do {
+     var snapshotPath: String?
++    var standsPath: String?
++    var speakersPath: String?
++    var appearancesPath: String?
+     var restoreUUID: String?
+     var identityDomain = "arendalsuka-public-landing"
+     var batchSize = 200
+@@ -65,6 +93,24 @@ do {
+                 throw NSError(domain: "ArendalsukaProgramSeed", code: 1, userInfo: [NSLocalizedDescriptionKey: "Missing value for --snapshot"])
+             }
+             snapshotPath = arguments[index]
++        case "--stands":
++            index += 1
++            guard index < arguments.count else {
++                throw NSError(domain: "ArendalsukaProgramSeed", code: 1, userInfo: [NSLocalizedDescriptionKey: "Missing value for --stands"])
++            }
++            standsPath = arguments[index]
++        case "--speakers":
++            index += 1
++            guard index < arguments.count else {
++                throw NSError(domain: "ArendalsukaProgramSeed", code: 1, userInfo: [NSLocalizedDescriptionKey: "Missing value for --speakers"])
++            }
++            speakersPath = arguments[index]
++        case "--appearances":
++            index += 1
++            guard index < arguments.count else {
++                throw NSError(domain: "ArendalsukaProgramSeed", code: 1, userInfo: [NSLocalizedDescriptionKey: "Missing value for --appearances"])
++            }
++            appearancesPath = arguments[index]
+         case "--restore-uuid":
+             index += 1
+             guard index < arguments.count else {
+@@ -94,42 +140,83 @@ do {
+         exit(0)
+     }
+ 
+-    guard let snapshotPath = sanitized(snapshotPath) else {
+-        FileHandle.standardError.write(Data("Missing required --snapshot PATH\n\n".utf8))
++    let cleanSnapshotPath = sanitized(snapshotPath)
++    let cleanStandsPath = sanitized(standsPath)
++    let cleanSpeakersPath = sanitized(speakersPath)
++    let cleanAppearancesPath = sanitized(appearancesPath)
++
++    if [cleanSnapshotPath, cleanStandsPath, cleanSpeakersPath ?? cleanAppearancesPath].compactMap({ $0 }).count != 1 {
++        FileHandle.standardError.write(Data("Specify exactly one of --snapshot, --stands, or --speakers/--appearances\n\n".utf8))
++        FileHandle.standardError.write(Data(usage.utf8))
++        exit(64)
++    }
++    if (cleanSpeakersPath == nil) != (cleanAppearancesPath == nil) {
++        FileHandle.standardError.write(Data("--speakers and --appearances must be given together\n\n".utf8))
+         FileHandle.standardError.write(Data(usage.utf8))
+         exit(64)
+     }
+ 
+-    let results: [ArendalsukaLocalProgramSeedRunner.BatchResult]
+-    if let restoreUUID = sanitized(restoreUUID) {
+-        print("Restoring persisted ArendalsukaEventAtlas cell \(restoreUUID) (identity domain \(identityDomain)) and seeding from \(snapshotPath) (batch size \(batchSize))...")
+-        results = try await ArendalsukaLocalProgramSeedRunner.runAgainstPersistedCell(
+-            snapshotPath: snapshotPath,
++    if let cleanStandsPath {
++        guard let restoreUUID = sanitized(restoreUUID) else {
++            FileHandle.standardError.write(Data("--stands requires --restore-uuid\n\n".utf8))
++            FileHandle.standardError.write(Data(usage.utf8))
++            exit(64)
++        }
++        print("Restoring persisted ArendalsukaEventAtlas cell \(restoreUUID) (identity domain \(identityDomain)) and ingesting stands from \(cleanStandsPath)...")
++        let report = try await ArendalsukaLocalProgramSeedRunner.runStandsAgainstPersistedCell(
++            standsPath: cleanStandsPath,
+             restoreUUID: restoreUUID,
+-            identityDomain: identityDomain,
+-            batchSize: batchSize
++            identityDomain: identityDomain
+         )
+-    } else {
+-        print("Seeding fresh local Arendalsuka program journal from \(snapshotPath) (batch size \(batchSize))...")
+-        results = try await ArendalsukaLocalProgramSeedRunner.run(snapshotPath: snapshotPath, batchSize: batchSize)
+-    }
++        print("Done. \(report)")
++        print("Restart the local `Run` server (swift run Run ...) so it picks up the updated cell state.")
++    } else if let cleanSpeakersPath, let cleanAppearancesPath {
++        guard let restoreUUID = sanitized(restoreUUID) else {
++            FileHandle.standardError.write(Data("--speakers/--appearances requires --restore-uuid\n\n".utf8))
++            FileHandle.standardError.write(Data(usage.utf8))
++            exit(64)
++        }
++        print("Restoring persisted ArendalsukaEventAtlas cell \(restoreUUID) (identity domain \(identityDomain)) and ingesting speakers from \(cleanSpeakersPath) + appearances from \(cleanAppearancesPath)...")
++        let report = try await ArendalsukaLocalProgramSeedRunner.runSpeakersAgainstPersistedCell(
++            speakersPath: cleanSpeakersPath,
++            appearancesPath: cleanAppearancesPath,
++            restoreUUID: restoreUUID,
++            identityDomain: identityDomain
++        )
++        print("Done. \(report)")
++        print("Restart the local `Run` server (swift run Run ...) so it picks up the updated cell state.")
++    } else if let cleanSnapshotPath {
++        let results: [ArendalsukaLocalProgramSeedRunner.BatchResult]
++        if let restoreUUID = sanitized(restoreUUID) {
++            print("Restoring persisted ArendalsukaEventAtlas cell \(restoreUUID) (identity domain \(identityDomain)) and seeding from \(cleanSnapshotPath) (batch size \(batchSize))...")
++            results = try await ArendalsukaLocalProgramSeedRunner.runAgainstPersistedCell(
++                snapshotPath: cleanSnapshotPath,
++                restoreUUID: restoreUUID,
++                identityDomain: identityDomain,
++                batchSize: batchSize
++            )
++        } else {
++            print("Seeding fresh local Arendalsuka program journal from \(cleanSnapshotPath) (batch size \(batchSize))...")
++            results = try await ArendalsukaLocalProgramSeedRunner.run(snapshotPath: cleanSnapshotPath, batchSize: batchSize)
++        }
+ 
+-    var totalReceived = 0
+-    var totalCreated = 0
+-    var totalUpdated = 0
+-    var totalUnchanged = 0
+-    var finalTotalSessions = 0
+-    for result in results {
+-        totalReceived += result.received
+-        totalCreated += result.created
+-        totalUpdated += result.updated
+-        totalUnchanged += result.unchanged
+-        finalTotalSessions = result.totalSessions
+-        print("  batch \(result.batchIndex): received \(result.received), created \(result.created), updated \(result.updated), unchanged \(result.unchanged) (total: \(result.totalSessions))")
+-    }
++        var totalReceived = 0
++        var totalCreated = 0
++        var totalUpdated = 0
++        var totalUnchanged = 0
++        var finalTotalSessions = 0
++        for result in results {
++            totalReceived += result.received
++            totalCreated += result.created
++            totalUpdated += result.updated
++            totalUnchanged += result.unchanged
++            finalTotalSessions = result.totalSessions
++            print("  batch \(result.batchIndex): received \(result.received), created \(result.created), updated \(result.updated), unchanged \(result.unchanged) (total: \(result.totalSessions))")
++        }
+ 
+-    print("Done. \(results.count) batch(es), \(totalReceived) session(s) received: \(totalCreated) created, \(totalUpdated) updated, \(totalUnchanged) unchanged. Cell now holds \(finalTotalSessions) session(s).")
+-    print("Restart the local `Run` server (swift run Run ...) so it picks up the updated cell state.")
++        print("Done. \(results.count) batch(es), \(totalReceived) session(s) received: \(totalCreated) created, \(totalUpdated) updated, \(totalUnchanged) unchanged. Cell now holds \(finalTotalSessions) session(s).")
++        print("Restart the local `Run` server (swift run Run ...) so it picks up the updated cell state.")
++    }
+ } catch {
+     FileHandle.standardError.write(Data("ArendalsukaProgramSeed error: \(String(reflecting: error))\n".utf8))
+     exit(64)
+diff --git a/Tests/AppTests/ArendalsukaEventAtlasCellTests.swift b/Tests/AppTests/ArendalsukaEventAtlasCellTests.swift
+index 24732421..7e5f3cf9 100644
+--- a/Tests/AppTests/ArendalsukaEventAtlasCellTests.swift
++++ b/Tests/AppTests/ArendalsukaEventAtlasCellTests.swift
+@@ -251,6 +251,28 @@ final class ArendalsukaEventAtlasCellTests: IsolatedCellTestCase {
+         let participantReasons = asStringList(value(in: participantMatch, keypath: "reasons"))
+         XCTAssertTrue(participantReasons.contains { $0.contains(sharedInterest) })
+ 
++        let selectedID = try XCTUnwrap(asString(participantMatch["participantId"]))
++        let selected = try await matchingOne.set(keypath: "matching.selectParticipant", value: .string(selectedID), requester: participantOne)
++        let selectedObject = try XCTUnwrap(asObject(selected))
++        XCTAssertEqual(asBool(value(in: selectedObject, keypath: "selectedParticipant.isOpen")), true)
++        XCTAssertEqual(asString(value(in: selectedObject, keypath: "selectedParticipant.avatarInitials")), "BS")
++        XCTAssertEqual(asString(value(in: selectedObject, keypath: "selectedParticipant.reason")), asString(participantMatch["reason"]))
++        let selectContract = try await matchingOne.contract(for: "matching.selectParticipant", method: .set, requester: participantOne)
++        let selectFields = try XCTUnwrap(ExploreContract.object(from: selectContract))
++        XCTAssertTrue(ExploreContractValidator.validate(value: .string(selectedID), against: selectFields[ExploreContract.Field.input]).ok)
++        XCTAssertTrue(ExploreContractValidator.validate(value: selected, against: selectFields[ExploreContract.Field.returns]).ok)
++        let closeContract = try await matchingOne.contract(for: "matching.closeParticipantDetail", method: .set, requester: participantOne)
++        let closeFields = try XCTUnwrap(ExploreContract.object(from: closeContract))
++        for payload: ValueType in [.bool(true), .object(["source": .string("skeleton.presentation"), "reason": .string("escape")])] {
++            XCTAssertTrue(ExploreContractValidator.validate(value: payload, against: closeFields[ExploreContract.Field.input]).ok)
++            let closed = try await matchingOne.set(keypath: "matching.closeParticipantDetail", value: payload, requester: participantOne)
++            XCTAssertEqual(asBool(value(in: asObject(closed) ?? [:], keypath: "selectedParticipant.isOpen")), false)
++            XCTAssertTrue(ExploreContractValidator.validate(value: closed, against: closeFields[ExploreContract.Field.returns]).ok)
++        }
++        _ = try await matchingOne.set(keypath: "matching.selectParticipant", value: .string(selectedID), requester: participantOne)
++        let otherSelection = try await matchingTwo.get(keypath: "state", requester: participantTwo)
++        XCTAssertEqual(asBool(value(in: asObject(otherSelection) ?? [:], keypath: "selectedParticipant.isOpen")), false)
++
+         // Shared interests are a third independent requirement. Consent and
+         // visibility alone must not keep a candidate in the result.
+         _ = try await profileTwo.set(
+@@ -259,6 +281,7 @@ final class ArendalsukaEventAtlasCellTests: IsolatedCellTestCase {
+             requester: participantTwo
+         )
+         let stateWithoutOverlap = try await matchingOne.get(keypath: "state", requester: participantOne)
++        XCTAssertEqual(asBool(value(in: asObject(stateWithoutOverlap) ?? [:], keypath: "selectedParticipant.isOpen")), false)
+         XCTAssertFalse(
+             listObjects(value(in: asObject(stateWithoutOverlap) ?? [:], keypath: "recommendedParticipants"))
+                 .contains { asString($0["displayName"]) == "Bjørn Sør" }
+@@ -278,6 +301,9 @@ final class ArendalsukaEventAtlasCellTests: IsolatedCellTestCase {
+         // not just hide it client-side.
+         _ = try await profileTwo.set(keypath: "profile.setMatchingConsent", value: .object(["isGranted": .bool(false)]), requester: participantTwo)
+         let stateAfterRevoke = try await matchingOne.get(keypath: "state", requester: participantOne)
++        XCTAssertEqual(asBool(value(in: asObject(stateAfterRevoke) ?? [:], keypath: "selectedParticipant.isOpen")), false)
++        let unknownSelection = try await matchingOne.set(keypath: "matching.selectParticipant", value: .string("not-a-visible-match"), requester: participantOne)
++        XCTAssertEqual(asBool(value(in: asObject(unknownSelection) ?? [:], keypath: "selectedParticipant.isOpen")), false)
+         let participantsAfterRevoke = listObjects(value(in: asObject(stateAfterRevoke) ?? [:], keypath: "recommendedParticipants"))
+         XCTAssertFalse(participantsAfterRevoke.contains { asString($0["displayName"]) == "Bjørn Sør" })
+ 
+@@ -286,6 +312,7 @@ final class ArendalsukaEventAtlasCellTests: IsolatedCellTestCase {
+         _ = try await profileTwo.set(keypath: "profile.setMatchingConsent", value: .object(["isGranted": .bool(true)]), requester: participantTwo)
+         _ = try await hub.set(keypath: "setParticipantDirectoryVisibility", value: .bool(false), requester: participantTwo)
+         let stateAfterVisibilityRevoke = try await matchingOne.get(keypath: "state", requester: participantOne)
++        XCTAssertEqual(asBool(value(in: asObject(stateAfterVisibilityRevoke) ?? [:], keypath: "selectedParticipant.isOpen")), false)
+         let participantsAfterVisibilityRevoke = listObjects(value(in: asObject(stateAfterVisibilityRevoke) ?? [:], keypath: "recommendedParticipants"))
+         XCTAssertFalse(participantsAfterVisibilityRevoke.contains { asString($0["displayName"]) == "Bjørn Sør" })
+ 
+@@ -3041,6 +3068,147 @@ final class ArendalsukaEventAtlasCellTests: IsolatedCellTestCase {
+         }
+     }
+ 
++    func testTaxonomyRequiresProofAndJournalCommitAndReplaysOverAnOlderSnapshot() async throws {
++        let previousDebugAccess = CellBase.debugValidateAccessForEverything
++        CellBase.debugValidateAccessForEverything = false
++        defer { CellBase.debugValidateAccessForEverything = previousDebugAccess }
++        try await withTemporaryLocalDataJournal { journalPath in
++            let owner = await makeCellProtocolTestIdentity("taxonomy-durability-owner")
++            let cell = await ArendalsukaEventAtlasCell(owner: owner)
++            func fields(_ count: Int) -> Object {
++                ["subcategories": .list([.object([
++                    "subcategory_id": .string("synthetic-topic"), "top_category": .string("Synthetic"),
++                    "name": .string("Synthetic topic"), "session_count": .integer(count)
++                ])])]
++            }
++            let denied = try await cell.set(keypath: "atlas.ingestTaxonomy", value: .object(fields(1)), requester: owner)
++            XCTAssertEqual(asString(value(in: asObject(denied) ?? [:], keypath: "decision.code")), "import_access_vc_missing")
++            XCTAssertFalse(FileManager.default.fileExists(atPath: journalPath))
++            try FileManager.default.createDirectory(atPath: journalPath, withIntermediateDirectories: false)
++            let signed = try await importAccessPayload(fields(1), actionKeypath: "atlas.ingestTaxonomy", issuer: owner)
++            let failed = try await cell.set(keypath: "atlas.ingestTaxonomy", value: signed, requester: owner)
++            XCTAssertTrue(asString(failed)?.contains("journal persistence failed") == true)
++            let empty = try await cell.get(keypath: "taxonomySeed", requester: owner)
++            XCTAssertTrue(listObjects(asObject(empty)?["subcategories"]).isEmpty)
++            try FileManager.default.removeItem(atPath: journalPath)
++            _ = try await cell.set(keypath: "atlas.ingestTaxonomy", value: signed, requester: owner)
++            let oldSnapshot = try JSONEncoder().encode(cell)
++            let update = try await importAccessPayload(fields(2), actionKeypath: "atlas.ingestTaxonomy", issuer: owner)
++            _ = try await cell.set(keypath: "atlas.ingestTaxonomy", value: update, requester: owner)
++            let restored = try JSONDecoder().decode(ArendalsukaEventAtlasCell.self, from: oldSnapshot)
++            await restored.ensurePortholeRuntimeBindings(requester: owner)
++            let replayed = try await restored.get(keypath: "taxonomySeed", requester: owner)
++            let rows = listObjects(asObject(replayed)?["subcategories"])
++            XCTAssertEqual(rows.count, 1)
++            XCTAssertEqual(asInt(rows.first?["sessionCount"]), 2, "The acknowledged journal update must survive restoring an older snapshot")
++
++            var corrupt = try XCTUnwrap(JSONSerialization.jsonObject(with: oldSnapshot) as? [String: Any])
++            corrupt["taxonomySubcategoriesByID"] = "invalid-new-field"
++            XCTAssertThrowsError(try JSONDecoder().decode(ArendalsukaEventAtlasCell.self, from: JSONSerialization.data(withJSONObject: corrupt)))
++            let journalBefore = try Data(contentsOf: URL(fileURLWithPath: journalPath))
++            for invalid: Object in [
++                ["subcategories": .string("not-a-list")],
++                ["subcategories": .list([.object(["name": .string("missing-id")])])],
++                ["sessionStatus": .list([.object(["session_id": .string("synthetic-session"), "subcategory_count": .integer(-1)])])]
++            ] {
++                let payload = try await importAccessPayload(invalid, actionKeypath: "atlas.ingestTaxonomy", issuer: owner)
++                let rejected = try await cell.set(keypath: "atlas.ingestTaxonomy", value: payload, requester: owner)
++                XCTAssertTrue(asString(rejected)?.hasPrefix("error:") == true)
++                XCTAssertEqual(try Data(contentsOf: URL(fileURLWithPath: journalPath)), journalBefore)
++            }
++        }
++    }
++
++    func testTaxonomyIngestionUpsertsSubcategoriesSeriesAndLinksAndExposesTaxonomySeed() async throws {
++        let previousDebugAccess = CellBase.debugValidateAccessForEverything
++        CellBase.debugValidateAccessForEverything = false
++        defer { CellBase.debugValidateAccessForEverything = previousDebugAccess }
++
++        try await withTemporaryLocalDataJournal { _ in
++        let owner = await makeCellProtocolTestIdentity("arendalsuka-atlas-taxonomy-owner", displayName: "Arendalsuka Taxonomy Owner")
++        let cell = await ArendalsukaEventAtlasCell(owner: owner)
++
++        let importValue = try await cell.set(
++            keypath: "atlas.ingestTaxonomy",
++            value: try await importAccessPayload([
++                "source": .string("arendalsuka-taxonomy-pipeline"),
++                "subcategories": .list([
++                    .object([
++                        "subcategory_id": .string("sub-mineraler"),
++                        "top_category": .string("Næring"),
++                        "topic_group": .string("Industri"),
++                        "name": .string("Mineraler og metaller"),
++                        "session_count": .integer(2)
++                    ]),
++                    .object([
++                        "subcategory_id": .string("sub-forsvar"),
++                        "top_category": .string("Sikkerhet"),
++                        "name": .string("Forsvarspolitikk"),
++                        "session_count": .integer(5)
++                    ])
++                ]),
++                "eventSeries": .list([
++                    .object([
++                        "series_id": .string("series-tirsdagsraadet"),
++                        "name": .string("Tirsdagsrådet"),
++                        "organizer_hint": .string("NHO")
++                    ])
++                ]),
++                "sessionSubcategoryLinks": .list([
++                    .object(["session_id": .string("session-1"), "subcategory_id": .string("sub-mineraler")]),
++                    .object(["session_id": .string("session-2"), "subcategory_id": .string("sub-forsvar")])
++                ]),
++                "sessionEventSeriesLinks": .list([
++                    .object(["session_id": .string("session-1"), "series_id": .string("series-tirsdagsraadet")])
++                ]),
++                "sessionStatus": .list([
++                    .object(["session_id": .string("session-3"), "subcategory_count": .integer(0)])
++                ])
++            ], actionKeypath: "atlas.ingestTaxonomy", issuer: owner),
++            requester: owner
++        )
++        let importedState = try XCTUnwrap(asObject(importValue))
++        XCTAssertEqual(asInt(value(in: importedState, keypath: "import.lastReport.subcategoriesCreated")), 2)
++        XCTAssertEqual(asInt(value(in: importedState, keypath: "import.lastReport.eventSeriesCreated")), 1)
++        XCTAssertEqual(asInt(value(in: importedState, keypath: "import.lastReport.sessionSubcategoryLinksCreated")), 2)
++        XCTAssertEqual(asInt(value(in: importedState, keypath: "import.lastReport.sessionEventSeriesLinksCreated")), 1)
++
++        // Re-ingesting the same subcategory should update, not duplicate.
++        _ = try await cell.set(
++            keypath: "atlas.ingestTaxonomy",
++            value: try await importAccessPayload([
++                "subcategories": .list([
++                    .object([
++                        "subcategory_id": .string("sub-mineraler"),
++                        "top_category": .string("Næring"),
++                        "topic_group": .string("Industri"),
++                        "name": .string("Mineraler og metaller"),
++                        "session_count": .integer(3)
++                    ])
++                ])
++            ], actionKeypath: "atlas.ingestTaxonomy", issuer: owner),
++            requester: owner
++        )
++
++        let seedValue = try await cell.get(keypath: "taxonomySeed", requester: owner)
++        let seed = try XCTUnwrap(asObject(seedValue))
++        let subcategories = listObjects(seed["subcategories"])
++        XCTAssertEqual(subcategories.count, 2)
++        let mineraler = try XCTUnwrap(subcategories.first { asString($0["subcategoryID"]) == "sub-mineraler" })
++        XCTAssertEqual(asInt(mineraler["sessionCount"]), 3)
++
++        let eventSeries = listObjects(seed["eventSeries"])
++        XCTAssertEqual(eventSeries.count, 1)
++        XCTAssertEqual(asString(eventSeries.first?["organizerHint"]), "NHO")
++
++        let sessionSubcategoryIDs = try XCTUnwrap(asObject(seed["sessionSubcategoryIDs"]))
++        XCTAssertEqual(asStringList(sessionSubcategoryIDs["session-1"]), ["sub-mineraler"])
++        let sessionSeriesIDs = try XCTUnwrap(asObject(seed["sessionSeriesIDs"]))
++        XCTAssertEqual(asStringList(sessionSeriesIDs["session-1"]), ["series-tirsdagsraadet"])
++        XCTAssertEqual(asStringList(seed["deliberatelyUntaggedSessionIDs"]), ["session-3"])
++        }
++    }
++
+     func testAtlasBuildsPortableMapAndSelectsMapFeatures() async throws {
+         let previousDebugAccess = CellBase.debugValidateAccessForEverything
+         CellBase.debugValidateAccessForEverything = true
+diff --git a/Tests/AppTests/ArendalsukaLocalMatchTestSeedSafetyTests.swift b/Tests/AppTests/ArendalsukaLocalMatchTestSeedSafetyTests.swift
+new file mode 100644
+index 00000000..af4378de
+--- /dev/null
++++ b/Tests/AppTests/ArendalsukaLocalMatchTestSeedSafetyTests.swift
+@@ -0,0 +1,34 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++
++@testable import App
++import Foundation
++import XCTest
++
++final class ArendalsukaLocalMatchTestSeedSafetyTests: XCTestCase {
++    func testSeedRequiresTestingEnvironmentAndDedicatedMarkedRuntime() throws {
++        let root = FileManager.default.temporaryDirectory.appendingPathComponent("MatchSeedSafety-\(UUID().uuidString)")
++        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
++        defer { try? FileManager.default.removeItem(at: root) }
++        let marker = root.appendingPathComponent(".haven-synthetic-test-runtime")
++        let environment = ["VAPOR_ENV": "testing", "CELL_SCAFFOLD_RUNTIME_ROOT": root.path]
++        XCTAssertThrowsError(try ArendalsukaLocalMatchTestSeedRunner.requireIsolatedTestRuntime(environment: [:]))
++        XCTAssertThrowsError(try ArendalsukaLocalMatchTestSeedRunner.requireIsolatedTestRuntime(environment: environment))
++        try "wrong-marker\n".write(to: marker, atomically: true, encoding: .utf8)
++        XCTAssertThrowsError(try ArendalsukaLocalMatchTestSeedRunner.requireIsolatedTestRuntime(environment: environment))
++        try "haven-synthetic-test-runtime-v1\n".write(to: marker, atomically: true, encoding: .utf8)
++        XCTAssertNoThrow(try ArendalsukaLocalMatchTestSeedRunner.requireIsolatedTestRuntime(environment: environment))
++        for disallowed in ["production", "staging", "development", ""] {
++            var value = environment; value["VAPOR_ENV"] = disallowed
++            XCTAssertThrowsError(try ArendalsukaLocalMatchTestSeedRunner.requireIsolatedTestRuntime(environment: value))
++        }
++        for disallowed in ["/", FileManager.default.homeDirectoryForCurrentUser.path, "relative/test"] {
++            var value = environment; value["CELL_SCAFFOLD_RUNTIME_ROOT"] = disallowed
++            XCTAssertThrowsError(try ArendalsukaLocalMatchTestSeedRunner.requireIsolatedTestRuntime(environment: value))
++        }
++        let moved = root.appendingPathComponent("marker-source")
++        try FileManager.default.moveItem(at: marker, to: moved)
++        try FileManager.default.createSymbolicLink(at: marker, withDestinationURL: moved)
++        XCTAssertThrowsError(try ArendalsukaLocalMatchTestSeedRunner.requireIsolatedTestRuntime(environment: environment))
++    }
++}
+diff --git a/ci/test-filter.txt b/ci/test-filter.txt
+index 786b1c1a..b2e3196a 100644
+--- a/ci/test-filter.txt
++++ b/ci/test-filter.txt
+@@ -456,3 +456,4 @@ ButlerBuiltInConfigurationUpgradeTests
+ ArendalsukaParticipantProfileCellTests
+ 
+ ArendalsukaParticipantConversationTests
++ArendalsukaLocalMatchTestSeedSafetyTests
+diff --git a/playwright/skeleton-navigation.spec.js b/playwright/skeleton-navigation.spec.js
+index 433ed41e..7c0d2590 100644
+--- a/playwright/skeleton-navigation.spec.js
++++ b/playwright/skeleton-navigation.spec.js
+@@ -292,6 +292,52 @@ test.describe("Skeleton button navigation", () => {
+     expect(Math.abs(positions.middle - positions.bottom)).toBeLessThan(1);
+   });
+ 
++  for (const width of [1280, 375]) {
++    test(`renders optional navigation icons and anchors the canvas bar at ${width} px`, async ({ page }) => {
++      await page.setViewportSize({ width, height: 812 });
++      await page.evaluate(() => {
++        const root = document.getElementById("root");
++        const canvas = document.createElement("section");
++        canvas.className = "canvas";
++        canvas.style.padding = "0";
++        document.body.style.margin = "0";
++        root.replaceWith(canvas); canvas.appendChild(root);
++        root.className = "skeleton-host";
++        root.style.height = "100vh";
++        root.style.overflow = "auto";
++        window.__iconActions = [];
++        window.HavenSkeletonRuntime.createRenderer({
++          rootElement: root,
++          onAction: async (keypath, payload) => window.__iconActions.push({ keypath, payload }),
++          skeleton: { VStack: { elements: [
++            ...Array.from({ length: 60 }, (_, i) => ({ Text: { text: `Content ${i}` } })),
++            { Button: { keypath: "last.action", label: "Last action", payload: true } },
++            { NavigationBar: { items: [
++              { keypath: "nav.select", label: "People", icon: "person.2", payload: "people" },
++              { keypath: "nav.select", label: "Plain", payload: "plain" },
++              { keypath: "nav.select", label: "Unknown", icon: "unmapped.symbol", payload: "unknown" },
++            ] } },
++          ] } },
++        });
++      });
++      const nav = page.getByRole("navigation", { name: "App navigation" });
++      await expect(nav).toHaveCSS("position", "fixed");
++      const people = page.getByRole("button", { name: "People", exact: true });
++      await expect(people.locator("svg")).toHaveAttribute("aria-hidden", "true");
++      await expect(page.getByRole("button", { name: "Plain", exact: true }).locator("svg")).toHaveCount(0);
++      await expect(page.getByRole("button", { name: "Unknown", exact: true })).toBeVisible();
++      await people.click();
++      await expect.poll(() => page.evaluate(() => window.__iconActions)).toEqual([{ keypath: "nav.select", payload: "people" }]);
++      await page.getByRole("button", { name: "Last action", exact: true }).scrollIntoViewIfNeeded();
++      const bounds = await nav.boundingBox();
++      expect(Math.round(bounds.y + bounds.height)).toBe(812);
++      expect(bounds.x).toBeGreaterThanOrEqual(0);
++      expect(bounds.x + bounds.width).toBeLessThanOrEqual(width);
++      const last = await page.getByRole("button", { name: "Last action", exact: true }).boundingBox();
++      expect(last.y + last.height).toBeLessThanOrEqual(bounds.y);
++    });
++  }
++
+   test("fails closed when a navigation bar item is missing its portable label contract", async ({ page }) => {
+     const error = await page.evaluate(() => {
+       try {
+@@ -311,4 +357,19 @@ test.describe("Skeleton button navigation", () => {
+     });
+     await expect(page.getByRole("alert")).toContainText("items[0].label");
+   });
++
++  test("rejects a non-string navigation icon like the native decoder", async ({ page }) => {
++    const error = await page.evaluate(() => {
++      try {
++        window.HavenSkeletonRuntime.createRenderer({
++          rootElement: document.getElementById("root"),
++          skeleton: { NavigationBar: { items: [{ keypath: "nav.select", label: "People", icon: 42 }] } },
++        });
++      } catch (caught) {
++        return caught.message;
++      }
++    });
++    expect(error).toBe("Invalid skeleton at root.NavigationBar.items[0].icon: expected a string.");
++    await expect(page.getByRole("alert")).toContainText("items[0].icon");
++  });
+ });

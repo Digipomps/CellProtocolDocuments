@@ -1,0 +1,13 @@
+# Integration boundaries — 2026-10-05
+
+These are observed source dependencies, not statements that the runtime fails.
+
+- WP4: existing `ExecutablePurposeGroundingCell` exposes `grounding.decompose`; its bounded deterministic proposal is reusable. Provider-backed argument advice still needs an actual provider-Cell use grant, data policy and bounded budget. Do not reuse environment-key fallback. No provider invocation is verified in this run.
+- WP5: source e5c34345 includes real second-process Entity read/revoke tests. Stable CP pin 2026.9.4 predates PR53. CP origin/main includes PR53; scanner follow-up is 14181968c8998c4543b42282c3559bc74ed6bddc in its separate clean worktree. Shared authenticated Bridge ingress already has another integration candidate/owner. Reuse it; exact selected contribution → recipient-local owner-signed EntityAuthority commit and restart proof still remain.
+- WP6: company/group Entity is its own owner/resource; publisher membership is the representation layer, not proof of legal incorporation and not access to employees' private Entities. Only additive member fields, strict key/expiry read policy and creator-key binding at new publisher creation have been applied, untested. The broader grant/revoke writer was rejected in source review and remains unapplied: revision ABA, persistence uncertainty, unsynchronized snapshots, legacy bypass and invalid last-manager counting. Existing unbound publishers have no strict Conference Commons management access until an explicit safe migration exists.
+- WP7: merge parity selectively with current Tree/List semantics; a wholesale old CP pin would drop newer fixes. The common skeleton candidate does not prove an installed Binding host.
+- WP8: deterministic synthetic capture transition exists in the domain candidate only. No microphone action is exposed. Native recording must use its own adapter, recheck exact plan/epoch after OS permission awaits and immediately before capture; use current scanner invitationID/decisionID payloads. Background physical retention sweeping remains unfinished.
+- WP9: use existing Swarm run/shard/worker lifecycle. Current VirtualUser send metrics measure send, not domain success; correlation/receipt checks are necessary. No OIW semantic executor or live Workbench run is delivered yet. Fixture specification is pilot/synthetic-fixture.v1.json.
+- WP10: pilot/RUNBOOK.md is prepared; no participant has been recruited, invited or tested by this task.
+
+Adviser evidence is copied into evidence/ when complete. No local ref, catalog, mockup or JSON fixture is a deployment receipt.

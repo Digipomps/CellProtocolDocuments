@@ -1,0 +1,732 @@
+name: AdminScaffold immutable images
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  merge_group:
+    types:
+      - checks_requested
+  workflow_dispatch:
+    inputs:
+      release_note:
+        description: Audit note for this explicit release build
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: admin-scaffold-image-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  WEB_IMAGE: ghcr.io/digipomps/cellscaffold-web
+  ADMIN_IMAGE: ghcr.io/digipomps/cellscaffold-admin
+  NODE_TOOLS_IMAGE: ghcr.io/digipomps/cellscaffold-node-admin-tools
+  CELLPROTOCOL_DOCUMENTS_REF: a08f72f369fad5be22364e35f92de52a41e04033
+
+jobs:
+  focused-tests:
+    name: Focused control-plane gates
+    runs-on: ubuntu-24.04
+    container:
+      image: swift:6.1-noble@sha256:e1cdaf7ddc9de37d8561da7a260535236694fca8c1b67d3129d47d8b180a9394
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Check out pinned public CellProtocolDocuments book
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: Digipomps/CellProtocolDocuments
+          ref: ${{ env.CELLPROTOCOL_DOCUMENTS_REF }}
+          path: CellProtocolDocuments
+          persist-credentials: false
+
+      - name: Verify pinned book inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -c safe.directory="$GITHUB_WORKSPACE" ls-tree HEAD CellProtocolDocuments | awk '{print $3}')" = "$CELLPROTOCOL_DOCUMENTS_REF"
+          test "$(git -c safe.directory="$GITHUB_WORKSPACE/CellProtocolDocuments" -C CellProtocolDocuments rev-parse HEAD)" = "$CELLPROTOCOL_DOCUMENTS_REF"
+          test -f CellProtocolDocuments/Book/book_catalog.json
+          test -f CellProtocolDocuments/Book/00_Book_Home.md
+          grep -q '"doc_id": "book-16-reference-workspace"' CellProtocolDocuments/Book/book_catalog.json
+
+      - name: Resolve pinned private dependency commits
+        id: private_deps
+        shell: bash
+        run: |
+          set -euo pipefail
+          revision_for() {
+            local identity="$1"
+            awk -v identity="$identity" '
+              $0 ~ "\"identity\" : \"" identity "\"" { found = 1; next }
+              found && /\"revision\" : \"/ {
+                line = $0
+                sub(/^.*\"revision\" : \"/, "", line)
+                sub(/\".*$/, "", line)
+                print line
+                exit
+              }
+            ' Package.resolved
+          }
+          fileutils="$(revision_for fileutils-c)"
+          micropayments="$(revision_for dimymicropayments)"
+          mint="$(revision_for dimymint)"
+          for revision in "$fileutils" "$micropayments" "$mint"; do
+            [[ "$revision" =~ ^[0-9a-f]{40}$ ]]
+          done
+          printf 'fileutils=%s\n' "$fileutils" >> "$GITHUB_OUTPUT"
+          printf 'micropayments=%s\n' "$micropayments" >> "$GITHUB_OUTPUT"
+          printf 'mint=%s\n' "$mint" >> "$GITHUB_OUTPUT"
+
+      - name: Require scoped dependency credentials
+        env:
+          FILEUTILS_KEY: ${{ secrets.FILEUTILS_C_DEPLOY_KEY }}
+          DIMY_APP_ID: ${{ secrets.DIMY_DEPENDENCY_APP_ID }}
+          DIMY_APP_PRIVATE_KEY: ${{ secrets.DIMY_DEPENDENCY_APP_PRIVATE_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$FILEUTILS_KEY" ] || [ -z "$DIMY_APP_ID" ] || [ -z "$DIMY_APP_PRIVATE_KEY" ]; then
+            echo "The FileUtils deploy key and scoped DiMy GitHub App credentials are required." >&2
+            exit 78
+          fi
+
+      - name: Check out FileUtils-c dependency
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: Digipomps/FileUtils-c
+          ref: ${{ steps.private_deps.outputs.fileutils }}
+          path: .ci-dependencies/FileUtils-c
+          ssh-key: ${{ secrets.FILEUTILS_C_DEPLOY_KEY }}
+          persist-credentials: false
+
+      - name: Create scoped DiMy dependency token
+        id: dimy_token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.DIMY_DEPENDENCY_APP_ID }}
+          private-key: ${{ secrets.DIMY_DEPENDENCY_APP_PRIVATE_KEY }}
+          owner: DiMy-io
+          repositories: |
+            DiMyMicropayments
+            DiMyMint
+          permission-contents: read
+
+      - name: Check out DiMyMicropayments dependency
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: DiMy-io/DiMyMicropayments
+          ref: ${{ steps.private_deps.outputs.micropayments }}
+          path: .ci-dependencies/DiMyMicropayments
+          token: ${{ steps.dimy_token.outputs.token }}
+          persist-credentials: false
+
+      - name: Check out DiMyMint dependency
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: DiMy-io/DiMyMint
+          ref: ${{ steps.private_deps.outputs.mint }}
+          path: .ci-dependencies/DiMyMint
+          token: ${{ steps.dimy_token.outputs.token }}
+          persist-credentials: false
+
+      - name: Verify pinned persistence-key maintenance runtime
+        env:
+          CELL_VAULT_KEY_CONTINUITY_BOOTSTRAP_PYTHON: /usr/bin/python3.12
+        shell: bash
+        run: |
+          set -euo pipefail
+          apt-get update
+          apt-get install -y --no-install-recommends python3.12 python3.12-venv
+          runtime_python="$(bash scripts/install-cell-vault-key-continuity-runtime.sh --expected-commit "$(git -c safe.directory="$GITHUB_WORKSPACE" rev-parse HEAD)")"
+          "$runtime_python" -m unittest -v scripts.tests.test_cell_vault_key_continuity
+          "$runtime_python" -m unittest -v scripts.tests.test_cellscaffold_volume_generation
+          "$runtime_python" -m unittest -v scripts.tests.test_cellscaffold_container_controller
+          "$runtime_python" -m unittest -v scripts.tests.test_cell_vault_key_backup
+          "$runtime_python" -m unittest -v scripts.tests.test_cellscaffold_runtime_secrets
+          "$runtime_python" -m unittest -v scripts.tests.test_cellscaffold_maintenance_transaction
+          "$runtime_python" -m unittest -v scripts.tests.test_cellscaffold_maintenance_v3
+          "$runtime_python" -m unittest -v scripts.tests.test_admin_scaffold_image_workflow
+          "$runtime_python" -m unittest -v scripts.tests.test_xcode_check
+          "$runtime_python" -m unittest -v scripts.tests.test_ci_run_tests
+          "$runtime_python" -m unittest -v scripts.tests.test_deploy_staging_atomic_v3
+          "$runtime_python" -m unittest -v scripts.tests.test_haven_deploy_set_env
+          "$runtime_python" -m unittest -v scripts.tests.test_cellscaffold_deploy_status
+          "$runtime_python" -m unittest -v scripts.tests.test_haven_deploy_admin
+          "$runtime_python" -m unittest -v scripts.tests.test_admin_browser_observation_relay
+          "$runtime_python" -m unittest -v scripts.tests.test_admin_quiesced_backup
+          "$runtime_python" -m py_compile \
+            scripts/cell-vault-key-continuity.py \
+            scripts/cellscaffold-volume-generation.py \
+            scripts/cellscaffold-container-controller.py \
+            scripts/cell-vault-key-backup.py \
+            scripts/cellscaffold-runtime-secrets.py \
+            scripts/cellscaffold-maintenance-transaction.py \
+            scripts/cellscaffold-maintenance-v3.py \
+            scripts/deploy-staging-atomic-v3.py \
+            scripts/cellscaffold-deploy-status.py \
+            scripts/production/staging-correspondence-env-migration.py \
+            scripts/tests/test_haven_deploy_set_env.py \
+            scripts/tests/test_cellscaffold_deploy_status.py \
+            scripts/tests/test_cell_vault_key_continuity.py \
+            scripts/tests/test_cellscaffold_volume_generation.py \
+            scripts/tests/test_cellscaffold_container_controller.py \
+            scripts/tests/test_cell_vault_key_backup.py \
+            scripts/tests/test_cellscaffold_runtime_secrets.py \
+            scripts/tests/test_cellscaffold_maintenance_transaction.py \
+            scripts/tests/test_cellscaffold_maintenance_v3.py \
+            scripts/tests/test_admin_scaffold_image_workflow.py \
+            scripts/tests/test_ci_run_tests.py \
+            scripts/tests/test_deploy_staging_atomic_v3.py
+
+      - name: Verify skeleton parity provenance before building
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/python3.12 scripts/verify-skeleton-parity-pin.py
+
+      - name: Configure pinned local dependency mirrors
+        shell: bash
+        run: |
+          set -euo pipefail
+          swift package config set-mirror \
+            --original 'git@github.com:Digipomps/FileUtils-c.git' \
+            --mirror "file://$GITHUB_WORKSPACE/.ci-dependencies/FileUtils-c"
+          swift package config set-mirror \
+            --original 'git@github.com:DiMy-io/DiMyMicropayments.git' \
+            --mirror "file://$GITHUB_WORKSPACE/.ci-dependencies/DiMyMicropayments"
+          swift package config set-mirror \
+            --original 'git@github.com:DiMy-io/DiMyMint.git' \
+            --mirror "file://$GITHUB_WORKSPACE/.ci-dependencies/DiMyMint"
+
+      - name: Verify ValueType literal size
+        shell: bash
+        run: ci/check-value-literals.sh
+
+      - name: Build every target
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+          swift build --build-tests --force-resolved-versions --jobs 2
+
+      - name: Verify test-suite coverage
+        shell: bash
+        run: ci/test-suite-coverage.sh
+
+      - name: Run focused Swift gates
+        env:
+          CI_TEST_LOGDIR: test-results/swift
+        shell: bash
+        run: ci/run-tests.sh
+
+      - name: Validate deployment shell syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n scripts/production/haven-deploy
+          bash -n scripts/admin-scaffold-backup.sh
+          bash -n scripts/admin-scaffold-restore-verify.sh
+          bash -n scripts/deploy-admin-staging.sh
+          bash -n scripts/run-admin-m4-gate.sh
+          bash -n scripts/container-entrypoint.sh
+          bash -n scripts/install-cell-vault-key-continuity-runtime.sh
+          bash -n scripts/stage-cellscaffold-runtime-secrets.sh
+          bash -n scripts/test-admin-deployment-contracts.sh
+          bash scripts/test-admin-deployment-contracts.sh
+
+      - name: Validate and restore mirror-only package resolution
+        shell: bash
+        run: |
+          set -euo pipefail
+          canonical_resolved="$(mktemp)"
+          trap 'rm -f -- "$canonical_resolved"' EXIT HUP INT TERM
+          git -c safe.directory="$GITHUB_WORKSPACE" show HEAD:Package.resolved > "$canonical_resolved"
+          /usr/bin/python3.12 scripts/package-resolved-mirror-normalization.py \
+            --canonical "$canonical_resolved" \
+            --actual Package.resolved \
+            --mirror "fileutils-c=$GITHUB_WORKSPACE/.ci-dependencies/FileUtils-c" \
+            --mirror "dimymicropayments=$GITHUB_WORKSPACE/.ci-dependencies/DiMyMicropayments" \
+            --mirror "dimymint=$GITHUB_WORKSPACE/.ci-dependencies/DiMyMint"
+          rm -f -- "$canonical_resolved"
+          trap - EXIT HUP INT TERM
+          /usr/bin/python3.12 -m unittest -v scripts.tests.test_package_resolved_mirror_normalization
+          /usr/bin/python3.12 -m py_compile \
+            scripts/package-resolved-mirror-normalization.py \
+            scripts/tests/test_package_resolved_mirror_normalization.py
+
+      - name: Run Admin web accessibility and responsive gates
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          apt-get update
+          apt-get install -y nodejs npm
+          npm ci
+          npm run test:workbench-shared-access-verify-existing
+          npm run test:staging-conference-message-contract
+          npx playwright install --with-deps chromium
+          npm run test:admin-web
+          npx playwright test --config=playwright.config.js playwright/rich-document.spec.js playwright/porthole-skeleton-atomic-swap.spec.js playwright/porthole-skeleton-localization.spec.js playwright/skeleton-localization.spec.js
+
+      - name: Run Thursday demo P0 browser proof
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          server_log="$(mktemp)"
+          test_runtime_root="$(mktemp -d)"
+          bin_path="$(swift build --show-bin-path --force-resolved-versions)"
+          server_binary="$bin_path/Run"
+          seed_binary="$bin_path/ArendalsukaProgramSeed"
+          test -x "$server_binary"
+          test -x "$seed_binary"
+          CELL_SCAFFOLD_RUNTIME_ROOT="$test_runtime_root" \
+            "$seed_binary" --snapshot \
+              playwright/fixtures/arendalsuka-demo-20260903/program-snapshot.v1.json
+          build_timestamp="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          APP_BUILD_REVISION="$GITHUB_SHA" \
+          APP_BUILD_TIMESTAMP="$build_timestamp" \
+          ARENDALSUKA_REMOTE_CONFIGURATION_ACCESS=released \
+          CELL_SCAFFOLD_RUNTIME_ROOT="$test_runtime_root" \
+          VAPOR_ENV=testing \
+            "$server_binary" serve --env testing --hostname 127.0.0.1 --port 9089 \
+            >"$server_log" 2>&1 &
+          server_pid=$!
+          cleanup_server() {
+            status=$?
+            trap - EXIT
+            set +e
+            kill "$server_pid" 2>/dev/null
+            wait "$server_pid" 2>/dev/null
+            if [ "$status" -ne 0 ]; then
+              tail -n 200 "$server_log"
+            fi
+            exit "$status"
+          }
+          trap cleanup_server EXIT
+
+          ready=0
+          for _ in $(seq 1 90); do
+            if node -e 'fetch("http://127.0.0.1:9089/health/build", { signal: AbortSignal.timeout(1000) }).then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))'; then
+              ready=1
+              break
+            fi
+            kill -0 "$server_pid" 2>/dev/null || break
+            sleep 1
+          done
+          test "$ready" -eq 1
+
+          CONFERENCE_DEMO_BASE_URL=http://127.0.0.1:9089 \
+          PORTHOLE_CHAT_BASE_URL=http://127.0.0.1:9089 \
+          PORTHOLE_CHAT_PASSWORD='LocalButlerExplicitHelper!2026' \
+          ARENDALSUKA_DEMO_BASE_URL=http://127.0.0.1:9089 \
+          ARENDALSUKA_DEMO_PASSWORD='LocalArendalsukaUserProof!2026' \
+          ARENDALSUKA_EXPECTED_REVISION="$GITHUB_SHA" \
+            npx playwright test --config=playwright.config.js \
+              playwright/butler-explicit-helper-placement.spec.js \
+              playwright/skeleton-workbench-autoscroll.spec.js \
+              playwright/cellconfiguration-studio-upload.smoke.spec.js \
+              playwright/arendalsuka-onboarding-matching.smoke.spec.js \
+              playwright/butterpop-queue.spec.js \
+              playwright/butterpop-mix-tidy.spec.js \
+              playwright/skeleton-tabs-optimistic-hold.spec.js
+
+      - name: Run document live collaboration proof
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test_runtime_root="$(mktemp -d)"
+          server_log="$(mktemp)"
+          bin_path="$(swift build --show-bin-path --force-resolved-versions)"
+          # A separate server gives this fixture its own authentication rate
+          # bucket. Production rate limits are never disabled for this proof.
+          APP_BUILD_REVISION="$GITHUB_SHA" \
+          CELL_SCAFFOLD_RUNTIME_ROOT="$test_runtime_root" \
+          VAPOR_ENV=testing \
+            "$bin_path/Run" serve --env testing --hostname 127.0.0.1 --port 9090 \
+            >"$server_log" 2>&1 &
+          server_pid=$!
+          cleanup_document_server() {
+            status=$?
+            trap - EXIT
+            set +e
+            kill "$server_pid" 2>/dev/null
+            wait "$server_pid" 2>/dev/null
+            if [ "$status" -ne 0 ]; then tail -n 200 "$server_log"; fi
+            exit "$status"
+          }
+          trap cleanup_document_server EXIT
+          ready=0
+          for _ in $(seq 1 90); do
+            if node -e 'fetch("http://127.0.0.1:9090/health/build", { signal: AbortSignal.timeout(1000) }).then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))'; then
+              ready=1
+              break
+            fi
+            kill -0 "$server_pid" 2>/dev/null || break
+            sleep 1
+          done
+          test "$ready" -eq 1
+          PORTHOLE_CHAT_BASE_URL=http://127.0.0.1:9090 \
+            npx playwright test --config=playwright.config.js \
+              --output=test-results/rich-document-live playwright/rich-document-live.spec.js
+
+      - name: Keep document collaboration proof
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: document-proof-${{ github.sha }}
+          path: test-results/rich-document-live
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Keep Swift gate logs when the proof fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: swift-gates-${{ github.sha }}
+          path: test-results/swift
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Keep browser-proof traces when the proof fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-proof-${{ github.sha }}
+          path: |
+            test-results/playwright
+            test-results/rich-document-live
+          if-no-files-found: ignore
+          retention-days: 14
+
+  publish:
+    name: Publish signed-source image pair
+    needs: focused-tests
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      web_digest: ${{ steps.web.outputs.digest }}
+      admin_digest: ${{ steps.admin.outputs.digest }}
+      node_tools_digest: ${{ steps.node_tools.outputs.digest }}
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Check out pinned public CellProtocolDocuments book
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: Digipomps/CellProtocolDocuments
+          ref: ${{ env.CELLPROTOCOL_DOCUMENTS_REF }}
+          path: CellProtocolDocuments
+          persist-credentials: false
+
+      - name: Verify pinned book inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -c safe.directory="$GITHUB_WORKSPACE" ls-tree HEAD CellProtocolDocuments | awk '{print $3}')" = "$CELLPROTOCOL_DOCUMENTS_REF"
+          test "$(git -c safe.directory="$GITHUB_WORKSPACE/CellProtocolDocuments" -C CellProtocolDocuments rev-parse HEAD)" = "$CELLPROTOCOL_DOCUMENTS_REF"
+          test -f CellProtocolDocuments/Book/book_catalog.json
+          test -f CellProtocolDocuments/Book/00_Book_Home.md
+          grep -q '"doc_id": "book-16-reference-workspace"' CellProtocolDocuments/Book/book_catalog.json
+
+      - name: Resolve pinned private dependency commits
+        id: private_deps
+        shell: bash
+        run: |
+          set -euo pipefail
+          revision_for() {
+            local identity="$1"
+            awk -v identity="$identity" '
+              $0 ~ "\"identity\" : \"" identity "\"" { found = 1; next }
+              found && /\"revision\" : \"/ {
+                line = $0
+                sub(/^.*\"revision\" : \"/, "", line)
+                sub(/\".*$/, "", line)
+                print line
+                exit
+              }
+            ' Package.resolved
+          }
+          fileutils="$(revision_for fileutils-c)"
+          micropayments="$(revision_for dimymicropayments)"
+          mint="$(revision_for dimymint)"
+          for revision in "$fileutils" "$micropayments" "$mint"; do
+            [[ "$revision" =~ ^[0-9a-f]{40}$ ]]
+          done
+          printf 'fileutils=%s\n' "$fileutils" >> "$GITHUB_OUTPUT"
+          printf 'micropayments=%s\n' "$micropayments" >> "$GITHUB_OUTPUT"
+          printf 'mint=%s\n' "$mint" >> "$GITHUB_OUTPUT"
+
+      - name: Require scoped dependency credentials
+        env:
+          FILEUTILS_KEY: ${{ secrets.FILEUTILS_C_DEPLOY_KEY }}
+          DIMY_APP_ID: ${{ secrets.DIMY_DEPENDENCY_APP_ID }}
+          DIMY_APP_PRIVATE_KEY: ${{ secrets.DIMY_DEPENDENCY_APP_PRIVATE_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$FILEUTILS_KEY" ] || [ -z "$DIMY_APP_ID" ] || [ -z "$DIMY_APP_PRIVATE_KEY" ]; then
+            echo "The FileUtils deploy key and scoped DiMy GitHub App credentials are required." >&2
+            exit 78
+          fi
+
+      - name: Check out FileUtils-c dependency
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: Digipomps/FileUtils-c
+          ref: ${{ steps.private_deps.outputs.fileutils }}
+          path: .ci-dependencies/FileUtils-c
+          ssh-key: ${{ secrets.FILEUTILS_C_DEPLOY_KEY }}
+          persist-credentials: false
+
+      - name: Create scoped DiMy dependency token
+        id: dimy_token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.DIMY_DEPENDENCY_APP_ID }}
+          private-key: ${{ secrets.DIMY_DEPENDENCY_APP_PRIVATE_KEY }}
+          owner: DiMy-io
+          repositories: |
+            DiMyMicropayments
+            DiMyMint
+          permission-contents: read
+
+      - name: Check out DiMyMicropayments dependency
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: DiMy-io/DiMyMicropayments
+          ref: ${{ steps.private_deps.outputs.micropayments }}
+          path: .ci-dependencies/DiMyMicropayments
+          token: ${{ steps.dimy_token.outputs.token }}
+          persist-credentials: false
+
+      - name: Check out DiMyMint dependency
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: DiMy-io/DiMyMint
+          ref: ${{ steps.private_deps.outputs.mint }}
+          path: .ci-dependencies/DiMyMint
+          token: ${{ steps.dimy_token.outputs.token }}
+          persist-credentials: false
+
+      - name: Authenticate to GHCR
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Buildx
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
+
+      - name: Reclaim runner disk before image builds
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "free before:"; df -h --output=avail / | tail -1
+          # Toolchains this job never touches; every build happens inside
+          # Docker. Removing them frees roughly 25 GB, which is the difference
+          # between three Swift image builds fitting on one runner and the
+          # second one dying part-way through its push.
+          sudo rm -rf \
+            /usr/share/dotnet \
+            /usr/local/lib/android \
+            /opt/ghc \
+            /usr/local/.ghcup \
+            /usr/local/share/powershell \
+            /usr/local/share/chromium \
+            /usr/local/share/boost \
+            /opt/hostedtoolcache/CodeQL || true
+          echo "free after:"; df -h --output=avail / | tail -1
+
+      - name: Reclaim image-build capacity before AdminScaffold
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker_root="$(docker info --format '{{.DockerRootDir}}')"
+          test -n "$docker_root"
+          df -h / "$docker_root"
+          docker buildx du
+          docker buildx prune --all --force
+          df -h / "$docker_root"
+          docker buildx du
+          available_kib="$(df -Pk "$docker_root" | awk 'NR == 2 { print $4 }')"
+          [[ "$available_kib" =~ ^[0-9]+$ ]]
+          if (( available_kib < 5242880 )); then
+            echo "::error::Less than 5 GiB free at Docker root after BuildKit prune; refusing next image build." >&2
+            exit 1
+          fi
+
+      - name: Build and publish AdminScaffold
+        id: admin
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        with:
+          context: .
+          file: Dockerfile.admin
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.ADMIN_IMAGE }}:sha-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          build-args: |
+            APP_GIT_REVISION=${{ github.sha }}
+            APP_BUILD_TIMESTAMP=${{ github.event.repository.updated_at }}
+          sbom: true
+          provenance: mode=max
+
+      - name: Reclaim image-build capacity before CellScaffold web
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker_root="$(docker info --format '{{.DockerRootDir}}')"
+          test -n "$docker_root"
+          df -h / "$docker_root"
+          docker buildx du
+          docker buildx prune --all --force
+          df -h / "$docker_root"
+          docker buildx du
+          available_kib="$(df -Pk "$docker_root" | awk 'NR == 2 { print $4 }')"
+          [[ "$available_kib" =~ ^[0-9]+$ ]]
+          if (( available_kib < 5242880 )); then
+            echo "::error::Less than 5 GiB free at Docker root after BuildKit prune; refusing next image build." >&2
+            exit 1
+          fi
+
+      - name: Build and publish CellScaffold web
+        id: web
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.WEB_IMAGE }}:sha-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.haven.cellprotocol-documents.revision=${{ env.CELLPROTOCOL_DOCUMENTS_REF }}
+          build-args: |
+            APP_GIT_REVISION=${{ github.sha }}
+            APP_BUILD_TIMESTAMP=${{ github.event.repository.updated_at }}
+          sbom: true
+          provenance: mode=max
+
+      - name: Reclaim image-build capacity before NodeAdmin tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker_root="$(docker info --format '{{.DockerRootDir}}')"
+          test -n "$docker_root"
+          df -h / "$docker_root"
+          docker buildx du
+          docker buildx prune --all --force
+          df -h / "$docker_root"
+          docker buildx du
+          available_kib="$(df -Pk "$docker_root" | awk 'NR == 2 { print $4 }')"
+          [[ "$available_kib" =~ ^[0-9]+$ ]]
+          if (( available_kib < 5242880 )); then
+            echo "::error::Less than 5 GiB free at Docker root after BuildKit prune; refusing next image build." >&2
+            exit 1
+          fi
+
+      - name: Build and publish NodeAdmin tools
+        id: node_tools
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        with:
+          context: .
+          file: Dockerfile.node-admin-tools
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.NODE_TOOLS_IMAGE }}:sha-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          build-args: |
+            APP_GIT_REVISION=${{ github.sha }}
+            APP_BUILD_TIMESTAMP=${{ github.event.repository.updated_at }}
+          sbom: true
+          provenance: mode=max
+
+      - name: Reclaim image-build capacity before OCI verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker_root="$(docker info --format '{{.DockerRootDir}}')"
+          test -n "$docker_root"
+          df -h / "$docker_root"
+          docker buildx du
+          docker buildx prune --all --force
+          df -h / "$docker_root"
+          docker buildx du
+          available_kib="$(df -Pk "$docker_root" | awk 'NR == 2 { print $4 }')"
+          [[ "$available_kib" =~ ^[0-9]+$ ]]
+          if (( available_kib < 5242880 )); then
+            echo "::error::Less than 5 GiB free at Docker root after BuildKit prune; refusing next image build." >&2
+            exit 1
+          fi
+
+      - name: Verify OCI revisions and attestation manifests
+        env:
+          WEB_DIGEST: ${{ steps.web.outputs.digest }}
+          ADMIN_DIGEST: ${{ steps.admin.outputs.digest }}
+          NODE_TOOLS_DIGEST: ${{ steps.node_tools.outputs.digest }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for pair in "$WEB_IMAGE@$WEB_DIGEST" "$ADMIN_IMAGE@$ADMIN_DIGEST" "$NODE_TOOLS_IMAGE@$NODE_TOOLS_DIGEST"; do
+            docker buildx imagetools inspect "$pair"
+            raw="$(docker buildx imagetools inspect --raw "$pair")"
+            grep -q 'vnd.docker.reference.type.*attestation-manifest' <<< "$raw"
+            docker pull --platform linux/amd64 "$pair"
+          done
+          web_revision="$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$WEB_IMAGE@$WEB_DIGEST")"
+          web_documents_revision="$(docker image inspect --format '{{ index .Config.Labels "org.haven.cellprotocol-documents.revision" }}' "$WEB_IMAGE@$WEB_DIGEST")"
+          admin_revision="$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$ADMIN_IMAGE@$ADMIN_DIGEST")"
+          tools_revision="$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$NODE_TOOLS_IMAGE@$NODE_TOOLS_DIGEST")"
+          test "$web_revision" = "$GITHUB_SHA"
+          test "$web_documents_revision" = "$CELLPROTOCOL_DOCUMENTS_REF"
+          test "$admin_revision" = "$GITHUB_SHA"
+          test "$tools_revision" = "$GITHUB_SHA"
+
+      - name: Write sanitized release metadata
+        env:
+          WEB_DIGEST: ${{ steps.web.outputs.digest }}
+          ADMIN_DIGEST: ${{ steps.admin.outputs.digest }}
+          NODE_TOOLS_DIGEST: ${{ steps.node_tools.outputs.digest }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release-metadata
+          jq -n \
+            --arg schemaVersion haven.release.image-set.v1 \
+            --arg commit "$GITHUB_SHA" \
+            --arg cellProtocolDocumentsCommit "$CELLPROTOCOL_DOCUMENTS_REF" \
+            --arg webImage "$WEB_IMAGE@$WEB_DIGEST" \
+            --arg adminImage "$ADMIN_IMAGE@$ADMIN_DIGEST" \
+            --arg nodeToolsImage "$NODE_TOOLS_IMAGE@$NODE_TOOLS_DIGEST" \
+            --arg runID "$GITHUB_RUN_ID" \
+            '{schemaVersion:$schemaVersion,commit:$commit,cellProtocolDocumentsCommit:$cellProtocolDocumentsCommit,webImage:$webImage,adminImage:$adminImage,nodeToolsImage:$nodeToolsImage,attestationPresenceVerified:true,workflowRunID:$runID}' \
+            > release-metadata/admin-scaffold-images.json
+
+      - name: Upload release metadata
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: admin-scaffold-image-metadata-${{ github.sha }}
+          path: release-metadata/admin-scaffold-images.json
+          if-no-files-found: error
+          retention-days: 90

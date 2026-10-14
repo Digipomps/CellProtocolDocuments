@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="nb"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spillverksted skisse</title>
+<style>
+:root{--bg:#f4f1ea;--panel:#fff;--ink:#1d2330;--mute:#667085;--line:#e3ddd0;--acc:#2f6fed;--ok:#1f8a4c;--warn:#b54708;--err:#c0362c;--soft:#eef3ff;--kid:#ffcc4d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--panel)}
+header b{font-size:17px}.lvl{margin-left:auto;display:flex;gap:4px;align-items:center;color:var(--mute);font-size:13px}
+.lvl i{width:22px;height:8px;border-radius:4px;background:var(--line)}.lvl i.on{background:var(--kid)}
+.who{font-size:13px;color:var(--mute)}
+main{display:grid;grid-template-columns:340px 1fr 300px;gap:14px;padding:14px;height:calc(100vh - 50px)}
+section{background:var(--panel);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+h2{margin:0;padding:12px 14px;font-size:14px;letter-spacing:.02em;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
+h2 small{margin-left:auto;font-weight:400;color:var(--mute)}
+.body{padding:12px 14px;overflow:auto;flex:1}
+.msg{max-width:92%;padding:9px 12px;border-radius:12px;margin:0 0 10px}.me{margin-left:auto;background:var(--soft)}.ai{background:#f7f5f0}
+.prop{border:1.5px solid var(--acc);border-radius:12px;padding:10px 12px;margin:4px 0 10px;background:#fbfcff}
+.prop .t{font-weight:600;margin-bottom:4px}.prop ul{margin:4px 0 8px 18px;padding:0}
+.why{font-size:13px;color:var(--mute);border-left:3px solid var(--kid);padding-left:8px;margin:6px 0}
+.btns{display:flex;gap:8px;flex-wrap:wrap}.b{border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 11px;font:inherit;font-size:14px}
+.b.p{background:var(--acc);border-color:var(--acc);color:#fff}
+.in{border-top:1px solid var(--line);padding:10px;display:flex;gap:8px}.in div{flex:1;border:1px solid var(--line);border-radius:10px;padding:8px 10px;color:var(--mute)}
+.stage{flex:1;display:grid;place-items:center;background:#1f2a44;margin:12px;border-radius:12px;position:relative;min-height:0}
+.stage svg{width:100%;height:100%}
+.tag{position:absolute;top:10px;left:10px;font-size:12px;background:rgba(255,255,255,.9);border-radius:6px;padding:3px 7px}
+.bar{display:flex;gap:8px;padding:0 12px 12px;align-items:center;font-size:13px;color:var(--mute)}
+.code{margin:0 12px 12px;background:#0f1525;color:#d8e1ff;border-radius:10px;padding:10px 12px;font:12.5px/1.5 ui-monospace,Menlo,monospace;white-space:pre;overflow:auto;max-height:150px}
+.code .hl{background:#2a3d6b;display:block;margin:0 -12px;padding:0 12px}
+.side{display:grid;grid-template-rows:1fr 1fr;gap:14px;min-height:0}
+.row{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.row:last-child{border:0}.dot{width:10px;height:10px;border-radius:50%;margin-top:5px;flex:none}
+.empty{color:var(--mute);text-align:center;padding:24px 10px;font-size:14px}.empty big{display:block;font-size:30px;margin-bottom:6px}
+.lib{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:8px;font-size:13.5px}
+.lib b{font-size:14px}.ref{font:11.5px ui-monospace,Menlo,monospace;color:var(--acc)}.lic{float:right;font-size:11.5px;color:var(--ok)}
+.err{border:1.5px solid var(--err);background:#fff6f5;border-radius:12px;padding:10px 12px;margin-bottom:10px}
+.err .t{color:var(--err);font-weight:600}
+.v{font-size:12.5px;color:var(--mute)}
+</style></head><body>
+<header><b>🎮 Spillverksted</b><span class="who">Sverre · prosjekt: <span id="pname"></span></span>
+<span class="lvl">Nivå <span id="lv"></span>&nbsp;<i class="on"></i><i id="l2"></i><i></i><i></i><i></i></span></header>
+<main>
+<section id="samtale"><h2>💬 Samtale <small>Hjelperen foreslår, du bestemmer</small></h2><div class="body" id="chat"></div>
+<div class="in"><div>Skriv hva du vil lage eller endre …</div><button class="b p">Send</button></div></section>
+<section id="forhandsvisning"><h2>👀 Forhåndsvisning <small id="pvs"></small></h2><div class="stage" id="stage"></div><div id="codewrap"></div><div class="bar" id="pbar"></div></section>
+<div class="side">
+<section id="prosjekt"><h2>📋 Prosjekt <small id="ver"></small></h2><div class="body" id="proj"></div></section>
+<section id="bibliotek"><h2>📚 Bibliotek <small>etter formål</small></h2><div class="body" id="lib"></div></section>
+</div></main>
+<script>
+const S=new URLSearchParams(location.search).get("state")||"fylt";
+const $=id=>document.getElementById(id);
+const game=(extra="")=>`<svg viewBox="0 0 400 240"><rect width="400" height="240" fill="#1f2a44"/><rect y="200" width="400" height="40" fill="#3b7d4f"/>
+<rect x="150" y="150" width="70" height="12" rx="3" fill="#8bd3dd"/><rect x="260" y="110" width="70" height="12" rx="3" fill="#8bd3dd"/>
+<circle cx="70" cy="184" r="16" fill="#ffcc4d"/><circle cx="64" cy="180" r="3" fill="#1d2330"/><circle cx="76" cy="180" r="3" fill="#1d2330"/>
+<text x="300" y="98" font-size="20">⭐</text><text x="180" y="140" font-size="20">⭐</text>${extra}
+<text x="12" y="24" fill="#fff" font-family="system-ui" font-size="14">Stjerner: 1 / 3</text></svg>`;
+const D={
+tom:{p:"(nytt)",lv:"1",chat:`<div class="msg ai">Hei Sverre! Hva vil du lage i dag? Du kan beskrive et spill med egne ord, eller starte fra en mal i biblioteket.</div>
+<div class="btns"><button class="b">Et hoppespill</button><button class="b">Et labyrintspill</button><button class="b">Noe helt eget</button></div>`,
+stage:`<div class="empty" style="color:#c9d3ee"><big>🕹️</big>Her vises spillet ditt.<br>Ingenting er laget ennå.</div>`,pvs:"",code:"",bar:"",
+ver:"",proj:`<div class="empty"><big>🗂️</big>Ingen oppgaver ennå.<br>Når du og hjelperen blir enige om noe, kommer det her.</div>`,
+lib:`<div class="v" style="margin-bottom:8px">Forslag til å starte med:</div>
+<div class="lib"><span class="lic">MIT</span><b>Hoppespill-mal</b><div class="ref">purpose://candidate.game.platformer-template</div>Figur som hopper mellom plattformer.</div>
+<div class="lib"><span class="lic">CC0</span><b>Kenney figurer</b><div class="ref">purpose://candidate.game.character-art</div>Ferdige figurer og bakgrunner.</div>`},
+fylt:{p:"Stjernehopp",lv:"2",chat:`<div class="msg me">Kan figuren hoppe høyere og samle stjerner?</div>
+<div class="msg ai">Ja! Her er forslaget mitt. Se til høyre hvordan det blir før du bestemmer.</div>
+<div class="prop"><div class="t">Forslag 3: høyere hopp og stjerner</div><ul><li>Hoppkraft fra 400 til 600</li><li>Tre stjerner du kan samle</li><li>Teller øverst til venstre</li></ul>
+<div class="why">Hvorfor: <code>jump(600)</code> gir figuren mer fart oppover. Stjernene bruker <code>onCollide</code>, som sjekker om to ting treffer hverandre.</div>
+<div class="btns"><button class="b p">Bruk</button><button class="b">Endre</button><button class="b">Forkast</button></div></div>`,
+stage:game(`<rect x="0" y="0" width="400" height="240" fill="none" stroke="#2f6fed" stroke-width="6" stroke-dasharray="10 6"/>`),pvs:"Forslag 3, ikke lagret",
+code:`<div class="code">onKeyPress("space", () =&gt; {
+<span class="hl">  if (player.isGrounded()) player.jump(600)  // var 400</span>})
+<span class="hl">player.onCollide("star", (s) =&gt; { destroy(s); score++ })</span></div>`,
+bar:`KAPLAY i sandkasse · <span style="color:var(--ok)">kjører</span> · trykk mellomrom for å hoppe`,
+ver:"versjon 2",proj:`<div class="row"><span class="dot" style="background:var(--ok)"></span><div><b>Figuren kan hoppe</b><div class="v">ferdig · versjon 1</div></div></div>
+<div class="row"><span class="dot" style="background:var(--ok)"></span><div><b>Plattformer</b><div class="v">ferdig · versjon 2</div></div></div>
+<div class="row"><span class="dot" style="background:var(--acc)"></span><div><b>Samle stjerner</b><div class="v">forslag 3 vises nå</div></div></div>
+<div class="row"><span class="dot" style="background:var(--line)"></span><div><b>Lyd når du hopper</b><div class="v">senere</div></div></div>
+<div class="btns" style="margin-top:8px"><button class="b">↶ Angre til versjon 1</button><button class="b">Be pappa se</button></div>`,
+lib:`<div class="v" style="margin-bottom:8px">Brukt i forslag 3:</div>
+<div class="lib"><span class="lic">MIT</span><b>onCollide</b><div class="ref">purpose://candidate.game.detect-collision</div>Merker når to ting treffer hverandre.</div>
+<div class="lib"><span class="lic">CC0</span><b>Stjerne (Kenney)</b><div class="ref">purpose://candidate.game.collectible-item</div>Figur fra Kenney Platformer Pack.</div>
+<div class="lib"><span class="lic">MIT</span><b>Teller på skjermen</b><div class="ref">purpose://candidate.game.show-score</div>Tekst som oppdateres mens du spiller.</div>`},
+feil:{p:"Stjernehopp",lv:"2",chat:`<div class="msg me">Kan stjernene fly rundt?</div>
+<div class="err"><div class="t">Forslag 4 virket ikke</div>Spillet stoppet fordi <code>star.move</code> fikk et ord i stedet for et tall. Ingenting er lagret; versjon 2 er som før.
+<div class="btns" style="margin-top:8px"><button class="b p">La hjelperen rette</button><button class="b">Vis meg feilen</button><button class="b">Forkast</button></div></div>
+<div class="msg ai">Jeg skrev <code>"rask"</code> der det skulle stått et tall. Vil du at jeg retter det, eller vil du prøve selv?</div>`,
+stage:game(`<rect x="40" y="70" width="320" height="100" rx="10" fill="#fff6f5" stroke="#c0362c" stroke-width="2"/><text x="200" y="112" text-anchor="middle" font-family="system-ui" font-size="15" fill="#c0362c" font-weight="600">Spillet stoppet</text><text x="200" y="138" text-anchor="middle" font-family="ui-monospace,monospace" font-size="12" fill="#1d2330">linje 14: move() trenger et tall</text>`),
+pvs:"Forslag 4, stoppet",code:`<div class="code">star.onUpdate(() =&gt; {
+<span class="hl" style="background:#5a2323">  star.move("rask", 0)   // ← her</span>})</div>`,
+bar:`KAPLAY i sandkasse · <span style="color:var(--err)">stoppet</span> · resten av HAVEN er ikke påvirket`,
+ver:"versjon 2",proj:`<div class="row"><span class="dot" style="background:var(--ok)"></span><div><b>Figuren kan hoppe</b><div class="v">ferdig · versjon 1</div></div></div>
+<div class="row"><span class="dot" style="background:var(--ok)"></span><div><b>Plattformer og stjerner</b><div class="v">ferdig · versjon 2</div></div></div>
+<div class="row"><span class="dot" style="background:var(--err)"></span><div><b>Stjerner som flyr</b><div class="v">forslag 4 feilet · ikke lagret</div></div></div>`,
+lib:`<div class="err" style="font-size:13.5px"><div class="t">Fant ikke noe for «fly rundt»</div>Biblioteket har ingen oppføring for bevegelse i bane ennå. Hjelperen skrev koden selv og sier fra om det.</div>
+<div class="lib"><span class="lic">MIT</span><b>move</b><div class="ref">purpose://candidate.game.move-object</div>Flytter noe et antall punkter per sekund.</div>`}};
+const d=D[S];$("pname").textContent=d.p;$("lv").textContent=d.lv;if(d.lv==="2")$("l2").className="on";
+$("chat").innerHTML=d.chat;$("stage").innerHTML=d.stage+(d.pvs?`<span class="tag">${d.pvs}</span>`:"");$("pvs").textContent=d.pvs;
+$("codewrap").innerHTML=d.code;$("pbar").innerHTML=d.bar;$("ver").textContent=d.ver;$("proj").innerHTML=d.proj;$("lib").innerHTML=d.lib;
+</script></body></html>

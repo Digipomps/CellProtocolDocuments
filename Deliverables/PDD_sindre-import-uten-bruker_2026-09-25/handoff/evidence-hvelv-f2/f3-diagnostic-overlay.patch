@@ -1,0 +1,77 @@
+diff --git a/Tests/AppTests/CellScaffoldRuntimeIdentityProvisionerTests.swift b/Tests/AppTests/CellScaffoldRuntimeIdentityProvisionerTests.swift
+index 10184083..9f0e6f3b 100644
+--- a/Tests/AppTests/CellScaffoldRuntimeIdentityProvisionerTests.swift
++++ b/Tests/AppTests/CellScaffoldRuntimeIdentityProvisionerTests.swift
+@@ -23,6 +23,32 @@ private func haven_test_setxattr(
+ #endif
+ 
+ final class CellScaffoldRuntimeIdentityProvisionerTests: XCTestCase {
++    func testF3OriginalTemporaryRootDiagnostics() throws {
++        let temporary = URL(fileURLWithPath: NSTemporaryDirectory()).resolvingSymlinksInPath()
++        print("F3 original temporary raw=", NSTemporaryDirectory(), "canonical=", temporary.path)
++        var descriptor = Darwin.open("/", O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
++        defer { if descriptor >= 0 { Darwin.close(descriptor) } }
++        for part in temporary.path.split(separator: "/") {
++            let next = Darwin.openat(descriptor, String(part), O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
++            print("F3 openat component=", part, "result=", next, "errno=", errno)
++            Darwin.close(descriptor); descriptor = next
++            if next < 0 { break }
++        }
++        let fixture = URL(fileURLWithPath: "/private/tmp/f3-reader-diagnostic-" + UUID().uuidString)
++        defer { try? FileManager.default.removeItem(at: fixture) }
++        try FileManager.default.createDirectory(at: fixture, withIntermediateDirectories: false, attributes: [.posixPermissions: 0o700])
++        let file = fixture.appendingPathComponent("manifest.json")
++        FileManager.default.createFile(atPath: file.path, contents: Data("{}".utf8), attributes: [.posixPermissions: 0o400])
++        for path in [fixture, file] {
++            let attributes = try FileManager.default.attributesOfItem(atPath: path.path)
++            let fd = Darwin.open(path.path, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
++            defer { if fd >= 0 { Darwin.close(fd) } }
++            var names = [CChar](repeating: 0, count: 4096)
++            let count = Darwin.flistxattr(fd, &names, names.count, 0)
++            print("F3 reader fixture", path.lastPathComponent, "uid", attributes[.ownerAccountID]!, "gid", attributes[.groupOwnerAccountID]!, "mode", attributes[.posixPermissions]!, "xattrs", count, String(decoding: names.prefix(max(0,count)).map { UInt8(bitPattern: $0) }, as: UTF8.self))
++        }
++    }
++
+     func testProvisionerCreatesOnlyOfflineAllowedBindingsAndWritesOwnerSignedManifest() async throws {
+         let fixture = try await Fixture.make()
+         let receipt = try await fixture.provisioner.provision(fixture.input)
+@@ -702,7 +728,7 @@ final class CellScaffoldRuntimeIdentityProvisionerTests: XCTestCase {
+     }
+ 
+     func testWriterRejectsOverwriteWithoutExactOldDigestAndUses0600() async throws {
+-        let directory = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
++        let directory = URL(fileURLWithPath: "/Users/kjetil/Build/Digipomps/HAVEN/CellScaffold/_wt-forvaltet-import-20260926/.hvelv-test-root", isDirectory: true)
+             .resolvingSymlinksInPath()
+             .appendingPathComponent("runtime-manifest-writer-\(UUID().uuidString)", isDirectory: true)
+         try FileManager.default.createDirectory(
+@@ -762,7 +788,7 @@ final class CellScaffoldRuntimeIdentityProvisionerTests: XCTestCase {
+     }
+ 
+     func testWriterRejectsSymlinkInParentTraversal() async throws {
+-        let root = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
++        let root = URL(fileURLWithPath: "/Users/kjetil/Build/Digipomps/HAVEN/CellScaffold/_wt-forvaltet-import-20260926/.hvelv-test-root", isDirectory: true)
+             .resolvingSymlinksInPath()
+             .appendingPathComponent("runtime-manifest-symlink-\(UUID().uuidString)", isDirectory: true)
+         let actual = root.appendingPathComponent("actual", isDirectory: true)
+@@ -808,7 +834,7 @@ final class CellScaffoldRuntimeIdentityProvisionerTests: XCTestCase {
+     }
+ 
+     func testWriterRejectsExtendedAttributesOnExistingManifest() async throws {
+-        let directory = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
++        let directory = URL(fileURLWithPath: "/Users/kjetil/Build/Digipomps/HAVEN/CellScaffold/_wt-forvaltet-import-20260926/.hvelv-test-root", isDirectory: true)
+             .resolvingSymlinksInPath()
+             .appendingPathComponent("runtime-manifest-xattr-\(UUID().uuidString)", isDirectory: true)
+         try FileManager.default.createDirectory(
+diff --git a/Tests/AppTests/SecureRuntimeIdentityManifestFileTests.swift b/Tests/AppTests/SecureRuntimeIdentityManifestFileTests.swift
+index b6fc5fe3..eb1dbc74 100644
+--- a/Tests/AppTests/SecureRuntimeIdentityManifestFileTests.swift
++++ b/Tests/AppTests/SecureRuntimeIdentityManifestFileTests.swift
+@@ -197,7 +197,7 @@ private final class FileFixture {
+ 
+     init(data: Data, keepWritableDescriptor: Bool = false) throws {
+         self.data = data
+-        directoryPath = "/private/tmp/cellscaffold-runtime-manifest-reader-\(UUID().uuidString)"
++        directoryPath = "/Users/kjetil/Build/Digipomps/HAVEN/CellScaffold/_wt-forvaltet-import-20260926/.hvelv-test-root/cellscaffold-runtime-manifest-reader-\(UUID().uuidString)"
+         try FileManager.default.createDirectory(
+             atPath: directoryPath,
+             withIntermediateDirectories: false,

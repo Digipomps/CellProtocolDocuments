@@ -1,0 +1,371 @@
+[haven-swiftpm] running swift test with cache 78c2e52a5799
+warning: 'cellprotocol': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Using on-disk description]
+[1 / 2] swift-nio-ssl_NIOSSL
+[1 / 140] NIOHTTP2
+[1 / 162] CNIOBoringSSL
+[2 / 14] CellApple
+[4 / 16] CellApple
+[5 / 17] CellApple
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:255:9: warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+253 | struct SkeletonBorderShape: Shape {
+254 |     let radius: CGFloat
+255 |     let edges: [SkeletonEdge]?
+    |         `- warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+256 |     let rtl: Bool
+257 |     func path(in rect: CGRect) -> Path {
+
+CellBase.SkeletonEdge:1:13: note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+1 | public enum SkeletonEdge : String, Codable {
+  |             `- note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+2 |     case top
+3 |     case leading
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:5:1: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  3 | 
+  4 | import SwiftUI
+  5 | import CellBase
+    | `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  6 | #if os(macOS)
+  7 | import AppKit
+
+[#AddPreconcurrencyImport]: <https://docs.swift.org/compiler/documentation/diagnostics/add-preconcurrency-import>
+[11 / 20] CellApple
+[13 / 18] CellApple-product
+[13 / 18] CellBaseTests-product
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/PerspectiveContextTests.swift:137:89: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+135 |         let config = ContextConfiguration(sources: [.init(sourceID: "place", endpoint: "cell:///place")], rules: [.init(id: "home", definition: definition, label: "home", purposeWeights: [purpose.reference: 0])])
+136 |         let response = try await cell.set(keypath: "perspective.context.configure", value: ContextCodec.encode(config), requester: owner)
+137 |         guard case let .object(object) = response else { return XCTFail("bad response \(response)") }
+    |                                                                                         |- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+    |                                                                                         |- note: use a default value parameter to avoid this warning
+    |                                                                                         |- note: provide a default value to avoid this warning
+    |                                                                                         `- note: use 'String(describing:)' to silence this warning
+138 |         guard case let .string(status)? = object["status"] else { return XCTFail("missing status \(response)") }
+139 |         XCTAssertEqual(status, "ok", "\(response)")
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/PerspectiveContextTests.swift:138:100: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+136 |         let response = try await cell.set(keypath: "perspective.context.configure", value: ContextCodec.encode(config), requester: owner)
+137 |         guard case let .object(object) = response else { return XCTFail("bad response \(response)") }
+138 |         guard case let .string(status)? = object["status"] else { return XCTFail("missing status \(response)") }
+    |                                                                                                    |- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+    |                                                                                                    |- note: use a default value parameter to avoid this warning
+    |                                                                                                    |- note: provide a default value to avoid this warning
+    |                                                                                                    `- note: use 'String(describing:)' to silence this warning
+139 |         XCTAssertEqual(status, "ok", "\(response)")
+140 |         let changed = expectation(description: "home context")
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/PerspectiveContextTests.swift:139:41: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+137 |         guard case let .object(object) = response else { return XCTFail("bad response \(response)") }
+138 |         guard case let .string(status)? = object["status"] else { return XCTFail("missing status \(response)") }
+139 |         XCTAssertEqual(status, "ok", "\(response)")
+    |                                         |- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+    |                                         |- note: use a default value parameter to avoid this warning
+    |                                         |- note: provide a default value to avoid this warning
+    |                                         `- note: use 'String(describing:)' to silence this warning
+140 |         let changed = expectation(description: "home context")
+141 |         let departed = expectation(description: "departure context")
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/PerspectiveContextTests.swift:238:108: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+236 |         do {
+237 |             let response = try await perspective.set(keypath: "perspective.context.configure", value: ContextCodec.encode(ContextConfiguration()), requester: outsider)
+238 |             guard case .string("denied") = response else { return XCTFail("Unprivileged config accepted: \(response)") }
+    |                                                                                                            |- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+    |                                                                                                            |- note: use a default value parameter to avoid this warning
+    |                                                                                                            |- note: provide a default value to avoid this warning
+    |                                                                                                            `- note: use 'String(describing:)' to silence this warning
+239 |         } catch { /* Existing runtime may reject before the registered handler. */ }
+240 |         let value = try await perspective.get(keypath: "perspective.context.configuration", requester: owner)
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/PerspectiveContextTests.swift:275:13: warning: variable 'state' was never mutated; consider changing to 'let' constant [#VariableNeverMutated]
+273 |     }
+274 |     func testMalformedControlCannotClaimActiveRulesWithoutValidity() throws {
+275 |         var state = PerspectiveContextState(configuration: config())
+    |             `- warning: variable 'state' was never mutated; consider changing to 'let' constant [#VariableNeverMutated]
+276 |         let valid = state.decision(now: now)
+277 |         XCTAssertNoThrow(try valid.validate())
+
+[#VariableNeverMutated]: <https://docs.swift.org/compiler/documentation/diagnostics/variable-never-mutated>
+[15 / 20] CellBaseTests-product
+[21 / 25] CellBaseTests-product
+[22 / 25] CellBaseTests-product
+[23 / 25] CellBaseTests-product
+Build complete! (7,17 sek)
+Test Suite 'Selected tests' started at 2026-10-12 11:50:11.399.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-10-12 11:50:11.399.
+Test Suite 'KeyPathResolverTests' started at 2026-10-12 11:50:11.399.
+Test Case '-[HavenCommonsTests.KeyPathResolverTests testUnknownPerspectiveChildPathStillRoutesToPerspectiveCell]' started.
+Test Case '-[HavenCommonsTests.KeyPathResolverTests testUnknownPerspectiveChildPathStillRoutesToPerspectiveCell]' passed (0.002 seconds).
+Test Suite 'KeyPathResolverTests' passed at 2026-10-12 11:50:11.402.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-10-12 11:50:11.402.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'Selected tests' passed at 2026-10-12 11:50:11.402.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.002 (0.003) seconds
+Test Suite 'Selected tests' started at 2026-10-12 11:50:11.474.
+Test Suite 'CellNearbyTests.xctest' started at 2026-10-12 11:50:11.475.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-10-12 11:50:11.475.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-12 11:50:11.475.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-12 11:50:11.571.
+Test Suite 'CellBaseTests.xctest' started at 2026-10-12 11:50:11.571.
+Test Suite 'GeneralCellInterfaceTests' started at 2026-10-12 11:50:11.571.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testAgreementRequestCannotOutliveCurrentTemplate]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testAgreementRequestCannotOutliveCurrentTemplate]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testAttachDeniedEmitsConnectChallenge]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testAttachDeniedEmitsConnectChallenge]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testAttachSignContractWithConditionalEngagementIncludesHelperConfiguration]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testAttachSignContractWithConditionalEngagementIncludesHelperConfiguration]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testAttachSignContractWithUnmetConditionEmitsConnectChallenge]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testAttachSignContractWithUnmetConditionEmitsConnectChallenge]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testAutomaticAdmissionRequiresPredicateBoundProvedClaim]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testAutomaticAdmissionRequiresPredicateBoundProvedClaim]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testCatalogRetainsLegacyBaseAlongsideMethodSpecificContract]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testCatalogRetainsLegacyBaseAlongsideMethodSpecificContract]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testCellSpecificAccessHookAllowsSubclassManagedReadWithoutContract]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testCellSpecificAccessHookAllowsSubclassManagedReadWithoutContract]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testChangingPolicyBindingRevokesPreviouslyIssuedContract]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testChangingPolicyBindingRevokesPreviouslyIssuedContract]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testConcurrentFirstRemovalAndAdditionAfterRestartDoNotResurrectRevokedContract]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testConcurrentFirstRemovalAndAdditionAfterRestartDoNotResurrectRevokedContract]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testConcurrentRepeatedAgreementIssuanceIsIdempotent]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testConcurrentRepeatedAgreementIssuanceIsIdempotent]' passed (0.012 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testCurrentAgreementTemplateRevokesPreviouslyIssuedGrant]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testCurrentAgreementTemplateRevokesPreviouslyIssuedGrant]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testDecodedAbsorbCellInstallsFeedBindingBeforeAttachmentAndSubscription]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testDecodedAbsorbCellInstallsFeedBindingBeforeAttachmentAndSubscription]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testDefaultAdmissionPolicyRejectsConditionlessAutomaticWriteContract]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testDefaultAdmissionPolicyRejectsConditionlessAutomaticWriteContract]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testEmptyMeddleKeypathsFailWithoutBreakingValidReads]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testEmptyMeddleKeypathsFailWithoutBreakingValidReads]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testExactChildGrantCannotReachLegacyRootGetterOrSetter]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testExactChildGrantCannotReachLegacyRootGetterOrSetter]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testExplicitOwnerPublishedReadPolicyAllowsOnlyTemplateBoundRead]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testExplicitOwnerPublishedReadPolicyAllowsOnlyTemplateBoundRead]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testExplicitSchemaRegistrationForGetAndSet]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testExplicitSchemaRegistrationForGetAndSet]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testFirstAgreementAfterRestartPreservesExistingAuthorizations]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testFirstAgreementAfterRestartPreservesExistingAuthorizations]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testFirstRemovalAfterRestartPreservesOtherAuthorizations]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testFirstRemovalAfterRestartPreservesOtherAuthorizations]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testGetInterceptReturnsValue]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testGetInterceptReturnsValue]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testNonOwnerAllowedWithSignedContract]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testNonOwnerAllowedWithSignedContract]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testNonOwnerDeniedWithoutContract]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testNonOwnerDeniedWithoutContract]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testOperationCatalogRetainsLegacySchemaWithoutMethodMetadata]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testOperationCatalogRetainsLegacySchemaWithoutMethodMetadata]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testOwnerLookupReturnsPublicDescriptorWithoutAuthority]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testOwnerLookupReturnsPublicDescriptorWithoutAuthority]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testOwnerProofAndRuntimeRestoreRequireSigningControl]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testOwnerProofAndRuntimeRestoreRequireSigningControl]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testOwnerPublishedReadRejectsLatentOtherPermissionBits]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testOwnerPublishedReadRejectsLatentOtherPermissionBits]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testPermissiveAndWarnHandlersRetainExplicitMethodlessLegacySchema]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testPermissiveAndWarnHandlersRetainExplicitMethodlessLegacySchema]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testPersistedOwnerProofUsesStoredPublicKeyNotUUID]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testPersistedOwnerProofUsesStoredPublicKeyNotUUID]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testPolicyBoundAgreementRequiresExactTemplateBinding]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testPolicyBoundAgreementRequiresExactTemplateBinding]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testRegisterExploreContractSupportsFlowEffects]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testRegisterExploreContractSupportsFlowEffects]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testRemovingMemberRevokesContractsAcrossRestart]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testRemovingMemberRevokesContractsAcrossRestart]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testRequesterCannotEscalateAgreementBeyondCellTemplate]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testRequesterCannotEscalateAgreementBeyondCellTemplate]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testRequesterCannotEscalatePermissionOnPublishedTemplateKey]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testRequesterCannotEscalatePermissionOnPublishedTemplateKey]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testResolverUsesCentralAuthorizationDecisionBeforeMeddle]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testResolverUsesCentralAuthorizationDecisionBeforeMeddle]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testRetryAdmissionSessionReconnectsAfterConditionBecomesMet]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testRetryAdmissionSessionReconnectsAfterConditionBecomesMet]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testRootGrantStillAuthorizesExactHandlerCompatibilityFallback]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testRootGrantStillAuthorizesExactHandlerCompatibilityFallback]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testSequentialAttachRequestsDoNotMutatePublishedAgreementTemplate]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testSequentialAttachRequestsDoNotMutatePublishedAgreementTemplate]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testSetInterceptRegistersSchemaAndReturnsValue]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testSetInterceptRegistersSchemaAndReturnsValue]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testSignedContractAccessUsesStoredSignatoryPublicKeyNotUUID]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testSignedContractAccessUsesStoredSignatoryPublicKeyNotUUID]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testSignedContractsPersistAcrossGeneralCellDecode]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testSignedContractsPersistAcrossGeneralCellDecode]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testStoragePermissionRequiresExplicitIdentityBoundSGrant]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testStoragePermissionRequiresExplicitIdentityBoundSGrant]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testStrictModeAllowsExplicitRegisterSetHelper]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testStrictModeAllowsExplicitRegisterSetHelper]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testStrictModeGetContractCannotAuthorizeSetHandler]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testStrictModeGetContractCannotAuthorizeSetHandler]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testStrictModeRejectsImplicitSetRegistration]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testStrictModeRejectsImplicitSetRegistration]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testStrictModeRejectsMethodlessLegacySchemaForHandlerInstallation]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testStrictModeRejectsMethodlessLegacySchemaForHandlerInstallation]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testStrictModeRequiresContractForExactHandlerMethod]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testStrictModeRequiresContractForExactHandlerMethod]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testUninitializedInterceptSetupRejectsForgedOwnerUUID]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testUninitializedInterceptSetupRejectsForgedOwnerUUID]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testVaultRefusesToSignWhenPresentedIdentityKeyDiffersFromStoredKey]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testVaultRefusesToSignWhenPresentedIdentityKeyDiffersFromStoredKey]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testVaultRefusesToSignWhenPresentedIdentityKeyIsMissing]' started.
+Test Case '-[CellBaseTests.GeneralCellInterfaceTests testVaultRefusesToSignWhenPresentedIdentityKeyIsMissing]' passed (0.000 seconds).
+Test Suite 'GeneralCellInterfaceTests' passed at 2026-10-12 11:50:11.643.
+	 Executed 49 tests, with 0 failures (0 unexpected) in 0.070 (0.072) seconds
+Test Suite 'GoalDefinitionTests' started at 2026-10-12 11:50:11.643.
+Test Case '-[CellBaseTests.GoalDefinitionTests testNetworkGoalEvaluationRoundTripsAndTerminalSemantics]' started.
+Test Case '-[CellBaseTests.GoalDefinitionTests testNetworkGoalEvaluationRoundTripsAndTerminalSemantics]' passed (0.001 seconds).
+Test Suite 'GoalDefinitionTests' passed at 2026-10-12 11:50:11.644.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'GoalEvaluationCellTests' started at 2026-10-12 11:50:11.644.
+Test Case '-[CellBaseTests.GoalEvaluationCellTests testGoalEvaluationCellConfiguresEvaluatesStoresAndEmits]' started.
+Test Case '-[CellBaseTests.GoalEvaluationCellTests testGoalEvaluationCellConfiguresEvaluatesStoresAndEmits]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.GoalEvaluationCellTests testGoalEvaluationCellRequiresDefinitionBeforeEvaluation]' started.
+Test Case '-[CellBaseTests.GoalEvaluationCellTests testGoalEvaluationCellRequiresDefinitionBeforeEvaluation]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.GoalEvaluationCellTests testGoalEvaluationCellReturnsUnknownWhenEvidenceIsMissing]' started.
+Test Case '-[CellBaseTests.GoalEvaluationCellTests testGoalEvaluationCellReturnsUnknownWhenEvidenceIsMissing]' passed (0.002 seconds).
+Test Suite 'GoalEvaluationCellTests' passed at 2026-10-12 11:50:11.648.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.004 (0.004) seconds
+Test Suite 'GoalEvaluationEngineTests' started at 2026-10-12 11:50:11.648.
+Test Case '-[CellBaseTests.GoalEvaluationEngineTests testCompositeSemanticGoalIsActiveWhenOnlyOneLabelMatches]' started.
+Test Case '-[CellBaseTests.GoalEvaluationEngineTests testCompositeSemanticGoalIsActiveWhenOnlyOneLabelMatches]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.GoalEvaluationEngineTests testCompositeSemanticLocationAndTimeGoalIsSatisfiedWhenBothLabelsMatch]' started.
+Test Case '-[CellBaseTests.GoalEvaluationEngineTests testCompositeSemanticLocationAndTimeGoalIsSatisfiedWhenBothLabelsMatch]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.GoalEvaluationEngineTests testHumanConfirmationGoalIsSatisfiedWhenConfirmationEventArrives]' started.
+Test Case '-[CellBaseTests.GoalEvaluationEngineTests testHumanConfirmationGoalIsSatisfiedWhenConfirmationEventArrives]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.GoalEvaluationEngineTests testMissingEvidenceMakesGoalUnknownInsteadOfInventingState]' started.
+Test Case '-[CellBaseTests.GoalEvaluationEngineTests testMissingEvidenceMakesGoalUnknownInsteadOfInventingState]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.GoalEvaluationEngineTests testNetworkGoalTransitionsFromSatisfiedToAtRiskToMissed]' started.
+Test Case '-[CellBaseTests.GoalEvaluationEngineTests testNetworkGoalTransitionsFromSatisfiedToAtRiskToMissed]' passed (0.000 seconds).
+Test Suite 'GoalEvaluationEngineTests' passed at 2026-10-12 11:50:11.649.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'PerspectiveCellContractTests' started at 2026-10-12 11:50:11.649.
+Test Case '-[CellBaseTests.PerspectiveCellContractTests testInitialPurposeTemplateUsesEventGoalReferenceAndConcreteGoalText]' started.
+Test Case '-[CellBaseTests.PerspectiveCellContractTests testInitialPurposeTemplateUsesEventGoalReferenceAndConcreteGoalText]' passed (0.000 seconds).
+Test Suite 'PerspectiveCellContractTests' passed at 2026-10-12 11:50:11.650.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'PerspectiveCellMatchPayloadTests' started at 2026-10-12 11:50:11.650.
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testDirectPurposeMatchUsesMinimumPurposeWeight]' started.
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testDirectPurposeMatchUsesMinimumPurposeWeight]' passed (0.007 seconds).
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testDuplicateTargetKeysProduceOneDirectHit]' started.
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testDuplicateTargetKeysProduceOneDirectHit]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testLimitTruncatesCombinedResultsByScore]' started.
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testLimitTruncatesCombinedResultsByScore]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testMinimumMatchScoreFiltersBothRoutes]' started.
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testMinimumMatchScoreFiltersBothRoutes]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testSlugifyCollisionUsesPortableDedupKey]' started.
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testSlugifyCollisionUsesPortableDedupKey]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testViaInterestScoreIsMinPurposeTimesMinInterest]' started.
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testViaInterestScoreIsMinPurposeTimesMinInterest]' passed (0.002 seconds).
+Test Suite 'PerspectiveCellMatchPayloadTests' passed at 2026-10-12 11:50:11.668.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.018 (0.019) seconds
+Test Suite 'PerspectiveContextFlowTests' started at 2026-10-12 11:50:11.668.
+Test Case '-[CellBaseTests.PerspectiveContextFlowTests testRealSubscriptionChangesEffectivePurposesAndDepartureRestoresBaseline]' started.
+Test Case '-[CellBaseTests.PerspectiveContextFlowTests testRealSubscriptionChangesEffectivePurposesAndDepartureRestoresBaseline]' passed (0.007 seconds).
+Test Suite 'PerspectiveContextFlowTests' passed at 2026-10-12 11:50:11.675.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.007 (0.007) seconds
+Test Suite 'PerspectiveContextIntegrationTests' started at 2026-10-12 11:50:11.675.
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testConfigurationRejectsNonOwnerWithoutDebugBypass]' started.
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testConfigurationRejectsNonOwnerWithoutDebugBypass]' passed (0.006 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testDurableContextReadAfterFreshCellDecodeAndDetachPersists]' started.
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testDurableContextReadAfterFreshCellDecodeAndDetachPersists]' passed (0.007 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testResolverLoadedPortholeInputFiltersContentAndConsumesControlEvents]' started.
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testResolverLoadedPortholeInputFiltersContentAndConsumesControlEvents]' passed (1.036 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testSameFilterConfigurationPreservesActiveRestrictions]' started.
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testSameFilterConfigurationPreservesActiveRestrictions]' passed (0.233 seconds).
+Test Suite 'PerspectiveContextIntegrationTests' passed at 2026-10-12 11:50:12.958.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 1.282 (1.283) seconds
+Test Suite 'PerspectiveContextTests' started at 2026-10-12 11:50:12.958.
+Test Case '-[CellBaseTests.PerspectiveContextTests testDepartureDuplicateDelayedAndConflictingEvents]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testDepartureDuplicateDelayedAndConflictingEvents]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testExpiryAdvancesRevisionOnceAndExpiredSnapshotCannotConfirm]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testExpiryAdvancesRevisionOnceAndExpiredSnapshotCannotConfirm]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testExpiryAndRestartRequireFreshSnapshotEvenAtSameRevision]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testExpiryAndRestartRequireFreshSnapshotEvenAtSameRevision]' passed (0.005 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testFiltersIntersectWithinBaseAndUseBaseWhenUnknownOrExpired]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testFiltersIntersectWithinBaseAndUseBaseWhenUnknownOrExpired]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testJobParentMeetingDigitalGroupAndNewsLabelsAreIndependentRules]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testJobParentMeetingDigitalGroupAndNewsLabelsAreIndependentRules]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testMalformedConfigurationAndEventsAreRejected]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testMalformedConfigurationAndEventsAreRejected]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testMalformedControlCannotClaimActiveRulesWithoutValidity]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testMalformedControlCannotClaimActiveRulesWithoutValidity]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testMorningNeedsTimeAndHomeOrFamilyAndKnownEmptySources]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testMorningNeedsTimeAndHomeOrFamilyAndKnownEmptySources]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testPrioritySupportsLowerWeightsAndDeactivationAndStableTies]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testPrioritySupportsLowerWeightsAndDeactivationAndStableTies]' passed (0.001 seconds).
+Test Suite 'PerspectiveContextTests' passed at 2026-10-12 11:50:12.973.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.013 (0.015) seconds
+Test Suite 'PerspectiveEntityProjectionTests' started at 2026-10-12 11:50:12.973.
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testAnAddedEntityCanBeFoundAgain]' started.
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testAnAddedEntityCanBeFoundAgain]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testAnEmptyProjectionIsHowASourceWithdrawsEntirely]' started.
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testAnEmptyProjectionIsHowASourceWithdrawsEntirely]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testAProjectionNeverTouchesAnotherSourcesNodes]' started.
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testAProjectionNeverTouchesAnotherSourcesNodes]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testAReferenceOnlyWeightIsSkippedRatherThanOrphaned]' started.
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testAReferenceOnlyWeightIsSkippedRatherThanOrphaned]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testAStaleEpochIsIgnored]' started.
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testAStaleEpochIsIgnored]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testEncodingAnEntityLeavesPersonalDetailBehind]' started.
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testEncodingAnEntityLeavesPersonalDetailBehind]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testInterestsSurviveTheProjectionSoTheNodeCanActuallyMatch]' started.
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testInterestsSurviveTheProjectionSoTheNodeCanActuallyMatch]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testNodeIdentifierOverridesTheNameAsReference]' started.
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testNodeIdentifierOverridesTheNameAsReference]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testProjectingASetAddsAllOfIt]' started.
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testProjectingASetAddsAllOfIt]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testProjectionSourcesAreReportedWithTheirEpoch]' started.
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testProjectionSourcesAreReportedWithTheirEpoch]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testRemovingClearsEveryIndexAndTheActiveWeight]' started.
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testRemovingClearsEveryIndexAndTheActiveWeight]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testSomeoneMissingFromTheNextProjectionIsRemoved]' started.
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testSomeoneMissingFromTheNextProjectionIsRemoved]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testTwoPeopleWithTheSameNameStayTwoNodes]' started.
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testTwoPeopleWithTheSameNameStayTwoNodes]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testUpdatingSomethingNewIsAnInsertNotAnError]' started.
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testUpdatingSomethingNewIsAnInsertNotAnError]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testUpsertIsIdempotent]' started.
+Test Case '-[CellBaseTests.PerspectiveEntityProjectionTests testUpsertIsIdempotent]' passed (0.000 seconds).
+Test Suite 'PerspectiveEntityProjectionTests' passed at 2026-10-12 11:50:12.978.
+	 Executed 15 tests, with 0 failures (0 unexpected) in 0.004 (0.005) seconds
+Test Suite 'CellBaseTests.xctest' passed at 2026-10-12 11:50:12.978.
+	 Executed 94 tests, with 0 failures (0 unexpected) in 1.401 (1.407) seconds
+Test Suite 'Selected tests' passed at 2026-10-12 11:50:12.978.
+	 Executed 94 tests, with 0 failures (0 unexpected) in 1.401 (1.408) seconds
+Got no signed data!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/06590CB4-E052-4194-8792-2864B4A27F83/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/06590CB4-E052-4194-8792-2864B4A27F83/Perspective.json, NSUnderlyingError=0x750a46dc50 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/BF1B2795-48B7-4459-B47E-F9388B2DAD65/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/BF1B2795-48B7-4459-B47E-F9388B2DAD65/Perspective.json, NSUnderlyingError=0x750a46daa0 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/D785B41E-587F-4919-A6CA-2AF5B821A502/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/D785B41E-587F-4919-A6CA-2AF5B821A502/Perspective.json, NSUnderlyingError=0x750a46d8c0 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/6DA08EA0-E503-4898-90DF-4278D3B02B96/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/6DA08EA0-E503-4898-90DF-4278D3B02B96/Perspective.json, NSUnderlyingError=0x750a46e790 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/E5A0F8C2-C3BA-4847-A7F2-9E3EE95B4979/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/E5A0F8C2-C3BA-4847-A7F2-9E3EE95B4979/Perspective.json, NSUnderlyingError=0x750a46e5e0 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/6BA2A09A-D282-4E6F-957B-60612A5F0E51/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/6BA2A09A-D282-4E6F-957B-60612A5F0E51/Perspective.json, NSUnderlyingError=0x750a46e550 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/C0D97381-B912-482B-B754-AD82ECD626FE/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/C0D97381-B912-482B-B754-AD82ECD626FE/Perspective.json, NSUnderlyingError=0x750a46e5e0 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/589DA452-D827-48C4-B7D0-4ED8AE407249/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/589DA452-D827-48C4-B7D0-4ED8AE407249/Perspective.json, NSUnderlyingError=0x750a69c630 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/3C0E02D1-726C-479E-8D38-E6995A5BE38F/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/3C0E02D1-726C-479E-8D38-E6995A5BE38F/Perspective.json, NSUnderlyingError=0x750a46e550 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/3C0E02D1-726C-479E-8D38-E6995A5BE38F/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/3C0E02D1-726C-479E-8D38-E6995A5BE38F/Perspective.json, NSUnderlyingError=0x750a69c240 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/ABE3550C-CD55-4C4C-A14F-08277A2F9A40/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/ABE3550C-CD55-4C4C-A14F-08277A2F9A40/Perspective.json, NSUnderlyingError=0x750a46d740 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/E864641B-0F3B-44E8-85C2-19505CE92593/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-76325/CellsContainer/E864641B-0F3B-44E8-85C2-19505CE92593/Perspective.json, NSUnderlyingError=0x750a44c390 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}

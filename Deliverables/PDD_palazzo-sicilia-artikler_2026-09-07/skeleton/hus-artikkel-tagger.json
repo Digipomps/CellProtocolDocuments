@@ -1,0 +1,13 @@
+{ "name": "Palazzo Hus — utkast", "_note": "Samme seksjon som hus-tagger.json, men listen content.draft.tags.pending inneholder også artikler (kind: article).",
+  "skeleton": { "Section": { "header": { "Text": { "text": "Nye artikler i utkastet — tagger" } }, "content": [
+    { "Text": { "text": "Artikler uten godkjente tagger publiseres, men gir ingen treff hos gjestene.", "modifiers": { "fontStyle": "caption" } } },
+    { "List": { "keypath": "content.draft.tags.pending", "selectionMode": "single", "selectionValueKeypath": "id", "selectionActionKeypath": "content.draft.tags.select", "selectionPayloadMode": "item_id",
+      "flowElementSkeleton": { "VStack": { "spacing": 6, "modifiers": { "padding": 12, "cornerRadius": 12, "maxWidthInfinity": true, "hAlignment": "leading", "styleClasses": ["pz-tag-card"] }, "elements": [
+        { "Text": { "keypath": "dishTitle", "modifiers": { "fontStyle": "headline", "fontWeight": "bold" } } },
+        { "Text": { "keypath": "dishDescription", "modifiers": { "fontStyle": "caption" } } },
+        { "Text": { "text": "Foreslåtte tagger", "modifiers": { "fontStyle": "caption", "fontWeight": "bold" } } },
+        { "TextField": { "sourceKeypath": "proposedTagsText", "targetKeypath": "content.draft.tags.edit", "placeholder": "tagger, adskilt med komma" } },
+        { "HStack": { "spacing": 8, "elements": [
+          { "Button": { "keypath": "content.draft.tags.approve", "label": "Godkjenn tagger", "payload": { "dishID": "$id" }, "icon": "checkmark.seal" } },
+          { "Button": { "keypath": "content.draft.tags.skip", "label": "Uten signal", "payload": { "dishID": "$id" }, "icon": "minus.circle" } } ] } } ] } } } },
+    { "Button": { "keypath": "content.publish", "label": "Publiser", "icon": "paperplane" } } ] } } }

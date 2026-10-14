@@ -1,0 +1,72 @@
+{
+  "checkedAt": "2026-10-14T13:46:48.557729+00:00",
+  "result": {
+    "jobID": "g2-w1-cs17-r2-20261014",
+    "startedAt": "2026-10-14T13:40:33.694561+00:00",
+    "phases": [
+      {
+        "phase": "cs",
+        "exitCode": 1,
+        "log": "cs-tests.log"
+      }
+    ],
+    "status": "stopped",
+    "reusedEvidence": {
+      "baselineTests": 116,
+      "cpTests": 8,
+      "manifestSHA256": "66a86e662bd3f77617df76ef2bf504bf87fff5f6a5416ea25fa4b4dd92153364"
+    },
+    "reason": "cs failed; dependent test chain stopped",
+    "finishedAt": "2026-10-14T13:41:24.413950+00:00",
+    "exitCode": 1
+  },
+  "manifestSHA256": "66a86e662bd3f77617df76ef2bf504bf87fff5f6a5416ea25fa4b4dd92153364",
+  "testStarts": 0,
+  "expectedTests": 17,
+  "terminalQueueExit": 1,
+  "frozenCheckExit": 0,
+  "automationStatus": "PAUSED",
+  "artifactHashes": {
+    "manifest.json": "66a86e662bd3f77617df76ef2bf504bf87fff5f6a5416ea25fa4b4dd92153364",
+    "result.json": "61cd308ed31eb50269776f286fe3b3257fd8bb602d395fc4e32e17f88eae355b",
+    "cs-tests.log": "f18cc29398eb661f4e692a033eb212f378bfb8dd477585375a543ce7f88d0f8d",
+    "QUEUE-OUTPUT.md": "1ebdf1df4cf5486fcb88740d5401c7fdfc9672c78088bb0f1993dafe04b435d5",
+    "ADMISSION.json": "b7f5b87eaa4695e16e0de184da90c50667f26bfc308cd786cef773f9804a9190",
+    "AUTHORIZATION.json": "b3b50ac8e3cbe5f8b5386f4f024ddd3bcbff08b1d5518f11eb1bd9c85bf9dfec"
+  },
+  "pins": {
+    "cp": {
+      "before": "2384777e8aee837a02588d8d9540125155cbdee5bbc50056c65d4d60a598ae2d",
+      "after": "2384777e8aee837a02588d8d9540125155cbdee5bbc50056c65d4d60a598ae2d",
+      "current": "2384777e8aee837a02588d8d9540125155cbdee5bbc50056c65d4d60a598ae2d",
+      "identical": true
+    },
+    "cs": {
+      "before": "5d6c96c86236746de21f689b964bb347f54866a875e0387cd0168e05062a199d",
+      "after": "5d6c96c86236746de21f689b964bb347f54866a875e0387cd0168e05062a199d",
+      "current": "5d6c96c86236746de21f689b964bb347f54866a875e0387cd0168e05062a199d",
+      "identical": true
+    }
+  },
+  "diagnosis": {
+    "stage": "dependency resolution before compilation/tests",
+    "error": "error: Dependencies could not be resolved because package 'dimymicropayments' is required using a stable-version but 'dimymicropayments' depends on an unstable-version package 'cellprotocol' and root depends on 'dimymicropayments' 2026.9.4.",
+    "rootOverride": "CELLPROTOCOL_LOCAL_PACKAGE_PATH only; DiMyMicropayments remains exact 2026.9.4 source control",
+    "nestedManifest": "DiMyMicropayments switches its CellProtocol dependency to .package(path:) when the CP environment variable is present",
+    "repairCandidate": "Review the complete dependency closure and use source-identical local DiMy packages at the currently pinned commits; no manifests or tests changed. Not prepared or runtime-verified."
+  },
+  "queueFormatCorrection": {
+    "source": "_losen-queue/runner.sh lines91-150",
+    "actualFields": [
+      "cwd",
+      "sandbox/type",
+      "output",
+      "minutes",
+      "script",
+      "argument"
+    ],
+    "ownerEnvelopeCorrect": true,
+    "frozenHoldTemplateIncorrect": true,
+    "correctionSentToOwner": true
+  }
+}

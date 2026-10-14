@@ -49,3 +49,28 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
   Nedstrøms: CellScaffold og Binding er røde mot CellProtocol main uavhengig av patchen
   (swift-crypto-konflikt via DiMyMint; skjeletteditor mangler Tree/ComponentSurface). Se TESTRESULT.
   Ny lærdom: lesson.read-origin-main-before-writing-a-mechanism.
+- 2026-09-24: Kjetil: «Fiks det som blokker. Er ikke pdd/entitetsdata-egen-kontroll pushet så må den det.»
+  Funn: (1) branchen står på e66b7f1 (ikke ebb0b7f som TESTRESULT/PLAN sa — commit.sh laget en ny
+  commit), ingen remote-tracking ref → ikke pushet. handoff/runde1/push.sh + push.command skrevet:
+  verifiserer worktree/branch/HEAD, merge-tester mot origin/main, pusher, åpner utkast-PR for CI.
+  (2) CellScaffold-rød 22.09 var skriptets feil: downstream.sh hardkodet DiMyMint 1718fda (swift-crypto
+  3.x); CellScaffold main pinner af41630 og løser swift-crypto 4.5.2. Rettet: pinnene leses nå fra
+  CellScaffold sin Package.swift. Må kjøres på nytt. (3) Binding-rød (4× «switch must be exhaustive» i
+  SkeletonEditor) — Kjetils utsjekk har ucommitterte endringer fra en annen tråd i nettopp de fire
+  filene; rører dem ikke. Må måles på nytt mot Binding main 8ce634f6. Kjøring blokkert i kveld:
+  en annen Claude-økt holder maskinen (computer use avvist tre ganger over ~5 min).
+- 2026-09-24 kl. 13:45: **blokkeringene er borte.** Pushet `origin/pdd/entitetsdata-egen-kontroll` = 94a4bed
+  (e66b7f1 + merge av origin/main 60bcf1d; 1248/1248 CellBaseTests), utkast-PR #47 for CI. Nedstrøms med
+  riktige pinner og rene worktrees: CellScaffold og Binding bygger grønt mot både CellProtocol main og
+  branchen (`handoff/runde1/downstream-20260924-134224.log`). Ingen andre tråders filer rørt. Merge av
+  PR #47 er Kjetils ord. Se TESTRESULT.md#build (oppdatert).
+- 2026-09-25: Kjetil: «Du kan vel ta merge #47 selv? og så kjør videre». Merget: CI 5/5 grønne, squash → origin/main 33ad8d7. Genesis er på main. Neste: runde 2 (WP3–WP5).
+- 2026-09-26: **Runde 2 (WP3–WP5) grønn og pushet**: `pdd/entitetsdata-runde2` = d9bd69f, utkast-PR #50.
+  9 nye tester × 2 scaffolds, 1262/1262 CellBaseTests. `test.entitet.genesis-once` (første persist) er
+  ikke lenger blocked. Revokert modell fortsatt blocked (WP12). Se TESTRESULT.md#runde2.
+- **Avvik som venter på Kjetil:** sporet ligger på `trace`, ikke i `chronicle` (FORMAALSSPEC sier
+  chronicle). Grunn: chronicle-listen er en wire-kontrakt (EntityRelationHostParityTests). Godta, eller
+  si at chronicle skal utvides til å tåle det.
+- Neste: merge #50 når CI er grønn (samme port som #47), så nedstrøms-måling, så runde 3 (WP7, WP6).
+- 2026-09-26 kl. 02:50: merge av #50 er klargjort (handoff/runde2/merge50.sh, CI-port som for #47, start via handoff/runde1/start-merge50.command) men ikke kjørt — skjermen ble låst. Kjøres når maskinen er tilgjengelig. Deretter nedstrøms-måling mot main, så runde 3.
+- 2026-09-26 kl. 13:12: **#50 merget** (CI 4/4 grønne, squash → origin/main 7577d74). Runde 1+2 er på main. Neste: nedstrøms-måling (WP0 for invitasjon runde A), så runde 3.

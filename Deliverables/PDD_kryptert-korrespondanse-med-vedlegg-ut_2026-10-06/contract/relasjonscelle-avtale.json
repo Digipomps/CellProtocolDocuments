@@ -1,0 +1,201 @@
+{
+  "schema": "haven.pdd.contract.v0",
+  "task": "kryptert-korrespondanse-med-vedlegg-ut",
+  "status": "Lest av koden der det står «finnes». Det som står «planlagt», er ikke bygget.",
+  "readFrom": {
+    "repo": "CellProtocol",
+    "revision": "grenen med koden for vedlegg, 9420e7d (bygger på 81601a6). origin/main var 1ec56d5 da dette ble lest og hadde ikke vedleggsfilene; fra 07.10 kl. 15:04Z er origin/main 68069b6 (2026.9.5), som ikke er lest",
+    "readAt": "2026-10-07",
+    "files": [
+      "Sources/CellBase/Cells/Correspondence/CorrespondenceAgreementTemplates.swift",
+      "Sources/CellBase/Cells/Correspondence/CorrespondenceCell.swift",
+      "Sources/CellBase/Agreement/Contract.swift",
+      "Sources/CellBase/Cells/GeneralCell/GeneralCell.swift"
+    ],
+    "note": "CorrespondenceCell.swift er lest 06.10 og 07.10; identityDomain, flowTopic og envelopePurposeRef er hentet derfra"
+  },
+  "cell": {
+    "type": "CorrespondenceCell",
+    "identityDomain": "correspondence",
+    "flowTopic": "haven.correspondence",
+    "envelopePurposeRef": "purpose://correspondence.envelope",
+    "oneCellPer": "relasjon (eieren og én invitert)"
+  },
+  "agreementTemplates": {
+    "external_v0": {
+      "status": "finnes på main (malene er lest på grenen med koden for vedlegg; at eier-malen og lista neverGrantedToExternal er like på main, er ikke målt)",
+      "name": "Correspondence external surface v0",
+      "durationSeconds": 31536000,
+      "grants": [
+        {
+          "keypath": "inbox",
+          "permission": "r---"
+        },
+        {
+          "keypath": "readMessage",
+          "permission": "-w--"
+        },
+        {
+          "keypath": "sendMessage",
+          "permission": "-w--"
+        },
+        {
+          "keypath": "ackMessage",
+          "permission": "-w--"
+        }
+      ]
+    },
+    "withAttachments_v1": {
+      "status": "finnes på vedleggsgrenen, ikke på main",
+      "name": "Correspondence with attachments v1",
+      "grants": "external_v0 og de ti under",
+      "attachmentGrants": [
+        {
+          "keypath": "attachments.probe",
+          "permission": "-w--"
+        },
+        {
+          "keypath": "attachments.prepare",
+          "permission": "-w--"
+        },
+        {
+          "keypath": "attachments.upload",
+          "permission": "-w--"
+        },
+        {
+          "keypath": "attachments.metadata",
+          "permission": "-w--"
+        },
+        {
+          "keypath": "attachments.fetch",
+          "permission": "-w--"
+        },
+        {
+          "keypath": "attachments.receipt",
+          "permission": "-w--"
+        },
+        {
+          "keypath": "attachments.revoke",
+          "permission": "-w--"
+        },
+        {
+          "keypath": "attachments.transfer",
+          "permission": "-w--"
+        },
+        {
+          "keypath": "attachments.acceptTransfer",
+          "permission": "-w--"
+        },
+        {
+          "keypath": "attachments.status",
+          "permission": "-w--"
+        }
+      ]
+    },
+    "delivery": {
+      "status": "planlagt (formål A7 og A4); navnene på rettighetene settes når cellen bygges",
+      "requirements": [
+        "en invitert med avtale kan abonnere på cellens hendelser og hente historikken",
+        "abonnenter og historikk gir bare chiffertekst og ytterdata",
+        "en identitet uten avtale får verken hendelser eller historikk"
+      ]
+    },
+    "owner_v0": {
+      "status": "finnes i koden som er lest (se merknaden under external_v0)",
+      "name": "Correspondence owner v0",
+      "rule": "gis aldri til MCP-prosessen (HavenAgentD/Docs/CorrespondenceS6ChangeSetAndRollback.md)",
+      "grants": [
+        {
+          "keypath": "audience.inviteIdentities",
+          "permission": "-w--"
+        },
+        {
+          "keypath": "audience.generateInvitationArtifacts",
+          "permission": "-w--"
+        },
+        {
+          "keypath": "audience.acceptInvitationArtifact",
+          "permission": "-w--"
+        },
+        {
+          "keypath": "audience.revokeInvites",
+          "permission": "-w--"
+        },
+        {
+          "keypath": "crypto.requestRekey",
+          "permission": "-w--"
+        },
+        {
+          "keypath": "lifecycle.retentionPolicy",
+          "permission": "-w--"
+        },
+        {
+          "keypath": "lifecycle.close",
+          "permission": "-w--"
+        }
+      ]
+    },
+    "neverGrantedToExternal": [
+      "chat",
+      "audience.*",
+      "members",
+      "participants",
+      "crypto.policy",
+      "crypto.persistenceMode",
+      "crypto.requestRekey",
+      "audience.inviteIdentities",
+      "audience.generateInvitationArtifacts",
+      "audience.acceptInvitationArtifact",
+      "start",
+      "stop",
+      "lifecycle.*"
+    ]
+  },
+  "contract": {
+    "format": "issuer_only_subject_bound_v1",
+    "meaning": "én signatur, utstederens, bundet til ett subjekt og ett domene",
+    "signingPayloadFields": [
+      "uuid",
+      "agreement",
+      "issuerUUID",
+      "issuerSigningKeyFingerprint",
+      "subjectUUID",
+      "subjectSigningKeyFingerprint",
+      "domain",
+      "issuedAt",
+      "expiresAt"
+    ],
+    "maximumDurationSeconds": 31536000,
+    "allowedClockSkewSeconds": 300
+  },
+  "admission": {
+    "today": "GeneralCell.addAgreement(_:for:authorizedBy:) signerer kontrakten i cellens prosess med eierens nøkkel (contractSigningOwner). Standard agreementAdmissionPolicy er ownerApprovalRequired.",
+    "accessCheckToday": "authorizationContracts(for:) kontrollerer hver lagret kontrakt med verifyAuthorizationBinding(expectedIssuer: owner, ...) og krever at subjektet beviser nøkkelen sin.",
+    "planned": "noe eieren har signert på sin egen maskin, legges fram for cellen. Prøves i bolk 1 (handoff/BOLK-1-OPPDRAG.md) før noe bygges på det.",
+    "mustStillBeRejected": [
+      "signert med en annen nøkkel enn eierens",
+      "signert for en annen celle med samme eier",
+      "utløpt eller ikke gyldig ennå",
+      "subjekt som ikke kan bevise nøkkelen sin",
+      "rettigheter eller varighet ut over malen",
+      "en tredje identitet som prøver å få tilgang med noe som er signert for en annen",
+      "det samme lagt fram to ganger (medlemslista og kontraktlista skal ikke vokse)",
+      "innslipp fra cellens egen prosess uten eierens nøkkel"
+    ]
+  },
+  "clientRules": {
+    "status": "finnes på main i HavenAgentD (Sources/HavenCorrespondenceMCP/CorrespondenceClient.swift, validate; lest på ea558ba)",
+    "rules": [
+      "relasjonen har en identifikator, medlemsfingeravtrykket er en SHA-256-verdi, og cellens adresse lar seg tolke",
+      "medlemmene er unike og omfatter den lokale identiteten",
+      "kontraktens domene er correspondence",
+      "subjektet er den lokale korrespondanseidentiteten",
+      "utstederen er medlem av relasjonen",
+      "ingen keypath står to ganger, og rettighetene er nøyaktig de fire i external_v0",
+      "signatur, signatarer, eierbinding, tilstand og gyldighetstid kontrolleres med verifyAuthorizationBinding, der forventet utsteder er kontraktens egen utsteder",
+      "hvert medlems krypteringsnøkkel står i den signerte avtalen",
+      "den lokale identitetens krypteringsnøkkel i medlemslista er den samme som i nøkkellageret"
+    ],
+    "plannedChange": "klienten må godta avtalen med vedlegg og levering, og virke for eieren som for den inviterte (formål A1, A4, A7)"
+  }
+}

@@ -1,0 +1,270 @@
+warning: /Users/kjetil/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/kjetil/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: '_wt-bro-kanal-auth-20260927': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Using on-disk description]
+[1 / 2] swift-nio_NIOPosix
+[1 / 120] OpenCombine
+[1 / 273] NIOTransportServices
+[1 / 66] NIOExtras
+[2 / 27] CellBase
+[5 / 30] CellBase
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/Cells/Bridging/BridgeChannelTransport.swift:88:81: warning: converting non-Sendable function value to '@Sendable () throws -> Void' may introduce data races
+ 86 |             if peer.hello.role == .initiator {
+ 87 |                 try await trackedWork(admission: true) {
+ 88 |                     try await self.sendPeerAuthentication(peer.begin(live: self.checkPeerHandshake))
+    |                                                                                 `- warning: converting non-Sendable function value to '@Sendable () throws -> Void' may introduce data races
+ 89 |                 }
+ 90 |             }
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/Cells/Bridging/BridgeChannelTransport.swift:157:58: warning: converting non-Sendable function value to '@Sendable () throws -> Void' may introduce data races
+155 |         peer: BridgePeerChannelAuthentication.Operation) async throws {
+156 |         let wire = try Auth.encode(command)
+157 |         let records = try await peer.receive(wire, live: checkPeerHandshake,
+    |                                                          `- warning: converting non-Sendable function value to '@Sendable () throws -> Void' may introduce data races
+158 |             authenticate: { [self] challenge, proof in
+159 |                 try checkPeerHandshake()
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/Cells/Bridging/BridgeChannelTransport.swift:163:25: warning: converting non-Sendable function value to '@Sendable () async throws -> Void' may introduce data races
+161 |                 try session.reserveOpen(proof)
+162 |                 try await recheckPeerPolicy()
+163 |             }, recheck: recheckPeerPolicy, send: sendPeerAuthentication)
+    |                         `- warning: converting non-Sendable function value to '@Sendable () async throws -> Void' may introduce data races
+164 |         // The operation has validated the exact expected, transcript-bound step.
+165 |         // M5's reservation remains until an authenticated application record.
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/Cells/Bridging/BridgeChannelTransport.swift:163:50: warning: converting non-Sendable function value to '@Sendable (Data) async throws -> Void' may introduce data races
+161 |                 try session.reserveOpen(proof)
+162 |                 try await recheckPeerPolicy()
+163 |             }, recheck: recheckPeerPolicy, send: sendPeerAuthentication)
+    |                                                  `- warning: converting non-Sendable function value to '@Sendable (Data) async throws -> Void' may introduce data races
+164 |         // The operation has validated the exact expected, transcript-bound step.
+165 |         // M5's reservation remains until an authenticated application record.
+[7 / 32] CellBase
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/Cells/Bridging/BridgeBase.swift:777:53: warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+ 763 |         self.connectPublisher = connectPublisher
+ 764 |         
+ 765 |         Task {
+     |              |- note: 'self' implicitly strongly captured here
+     |              `- note: add 'self' as a capture list item to silence
+ 766 |             if let identity = context.identity,
+ 767 |                let connectPublisher = self.connectPublisher
+     :
+ 775 |                         connectPublisher.send(completion: .failure(ConnectError.cancelled ))
+ 776 |                     })
+ 777 |                     .sink(receiveCompletion: {[weak self] completion in
+     |                                                     |- warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+     |                                                     `- note: explicitly assign the capture list item to silence
+ 778 |                         bridgeLog("Connect callback publisher completed")
+ 779 |                         connectPublisher.send(completion: .finished)
+
+[#ImplicitStrongCapture]: <https://docs.swift.org/compiler/documentation/diagnostics/implicit-strong-capture>
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PersistingCells/EntityRelationRecordV1.swift:321:16: warning: stored property 'entityRepresentation' of 'Sendable'-conforming struct 'EntityRelationRecord' contains non-Sendable type 'EntityRepresentation'; this is an error in the Swift 6 language mode
+ 319 |     /// Canonical owner-held knowledge when present. The legacy subject/tags/
+ 320 |     /// purposeRefs remain readable for existing clients and import adapters.
+ 321 |     public var entityRepresentation: EntityRepresentation?
+     |                `- warning: stored property 'entityRepresentation' of 'Sendable'-conforming struct 'EntityRelationRecord' contains non-Sendable type 'EntityRepresentation'; this is an error in the Swift 6 language mode
+ 322 | 
+ 323 |     public init(
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/EntityRepresentation.swift:61:14: note: class 'EntityRepresentation' does not conform to the 'Sendable' protocol
+ 59 | 
+ 60 | 
+ 61 | public class EntityRepresentation:  PerspectiveNodeImpl {
+    |              `- note: class 'EntityRepresentation' does not conform to the 'Sendable' protocol
+ 62 | 
+ 63 |     var fulfilled: Fullfilled = Fullfilled() // Until Interests and Purposes are moved
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/ClaimComposition.swift:36:16: warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimCounter' has non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 34 | public struct ClaimCounter: Codable, Equatable, Sendable {
+ 35 |     public var role: ClaimCounterRole
+ 36 |     public var composition: ClaimComposition
+    |                `- warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimCounter' has non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 37 | 
+ 38 |     public init(role: ClaimCounterRole, composition: ClaimComposition) {
+    :
+187 | }
+188 | 
+189 | public indirect enum ClaimComposition: Codable, Equatable {
+    |                      `- note: consider making enum 'ClaimComposition' conform to the 'Sendable' protocol
+190 |     case claim(ClaimCompositionLeaf)
+191 |     // allOf: linked premises, weakest link decides the score.
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/ClaimDefinition.swift:91:16: warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimDefinition' contains non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 89 |     public var goalID: String?
+ 90 |     public var supports: [ClaimSupportNode]
+ 91 |     public var composition: ClaimComposition?
+    |                `- warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimDefinition' contains non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 92 |     public var tags: [String]
+ 93 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/ClaimComposition.swift:189:22: note: consider making enum 'ClaimComposition' conform to the 'Sendable' protocol
+187 | }
+188 | 
+189 | public indirect enum ClaimComposition: Codable, Equatable {
+    |                      `- note: consider making enum 'ClaimComposition' conform to the 'Sendable' protocol
+190 |     case claim(ClaimCompositionLeaf)
+191 |     // allOf: linked premises, weakest link decides the score.
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/PerspectiveEntityProjection.swift:30:16: warning: stored property 'entities' of 'Sendable'-conforming struct 'PerspectiveEntityProjection' contains non-Sendable type 'Weight<EntityRepresentation>'; this is an error in the Swift 6 language mode
+ 28 |     /// delayed write cannot resurrect entities a newer one removed.
+ 29 |     public let epoch: Int
+ 30 |     public let entities: [Weight<EntityRepresentation>]
+    |                `- warning: stored property 'entities' of 'Sendable'-conforming struct 'PerspectiveEntityProjection' contains non-Sendable type 'Weight<EntityRepresentation>'; this is an error in the Swift 6 language mode
+ 31 | 
+ 32 |     public init(source: String, epoch: Int, entities: [Weight<EntityRepresentation>]) {
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/Weight.swift:13:15: note: consider making generic struct 'Weight' conform to the 'Sendable' protocol
+ 11 | import Foundation
+ 12 | 
+ 13 | public struct Weight<T: PerspectiveNode & Codable> :  Weighted, Codable {
+    |               `- note: consider making generic struct 'Weight' conform to the 'Sendable' protocol
+ 14 |     
+ 15 |     
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/RelationalLearningModels.swift:95:16: warning: stored property 'payload' of 'Sendable'-conforming struct 'RelationalLearningEventEnvelope' contains non-Sendable type 'ValueType'; this is an error in the Swift 6 language mode
+ 93 |     public var schemaVersion: String
+ 94 |     public var emittedAt: TimeInterval
+ 95 |     public var payload: Object
+    |                `- warning: stored property 'payload' of 'Sendable'-conforming struct 'RelationalLearningEventEnvelope' contains non-Sendable type 'ValueType'; this is an error in the Swift 6 language mode
+ 96 | 
+ 97 |     public init(eventType: RelationalLearningEventType,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/ValueTypes/ValueType.swift:11:22: note: consider making enum 'ValueType' conform to the 'Sendable' protocol
+  9 | #endif
+ 10 | 
+ 11 | public indirect enum ValueType: Codable {
+    |                      `- note: consider making enum 'ValueType' conform to the 'Sendable' protocol
+ 12 |     case flowElement(FlowElement)
+ 13 |     case bool(Bool)
+[17 / 45] CellApple
+[19 / 45] ReferenceLoadBenchmark-product
+[23 / 44] haven-commons-product
+[27 / 43] CellVapor
+[29 / 43]
+[31 / 44] ReferenceLoadBenchmark-product
+[33 / 45] CellVapor-product
+[36 / 46] CellRuntimeBenchmarks-product
+[37 / 47] CellApple/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:255:9: warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+253 | struct SkeletonBorderShape: Shape {
+254 |     let radius: CGFloat
+255 |     let edges: [SkeletonEdge]?
+    |         `- warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+256 |     let rtl: Bool
+257 |     func path(in rect: CGRect) -> Path {
+
+CellBase.SkeletonEdge:1:13: note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+1 | public enum SkeletonEdge : String, Codable {
+  |             `- note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+2 |     case top
+3 |     case leading
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:5:1: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  3 | 
+  4 | import SwiftUI
+  5 | import CellBase
+    | `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  6 | #if os(macOS)
+  7 | import AppKit
+
+[#AddPreconcurrencyImport]: <https://docs.swift.org/compiler/documentation/diagnostics/add-preconcurrency-import>
+
+[41 / 46] CellApple-product
+[41 / 46] CellBaseTests-product
+[44 / 49] CellBaseTests-product
+[47 / 50] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:419:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 417 |         // concerns A's physical route, and preserves the receive sequence.
+ 418 |         _ = try pair.pb.gate.openPeerFrame(heldRequest.data)
+ 419 |         let pendingCommand = await bridge.auditor.loadBridgeCommandForCommandId(1)
+     |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 420 |         XCTAssertNotNil(pendingCommand)
+ 421 |         let forged = BridgeCommand(cmd: "response", payload: .string("from-c"), cid: 1,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:425:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 423 |         try await pc.gate.sendData(A.encode(forged))
+ 424 |         try await pair.deliverNext()
+ 425 |         let stillPending = await bridge.auditor.loadBridgeCommandForCommandId(1)
+     |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 426 |         XCTAssertNotNil(stillPending, "C's response must not consume B's pending cid")
+ 427 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:451:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 449 |             await pair.pb.bridge!.sendCommand(command: .description, identity: pair.b.owner, payload: nil)
+ 450 |             let oldCommand = try await pair.next(), captured = try pair.receiver(oldCommand)
+ 451 |             let firstCID = await pair.pb.bridge!.auditor.loadBridgeCommandForCommandId(1)
+     |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 452 |             XCTAssertEqual(firstCID?.cid, 1)
+ 453 |             try await pair.deliver(oldCommand)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:460:26: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 458 |             await fresh.1.bridge!.sendCommand(command: .description, identity: pair.b.owner, payload: nil)
+ 459 |             let newCommand = try await pair.next()
+ 460 |             let newCID = await fresh.1.bridge!.auditor.loadBridgeCommandForCommandId(1)
+     |                          `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 461 |             XCTAssertEqual(firstCID?.cid, newCID?.cid, "Actual Base cid reuse")
+ 462 |             // A callback already captured by an old transport cannot close the new one.
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:779:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 777 |                 XCTAssertNotEqual(oldKey, freshKey)
+ 778 |                 let request = BridgeCommand(cmd: "description", identity: pair.a.owner.publicIdentitySnapshot(), payload: nil, cid: 1)
+ 779 |                 let stored = await fresh.0.bridge!.auditor.storeBridgeCommand(request, for: 1)
+     |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 780 |                 XCTAssertTrue(stored)
+ 781 |                 // M knows the public new generation and the expected counter.
+
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+[48 / 50] CellBaseTests-product
+[49 / 53] CellBaseTests-product
+[50 / 53] CellBaseTests-product
+[51 / 53] CellBaseTests-product
+[52 / 52] ReferenceLoadBenchmark-product
+[54 / 54] haven-commons-product
+[56 / 56] CellRuntimeBenchmarks-product
+Build complete! (15,00 sek)
+Test Suite 'Selected tests' started at 2026-09-29 05:00:00.202.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-09-29 05:00:00.203.
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-09-29 05:00:00.203.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 05:00:00.203.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 05:00:00.299.
+Test Suite 'CellNearbyTests.xctest' started at 2026-09-29 05:00:00.300.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-09-29 05:00:00.300.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 05:00:00.300.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 05:00:00.396.
+Test Suite 'CellBaseTests.xctest' started at 2026-09-29 05:00:00.397.
+Test Suite 'BridgePeerFlowControlTests' started at 2026-09-29 05:00:00.397.
+Test Case '-[CellBaseTests.BridgePeerFlowControlTests testFullDataWindowStillReceiptsAndNoAckLoopWithSustainedTraffic]' started.
+Test Case '-[CellBaseTests.BridgePeerFlowControlTests testFullDataWindowStillReceiptsAndNoAckLoopWithSustainedTraffic]' passed (0.126 seconds).
+Test Case '-[CellBaseTests.BridgePeerFlowControlTests testLargeFramesAndControlFloodAreBoundedWithoutQuotaReleaseAtEnqueue]' started.
+Test Case '-[CellBaseTests.BridgePeerFlowControlTests testLargeFramesAndControlFloodAreBoundedWithoutQuotaReleaseAtEnqueue]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgePeerFlowControlTests testMissingReceiverRetainsEveryByteAndBoundsSequentialFeed]' started.
+Test Case '-[CellBaseTests.BridgePeerFlowControlTests testMissingReceiverRetainsEveryByteAndBoundsSequentialFeed]' passed (0.035 seconds).
+Test Case '-[CellBaseTests.BridgePeerFlowControlTests testReceiptProvesUnpredictableTokenAndCannotReleaseOtherGenerationOrDuplicate]' started.
+Test Case '-[CellBaseTests.BridgePeerFlowControlTests testReceiptProvesUnpredictableTokenAndCannotReleaseOtherGenerationOrDuplicate]' passed (0.000 seconds).
+Test Suite 'BridgePeerFlowControlTests' passed at 2026-09-29 05:00:00.560.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.163 (0.164) seconds
+Test Suite 'BridgePeerRecordLayerTests' started at 2026-09-29 05:00:00.560.
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testCounterExhaustionClosesBeforeWrapInBothDirections]' started.
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testCounterExhaustionClosesBeforeWrapInBothDirections]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testExactFrameBoundsAndFailureAreTerminal]' started.
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testExactFrameBoundsAndFailureAreTerminal]' passed (0.004 seconds).
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testRFC7748AndIndependentHKDFAndRecordVectors]' started.
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testRFC7748AndIndependentHKDFAndRecordVectors]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testRFC8439AEADKnownAnswer]' started.
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testRFC8439AEADKnownAnswer]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testSmallOrderPublicKeysAreRejected]' started.
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testSmallOrderPublicKeysAreRejected]' passed (0.000 seconds).
+Test Suite 'BridgePeerRecordLayerTests' passed at 2026-09-29 05:00:00.567.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.006 (0.007) seconds
+Test Suite 'BridgePeerV3Tests' started at 2026-09-29 05:00:00.567.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testActiveInitiatorCanReadResponderButUnrelatedRelayDHCannot]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testActiveInitiatorCanReadResponderButUnrelatedRelayDHCannot]' passed (0.006 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testAuthenticatedInnerFieldMutationsRequireM

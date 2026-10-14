@@ -1,0 +1,335 @@
+{
+  "schema": "haven.tool-library.v0",
+  "id": "game-tool-library.v0",
+  "purposeRef": "purpose://candidate.tool-library.root",
+  "note": "Draft. candidate.game.* purposes are not yet in Book 23; register them before G2. API entries point at KAPLAY docs; derive them from the KAPLAY source in phase 2 (purpose://candidate.tool-library.derived-from-sources).",
+  "purposes": [
+    {
+      "ref": "purpose://candidate.game.platformer-template",
+      "title": "Start et hoppespill"
+    },
+    {
+      "ref": "purpose://candidate.game.maze-template",
+      "title": "Start et labyrintspill"
+    },
+    {
+      "ref": "purpose://candidate.game.catch-template",
+      "title": "Start et fangespill"
+    },
+    {
+      "ref": "purpose://candidate.game.react-to-input",
+      "title": "Reager på tastatur, mus og berøring"
+    },
+    {
+      "ref": "purpose://candidate.game.gravity-and-jump",
+      "title": "Tyngdekraft og hopp"
+    },
+    {
+      "ref": "purpose://candidate.game.detect-collision",
+      "title": "Merk når to ting treffer hverandre"
+    },
+    {
+      "ref": "purpose://candidate.game.move-object",
+      "title": "Flytt noe på skjermen"
+    },
+    {
+      "ref": "purpose://candidate.game.spawn-and-remove",
+      "title": "Lag og fjern ting mens spillet går"
+    },
+    {
+      "ref": "purpose://candidate.game.show-score",
+      "title": "Vis poeng og tekst"
+    },
+    {
+      "ref": "purpose://candidate.game.timing",
+      "title": "Gjør noe etter en stund eller igjen og igjen"
+    },
+    {
+      "ref": "purpose://candidate.game.switch-scene",
+      "title": "Bytt mellom start, spill og ferdig"
+    },
+    {
+      "ref": "purpose://candidate.game.play-sound",
+      "title": "Spill av lyd"
+    },
+    {
+      "ref": "purpose://candidate.game.character-art",
+      "title": "Figurer og bakgrunner"
+    },
+    {
+      "ref": "purpose://candidate.game.collectible-item",
+      "title": "Ting å samle"
+    }
+  ],
+  "entries": [
+    {
+      "id": "engine.kaplay",
+      "title": "KAPLAY",
+      "kind": "engine",
+      "purposeRefs": [
+        "purpose://candidate.game-workshop.engine.selection"
+      ],
+      "license": "MIT",
+      "source": "https://github.com/kaplayjs/kaplay",
+      "summary": "Browser game library, no build step; first engine.",
+      "childSummary": "Verktøyet spillene dine er laget med.",
+      "status": "available"
+    },
+    {
+      "id": "engine.phaser",
+      "title": "Phaser",
+      "kind": "engine",
+      "purposeRefs": [
+        "purpose://candidate.game-workshop.engine.selection",
+        "purpose://candidate.game-workshop.engine.swappable-adapter"
+      ],
+      "license": "MIT",
+      "source": "https://github.com/phaserjs/phaser",
+      "summary": "Larger engine for later; behind the same adapter.",
+      "childSummary": "Et større verktøy for store spill senere.",
+      "status": "later"
+    },
+    {
+      "id": "template.platformer",
+      "title": "Hoppespill-mal",
+      "kind": "template",
+      "purposeRefs": [
+        "purpose://candidate.game.platformer-template",
+        "purpose://candidate.game.gravity-and-jump"
+      ],
+      "license": "MIT (HAVEN)",
+      "source": "contract/templates/platformer.js",
+      "summary": "Player, platforms, three stars, score.",
+      "childSummary": "Figur som hopper mellom plattformer.",
+      "status": "to-write"
+    },
+    {
+      "id": "template.maze",
+      "title": "Labyrintspill-mal",
+      "kind": "template",
+      "purposeRefs": [
+        "purpose://candidate.game.maze-template",
+        "purpose://candidate.game.move-object"
+      ],
+      "license": "MIT (HAVEN)",
+      "source": "contract/templates/maze.js",
+      "summary": "Grid maze from a text map, goal tile.",
+      "childSummary": "Finn veien ut av labyrinten.",
+      "status": "to-write"
+    },
+    {
+      "id": "template.catch",
+      "title": "Fangespill-mal",
+      "kind": "template",
+      "purposeRefs": [
+        "purpose://candidate.game.catch-template",
+        "purpose://candidate.game.spawn-and-remove"
+      ],
+      "license": "MIT (HAVEN)",
+      "source": "contract/templates/catch.js",
+      "summary": "Things fall, player catches them, timer.",
+      "childSummary": "Fang det som faller ned.",
+      "status": "to-write"
+    },
+    {
+      "id": "api.kaplay.onKeyPress",
+      "title": "onKeyPress / onClick",
+      "kind": "api",
+      "purposeRefs": [
+        "purpose://candidate.game.react-to-input"
+      ],
+      "license": "MIT",
+      "source": "https://kaplayjs.com",
+      "summary": "Run code when a key or pointer is pressed.",
+      "childSummary": "Gjør noe når du trykker på en tast.",
+      "status": "available"
+    },
+    {
+      "id": "api.kaplay.body-jump",
+      "title": "body() og jump()",
+      "kind": "api",
+      "purposeRefs": [
+        "purpose://candidate.game.gravity-and-jump"
+      ],
+      "license": "MIT",
+      "source": "https://kaplayjs.com",
+      "summary": "Gravity component and jump force.",
+      "childSummary": "Får figuren til å falle og hoppe.",
+      "status": "available"
+    },
+    {
+      "id": "api.kaplay.onCollide",
+      "title": "area() og onCollide",
+      "kind": "api",
+      "purposeRefs": [
+        "purpose://candidate.game.detect-collision"
+      ],
+      "license": "MIT",
+      "source": "https://kaplayjs.com",
+      "summary": "Collision area and handler by tag.",
+      "childSummary": "Merker når to ting treffer hverandre.",
+      "status": "available"
+    },
+    {
+      "id": "api.kaplay.move",
+      "title": "move()",
+      "kind": "api",
+      "purposeRefs": [
+        "purpose://candidate.game.move-object"
+      ],
+      "license": "MIT",
+      "source": "https://kaplayjs.com",
+      "summary": "Move by velocity per second; arguments are numbers.",
+      "childSummary": "Flytter noe et antall punkter per sekund.",
+      "status": "available"
+    },
+    {
+      "id": "api.kaplay.add-destroy",
+      "title": "add() og destroy()",
+      "kind": "api",
+      "purposeRefs": [
+        "purpose://candidate.game.spawn-and-remove"
+      ],
+      "license": "MIT",
+      "source": "https://kaplayjs.com",
+      "summary": "Create and remove game objects.",
+      "childSummary": "Lag nye ting eller fjern dem.",
+      "status": "available"
+    },
+    {
+      "id": "api.kaplay.text",
+      "title": "text()",
+      "kind": "api",
+      "purposeRefs": [
+        "purpose://candidate.game.show-score"
+      ],
+      "license": "MIT",
+      "source": "https://kaplayjs.com",
+      "summary": "Text component for score and messages.",
+      "childSummary": "Skriver tekst på skjermen, som poeng.",
+      "status": "available"
+    },
+    {
+      "id": "api.kaplay.wait-loop",
+      "title": "wait() og loop()",
+      "kind": "api",
+      "purposeRefs": [
+        "purpose://candidate.game.timing"
+      ],
+      "license": "MIT",
+      "source": "https://kaplayjs.com",
+      "summary": "Delayed and repeated actions.",
+      "childSummary": "Gjør noe om litt, eller igjen og igjen.",
+      "status": "available"
+    },
+    {
+      "id": "api.kaplay.scene-go",
+      "title": "scene() og go()",
+      "kind": "api",
+      "purposeRefs": [
+        "purpose://candidate.game.switch-scene"
+      ],
+      "license": "MIT",
+      "source": "https://kaplayjs.com",
+      "summary": "Named scenes and switching.",
+      "childSummary": "Bytter mellom startskjerm, spill og ferdig.",
+      "status": "available"
+    },
+    {
+      "id": "api.kaplay.play",
+      "title": "loadSound() og play()",
+      "kind": "api",
+      "purposeRefs": [
+        "purpose://candidate.game.play-sound"
+      ],
+      "license": "MIT",
+      "source": "https://kaplayjs.com",
+      "summary": "Load and play sounds.",
+      "childSummary": "Spiller av en lyd.",
+      "status": "available"
+    },
+    {
+      "id": "asset.kenney.platformer",
+      "title": "Kenney Platformer Pack Redux",
+      "kind": "asset",
+      "purposeRefs": [
+        "purpose://candidate.game.character-art",
+        "purpose://candidate.game.collectible-item",
+        "purpose://candidate.tool-library.open-licensed-game-content"
+      ],
+      "license": "CC0",
+      "source": "https://kenney.nl/assets/platformer-pack-redux",
+      "summary": "Characters, tiles, coins and stars.",
+      "childSummary": "Ferdige figurer, bakker og stjerner.",
+      "status": "available"
+    },
+    {
+      "id": "asset.kenney.interface-sounds",
+      "title": "Kenney Interface Sounds",
+      "kind": "asset",
+      "purposeRefs": [
+        "purpose://candidate.game.play-sound",
+        "purpose://candidate.tool-library.open-licensed-game-content"
+      ],
+      "license": "CC0",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "summary": "Short UI and game sounds.",
+      "childSummary": "Korte lyder til knapper og spill.",
+      "status": "available"
+    },
+    {
+      "id": "gui.proposal-card",
+      "title": "Forslagskort",
+      "kind": "gui",
+      "purposeRefs": [
+        "purpose://candidate.workbench-assistant.propose-human-decides",
+        "purpose://candidate.game-workshop.learning.explain-each-change"
+      ],
+      "license": "MIT (HAVEN)",
+      "source": "images/samtale-fylt-v1.png",
+      "summary": "Proposal with changes, why, and Bruk/Endre/Forkast.",
+      "childSummary": "Viser hva hjelperen vil endre og hvorfor.",
+      "status": "to-build"
+    },
+    {
+      "id": "gui.sandbox-preview",
+      "title": "Forhåndsvisning i sandkasse",
+      "kind": "gui",
+      "purposeRefs": [
+        "purpose://candidate.workbench-assistant.preview-before-change",
+        "purpose://candidate.game-workshop.engine.sandbox-isolation"
+      ],
+      "license": "MIT (HAVEN)",
+      "source": "images/forhandsvisning-fylt-v1.png",
+      "summary": "Runs the proposal in an iframe without allow-same-origin.",
+      "childSummary": "Prøv spillet før du bestemmer deg.",
+      "status": "to-build"
+    },
+    {
+      "id": "gui.version-list",
+      "title": "Versjoner og angre",
+      "kind": "gui",
+      "purposeRefs": [
+        "purpose://candidate.game-workshop.project.versioned-changes"
+      ],
+      "license": "MIT (HAVEN)",
+      "source": "images/prosjekt-fylt-v1.png",
+      "summary": "Saved versions with one-click revert.",
+      "childSummary": "Gå tilbake til en tidligere versjon.",
+      "status": "to-build"
+    },
+    {
+      "id": "gui.level-indicator",
+      "title": "Nivåmåler",
+      "kind": "gui",
+      "purposeRefs": [
+        "purpose://candidate.game-workshop.learning.progression-path"
+      ],
+      "license": "MIT (HAVEN)",
+      "source": "images/arbeidsbenk-fylt-v1.png",
+      "summary": "Shows the current learning level.",
+      "childSummary": "Viser hvilket nivå du er på.",
+      "status": "to-build"
+    }
+  ]
+}

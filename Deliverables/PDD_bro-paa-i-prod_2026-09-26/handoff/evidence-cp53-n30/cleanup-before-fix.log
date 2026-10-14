@@ -1,0 +1,89 @@
+COMMAND=swift test --disable-sandbox --disable-automatic-resolution --cache-path /private/tmp/bro-swift-cache --jobs 4 --filter VaporWebSocketAdmissionTests/testRejectedPayloadRetainsAdmissionUntilSecurityAuditReturns|VaporWebSocketAdmissionTests/testConcurrentCloseRetainsGateSlotUntilResolverCleanupReturns
+warning: /Users/kjetil/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/kjetil/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: '_wt-bro-kanal-auth-20260927': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Using on-disk description]
+[1 / 100] CombineHelpers-product
+[1 / 200] _CertificateInternals
+[1 / 127] NIOHTTP2
+[2 / 11] CellVapor
+[3 / 12] CellVapor
+[9 / 19] CellRuntimeBenchmarks-product
+[12 / 20] CellVapor
+[24 / 32] CellBaseTests-product
+[27 / 32] CellVapor-product
+[27 / 34] CellRuntimeBenchmarks-product
+[28 / 34] CellRuntimeBenchmarks-product
+[29 / 34] CellBaseTests-product
+[34 / 39] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/VaporWebSocketAdmissionTests.swift:290:89: warning: left side of nil coalescing operator '??' has non-optional type 'String', so the right side is never used
+288 |     func consumeCommand(command: BridgeCommand) async throws { if command.command == .sign { signs.increment() } }
+289 |     func consumeResponse(command: BridgeCommand) async throws {
+290 |         guard case .flowElement(let flow) = command.payload, let value = Int(flow.title ?? "") else { otherResponses.increment(); return }
+    |                                                                                         `- warning: left side of nil coalescing operator '??' has non-optional type 'String', so the right side is never used
+291 |         let first = lock.withLock { received.append(value); return received.count == 1 }
+292 |         if first { await holdFirst?.wait() }
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/VaporWebSocketAdmissionTests.swift:330:41: warning: conformance of 'WebSocketFrameEncoder' to 'Sendable' is unavailable; this is an error in the Swift 6 language mode
+328 |         let endpoint = try BridgeChannelAuthentication.Endpoint(url: URL(string: "wss://n30.example/bridge")!, domain: "bridge")
+329 |         let listener = try await ServerBootstrap(group: group).childChannelInitializer { channel in
+330 |             channel.pipeline.addHandler(WebSocketFrameEncoder()).flatMap {
+    |                                         `- warning: conformance of 'WebSocketFrameEncoder' to 'Sendable' is unavailable; this is an error in the Swift 6 language mode
+331 |                 WebSocket.server(on: channel) { socket in
+332 |                     let close: @Sendable () async -> Void = {
+
+NIOWebSocket.WebSocketFrameEncoder:2:11: note: conformance of 'WebSocketFrameEncoder' to 'Sendable' has been explicitly marked unavailable here
+1 | @available(*, unavailable)
+2 | extension WebSocketFrameEncoder : Sendable {
+  |           `- note: conformance of 'WebSocketFrameEncoder' to 'Sendable' has been explicitly marked unavailable here
+3 | }
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/VaporWebSocketAdmissionTests.swift:372:34: warning: 'fireChannelRead' is deprecated: NIOAny is not Sendable. Avoid wrapping the value in NIOAny to silence this warning. [#DeprecatedDeclaration]
+370 |                 let frame = WebSocketFrame(fin: true, opcode: (binary ?? index.isMultiple(of: 2)) ? .binary : .text,
+371 |                     data: channel.allocator.buffer(bytes: bytes))
+372 |                 channel.pipeline.fireChannelRead(NIOAny(frame))
+    |                                  `- warning: 'fireChannelRead' is deprecated: NIOAny is not Sendable. Avoid wrapping the value in NIOAny to silence this warning. [#DeprecatedDeclaration]
+373 |             }
+374 |             return transport.receiveSnapshot
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+[38 / 42] CellBaseTests-product
+[40 / 42] CellBaseTests-product
+Build complete! (6,76 sek)
+Test Suite 'Selected tests' started at 2026-09-29 12:28:01.185.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-09-29 12:28:01.186.
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-09-29 12:28:01.186.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 12:28:01.186.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 12:28:01.249.
+Test Suite 'CellNearbyTests.xctest' started at 2026-09-29 12:28:01.250.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-09-29 12:28:01.250.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 12:28:01.250.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 12:28:01.316.
+Test Suite 'CellBaseTests.xctest' started at 2026-09-29 12:28:01.317.
+Test Suite 'VaporWebSocketAdmissionTests' started at 2026-09-29 12:28:01.317.
+Test Case '-[CellBaseTests.VaporWebSocketAdmissionTests testConcurrentCloseRetainsGateSlotUntilResolverCleanupReturns]' started.
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/VaporWebSocketAdmissionTests.swift:196: error: -[CellBaseTests.VaporWebSocketAdmissionTests testConcurrentCloseRetainsGateSlotUntilResolverCleanupReturns] : XCTAssertEqual failed: ("XCTWaiterResult(rawValue: 1)") is not equal to ("XCTWaiterResult(rawValue: 2)")
+Test Case '-[CellBaseTests.VaporWebSocketAdmissionTests testConcurrentCloseRetainsGateSlotUntilResolverCleanupReturns]' failed (2.368 seconds).
+Test Case '-[CellBaseTests.VaporWebSocketAdmissionTests testRejectedPayloadRetainsAdmissionUntilSecurityAuditReturns]' started.
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/VaporWebSocketAdmissionTests.swift:174: error: -[CellBaseTests.VaporWebSocketAdmissionTests testRejectedPayloadRetainsAdmissionUntilSecurityAuditReturns] : XCTAssertEqual failed: ("0") is not equal to ("1")
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/VaporWebSocketAdmissionTests.swift:175: error: -[CellBaseTests.VaporWebSocketAdmissionTests testRejectedPayloadRetainsAdmissionUntilSecurityAuditReturns] : XCTAssertEqual failed: ("0") is not equal to ("1")
+Test Case '-[CellBaseTests.VaporWebSocketAdmissionTests testRejectedPayloadRetainsAdmissionUntilSecurityAuditReturns]' failed (0.012 seconds).
+Test Suite 'VaporWebSocketAdmissionTests' failed at 2026-09-29 12:28:03.697.
+	 Executed 2 tests, with 3 failures (0 unexpected) in 2.380 (2.380) seconds
+Test Suite 'CellBaseTests.xctest' failed at 2026-09-29 12:28:03.697.
+	 Executed 2 tests, with 3 failures (0 unexpected) in 2.380 (2.380) seconds
+Test Suite 'Selected tests' failed at 2026-09-29 12:28:03.697.
+	 Executed 2 tests, with 3 failures (0 unexpected) in 2.380 (2.381) seconds
+Note: Some test targets reported failures:
+  - CellBaseTests (XCTest)
+
+COMMAND_EXIT=1

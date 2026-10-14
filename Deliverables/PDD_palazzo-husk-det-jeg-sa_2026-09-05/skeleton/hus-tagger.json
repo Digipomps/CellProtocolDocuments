@@ -1,0 +1,27 @@
+{
+  "name": "Palazzo Hus — utkast",
+  "_note": "Ny seksjon i husets utkastflate (eier/kjøkken). Forslag avledes deterministisk av rettens navn/ingredienser i PalazzoContentCell ved content.draft.apply; huset redigerer og godkjenner før content.publish kompilerer signalet.",
+  "cellReferences": [ { "endpoint": "cell:///PalazzoContent", "subscribeFeed": true, "label": "content" } ],
+  "skeleton": { "Section": {
+    "header": { "Text": { "text": "Nye retter i utkastet — tagger" } },
+    "content": [
+      { "Text": { "text": "Taggene avgjør hvilke gjester som får et treff. Forslagene er avledet av navn og ingredienser; rett dem, og godkjenn. Uten godkjente tagger publiseres retten uten signal.", "modifiers": { "fontStyle": "caption" } } },
+      { "List": { "keypath": "content.draft.tags.pending", "flowElementSkeleton": { "VStack": {
+        "spacing": 6,
+        "modifiers": { "padding": 12, "cornerRadius": 12, "maxWidthInfinity": true, "hAlignment": "leading", "styleClasses": ["pz-tag-card"] },
+        "elements": [
+          { "Text": { "keypath": "dishTitle", "modifiers": { "fontStyle": "headline", "fontWeight": "bold" } } },
+          { "Text": { "keypath": "dishDescription", "modifiers": { "fontStyle": "caption" } } },
+          { "Text": { "text": "Foreslåtte tagger", "modifiers": { "fontStyle": "caption", "fontWeight": "bold" } } },
+          { "TextField": { "sourceKeypath": "proposedTagsText", "targetKeypath": "content.draft.tags.edit", "placeholder": "tagger, adskilt med komma" } },
+          { "HStack": { "spacing": 8, "elements": [
+            { "Button": { "keypath": "content.draft.tags.approve", "label": "Godkjenn tagger", "payload": { "dishID": "$id" }, "icon": "checkmark.seal" } },
+            { "Button": { "keypath": "content.draft.tags.skip", "label": "Uten signal", "payload": { "dishID": "$id" }, "icon": "minus.circle" } }
+          ] } }
+        ]
+      } } } },
+      { "Button": { "keypath": "content.publish", "label": "Publiser meny", "icon": "paperplane" } }
+    ]
+  } },
+  "_verify_in_porthole": [ "TextField i List-rad med targetKeypath utenfor raden: hvordan raden identifiseres i payloaden må verifiseres (trolig må approve-payloaden bære teksten, ikke TextField). Chips finnes ikke i skeleton — tagger vises som kommaseparert tekst." ]
+}

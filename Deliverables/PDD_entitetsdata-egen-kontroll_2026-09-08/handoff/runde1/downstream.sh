@@ -7,14 +7,22 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 LOG="$HERE/downstream-$(date +%Y%m%d-%H%M%S).log"
 REV="$(git -C "$WT" rev-parse HEAD)"
 BASEREV="$(git -C "$WT" rev-parse origin/main)"
-MINT_REV="1718fda4ee8185cf3f848edc0b0b966543d834cf"
-MICRO_REV="bc6f359c83f1af73f2509478981d919d5ee9292b"
+# Pinnene leses fra CellScaffold sin egen Package.swift på origin/main — 22.09 var de hardkodet til
+# eldre revisjoner (DiMyMint 1718fda, swift-crypto 3.x) og ga en falsk rød baseline.
+pin_from_scaffold() { git -C "$BASE/CellScaffold" show origin/main:Package.swift | grep -A2 "$1" | grep -oE 'revision: "[0-9a-f]+"' | head -1 | grep -oE '[0-9a-f]{40}'; }
+git -C "$BASE/CellScaffold" fetch -q origin
+MINT_REV="$(pin_from_scaffold DiMyMint.git)"
+MICRO_REV="$(pin_from_scaffold DiMyMicropayments.git)"
+echo "DiMyMint pin: $MINT_REV · DiMyMicropayments pin: $MICRO_REV"
 echo "logg: $LOG"
 
 ensure_worktree() {
   local repo="$1" target="$2" rev="$3" url="$4"
   if [ -d "$target/.git" ] || [ -f "$target/.git" ]; then
-    git -C "$target" checkout -q --detach "$rev" 2>/dev/null || { git -C "$target" fetch -q origin && git -C "$target" checkout -q --detach "$rev"; }
+    # pdd-check-worktrees er engangs: kast lokale endringer (pbxproj-byttet fra forrige kjoring) for utsjekk
+    git -C "$target" reset -q --hard
+    git -C "$target" fetch -q origin
+    git -C "$target" checkout -q --detach "$rev" 2>/dev/null || git -C "$target" checkout -q --detach "origin/${rev#origin/}"
   elif [ -d "$BASE/$repo/.git" ]; then
     git -C "$BASE/$repo" fetch -q origin
     git -C "$BASE/$repo" worktree add --detach "$target" "$rev"
@@ -28,11 +36,13 @@ point_binding_at_local_cellprotocol() {
   local f="$CHECK/Binding/Binding.xcodeproj/project.pbxproj"
   if grep -q 'relativePath = ../CellProtocol;' "$f"; then
     echo "pbxproj: peker allerede paa ../CellProtocol"
+    rm -f "$CHECK/Binding/Binding.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved" "$CHECK/Binding/Binding.xcworkspace/xcshareddata/swiftpm/Package.resolved"
     return
   fi
   /usr/bin/perl -0pi -e 's|\t\t24FEA0022F4203AB000334E1 /\* XCRemoteSwiftPackageReference "CellProtocol" \*/ = \{\n\t\t\tisa = XCRemoteSwiftPackageReference;\n\t\t\trepositoryURL = "https://github.com/Digipomps/CellProtocol.git";\n\t\t\trequirement = \{\n\t\t\t\tkind = revision;\n\t\t\t\trevision = [0-9a-f]+;\n\t\t\t\};\n\t\t\};\n|\t\t24FEA0022F4203AB000334E1 /* XCLocalSwiftPackageReference "../CellProtocol" */ = {\n\t\t\tisa = XCLocalSwiftPackageReference;\n\t\t\trelativePath = ../CellProtocol;\n\t\t};\n|' "$f"
+  rm -f "$CHECK/Binding/Binding.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved" "$CHECK/Binding/Binding.xcworkspace/xcshareddata/swiftpm/Package.resolved"
   if grep -q 'relativePath = ../CellProtocol;' "$f"; then
-    echo "pbxproj: CellProtocol -> ../CellProtocol (lokal worktree)"
+    echo "pbxproj: CellProtocol -> ../CellProtocol (lokal worktree); Package.resolved fjernet for ny oppløsning"
   else
     echo "pbxproj: FEIL - fikk ikke byttet referansen. Binding-bygget vil bruke GitHub-pinnen, ikke endringen."
   fi

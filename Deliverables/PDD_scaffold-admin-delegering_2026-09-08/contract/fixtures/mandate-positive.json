@@ -1,0 +1,40 @@
+[
+  {
+    "case": "bruksmandat, minimalt gyldig",
+    "expect": "accepted",
+    "mandate": {
+      "kind": "use",
+      "scaffoldRef": "scaffold://cellscaffold-staging",
+      "issuerEntityRef": "entity:digipomps",
+      "subjectIdentity": { "uuid": "00000000-0000-4000-8000-00000000fa01", "publicKeyFingerprint": "sha256:AAAA" },
+      "resourceRefs": ["cell:///ArendalsukaConfigurationPublisher"],
+      "actionKeypaths": ["publisherAccess.issue"],
+      "purposeRef": "purpose://arendalsuka.configuration.official-publish",
+      "issuedAt": "2026-09-09T06:00:00Z",
+      "validUntil": "2026-09-16T06:00:00Z",
+      "revocationRef": "cell:///ScaffoldMandate/mandates/00000000-0000-4000-8000-0000000000a1",
+      "signatures": [{ "identityUUID": "00000000-0000-4000-8000-00000000b001", "signedAt": "2026-09-09T06:00:00Z", "signature": "AAAA" }],
+      "orgLinkRef": null
+    }
+  },
+  {
+    "case": "administratormandat med én signatur, terskel 1",
+    "expect": "accepted",
+    "thresholdPolicy": { "requiredSignatures": 1, "reason": "utviklingsfase, styreleder alene", "setAt": "2026-09-09T06:00:00Z" },
+    "expectAdvisory": "scaffold_administrator_threshold_below_two",
+    "mandate": {
+      "kind": "administrate",
+      "scaffoldRef": "scaffold://palazzo",
+      "issuerEntityRef": "entity:dimy",
+      "subjectIdentity": { "uuid": "00000000-0000-4000-8000-00000000fa02", "publicKeyFingerprint": "sha256:BBBB" },
+      "resourceRefs": ["scaffold://palazzo"],
+      "actionKeypaths": ["mandate.issue"],
+      "purposeRef": "purpose://scaffold.operations",
+      "issuedAt": "2026-09-09T06:00:00Z",
+      "validUntil": "2026-12-09T06:00:00Z",
+      "revocationRef": "cell:///ScaffoldMandate/mandates/00000000-0000-4000-8000-0000000000a2",
+      "signatures": [{ "identityUUID": "00000000-0000-4000-8000-00000000b001", "signedAt": "2026-09-09T06:00:00Z", "signature": "BBBB" }],
+      "orgLinkRef": null
+    }
+  }
+]

@@ -1,0 +1,76 @@
+diff --git a/Sources/App/Controllers/PortholeWebSessionSupport.swift b/Sources/App/Controllers/PortholeWebSessionSupport.swift
+index 80018c6c..6fd1380d 100644
+--- a/Sources/App/Controllers/PortholeWebSessionSupport.swift
++++ b/Sources/App/Controllers/PortholeWebSessionSupport.swift
+@@ -4362,10 +4362,15 @@ enum PortholeWebSessionSupport {
+ 
+         if let currentConfiguration = controlCell.getCellConfiguration(),
+            payloadRequestsConfiguration(effectivePayload, matching: currentConfiguration) {
+-            return await EditableCellConfigurationOverlayResolver.overlay(
++            let sourceBacked = await EditableCellConfigurationOverlayResolver.overlay(
+                 configuration: currentConfiguration,
+                 requester: requester
+             )
++            if let currentBuiltIn = defaultChatWorkbenchConfiguration(),
++               let upgraded = ButlerBuiltInConfigurationUpgrade.upgraded(sourceBacked, using: currentBuiltIn) {
++                return upgraded
++            }
++            return sourceBacked
+         }
+ 
+         let directConfiguration = PortholeWebPayloads.decodeCellConfiguration(from: effectivePayload)
+@@ -4556,18 +4561,30 @@ enum PortholeWebSessionSupport {
+         guard let activeConfiguration else { return nil }
+ 
+         let candidates = defaultPortholePublishedConfigurations()
+-        guard let replacement = preferredPortholePublishedConfiguration(
++        guard let published = preferredPortholePublishedConfiguration(
+             matching: activeConfiguration,
+             in: candidates
+-        ), activeConfigurationNeedsPublishedRepair(activeConfiguration, replacement: replacement) else {
++        ) else { return activeConfiguration }
++        let builtInUpgrade = ButlerBuiltInConfigurationUpgrade.upgraded(activeConfiguration, using: published)
++        // Established Butler skeletons require an exact version migration.
++        // Generic reference repair would overwrite a custom layout or repeatedly
++        // restore optional references that normal authorization already isolated.
++        if builtInUpgrade == nil, activeConfiguration.skeleton != nil,
++           activeConfiguration.discovery?.sourceCellEndpoint == PersonalChatHubContract.endpoint {
++            return activeConfiguration
++        }
++        guard builtInUpgrade != nil
++                || activeConfigurationNeedsPublishedRepair(activeConfiguration, replacement: published) else {
+             return activeConfiguration
+         }
+ 
+         let sourceBackedConfiguration = await EditableCellConfigurationOverlayResolver.overlay(
+-            configuration: replacement,
++            configuration: builtInUpgrade ?? published,
+             requester: requester
+         )
+-        var loadConfiguration = portholeWebLoadConfiguration(sourceBackedConfiguration)
++        var loadConfiguration = portholeWebLoadConfiguration(
++            configurationForControlCell(sourceBackedConfiguration, controlCell: controlCell) ?? sourceBackedConfiguration
++        )
+         do {
+             var referenceRequesters = try await referenceRequestersForLoading(
+                 configuration: loadConfiguration,
+@@ -4601,7 +4618,7 @@ enum PortholeWebSessionSupport {
+             )
+             return loadConfiguration
+         } catch {
+-            print("Porthole failed repairing active configuration '\(activeConfiguration.name)' from \(replacement.discovery?.sourceCellEndpoint ?? "unknown endpoint"): \(error)")
++            print("Porthole failed repairing active configuration '\(activeConfiguration.name)' from \(published.discovery?.sourceCellEndpoint ?? "unknown endpoint"): \(error)")
+             return activeConfiguration
+         }
+     }
+diff --git a/ci/test-filter.txt b/ci/test-filter.txt
+index 257e545c..086de4f7 100644
+--- a/ci/test-filter.txt
++++ b/ci/test-filter.txt
+@@ -449,3 +449,6 @@ ScaffoldRoleIsNotAuthorityTests
+ ScaffoldAdministratorProvisionerTests
+ 
+ ChatAIGatewayRequestTests
++
++# Existing users must receive the current built-in Butler UI without losing custom layouts.
++ButlerBuiltInConfigurationUpgradeTests

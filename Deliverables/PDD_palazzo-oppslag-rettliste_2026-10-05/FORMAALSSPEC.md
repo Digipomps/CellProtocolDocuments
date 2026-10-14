@@ -1,0 +1,288 @@
+# Formålsspesifikasjon — palazzo oppslag rettliste
+
+Oppgavemappe: `PDD_palazzo-oppslag-rettliste_2026-10-05` · Opprettet 2026-10-05 · Iterasjon 0 (ikke godkjent)
+
+> Regel: ingen plan før G1 er godkjent av Kjetil. For GUI: ingen implementering før G1-GUI (rendret bilde) er godkjent.
+> Et dokument om leveransen teller aldri som leveransen.
+
+## 0. Intensjon (ordrett) og brief-audit
+
+> HD-0077: oppslaget svarer med retten når gjesten spør om én rett eller én pizza, og rettlisten går tilbake til modellen. Kjetil valgte begge deler 5. oktober 2026.
+
+| Påstand i intensjonen / antatt kapabilitet | Audit (retrieved / recalled / unavailable / contradicted) | Kilde |
+|---|---|---|
+| | | |
+
+## 1. Formålstre
+
+| purposeRef | Tittel | Forelder | Goal (outcome) | Verifier | Status |
+|---|---|---|---|---|---|
+| purpose://candidate.palazzo-oppslag-rettliste.root | | | | | candidate |
+
+Regler: velg fra Book 23 og pakkene først; nye noder får `purpose://candidate.…` og navngis her, aldri av en modell.
+Hvert bladformål skal ha en test i §5. Et formål uten observerbart Goal er ikke klart til arbeid.
+
+## 2. Avgrensning og avhengigheter
+
+Hva dette IKKE er:
+-
+
+Kapabiliteter og avhengigheter oppgaven bygger på (hver med kilde og hva den ikke dekker):
+| Kapabilitet | Kilde (fil) | Avgrensning | Må virke før test? |
+|---|---|---|---|
+| | | | |
+
+## 3. Forventningskontrakt — «Det du kommer til å se»
+
+Én rad per leveranse. Dette er det eneste som teller som fremdrift etter G2.
+(ingen GUI-flate deklarert — sett `surfaces` i STATUS.md hvis det er feil)
+| Leveranse | Type (bilde / fil / testutdata / kjørende flate) | Hvor | Referanse (images/…-v1.png osv.) | Godkjent |
+|---|---|---|---|---|
+| | | | | nei |
+
+## 4. Tilknyttede formålspakker og lærdommer (auto fra purpose_dev.py lookup)
+
+## Formålspakker som festes
+- **pkg.std.everything-works** — Alt skal virke (standard kvalitetsport)
+    - purpose://quality.build-and-regression: Alle berørte mål bygger og eksisterende tester passerer uten at tester er fjernet eller svekket.
+        - test test.build [command]: Bygg alle berørte mål. → TESTRESULT.md#build
+        - test test.regression [command]: Kjør hele eksisterende testmengde. → TESTRESULT.md#regression
+    - purpose://quality.docs-in-same-change: Alle dokumenter som beskriver endret oppførsel er oppdatert og datert 'Last verified against code'.
+        - test test.docs-updated [inspection]: Hver endret kontrakt/atferd har tilsvarende doc-diff. → ACCEPT.md#docs
+    - purpose://quality.work-is-visible: Oppgavemappen har oppdatert STATUS.md med gate-tilstand, og et eventuelt planbytte er datert og begrunnet.
+        - test test.status-current [inspection]: STATUS.md speiler faktisk tilstand. → ACCEPT.md#status
+    - artefakt FORMAALSSPEC.md (port G1): Godkjent formålsspesifikasjon.
+    - artefakt PLAN.md (port G2): Arbeidspakker 1:1 mot bladformål.
+    - artefakt TESTRESULT.md (port G3): Utdata fra alle avledede tester.
+    - artefakt ACCEPT.md (port G3): Forventning mot faktisk, per leveranse.
+    - artefakt STATUS.md (port G3): Gate-tilstand og planbytter.
+- **pkg.std.cell-contract** — Cellekontrakt
+    - purpose://cell.contract-explicit: Book/<celle>_contract_v<n>.json finnes, og en validator kjører grønt på alle fixtures.
+        - test test.cell.contract-fixtures [command]: Kjør kontraktvalidator mot positive/negative fixtures. → TESTRESULT.md#contract
+    - purpose://cell.authorization-honours-keypath: Negative tester viser at feil requester, feil keypath og purpose://prompt.unknown alle avvises.
+        - test test.cell.auth-negative [command]: Feil requester / feil keypath / ukjent formål avvises. → TESTRESULT.md#auth
+    - purpose://cell.no-empty-stubs: Ingen endepunkt i kontrakten er implementert som no-op uten status 'not-implemented'.
+        - test test.cell.stub-scan [inspection]: Liste alle no-op-handlere og avstem mot Gap_Analysis.md. → ACCEPT.md#stubs
+    - artefakt contract/ (port G2): Kontrakt-JSON + fixtures (kan være lenke til Book/).
+- **pkg.std.cell-combination** — Cellekombinasjon og dataflyt
+    - purpose://cells.dataflow-declared: dataflow.md (eller .graffle/.json) finnes med alle kanter navngitt med endepunkt/event.
+        - test test.cells.dataflow-matches-contracts [inspection]: Hver kant i dataflow finnes i en kontrakt. → PLAN.md#dataflow
+    - purpose://cells.capabilities-declared-with-boundary: FORMAALSSPEC.md §2 lister hver antatt kapabilitet med kildefil og hva den ikke dekker.
+        - test test.cells.capability-audit [inspection]: Alle kapabilitetspåstander har audit-status retrieved. → FORMAALSSPEC.md#audit
+    - artefakt dataflow.md (port G2): Diagram + kant-tabell.
+- **pkg.std.codex-handoff** — Overlevering til Codex/terminal
+    - purpose://handoff.runnable-without-guessing: README.md i _handoff-mappen har rekkefølge, forventet utfall per steg, og alle skript støtter --dry-run/--go.
+        - test test.handoff.dry-run [command]: Tørrkjøring gir 0 og lister hva som ville skjedd. → TESTRESULT.md#dry-run
+    - artefakt handoff/README.md (port G2): Rekkefølge og kommandoer.
+- **pkg.std.maal-formaalsforstaaelse** — Måle og forbedre formålsforståelse
+    - purpose://measurement.gain-on-unseen-data: Rapporten viser før/etter både på holdout og på et uavhengig korpus skrevet etter frysing, med vunnet/tapt per melding.
+        - test test.maal.holdout-urort [inspection]: Ingen endring begrunnes med en holdout-rad. → TESTRESULT.md#forstaaelse
+        - test test.maal.uavhengig-korpus [measurement]: Frosset variant målt på nytt korpus fra nye skribenter. → TESTRESULT.md#uavhengig
+    - purpose://measurement.production-path: Måleløpet går gjennom produksjonens funksjon, og den eksisterende CI-fasiten gir fullt treff i samme kjøring.
+        - test test.maal.produksjonsvei [command]: Harnessen kaller produksjonens egen funksjon. → TESTRESULT.md#forstaaelse
+        - test test.maal.tilregnelighet [command]: CI-fasiten scorer fullt i samme kjøring. → TESTRESULT.md#forstaaelse
+    - purpose://measurement.honest-labels: Sølvfasit fra blind tolk og gullfasit fra dom der lokkeduene avsløres.
+        - test test.maal.opake-id [inspection]: Tolkens innfiler har opake id-er. → TESTRESULT.md#fasit
+        - test test.maal.lokkeduer [inspection]: Dommerrunden har lokkeduer og ble avslørt. → TESTRESULT.md#fasit
+    - purpose://measurement.negatives-guarded: Negativer uten handling er rapportert for seg og er ikke lavere etter endringen.
+        - test test.maal.negativer [measurement]: Negativer uten handling er ikke lavere enn før. → TESTRESULT.md#forstaaelse
+    - artefakt maaling/ (port G3): Korpus, fasit, rapporter per variant (se Book 38).
+
+## Lærdommer du må lese før dekomponering
+- **lesson.plan-instead-of-delivery** (2026-08-21, major): Kjetil ba om en leveranse flere ganger og fikk planer/dokumenter om leveransen i stedet.
+    - forebygging: G1 godkjenner formål, ikke arbeid; etter G2 telles bare artefakter listet i §3 'Det du kommer til å se' som fremdrift. Et dokument om leveransen teller aldri som leveransen.
+- **lesson.undocumented-plan-switch** (2026-08-24, major): Tre produktive døgn (22.–24.08) så tomme ut i alle statusdokumenter fordi planbyttet fra bølge 1–3 til deploy-seremonien aldri ble skrevet ned.
+    - forebygging: STATUS.md i oppgavemappen oppdateres ved hvert planbytte med dato og hvorfor; sjekkes i test.status-current.
+- **lesson.planned-documented-as-implemented** (2026-08-24, major): Book/05_Flows_Lifecycle.md beskrev sekvensnummer, signatur og replay som ikke finnes i structen.
+    - forebygging: Docs-diff i samme endring, med 'Last verified against code'-dato; planlagt oppførsel merkes eksplisitt.
+- **lesson.bridge-inferred-architecture-from-one-use** (2026-08-09, major): En kodeassistent sluttet fra én observert bruksmåte av bridge til en egenskap ved arkitekturen og konkluderte feil.
+    - forebygging: Erklær hver kapabilitet oppgaven bygger på som eget formål med kilde og Avgrensning (pkg.std.cell-combination).
+- **lesson.decomposition-is-classification** (2026-07-11, major): Modeller som genererte purpose://-refs fritt hallusinerte referanser.
+    - forebygging: Dekomponering velger fra Book 23 + pakker først; nye noder merkes 'candidate' og navngis av Claude, aldri implisitt av en modell.
+- **lesson.cellscaffold-two-holes** (2026-09-01, blocker): CellScaffold har tomme booking-/concierge-stubber og autorisasjon som kaster nøkkelstien og bare sjekker eierskap.
+    - forebygging: Ikke porter celler fra CellScaffold til PalazzoScaffold uten å lukke begge hullene; test.cell.auth-negative og test.cell.stub-scan må være grønne.
+- **lesson.purpose-never-grants-rights** (2026-08-03, blocker): Risiko for at formålsmatch tolkes som tilgang.
+    - forebygging: Et formål kan innsnevre en rettighet, aldri opprette, utvide eller arve en; exact match; purpose://prompt.unknown feiler lukket.
+- **lesson.zsh-no-inline-comments** (2026-08-25, minor): Begge kommandolinjene feilet med 'ukjent argument: #' og ingenting kjørte.
+    - forebygging: Aldri forklaring på samme linje som en kommando; skript har '"#"*) break ;;' i argumentparseren.
+- **lesson.mount-is-not-git** (2026-08-25, major): Hver git-kommando fra device_bash etterlot en index.lock som ikke kunne fjernes og blokkerte Kjetils commits; seks repoer låst 24.08.
+    - forebygging: Aldri git mot $HOME/mnt fra device_bash; les .git/refs som filer; all git kjøres av Kjetil eller codex exec.
+- **lesson.codex-mcp-60s** (2026-08-18, major): Codex-MCP-kall kuttes etter ~60 s; registerlesning og Swift-bygg sprengte taket.
+    - forebygging: Bygg/test/lange jobber går via terminal codex exec eller filbasert overlevering, aldri via Codex-MCP.
+- **lesson.corr-approval-surfaces-timed-out** (2026-08-30, major): Corr-godkjenningen (Vegar) er utestet fordi flater/godkjenninger timet ut før testing rakk å skje.
+    - forebygging: FORMAALSSPEC.md §2 lister avhengigheter som egne formål med verifier; pkg.std.everything-works og gui.surface-loads-in-time må være grønne før den egentlige testen kjøres.
+- **lesson.test-corpus-is-not-shipped-corpus** (2026-09-05, major): Rot-probe-testen, lastetidstesten og finnbarhetsauditen var gronne i to uker mens Relasjoner-flaten var tom.
+    - forebygging: Enhver flate-test skal bygge korpuset fra det som faktisk sendes ut (menykonfigurasjoner + navigasjonsdestinasjoner + verifiseringshjelperen), dedupliseres, og feile hvis korpuset er mindre enn appens egen meny.
+- **lesson.tested-a-different-path-than-production** (2026-09-05, major): Rot-probene leste relations.state.* gjennom porthole.get og var gronne, mens rendereren aldri fikk de samme dataene.
+    - forebygging: Naar en test skal si noe om hva brukeren ser, maa den bruke produksjonens egen kodevei - helst produksjonens egen funksjon med produksjonens egne inndata (SkeletonReachabilityAudit kaller condition.evaluate(root: nil, ...) nettopp derfor).
+- **lesson.paste-command-instead-of-queue** (2026-09-07, major): Kjetil fikk et innlimingsskript for å starte Codex; flagget --full-auto finnes ikke på `codex exec`, og kjøringen feilet ved første linje.
+    - forebygging: Før enhver Codex-kjøring fra Cowork: `ls HAVEN/_losen-queue/inbox running; tail logs/runner.log`, legg jobben som <id>.job + <id>.prompt.md. Aldri gi Kjetil kommandoer å lime inn. Gyldige `codex exec`-flagg: --sandbox, --skip-git-repo-check, -C.
+- **lesson.baseline-count-from-report-not-run** (2026-09-07, minor): PLAN.md sa «48 tester grønne»; baseline-kjøringen viste 68 tester med 3 røde.
+    - forebygging: WP0/S0 baseline er alltid en ekte kjøring før endring; PLAN oppgir testtall som «forventet ≈ N (fra <kilde, dato>)», og et rødt baseline stopper ikke arbeidet men registreres som eget avvik med årsak.
+- **lesson.codex-sandbox-cannot-reach-docker** (2026-09-07, major): S10 (docker compose build/up) endte i `permission denied … docker.sock` i Codex-sandkassen; deploy-slicen ble blocked.
+    - forebygging: Deploy-/image-steg planlegges aldri som Codex-slice; de registreres som HAVEN-Deploy-post med eier Kjetil (eller en dispatcher-adapter med eksplisitt docker-rettighet når arbeidskø-PDD-en er levert). Se HD-0012.
+- **lesson.scaffold-without-porthole-host-has-no-preview** (2026-09-07, minor): G1-GUI måtte bruke mockups rendret fra skeleton-JSON; ekte Porthole-preview var umulig.
+    - forebygging: For scaffolds uten Porthole-vert: (1) images/README.md må si eksplisitt at bildene er mockups og hva skeleton ikke kan rendre, (2) paritet (test.gui.parity) planlegges som egen slice med kjørende scaffold + Binding/Porthole via bridge, ikke som del av implementeringsjobben.
+- **lesson.codex-workspace-write-cannot-build-cellscaffold** (2026-09-09, major): WP0-baselinen i køen ble blocked: `sandbox-exec: sandbox_apply: Operation not permitted`. Testkommandoen brukte 1 604 sekunder uten at én eneste test startet.
+    - forebygging: Lange bygg og testkjøringer legges ikke som `workspace-write`-køjobb. De kjøres som detached skript startet via Codex med `danger-full-access` og python Popen(start_new_session=True), med logg i en montert mappe som Cowork kan polle — samme mønster som produserte den notariserte HavenAgentD-pakken 2026-09-08. Køjobber brukes til analyse, kontrakter, dokumentasjon og korte kommandoer.
+- **lesson.baseline-measured-another-pdds-branch** (2026-09-09, major): WP0 målte `pdd/tillitspakke-agentflaate` med 181 skitne oppføringer, ikke et rent utgangspunkt for sin egen PDD. En regresjonsbaseline derfra sier ingenting om hva denne PDD-en endrer.
+    - forebygging: WP0 måler en ren eksport av den revisjonen arbeidet skal gå ut fra (`git archive <rev> | tar -x -C <scratch>`), ikke det delte arbeidstreet. Er arbeidstreet opptatt av en annen PDD, er det en planopplysning som hører i STATUS, ikke noe implementeringen skal jobbe rundt.
+- **lesson.worktree-created-from-vm-has-unusable-gitdir** (2026-09-09, major): WP1 ble blocked etter ett minutt: `fatal: not a git repository: /sessions/<sesjon>/mnt/CellScaffold/.git/worktrees/_wt-sad-20260909`, exit 128. Branch og HEAD kunne ikke bekreftes.
+    - forebygging: Opprett worktrees fra macOS (Codex), ikke fra VM-en. Er det allerede gjort fra VM-en: skriv om begge pekerfilene til macOS-stien og verifiser `branch --show-current` + `rev-parse HEAD` **fra macOS** før noen jobb legges i køen. En jobb skal aldri være første stedet en sti blir prøvd.
+- **lesson.cellbase-decodingerror-shadows-swift** (2026-09-09, minor): WP1s nye celle ga 50 kompileringsfeil: `type 'DecodingError' has no member 'dataCorruptedError'` og `cannot infer contextual base in reference to member 'registry'`, alle fra én linje.
+    - forebygging: I App-modulen: skriv `Swift.DecodingError` når du vil ha standardbibliotekets. Gjelder generelt for typenavn CellBase også definerer — sjekk med `grep -rn "enum <Navn>" CellProtocol::Sources/CellBase` før du antar at et kjent Foundation-navn er Foundations.
+- **lesson.valuetype-equality-false-for-objects** (2026-09-09, major): Fire av sju WP1-tester feilet på `XCTAssertEqual` mellom to `ValueType.object` som hadde identisk innhold. Feilmeldingen viste samme nøkler og verdier på begge sider, i ulik rekkefølge.
+    - forebygging: Aldri assert på hele sammensatte `ValueType`-verdier. Sammenlign kanonisk JSON (`JSONEncoder` med `.sortedKeys`) eller pakk ut og sammenlign felt for felt. Skalarer (`.string`, `.integer`, `.bool`, `.null`) sammenlignes trygt. Merk: dette er et funn i CellBase, ikke bare en testregel — App-kildene destrukturerer riktignok før sammenligning, men en fremtidig `==` på hele verdier vil stille behandle like verdier som ulike. Ikke revidert utover App-kildene.
+- **lesson.syntax-check-reported-as-delivered** (2026-09-09, major): WP1 ble rapportert som «kode og 7 tester levert, syntakssjekken bestod». Et faktisk bygg ga 50 kompileringsfeil, og testene feilet 4 av 7 da de først kunne kjøre.
+    - forebygging: En implementeringsslice er ikke levert før et detached bygg med `danger-full-access` er kjørt mot arbeidstreet og både bygg og de nye testene er grønne. Legg byggejobben klar FØR slicen kjøres, og skriv i prompten at slicen skal rapportere «skrevet, ikke verifisert» — ikke «levert».
+- **lesson.cellbase-internal-members-look-public** (2026-09-09, minor): WP2 stoppet på `'fullPermissionString' is inaccessible due to 'internal' protection level`. Medlemmet finnes og brukes i CellBase selv, så det så ut som et gyldig API.
+    - forebygging: Sjekk tilgangsnivå og faktisk returverdi før du bruker et CellBase-medlem fra App: `grep -n "var <navn>" CellProtocol::Sources/CellBase/...`. Et medlem som brukes internt i CellBase er ikke automatisk en del av API-et, og navnelikhet betyr ikke verdilikhet.
+- **lesson.entityanchor-keypaths-are-registered** (2026-09-09, minor): WP2-testen skrev en sentinel til `profile` på abonnentens EntityAnchor og fikk `notFound` ved gjenlesing. Skrivingen ga ingen feil.
+    - forebygging: Skriv aldri testdata til en oppdiktet keypath på en celle. Finn en keypath cellen faktisk registrerer, helst en annen test som allerede bruker den. At et `set` går gjennom er ikke bevis på at keypathen finnes.
+- **lesson.new-cell-must-declare-its-provisioning-mode** (2026-09-09, major): To nye celler i CellScaffold ga tre nye regresjoner: `OrchestratorPersistenceTests testRequireExistingModeRejectsFreshStorageWithoutCreatingBootstrapCells` (opprettet en celle i require-existing-modus mot fersk lagring) og to `TopUpCheckoutTests` som teller celler i provision-only-modus (5 mot forventet 4).
+    - forebygging: Enhver ny persistert celle i CellScaffold må eksplisitt svare på tre spørsmål før den registreres: (1) skal den opprettes i require-existing mot fersk lagring? Nei, med mindre den er kanonisk bootstrap. (2) Er den en av de kanoniske eager-bootstrap-cellene som provision-only skal lage? Nesten alltid nei — TopUpCheckoutTests teller dem eksplisitt. (3) Er den en Porthole-publisert flate? Bare da hører den i `reconcilePortholePublishedCellResolves`. Scaffold-intern tilstand registreres i egen funksjon, gated på policy OG provisionOnly, med gjenkjenning av eksisterende mapping.
+- **lesson.branch-is-empty-after-eight-work-packages** (2026-09-09, major): Åtte arbeidspakker rapportert utført og verifisert, ACCEPT.md skrevet — men `git branch -v` viste at `pdd/scaffold-admin-delegering` fortsatt pekte på samme commit som `main` (`e1f3e22f`). All koden lå ucommittet i et worktree som bare finnes på én maskin. Ett tapt worktree = 2 750 linjer kode og test borte, med full dokumentasjon på at arbeidet var «levert».
+    - forebygging: Skill «filene finnes» fra «branchen har dem». Sjekk `git rev-parse <branch>` mot `git rev-parse <base>` som del av hver verifikasjon som påstår at noe ligger på en branch; er de like, er branchen tom. Legg en commit-pakke inn i planen etter første grønne bygg, ikke etter siste arbeidspakke. Når worktreet bare kan leses fra macOS, kjør sjekken der — ikke hopp over den fordi verktøyet svarer feil.
+- **lesson.stop-rule-too-wide-stops-the-job** (2026-09-09, minor): En commit-jobb til Codex stoppet før første `git add` fordi stoppregelen sa «finner du `.git/index.lock` eller annen låsefil: stopp». Et rekursivt søk fant 25 filer som heter `locked` under andre arbeidstrær — normale `git worktree lock`-markører som ikke blokkerer noe. Jobben gjorde ingenting, og hele runden gikk tapt.
+    - forebygging: Skriv stoppregler som navn og sti, ikke som kategori: «stopp hvis `index.lock`, `HEAD.lock` eller `*.lock` finnes under `<denne stien>`». Navngi eksplisitt det som ser ut som en treffer men ikke er det, og si at det skal ignoreres. Legg alltid til «stopp hvis kommandoen faktisk avvises med denne feilen» — en filsøk-treffliste er ikke et bevis på blokkering. Samme gjelder alle vide vendinger i en prompt: «eller lignende», «eller annet», «eventuelle andre».
+- **lesson.ciphertext-field-held-plaintext-hash** (2026-09-10, blocker): Losen fortalte Kjetil at lyd allerede var kryptert i lagring. Det var feil: filene i prod begynner med ID3 og er vanlig MP3. To ting forte dit. (1) Krypteringskoden som ble lest tilhorer MusicIngestCell paa /mvp/ingest/local, mens Butterpop publiserer gjennom MusicAssetStoreCell.storeLocalAsset, som skriver bytene slik de kommer. (2) storeLocalAsset setter ciphertextSHA256 = plaintextSHA256 = sha256(data), saa manifestet ser kryptert ut selv naar encryptionPolicy er none.
+    - forebygging: En paastand om at noe er kryptert, signert eller verifisert skal bekreftes paa artefaktet - les bytene, ikke feltet. Et felt som heter ciphertext* skal ikke settes naar encryptionPolicy er none; enten utelates det, eller navnet sier hva det er. Kan bli derivedTest: manifest med encryptionPolicy none har ingen ciphertext-verdi.
+- **lesson.local-main-is-not-main** (2026-09-11, major): WP0-baselinen var rød og ble meldt som «main bygger ikke». Det var feil. Den commiten baselinen ble målt mot, `ba14895`, lå bare på den LOKALE main-grenen og var aldri pushet; den avhang av CellBase-kode som heller ikke var pushet. origin/main lå fire commits lenger fram, pinnet CellProtocol til en revisjon som ER på CellProtocol sin main, og hadde grønn CI hele tiden. Et helt døgns arbeid ble bygget oppå den lokale commiten.
+    - forebygging: Før du måler en baseline eller sier at main er rød: `git fetch origin main` og sammenlign. Er lokal main foran origin/main, er de commitene ikke main for andre — bygg aldri videre på dem. Se på CI for origin/main før du konkluderer. `swift package edit` skal aldri være på når noe måles eller meldes verifisert. Og den eneste sjekken som virkelig avgjør: klon fra GitHub til en tom katalog og bygg der. HavenAgentD::Scripts/preflight_before_landing.sh stiller alle fire spørsmålene.
+- **lesson.a-new-red-test-needs-a-repeated-baseline** (2026-09-10, minor): Første fulle kjøring med nye endringer viste to røde i stedet for baselinens én, og den nye lå i en fil jeg hadde endret. Det så ut som en regresjon jeg hadde innført.
+    - forebygging: Når en ny rød dukker opp: kjør basen på nytt, i et eget rent worktree, **flere ganger** (tre holder som regel), før du enten tar på deg feilen eller avfeier den. Skriv resultatet av gjentakelsen i TESTRESULT — «2 av 3 på ren base» er et svar, «den er nok flaky» er ikke. Det koster ti minutter og avgjør om du bruker natten på å jage din egen feil eller andres.
+- **lesson.swift-test-exit-code-lies-in-havenagentd** (2026-09-10, minor): `swift test` i HavenAgentD avslutter med 1 selv når samtlige 212 tester passerer. Et skript som leser `$?` melder rødt på et helt grønt tre.
+    - forebygging: Les resultatet fra linjen `Test run with N tests in M suites passed/failed`, ikke fra exitkoden, i alle skript og køjobber for dette repoet. Og fjern det tomme XCTest-målet, eller bygg det for riktig arkitektur, før noen setter opp CI her — ellers vil CI være rød uansett hva som gjøres.
+- **lesson.pkill-pattern-killed-the-queue-job** (2026-09-10, major): En commit-jobb i Losen-køen døde med EXIT=143 tolv sekunder etter start. Ingen feilmelding, ingen commit. Årsaken var min egen opprydding i et annet skript: `pkill -f "<appnavn>"`.
+    - forebygging: Bruk aldri `pkill -f <mønster>` på en maskin der andre prosesser kan ha teksten i argv. Stopp en prosess ved PID du selv startet, eller ved `pgrep -x <prosessnavn>` kombinert med en sjekk av `ps -o comm=` mot den nøyaktige kjørbare stien. Dette gjelder særlig når en jobbkø kjører prompter som argument: alt du skriver i en prompt står på en kommandolinje et sted.
+- **lesson.queue-job-file-before-prompt** (2026-09-10, minor): Køjobben `formaalskomposisjon-fullfor-commit-20260910-1020` ble avvist med «mangler promptfil» 13 sekunder etter at `.job` ble skrevet; promptfilen kom to sekunder etter avvisningen og ligger foreldreløs i `_losen-queue/inbox/`, der runneren aldri ser den igjen.
+    - forebygging: Skriv `<id>.prompt.md` først og `<id>.job` sist, helst som `mv` fra en tmp-fil i samme mappe — `.job` er registreringssignalet, slik `job.json` er det i HavenAgentD::Docs/AgentJobs.md. Kan bli derivedTest: runneren eller `hd validate` rapporterer enhver `inbox/*.prompt.md` uten tilhørende `.job`, eldre enn to minutter, som foreldreløs.
+- **lesson.pin-must-be-on-their-main** (2026-09-11, major): En revisjonspin i Package.swift pekte på en CellProtocol-revisjon som ikke lå på CellProtocol sin main. Koden bygde bare på den ene maskinen som hadde revisjonen liggende lokalt.
+    - forebygging: Å pinne er riktig — det er det som gjør bygget reproduserbart. Kravet er at revisjonen er en forfar av avhengighetens egen main. Da er «bygg fra andres main» og «reproduserbart bygg» samme krav. HavenAgentD::Scripts/assert_dependencies_are_on_their_main.sh håndhever det, og CI kjører den. Lander du en klient før cellen den bruker er på den andres main, har du laget et repo som bare bygger hos deg.
+- **lesson.a-red-baseline-is-a-question-not-an-answer** (2026-09-11, major): En rød baseline ble behandlet som en opplysning om prosjektet, og arbeidet gikk videre med et tiltak som gjorde den grønn. Tiltaket skjulte årsaken i stedet for å fjerne den.
+    - forebygging: Svar på tre spørsmål før du gjør noe med en rød baseline: er utsjekket mitt likt origin? er CI grønn på origin/main? hvilken commit gjorde den rød, og hvem eier den? Først når svaret er «prosjektet er faktisk rødt» er det riktig å jobbe rundt det — og da som en egen, navngitt sak, ikke som en stille lokal omgåelse.
+- **lesson.a-conditional-artifact-must-still-cost-something** (2026-09-18, minor): purpose_dev.py validate ble rød på PDD_entitetsdata-egen-kontroll fordi artefaktet 'skeleton/' manglet, selv om G1-GUI var godkjent på bilder Kjetil faktisk hadde sett. Pakken beskrev artefaktet som påkrevd «når Porthole-preview er brukt»; validatoren krevde det alltid.
+    - forebygging: Et betinget krav oppfylles av et *annet krav*, aldri av et fravær. Feltet 'satisfiedByDeclaration' peker på en fil og en overskrift og krever minst ett punkt under den: enten viser du skjelett-JSON-en bildet er rendret fra, eller du skriver ned hva skjelettet ikke kan rendre. Begge tvinger frem spørsmålet «kan flaten dette?». Feilmeldingen navngir begge veier ut. Sjekket begge veier: rød uten erklæring, grønn med.
+- **lesson.location-is-not-ownership** (2026-09-22, major): dataflow.md begrunnet at AIGateway matte ligge i appen med at «en gateway utenfor entiteten gjor prompten til noen andres data». Kjetil: en celle i skyen som eies av meg er pr definisjon innenfor min entitet.
+    - forebygging: Regelen er uniform og gjelder alle scaffolds likt: ingen andre, scaffold-admin inkludert, nar data ELLER funksjonalitet i en celle jeg eier uten en Agreement som sier det. Et vern som bare gjelder skyen er et tegn pa at grensen er tegnet feil. Negative tester skal kjores i begge oppsett, lokalt og sky, og gi samme svar — og de skal dekke handlinger, ikke bare felter. Den positive motsatsen ma ogsa testes: en Agreement apner nayktig sitt eget omfang.
+- **lesson.read-origin-main-before-writing-a-mechanism** (2026-09-22, major): Runde 1 av PDD_entitetsdata skrev en egen resolver for lenkede identiteter (EntityLinkAuthorizer, ny CellAuthorizationPath.linkedIdentity, ny hook pa GeneralCell). Da patchen ble lagt mot origin/main viste det seg at IdentityLinkRegistry og GeneralCell.authorizationEvidence allerede gjorde det samme, landet av en annen oppgave (purpose://candidate.entity-link.resolver-honours-link). Hele resolveren ble forkastet.
+    - forebygging: Brief-audit skal si HVILKEN revisjon noe ble lest fra, og for et formal som skal endre en mekanisme skal kilden vaere origin/main (git show origin/main:<fil>), ikke utsjekket. Preflight-skriptet sjekker na at patchen passer mot origin/main i et eget worktree for noe legges pa. Og: for du skriver en mekanisme, grep pa main etter navnet pa det den skal gjore (her: sameEntity, linkedIdentity) - ikke bare etter typen du planlegger a lage.
+- **lesson.dev-set-called-holdout** (2026-09-24, major): Nattens formålsmatching rapporterte 0,16 → 0,40 «holdout top-1». Astra viste at rundene 2–4 var designet mot feilene i den samme 40 %-delen, at 27 kandidater ble lest av mot den, og at valgene gain=3 og priorvekt 0,12 ikke var forhåndsbestemte treningsregler (andre verdier hadde identisk treningsmål). Tallet var reprodusert, men settet var et gjenbrukt utviklingssett. I samme rapport ble en håndskrevet spørreordstabell kalt «avledet av Book», og en nullinvariant («null tekst → null») holdt bare fordi et generisk spørreord ble regnet som tekstbevis. Bekreftet 28.9 med Kjetils egne ord: på de 22 sakene der han valgte et formål i «Dommerbenken — chat», traff den frosne R4 9 med Losens ytringer og 4 med Kjetils fritekst for samme mening. Samme mønster som lesson.same-writers-holdout-overstates i butler-tråden.
+    - forebygging: Kall ingenting holdout som har vært lest av mer enn én gang. Frys sluttvarianten, og gjør én evaluering på et sett skrevet og merket av noen som ikke har sett reglene eller modellutdata, splittet etter frasefamilie og forfatter, med størrelse avtalt før kjøring. Skriv utvalgsregelen for hyperparametre ned FØR runden. En invariant om «null bevis» må definere bevis som domeneforankret registertekst, ikke enhver positiv score. Kall en håndskrevet tabell håndskrevet.
+- **lesson.same-writers-holdout-overstates** (2026-09-24, major): Butlers formålsgraf v3 løftet riktig forslag fra 20 % til 40 % på holdout, men bare fra 20 % til 28 % på 264 meldinger fra fire nye skribenter skrevet etter at grafen var frosset.
+    - forebygging: Etter frysing: mål på et nytt korpus fra skribenter (personaer) som ikke har bidratt til treningen, og rapporter både holdout og uavhengig. Kall bare det uavhengige tallet generalisering.
+- **lesson.sequential-ids-can-leak-labels** (2026-09-24, minor): Tolken var enig med generatoren i 264 av 264 meldinger når id-ene fulgte generatorens rekkefølge (etikett for etikett), og i 261 av 264 med tilfeldige, opake id-er.
+    - forebygging: Gi tolken tilfeldige, opake id-er og stokket rekkefølge; behold kartet id→opak separat.
+- **lesson.helper-bypassed-shared-negation-check** (2026-09-24, major): «bare så du vet, ikke gjør noe med det ennå: … flytte styremøtene til tirsdager» ga et møteforslag etter graf v3; bare det uavhengige korpuset viste det, og v3 var allerede i prod.
+    - forebygging: Hver hjelper-scorer har en negativtest med «ikke/don't»; en ny scorer som ikke kaller den felles nektelsessjekken feiler testen. Mål på uavhengig korpus før prod, ikke etter.
+- **lesson.method-lived-only-on-one-machine** (2026-09-24, major): Metoden selv — Book 35 (PDD-arbeidsflyten), Book 36, lærdomsregisteret med 50 lærdommer, formålspakkene, purpose_dev.py — lå bare i ett utsjekk på Kjetils Mac på grenen codex/docs-cleanup-20260810, aldri på main; derfor verken i HAVEN eller hos andre utviklere.
+    - forebygging: Metodeartefakter landes som kode: PR til main og pin-oppdatering i HAVEN. Test: git cat-file -e origin/main:<fil> for hver metodefil.
+- **lesson.readonly-git-is-not-all-git** (2026-09-24, minor): Et `git status` fra device_bash i CellProtocolDocuments etterlot .git/index.lock (0 byte) som ikke kunne fjernes fra VM-en, selv om git show/grep/log/rev-parse i samme økt ikke gjorde det.
+    - forebygging: Fra device_bash bare objektlesende git mot en revisjon (git show/grep/log/cat-file <rev>); aldri status, diff mot arbeidstreet, add eller commit. Finnes en lås likevel: flytt den til _to_delete/ (mv virker, rm gjør ikke).
+- **lesson.downstream-pin-must-come-from-the-consumer** (2026-09-24, major): Nedstrøms-baselinen for CellScaffold var rød 22.09 («cellprotocol krever swift-crypto 4.5.2, dimymint krever 3.x») og ble rapportert som prosjektets blokkering. CellScaffold main pinnet DiMyMint af41630, som løser swift-crypto 4.x; skriptet hadde hardkodet en eldre revisjon (1718fda).
+    - forebygging: Et nedstrøms-skript leser alle transitive pinner fra forbrukerens egen Package.swift/Package.resolved på origin/main ved kjøring, og logger dem. En rød avhengighetsoppløsning i et skript med hardkodede pinner er ikke et funn før pinnene er bekreftet mot forbrukerens resolved.
+- **lesson.disposable-worktree-must-be-reset-before-checkout** (2026-09-24, minor): pdd-check/Binding ble stående på 72f6a6c9 i to kjøringer selv om skriptet ba om origin/main: «Your local changes to project.pbxproj would be overwritten by checkout». Baselinen målte feil Binding-revisjon uten å si fra.
+    - forebygging: Engangs-worktrees resettes hardt (`git reset --hard` + fjern Package.resolved) før hver utsjekk, og skriptet skriver ut revisjonen den faktisk står på — en avvikende revisjon skal stoppe kjøringen, ikke logges forbi.
+- **lesson.report-the-commit-you-pushed-not-the-one-you-planned** (2026-09-24, minor): TESTRESULT og PLAN sa «commit ebb0b7f». Branchen sto på e66b7f1 — commit.sh hadde laget en ny hash — og var ikke pushet. Push-skriptets EXPECT måtte rettes før det kunne kjøre.
+    - forebygging: Etter hver commit/push: les `git rev-parse --short HEAD` og `git ls-remote --heads origin <branch>` og lim inn utdataene i STATUS/TESTRESULT. Sjekk også for remote-tracking ref før du sier «pushet» (lesson.branch-is-empty-after-eight-work-packages, samme familie).
+- **lesson.lookup-again-when-a-surface-is-added** (2026-09-24, major): De nye seksjonene i «Utvid entiteten» (B10) var portet på synlighet med rot-scope, og listen med verktøyets forespørsel forsvant — samme feil som lesson.unresolvable-condition-is-invisible fra 05.09.
+    - forebygging: For hver ny eller endret skjelettflate: kjør `purpose_dev.py lookup --tags skeleton gui` før utformingen, og `BindingTests/CellConfigurationVerifierXCTest/testNoLocalSurfaceHidesItsOwnWaysIn` + `testPersonalCopilotLocalSurfacesLoadWithoutReferenceFailures` før flaten vises eller committes.
+- **lesson.picker-state-keypath-is-read-and-written** (2026-09-24, minor): Velgeren «Verktøy» i «Gi tilgang» sto på «Velg verktøy» selv om cellen hadde valgt verktøyet.
+    - forebygging: `selectionStateKeypath` skal være en nøkkel cellen både leser (`{selected}`) og skriver; test rundturen (`pickerSelectionRoundTrips`).
+- **lesson.pairing-can-outlive-the-identity** (2026-09-24, major): Agenten var paret med en HAVEN-identitet fra 4. mai («Binding Local Session», nøkkel 13BF…), mens HAVEN brukte en annen privat identitet (D362…, identitetsfilen skrevet 18.09). Svar fra HAVEN ville blitt avvist; ingen test i noen av endene kunne se det.
+    - forebygging: En flate som ber eieren signere for agenten sammenligner egen nøkkel med agentens forankring og viser forskjellen før signering, med vei til ny paring (test: `offerIsRefusedHereWhenThisHavenHoldsAnotherKey`, `theOwnerNeverSignsWhatFailedTheCheck`). Sjekk nøkkelkontinuitet før live-test av noe som signeres.
+- **lesson.jxa-objc-method-without-arguments-is-a-property** (2026-09-24, minor): `a.terminate()` i JXA ga `TypeError: a.terminate is not a function`, men appene avsluttet likevel.
+    - forebygging: Skriv `a.terminate` (uten parentes) og sjekk etterpå med `pgrep` at prosessen er borte før du går videre.
+- **lesson.screencapture-from-runner-can-fail** (2026-09-24, minor): `screencapture -l <vindu>` fra jobbløperen ga «could not create image from window» for HAVEN-vinduet, med samme vindus-ID som computer use så.
+    - forebygging: Ta bilder av flater med computer use (eller be Kjetil), og ikke planlegg bevis som avhenger av `screencapture` fra løperen før det er målt at det virker den dagen.
+- **lesson.pgrep-pattern-must-allow-arguments** (2026-09-25, minor): Byggejobben avsluttet ikke HAVEN, og `open` hentet bare fram det gamle bygget (startet 24.09 17:29) i stedet for å starte det nye.
+    - forebygging: Bruk 'HAVEN( |$)' i mønsteret, og skriv ut prosessens starttid etter omstart og sammenlign den med byggetiden før noe vises fram.
+- **lesson.computer-use-image-is-not-a-file** (2026-09-25, minor): Skjermbildene av den nye flaten kunne ikke sendes til Kjetil som fil; vinduet var i tillegg på et annet skrivebord og kunne ikke gjøres større i bakgrunnen.
+    - forebygging: Planlegg bildebeviset med en vei som gir en fil (Kjetils eget skjermbilde, eller skjermopptakstilgang for løperen), og si det før arbeidet, ikke etter.
+- **lesson.green-gate-must-read-the-last-summary-line** (2026-09-26, major): runde2.sh committet og pushet 399f6d2 med 4 røde tester. Porten grep'et «Executed … with 0 failures» i hele loggen og traff en grønn suites linje lenger opp; siste linje sa «1262 tests, with 2 tests skipped and 8 failures».
+    - forebygging: En grønn-port leser bare den siste «Executed»-linjen (tail -1) og krever « 0 failures (0 unexpected)». Sammenligningen gjøres uten pipe (POSIX case), fordi `echo | grep -q` under pipefail kan gi rødt på grønt (SIGPIPE). Porten skriver ut nøyaktig hva den sammenlignet.
+- **lesson.module-and-type-share-a-name-in-cellprotocol** (2026-09-26, minor): `CellApple.EntityAnchorCell` og `CellVapor.EntityAnchorCell` kompilerte ikke: «type 'CellApple' has no member 'EntityAnchorCell'». Begge modulene har en type med samme navn som modulen.
+    - forebygging: Én fil per modul som importerer bare den ene og gir typen et unikt typealias (TestSupport/AppleEntityAnchorAlias.swift, VaporEntityAnchorAlias.swift). Testfilen importerer ingen av modulene direkte.
+- **lesson.placeholder-example-leaks-into-judgement** (2026-09-28, minor): I «Dommerbenken — chat» v2 var plassholderen i fritekstfeltet «f.eks. «status på prosjektet»». Kjetil skrev nøyaktig «status på prosjektet» som sin egen tolkning i to av tretti saker («hvor står vi nå på prosjektet», «hva står igjen»). Eksempelet var hentet fra meningen til en sak i settet.
+    - forebygging: Eksempler, plassholdere og hjelpetekst i en dommerflate skal hentes fra et domene som ikke finnes i settet, og testes: ingen sak i settet skal ha gold hvis tittel eller alias overlapper eksempelteksten. Rapporter saker der dommerens fritekst er lik eksempelet som svakere.
+- **lesson.host-mutation-without-reading-the-coordination-file** (2026-10-02, major): 30.09 satte en Claude-tråd ut en gren-commit på staging og byttet invitasjonene, med Kjetils ja, men uten claim. En Codex-tråd hadde claim på samme container (HD-0141), staging var reservert for 2026.9.4, og deploykøen trodde i to døgn at staging kjørte forrige utgivelse.
+    - forebygging: Før enhver vertsmutasjon: les `_losen-queue/KOORDINERING.md`, kjør `hd coord status`, ta egen claim på en HD-oppgave, og før utsettingen inn i køen etterpå. Test: jobbloggen for utsettingen viser `hd coord status` uten annen claim på samme tjeneste, og egen claim, før første kommando mot verten. Eierens ja til å sette ut erstatter ikke sjekken.
+- **lesson.remembered-install-state-is-not-measured** (2026-10-02, minor): En plan sa at agenten på Macen var bygget fra en bestemt gren, og bygde grenvalg og et åpent spørsmål til eieren på det. Agenten var installert på nytt fra `main` av en annen tråd seks dager tidligere.
+    - forebygging: Hva som er installert, måles før en plan bygger på det: dato og navn på binærene og sikkerhetskopiene i `bin/`, `launchctl print`, og om commiten er på `origin/main`. Test: påstandstabellen merker installasjonstilstand som hentet med måletidspunkt, aldri som husket.
+- **lesson.md5-differs-for-images-written-from-the-cloud** (2026-10-02, minor): Etter at seks PNG-filer ble skrevet fra en Cowork-økt til Macen, stemte ikke md5 mot originalene, mens alle tekstfilene stemte. Det så ut som feilen der en gammel utgave blir skrevet.
+    - forebygging: Kontroller tekstfiler med md5. Kontroller bilder ved å sammenligne `IDAT`-dataene eller størrelsen minus `caBX`-blokken, ikke md5 av hele fila. Test: kontrollskriptet for overførte filer skiller de to tilfellene.
+- **lesson.vocabulary-guard-admits-new-claims** (2026-10-03, major): En vakt som godtok enhver setning bygd av tillatte ord, også i bøyd form, slapp 38 av 45 angrepsomskrivinger gjennom («Det har vi:», «Dette er menyen vår:», «Du har rett:»).
+    - forebygging: Det en vakt publiserer i en modells navn, er en tekst vakten selv kan bygge av lukkede lister med hele setninger; modellens tekst velger bare hvilken. Test: et sett omskrivinger skrevet av en som ikke har skrevet reglene, gir null publiserte tekster utenfor den mengden.
+- **lesson.rejected-rule-kind-not-swept-elsewhere** (2026-10-03, minor): Samme feil ble gjort to ganger på én dag: et ordforråd i stedet for hele setninger, først for setningen foran en liste, så for gjestens spørsmål (femten funn av 25 rader i et utkast som ikke ble bygget).
+    - forebygging: Når en regeltype forkastes etter et angrep, listes hvert sted samme regeltype brukes, og hvert av dem angripes før noe bygges. Test: planbyttet i STATUS.md har listen, og det finnes et angrep per sted.
+- **lesson.compared-normalized-published-raw** (2026-10-03, major): Et Kelvin-tegn for K, anførselstegn paret om over ni retter og førti mellomrom i et rettnavn ble publisert av en vakt som hadde godkjent teksten.
+    - forebygging: Teksten som publiseres, er den som ble kontrollert: vakten bygger den selv, og modellens tekst velger bare hvilken. Test: hver publisert tekst er lik en vaktbygd tekst tegnkode for tegnkode.
+- **lesson.guard-must-see-the-question-the-model-does-not** (2026-10-03, major): «Vi har følgende pizzaer: …» etter spørsmålet «Hvilke pizzaer har dere uten kjøtt?» leses som fem pizzaer uten kjøtt; to av dem har salami.
+    - forebygging: For hver svartype som kan omformuleres, finnes en lukket liste med hele spørsmål; alt annet gir det godkjente svaret ordrett. Et ord som tas ut av svaret, tas også ut av spørsmålene. Test: hvert spørsmål utenfor listen gir null kall til modellen.
+- **lesson.approval-by-example-covers-the-example** (2026-10-03, major): Kjetil godkjente «Vi har følgende pizzaer» ved eksempel. Det ble utvidet til rettlisten og til nitten setninger uten å spørre, og sto på nett i over sju timer.
+    - forebygging: Det eieren godkjenner ved eksempel, dekker eksempelet. Hver setning en modell får si i tjenestens navn, føres opp med hvem som har godkjent den; en setning uten eierens ord er et spørsmål til ham før den settes ut. Test: listen i ACCEPT.md har en godkjenning per setning.
+- **lesson.deployed-after-the-attack-was-known** (2026-10-03, major): To utgaver av en vakt ble satt ut etter at angrepet mot dem var målt; den første ble lagt i køen 5 minutter og 28 sekunder etter at målingen viste 20 av 40 publisert.
+    - forebygging: Et frosset angrep måles mot en utgave før den pushes, og skriptet som pusher og setter ut, startes først når målingen er lest. Test: tidspunktet for angrepsmålingen i TESTRESULT.md er før tidspunktet for push.
+- **lesson.own-committed-tests-changed-without-asking** (2026-10-03, major): Ti tester tråden selv hadde committet tidligere samme dag, ble endret uten å spørre: tretten endringer, og sju av dem snudde eller fjernet noe en test krevde godtatt.
+    - forebygging: En committet test er eksisterende, uansett hvem som skrev den og når. Før hver commit leses testendringene rett fra git; en endring i en committet test er et spørsmål til eieren. Test: skriptet som lister testendringer fra git, viser ingen endring i en committet test uten en godkjenning ført i STATUS.md.
+- **lesson.container-log-dies-with-the-container** (2026-10-03, major): Loggene til to utgaver gikk tapt ved neste utsetting, så ingen kan si hva gjester fikk i de periodene; ved det tredje byttet skulle kjeden lese 24 timer av en logg på 25 timer og 18 minutter.
+    - forebygging: Rett før en container byttes, leses loggen fra containeren startet, med et vindu som er lengre enn oppetiden, og beviset sier hvor lenge før byttet den ble lest. Test: bevisfilen har containerens starttid, lesetidspunkt og linjetall, og vinduet er lengre enn oppetiden.
+- **lesson.red-check-rerun-because-the-cause-looked-like-the-network** (2026-10-03, major): Deployens egen kontroll ble rød på én av 25 rader (kode 000, kallet kom ikke fram). Tråden kjørte de samme kontrollene om igjen, fikk grønt og gikk videre, mot planens stopp-regel.
+    - forebygging: En rød kontroll stopper kjeden uansett årsak. Rapporten sier hvilke rader som er kall som ikke kom fram, og kontrollen kjøres ikke om igjen uten eierens ord. Test: kjedeskriptet avslutter ved første røde kontroll og har ikke noe nytt forsøk på en hel kontroll.
+- **lesson.status-reader-gave-up-at-the-first-network-error** (2026-10-03, major): Skriptet som ventet på CI for en utgave, ga opp ved første nettfeil. Utgaven lå bygget, men ikke satt ut, i tre timer, mens den forrige sto på nett med hull et angrep hadde vist.
+    - forebygging: Lesing av et utfall som ligger et annet sted, prøves på nytt når ingen svar kom, og skriptet sier hvor mange ganger; et rødt utfall stopper. Det er lesing, ikke en kontroll som er blitt rød (se lesson.red-check-rerun-because-the-cause-looked-like-the-network). Test: venteren kjørt uten nett leser igjen og skriver antall forsøk.
+- **lesson.accept-written-from-memory-had-27-errors** (2026-10-03, major): Første utkast til ACCEPT.md og TESTRESULT.md hadde 27 feil da en uavhengig tråd holdt det mot bevisfilene; ett av dem var påstanden om at hver frosset utgave ble angrepet etter at den var satt ut.
+    - forebygging: Tall, klokkeslett, commit-numre og sitater i ACCEPT.md og TESTRESULT.md fylles inn fra bevisfilene av kode, og en uavhengig tråd holder hver påstand mot bevisene før eieren får dokumentene. Test: rapporten fra kontrollen ligger blant bevisene, med en dom per påstand.
+- **lesson.measurement-without-contact-looked-like-a-result** (2026-10-03, major): To målinger som kjørte uten nett, endte med «kall=12 model=0 … endret_innhold=0», samme sluttlinje som en ekte måling. Ingen kall hadde kommet fram.
+    - forebygging: En måling teller kallene som fikk svar. Sluttlinjen sier «INGEN KONTAKT» eller «UFULLSTENDIG», og exit-koden er ikke 0, når ikke alle fikk svar eller utgaven som svarte, er ukjent. Test: skriptet kjørt mot en adresse som ikke finnes, gir ingen resultatlinje og exit-kode 3.
+- **lesson.failure-named-by-a-guess** (2026-10-03, minor): En kjede leste CI-utfallet tjue ganger uten nett og meldte «gh er ikke logget inn» hver gang; innloggingen var i orden.
+    - forebygging: Et skript skriver ut det kommandoen sa, eller prøver nettet før innloggingen. Test: skriptet kjørt uten nett melder at det ikke fikk kontakt.
+- **lesson.claim-on-another-resource-does-not-stop-a-deploy** (2026-10-03, major): En annen tråd tok claim på host-disk på verten og tømte systemlogger der mens en utsetting med claim på palazzo-staging-app pågikk. Utsettingen kjørte tre forsøk til, og ingen ble stoppet eller varslet.
+    - forebygging: Aktive claims for verten leses rett før hvert forsøk på utsetting (`hd coord status`), og enhver claim på samme vert stopper forsøket, uansett ressurs. Dette er strengere enn lesson.host-mutation-without-reading-the-coordination-file, som sier «på samme tjeneste». Test: jobbloggen for hvert forsøk viser lesingen av claims, og ingen andre sto.
+- **lesson.rule-for-one-link-taken-for-the-reach-of-the-chain** (2026-10-04, major): Vakten ble bygget for tolv retter, og utkastene sa «tolv av atten retter». På nett svarer oppslaget med retten for seks av de tolv, så bare seks kan vise modellens ord.
+    - forebygging: Hvert ledd foran det som endres, er en rad i §2 med en måling på den kjørende tjenesten, tatt før G1, og rekkevidden oppgis som det målte tallet. Test: §2 har en målt rad per ledd foran endringen, og tallet i §3 er det målte.
+- **lesson.example-in-accept-was-not-measured** (2026-10-04, major): Et utkast til ACCEPT.md ba Kjetil prøve «Hva er Arancini?» for å se modellens ord. Tjenesten svarer ikke på det spørsmålet.
+    - forebygging: Hvert spørsmål eieren blir bedt om å prøve, er stilt til den kjørende tjenesten først, og det målte svaret står ved siden av. Test: hver rad i tabellen «Spør / Du skal se» i ACCEPT.md viser til en måling.
+- **lesson.red-first-claimed-for-tests-that-were-not** (2026-10-04, minor): TESTRESULT.md sa at hver ny eller endret test var kjørt rød først. Tolv endringer i tester som alt fantes, og ti av de 24 nye i første runde, kom inn sammen med koden og var aldri kjørt røde.
+    - forebygging: En påstand om alle tester føres per test: «rød først» listes med hvilke tester som fantes i den røde kjøringen, og hvilke som kom til etterpå. Test: antall tester i den røde og i den grønne kjøringen står i TESTRESULT.md, og differansen er forklart.
+- **lesson.estimate-assumed-one-attack-round** (2026-10-04, minor): Planen sa «rundt tre og en halv time etter G1». Den siste utgaven var målt på nett 34 timer og 50 minutter etter.
+    - forebygging: Et anslag for arbeid som skal angripes av en uavhengig tråd, oppgis per runde, og sier at antall runder er ukjent til første angrep er målt. Test: planen har tid per runde, ikke en sluttid.
+- **lesson.full-path-rule-broken-in-short-references** (2026-10-05, major): Kjetil måtte for tredje gang si at filer skal stå med hele stien («Du må legge med hele banen til filer som dette: ACCEPT.md»): meldingene og spørsmålene ved G3 hadde bare filnavnet.
+    - forebygging: Hver melding til eieren kontrolleres maskinelt før den sendes: et ord som ender på en filendelse og ikke begynner med en rot, stopper sendingen. Det gjelder hver gang en fil nevnes, også i spørsmål. Test: skriptet som kontrollerer meldinger, gir null funn på hver melding som ber om en port.
+
+## Book 23-noder som kan være forelder/gjenbruk (leksikalsk forslag, verifiser)
+- purpose://validation [active] — Validation
+- purpose://test.acceptance [active] — Acceptance tests
+- purpose://grounding.local-model-assisted-decomposition [active] — Local model assisted decomposition
+
+## 5. Avledede tester (samlet)
+
+| testRef | Formål | Hvordan | Evidens | Status |
+|---|---|---|---|---|
+| test.build | purpose://quality.build-and-regression | Prosjektets byggkommando (xcodebuild / swift build / pytest) — angis i PLAN.md. | TESTRESULT.md#build | venter |
+| test.regression | purpose://quality.build-and-regression | Prosjektets testkommando; sammenlign antall tester før/etter. | TESTRESULT.md#regression | venter |
+| test.docs-updated | purpose://quality.docs-in-same-change | Les diff; kryss av i ACCEPT.md. | ACCEPT.md#docs | venter |
+| test.status-current | purpose://quality.work-is-visible | Sammenlign STATUS.md med filene i mappen. | ACCEPT.md#status | venter |
+| test.cell.contract-fixtures | purpose://cell.contract-explicit | python3 checks/validate_contract.py | TESTRESULT.md#contract | venter |
+| test.cell.auth-negative | purpose://cell.authorization-honours-keypath | Tre enhetstester navngitt etter tilfellet. | TESTRESULT.md#auth | venter |
+| test.cell.stub-scan | purpose://cell.no-empty-stubs | Søk i berørte filer; skriv listen i ACCEPT.md. | ACCEPT.md#stubs | venter |
+| test.cells.dataflow-matches-contracts | purpose://cells.dataflow-declared | Tabell kant→kontrakt i PLAN.md. | PLAN.md#dataflow | venter |
+| test.cells.capability-audit | purpose://cells.capabilities-declared-with-boundary | Tabell i FORMAALSSPEC.md §0. | FORMAALSSPEC.md#audit | venter |
+| test.handoff.dry-run | purpose://handoff.runnable-without-guessing | ./<skript>.sh (uten --go) | TESTRESULT.md#dry-run | venter |
+| test.maal.holdout-urort | purpose://measurement.gain-on-unseen-data | Les grafendringslogg: hver endring lister treningsrader. | TESTRESULT.md#forstaaelse | venter |
+| test.maal.uavhengig-korpus | purpose://measurement.gain-on-unseen-data | score.py på korpus generert etter frysing | TESTRESULT.md#uavhengig | venter |
+| test.maal.produksjonsvei | purpose://measurement.production-path | Les harnessen; kjør den. | TESTRESULT.md#forstaaelse | venter |
+| test.maal.tilregnelighet | purpose://measurement.production-path | score.py på fixtures | TESTRESULT.md#forstaaelse | venter |
+| test.maal.opake-id | purpose://measurement.honest-labels | Les tolk-inn-filene | TESTRESULT.md#fasit | venter |
+| test.maal.lokkeduer | purpose://measurement.honest-labels | Les dommerbenk-nøkkelen etter dom | TESTRESULT.md#fasit | venter |
+| test.maal.negativer | purpose://measurement.negatives-guarded | score.py, kolonnen negativer uten handling | TESTRESULT.md#forstaaelse | venter |
+
+## 6. Åpne spørsmål til Kjetil
+
+1.
+
+## 7. Revisjonslogg
+
+| Iterasjon | Dato | Hva endret seg | Hvem |
+|---|---|---|---|
+| 0 | 2026-10-05 | Opprettet | Losen |

@@ -1,0 +1,13 @@
+{ "patterns": ["*.example.org", "docs.claude.com"], "cases": [
+  { "url": "https://a.example.org/x", "expect": "allow" },
+  { "url": "https://a.b.example.org/x", "expect": "allow" },
+  { "url": "https://example.org/x", "expect": "deny", "reason": "host_not_whitelisted" },
+  { "url": "https://example.org.evil.com/x", "expect": "deny", "reason": "host_not_whitelisted" },
+  { "url": "https://a.example.org:8443/x", "expect": "deny", "reason": "host_not_whitelisted" },
+  { "url": "http://a.example.org/x", "expect": "deny", "reason": "https_required" },
+  { "url": "https://docs.claude.com/en", "expect": "allow" },
+  { "url": "https://www.docs.claude.com/en", "expect": "deny", "reason": "host_not_whitelisted" },
+  { "url": "https://a.example.org/x", "method": "POST", "expect": "deny", "reason": "method_not_allowed" },
+  { "url": "https://a.example.org/redir", "redirectTo": "https://evil.com/", "expect": "deny", "reason": "redirect_outside_whitelist", "expectSecondRequest": false },
+  { "url": "https://a.example.org/x", "credentialAlias": "anthropic", "expect": "deny", "reason": "credential_not_granted", "expectLookups": 0 }
+] }

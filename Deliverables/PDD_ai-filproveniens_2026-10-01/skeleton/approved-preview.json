@@ -1,0 +1,290 @@
+{
+  "VStack": {
+    "elements": [
+      {
+        "Section": {
+          "header": {
+            "Text": {
+              "text": "Developer Workbench"
+            }
+          },
+          "content": [
+            {
+              "Text": {
+                "text": "Filer, opphav og bevaring"
+              }
+            },
+            {
+              "Text": {
+                "text": "FORHÅNDSVISNING · Eksempeldata. Ingen innsamler eller grafdatabase er koblet til."
+              }
+            }
+          ]
+        }
+      },
+      {
+        "Tabs": {
+          "tabsKeypath": "tabs",
+          "activeTabStateKeypath": "activeTab",
+          "selectionActionKeypath": "preview.tab",
+          "panels": [
+            {
+              "id": "files",
+              "content": [
+                {
+                  "Section": {
+                    "header": {
+                      "Text": {
+                        "text": "Filer og mapper"
+                      }
+                    },
+                    "content": [
+                      {
+                        "HStack": {
+                          "elements": [
+                            {
+                              "Picker": {
+                                "label": "Maskin",
+                                "keypath": "options.machine",
+                                "optionLabelKeypath": "label",
+                                "selectionValueKeypath": "id",
+                                "selectionStateKeypath": "filters.machine",
+                                "selectionActionKeypath": "preview.filter.machine",
+                                "selectionPayloadMode": "item_id",
+                                "allowsEmptySelection": false
+                              }
+                            },
+                            {
+                              "Picker": {
+                                "label": "Prosjekt",
+                                "keypath": "options.project",
+                                "optionLabelKeypath": "label",
+                                "selectionValueKeypath": "id",
+                                "selectionStateKeypath": "filters.project",
+                                "selectionActionKeypath": "preview.filter.project",
+                                "selectionPayloadMode": "item_id",
+                                "allowsEmptySelection": false
+                              }
+                            },
+                            {
+                              "Picker": {
+                                "label": "Tilstand",
+                                "keypath": "options.status",
+                                "optionLabelKeypath": "label",
+                                "selectionValueKeypath": "id",
+                                "selectionStateKeypath": "filters.status",
+                                "selectionActionKeypath": "preview.filter.status",
+                                "selectionPayloadMode": "item_id",
+                                "allowsEmptySelection": false
+                              }
+                            }
+                          ],
+                          "spacing": 12
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "message"
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "coverage"
+                        }
+                      },
+                      {
+                        "List": {
+                          "keypath": "rows",
+                          "flowElementSkeleton": {
+                            "VStack": {
+                              "elements": [
+                                {
+                                  "Text": {
+                                    "keypath": "title"
+                                  }
+                                },
+                                {
+                                  "Text": {
+                                    "keypath": "meta"
+                                  }
+                                },
+                                {
+                                  "Text": {
+                                    "keypath": "reason"
+                                  }
+                                },
+                                {
+                                  "Button": {
+                                    "keypath": "preview.details",
+                                    "label": "Vis detaljer",
+                                    "payloadKeypath": "id"
+                                  }
+                                }
+                              ],
+                              "spacing": 10
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "Section": {
+                    "header": {
+                      "Text": {
+                        "text": "Valgt fil eller mappe"
+                      }
+                    },
+                    "content": [
+                      {
+                        "Text": {
+                          "keypath": "selected.title"
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "selected.path"
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "selected.origin"
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "selected.size"
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "selected.retention"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "graph",
+              "content": [
+                {
+                  "Section": {
+                    "header": {
+                      "Text": {
+                        "text": "Relasjoner"
+                      }
+                    },
+                    "content": [
+                      {
+                        "Text": {
+                          "text": "SwiftPM-cache · relasjoner i utvalget"
+                        }
+                      },
+                      {
+                        "Text": {
+                          "text": "CellScaffold ← tilhører ← Codex · bygg 42"
+                        }
+                      },
+                      {
+                        "Text": {
+                          "text": "Codex · bygg 42 → opprettet → SwiftPM-cache"
+                        }
+                      },
+                      {
+                        "Text": {
+                          "text": "Claude · bygg 43 → bruker → SwiftPM-cache"
+                        }
+                      },
+                      {
+                        "Text": {
+                          "text": "SwiftPM-cache → ligger på → Laptop · disk"
+                        }
+                      },
+                      {
+                        "Button": {
+                          "keypath": "preview.openCache",
+                          "label": "Vis cachen i filoversikten"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "Section": {
+                    "header": {
+                      "Text": {
+                        "text": "Hvorfor beholdes dette?"
+                      }
+                    },
+                    "content": [
+                      {
+                        "Text": {
+                          "text": "To jobber er koblet til den samme cachen. Avslutning av én jobb frigir ikke den andre jobbens avhengighet."
+                        }
+                      },
+                      {
+                        "Text": {
+                          "text": "Eksempeldata — relasjonene kommer fra lokale fixtures. Live GraphStore-tilkobling må implementeres."
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "retention",
+              "content": [
+                {
+                  "Section": {
+                    "header": {
+                      "Text": {
+                        "text": "Bevaring og ryddeforslag"
+                      }
+                    },
+                    "content": [
+                      {
+                        "Text": {
+                          "text": "Aktiv — en jobb, prosess, mount eller lease bruker artefakten."
+                        }
+                      },
+                      {
+                        "Text": {
+                          "text": "Beholdes — bevis, kildekode eller en avhengighet trenger den fortsatt."
+                        }
+                      },
+                      {
+                        "Text": {
+                          "text": "Kan vurderes — bevaringen er utløpt og de aktuelle kontrollene er bestått."
+                        }
+                      },
+                      {
+                        "Text": {
+                          "text": "Ukjent — mangler grunnlag. Opphav og bruk må undersøkes."
+                        }
+                      },
+                      {
+                        "Text": {
+                          "text": "En utløpt frist gir et forslag. Aktiv bruk, uavklarte avhengigheter og beskyttede data hindrer sletting."
+                        }
+                      },
+                      {
+                        "Text": {
+                          "text": "Tid og bevaringsgrunn knyttes til hvert artefakt. Utførelse følger eksisterende rydderutine med ferske kontroller og godkjenning."
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "spacing": 10
+  }
+}

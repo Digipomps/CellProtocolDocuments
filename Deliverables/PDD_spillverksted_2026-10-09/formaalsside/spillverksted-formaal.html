@@ -1,0 +1,393 @@
+<title>Spillverksted – formålsplan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: arbeidstegning. Venstre: formålstreet som et kart man scroller i. Høyre: porten (godkjenning) som alltid er synlig. Popup for detaljer. */
+:root{
+  --bg:#eef1f6; --paper:#ffffff; --paper2:#f5f7fb; --ink:#141b2b; --muted:#56607a; --faint:#8b93a8;
+  --line:#d4d9e4; --line2:#b7bfd0; --accent:#2f4fd1; --accent-ink:#ffffff; --ok:#21794a; --warn:#9a6400; --bad:#b0362c;
+  --h0:#2f4fd1; --h1:#c0571e; --h2:#7b3fa6; --h3:#1d8270; --h4:#a2386a; --h5:#5a6b12; --h6:#2b6fa3; --h7:#8a5a1b;
+  --tint:.10;
+  --display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1320; --paper:#171c2c; --paper2:#1d2336; --ink:#e6e9f2; --muted:#a3abc2; --faint:#717a93;
+  --line:#2a3148; --line2:#3a4361; --accent:#8ea2ff; --accent-ink:#0f1320; --ok:#5fd394; --warn:#e8b04f; --bad:#f08a7f;
+  --h0:#8ea2ff; --h1:#f39a62; --h2:#c79af0; --h3:#5fd0bb; --h4:#f08bb8; --h5:#bfd060; --h6:#79b8ec; --h7:#e0b067;
+  --tint:.16; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1320; --paper:#171c2c; --paper2:#1d2336; --ink:#e6e9f2; --muted:#a3abc2; --faint:#717a93;
+  --line:#2a3148; --line2:#3a4361; --accent:#8ea2ff; --accent-ink:#0f1320; --ok:#5fd394; --warn:#e8b04f; --bad:#f08a7f;
+  --h0:#8ea2ff; --h1:#f39a62; --h2:#c79af0; --h3:#5fd0bb; --h4:#f08bb8; --h5:#bfd060; --h6:#79b8ec; --h7:#e0b067;
+  --tint:.16; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
+button,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1500px;margin:0 auto;padding-inline:16px;padding-block:18px 32px;display:grid;gap:16px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 20px}
+header .t{flex:1;min-width:0}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(1.6rem,4vw,2.4rem);line-height:1.05;margin:0;text-wrap:balance;letter-spacing:-.01em}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+.lede{margin:6px 0 0;color:var(--muted);max-width:70ch}
+.gatepill{display:inline-flex;align-items:center;gap:8px;border:1.5px solid var(--line2);border-radius:999px;padding:6px 12px;font-weight:600;font-size:13px;background:var(--paper)}
+.gatepill .d{width:9px;height:9px;border-radius:50%;background:var(--warn)}
+.gatepill.ok .d{background:var(--ok)} .gatepill.chg .d{background:var(--bad)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:none;padding:10px 12px;border-bottom:2.5px solid transparent;cursor:pointer;color:var(--muted);font-weight:500}
+.tabs button[aria-selected="true"]{color:var(--ink);border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;align-items:start}
+@media (max-width:980px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px}
+/* tree */
+.mapbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)}
+.mapbar .hint{color:var(--muted);font-size:13px;flex:1;min-width:180px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);background:var(--paper);border-radius:9px;padding:7px 12px;cursor:pointer;font-weight:500;font-size:14px}
+.btn:hover{background:var(--paper2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn:disabled{opacity:.5;cursor:default}
+.map{position:relative;overflow:auto;height:min(76vh,900px);background-image:radial-gradient(color-mix(in srgb,var(--line) 80%,transparent) 1px,transparent 1px);background-size:20px 20px;border-radius:0 0 14px 14px}
+.layer{position:relative;transform-origin:0 0}
+svg.links{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+.links path{fill:none;stroke-width:2}
+.node{position:absolute;display:flex;align-items:center;gap:8px;box-sizing:border-box;border:1.5px solid var(--hue);background:color-mix(in srgb,var(--hue) calc(var(--tint)*100%),var(--paper));border-radius:12px;padding:7px 10px;cursor:pointer;text-align:left;color:var(--ink)}
+.node:hover{box-shadow:0 0 0 3px color-mix(in srgb,var(--hue) 25%,transparent)}
+.node .c{font-family:var(--mono);font-size:11.5px;padding:2px 6px;border-radius:6px;background:var(--hue);color:var(--paper);flex:none}
+.node .n{flex:1;min-width:0;font-size:13.5px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.node .reuse{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);flex:none}
+.node.root{border-width:2px;background:var(--paper);font-family:var(--display);font-weight:600}
+.node.root .n{font-size:15px;-webkit-line-clamp:4}
+.node.anc{border-style:dashed;--hue:var(--line2);background:var(--paper2);color:var(--muted)}
+.node.cmt::after{content:"";position:absolute;top:-4px;right:-4px;width:10px;height:10px;border-radius:50%;background:var(--warn);border:2px solid var(--paper)}
+.tog{position:absolute;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--hue);background:var(--paper);display:grid;place-items:center;font-family:var(--mono);font-size:11px;padding:0;cursor:pointer;color:var(--ink)}
+/* gate */
+.gate{padding:16px;display:grid;gap:12px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+.gate h2{font-family:var(--display);font-weight:800;font-size:1.25rem;margin:0}
+.gate p{margin:0}
+.muted{color:var(--muted)} .small{font-size:13px}
+.next{background:var(--paper2);border-radius:10px;padding:10px 12px}
+.next ol{margin:6px 0 0;padding-left:20px;display:grid;gap:4px}
+label.f{display:grid;gap:6px;font-weight:600;font-size:13px}
+textarea{background:var(--paper2);border:1px solid var(--line2);border-radius:10px;padding:9px 10px;min-height:110px;resize:vertical;font-weight:400;line-height:1.45}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.msg{border-radius:10px;padding:9px 11px;font-size:14px;border:1px solid var(--line2)}
+.msg.ok{border-color:var(--ok)} .msg.warn{border-color:var(--warn)} .msg.bad{border-color:var(--bad)}
+.hist{display:grid;gap:8px;max-height:260px;overflow:auto}
+.hi{border-top:1px solid var(--line);padding-top:8px;font-size:13.5px}
+.hi b{font-weight:600}
+.hi .when{color:var(--faint);font-size:12px;font-variant-numeric:tabular-nums}
+/* dialog */
+dialog{border:none;border-radius:16px;padding:0;max-width:min(640px,calc(100vw - 32px));width:100%;background:var(--paper);color:var(--ink);box-shadow:0 24px 60px rgba(0,0,0,.28)}
+dialog::backdrop{background:rgba(10,14,25,.45)}
+.dh{display:flex;gap:10px;align-items:flex-start;padding:18px 18px 10px;border-bottom:1px solid var(--line)}
+.dh h3{font-family:var(--display);font-weight:800;font-size:1.25rem;line-height:1.2;margin:0;flex:1;text-wrap:balance}
+.db{padding:14px 18px 18px;display:grid;gap:14px;max-height:70vh;overflow:auto}
+.k{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
+.goal{border-left:4px solid var(--hue);background:color-mix(in srgb,var(--hue) calc(var(--tint)*100%),var(--paper2));border-radius:0 10px 10px 0;padding:10px 12px}
+.goal ul{margin:6px 0 0;padding-left:18px}
+.ref{font-family:var(--mono);font-size:12px;color:var(--muted);word-break:break-all}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.meta div{background:var(--paper2);border-radius:10px;padding:8px 10px}
+.kids{display:flex;flex-wrap:wrap;gap:6px}
+.kids button{border:1px solid var(--line2);background:var(--paper);border-radius:999px;padding:4px 10px;cursor:pointer;font-size:13px}
+.crumbs{font-size:13px;color:var(--muted)}
+.crumbs button{border:0;background:none;padding:0;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+/* analysis */
+.ana{padding:18px;display:grid;gap:20px}
+.ana>section,.grid>*{min-width:0}
+.ana li,.ana p,.hi{overflow-wrap:anywhere}
+.ana h2{font-family:var(--display);font-weight:800;font-size:1.3rem;margin:0 0 8px}
+.ana p,.ana li{max-width:72ch}
+.ana ol,.ana ul{margin:0;padding-left:20px;display:grid;gap:6px}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;font-size:14px;min-width:640px}
+th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-weight:600;background:var(--paper2)}
+td.win{font-weight:600}
+.loop{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.loop div{background:var(--paper2);border-radius:10px;padding:10px 12px}
+.loop b{display:block;font-family:var(--display);font-size:1.05rem}
+.loop .m{font-size:12px;color:var(--accent);font-weight:600;margin-top:4px}
+@media (prefers-reduced-motion:no-preference){.layer{transition:transform .2s ease}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="t">
+      <p class="eyebrow">Formålsplan · PDD_spillverksted_2026-10-09 · port G1</p>
+      <h1>Spillverksted for Sverre</h1>
+      <p class="lede">Arbeidsbenk der Sverre lærer programmering og AI-orkestrering ved å lage og publisere egne spill i HAVEN. Trykk på et formål for å se målet og hvordan det sjekkes.</p>
+    </div>
+    <span class="gatepill" id="gatepill"><span class="d"></span><span id="gatetext">G1 venter på deg</span></span>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-tree" aria-selected="true">Formålstre</button>
+    <button role="tab" id="tab-ana" aria-selected="false">Analyse</button>
+  </div>
+
+  <div class="grid">
+    <div>
+      <section class="panel" id="view-tree" aria-label="Formålstre">
+        <div class="mapbar">
+          <span class="hint" id="counts"></span>
+          <button class="btn" id="zout" aria-label="Zoom ut">−</button>
+          <button class="btn" id="zin" aria-label="Zoom inn">+</button>
+          <button class="btn" id="collapse">Skjul blad</button>
+        </div>
+        <div class="map" id="map"><div class="layer" id="layer"><svg class="links" id="links"></svg></div></div>
+      </section>
+      <section class="panel" id="view-ana" hidden aria-label="Analyse">
+        <div class="ana" id="ana"></div>
+      </section>
+    </div>
+
+    <aside class="panel gate" aria-label="Godkjenning">
+      <h2>Godkjenn formålene</h2>
+      <p class="muted small">Du godkjenner formålene og målene i treet (G1), ikke kode. Kommentarer følger med til Claude og blir en ny runde hvis du ber om endringer.</p>
+      <div class="next">
+        <b>Det skjer når du godkjenner (fase 1)</b>
+        <ol id="nextlist"></ol>
+      </div>
+      <label class="f" for="comment">Kommentarer
+        <textarea id="comment" placeholder="Skriv hva du vil ha endret, eller svar på spørsmålene under Analyse. Trykk på et formål og «Kommenter» for å henvise til det."></textarea>
+      </label>
+      <div class="row">
+        <button class="btn primary" id="approve">Godkjenn og start fase 1</button>
+        <button class="btn" id="changes">Be om endringer</button>
+      </div>
+      <div class="msg" id="gatemsg" hidden aria-live="polite"></div>
+      <div>
+        <div class="k">Beslutninger</div>
+        <div class="hist" id="hist"><p class="muted small">Ingen beslutninger ennå.</p></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<dialog id="dlg" aria-labelledby="dtitle"><div id="dcontent"></div></dialog>
+
+<script type="application/json" id="tree-data">{"id": "spillverksted-2026-10-09", "title": "Spillverksted for Sverre", "pdd": "PDD_spillverksted_2026-10-09", "anchorRef": "purpose://human-agency", "anchorNote": "Læring og eget skapende arbeid er menneskelig handlekraft og forståelse. Prosjektdelen gjenbruker purpose://project-work.work-items.", "rootRef": "purpose://candidate.game-workshop.root", "nodes": [{"ref": "purpose://candidate.game-workshop.root", "parentRef": null, "code": "R", "title": "Sverre lærer programmering og AI-orkestrering ved å lage og publisere egne spill i HAVEN", "composition": "allOf", "outcome": "Sverre har laget og publisert minst ett spill han selv har bestemt innholdet i, og kan forklare med egne ord hva koden og AI-hjelperne gjorde.", "signals": ["Ett publisert spill med Sverre som skaper", "Sverre forklarer tre endringer han ba om, og hva som skjedde i koden", "Kjetil har godkjent publiseringen"], "verifier": "T-R1: samtale med Sverre etter første publisering, notert i ACCEPT.md", "status": "candidate", "phase": "Fase 1–3", "why": "Kjetils bestilling 09.10."}, {"ref": "purpose://candidate.game-workshop.learning", "parentRef": "purpose://candidate.game-workshop.root", "code": "A", "title": "Sverre forstår det han lager", "composition": "allOf", "outcome": "Hvert steg i verkstedet lærer Sverre noe han kan vise, ikke bare noe AI har gjort for ham.", "signals": ["Hver økt ender med én ting Sverre kan forklare"], "verifier": "T-A: øktlogg med «dette lærte jeg» per økt", "status": "candidate", "phase": "Fase 1", "why": "Målet er læring, ikke flest mulig spill."}, {"ref": "purpose://candidate.game-workshop.learning.progression-path", "parentRef": "purpose://candidate.game-workshop.learning", "code": "A1", "title": "Læringssti i fem nivåer", "composition": "sequence", "outcome": "Verkstedet har fem nivåer som låses opp etter hvert: 1 Endre tall i et ferdig spill. 2 Bestille endringer fra hjelperen. 3 Lese og forklare koden hjelperen skrev. 4 Skrive egen kode som hjelperen ser over. 5 Dele et spill i oppgaver og fordele dem på flere AI-roller.", "signals": ["Nivået vises i arbeidsbenken", "Hvert nivå har én oppgave som avslutter det"], "verifier": "T-A1: gå gjennom nivå 1–2 med Sverre i prototypen", "status": "candidate", "phase": "Fase 1", "why": "Nivå 5 er AI-orkestrering. De første nivåene gir mestring før det."}, {"ref": "purpose://candidate.game-workshop.learning.explain-each-change", "parentRef": "purpose://candidate.game-workshop.learning", "code": "A2", "title": "Hjelperen forklarer hver endring", "outcome": "Hver endring hjelperen foreslår kommer med en kort forklaring på barnespråk og en markering av hvilke linjer som endres.", "signals": ["Forklaring og endrede linjer vises før Sverre godtar", "Sverre kan be om «forklar enklere»"], "verifier": "T-A2: ti forslag i prototypen har forklaring og markerte linjer", "status": "candidate", "phase": "Fase 1", "why": "Uten forklaring blir det bestilling, ikke læring."}, {"ref": "purpose://candidate.game-workshop.learning.mentor-oversight", "parentRef": "purpose://candidate.game-workshop.learning", "code": "A3", "title": "Kjetil følger med og veileder", "outcome": "Kjetil ser hva Sverre har bedt om, hva som ble godtatt og hvor han står i læringsstien, og kan legge igjen en kommentar.", "signals": ["Mentorvisning med øktlogg", "Kommentarer fra Kjetil vises for Sverre neste gang"], "verifier": "T-A3: Kjetil finner forrige økt på under ett minutt", "status": "candidate", "phase": "Fase 2", "why": "Kjetil er læreren. Hjelperen skal støtte ham, ikke erstatte ham."}, {"ref": "purpose://candidate.workbench-assistant.root", "parentRef": "purpose://candidate.game-workshop.root", "code": "B", "title": "Arbeidsbenk-assistenten (mønster for alle arbeidsbenker)", "composition": "allOf", "outcome": "Det finnes én beskrevet og testet måte å lage en samtalehjelper for en arbeidsbenk på. Spillverkstedet er første bruker.", "signals": ["Mønsteret er dokumentert i eget område", "Spillverkstedet bruker mønsteret uten spesialkode i chatmotoren"], "verifier": "T-B: kontrakt og fixtures validerer; spillverkstedets profil lastes uten kodeendring i chatmotoren", "status": "candidate", "phase": "Fase 1–2", "why": "Kjetil: «Denne chat-hjelperen er et mønster vi skal bruke i alle andre arbeidsbenker også.»"}, {"ref": "purpose://candidate.workbench-assistant.understand-intent", "parentRef": "purpose://candidate.workbench-assistant.root", "code": "B1", "title": "Forstår hva brukeren vil lage, som formål", "outcome": "Det brukeren skriver blir klassifisert mot formålstreet først. Bare det som ikke passer, dekomponeres med modell. Hjelperen spør bare om det som endrer hva som lages.", "signals": ["Hver samtale har et formålstre med refs fra registeret", "Ukjent formål gir et avklarende spørsmål, aldri en gjetning"], "verifier": "T-B1: tjue barneformulerte ønsker gir riktig formål i minst femten, målt på et sett skrevet av noen som ikke har sett reglene", "status": "candidate", "reused": "purpose://grounding.local-model-assisted-decomposition", "phase": "Fase 1", "why": "Bygger på PurposeDecomposition og ExecutablePurposeGroundingCell. Lærdom: klassifisering først, og mål aldri på eget utviklingssett."}, {"ref": "purpose://candidate.workbench-assistant.preview-before-change", "parentRef": "purpose://candidate.workbench-assistant.root", "code": "B2", "title": "Viser hvordan det blir før noe endres", "outcome": "Hvert forslag vises i en forhåndsvisning ved siden av samtalen før brukeren godtar det. Det som er godtatt og det som er foreslått, kan sammenlignes.", "signals": ["Forhåndsvisning oppdateres innen fem sekunder etter et forslag", "Forkast tar tilbake forrige versjon"], "verifier": "T-B2: måling av tid fra forslag til synlig forhåndsvisning, tre forsøk", "status": "candidate", "phase": "Fase 1", "why": "Kjetil: «vise hvordan det blir». Lærdom: tekst er ikke design."}, {"ref": "purpose://candidate.workbench-assistant.select-tools-by-purpose", "parentRef": "purpose://candidate.workbench-assistant.root", "code": "B3", "title": "Velger verktøy og GUI-elementer ut fra formål", "outcome": "For hvert formål foreslår hjelperen verktøy og GUI-elementer fra biblioteket som er merket med det formålet, og sier hvorfor.", "signals": ["Hvert forslag har en purposeRef og en bibliotekoppføring", "Ingen forslag peker på noe som ikke finnes i biblioteket"], "verifier": "T-B3: alle forslag i en testsamtale kan spores til en bibliotekoppføring", "status": "candidate", "phase": "Fase 2", "why": "Kjetil: «bruke formål for å finne riktige verktøy og GUI elementer»."}, {"ref": "purpose://candidate.workbench-assistant.propose-human-decides", "parentRef": "purpose://candidate.workbench-assistant.root", "code": "B4", "title": "Foreslår, mennesket bestemmer", "outcome": "Modellen foreslår bare. Alle endringer skjer etter et klikk fra brukeren, og målcellen sjekker tilgang på nytt.", "signals": ["Ingen skjulte modellkall, RAG-oppslag eller agenthandlinger", "Et formål gir aldri rettigheter"], "verifier": "T-B4: negative tester: endring uten klikk, feil bruker og ukjent formål blir avvist", "status": "candidate", "phase": "Fase 2", "why": "Book 19 §9 og Kjetils beslutning 02.09: AIGateway foreslår, Butler Chat ruter og har autoriteten."}, {"ref": "purpose://candidate.workbench-assistant.reusable-profile", "parentRef": "purpose://candidate.workbench-assistant.root", "code": "B5", "title": "Andre arbeidsbenker kan ta det i bruk med en profil", "outcome": "En ny arbeidsbenk får sin hjelper ved å skrive en profil: formålsgren, bibliotek, forhåndsvisning, tillatte handlinger, tone og eskaleringstak. Ingen ny kode i chatmotoren.", "signals": ["Hjelpere registreres deklarativt, ikke i den faste switchen i PersonalCopilotCloudStore", "Én arbeidsbenk til (Developer Workbench) har en profil"], "verifier": "T-B5: to profiler lastes av samme motor; kontraktvalidator grønn", "status": "candidate", "phase": "Fase 2", "why": "I dag er hjelperne hardkodet rundt PersonalCopilotCloudStore.swift:5080."}, {"ref": "purpose://candidate.workbench-assistant.child-safe-dialogue", "parentRef": "purpose://candidate.workbench-assistant.root", "code": "B6", "title": "Trygg samtale for et barn", "outcome": "Hjelperen svarer tilpasset alder, holder seg til verkstedet, ber ikke om personopplysninger, og bruker bare modeller Kjetil har valgt.", "signals": ["Eskaleringstak never_external eller ask_each_time for Sverre", "Modell og leverandør vises i arbeidsbenken"], "verifier": "T-B6: et sett med vanskelige meldinger gir avvisning eller omdirigering, gjennomgått av Kjetil", "status": "candidate", "phase": "Fase 1", "why": "Bygger på ChatInterpreterEscalationCeiling."}, {"ref": "purpose://candidate.tool-library.root", "parentRef": "purpose://candidate.game-workshop.root", "code": "C", "title": "Verktøybibliotek: hva som finnes og hva det løser", "composition": "allOf", "outcome": "Biblioteket svarer på «hva kan jeg bruke til dette formålet?» med oppføringer som sier hva de løser, for hvem, og med hvilken lisens.", "signals": ["Spørsmål med et formål gir oppføringer med begrunnelse"], "verifier": "T-C: bibliotekoppslag for tjue formål gir minst én relevant oppføring per formål", "status": "candidate", "phase": "Fase 1–2", "why": "Kjetil: «lage et bibliotek - eventuelt en RAG for hva som finnes av verktøy og hva de skal løse»."}, {"ref": "purpose://candidate.tool-library.purpose-keyed-entries", "parentRef": "purpose://candidate.tool-library.root", "code": "C1", "title": "Hver oppføring er merket med formål", "outcome": "Hver oppføring har purposeRefs, hva den løser, eksempler, lisens og alder. Den nøkles på purpose://-refs, ikke på fritekst.", "signals": ["Ingen oppføring uten purposeRef", "ConfigurationCatalog og Library får purposeRefs"], "verifier": "T-C1: validator nekter oppføring uten purposeRef og lisens", "status": "candidate", "phase": "Fase 1", "why": "I dag matcher katalogen på fritekst og delstrenger, og Library har ikke formålsfelt."}, {"ref": "purpose://candidate.tool-library.purpose-first-lookup", "parentRef": "purpose://candidate.tool-library.root", "code": "C2", "title": "Oppslag: formål først, tekstsøk etterpå", "outcome": "Oppslag går først via formålsrefs, så via ordsøk. Tekst til modellen hentes etter oppslag, aldri i det skjulte. Semantisk søk (vektorer) legges til bare hvis målinger viser at ordsøk ikke holder.", "signals": ["Hvert treff sier om det kom fra formål eller tekst"], "verifier": "T-C2: treffrate med og uten tekstsøk på et uavhengig sett", "status": "candidate", "phase": "Fase 2", "why": "Det finnes ingen vektorsøk i HAVEN i dag. CommonsLibrarian og kapabilitetsindeksen er ordbasert."}, {"ref": "purpose://candidate.tool-library.derived-from-sources", "parentRef": "purpose://candidate.tool-library.root", "code": "C3", "title": "Biblioteket bygges fra kildene, ikke for hånd", "outcome": "Oppføringer for celler og GUI-elementer lages fra cellenes Explore-kontrakter, CellConfiguration-discovery og kapabilitetsindeksen. En oppføring som ikke lenger finnes i kilden, faller ut.", "signals": ["Bygget feiler hvis en oppføring peker på noe som ikke finnes"], "verifier": "T-C3: bygg biblioteket to ganger fra samme kilde gir samme resultat; fjernet celle forsvinner", "status": "candidate", "phase": "Fase 2", "why": "Forskningsnotatet 28.08: håndvedlikeholdt sporbarhet råtner, bare utført sporbarhet overlever."}, {"ref": "purpose://candidate.tool-library.open-licensed-game-content", "parentRef": "purpose://candidate.tool-library.root", "code": "C4", "title": "Spillinnhold med åpne lisenser", "outcome": "Biblioteket har maler (plattform, labyrint, huskespill, regnespill), figurer og lyder med kjent åpen lisens, slik at Sverre kan bruke dem i publiserte spill.", "signals": ["Hver ressurs har lisens og kilde", "Malene i Sverres spillrom er første innhold"], "verifier": "T-C4: lisensfeltet er fylt og kontrollert for hver ressurs", "status": "candidate", "phase": "Fase 1", "why": "Publisering krever at alt innhold kan deles."}, {"ref": "purpose://candidate.game-workshop.engine", "parentRef": "purpose://candidate.game-workshop.root", "code": "D", "title": "Spillmotor og sandkasse", "composition": "allOf", "outcome": "Spillene lages med en motor valgt etter målte kriterier og kjører isolert fra resten av HAVEN.", "signals": ["Motorvalget er begrunnet i en tabell"], "verifier": "T-D: motorvalgstabell med målinger i FORMAALSSPEC", "status": "candidate", "phase": "Fase 1", "why": "Kjetil: «hvilken spillmotor skal vi bruke»."}, {"ref": "purpose://candidate.game-workshop.engine.selection", "parentRef": "purpose://candidate.game-workshop.engine", "code": "D1", "title": "Motorvalg: KAPLAY først, Phaser når spillene vokser", "outcome": "Første motor er KAPLAY (MIT, enkel og lesbar kode, kjører i nettleseren uten byggesteg). Phaser er neste trinn for større spill. Valget bekreftes ved at hjelperen lager fem fungerende småspill i hver.", "signals": ["Fem av fem testspill kjører i KAPLAY uten manuell retting", "Sverre kan lese koden i et KAPLAY-spill"], "verifier": "T-D1: fem bestillinger per motor, tell spill som kjører uten retting", "status": "candidate", "phase": "Fase 1", "why": "Phaser 4 er nylig lansert, mens det meste modellene har sett er Phaser 3. Scratch gikk over til AGPL i 2024 og egner seg ikke til å bygges inn."}, {"ref": "purpose://candidate.game-workshop.engine.sandbox-isolation", "parentRef": "purpose://candidate.game-workshop.engine", "code": "D2", "title": "Spillene kjører isolert fra HAVEN", "outcome": "Et spill kjører i en sandkasse uten tilgang til HAVEN-økten, informasjonskapsler eller data: iframe med sandbox og uten allow-same-origin i forhåndsvisning, og CSP-direktivet sandbox på publiserte spill.", "signals": ["Spillkode kan ikke lese document.cookie eller kalle HAVEN-API-er", "Publisert spill har eget, ugjennomsiktig opphav"], "verifier": "T-D2: et ondsinnet testspill prøver å lese økt og kalle API; alt blir avvist", "status": "candidate", "phase": "Fase 2", "why": "I dag finnes ingen vei for brukerlaget HTML eller JS i HAVEN. Alle CSP-er blokkerer skript."}, {"ref": "purpose://candidate.game-workshop.engine.swappable-adapter", "parentRef": "purpose://candidate.game-workshop.engine", "code": "D3", "title": "Motoren kan byttes", "outcome": "Arbeidsbenken snakker med motoren gjennom en liten adapter (mal, forhåndsvisning, eksport), så et nytt motorvalg ikke krever ny arbeidsbenk.", "signals": ["To motorer har adapter"], "verifier": "T-D3: samme spillprosjekt forhåndsvises med to adaptere", "status": "candidate", "phase": "Fase 2", "why": "Motorlandskapet endrer seg raskt."}, {"ref": "purpose://candidate.game-workshop.project", "parentRef": "purpose://candidate.game-workshop.root", "code": "E", "title": "Prosjektadministrasjon for spillene", "composition": "allOf", "outcome": "Hvert spill er et prosjekt med oppgaver, versjoner og status som både Sverre og Kjetil ser.", "signals": ["Spillprosjekt vises i HAVEN Workbench"], "verifier": "T-E: et spill fra idé til publisert har sporbare oppgaver og versjoner", "status": "candidate", "phase": "Fase 2", "why": "Kjetil: «Vi trenger prosjektadministrasjon»."}, {"ref": "purpose://candidate.game-workshop.project.uses-haven-workbench", "parentRef": "purpose://candidate.game-workshop.project", "code": "E1", "title": "Spillprosjekter bruker HAVEN Workbench", "outcome": "Spillprosjekter lages med ProjectPortfolio og WorkItem som allerede finnes, ikke med et nytt prosjektsystem.", "signals": ["Ingen ny prosjektcelle"], "verifier": "T-E1: inspeksjon av at spillprosjektet er WorkItem-poster under et ProjectPortfolio-prosjekt", "status": "gjenbruk", "reused": "purpose://project-work.work-items", "phase": "Fase 2", "why": "Workbench-cellene finnes i Sources/App/Cells/WorkItems/."}, {"ref": "purpose://candidate.game-workshop.project.versioned-changes", "parentRef": "purpose://candidate.game-workshop.project", "code": "E2", "title": "Hver godtatt endring er en versjon", "outcome": "Hver endring Sverre godtar lagres som en versjon med hvem som ba om den, hva hjelperen foreslo og hva som ble godtatt. Han kan gå tilbake til en tidligere versjon.", "signals": ["Angre virker etter ti endringer"], "verifier": "T-E2: ti endringer, gå tilbake til nummer tre, spillet er likt versjon tre", "status": "candidate", "phase": "Fase 2", "why": "Trygghet til å prøve er viktig for læring."}, {"ref": "purpose://candidate.game-workshop.project.child-readable-tasks", "parentRef": "purpose://candidate.game-workshop.project", "code": "E3", "title": "Oppgaver Sverre forstår", "outcome": "Hjelperen gjør ønsker om til korte oppgaver i barnespråk («Få helten til å hoppe») som vises som en liste Sverre kan krysse av.", "signals": ["Hver oppgave er knyttet til et formål"], "verifier": "T-E3: Sverre leser opp og forklarer tre oppgaver", "status": "candidate", "phase": "Fase 2", "why": "Prosjektstyring må gi mening for en som er ny."}, {"ref": "purpose://candidate.game-workshop.publishing", "parentRef": "purpose://candidate.game-workshop.root", "code": "F", "title": "Publisering via HAVEN", "composition": "sequence", "outcome": "Et ferdig spill kan publiseres til en fast adresse i HAVEN etter Kjetils godkjenning.", "signals": ["Publisert spill åpnes uten innlogging"], "verifier": "T-F: publiser et testspill og åpne det på en annen enhet", "status": "candidate", "phase": "Fase 3", "why": "Kjetil: «spill han kan publisere via HAVEN»."}, {"ref": "purpose://candidate.game-workshop.publishing.public-address", "parentRef": "purpose://candidate.game-workshop.publishing", "code": "F1", "title": "Publisert spill har egen adresse", "outcome": "Publiserte spill ligger under en egen rute (for eksempel /spill/navn) med CSP sandbox, ved siden av /pub.", "signals": ["Adressen virker på telefon og PC"], "verifier": "T-F1: tre målinger av lastetid under fem sekunder", "status": "candidate", "phase": "Fase 3", "why": "Publication-cellen publiserer i dag bare maler og medier, ikke skript."}, {"ref": "purpose://candidate.game-workshop.publishing.guardian-approval", "parentRef": "purpose://candidate.game-workshop.publishing", "code": "F2", "title": "Kjetil godkjenner hver publisering", "outcome": "Sverre kan be om publisering, men spillet blir offentlig først når Kjetil har godkjent den versjonen. Avpublisering kan begge gjøre.", "signals": ["Godkjenningen er bundet til versjonen"], "verifier": "T-F2: publisering uten godkjenning avvises; endret versjon etter godkjenning krever ny godkjenning", "status": "candidate", "phase": "Fase 3", "why": "HAVEN har ingen modell for barn eller foresatte i dag. Godkjenninger i arbeidsbenken spesifiseres i PDD_godkjenninger-i-arbeidsbenken."}, {"ref": "purpose://candidate.game-workshop.publishing.child-privacy", "parentRef": "purpose://candidate.game-workshop.publishing", "code": "F3", "title": "Ingen persondata om Sverre i publiserte spill", "outcome": "Publiserte spill viser bare et kunstnernavn Kjetil har godkjent. Spillene samler ikke inn data, og det finnes ingen chat med fremmede.", "signals": ["Ingen nettverkskall fra spillet utenfor egen adresse"], "verifier": "T-F3: inspeksjon av publisert spill og CSP connect-src", "status": "candidate", "phase": "Fase 3", "why": "Barns personvern krever strengere grenser enn voksnes."}, {"ref": "purpose://candidate.game-workshop.platform", "parentRef": "purpose://candidate.game-workshop.root", "code": "G", "title": "Eget scaffold? Ikke nå", "composition": "allOf", "outcome": "Spillverkstedet bygges som celler og CellConfiguration i CellScaffold. Det skilles ut først når et målt kriterium slår til.", "signals": ["Beslutningen og kriteriene står i FORMAALSSPEC §2"], "verifier": "T-G: inspeksjon mot Scaffold_Product_Split_Plan_2026-07-10", "status": "candidate", "phase": "Fase 1", "why": "Kjetil: «Vurder om vi trenger et eget scaffold»."}, {"ref": "purpose://candidate.game-workshop.platform.no-new-scaffold-yet", "parentRef": "purpose://candidate.game-workshop.platform", "code": "G1", "title": "Ingen nytt scaffold nå, men egen sandkasse for spill", "outcome": "Arbeidsbenken, hjelperen og biblioteket lever i CellScaffold. Det eneste med en annen risikoprofil er brukerlaget spillkode, og den isoleres med sandkasse (D2) i stedet for et eget scaffold.", "signals": ["Ingen ny deploybar enhet i fase 1–2"], "verifier": "T-G1: inspeksjon av at ingen ny Package-target er lagt til før kriteriet i G2 er målt", "status": "candidate", "phase": "Fase 1", "why": "Regelen i Scaffold_Product_Split_Plan: eget scaffold bare ved ulik risikoprofil eller deploytakt, og ikke ett per cellefamilie."}, {"ref": "purpose://candidate.game-workshop.platform.split-out-criteria", "parentRef": "purpose://candidate.game-workshop.platform", "code": "G2", "title": "Kriterier for å skille ut en spillvert", "outcome": "En egen spillvert (eget domene eller target) lages hvis ett av disse slår til: spill trenger lagring per spiller, trafikken fra spill påvirker resten av HAVEN, eller sandkassetesten T-D2 ikke kan bli grønn på samme domene.", "signals": ["Kriteriene måles ved hver publiseringsfase"], "verifier": "T-G2: måling ved fase 3", "status": "candidate", "phase": "Fase 3", "why": "Gjør utskillelsen til en målt beslutning, ikke en smak."}, {"ref": "purpose://candidate.game-workshop.documentation", "parentRef": "purpose://candidate.game-workshop.root", "code": "H", "title": "Dokumentasjon, instruksjoner og skills", "composition": "allOf", "outcome": "Arbeidsbenk-assistenten er et eget dokumentert område som Claude, Codex og mennesker kan bygge videre på.", "signals": ["Området finnes i repoet og er lenket fra Book"], "verifier": "T-H: lenkesjekk og inspeksjon", "status": "candidate", "phase": "Fase 1", "why": "Kjetil: «Dette må dokumenteres som et eget område som vi kan lage instruksjoner og skills til»."}, {"ref": "purpose://candidate.game-workshop.documentation.dedicated-area", "parentRef": "purpose://candidate.game-workshop.documentation", "code": "H1", "title": "Eget område for arbeidsbenk-assistenten", "outcome": "Documentation/Arbeidsbenkassistent/ i CellScaffold beskriver mønsteret, kontrakten og profilformatet, og et Book-kapittel i CellProtocolDocuments beskriver protokolldelen.", "signals": ["Skillet mellom implementert og planlagt står i hver fil"], "verifier": "T-H1: hver påstand om implementert oppførsel har fil:linje", "status": "candidate", "phase": "Fase 1", "why": "Lærdom: planlagt oppførsel dokumentert som implementert."}, {"ref": "purpose://candidate.game-workshop.documentation.skills", "parentRef": "purpose://candidate.game-workshop.documentation", "code": "H2", "title": "Skills for å bygge og bruke arbeidsbenker", "outcome": "To skills: «workbench-assistant-authoring» for å lage en ny arbeidsbenkprofil, og «spillverksted-mentor» for Claude og Codex som hjelper Sverre.", "signals": ["Skillene er distribuert til Claude Code, Codex og Claude Desktop"], "verifier": "T-H2: en ny tråd lager en profil for Developer Workbench bare ved hjelp av skillen", "status": "candidate", "phase": "Fase 2", "why": "Instruksjoner må ligge der neste tråd faktisk leser dem."}, {"ref": "purpose://candidate.game-workshop.documentation.lesson-capture", "parentRef": "purpose://candidate.game-workshop.documentation", "code": "H3", "title": "Lærdommer fanges underveis", "outcome": "Avvik og funn i verkstedet blir lærdommer i registeret og endringer i skills.", "signals": ["Lærdomsregisteret har oppføringer med denne PDD-en som kilde"], "verifier": "T-H3: purpose_dev.py validate er grønn etter hver fase", "status": "gjenbruk", "reused": "purpose://purpose-taxonomy.capture-and-place", "phase": "Alle faser", "why": "P6 i PDD-arbeidsflyten."}], "analysis": {"summary": ["Ingen spillarbeid fantes fra før. «Sverres spillrom» fra 8. oktober er det eneste, og det er en Claude-side, ikke HAVEN.", "HAVEN har det meste av chathjelperen allerede: ruting, forslag med bekreftelse, eskaleringstak, AIGateway og formålsforankring. Det som mangler er at hjelpere kan registreres uten kode, og en kjede fra samtale til forhåndsvisning.", "Formål er bare løst koblet til verktøy og GUI-elementer i dag (fritekst og tre ulike vokabularer). Biblioteket må nøkles på purpose://-refs.", "Spillmotor: KAPLAY først, Phaser når spillene vokser, bak en adapter så valget kan endres.", "Ikke et eget scaffold nå. Brukerlaget spillkode isoleres med sandkasse, og en egen spillvert lages bare hvis målte kriterier slår til.", "Publisering krever Kjetils godkjenning per versjon. HAVEN har ingen barne- eller foresattmodell i dag."], "loop": [["Forstå", "Ønsket klassifiseres mot formålstreet; bare resten dekomponeres.", "modell for resten"], ["Avklar", "Spør bare om det som endrer hva som lages.", ""], ["Foreslå", "Plan med verktøy og GUI-elementer fra biblioteket, med forklaring.", "modell"], ["Vis", "Forhåndsvisning ved siden av samtalen.", ""], ["Bestem", "Brukeren godtar, endrer eller forkaster med et klikk.", ""], ["Utfør", "Målcellen sjekker tilgang og lagrer en versjon.", ""], ["Lær", "Avvik blir lærdommer og skill-endringer.", ""]], "profile": "formålsgren, bibliotek, forhåndsvisningsadapter, tillatte handlinger, tone og alder, eskaleringstak og måletall (andel forslag godtatt uten endring, tid til første forhåndsvisning, avklaringsspørsmål per ønske).", "gaps": [["Samtale med språkmodell", "AIGateway (ai.invoke), Butler Chat-ruting, eskaleringstak", "Hjelpere er hardkodet i chatmotoren"], ["Vise hvordan det blir", "Porthole-editoren lagrer skjelett uten rekompilering", "Ingen kjede fra chat til forhåndsvisning; ingen sandkasse for spill"], ["Formål til verktøy og GUI", "PurposeKnowledgeBase, PurposeDecomposition, ConfigurationCatalog", "Ingen typede koblinger; tre vokabularer; katalogen matcher på fritekst"], ["Bibliotek / RAG", "CommonsLibrarian, kapabilitetsindeksen, RAG-celler (ordsøk)", "Ingen oppføringer nøklet på formål; ingen vektorsøk"], ["Prosjektadministrasjon", "ProjectPortfolio, WorkItem, Developer Workbench", "Barnespråk og versjoner per spill"], ["Publisering", "/pub (Publication), personlig side, Butterpop", "Ingen vei for brukerlaget JS; ingen foresattgodkjenning"], ["Godkjenning", "Spesifisert i PDD_godkjenninger-i-arbeidsbenken", "Ikke bygget; denne siden er midlertidig"]], "engineVerdict": "KAPLAY først, fordi koden er kort og lesbar for et barn og kjører i nettleseren uten byggesteg. Phaser er neste trinn for større spill. Valget bekreftes ved at hjelperen lager fem småspill i hver motor før planen (G2).", "engine": [["Kriterium", "KAPLAY", "Phaser 4", "Godot", "Scratch", "MakeCode Arcade"], ["Kjører i nettleser uten byggesteg", "ja", "ja", "nei, eksport", "ja", "ja, fra makecode.com"], ["Lesbar for et barn", "best", "middels", "eget verktøy", "blokker", "blokker, JS, Python"], ["Modeller skriver riktig kode", "antatt god, ikke målt", "risiko: mest Phaser 3 i treningsdata", "middels", "—", "ikke målt"], ["Kan bygges inn i HAVEN", "ja (MIT)", "ja (MIT)", "tungt", "nei, AGPL siden 2024", "ikke sjekket"], ["Vokser med eleven", "mellomstore spill", "store spill", "fullverdig", "begrenset", "begrenset"]], "scaffold": "Nei, ikke nå. Arbeidsbenken, hjelperen og biblioteket har samme risiko og deploytakt som resten av CellScaffold, og regelen i Scaffold_Product_Split_Plan er at et eget scaffold bare lages når det er annerledes. Det eneste som skiller seg ut er brukerlaget spillkode. Den isoleres med iframe uten allow-same-origin i forhåndsvisning og CSP sandbox på publiserte spill, som gir spillet et eget opphav uten tilgang til HAVEN-økten. En egen spillvert lages hvis spill trenger lagring per spiller, belaster resten av HAVEN, eller sandkassetesten ikke blir grønn.", "library": "Først en katalog nøklet på formål, bygget fra cellenes egne beskrivelser og kapabilitetsindeksen, slik at den ikke råtner. Oppslag går via formål, så ordsøk. Modellen får tekst fra biblioteket først etter oppslaget. Vektorsøk legges til bare hvis målinger på et uavhengig sett viser at ordsøk ikke holder.", "questions": ["Hvor gammel er Sverre, og leser han godt? Det avgjør om de første nivåene skal ha blokker i stedet for tekst.", "Hvilken enhet bruker han mest: iPad, PC eller Mac?", "Hvilken modell skal hjelperen bruke for ham: Claude via AIGateway, eller en lokal modell?", "Skal publiserte spill være åpne for alle, eller bare for dem som har lenken?"], "next": ["Bilder av arbeidsbenken (samtale, forhåndsvisning, prosjekt, bibliotek) til G1-GUI.", "En klikkbar prototype Sverre kan prøve: chat med Claude, KAPLAY-spill i sandkasse og angre.", "Profilformat og kontrakt for arbeidsbenk-assistenten.", "Bibliotek v0 for spill med formål og lisens.", "Motorvalgsmåling: fem småspill i KAPLAY og Phaser."], "docs": ["Formålsspesifikasjon: CellProtocolDocuments/Deliverables/PDD_spillverksted_2026-10-09/FORMAALSSPEC.md", "Mønsteret: CellScaffold Documentation/Arbeidsbenkassistent/README.md", "Spillverkstedet: CellScaffold Documentation/Spillverksted/README.md", "Grunnlag: Book 19 (chat-arbeidsbenk), Book 35 (PDD), Book 36 (formålssammensetning)"]}}</script>
+<script>
+(() => {
+"use strict";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const T = JSON.parse($("tree-data").textContent);
+const SESSION = "session_01EpsSQYe1DthvA4E5RakX6R";
+const by = {}, kids = {};
+T.nodes.forEach((n) => { by[n.ref] = n; });
+T.nodes.forEach((n) => { if (n.parentRef) (kids[n.parentRef] = kids[n.parentRef] || []).push(n.ref); });
+const branches = kids[T.rootRef] || [];
+const hueOf = {};
+branches.forEach((b, i) => { const set = (r) => { hueOf[r] = i % 8; (kids[r] || []).forEach(set); }; set(b); });
+const hue = (r) => r === T.rootRef ? "var(--ink)" : `var(--h${hueOf[r]})`;
+const leaves = T.nodes.filter((n) => !kids[n.ref]);
+$("counts").textContent = `${branches.length} grener · ${leaves.length} bladformål · ${leaves.filter((n) => n.reused).length + T.nodes.filter((n)=>kids[n.ref]&&n.reused).length} gjenbruker Book 23`;
+
+const COMP = { allOf: "Alle barna må oppfylles (allOf)", sequence: "Barna oppfylles i rekkefølge (sequence)", anyOf: "Minst ett barn (anyOf)" };
+
+// ---------- tree layout ----------
+const W = { root: 270, branch: 250, leaf: 290 }, H = { root: 96, other: 52 }, COLX = [0, 300, 580], ROW = 62, ANC_W = 200;
+let collapsed = {}, k = 0;
+try { const s = JSON.parse(localStorage.getItem("spillverksted.view") || "{}"); collapsed = s.collapsed || {}; k = s.k || 0; } catch (e) {}
+const saveView = () => { try { localStorage.setItem("spillverksted.view", JSON.stringify({ collapsed, k })); } catch (e) {} };
+const commented = new Set();
+
+function render() {
+  const layer = $("layer"), svg = $("links");
+  layer.querySelectorAll(".node,.tog").forEach((e) => e.remove());
+  const pos = {}; let row = 0;
+  const x0 = ANC_W + 40;
+  branches.forEach((b) => {
+    const ch = collapsed[b] ? [] : (kids[b] || []);
+    if (!ch.length) { pos[b] = { x: x0 + COLX[1], y: row * ROW, w: W.branch, h: H.other }; row++; }
+    else {
+      ch.forEach((c) => { pos[c] = { x: x0 + COLX[2], y: row * ROW, w: W.leaf, h: H.other }; row++; });
+      const ys = ch.map((c) => pos[c].y);
+      pos[b] = { x: x0 + COLX[1], y: (Math.min(...ys) + Math.max(...ys)) / 2, w: W.branch, h: H.other };
+    }
+    row += 0.35;
+  });
+  const by0 = branches.map((b) => pos[b].y);
+  pos[T.rootRef] = { x: x0, y: Math.max(0, Math.min(...by0)), w: W.root - 30, h: H.root };
+  const paths = [];
+  const link = (a, b, color, dash) => {
+    const x1 = a.x + a.w, y1 = a.y + a.h / 2, x2 = b.x, y2 = b.y + b.h / 2, mx = (x1 + x2) / 2;
+    paths.push(`<path d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}" style="stroke:${color}"${dash ? ' stroke-dasharray="5 5"' : ""}/>`);
+  };
+  // ancestor: Book 23 anchor
+  const anc = { x: 0, y: pos[T.rootRef].y + (H.root - H.other) / 2, w: ANC_W, h: H.other };
+  const ae = document.createElement("button");
+  ae.className = "node anc"; Object.assign(ae.style, { left: anc.x + "px", top: anc.y + "px", width: anc.w + "px", minHeight: anc.h + "px" });
+  ae.innerHTML = `<span class="n">Book 23: Human agency and understanding</span>`;
+  ae.title = T.anchorRef; ae.onclick = () => openAnchor();
+  layer.appendChild(ae);
+  link(anc, pos[T.rootRef], "var(--line2)", true);
+  let maxX = 0, maxY = 0;
+  for (const ref in pos) {
+    const n = by[ref], p = pos[ref];
+    const el = document.createElement("button");
+    el.className = "node" + (ref === T.rootRef ? " root" : "") + (commented.has(n.code) ? " cmt" : "");
+    el.style.setProperty("--hue", hue(ref));
+    Object.assign(el.style, { left: p.x + "px", top: p.y + "px", width: p.w + "px", minHeight: p.h + "px" });
+    el.innerHTML = `<span class="c">${esc(n.code)}</span><span class="n">${esc(n.title)}</span>${n.reused ? '<span class="reuse">gjenbruk</span>' : ""}`;
+    el.setAttribute("aria-label", `${n.code}: ${n.title}. Vis detaljer`);
+    el.onclick = () => openNode(ref);
+    layer.appendChild(el);
+    maxX = Math.max(maxX, p.x + p.w); maxY = Math.max(maxY, p.y + p.h);
+    const ch = kids[ref] || [];
+    if (ref !== T.rootRef && ch.length) {
+      const t = document.createElement("button");
+      t.className = "tog"; t.style.setProperty("--hue", hue(ref));
+      Object.assign(t.style, { left: (p.x + p.w - 12) + "px", top: (p.y + p.h / 2 - 12) + "px" });
+      t.textContent = collapsed[ref] ? "+" + ch.length : "−";
+      t.setAttribute("aria-label", collapsed[ref] ? "Vis underformål" : "Skjul underformål");
+      t.onclick = (e) => { e.stopPropagation(); collapsed[ref] = !collapsed[ref]; saveView(); render(); };
+      layer.appendChild(t);
+    }
+    if (ch.length && (ref === T.rootRef || !collapsed[ref])) ch.forEach((c) => pos[c] && link(p, pos[c], hue(c)));
+  }
+  svg.innerHTML = paths.join("");
+  svg.setAttribute("width", maxX + 20); svg.setAttribute("height", maxY + 20);
+  layer.style.width = (maxX + 40) + "px"; layer.style.height = (maxY + 40) + "px";
+  if (!k) { const avail = $("map").clientWidth - 16; k = Math.max(0.55, Math.min(1, +(avail / (maxX + 40)).toFixed(2))); }
+  layer.style.transform = `scale(${k})`;
+  layer.style.marginBottom = ((maxY + 40) * (k - 1)) + "px";
+  layer.style.marginRight = ((maxX + 40) * (k - 1)) + "px";
+  $("collapse").textContent = branches.every((b) => collapsed[b]) ? "Vis alle" : "Skjul blad";
+}
+$("zin").onclick = () => { k = Math.min(1.6, +(k + 0.15).toFixed(2)); saveView(); render(); };
+$("zout").onclick = () => { k = Math.max(0.5, +(k - 0.15).toFixed(2)); saveView(); render(); };
+$("collapse").onclick = () => { const all = branches.every((b) => collapsed[b]); branches.forEach((b) => { collapsed[b] = !all; }); saveView(); render(); };
+
+// ---------- popup ----------
+const dlg = $("dlg");
+function chain(ref) { const out = []; let r = by[ref]?.parentRef; while (r) { out.unshift(by[r]); r = by[r].parentRef; } return out; }
+function openNode(ref) {
+  const n = by[ref], ch = (kids[ref] || []).map((r) => by[r]);
+  $("dcontent").innerHTML = `
+  <div class="dh" style="--hue:${hue(ref)}"><span class="node" style="position:static;padding:2px 0;border:0;background:none"><span class="c">${esc(n.code)}</span></span><h3 id="dtitle">${esc(n.title)}</h3><button class="btn" id="dclose" aria-label="Lukk">Lukk</button></div>
+  <div class="db" style="--hue:${hue(ref)}">
+    ${chain(ref).length ? `<div class="crumbs">${chain(ref).map((c) => `<button data-go="${esc(c.ref)}">${esc(c.code)} ${esc(c.title)}</button>`).join(" › ")}</div>` : `<div class="crumbs">Hører hjemme under Book 23: <span class="ref">${esc(T.anchorRef)}</span></div>`}
+    <div class="goal"><div class="k">Mål (Goal)</div><div>${esc(n.outcome)}</div>
+      ${(n.signals || []).length ? `<div class="k" style="margin-top:10px">Tegn på at målet er nådd</div><ul>${n.signals.map((s) => `<li>${esc(s)}</li>`).join("")}</ul>` : ""}</div>
+    <div><div class="k">Hvordan det sjekkes</div><div>${esc(n.verifier)}</div></div>
+    <div class="meta">
+      <div><div class="k">Fase</div>${esc(n.phase || "—")}</div>
+      <div><div class="k">Status</div>${esc(n.status)}</div>
+      <div><div class="k">Sammensetning</div>${ch.length ? esc(COMP[n.composition] || n.composition || "ikke satt") : "Bladformål"}</div>
+    </div>
+    ${n.reused ? `<div><div class="k">Gjenbruker fra Book 23</div><span class="ref">${esc(n.reused)}</span></div>` : ""}
+    ${n.why ? `<div><div class="k">Hvorfor</div><div>${esc(n.why)}</div></div>` : ""}
+    ${ch.length ? `<div><div class="k">Underformål</div><div class="kids">${ch.map((c) => `<button data-go="${esc(c.ref)}">${esc(c.code)} ${esc(c.title)}</button>`).join("")}</div></div>` : ""}
+    <div><div class="k">Ref</div><span class="ref">${esc(n.ref)}</span></div>
+    <div class="row"><button class="btn primary" id="dcomment">Kommenter ${esc(n.code)}</button></div>
+  </div>`;
+  $("dclose").onclick = () => dlg.close();
+  $("dcomment").onclick = () => { const c = $("comment"); c.value = (c.value.trim() ? c.value.trimEnd() + "\n" : "") + `[${n.code}] `; dlg.close(); c.focus(); c.setSelectionRange(c.value.length, c.value.length); commented.add(n.code); render(); };
+  $("dcontent").querySelectorAll("[data-go]").forEach((b) => b.onclick = () => openNode(b.dataset.go));
+  if (!dlg.open) dlg.showModal();
+}
+function openAnchor() {
+  $("dcontent").innerHTML = `<div class="dh"><h3 id="dtitle">Hvor treet hører hjemme</h3><button class="btn" id="dclose">Lukk</button></div>
+  <div class="db"><div><div class="k">Book 23</div><span class="ref">${esc(T.anchorRef)}</span></div><div>${esc(T.anchorNote)}</div>
+  <div class="muted small">Alle nye formål er kandidater. De blir en del av Book 23 først når du har godkjent dem som forslag.</div></div>`;
+  $("dclose").onclick = () => dlg.close();
+  dlg.showModal();
+}
+dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
+
+// ---------- tabs ----------
+function tab(name) {
+  $("tab-tree").setAttribute("aria-selected", name === "tree"); $("tab-ana").setAttribute("aria-selected", name === "ana");
+  $("view-tree").hidden = name !== "tree"; $("view-ana").hidden = name !== "ana";
+  try { localStorage.setItem("spillverksted.tab", name); } catch (e) {}
+}
+$("tab-tree").onclick = () => tab("tree"); $("tab-ana").onclick = () => tab("ana");
+
+// ---------- analysis ----------
+const A = T.analysis;
+$("nextlist").innerHTML = A.next.map((x) => `<li>${esc(x)}</li>`).join("");
+$("ana").innerHTML = `
+  <section><h2>Kort fortalt</h2><ul>${A.summary.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></section>
+  <section><h2>Arbeidsbenk-assistenten: løkken</h2><p class="muted">Samme løkke i alle arbeidsbenker. Modellen deltar bare der det står «modell».</p>
+    <div class="loop">${A.loop.map((s, i) => `<div><b>${i + 1}. ${esc(s[0])}</b>${esc(s[1])}${s[2] ? `<div class="m">${esc(s[2])}</div>` : ""}</div>`).join("")}</div>
+    <p style="margin-top:10px">En arbeidsbenk tar mønsteret i bruk med en profil: ${esc(A.profile)}</p></section>
+  <section><h2>Hva som finnes, og hva som mangler</h2>
+    <div class="tbl"><table><thead><tr><th>Behov</th><th>Finnes i HAVEN</th><th>Mangler</th></tr></thead><tbody>
+    ${A.gaps.map((g) => `<tr><td>${esc(g[0])}</td><td>${esc(g[1])}</td><td>${esc(g[2])}</td></tr>`).join("")}</tbody></table></div></section>
+  <section><h2>Spillmotor</h2><p>${esc(A.engineVerdict)}</p>
+    <div class="tbl"><table><thead><tr>${A.engine[0].map((h) => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>
+    ${A.engine.slice(1).map((r) => `<tr>${r.map((c, i) => `<td class="${i === 1 ? "win" : ""}">${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div></section>
+  <section><h2>Eget scaffold?</h2><p>${esc(A.scaffold)}</p></section>
+  <section><h2>Bibliotek eller RAG?</h2><p>${esc(A.library)}</p></section>
+  <section><h2>Spørsmål som kan endre treet</h2><ol>${A.questions.map((q) => `<li>${esc(q)}</li>`).join("")}</ol></section>
+  <section><h2>Dokumenter</h2><ul>${A.docs.map((d) => `<li>${esc(d)}</li>`).join("")}</ul></section>`;
+
+// ---------- gate: approval ----------
+let db = null, user = null, mcp = null, isOwner = false, sending = false;
+const msg = (cls, text) => { const m = $("gatemsg"); m.className = "msg " + cls; m.textContent = text; m.hidden = false; };
+function setPill(latest) {
+  const p = $("gatepill");
+  p.className = "gatepill" + (latest?.decision === "godkjent" ? " ok" : latest?.decision === "endringer" ? " chg" : "");
+  $("gatetext").textContent = latest?.decision === "godkjent" ? "G1 godkjent, fase 1 i gang" : latest?.decision === "endringer" ? "Endringer bedt om" : "G1 venter på deg";
+}
+function fmt(iso) { try { return new Date(iso).toLocaleString("nb-NO", { dateStyle: "medium", timeStyle: "short" }); } catch (e) { return iso; } }
+function renderHist(rows) {
+  setPill(rows[0]);
+  $("hist").innerHTML = rows.length ? rows.map((r) => `<div class="hi"><b>${r.decision === "godkjent" ? "Godkjent" : "Endringer bedt om"}</b> <span class="when">${esc(fmt(r.at))}</span>
+    ${r.comment ? `<div style="white-space:pre-wrap">${esc(r.comment)}</div>` : ""}
+    <div class="when">${r.notified === true ? "Sendt til Claude" : r.notified === false ? "Ikke sendt til Claude" : ""}</div></div>`).join("") : `<p class="muted small">Ingen beslutninger ennå.</p>`;
+}
+async function decide(decision) {
+  if (sending) return;
+  const comment = $("comment").value.trim();
+  if (decision === "endringer" && !comment) { msg("warn", "Skriv hva du vil ha endret, så vet Claude hva neste runde skal gjøre."); $("comment").focus(); return; }
+  if (!db) { msg("bad", "Beslutningen kan ikke lagres her. Åpne siden innlogget i Claude, eller skriv beslutningen i tråden."); return; }
+  if (!isOwner) { msg("bad", "Bare eieren av siden kan godkjenne."); return; }
+  sending = true; $("approve").disabled = $("changes").disabled = true;
+  msg("", "Lagrer beslutningen…");
+  const at = new Date().toISOString();
+  let ref;
+  try {
+    ref = await db.collection("gates").add({ gate: "G1", pdd: T.pdd, decision, comment, at, by: (await user?.id?.()) || null, notified: null });
+  } catch (e) {
+    msg("bad", "Beslutningen ble ikke lagret (" + (e.code || "ukjent feil") + "). Prøv igjen, eller skriv den i tråden.");
+    sending = false; $("approve").disabled = $("changes").disabled = false; return;
+  }
+  let notified = false, why = "";
+  if (mcp) {
+    const text = decision === "godkjent"
+      ? `Kjetil godkjente G1 for ${T.pdd} på formålssiden ${at}. Start fase 1.${comment ? "\n\nKommentar:\n" + comment : ""}`
+      : `Kjetil ba om endringer i G1 for ${T.pdd} på formålssiden ${at}. Lag en ny runde av treet.\n\nKommentar:\n${comment}`;
+    try { await mcp.callTool("Claude Code Remote", "send_message", { session_id: SESSION, message: text }, { cache: false }); notified = true; }
+    catch (e) { why = e.code === "not_granted" || e.code === "denied" ? "du ga ikke siden lov til å varsle Claude" : e.code === "server_not_connected" ? "Claude Code Remote er ikke koblet til" : (e.code || "ukjent feil"); }
+  } else why = "varsling er ikke tilgjengelig i denne visningen";
+  try { await ref.update({ notified }); } catch (e) {}
+  if (notified) msg("ok", decision === "godkjent" ? "Godkjent og sendt til Claude. Fase 1 starter i tråden «Små spill for Sverre»." : "Sendt til Claude. Neste runde av treet kommer i tråden.");
+  else msg("warn", `Beslutningen er lagret, men Claude ble ikke varslet: ${why}. Skriv «${decision === "godkjent" ? "godkjent" : "se kommentarene"}» i tråden, så leser Claude den herfra.`);
+  if (notified) $("comment").value = "";
+  sending = false; $("approve").disabled = $("changes").disabled = false;
+}
+$("approve").onclick = () => decide("godkjent");
+$("changes").onclick = () => decide("endringer");
+
+(async () => {
+  const c = window.claude;
+  if (!c?.use) { msg("warn", "Lagring og varsling er ikke tilgjengelig i denne visningen. Du kan lese planen og gi beslutningen i tråden."); return; }
+  const [d, u, m] = await Promise.all([c.use("db"), c.use("user"), c.use("mcp")]);
+  db = d; user = u; mcp = m;
+  try { isOwner = (await user?.isOwner?.()) ?? false; } catch (e) {}
+  if (!db) msg("warn", "Lagring er ikke tilgjengelig. Du kan gi beslutningen i tråden.");
+  else if (!isOwner) { $("approve").disabled = $("changes").disabled = true; msg("", "Bare Kjetil kan godkjenne. Du kan lese planen og se beslutningene."); }
+  if (db) db.collection("gates").orderBy("at", "desc").limit(20).onSnapshot((s) => renderHist(s.docs.map((x) => x.data() || {})), () => {});
+})();
+
+render();
+try { if (localStorage.getItem("spillverksted.tab") === "ana") tab("ana"); } catch (e) {}
+})();
+</script>

@@ -1,0 +1,164 @@
+{
+  "role": "gjest",
+  "principal": "guest:{guest_id}",
+  "note": "Gjesten som har vært på Palazzo før og har en privat entitet. Formålene er hentet fra §1 i PDD_palazzo-gjestebestilling, PDD_palazzo-husk-det-jeg-sa og PDD_palazzo-sicilia-artikler.",
+  "purposes": [
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.gjest.own-entity",
+      "title": "Gjesten leser sin egen entitet",
+      "calibration": "positive",
+      "action": {
+        "method": "GET",
+        "path": "/api/entity/state"
+      },
+      "expect": {
+        "access": "allowed",
+        "state": {
+          "path": "value",
+          "op": "ne",
+          "value": null
+        }
+      },
+      "why": "Kalibrering: klarer aktøren ikke dette, er det aktøren som er i stykker.",
+      "null_principal_may_reach": true
+    },
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.gjest.house-ledger",
+      "title": "Gjesten leser husets personalliste",
+      "calibration": "null",
+      "action": {
+        "method": "GET",
+        "path": "/api/house/staff"
+      },
+      "expect": {
+        "access": "denied"
+      },
+      "why": "Riktig stopp: husets personalliste er ikke gjestens data."
+    },
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.gjest.record-visit",
+      "title": "Gjesten lagrer noe i sin egen entitet",
+      "action": {
+        "method": "POST",
+        "path": "/api/entity/record",
+        "json": {
+          "value": {
+            "kind": "note",
+            "text": "rollesimulering"
+          }
+        }
+      },
+      "expect": {
+        "access": "allowed",
+        "state": {
+          "path": "value",
+          "op": "ne",
+          "value": null
+        }
+      },
+      "null_principal_may_reach": true
+    },
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.gjest.read-articles",
+      "title": "Gjesten ser Sicilia-artiklene",
+      "action": {
+        "method": "GET",
+        "path": "/api/content"
+      },
+      "expect": {
+        "access": "allowed",
+        "state": {
+          "path": "value.items#",
+          "op": "gte",
+          "value": 1
+        }
+      },
+      "stop_is": "feil",
+      "why": "Er innholdscellen ikke publisert over bridgehead, stopper appveien her. Dette er stoppet Sicilia G7 skal lukke, og kjøringen skal finne det selv.",
+      "null_principal_may_reach": true,
+      "null_exempt_why": "publisert innhold er offentlig; at en principal uten grants nar det er riktig, ikke lekkasje"
+    },
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.gjest.react-to-article",
+      "title": "Gjesten reagerer på en artikkel, og reaksjonen huskes",
+      "action": {
+        "method": "POST",
+        "path": "/api/entity/article/react",
+        "json": {
+          "value": {
+            "articleID": "{article_id}",
+            "reaction": "interessant"
+          }
+        }
+      },
+      "expect": {
+        "access": "allowed",
+        "state": {
+          "path": "value",
+          "op": "ne",
+          "value": null
+        }
+      },
+      "null_principal_may_reach": true,
+      "null_exempt_why": "reaksjonen lagres i aktorens egen entitet; enhver gjest kan reagere pa egne vegne"
+    },
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.gjest.article-configuration",
+      "title": "Gjesten får artikkelflaten sin",
+      "action": {
+        "method": "GET",
+        "path": "/api/guest/article/configuration"
+      },
+      "expect": {
+        "access": "allowed",
+        "state": {
+          "path": "value",
+          "op": "ne",
+          "value": null
+        }
+      },
+      "stop_is": "feil",
+      "why": "Samme bridgehead-avhengighet som over.",
+      "null_principal_may_reach": true,
+      "null_exempt_why": "gjestens egen artikkelflate"
+    },
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.gjest.consent-state",
+      "title": "Gjesten ser hva hun har delt, og med hvem",
+      "action": {
+        "method": "GET",
+        "path": "/api/consent/state"
+      },
+      "expect": {
+        "access": "allowed",
+        "state": {
+          "path": "value",
+          "op": "ne",
+          "value": null
+        }
+      },
+      "null_principal_may_reach": true
+    },
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.gjest.revoke",
+      "title": "Gjesten kan trekke tilbake en tilgang hun har gitt",
+      "action": {
+        "method": "POST",
+        "path": "/api/access/revoke",
+        "json": {
+          "value": {
+            "agreementID": "{agreement_id}"
+          }
+        }
+      },
+      "expect": {
+        "access": "allowed",
+        "state": {
+          "path": "value",
+          "op": "ne",
+          "value": null
+        }
+      }
+    }
+  ]
+}

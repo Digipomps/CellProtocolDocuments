@@ -1,0 +1,367 @@
+diff --git a/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift b/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift
+index 383a383f..f7583d81 100644
+--- a/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift
++++ b/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift
+@@ -4577,7 +4577,9 @@ actor PersonalCopilotCloudStore {
+                 id: "perspective.chat-interpreter-ceiling",
+                 source: .perspective,
+                 mode: Self.perspectiveInterpreterCeilingMode(purposeContext),
+-                reason: "requester_perspective_context"
++                reason: purposeContext.libraryProjectionStatus != nil || purposeContext.isEmpty
++                    ? "perspective_automatic_policy_unavailable"
++                    : "requester_perspective_context"
+             )
+         ]
+ 
+@@ -4606,13 +4608,20 @@ actor PersonalCopilotCloudStore {
+     }
+ 
+     private static func perspectiveInterpreterCeilingMode(_ purposeContext: ChatPurposeContext) -> ChatInterpreterEscalationMode {
++        // Resolved library tokens carry routing context, not permission to invoke a model.
++        // No separate authorized automatic policy is supplied by this projection contract.
++        guard purposeContext.libraryProjectionStatus == nil, !purposeContext.isEmpty else {
++            return .askEachTime
++        }
++        return legacyPerspectiveHasConferenceScope(purposeContext) ? .askEachTime : .automaticWithinGrant
++    }
++
++    private static func legacyPerspectiveHasConferenceScope(_ purposeContext: ChatPurposeContext) -> Bool {
++        guard purposeContext.libraryProjectionStatus == nil else { return false }
+         let text = (purposeContext.purposeRefs + purposeContext.interests + [purposeContext.source])
+             .joined(separator: " ")
+             .lowercased()
+-        if text.contains("conference") || text.contains("arendalsuka") {
+-            return .askEachTime
+-        }
+-        return .automaticWithinGrant
++        return text.contains("conference") || text.contains("arendalsuka")
+     }
+ 
+     private func isConferenceInterpreterScope(
+@@ -4622,7 +4631,7 @@ actor PersonalCopilotCloudStore {
+         if let thread, acceptedParticipantCount(in: thread) > 1 {
+             return true
+         }
+-        return Self.perspectiveInterpreterCeilingMode(purposeContext) == .askEachTime
++        return Self.legacyPerspectiveHasConferenceScope(purposeContext)
+     }
+ 
+     private func chatAutomaticEscalationObject(requesterUUID: String, threadID: String?) -> Object {
+@@ -8868,10 +8877,10 @@ actor PersonalCopilotCloudStore {
+     }
+ 
+     private func chatPurposeContext(for requester: Identity) async -> ChatPurposeContext {
+-        var context = ChatPurposeContext.from(requester: requester)
+-        if let activePurposes = await scopedCellValue(endpoint: "cell:///Perspective", keypath: "activePurpose", requester: requester) {
+-            context = context.merging(ChatPurposeContext.from(value: activePurposes, source: "PerspectiveCell.activePurpose"))
+-        }
++        let activePurposes = await scopedCellValue(endpoint: "cell:///Perspective", keypath: "activePurpose", requester: requester)
++        let activeContext = ChatPurposeContext.fromPerspective(value: activePurposes, source: "PerspectiveCell.activePurpose")
++        if activeContext.libraryProjectionStatus != nil { return activeContext }
++        var context = ChatPurposeContext.from(requester: requester).merging(activeContext)
+         if let perspectiveState = await scopedCellValue(endpoint: "cell:///Perspective", keypath: "perspective.state", requester: requester) {
+             context = context.merging(ChatPurposeContext.from(value: perspectiveState, source: "PerspectiveCell.state"))
+         }
+@@ -9001,7 +9010,10 @@ actor PersonalCopilotCloudStore {
+                 "truthSources": .list([]),
+                 "assistantProviders": .list([]),
+                 "providerRecommendation": .null,
+-                "purposeContext": .object([:]),
++                "purposeContext": .object(ChatPurposeContext.fromPerspective(
++                    value: nil,
++                    source: "chatstate.no_current_perspective_observation"
++                ).objectValue()),
+                 "sideEffectsRequireClick": .bool(true),
+                 "scope": .string("owner_visible_cellprotocol_scope"),
+                 "privacyBoundary": .string("no_global_identifier_no_cross_domain_merge")
+@@ -9047,7 +9059,12 @@ actor PersonalCopilotCloudStore {
+             availableRAGCases = nil
+             documentationResources = []
+             truthSources = []
+-            purposeContext = ChatPurposeContext.from(requester: requester)
++            // Ordinary state/refresh does not perform discovery and has no fresh projection.
++            // Cached suggestions and identity properties cannot establish current selection.
++            purposeContext = ChatPurposeContext.fromPerspective(
++                value: nil,
++                source: "chatstate.no_current_perspective_observation"
++            )
+             resourceMatches = resourceMatchesOverride
+                 ?? state.chatResourceMatchesByRequester[requester.uuid]
+                 ?? []
+diff --git a/Sources/App/Cells/Perspective/PerspectiveCell.swift b/Sources/App/Cells/Perspective/PerspectiveCell.swift
+index 8a7492ab..6aac2db4 100644
+--- a/Sources/App/Cells/Perspective/PerspectiveCell.swift
++++ b/Sources/App/Cells/Perspective/PerspectiveCell.swift
+@@ -4,6 +4,10 @@
+ import Foundation
+ import CellBase
+ 
++enum PerspectiveRuntimeBindingError: Error, Equatable {
++    case ownerDescriptorMismatch
++}
++
+ enum PerspectiveLearningContract {
+     static let stateKeypath = "perspective.learning.state"
+     static let configureKeypath = "perspective.learning.configure"
+@@ -259,8 +263,7 @@ final class PerspectiveCell: GeneralCell {
+         self.purposeLearningHistory = []
+         await super.init(owner: owner)
+         self.identityDomain = "private"
+-        await setupPermissions(owner: owner)
+-        await setupKeys(owner: owner)
++        try? await ensureRuntimeReady()
+     }
+ 
+     required init(from decoder: Decoder) throws {
+@@ -278,13 +281,19 @@ final class PerspectiveCell: GeneralCell {
+         self.learnedPurposeRelations = (try? container.decode([LearnedPurposeRelation].self, forKey: .learnedPurposeRelations)) ?? []
+         self.purposeLearningHistory = (try? container.decode([PurposeLearningEvent].self, forKey: .purposeLearningHistory)) ?? []
+         try super.init(from: decoder)
+-        Task {
+-            if let vault = CellBase.defaultIdentityVault,
+-               let owner = await vault.identity(for: "private", makeNewIfNotFound: true) {
+-                await self.setupPermissions(owner: owner)
+-                await self.setupKeys(owner: owner)
++        self.identityDomain = "private"
++    }
++
++    override func installCellRuntimeBindingsForAccess() async throws {
++        let owner = storedOwnerIdentity
++        try stateQueue.sync {
++            guard ownerUUID == "unknown" || ownerUUID == owner.uuid else {
++                throw PerspectiveRuntimeBindingError.ownerDescriptorMismatch
+             }
++            ownerUUID = owner.uuid
+         }
++        await setupPermissions(owner: owner)
++        await setupKeys(owner: owner)
+     }
+ 
+     override func encode(to encoder: Encoder) throws {
+@@ -341,7 +350,7 @@ final class PerspectiveCell: GeneralCell {
+             PerspectiveLearningContract.configureKeypath,
+             PerspectiveLearningContract.observePurposeVisitKeypath,
+             PerspectiveLearningContract.resetKeypath
+-        ].forEach { agreementTemplate.addGrant("rw--", for: $0) }
++        ].forEach { agreementTemplate.ensureGrant("rw--", for: $0) }
+     }
+ 
+     private func setupKeys(owner: Identity) async {
+diff --git a/Sources/App/Cells/Spatial/SpatialCells.swift b/Sources/App/Cells/Spatial/SpatialCells.swift
+index 4e07ac6e..e492224b 100644
+--- a/Sources/App/Cells/Spatial/SpatialCells.swift
++++ b/Sources/App/Cells/Spatial/SpatialCells.swift
+@@ -1640,6 +1640,10 @@ final class SpatialProjectionCell: GeneralCell {
+ 
+     private static func purposeInterestDefaults(from value: ValueType) -> (purposeRefs: [String], interestRefs: [String]) {
+         guard let object = SpatialValue.object(value) else { return ([], []) }
++        if PerspectiveLibraryProjection.recognizes(object) || PerspectiveLibraryProjection.requiresSharedGraphAdapter(object) {
++            let context = ChatPurposeContext.fromPerspective(value: value, source: "Perspective.activePurpose")
++            return (context.purposeRefs, context.interests)
++        }
+         var purposeRefs = SpatialValue.stringList(object["purposeRefs"])
+         var interestRefs = SpatialValue.stringList(object["interestRefs"])
+         interestRefs.append(contentsOf: SpatialValue.stringList(object["interests"]))
+diff --git a/Sources/App/Support/ChatPurposeResourceRouter.swift b/Sources/App/Support/ChatPurposeResourceRouter.swift
+index a5f39a12..44419884 100644
+--- a/Sources/App/Support/ChatPurposeResourceRouter.swift
++++ b/Sources/App/Support/ChatPurposeResourceRouter.swift
+@@ -302,13 +302,16 @@ struct ChatPurposeContext: Codable, Equatable {
+     var source: String
+ 
+     static let empty = ChatPurposeContext(purposeRefs: [], interests: [], weights: [:], source: "none")
++    // Optional for existing encoded contexts. A present value forbids legacy merging/fallback,
++    // including an intentionally empty selection or an unavailable canonical source.
++    var libraryProjectionStatus: PerspectiveLibraryProjection.Status? = nil
+ 
+     var isEmpty: Bool {
+         purposeRefs.isEmpty && interests.isEmpty
+     }
+ 
+     func objectValue() -> Object {
+-        [
++        var object: Object = [
+             "purposeRefs": .list(purposeRefs.map(ValueType.string)),
+             "interests": .list(interests.map(ValueType.string)),
+             "weights": .object(weights.reduce(into: Object()) { result, entry in
+@@ -317,9 +320,16 @@ struct ChatPurposeContext: Codable, Equatable {
+             "source": .string(source),
+             "privacyBoundary": .string("requester-local-purpose-context")
+         ]
++        if let libraryProjectionStatus {
++            object["referenceMode"] = .string(PerspectiveLibraryProjection.mode)
++            object["libraryProjectionStatus"] = .string(libraryProjectionStatus.rawValue)
++        }
++        return object
+     }
+ 
+     func merging(_ other: ChatPurposeContext) -> ChatPurposeContext {
++        if other.libraryProjectionStatus != nil { return other }
++        if libraryProjectionStatus != nil { return self }
+         guard other.isEmpty == false else { return self }
+         guard isEmpty == false else { return other }
+         var purposeRefsByKey = purposeRefs.reduce(into: [String: String]()) { result, value in
+@@ -356,6 +366,16 @@ struct ChatPurposeContext: Codable, Equatable {
+     }
+ 
+     func matchBoost(purposeRefs: [String], interests: [String]) -> Double {
++        if let libraryProjectionStatus {
++            guard libraryProjectionStatus == .ready else { return 0 }
++            let purposeScore = Set(purposeRefs).intersection(self.purposeRefs).reduce(0.0) {
++                $0 + 0.16 * (weights[$1] ?? 0)
++            }
++            let interestScore = Set(interests).intersection(self.interests).reduce(0.0) {
++                $0 + 0.07 * (weights[$1] ?? 0)
++            }
++            return min(0.24, purposeScore + interestScore)
++        }
+         guard isEmpty == false else { return 0 }
+         let purposeBoost = overlapBoost(candidateValues: purposeRefs, contextValues: self.purposeRefs, exactWeight: 0.16, tokenWeight: 0.05)
+         let interestBoost = overlapBoost(candidateValues: interests, contextValues: self.interests, exactWeight: 0.07, tokenWeight: 0.03)
+@@ -367,7 +387,49 @@ struct ChatPurposeContext: Codable, Equatable {
+         return from(value: .object(properties), source: "identity.properties")
+     }
+ 
++    /// Read boundary for the actual Perspective endpoint. Absence/denial is not permission to
++    /// rebuild purpose context from cached properties or the separate legacy state endpoint.
++    static func fromPerspective(value: ValueType?, source: String) -> ChatPurposeContext {
++        guard let value, case let .object(object) = value,
++              PerspectiveLibraryProjection.recognizes(object) || object["status"] == .string("ok") else {
++            return ChatPurposeContext(purposeRefs: [], interests: [], weights: [:], source: source, libraryProjectionStatus: .unavailable)
++        }
++        return from(value: value, source: source)
++    }
++
+     static func from(value: ValueType?, source: String) -> ChatPurposeContext {
++        // Raw graph bodies and pinned logical references need the shared CP adapter. Never flatten
++        // them through ContextBuilder, even if a caller attaches a legacy status or v0 view marker.
++        if let value, case let .object(object) = value, PerspectiveLibraryProjection.requiresSharedGraphAdapter(object) {
++            return ChatPurposeContext(purposeRefs: [], interests: [], weights: [:], source: source, libraryProjectionStatus: .unavailable)
++        }
++        // Preserve the boundary when our normalized advisory context is serialized and read back.
++        if let value, case let .object(object) = value, object["libraryProjectionStatus"] != nil {
++            if var context = try? JSONDecoder().decode(Self.self, from: JSONEncoder().encode(value)),
++               let status = context.libraryProjectionStatus {
++                let projected = PerspectiveLibraryProjection(
++                    status: status,
++                    purposes: context.purposeRefs.map { .init(token: $0, label: $0, weight: context.weights[$0] ?? 0) },
++                    interests: context.interests.map { .init(token: $0, label: $0, weight: context.weights[$0] ?? 0) }
++                )
++                if let projectedValue = try? projected.value(), PerspectiveLibraryProjection.decode(projectedValue) != nil {
++                    context.source = source
++                    return context
++                }
++            }
++            return ChatPurposeContext(purposeRefs: [], interests: [], weights: [:], source: source, libraryProjectionStatus: .unavailable)
++        }
++        if let value, case let .object(object) = value, PerspectiveLibraryProjection.recognizes(object) {
++            guard let projection = PerspectiveLibraryProjection.decode(value) else {
++                return ChatPurposeContext(purposeRefs: [], interests: [], weights: [:], source: source, libraryProjectionStatus: .unavailable)
++            }
++            return ChatPurposeContext(
++                purposeRefs: projection.purposes.map(\.token),
++                interests: projection.interests.map(\.token),
++                weights: Dictionary(uniqueKeysWithValues: (projection.purposes + projection.interests).map { ($0.token, $0.weight) }),
++                source: source, libraryProjectionStatus: projection.status
++            )
++        }
+         var builder = ContextBuilder()
+         builder.collect(value, hint: nil, inheritedWeight: nil)
+         return builder.build(source: source)
+diff --git a/Sources/App/configure.swift b/Sources/App/configure.swift
+index 57bc29bd..74d575d1 100644
+--- a/Sources/App/configure.swift
++++ b/Sources/App/configure.swift
+@@ -1219,6 +1219,7 @@ public func configure(_ app: Application) async throws {
+                 try await addCellResolveIfNeeded(name: FlowDebugProbeContract.cellName, cellScope: .identityUnique, persistency: .persistant, type: FlowDebugProbeCell.self)
+                 try await addCellResolveIfNeeded(name: "DisplayNameAccessGate", cellScope: .scaffoldUnique, persistency: .persistant, type: DisplayNameAccessGateCell.self)
+                 try await addCellResolveIfNeeded(name: "EntityStudio", cellScope: .identityUnique, persistency: .persistant, type: EntityStudioCell.self)
++                try await addCellResolveIfNeeded(name: EntityPurposeLibrarySetupContract.cellName, cellScope: .identityUnique, persistency: .ephemeral, type: EntityPurposeLibrarySetupCell.self)
+                 try await addCellResolveIfNeeded(name: "ParticipationHub", cellScope: .identityUnique, persistency: .persistant, type: ParticipationHubCell.self)
+                 try await addCellResolveIfNeeded(name: "RAGGateway", cellScope: .identityUnique, persistency: .persistant, type: RAGGatewayCell.self)
+                 try await addCellResolveIfNeeded(name: "AIGateway", cellScope: .identityUnique, persistency: .persistant, type: AIGatewayCell.self)
+@@ -1330,6 +1331,7 @@ public func configure(_ app: Application) async throws {
+             try await addCellResolveIfNeeded(name: "DraftVersion", cellScope: .identityUnique, persistency: .persistant, type: DraftVersionCell.self)
+             try await addCellResolveIfNeeded(name: "EntitiesWrapper", cellScope: .identityUnique, persistency: .persistant, type: EntitiesWrapperCell.self)
+             try await addCellResolveIfNeeded(name: "EntityStudio", cellScope: .identityUnique, persistency: .persistant, type: EntityStudioCell.self)
++            try await addCellResolveIfNeeded(name: EntityPurposeLibrarySetupContract.cellName, cellScope: .identityUnique, persistency: .ephemeral, type: EntityPurposeLibrarySetupCell.self)
+             try await addCellResolveIfNeeded(name: "GitHubWorkSync", cellScope: .identityUnique, persistency: .persistant, type: GitHubWorkSyncCell.self)
+             try await addCellResolveIfNeeded(name: "IdeaTaskWorkspace", cellScope: .identityUnique, persistency: .persistant, type: IdeaTaskWorkspaceCell.self)
+             try await addCellResolveIfNeeded(name: "MarkdownRenderer", cellScope: .identityUnique, persistency: .persistant, type: MarkdownRendererCell.self)
+diff --git a/Tests/AppTests/PersonalCopilotV1Tests.swift b/Tests/AppTests/PersonalCopilotV1Tests.swift
+index f4a9d6a7..3d7bf381 100644
+--- a/Tests/AppTests/PersonalCopilotV1Tests.swift
++++ b/Tests/AppTests/PersonalCopilotV1Tests.swift
+@@ -1894,6 +1894,7 @@ final class PersonalCopilotV1Tests: IsolatedCellTestCase {
+ 
+     func testChatInterpreterEscalationDecisionAuditsPermitDowngradeAndDenyWithSharedCorrelation() async throws {
+         let alice = try await testIdentity("assistant-auto-ceiling-audit-alice", displayName: "Auto Ceiling Audit Alice")
++        try await CopilotPerspectiveResponseFixture.installLegacyPersonalContext(owner: alice)
+         let chat = await PersonalChatHubCell(owner: alice)
+         let provider = automaticEscalationTestProvider()
+         let adapter = installAutomaticEscalationTestDoubles(outputText: "external-model-output: permit audit proposal")
+@@ -2024,6 +2025,7 @@ final class PersonalCopilotV1Tests: IsolatedCellTestCase {
+ 
+     func testChatInterpreterPauseAutomaticEscalationDowngradesAndUnpauseRestoresPermitDecision() async throws {
+         let alice = try await testIdentity("assistant-auto-ceiling-pause-alice", displayName: "Auto Ceiling Pause Alice")
++        try await CopilotPerspectiveResponseFixture.installLegacyPersonalContext(owner: alice)
+         let chat = await PersonalChatHubCell(owner: alice)
+         let provider = automaticEscalationTestProvider()
+         let adapter = installAutomaticEscalationTestDoubles(outputText: "external-model-output: pause test proposal")
+@@ -2097,6 +2099,7 @@ final class PersonalCopilotV1Tests: IsolatedCellTestCase {
+ 
+     func testChatInterpreterEscalationGrantIssueAndRevokeEmitAuditFlows() async throws {
+         let alice = try await testIdentity("assistant-auto-grant-audit-alice", displayName: "Auto Grant Audit Alice")
++        try await CopilotPerspectiveResponseFixture.installLegacyPersonalContext(owner: alice)
+         let chat = await PersonalChatHubCell(owner: alice)
+ 
+         let (issue, issueEvents) = try await captureModelRouteAuditEvents(
+@@ -2168,6 +2171,7 @@ final class PersonalCopilotV1Tests: IsolatedCellTestCase {
+ 
+     func testChatPromptSubmitInvokesExternalProviderBehindVerifiedGrantAndStoresEncryptedAuditVault() async throws {
+         let alice = try await testIdentity("assistant-auto-ceiling-redline-alice", displayName: "Auto Ceiling Redline Alice")
++        try await CopilotPerspectiveResponseFixture.installLegacyPersonalContext(owner: alice)
+         let bob = try await testIdentity("assistant-auto-ceiling-redline-bob", displayName: "Auto Ceiling Redline Bob")
+         let chat = await PersonalChatHubCell(owner: alice)
+         let provider = automaticEscalationTestProvider()
+@@ -2288,6 +2292,7 @@ final class PersonalCopilotV1Tests: IsolatedCellTestCase {
+ 
+     func testAutomaticExternalModelGateDenialsDoNotInvokeAdapter() async throws {
+         let alice = try await testIdentity("assistant-auto-gate-denials-alice", displayName: "Auto Gate Denials Alice")
++        try await CopilotPerspectiveResponseFixture.installLegacyPersonalContext(owner: alice)
+         let chat = await PersonalChatHubCell(owner: alice)
+         let provider = automaticEscalationTestProvider()
+         let adapter = installAutomaticEscalationTestDoubles(outputText: "external-model-output: should not be called")
+@@ -2377,6 +2382,7 @@ final class PersonalCopilotV1Tests: IsolatedCellTestCase {
+ 
+     func testAutomaticExternalModelMissingCredentialFailsWithoutInvokeOrQuotaReserve() async throws {
+         let alice = try await testIdentity("assistant-auto-missing-credential-alice", displayName: "Auto Missing Credential Alice")
++        try await CopilotPerspectiveResponseFixture.installLegacyPersonalContext(owner: alice)
+         let provider = automaticEscalationTestProvider()
+         let draft = "Lag et forslag til lunsjavstemning"
+         let adapter = installAutomaticEscalationTestDoubles(
+@@ -2427,6 +2433,7 @@ final class PersonalCopilotV1Tests: IsolatedCellTestCase {
+ 
+     func testAutomaticExternalModelReplayDoesNotInvokeOrDoubleConsumeQuota() async throws {
+         let alice = try await testIdentity("assistant-auto-replay-alice", displayName: "Auto Replay Alice")
++        try await CopilotPerspectiveResponseFixture.installLegacyPersonalContext(owner: alice)
+         let provider = automaticEscalationTestProvider()
+         let draft = "Lag et forslag til lunsjavstemning"
+         let outputText = "external-model-output: replay proposal"
+diff --git a/ci/test-filter.txt b/ci/test-filter.txt
+index 3a202e9e..7e242148 100644
+--- a/ci/test-filter.txt
++++ b/ci/test-filter.txt
+@@ -215,3 +215,12 @@ MixTidyPolicyTests
+ # fordi ArendalsukaPublicSurfaceRouteTests står i ci/test-exclusions.txt og
+ # derfor ikke fanger noe.
+ ArendalsukaKnowledgeDisabledRouteTests
++
++# Owner-local library candidate contracts and owner denial (no live services).
++EntityPurposeLibrarySetupContractTests
++EntityPurposeLibrarySetupCellTests
++PerspectiveRuntimeBindingTests
++PerspectiveLibraryProjectionTests
++
++# Co-Pilot decision/state boundaries with synthetic Perspective and model doubles.
++PersonalCopilotPerspectiveBoundaryTests

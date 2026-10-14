@@ -1,0 +1,786 @@
+[haven-swiftpm] running swift test with cache 78c2e52a5799
+warning: 'cellprotocol': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Constructing description]
+[Pre-planning 1 / 3614]
+[Planning 1157 / 3614]
+[Planning 3239 / 3614]
+[Planning deferred tasks]
+[Constructing 840 / 8669]
+[Starting]
+[1 / 6] swift-nio-ssl_NIOSSL
+[1 / 206] HashTreeCollections
+[1 / 177] MultipartKit
+[15 / 52] _NIOFileSystemFoundationCompat
+[18 / 45] CellBase
+[21 / 48] CellBase
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellBase/PersistingCells/EntityRelationRecordV1.swift:321:16: warning: stored property 'entityRepresentation' of 'Sendable'-conforming struct 'EntityRelationRecord' contains non-Sendable type 'EntityRepresentation'; this is an error in the Swift 6 language mode
+ 319 |     /// Canonical owner-held knowledge when present. The legacy subject/tags/
+ 320 |     /// purposeRefs remain readable for existing clients and import adapters.
+ 321 |     public var entityRepresentation: EntityRepresentation?
+     |                `- warning: stored property 'entityRepresentation' of 'Sendable'-conforming struct 'EntityRelationRecord' contains non-Sendable type 'EntityRepresentation'; this is an error in the Swift 6 language mode
+ 322 | 
+ 323 |     public init(
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellBase/PurposeAndInterest/EntityRepresentation.swift:61:14: note: class 'EntityRepresentation' does not conform to the 'Sendable' protocol
+ 59 | 
+ 60 | 
+ 61 | public class EntityRepresentation:  PerspectiveNodeImpl {
+    |              `- note: class 'EntityRepresentation' does not conform to the 'Sendable' protocol
+ 62 | 
+ 63 |     var fulfilled: Fullfilled = Fullfilled() // Until Interests and Purposes are moved
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellBase/PurposeAndInterest/ClaimComposition.swift:36:16: warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimCounter' has non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 34 | public struct ClaimCounter: Codable, Equatable, Sendable {
+ 35 |     public var role: ClaimCounterRole
+ 36 |     public var composition: ClaimComposition
+    |                `- warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimCounter' has non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 37 | 
+ 38 |     public init(role: ClaimCounterRole, composition: ClaimComposition) {
+    :
+187 | }
+188 | 
+189 | public indirect enum ClaimComposition: Codable, Equatable {
+    |                      `- note: consider making enum 'ClaimComposition' conform to the 'Sendable' protocol
+190 |     case claim(ClaimCompositionLeaf)
+191 |     // allOf: linked premises, weakest link decides the score.
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellBase/PurposeAndInterest/ClaimDefinition.swift:91:16: warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimDefinition' contains non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 89 |     public var goalID: String?
+ 90 |     public var supports: [ClaimSupportNode]
+ 91 |     public var composition: ClaimComposition?
+    |                `- warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimDefinition' contains non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 92 |     public var tags: [String]
+ 93 | 
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellBase/PurposeAndInterest/ClaimComposition.swift:189:22: note: consider making enum 'ClaimComposition' conform to the 'Sendable' protocol
+187 | }
+188 | 
+189 | public indirect enum ClaimComposition: Codable, Equatable {
+    |                      `- note: consider making enum 'ClaimComposition' conform to the 'Sendable' protocol
+190 |     case claim(ClaimCompositionLeaf)
+191 |     // allOf: linked premises, weakest link decides the score.
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellBase/PurposeAndInterest/PerspectiveEntityProjection.swift:30:16: warning: stored property 'entities' of 'Sendable'-conforming struct 'PerspectiveEntityProjection' contains non-Sendable type 'Weight<EntityRepresentation>'; this is an error in the Swift 6 language mode
+ 28 |     /// delayed write cannot resurrect entities a newer one removed.
+ 29 |     public let epoch: Int
+ 30 |     public let entities: [Weight<EntityRepresentation>]
+    |                `- warning: stored property 'entities' of 'Sendable'-conforming struct 'PerspectiveEntityProjection' contains non-Sendable type 'Weight<EntityRepresentation>'; this is an error in the Swift 6 language mode
+ 31 | 
+ 32 |     public init(source: String, epoch: Int, entities: [Weight<EntityRepresentation>]) {
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellBase/PurposeAndInterest/Weight.swift:13:15: note: consider making generic struct 'Weight' conform to the 'Sendable' protocol
+ 11 | import Foundation
+ 12 | 
+ 13 | public struct Weight<T: PerspectiveNode & Codable> :  Weighted, Codable {
+    |               `- note: consider making generic struct 'Weight' conform to the 'Sendable' protocol
+ 14 |     
+ 15 |     
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellBase/PurposeAndInterest/RelationalLearningModels.swift:95:16: warning: stored property 'payload' of 'Sendable'-conforming struct 'RelationalLearningEventEnvelope' contains non-Sendable type 'ValueType'; this is an error in the Swift 6 language mode
+ 93 |     public var schemaVersion: String
+ 94 |     public var emittedAt: TimeInterval
+ 95 |     public var payload: Object
+    |                `- warning: stored property 'payload' of 'Sendable'-conforming struct 'RelationalLearningEventEnvelope' contains non-Sendable type 'ValueType'; this is an error in the Swift 6 language mode
+ 96 | 
+ 97 |     public init(eventType: RelationalLearningEventType,
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellBase/ValueTypes/ValueType.swift:11:22: note: consider making enum 'ValueType' conform to the 'Sendable' protocol
+  9 | #endif
+ 10 | 
+ 11 | public indirect enum ValueType: Codable {
+    |                      `- note: consider making enum 'ValueType' conform to the 'Sendable' protocol
+ 12 |     case flowElement(FlowElement)
+ 13 |     case bool(Bool)
+[30 / 56] ReferenceLoadBenchmark-product
+[37 / 63] ReferenceLoadBenchmark-product
+[38 / 63] CellBase
+[39 / 63] PurposeInterestBenchmarkSupport
+[44 / 64] CellBase-product
+[50 / 74] CellVapor
+[53 / 87] haven-commons-product
+[55 / 87] CellVapor
+[56 / 87] CellVapor
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellVapor/Cells/OrchestratorCell.swift:119:44: warning: immutable value 'contentObject' was never used; consider replacing with '_' or removing it [#NoUsage]
+117 | //                let widgetData = try await self.wrapChatJsonInHtmlFragment(jsonObject: contentObject)
+118 |                 if flowElement.title == "Message" {
+119 |                     guard case let .object(contentObject) = flowElement.content else {
+    |                                            `- warning: immutable value 'contentObject' was never used; consider replacing with '_' or removing it [#NoUsage]
+120 |                         print("flow element content not object")
+121 |                         return nil
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellVapor/Cells/OrchestratorCell.swift:246:17: warning: variable 'resultString' was never mutated; consider changing to 'let' constant [#VariableNeverMutated]
+244 |             [weak self] keypath, requester  in
+245 |             guard let self = self else { return .string("failure")}
+246 |             var resultString = "denied"
+    |                 `- warning: variable 'resultString' was never mutated; consider changing to 'let' constant [#VariableNeverMutated]
+247 |             if await self.validateAccess("r---", at: "outwardMenu", for: requester) {
+248 |                 do {
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellVapor/Cells/OrchestratorCell.swift:261:17: warning: variable 'resultString' was never mutated; consider changing to 'let' constant [#VariableNeverMutated]
+259 |             [weak self] keypath, requester  in
+260 |             guard let self = self else { return .string("failure")}
+261 |             var resultString = "denied"
+    |                 `- warning: variable 'resultString' was never mutated; consider changing to 'let' constant [#VariableNeverMutated]
+262 |             if await self.validateAccess("r---", at: "historyMenu", for: requester) {
+263 |                 do {
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellVapor/Cells/OrchestratorCell.swift:131:15: warning: 'catch' block is unreachable because no errors are thrown in 'do' block
+129 |                 }
+130 |                 
+131 |             } catch {
+    |               `- warning: 'catch' block is unreachable because no errors are thrown in 'do' block
+132 |                 print("Embedding data in widget failed with error: \(error)")
+133 |             }
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellVapor/Cells/OrchestratorCell.swift:507:13: warning: variable 'cellReference1' was never mutated; consider changing to 'let' constant [#VariableNeverMutated]
+505 |         var menuItems = Object()
+506 |         
+507 |         var cellReference1 = CellReference(endpoint: "cell:///TimesWrapper", label: "times")
+    |             `- warning: variable 'cellReference1' was never mutated; consider changing to 'let' constant [#VariableNeverMutated]
+508 | //        cellReference1.setKeysAndValues = [KeyValue(key: "start", value: nil)]
+509 |         let cellConfiguration1 = CellConfiguration(name: "Times", cellReferences: [cellReference1])
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellVapor/Cells/OrchestratorCell.swift:512:13: warning: variable 'cellReference2' was never mutated; consider changing to 'let' constant [#VariableNeverMutated]
+510 |         
+511 |         
+512 |         var cellReference2 = CellReference(endpoint: "cell:///EntitiesWrapper", label: "entities")
+    |             `- warning: variable 'cellReference2' was never mutated; consider changing to 'let' constant [#VariableNeverMutated]
+513 | //        cellReference2.setKeysAndValues = [KeyValue(key: "start", value: nil)]
+514 |         let cellConfiguration2 = CellConfiguration(name: "Entities", cellReferences: [cellReference2])
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellVapor/Cells/OrchestratorCell.swift:516:13: warning: variable 'cellReference3' was never mutated; consider changing to 'let' constant [#VariableNeverMutated]
+514 |         let cellConfiguration2 = CellConfiguration(name: "Entities", cellReferences: [cellReference2])
+515 |         
+516 |         var cellReference3 = CellReference(endpoint: "cell:///LocationsWrapper", label: "locations")
+    |             `- warning: variable 'cellReference3' was never mutated; consider changing to 'let' constant [#VariableNeverMutated]
+517 | //        cellReference3.setKeysAndValues = [KeyValue(key: "start", value: nil)]
+518 |         let cellConfiguration3 = CellConfiguration(name: "Locations", cellReferences: [cellReference3])
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellVapor/Cells/OrchestratorCell.swift:563:19: warning: value 'documentRootPath' was defined but never used; consider replacing with boolean test [#NoUsage]
+561 |         let namedEmitters = try decoder.decode([String : String].self, from: namedEmittersData)
+562 |         
+563 |         guard let documentRootPath = CellBase.documentRootPath else {
+    |                   `- warning: value 'documentRootPath' was defined but never used; consider replacing with boolean test [#NoUsage]
+564 |            throw  CellBaseError.noTargetMeddleCell // Change to noDocumentRoot - when its in the lib
+565 |         }
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellVapor/Cells/OrchestratorCell.swift:134:13: warning: will never be executed
+132 |                 print("Embedding data in widget failed with error: \(error)")
+133 |             }
+134 |             return nil
+    |             `- warning: will never be executed
+135 |         })
+136 | 
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[#VariableNeverMutated]: <https://docs.swift.org/compiler/documentation/diagnostics/variable-never-mutated>
+[62 / 88] CellVapor
+[64 / 89] CellVapor
+[68 / 89] CellApple
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellVapor/Cells/EntityAnchorCell.swift:244:17: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 242 |         if await self.validateAccess("-w--", at: "person", for: requester) {
+ 243 |             CellBase.diagnosticLog("Entity data set keypath=\(keypath)", domain: .identity)
+ 244 |             try await self.storage.set(keypath: keypath, setValue: value)
+     |                 `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 245 |             try await self.saveKeypathStorage(entity: self.storage)
+ 246 |             // Send flowElement notification
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellVapor/Cells/EntityAnchorCell.swift:265:21: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 263 |             do {
+ 264 |                 CellBase.diagnosticLog("Entity data set keypath=\(keypath)", domain: .identity)
+ 265 |                 try await self.storage.set(keypath: keypath, setValue: value)
+     |                     `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 266 |                 try await self.saveKeypathStorage(entity: self.storage)
+ 267 |                 // Send flowElement notification
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellVapor/Cells/EntityAnchorCell.swift:297:33: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 295 |                         do {
+ 296 |                             _ = try self.storage.get(keypath: keypath)
+ 297 |                             try await self.storage.set(keypath: keypath, setValue: value)
+     |                                 `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 298 |                         } catch {
+ 299 |                             if case KeyPathError.notFound = error {
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellVapor/Cells/EntityAnchorCell.swift:302:37: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 300 |                                 let identityUuid = String(keypathArray[keypathArray.count - 1])
+ 301 |                                 let entityUuid = UUID().uuidString
+ 302 |                                 try await self.storage.set(keypath: keypath, setValue: .string(entityUuid))
+     |                                     `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 303 |                                 let entityKeypath = "relations.entities.\(entityUuid).identities.\(identityUuid)"
+ 304 |                                 try await self.storage.set(keypath: entityKeypath, setValue: value)
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellVapor/Cells/EntityAnchorCell.swift:304:37: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 302 |                                 try await self.storage.set(keypath: keypath, setValue: .string(entityUuid))
+ 303 |                                 let entityKeypath = "relations.entities.\(entityUuid).identities.\(identityUuid)"
+ 304 |                                 try await self.storage.set(keypath: entityKeypath, setValue: value)
+     |                                     `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 305 |                             } else {
+ 306 |                                 throw error
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellVapor/Cells/EntityAnchorCell.swift:310:29: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 308 |                         }
+ 309 |                     default:
+ 310 |                         try await self.storage.set(keypath: keypath, setValue: value)
+     |                             `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 311 |                     }
+ 312 |                 } else {
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellVapor/Cells/EntityAnchorCell.swift:313:25: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 311 |                     }
+ 312 |                 } else {
+ 313 |                     try await self.storage.set(keypath: keypath, setValue: value)
+     |                         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 314 |                 }
+ 315 | 
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellVapor/Cells/EntityAnchorCell.swift:852:13: warning: initialization of immutable value 'flowElement' was never used; consider replacing with assignment to '_' or removing it [#NoUsage]
+ 850 |         
+ 851 |         let setDataObject: Object = ["keypath" : .string(keypath), "value" : value, "timestamp" : .float(Date.now.timeIntervalSince1970)]
+ 852 |         let flowElement = FlowElement(title: "Set data", content: .object(setDataObject), properties: FlowElement.Properties(type: .event, contentType: .object))
+     |             `- warning: initialization of immutable value 'flowElement' was never used; consider replacing with assignment to '_' or removing it [#NoUsage]
+ 853 |     }
+ 854 | 
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellVapor/Cells/EntityAnchorCell.swift:879:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 877 |             try EntityValidatedContactRecordV1.validatePersistenceEnvelope(envelope)
+ 878 |             let relationPolicy = EntityRelationRecordV1.interactionPolicy(
+ 879 |                 from: try? await storage.get(keypath: EntityRelationRecordV1.interactionPolicyKeypath)
+     |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 880 |             )
+ 881 |             try EntityRelationRecordV1.validatePersistenceEnvelope(envelope, interactionPolicy: relationPolicy)
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellVapor/Cells/EntityAnchorCell.swift:888:35: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 886 |                     stored = pending
+ 887 |                 } else {
+ 888 |                     stored = try? await storage.get(keypath: mutation.keypath)
+     |                                   `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 889 |                 }
+ 890 |                 try EntityRelationRecordV1.validateExistingEvent(stored, proposed: mutation.value)
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+[70 / 89] PurposeInterestBenchmarkSupport
+[72 / 91] CellRuntimeBenchmarks-product
+[73 / 91] CellApple
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift:349:56: warning: '20.0' is not a valid version number for watchOS
+347 |         try await registerEntityScannerResolve(on: resolver)
+348 | 
+349 |         if #available(macOS 26.0, iOS 27.0, tvOS 27.0, watchOS 20.0, *) {
+    |                                                        `- warning: '20.0' is not a valid version number for watchOS
+350 |             try await registerResolve(
+351 |                 on: resolver,
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift:393:36: warning: conformance of 'CellType' to protocol 'Emit' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+391 |         do {
+392 |             if let persistency {
+393 |                 try await resolver.addCellResolve(
+    |                                    `- warning: conformance of 'CellType' to protocol 'Emit' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+394 |                     name: name,
+395 |                     cellScope: cellScope,
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift:393:36: warning: conformance of 'CellType' to protocol 'OwnerInstantiable' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+391 |         do {
+392 |             if let persistency {
+393 |                 try await resolver.addCellResolve(
+    |                                    `- warning: conformance of 'CellType' to protocol 'OwnerInstantiable' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+394 |                     name: name,
+395 |                     cellScope: cellScope,
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift:401:36: warning: conformance of 'CellType' to protocol 'Emit' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+399 |                 )
+400 |             } else {
+401 |                 try await resolver.addCellResolve(
+    |                                    `- warning: conformance of 'CellType' to protocol 'Emit' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+402 |                     name: name,
+403 |                     cellScope: cellScope,
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift:401:36: warning: conformance of 'CellType' to protocol 'OwnerInstantiable' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+399 |                 )
+400 |             } else {
+401 |                 try await resolver.addCellResolve(
+    |                                    `- warning: conformance of 'CellType' to protocol 'OwnerInstantiable' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+402 |                     name: name,
+403 |                     cellScope: cellScope,
+
+[#IsolatedConformances]: <https://docs.swift.org/compiler/documentation/diagnostics/isolated-conformances>
+[74 / 91] CellVapor
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Intelligence/AppleIntelligenceCell.swift:716:26: warning: 'init(sampling:temperature:maximumResponseTokens:)' is deprecated: replaced by 'init(samplingMode:temperature:maximumResponseTokens:)' [#DeprecatedDeclaration]
+ 714 |                 generating: PurposeWrapper.self,
+ 715 |                 includeSchemaInPrompt: false,
+ 716 |                 options: GenerationOptions(sampling: .greedy)
+     |                          |- warning: 'init(sampling:temperature:maximumResponseTokens:)' is deprecated: replaced by 'init(samplingMode:temperature:maximumResponseTokens:)' [#DeprecatedDeclaration]
+     |                          `- note: use 'init(samplingMode:temperature:maximumResponseTokens:)' instead
+ 717 |             ) {
+ 718 |                 "Generate 5 suggestions of Purposes"
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+[77 / 89]
+[77 / 89] CellRuntimeBenchmarks-product
+[80 / 91] CellRuntimeBenchmarks-product
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Intelligence/Tools/ItineraryPlanner.swift:59:22: warning: 'init(sampling:temperature:maximumResponseTokens:)' is deprecated: replaced by 'init(samplingMode:temperature:maximumResponseTokens:)' [#DeprecatedDeclaration]
+ 57 |             generating: Itinerary.self,
+ 58 |             includeSchemaInPrompt: false,
+ 59 |             options: GenerationOptions(sampling: .greedy)
+    |                      |- warning: 'init(sampling:temperature:maximumResponseTokens:)' is deprecated: replaced by 'init(samplingMode:temperature:maximumResponseTokens:)' [#DeprecatedDeclaration]
+    |                      `- note: use 'init(samplingMode:temperature:maximumResponseTokens:)' instead
+ 60 |         ) {
+ 61 |             "Generate a \(dayCount)-day itinerary to \(landmark.name)."
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+[80 / 91] CellVapor-product
+[81 / 90] haven-commons-product
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:255:9: warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+253 | struct SkeletonBorderShape: Shape {
+254 |     let radius: CGFloat
+255 |     let edges: [SkeletonEdge]?
+    |         `- warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+256 |     let rtl: Bool
+257 |     func path(in rect: CGRect) -> Path {
+
+CellBase.SkeletonEdge:1:13: note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+1 | public enum SkeletonEdge : String, Codable {
+  |             `- note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+2 |     case top
+3 |     case leading
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:5:1: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  3 | 
+  4 | import SwiftUI
+  5 | import CellBase
+    | `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  6 | #if os(macOS)
+  7 | import AppKit
+
+[#AddPreconcurrencyImport]: <https://docs.swift.org/compiler/documentation/diagnostics/add-preconcurrency-import>
+[83 / 91] CellApple
+[86 / 95] CellRuntimeBenchmarks-product
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/IdentityVault.swift:1037:42: warning: type 'Facilitator' does not conform to the 'Sendable' protocol
+1035 |         let (decryptedData, needsMigration) = try await decryptVaultData(encryptedData, scope: tag)
+1036 |         let decoder = JSONDecoder()
+1037 |         decoder.userInfo[.facilitator] = Facilitator(version: nil)
+     |                                          `- warning: type 'Facilitator' does not conform to the 'Sendable' protocol
+1038 |         let identities = try decoder.decode([VaultIdentity].self, from: decryptedData)
+1039 |         let (migratedIdentities, keyMigrationNeeded) = await migrateLoadedVaultIdentities(identities)
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Facilitator.swift:6:14: note: class 'Facilitator' does not conform to the 'Sendable' protocol
+ 4 | import Foundation
+ 5 | 
+ 6 | public class Facilitator {
+   |              `- note: class 'Facilitator' does not conform to the 'Sendable' protocol
+ 7 |     public var version: Int?
+ 8 |     public var uuids = [String : String]()
+[87 / 96] CellApple
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/WebSocketConnection.swift:183:64: warning: 'weak' ownership of capture 'webSocketTask' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+174 |             throw WebSocketConnectionError.NoTask
+175 |         }
+176 |       webSocketTask.sendPing { [weak self] error in
+    |                              |- note: 'webSocketTask' implicitly strongly captured here
+    |                              `- note: add 'webSocketTask' as a capture list item to silence
+177 |           guard let self = self else { return }
+178 |           guard self.webSocketTask === webSocketTask else { return }
+    :
+181 |         } else {
+182 | //            print("Web Socket connection is alive")
+183 |             let workItem = DispatchWorkItem { [weak self, weak webSocketTask] in
+    |                                                                |- warning: 'weak' ownership of capture 'webSocketTask' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+    |                                                                `- note: explicitly assign the capture list item to silence
+184 |                 guard let self = self else { return }
+185 |                 guard let webSocketTask, self.webSocketTask === webSocketTask else { return }
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/WebSocketConnection.swift:329:64: warning: 'weak' ownership of capture 'webSocketTask' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+320 |             throw WebSocketConnectionError.NoTask
+321 |         }
+322 |       webSocketTask.sendPing { [weak self] error in
+    |                              |- note: 'webSocketTask' implicitly strongly captured here
+    |                              `- note: add 'webSocketTask' as a capture list item to silence
+323 |           guard let self = self else { return }
+324 |           guard self.webSocketTask === webSocketTask else { return }
+    :
+327 |         } else {
+328 | //            print("Web Socket connection is alive")
+329 |             let workItem = DispatchWorkItem { [weak self, weak webSocketTask] in
+    |                                                                |- warning: 'weak' ownership of capture 'webSocketTask' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+    |                                                                `- note: explicitly assign the capture list item to silence
+330 |                 guard let self = self else { return }
+331 |                 guard let webSocketTask, self.webSocketTask === webSocketTask else { return }
+
+[#ImplicitStrongCapture]: <https://docs.swift.org/compiler/documentation/diagnostics/implicit-strong-capture>
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/CellViewModel.swift:71:36: warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+48 |     func setCellConfiguration(_ cellConfig: CellConfiguration) {
+49 |         print("******** Setting cell configuration in view **********")
+50 |         Task {
+   |              |- note: 'self' implicitly strongly captured here
+   |              `- note: add 'self' as a capture list item to silence
+51 |             if rootCell == nil {
+52 |                 rootCell = await GeneralCell()
+   :
+69 |                             print("Porthole flow got completion: \(completion)")
+70 |                             self.flowCancellable = nil
+71 |                         }) { [weak self] flowElement in
+   |                                    |- warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+   |                                    `- note: explicitly assign the capture list item to silence
+72 |                             
+73 |                             self?.appendFlowELement(flowElement)
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/PortholeViewModel.swift:136:36: warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+ 69 |     public init() {
+ 70 |         print("*************** Init Porthole view model! **********************")
+ 71 |         initializationTask = Task {
+    |                                   |- note: 'self' implicitly strongly captured here
+    |                                   `- note: add 'self' as a capture list item to silence
+ 72 | //            await AppInitializer.shared.setupCellResolvers()
+ 73 |             
+    :
+134 |                             print("Porthole flow got completion: \(completion)")
+135 |                             self.flowCancellable = nil
+136 |                         }) { [weak self] flowElement in
+    |                                    |- warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+    |                                    `- note: explicitly assign the capture list item to silence
+137 |                             guard let self = self else { return }
+138 | //                            print("Porthole got flowElement: \(flowElement)")
+
+[#ImplicitStrongCapture]: <https://docs.swift.org/compiler/documentation/diagnostics/implicit-strong-capture>
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/EntityRadar/NearbyAdvertisementProofSession.swift:21:13: warning: immutable property will not be decoded because it is declared with an initial value which cannot be overwritten
+ 19 | 
+ 20 |     private struct SigningPayload: Codable {
+ 21 |         let purpose = "haven-nearby-advertisement-proof-v2"
+    |             |- warning: immutable property will not be decoded because it is declared with an initial value which cannot be overwritten
+    |             |- note: set the initial value via the initializer or explicitly define a CodingKeys enum including a 'purpose' case to silence this warning
+    |             `- note: make the property mutable instead
+ 22 |         var challenge: NearbyAccessChallenge
+ 23 |         var readerDID: String
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:255:9: warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+253 | struct SkeletonBorderShape: Shape {
+254 |     let radius: CGFloat
+255 |     let edges: [SkeletonEdge]?
+    |         `- warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+256 |     let rtl: Bool
+257 |     func path(in rect: CGRect) -> Path {
+
+CellBase.SkeletonEdge:1:13: note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+1 | public enum SkeletonEdge : String, Codable {
+  |             `- note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+2 |     case top
+3 |     case leading
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:5:1: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  3 | 
+  4 | import SwiftUI
+  5 | import CellBase
+    | `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  6 | #if os(macOS)
+  7 | import AppKit
+
+[#AddPreconcurrencyImport]: <https://docs.swift.org/compiler/documentation/diagnostics/add-preconcurrency-import>
+[92 / 97] CellBaseTests-product
+[103 / 108] CellBaseTests-product
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/PerspectiveContextTests.swift:137:89: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+135 |         let config = ContextConfiguration(sources: [.init(sourceID: "place", endpoint: "cell:///place")], rules: [.init(id: "home", definition: definition, label: "home", purposeWeights: [purpose.reference: 0])])
+136 |         let response = try await cell.set(keypath: "perspective.context.configure", value: ContextCodec.encode(config), requester: owner)
+137 |         guard case let .object(object) = response else { return XCTFail("bad response \(response)") }
+    |                                                                                         |- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+    |                                                                                         |- note: use a default value parameter to avoid this warning
+    |                                                                                         |- note: provide a default value to avoid this warning
+    |                                                                                         `- note: use 'String(describing:)' to silence this warning
+138 |         guard case let .string(status)? = object["status"] else { return XCTFail("missing status \(response)") }
+139 |         XCTAssertEqual(status, "ok", "\(response)")
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/PerspectiveContextTests.swift:138:100: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+136 |         let response = try await cell.set(keypath: "perspective.context.configure", value: ContextCodec.encode(config), requester: owner)
+137 |         guard case let .object(object) = response else { return XCTFail("bad response \(response)") }
+138 |         guard case let .string(status)? = object["status"] else { return XCTFail("missing status \(response)") }
+    |                                                                                                    |- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+    |                                                                                                    |- note: use a default value parameter to avoid this warning
+    |                                                                                                    |- note: provide a default value to avoid this warning
+    |                                                                                                    `- note: use 'String(describing:)' to silence this warning
+139 |         XCTAssertEqual(status, "ok", "\(response)")
+140 |         let changed = expectation(description: "home context")
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/PerspectiveContextTests.swift:139:41: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+137 |         guard case let .object(object) = response else { return XCTFail("bad response \(response)") }
+138 |         guard case let .string(status)? = object["status"] else { return XCTFail("missing status \(response)") }
+139 |         XCTAssertEqual(status, "ok", "\(response)")
+    |                                         |- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+    |                                         |- note: use a default value parameter to avoid this warning
+    |                                         |- note: provide a default value to avoid this warning
+    |                                         `- note: use 'String(describing:)' to silence this warning
+140 |         let changed = expectation(description: "home context")
+141 |         let departed = expectation(description: "departure context")
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/PerspectiveContextTests.swift:238:108: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+236 |         do {
+237 |             let response = try await perspective.set(keypath: "perspective.context.configure", value: ContextCodec.encode(ContextConfiguration()), requester: outsider)
+238 |             guard case .string("denied") = response else { return XCTFail("Unprivileged config accepted: \(response)") }
+    |                                                                                                            |- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+    |                                                                                                            |- note: use a default value parameter to avoid this warning
+    |                                                                                                            |- note: provide a default value to avoid this warning
+    |                                                                                                            `- note: use 'String(describing:)' to silence this warning
+239 |         } catch { /* Existing runtime may reject before the registered handler. */ }
+240 |         let value = try await perspective.get(keypath: "perspective.context.configuration", requester: owner)
+[105 / 108] CellBaseTests-product
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/IntegrationTests.swift:1071:18: warning: weak variable 'releasedCell' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1069 |         let emitter = await CancellationObservingEmitter(owner: owner)
+1070 |         var cell: GeneralCell? = await GeneralCell(owner: owner)
+1071 |         weak var releasedCell = cell
+     |                  `- warning: weak variable 'releasedCell' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1072 | 
+1073 |         let state = try await cell?.attach(emitter: emitter, label: "source", requester: owner)
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/IntegrationTests.swift:1096:18: warning: weak variable 'releasedCell' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1094 |         let emitter = await CancellationObservingEmitter(owner: owner)
+1095 |         var cell: GeneralCell? = await GeneralCell(owner: owner)
+1096 |         weak var releasedCell = cell
+     |                  `- warning: weak variable 'releasedCell' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1097 | 
+1098 |         let downstreamEntered = expectation(description: "Downstream subscriber entered")
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/IntegrationTests.swift:1145:18: warning: weak variable 'releasedCell' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1143 |         let interceptGate = SuspendedFlowGate()
+1144 |         var cell: GeneralCell? = await GeneralCell(owner: owner)
+1145 |         weak var releasedCell = cell
+     |                  `- warning: weak variable 'releasedCell' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1146 | 
+1147 |         await cell?.addIntercept(requester: owner) { element, _ in
+
+[#VariableNeverMutated]: <https://docs.swift.org/compiler/documentation/diagnostics/variable-never-mutated>
+[#WeakMutability]: <https://docs.swift.org/compiler/documentation/diagnostics/weak-mutability>
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/TrustedIssuerCellTests.swift:1448:13: warning: variable 'missingProof' was never mutated; consider changing to 'let' constant [#VariableNeverMutated]
+1446 |         XCTAssertEqual(decision(unsignedTimeResult), "untrusted")
+1447 | 
+1448 |         var missingProof = try await makeClaim()
+     |             `- warning: variable 'missingProof' was never mutated; consider changing to 'let' constant [#VariableNeverMutated]
+1449 |         missingProof.proof.signatureData = Data()
+1450 |         let missingProofResult = try await evaluate(
+
+[#VariableNeverMutated]: <https://docs.swift.org/compiler/documentation/diagnostics/variable-never-mutated>
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/GeneralCellInterfaceTests.swift:127:51: warning: 'restoreStoredOwnerIdentity(using:)' is deprecated: renamed to 'bindStoredOwnerToRuntimeIdentity(_:)' [#DeprecatedDeclaration]
+ 125 |         let publicSnapshotOwnsCell = await restored.requesterProvesOwnership(publicOwner)
+ 126 |         let foreignOwnsCell = await restored.requesterProvesOwnership(foreign)
+ 127 |         let foreignRestoredOwner = await restored.restoreStoredOwnerIdentity(using: foreign)
+     |                                                   |- warning: 'restoreStoredOwnerIdentity(using:)' is deprecated: renamed to 'bindStoredOwnerToRuntimeIdentity(_:)' [#DeprecatedDeclaration]
+     |                                                   `- note: use 'bindStoredOwnerToRuntimeIdentity(_:)' instead
+ 128 | 
+ 129 |         let ownerRestoredOwner = await restored.restoreStoredOwnerIdentity(using: owner)
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/GeneralCellInterfaceTests.swift:129:49: warning: 'restoreStoredOwnerIdentity(using:)' is deprecated: renamed to 'bindStoredOwnerToRuntimeIdentity(_:)' [#DeprecatedDeclaration]
+ 127 |         let foreignRestoredOwner = await restored.restoreStoredOwnerIdentity(using: foreign)
+ 128 | 
+ 129 |         let ownerRestoredOwner = await restored.restoreStoredOwnerIdentity(using: owner)
+     |                                                 |- warning: 'restoreStoredOwnerIdentity(using:)' is deprecated: renamed to 'bindStoredOwnerToRuntimeIdentity(_:)' [#DeprecatedDeclaration]
+     |                                                 `- note: use 'bindStoredOwnerToRuntimeIdentity(_:)' instead
+ 130 |         let ownerOwnsCell = await restored.requesterProvesOwnership(owner)
+ 131 | 
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/GeneralCellInterfaceTests.swift:1425:20: warning: 'setInterceptValueForKey(requester:key:setValueForKeyIntercept:)' is deprecated [#DeprecatedDeclaration]
+1423 |         var rootWasMutated = false
+1424 | 
+1425 |         await cell.setInterceptValueForKey(requester: owner, key: "profile") { _ in
+     |                    `- warning: 'setInterceptValueForKey(requester:key:setValueForKeyIntercept:)' is deprecated [#DeprecatedDeclaration]
+1426 |             .object(["name": .string("Private"), "secret": .string("must-not-leak")])
+1427 |         }
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/GeneralCellInterfaceTests.swift:1428:20: warning: 'setInterceptSetValueForKey(requester:key:setValueForKeyIntercept:)' is deprecated [#DeprecatedDeclaration]
+1426 |             .object(["name": .string("Private"), "secret": .string("must-not-leak")])
+1427 |         }
+1428 |         await cell.setInterceptSetValueForKey(requester: owner, key: "profile") { _, _ in
+     |                    `- warning: 'setInterceptSetValueForKey(requester:key:setValueForKeyIntercept:)' is deprecated [#DeprecatedDeclaration]
+1429 |             rootWasMutated = true
+1430 |         }
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/BridgeIdentityBoundaryTests.swift:371:75: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+369 |             XCTAssertEqual(admission, .signed)
+370 |             let localDecision = await cell.authorizationDecision(requestedAccess: "r---", at: "feed", for: identity)
+371 |             XCTAssertTrue(localDecision.allowed, "Fresh local contract: \(localDecision.reasonCode)")
+    |                                                                           |             |- note: provide a default value to avoid this warning
+    |                                                                           |             `- note: use 'String(describing:)' to silence this warning
+    |                                                                           `- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+372 |             let outgoing = PairedTransport()
+373 |             let incoming = PairedTransport()
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/SkeletonLocalizationTests.swift:158:62: warning: 'accessibilityAttributeValue' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+156 |         // standalone XCTest host (the setting is scoped to this process).
+157 |         let accessibilityMode = NSAccessibility.Attribute(rawValue: "AXEnhancedUserInterface")
+158 |         let previousAccessibilityMode = NSApplication.shared.accessibilityAttributeValue(accessibilityMode)
+    |                                                              `- warning: 'accessibilityAttributeValue' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+159 |         NSApplication.shared.accessibilitySetValue(true, forAttribute: accessibilityMode)
+160 |         defer { NSApplication.shared.accessibilitySetValue(previousAccessibilityMode, forAttribute: accessibilityMode) }
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/SkeletonLocalizationTests.swift:159:30: warning: 'accessibilitySetValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+157 |         let accessibilityMode = NSAccessibility.Attribute(rawValue: "AXEnhancedUserInterface")
+158 |         let previousAccessibilityMode = NSApplication.shared.accessibilityAttributeValue(accessibilityMode)
+159 |         NSApplication.shared.accessibilitySetValue(true, forAttribute: accessibilityMode)
+    |                              `- warning: 'accessibilitySetValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+160 |         defer { NSApplication.shared.accessibilitySetValue(previousAccessibilityMode, forAttribute: accessibilityMode) }
+161 |         let host = NSHostingView(rootView: SkeletonView(element: element).environmentObject(model))
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/SkeletonLocalizationTests.swift:160:38: warning: 'accessibilitySetValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+158 |         let previousAccessibilityMode = NSApplication.shared.accessibilityAttributeValue(accessibilityMode)
+159 |         NSApplication.shared.accessibilitySetValue(true, forAttribute: accessibilityMode)
+160 |         defer { NSApplication.shared.accessibilitySetValue(previousAccessibilityMode, forAttribute: accessibilityMode) }
+    |                                      `- warning: 'accessibilitySetValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+161 |         let host = NSHostingView(rootView: SkeletonView(element: element).environmentObject(model))
+162 |         host.frame = NSRect(x: 0, y: 0, width: 600, height: 420)
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/SkeletonNativeTreeListTests.swift:403:58: warning: 'accessibilityAttributeValue' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+401 |     init(element: SkeletonElement, data: ValueType, width: CGFloat) {
+402 |         snapshot = TreeListSnapshot(data)
+403 |         previousAccessibilityMode = NSApplication.shared.accessibilityAttributeValue(accessibilityMode)
+    |                                                          `- warning: 'accessibilityAttributeValue' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+404 |         NSApplication.shared.accessibilitySetValue(true, forAttribute: accessibilityMode)
+405 |         window = NSWindow(contentRect: NSRect(x: -10000, y: -10000, width: width, height: 420),
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/SkeletonNativeTreeListTests.swift:404:30: warning: 'accessibilitySetValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+402 |         snapshot = TreeListSnapshot(data)
+403 |         previousAccessibilityMode = NSApplication.shared.accessibilityAttributeValue(accessibilityMode)
+404 |         NSApplication.shared.accessibilitySetValue(true, forAttribute: accessibilityMode)
+    |                              `- warning: 'accessibilitySetValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+405 |         window = NSWindow(contentRect: NSRect(x: -10000, y: -10000, width: width, height: 420),
+406 |                           styleMask: [.borderless], backing: .buffered, defer: false)
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/SkeletonNativeTreeListTests.swift:422:30: warning: 'accessibilitySetValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+420 |         window.orderOut(nil)
+421 |         window.close()
+422 |         NSApplication.shared.accessibilitySetValue(previousAccessibilityMode, forAttribute: accessibilityMode)
+    |                              `- warning: 'accessibilitySetValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+423 |     }
+424 | 
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+[107 / 111] CellBaseTests-product
+[109 / 111] CellBaseTests-product
+[112 / 112] CellRuntimeBenchmarks-product
+[114 / 114] ReferenceLoadBenchmark-product
+Build complete! (22,72 sek)
+Test Suite 'Selected tests' started at 2026-10-12 11:47:50.870.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-10-12 11:47:50.870.
+Test Suite 'KeyPathResolverTests' started at 2026-10-12 11:47:50.870.
+Test Case '-[HavenCommonsTests.KeyPathResolverTests testUnknownPerspectiveChildPathStillRoutesToPerspectiveCell]' started.
+Test Case '-[HavenCommonsTests.KeyPathResolverTests testUnknownPerspectiveChildPathStillRoutesToPerspectiveCell]' passed (0.002 seconds).
+Test Suite 'KeyPathResolverTests' passed at 2026-10-12 11:47:50.873.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-10-12 11:47:50.873.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'Selected tests' passed at 2026-10-12 11:47:50.873.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.002 (0.003) seconds
+Test Suite 'Selected tests' started at 2026-10-12 11:47:50.941.
+Test Suite 'CellNearbyTests.xctest' started at 2026-10-12 11:47:50.942.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-10-12 11:47:50.942.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-12 11:47:50.942.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-12 11:47:51.032.
+Test Suite 'CellBaseTests.xctest' started at 2026-10-12 11:47:51.033.
+Test Suite 'GoalDefinitionTests' started at 2026-10-12 11:47:51.033.
+Test Case '-[CellBaseTests.GoalDefinitionTests testNetworkGoalEvaluationRoundTripsAndTerminalSemantics]' started.
+Test Case '-[CellBaseTests.GoalDefinitionTests testNetworkGoalEvaluationRoundTripsAndTerminalSemantics]' passed (0.001 seconds).
+Test Suite 'GoalDefinitionTests' passed at 2026-10-12 11:47:51.034.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'GoalEvaluationCellTests' started at 2026-10-12 11:47:51.034.
+Test Case '-[CellBaseTests.GoalEvaluationCellTests testGoalEvaluationCellConfiguresEvaluatesStoresAndEmits]' started.
+Test Case '-[CellBaseTests.GoalEvaluationCellTests testGoalEvaluationCellConfiguresEvaluatesStoresAndEmits]' passed (0.004 seconds).
+Test Case '-[CellBaseTests.GoalEvaluationCellTests testGoalEvaluationCellRequiresDefinitionBeforeEvaluation]' started.
+Test Case '-[CellBaseTests.GoalEvaluationCellTests testGoalEvaluationCellRequiresDefinitionBeforeEvaluation]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.GoalEvaluationCellTests testGoalEvaluationCellReturnsUnknownWhenEvidenceIsMissing]' started.
+Test Case '-[CellBaseTests.GoalEvaluationCellTests testGoalEvaluationCellReturnsUnknownWhenEvidenceIsMissing]' passed (0.001 seconds).
+Test Suite 'GoalEvaluationCellTests' passed at 2026-10-12 11:47:51.040.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.006 (0.006) seconds
+Test Suite 'GoalEvaluationEngineTests' started at 2026-10-12 11:47:51.040.
+Test Case '-[CellBaseTests.GoalEvaluationEngineTests testCompositeSemanticGoalIsActiveWhenOnlyOneLabelMatches]' started.
+Test Case '-[CellBaseTests.GoalEvaluationEngineTests testCompositeSemanticGoalIsActiveWhenOnlyOneLabelMatches]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.GoalEvaluationEngineTests testCompositeSemanticLocationAndTimeGoalIsSatisfiedWhenBothLabelsMatch]' started.
+Test Case '-[CellBaseTests.GoalEvaluationEngineTests testCompositeSemanticLocationAndTimeGoalIsSatisfiedWhenBothLabelsMatch]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.GoalEvaluationEngineTests testHumanConfirmationGoalIsSatisfiedWhenConfirmationEventArrives]' started.
+Test Case '-[CellBaseTests.GoalEvaluationEngineTests testHumanConfirmationGoalIsSatisfiedWhenConfirmationEventArrives]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.GoalEvaluationEngineTests testMissingEvidenceMakesGoalUnknownInsteadOfInventingState]' started.
+Test Case '-[CellBaseTests.GoalEvaluationEngineTests testMissingEvidenceMakesGoalUnknownInsteadOfInventingState]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.GoalEvaluationEngineTests testNetworkGoalTransitionsFromSatisfiedToAtRiskToMissed]' started.
+Test Case '-[CellBaseTests.GoalEvaluationEngineTests testNetworkGoalTransitionsFromSatisfiedToAtRiskToMissed]' passed (0.000 seconds).
+Test Suite 'GoalEvaluationEngineTests' passed at 2026-10-12 11:47:51.041.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'PerspectiveCellContractTests' started at 2026-10-12 11:47:51.041.
+Test Case '-[CellBaseTests.PerspectiveCellContractTests testInitialPurposeTemplateUsesEventGoalReferenceAndConcreteGoalText]' started.
+Test Case '-[CellBaseTests.PerspectiveCellContractTests testInitialPurposeTemplateUsesEventGoalReferenceAndConcreteGoalText]' passed (0.001 seconds).
+Test Suite 'PerspectiveCellContractTests' passed at 2026-10-12 11:47:51.042.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'PerspectiveCellMatchPayloadTests' started at 2026-10-12 11:47:51.042.
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testDirectPurposeMatchUsesMinimumPurposeWeight]' started.
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testDirectPurposeMatchUsesMinimumPurposeWeight]' passed (0.007 seconds).
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testDuplicateTargetKeysProduceOneDirectHit]' started.
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testDuplicateTargetKeysProduceOneDirectHit]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testLimitTruncatesCombinedResultsByScore]' started.
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testLimitTruncatesCombinedResultsByScore]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testMinimumMatchScoreFiltersBothRoutes]' started.
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testMinimumMatchScoreFiltersBothRoutes]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testSlugifyCollisionUsesPortableDedupKey]' started.
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testSlugifyCollisionUsesPortableDedupKey]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testViaInterestScoreIsMinPurposeTimesMinInterest]' started.
+Test Case '-[CellBaseTests.PerspectiveCellMatchPayloadTests testViaInterestScoreIsMinPurposeTimesMinInterest]' passed (0.002 seconds).
+Test Suite 'PerspectiveCellMatchPayloadTests' passed at 2026-10-12 11:47:51.060.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.018 (0.019) seconds
+Test Suite 'PerspectiveContextFlowTests' started at 2026-10-12 11:47:51.060.
+Test Case '-[CellBaseTests.PerspectiveContextFlowTests testRealSubscriptionChangesEffectivePurposesAndDepartureRestoresBaseline]' started.
+Test Case '-[CellBaseTests.PerspectiveContextFlowTests testRealSubscriptionChangesEffectivePurposesAndDepartureRestoresBaseline]' passed (0.006 seconds).
+Test Suite 'PerspectiveContextFlowTests' passed at 2026-10-12 11:47:51.067.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.006 (0.006) seconds
+Test Suite 'PerspectiveContextIntegrationTests' started at 2026-10-12 11:47:51.067.
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testConfigurationRejectsNonOwnerWithoutDebugBypass]' started.
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testConfigurationRejectsNonOwnerWithoutDebugBypass]' passed (0.005 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testDurableContextReadAfterFreshCellDecodeAndDetachPersists]' started.
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testDurableContextReadAfterFreshCellDecodeAndDetachPersists]' passed (0.007 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testResolverLoadedPortholeInputFiltersContentAndConsumesControlEvents]' started.
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testResolverLoadedPortholeInputFiltersContentAndConsumesControlEvents]' passed (1.010 seconds).
+Test Suite 'PerspectiveContextIntegrationTests' passed at 2026-10-12 11:47:52.088.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 1.021 (1.022) seconds
+Test Suite 'PerspectiveContextTests' started at 2026-10-12 11:47:52.088.
+Test Case '-[CellBaseTests.PerspectiveContextTests testDepartureDuplicateDelayedAndConflictingEvents]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testDepartureDuplicateDelayedAndConflictingEvents]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testExpiryAndRestartRequireFreshSnapshotEvenAtSameRevision]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testExpiryAndRestartRequireFreshSnapshotEvenAtSameRevision]' passed (0.006 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testFiltersIntersectWithinBaseAndUseBaseWhenUnknownOrExpired]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testFiltersIntersectWithinBaseAndUseBaseWhenUnknownOrExpired]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testMalformedConfigurationAndEventsAreRejected]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testMalformedConfigurationAndEventsAreRejected]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testMorningNeedsTimeAndHomeOrFamilyAndKnownEmptySources]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testMorningNeedsTimeAndHomeOrFamilyAndKnownEmptySources]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testPrioritySupportsLowerWeightsAndDeactivationAndStableTies]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testPrioritySupportsLowerWeightsAndDeactivationAndStableTies]' passed (0.002 seconds).
+Test Suite 'PerspectiveContextTests' passed at 2026-10-12 11:47:52.101.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.012 (0.013) seconds
+Test Suite 'CellBaseTests.xctest' passed at 2026-10-12 11:47:52.101.
+	 Executed 26 tests, with 0 failures (0 unexpected) in 1.066 (1.068) seconds
+Test Suite 'Selected tests' passed at 2026-10-12 11:47:52.101.
+	 Executed 26 tests, with 0 failures (0 unexpected) in 1.066 (1.069) seconds
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/8C9BAB35-E94B-4B92-B1D8-3F611B6F590D/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/8C9BAB35-E94B-4B92-B1D8-3F611B6F590D/Perspective.json, NSUnderlyingError=0x7a1c54c900 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/C547360A-D56D-474F-B6C2-E50825A73C02/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/C547360A-D56D-474F-B6C2-E50825A73C02/Perspective.json, NSUnderlyingError=0x7a1c54c750 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/5EE52EAC-C544-4000-8A0F-F2368DB3DEAC/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/5EE52EAC-C544-4000-8A0F-F2368DB3DEAC/Perspective.json, NSUnderlyingError=0x7a1c54c570 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/D7BCC593-D135-4683-8192-36D584DC484E/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/D7BCC593-D135-4683-8192-36D584DC484E/Perspective.json, NSUnderlyingError=0x7a1c54d440 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/C3EDCE07-F6F8-405B-AEFC-6A31015F03FE/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/C3EDCE07-F6F8-405B-AEFC-6A31015F03FE/Perspective.json, NSUnderlyingError=0x7a1c54d290 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/664BC37F-C1DE-42B2-BE3F-D06D895BEA32/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/664BC37F-C1DE-42B2-BE3F-D06D895BEA32/Perspective.json, NSUnderlyingError=0x7a1c54d200 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/5789A169-28C3-4F2D-9310-21B51C16CC41/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/5789A169-28C3-4F2D-9310-21B51C16CC41/Perspective.json, NSUnderlyingError=0x7a1c54d290 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/AE45FB5E-C4E5-43B5-BFF8-478F1E2F899A/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/AE45FB5E-C4E5-43B5-BFF8-478F1E2F899A/Perspective.json, NSUnderlyingError=0x7a1c54c630 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/78909E92-7DE6-457B-86FD-64866784D177/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/78909E92-7DE6-457B-86FD-64866784D177/Perspective.json, NSUnderlyingError=0x7a1c478330 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/78909E92-7DE6-457B-86FD-64866784D177/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/78909E92-7DE6-457B-86FD-64866784D177/Perspective.json, NSUnderlyingError=0x7a1c478c60 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/76A1D144-77FE-44C2-915F-CEC1533EDC20/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-75716/CellsContainer/76A1D144-77FE-44C2-915F-CEC1533EDC20/Perspective.json, NSUnderlyingError=0x7a1c54d290 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}

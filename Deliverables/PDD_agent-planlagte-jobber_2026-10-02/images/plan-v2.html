@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<title>Planlagte jobber — oversikt (v2)</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #f6f4ef; font-family: "Helvetica Neue", "Liberation Sans", "Arimo", "DejaVu Sans", Arial, sans-serif; color: #1d1d1f; }
+  .page { width: 1180px; height: 545px; padding: 26px 30px; position: relative; }
+  h1 { font-size: 19px; margin: 0 0 4px; font-weight: 650; }
+  h2 { font-size: 14px; margin: 22px 0 10px; font-weight: 650; letter-spacing: 0.01em; }
+  .lead { font-size: 13px; color: #55524c; margin: 0; }
+  .steps { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+  .step { background: #fff; border: 1px solid #d9d4c8; border-radius: 9px; padding: 9px 10px 10px; min-height: 132px; position: relative; }
+  .step .n { font-size: 11px; color: #7b766b; font-weight: 650; letter-spacing: 0.04em; }
+  .step .t { font-size: 13px; font-weight: 650; margin: 3px 0 5px; line-height: 1.25; }
+  .step .d { font-size: 11.5px; line-height: 1.38; color: #3d3a35; }
+  .step.asked { border-color: #2f6fe0; border-width: 2px; background: #f3f7ff; }
+  .band { display: grid; grid-template-columns: 3fr 2fr 2fr; gap: 8px; margin-top: 6px; }
+  .band div { font-size: 11.5px; text-align: center; padding: 4px 0; border-radius: 5px; color: #3d3a35; }
+  .band .a { background: #e6e1d5; }
+  .band .b { background: #dbe7ff; color: #173a82; font-weight: 600; }
+  .band .c { background: #e6e1d5; }
+  .flow { display: grid; grid-template-columns: 1.05fr 26px 1.05fr 26px 1.15fr 26px 1.5fr 26px 1.15fr; align-items: center; }
+  .box { background: #fff; border: 1px solid #d9d4c8; border-radius: 9px; padding: 10px 11px; font-size: 12px; line-height: 1.4; min-height: 96px; }
+  .box b { display: block; font-size: 12.5px; margin-bottom: 3px; }
+  .box.you { border-color: #b3541e; border-width: 2px; background: #fff6ef; }
+  .box.agent { background: #f3f7ff; border-color: #9db8ee; }
+  .arr { text-align: center; color: #8a857a; font-size: 18px; }
+  .pair { display: grid; grid-template-rows: 1fr 1fr; gap: 8px; }
+  .pair .box { min-height: 44px; padding: 7px 11px; }
+  .notes { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+  .note { font-size: 12px; line-height: 1.45; color: #3d3a35; background: #efece4; border-radius: 8px; padding: 9px 12px; }
+  .note b { font-weight: 650; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Planlagte jobber i agenten</h1>
+  <p class="lead">Runde 3, 02.10.2026. Ingen ny kø: planleggeren i HAVEN Agent får cron, og bruker køen som alt finnes.</p>
+
+  <h2>Hva du får, og når</h2>
+  <div class="steps">
+    <div class="step"><div class="n">TRINN 0</div><div class="t">Koble til og mål</div><div class="d">Losens jobber går gjennom køen som finnes. Terminal-vinduet er borte.</div></div>
+    <div class="step"><div class="n">TRINN 1</div><div class="t">Ulest post blir en sak</div><div class="d">Innboksene sjekkes hvert 30. minutt. Saken står i menylinjen.</div></div>
+    <div class="step"><div class="n">TRINN 2</div><div class="t">Fristvarsel</div><div class="d">En sak sju dager før en av tilgangene dine går ut.</div></div>
+    <div class="step asked"><div class="n">TRINN 3</div><div class="t">Cron</div><div class="d">Faste klokkeslett med tidssone. Passerte kjøringer telles. En jobb som henger, blir avbrutt.</div></div>
+    <div class="step asked"><div class="n">TRINN 4</div><div class="t">Losen kan bruke den</div><div class="d">Losen ber om en jobb. Du godkjenner med ett trykk. Den går til avtalt tid.</div></div>
+    <div class="step"><div class="n">TRINN 5</div><div class="t">«Planlagte jobber» i menyen</div><div class="d">Neste tidspunkt, siste utfall, pause og stopp.</div></div>
+    <div class="step"><div class="n">TRINN 6</div><div class="t">Dokumentasjon og aksept</div><div class="d">Kontrakt, sikkerhetsmodell, testresultater.</div></div>
+  </div>
+  <div class="band">
+    <div class="a">uten ny agent, på planleggeren som kjører i dag</div>
+    <div class="b">det du ba om 01.10 · krever ny agent</div>
+    <div class="c">ny menyapp, og oppsummering</div>
+  </div>
+
+  <h2>Slik går en jobb Losen ber om (fra trinn 4)</h2>
+  <div class="flow">
+    <div class="box"><b>Losen ber om en jobb</b>fra Claude-appen: hva, når, og når den slutter.</div>
+    <div class="arr">→</div>
+    <div class="box you"><b>Du godkjenner</b>med ett trykk i menylinjen. Endres jobben, må den godkjennes på nytt.</div>
+    <div class="arr">→</div>
+    <div class="box agent"><b>Planleggeren venter</b>til tiden er inne. Sov Macen, kjøres jobben én gang når den våkner.</div>
+    <div class="arr">→</div>
+    <div class="pair">
+      <div class="box"><b>Et fast program</b>som står i policyen</div>
+      <div class="box"><b>En jobb i .agent-spool</b>bygg, test, git, gh</div>
+    </div>
+    <div class="arr">→</div>
+    <div class="box"><b>Du ser utfallet</b>i menylinjen: ferdig, feilet eller passert. En feil blir én sak.</div>
+  </div>
+
+  <div class="notes">
+    <div class="note"><b>Faste jobber</b> (korrespondansesjekken og fristvarselet) godkjenner du én gang, i G2. De trenger ikke trykk hver gang.</div>
+    <div class="note"><b>Planleggeren kjører aldri skalltekst.</b> Køen <code>.agent-spool</code> endres ikke av denne planen. Løperen i Terminal legges ned.</div>
+  </div>
+</div>
+</body>
+</html>

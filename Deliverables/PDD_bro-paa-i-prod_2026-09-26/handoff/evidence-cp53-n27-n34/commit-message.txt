@@ -1,0 +1,13 @@
+PDD_bro-paa-i-prod_2026-09-26: fix N27 feed ordering and N34 RPC reply ownership
+
+Drain admitted feed values in publisher order through normal completion, retain
+operation/byte leases through send, and fail queued values on upstream revocation
+or send/admission failure. Keep close scoped to the captured logical transport.
+
+Register cid/session-owned set and description Futures before sending. Retain
+early replies and isolate timeout, malformed response, close and renewal cleanup.
+Add WS, mux and encrypted peer regressions, including tests run against the
+original implementation, and extend the existing Linux and TSAN test gates.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_011CHU13qBKbb5szsQQo53rW

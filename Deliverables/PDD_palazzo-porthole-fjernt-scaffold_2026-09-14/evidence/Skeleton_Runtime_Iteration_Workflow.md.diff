@@ -1,0 +1,66 @@
+--- before/CellScaffold/Documentation/Skeleton_Runtime_Iteration_Workflow.md
++++ CellScaffold/Documentation/Skeleton_Runtime_Iteration_Workflow.md
+@@ -103,3 +103,63 @@
+ 
+ An end-to-end runbook for non-developers is in
+ `Documentation/Operations/skeleton-runtime-endring-20260831/README.md`.
++
++## Flater fra eksternt scaffold
++
++Last verified against code: 2026-09-14
++
++<!-- purposeRef: purpose://quality.docs-in-same-change -->
++<!-- purposeRef: purpose://candidate.palazzo-porthole-fjernt-scaffold.remote-lookup -->
++
++Porthole kan slå opp en publisert CellConfiguration med et fjernt
++`sourceCellEndpoint` og en eksplisitt `keypath`:
++
++```json
++{
++  "configurationLookup": {
++    "name": "Palazzo Gjest",
++    "sourceCellEndpoint": "cell://127.0.0.1:18083/PalazzoGuestShell",
++    "keypath": "guest.configuration"
++  }
++}
++```
++
++CellScaffold må ha `HAVEN_BRIDGEHEAD_TOKEN` og `HAVEN_BRIDGEHEAD_HOSTS`
++konfigurert for den nøyaktige verten og porten, for eksempel
++`127.0.0.1:18083`. Dette gjenbruker bridgehead-transportens konfigurasjon;
++ugyldig eller manglende token/vertsliste avvises. Manglende keypath eller en
++kilde utenfor listen gir HTTP 400 før resolveren brukes, også når en
++konfigurasjon med samme navn eller UUID allerede er aktiv. Bruk et eksplisitt
++vertsnavn eller `127.0.0.1`; CellResolver tolker `localhost` som lokalt, og
++fjernoppslaget avviser derfor denne formen.
++
++Oppslaget går via `CellBase.defaultCellResolver.cellAtEndpoint` og cellens
++`get(keypath:requester:)` med innlogget requester. Tokenet gir transportadgang;
++det erstatter ikke cellens autorisasjon. Husflaten krever fortsatt riktig
++husidentitet. TLS-policy og bridgehead-ruting håndteres av eksisterende runtime.
++
++Etter dekoding skrives `cell:///X` om til `cell://host:port/X` i
++`discovery.sourceCellEndpoint` og konfigurasjonens øverste `cellReferences`.
++Skeleton, keypaths, setup-verdier, underordnede subscriptions og referanser som
++allerede har en vert beholdes. Primærendepunkt på en godkjent bridgehead godtas
++av Porthole; den lokale statiske allowlisten og kontrollplanets særregel beholdes.
++Lokale oppslag følger den eksisterende katalog-/aktiv-konfigurasjonsveien.
++
++Preview-kommandoen kan angi `--configurationKeypath guest.configuration` eller
++`--configuration-keypath guest.configuration`. Scenario-JSON bruker feltet
++`configurationKeypath`; CLI overstyrer scenario. Feltet skrives til `input.json`
++og sendes som `configurationLookup.keypath`. Uten feltet beholder lokale
++preview-oppslag tidligere payload.
++
++I `PalazzoScaffold/docs/sicilia-gui-evidence/run-g5.sh` bruker de tre pålagte
++flatene henholdsvis `guest.configuration`, `guest.article.configuration` og
++`content.configuration`. Artikkel-preview bruker fortsatt den eksporterte
++`gjest-sicilia-artikkel.skeleton.json`, med binding og handlingspayload for
++`art-pistasj-bronte`. GET på `guest.article.configuration` velger ellers den
++første publiserte artikkelen; preview-filen er det som velger den avtalte
++artikkelen i G5. Den valgfrie tomtilstands-kommandoen er uendret i denne slicen.
++
++Avgrenset verifikasjon og gjenstående Palazzo-/G5-integrasjon dokumenteres i
++`CellProtocolDocuments/Deliverables/PDD_palazzo-porthole-fjernt-scaffold_2026-09-14/TESTRESULT.md`
++(relativt til HAVEN-roten). Et lokalt syntaks- eller brotestresultat er ikke
++visuell paritetsakseptanse.
