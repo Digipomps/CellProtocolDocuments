@@ -18,6 +18,47 @@ The goal is simple:
 - canonical entity data lives in the selected home scaffold unless the owner
   explicitly approves another placement or cache policy.
 
+## Entity presence and service delegation are different
+
+Implementation checkpoint, 2026-09-28: CellProtocol candidate
+[`980e8a2`](https://github.com/Digipomps/CellProtocol/pull/56) adds owner-attach
+entity presence. The human's domain-scoped identities represent the entity.
+A receiving scaffold identity only signs an offer and receipt; it is never
+merged into the human entity. The earlier enrollment flow below is a separate
+draft for bounded service-capability delegation, not the user-facing meaning
+of extending an entity. Its home-selection policy is a proposal, not a deployed
+placement or replication algorithm.
+
+When an explicit user navigation attaches a remotely owned cell, the client may
+request `GET entityExtension.ownerAttach.offer`. The receiver requires fresh
+cryptographic control of the real owner key, or a currently verified same-entity
+linked identity. Shared-cell access, a copied owner UUID/public descriptor, and
+debug access do not qualify. Generic Absorb/import/background operations do not
+activate the optional task-local attach handler.
+
+The selected human signs an exact consent after choosing once or a matching
+saved policy. `SET entityExtension.ownerAttach.accept` rechecks ownership,
+receiver key, cell, domain, expiry and signatures, then durably stores an
+encrypted receipt. Saved automatic/decline policy lasts at most one year and
+binds both keys, identity descriptors, domain, purpose and version. Retries
+reuse the receipt but still require current owner control. Revoked identity
+links do not regain authority through historical receipts.
+
+This reuses an already controlled identity. Enrolling another key or joining two
+unlinked identities still requires the signed IdentityLink ceremony. Presence
+is not a read/write/index grant, does not move entity data, and does not grant
+notification permissions. The protocol is transport-independent; QR, Nearby,
+Sprout or a menu helper can lead a human to the native consent UI without owning
+its authorization decisions.
+
+Implementation sources are in `CellProtocol/Sources/CellBase/Identity/OwnerAttach*`
+and `Cells/GeneralCell/GeneralCell.swift`; the wire profile and adoption limits
+are in `CellProtocol/Docs/Owner_Attach_Entity_Presence.md`. Local full CellBase
+regression passed (1,311 tests, two skipped). This checkpoint does not claim
+phone installation, a completed server rollout or cross-language wire parity.
+The process-global convenience receiver requires explicit scoped composition
+before use in a multi-tenant process.
+
 ## 1. Core Rule
 
 An enrolled scaffold is not the entity and is not the owner. It is a

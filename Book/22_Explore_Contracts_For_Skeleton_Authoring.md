@@ -67,6 +67,23 @@ Current limits:
   compatibility. Strict mode rejects handler installation until an exact
   method contract exists.
 
+## Optional host operations and availability
+
+In the owner-attach candidate described in [Chapter 32](32_Cross_Scaffold_Entity_Enrollment.md),
+`entityExtension.ownerAttach.offer` (GET) and `.accept` (SET) are advertised only
+while `OwnerAttachExtensionRuntime` has an installed receiver. Keys, method
+contracts, legacy metadata, descriptions and keypath audit use the same live
+availability. This applies even to cells created before the host is installed.
+The overlay is not persisted into cell JSON; removing the host removes these
+operations from discovery without changing existing cell contracts.
+
+Their empty permissions list means owner-only proof is required; it is not a
+public-access declaration. A skeleton or agent must not turn these operations
+into generic automatic form submissions: the native client verifies the offer,
+obtains human consent or exact saved policy, and signs the consent locally.
+Discovery itself provides no authority. New tests exercise host installation,
+uninstallation, decode, metadata consistency and unchanged persisted JSON.
+
 ## Normative Operation Contract
 
 Each public operation must advertise one contract identified by `(key,
