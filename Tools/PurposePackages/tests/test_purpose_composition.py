@@ -325,7 +325,8 @@ class CommandLineAndSchema(unittest.TestCase):
         self.assertEqual(code, 0, output.getvalue())
         self.assertIn('18 noder uten composition (18 Book 23-noder)', output.getvalue())
         kb = json.loads(Path(purpose_dev.KB_PATH).read_text())
-        self.assertEqual(len(kb['nodes']), 57)
+        # Book 23 vokser (58 noder fra 2026-09); testen vokter at ingen kanonisk node forsvinner, ikke et fast antall.
+        self.assertGreaterEqual(len(kb['nodes']), 57)
         self.assertFalse(any('composition' in n for n in kb['nodes']))
 
     def test_schema_references_resolve_and_composition_is_shared(self):

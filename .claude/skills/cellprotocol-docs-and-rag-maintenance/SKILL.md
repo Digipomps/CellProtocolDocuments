@@ -85,6 +85,9 @@ If code behavior changed, inspect the actual source before editing docs.
 5. Add "current limitation" language when behavior is partial.
 6. Avoid marketing claims unless `haven-claim-review` is also applicable.
 7. Validate links/paths and run any local catalog checks if present.
+8. If the change also alters how agents should work (a skill, prompt or
+   entrypoint), record it with `CellScaffold/scripts/haven_learn.py capture`
+   and update that target too (skill `haven-learning-capture`).
 
 ## RAG Hygiene
 
@@ -98,6 +101,45 @@ If code behavior changed, inspect the actual source before editing docs.
   when the hosting, auth, freshness, and source-revision boundary is explicit.
 - RAG source packages should preserve canonical citations, retrieval warnings,
   and prompt manifest hashes before provider invocation.
+
+## Hosted Documentation RAG (state 2026-10-08)
+
+Use it to find the section that answers a question about HAVEN/CellProtocol,
+in Norwegian or English, without a language model.
+
+- Retrieval: `POST https://doc.haven.digipomps.org/v1/cases/dimy_docs/retrieve`
+  with `{"query": "..."}`. The answer has `citations` (title, excerpt, doc_id)
+  and `context_text`. About 3 seconds; add `"rerank": false` for an answer in
+  0.2 seconds with a less precise order.
+- What is switched on: `GET https://doc.haven.digipomps.org/v1/retrieval/config`.
+  What is in it: `GET .../v1/cases/dimy_docs/corpus`.
+- It holds the PUBLIC repositories at `origin/main` (CellProtocol,
+  CellProtocolDocuments, Binding, CellUtility, DiMyDocuments, HAVEN_MVP,
+  RAG_Service), refreshed every 30 minutes. A chapter that is only in a working
+  tree or on a branch is not there. Documents from private repositories
+  (CellScaffold, DiMyMicropayments, DiMyMint, Sprout) are not there: read the
+  files, or use `Tools/HavenDocsMCP` for the Book.
+- `POST /v1/query` also formulates an answer with a language model. When the
+  model is unavailable it returns the sources with
+  `retrieval_debug.generation_skipped = true`; it does not fail.
+- `Tools/HavenDocsMCP` is lexical: measured on the same questions it finds the
+  right Book chapter in the top 5 for 71 % of English questions and 13 % of
+  Norwegian ones. Ask it in English, with the document's own terms.
+
+Before changing retrieval, the source list or the index:
+
+- Measure first and after with the fixed question set (108 questions with gold
+  documents). How: `HAVEN-Deploy/_handoff/RAG/LES-MEG.md`. Why each setting is
+  on or off: `docs/RETRIEVAL_QUALITY.md` in `kjetilh/RAG_Service`.
+- Embedding model, chunker version and document-id scheme belong to an index.
+  Changing one means building a new database next to the old one and switching
+  after it has been measured. Re-ranking and graph mode do not.
+- The source list is `config/sync_orchestrator.doc_public.toml`. Its exclude
+  patterns are `fnmatch` on the whole path and `*` crosses `/`: `**/*prompt*.md`
+  once removed `Book/28_RAG_Prompt_Transformer_Cell.md`. Check "not in corpus"
+  in the measurement after every change.
+- Only repositories that are public on GitHub go into the public endpoint.
+- Do not measure through `/v1/query` (it depends on the language model).
 
 ## Completion Checklist
 

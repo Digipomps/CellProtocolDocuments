@@ -122,11 +122,26 @@ The following limitations remain explicit:
 
 | ID | Status | Boundary and missing work |
 | --- | --- | --- |
-| SAD-01 | `not-implemented` | `publisherAccess.issue` has no handler on this branch. A positive issuance fixture naming that key proves mandate shape/signing, not target execution. The green target action is `resetEditableCellConfiguration`; other target integrations are planned. Source wiring for `applyEditableCellConfiguration` is not an end-to-end publication result. |
+| SAD-01 | **rettet 2026-09-25: implementert** | `publisherAccess.issue` har handler på main: nøkkelen defineres i `ArendalsukaConfigurationPublisherCell.issuePublishAccessKeypath`, og `ArendalsukaPublisherBootstrap` gir `rw-s` på den til en navngitt redaktør. Den opprinnelige teksten («has no handler on this branch») gjaldt PDD-grenen i september og var utdatert. En ende-til-ende-publisering er fortsatt ikke målt her. |
 | SAD-02 | `not-implemented` | Registry history does not recognize an administrate mandate by itself. `administrator.history` works through owner proof or the existing owner-authorized exact-key Agreement path. The broader mandate-only reader in the G2 draft remains planned. |
 | SAD-03 | `not-implemented` | Explicit failure when a registry handler loses its weak `self` is missing: `administrator.state` and `administrator.thresholdPolicy` fall back to `.null`, `administrator.history` to `[]`, and all three SET handlers share `guard let self else { return .null }`. These are conditional no-op/fallback paths, not missing normal operations. No lifecycle test proving these paths unreachable or requiring a typed error is recorded. `ScaffoldMandateCell` throws `persistenceUnavailable` on lost `self`. |
-| SAD-04 | planned / not executed | WP10, staging organization creation and representative provisioning are pending. Neither `entity:digipomps` nor `entity:dimy` is created there; Vegar's publishing access is not restored. No lawyer has assessed the organizational affiliation. |
+| SAD-04 | **rettet 2026-09-25: utført** | WP10 er kjørt i staging 2026-09-23 og i prod 2026-09-24T04:03Z: `status=committed_verified`, `administratorEntityRef=entity:digipomps`, representanter kjetil2 og Vegar. Registreringen står fortsatt i readiness 2026-09-25. Gjenstår fra denne raden: `entity:dimy` er ikke opprettet noe sted, og ingen jurist har vurdert organisasjonstilknytningen. |
 | SAD-05 | verification limit | Several mandate Explore return schemas are generic object/list descriptions; prior computed-key source-audit warnings required manual review. This is not a complete remote schema/parity or generated-UI proof. |
+
+**Rettelse 2026-09-25.** To rader over var utdaterte og er korrigert:
+
+- SAD-01: `publisherAccess.issue` har handler på `CellScaffold` main. Nøkkelen
+  defineres i `ArendalsukaConfigurationPublisherCell.issuePublishAccessKeypath`,
+  og `ArendalsukaPublisherBootstrap` gir `rw-s` på den til en navngitt redaktør.
+  Målt på `origin/main` 2026-09-25.
+- SAD-04: WP10 er utført i begge miljøer — staging 2026-09-23, prod
+  2026-09-24T04:03Z, `status=committed_verified`, `administratorEntityRef=entity:digipomps`.
+  Bevis: `Deliverables/PDD_scaffold-admin-delegering_2026-09-08/handoff/WP10-PROD-20260923.md`
+  og fersk readiness i `evidence/g3-20260925/tilstand.md`.
+  Gjenstår fra samme rad: `entity:dimy` er fortsatt ikke opprettet, og ingen
+  jurist har vurdert organisasjonstilknytningen.
+
+SAD-02, SAD-03 og SAD-05 står uendret.
 
 Intentional idempotence is separate from SAD-03: registering the same organization,
 revoking an already revoked mandate and revoking an already revoked orgLink return

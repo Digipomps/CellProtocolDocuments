@@ -1,8 +1,8 @@
 # Chapter 25 — SecretCredentialCell
 
-Status: draft Cell contract.
+Status: implemented database-key profile; broader API/provider Cell contract remains draft.
 
-Last updated: 2026-06-18.
+Last updated: 2026-09-22.
 
 `SecretCredentialCell` is the entity-scoped credential boundary for HAVEN. It
 stores or references provider credentials without exposing raw secrets to
@@ -35,6 +35,63 @@ Apple references:
 - <https://developer.apple.com/documentation/cryptokit/chachapoly>
 - <https://developer.apple.com/documentation/security/keychain-services>
 - <https://developer.apple.com/documentation/security/keychain-items>
+
+## Implemented database-key profile (2026-09-22)
+
+The database-key profile implements a narrower owner-controlled contract beside
+the API/provider credential draft below. See the [implementation and runbook](../../CellScaffold/Documentation/Cell_Database_Key_Custody.md).
+The earlier `SecretCredentialCell` in Binding/HavenAgentD remains an API-key
+profile; its generic `unlockKey` input is not the database-key transport.
+
+**Purpose:** preserve the owner's control over private cell data and independent
+service instances. Use cell-scoped SQLite/SQLCipher for a private cell's workload,
+a portable recipient-encrypted secret Cell for custody, and a separate owner
+IdentityVault/Keychain root for authorized opening. A storage scaffold can hold
+ciphertexts without possessing the unlocking key. A process running SQLCipher
+necessarily sees its database key and plaintext. Choose a suitable server
+database for genuinely shared, concurrent multi-user work; do not share private
+cell databases merely for deployment convenience.
+
+Discovery candidate: `purpose://access.audit.privacy.database-key-custody`, child
+of `purpose://access.audit.privacy`; goal `goal.database-key-custody.owner-control`.
+Norwegian and English aliases include database encryption, key custody, Keychain,
+IdentityVault, recovery, hemmelighetscelle, kryptering and sikker nøkkellagring.
+The `Private celledata og sikker nøkkellagring` catalog entry explains the solution
+without conferring an unlock grant or exposing a secret operation to a model.
+
+Implemented source contracts:
+
+- CellBase `SecretCredentialContract.swift`: versioned owner-signed contexts,
+  RFC 9180 HPKE envelopes, non-Codable secret material, operation-based unwrap,
+  and audience/purpose/recipient/nonce/expiry-bound use requests.
+- CellApple `AppleDatabaseSecretUnwrapper`: explicit create-only X25519 wrapping
+  roots, Data Protection Keychain + userPresence + WhenUnlockedThisDeviceOnly;
+  fresh authentication context on opening. Software keys, not Secure Enclave.
+- CellScaffold `SecretCredentialCell`: `cell:///SecretCredential` template;
+  persist its instance UUID. `credentials.state` is owner-only metadata.
+  Sealed records use the separate `/cell-secrets/v1/<UUID>/exchange` data plane.
+  They are never ordinary get/set, Flow, Skeleton or LLM payloads.
+- The blind per-cell bootstrap journal verifies the persisted owner's signing
+  key, domain, audience, signed record and monotonic policy/version. It commits
+  consumed nonces with the mutation, uses private files and has no unwrap key.
+- `CellDatabaseKeyBroker` acquires keys asynchronously before SQL locks, caches
+  only file-derived session keys, coalesces concurrent opening and closes all
+  registered handles on lock/expiry. A remote revocation prevents future opens;
+  an existing local session lasts until explicit local lock or expiry.
+- Explicit migration preserves the original random 32-byte root and v1 HKDF;
+  both primary and recovery recipients are verified. A private encrypted
+  checkpoint precedes publication so lost replies can resume without new keys.
+  Legacy source keys are retained. Root-compromise rotation across database
+  files and unattended service delegation are separate later profiles.
+
+Platform and acceptance boundaries: Apple's HPKE needs macOS 14/iOS 17 or newer;
+older systems fail unavailable. The Keychain adapter has been compiled, but
+real user-presence/restart behavior in a signed Binding app has not been tested
+by these synthetic contract/database tests. HTTP fixtures with separate roots
+do not establish independent administration of two deployed scaffolds. See the
+runbook's evidence link for executed tests and remaining deployment checks.
+
+The rest of this chapter remains the broader API/provider credential draft.
 
 ## 1. Responsibility
 

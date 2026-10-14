@@ -747,6 +747,222 @@
     "lesson.mount-is-not-git",
     "lesson.codex-mcp-60s"
    ]
+  },
+  {
+   "packageRef": "pkg.std.maal-formaalsforstaaelse",
+   "title": "Måle og forbedre formålsforståelse",
+   "summary": "Når en oppgave endrer hvordan HAVEN tolker det brukeren skriver (Butlers hjelpere og flater, Kallimachos, formålsregisteret), måles endringen på produksjonens egen kodevei mot en frosset fasit, med holdout som ingen endring er begrunnet med og et uavhengig korpus fra nye skribenter. Metoden: Book/38_Measuring_Purpose_Understanding_Without_A_Model.md.",
+   "status": "active",
+   "triggers": {
+    "surfaces": [],
+    "tags": [
+     "matching",
+     "formaalsmatching",
+     "formålsmatching",
+     "evaluering",
+     "måling",
+     "korpus",
+     "holdout",
+     "ruting",
+     "formålsgraf",
+     "kallimachos",
+     "butler-forstaaelse"
+    ]
+   },
+   "purposes": [
+    {
+     "purposeRef": "purpose://measurement.gain-on-unseen-data",
+     "parentRef": "purpose://test.acceptance",
+     "title": "Gevinsten måles på data ingen endring er begrunnet med",
+     "summary": "Holdout røres ikke, og etter at varianten er frosset måles den på et nytt korpus fra skribenter som ikke har sett reglene.",
+     "status": "candidate",
+     "goal": {
+      "goalRef": "goal.measurement.gain-on-unseen-data",
+      "lifecycle": "event",
+      "outcome": "Rapporten viser før/etter både på holdout og på et uavhengig korpus skrevet etter frysing, med vunnet/tapt per melding.",
+      "successSignals": [
+       "Hver endring i grafen peker på treningsrader, aldri holdout-rader.",
+       "Det uavhengige korpuset er generert etter frysing av nye personaer.",
+       "Tap på det uavhengige korpuset er listet rad for rad."
+      ],
+      "verifier": "Inspeksjon av endringslogg + måling."
+     },
+     "derivedTests": [
+      {
+       "testRef": "test.maal.holdout-urort",
+       "kind": "inspection",
+       "description": "Ingen endring begrunnes med en holdout-rad.",
+       "how": "Les grafendringslogg: hver endring lister treningsrader.",
+       "evidence": "TESTRESULT.md#forstaaelse"
+      },
+      {
+       "testRef": "test.maal.uavhengig-korpus",
+       "kind": "measurement",
+       "description": "Frosset variant målt på nytt korpus fra nye skribenter.",
+       "how": "score.py på korpus generert etter frysing",
+       "evidence": "TESTRESULT.md#uavhengig"
+      }
+     ],
+     "matchingHints": {
+      "aliases": [
+       "holdout",
+       "uavhengig korpus",
+       "generalisering"
+      ],
+      "tokens": [
+       "holdout",
+       "korpus",
+       "uavhengig",
+       "generalisering"
+      ]
+     }
+    },
+    {
+     "purposeRef": "purpose://measurement.production-path",
+     "parentRef": "purpose://test.acceptance",
+     "title": "Mål det brukeren faktisk får",
+     "summary": "Harnessen kaller produksjonens egen kodevei med fersk identitet per melding, og fasiten CI allerede tester måles i samme kjøring som tilregnelighetssjekk.",
+     "status": "candidate",
+     "goal": {
+      "goalRef": "goal.measurement.production-path",
+      "lifecycle": "event",
+      "outcome": "Måleløpet går gjennom produksjonens funksjon, og den eksisterende CI-fasiten gir fullt treff i samme kjøring.",
+      "successSignals": [
+       "Ingen reimplementasjon av matcheren i måleverktøyet.",
+       "CI-fasiten (f.eks. PromptPurposeLab) er med og grønn.",
+       "Tomt resultat feiler kjøringen."
+      ],
+      "verifier": "Kommando."
+     },
+     "derivedTests": [
+      {
+       "testRef": "test.maal.produksjonsvei",
+       "kind": "command",
+       "description": "Harnessen kaller produksjonens egen funksjon.",
+       "how": "Les harnessen; kjør den.",
+       "evidence": "TESTRESULT.md#forstaaelse"
+      },
+      {
+       "testRef": "test.maal.tilregnelighet",
+       "kind": "command",
+       "description": "CI-fasiten scorer fullt i samme kjøring.",
+       "how": "score.py på fixtures",
+       "evidence": "TESTRESULT.md#forstaaelse"
+      }
+     ],
+     "matchingHints": {
+      "aliases": [
+       "produksjonsvei",
+       "harness"
+      ],
+      "tokens": [
+       "harness",
+       "produksjon",
+       "fixtures"
+      ]
+     }
+    },
+    {
+     "purposeRef": "purpose://measurement.honest-labels",
+     "parentRef": "purpose://test.acceptance",
+     "title": "Fasiten er ærlig",
+     "summary": "Tolken ser aldri generatorens etikett, får stokket rekkefølge og opake id-er; uenigheter dømmes av et menneske med blinde lokkeduer.",
+     "status": "candidate",
+     "goal": {
+      "goalRef": "goal.measurement.honest-labels",
+      "lifecycle": "event",
+      "outcome": "Sølvfasit fra blind tolk og gullfasit fra dom der lokkeduene avsløres.",
+      "successSignals": [
+       "Tolk-id-er er tilfeldige, ikke i generatorrekkefølge.",
+       "Hver domsrunde har lokkeduer; en runde der dommeren sier ja til en lokkedue teller ikke."
+      ],
+      "verifier": "Inspeksjon."
+     },
+     "derivedTests": [
+      {
+       "testRef": "test.maal.opake-id",
+       "kind": "inspection",
+       "description": "Tolkens innfiler har opake id-er.",
+       "how": "Les tolk-inn-filene",
+       "evidence": "TESTRESULT.md#fasit"
+      },
+      {
+       "testRef": "test.maal.lokkeduer",
+       "kind": "inspection",
+       "description": "Dommerrunden har lokkeduer og ble avslørt.",
+       "how": "Les dommerbenk-nøkkelen etter dom",
+       "evidence": "TESTRESULT.md#fasit"
+      }
+     ],
+     "matchingHints": {
+      "aliases": [
+       "tolk",
+       "dommer",
+       "lokkedue",
+       "fasit"
+      ],
+      "tokens": [
+       "tolk",
+       "fasit",
+       "lokkedue",
+       "dommer"
+      ]
+     }
+    },
+    {
+     "purposeRef": "purpose://measurement.negatives-guarded",
+     "parentRef": "purpose://test.acceptance",
+     "title": "Ikke gjør ting ingen ba om",
+     "summary": "Småprat, «ikke gjør noe», spørsmål om assistenten selv og ønsker utenfor systemet er egne kategorier, og andelen uten handling får ikke synke.",
+     "status": "candidate",
+     "goal": {
+      "goalRef": "goal.measurement.negatives-guarded",
+      "lifecycle": "event",
+      "outcome": "Negativer uten handling er rapportert for seg og er ikke lavere etter endringen.",
+      "successSignals": [
+       "Negativer og hull rapporteres i egne kolonner.",
+       "Hver hjelper går gjennom den felles nektelsessjekken."
+      ],
+      "verifier": "Måling."
+     },
+     "derivedTests": [
+      {
+       "testRef": "test.maal.negativer",
+       "kind": "measurement",
+       "description": "Negativer uten handling er ikke lavere enn før.",
+       "how": "score.py, kolonnen negativer uten handling",
+       "evidence": "TESTRESULT.md#forstaaelse"
+      }
+     ],
+     "matchingHints": {
+      "aliases": [
+       "negativer",
+       "nektelse"
+      ],
+      "tokens": [
+       "negativ",
+       "nektelse",
+       "smaaprat"
+      ]
+     }
+    }
+   ],
+   "requiredArtifacts": [
+    {
+     "artifactRef": "art.maaling",
+     "path": "maaling/",
+     "gate": "G3",
+     "description": "Korpus, fasit, rapporter per variant (se Book 38)."
+    }
+   ],
+   "lessonRefs": [
+    "lesson.judgement-without-decoys-yields-all-yes",
+    "lesson.dev-set-called-holdout",
+    "lesson.tested-a-different-path-than-production",
+    "lesson.same-writers-holdout-overstates",
+    "lesson.sequential-ids-can-leak-labels",
+    "lesson.helper-bypassed-shared-negation-check"
+   ]
   }
  ]
 }

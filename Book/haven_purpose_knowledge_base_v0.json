@@ -2212,6 +2212,1357 @@
           "no-expertise"
         ]
       }
+    },
+    {
+      "purposeRef": "purpose://access.audit.privacy.database-key-custody",
+      "parentRef": "purpose://access.audit.privacy",
+      "title": "Eierstyrt kryptering og nøkkellagring for celledata",
+      "summary": "Preserve owner control and independent private cell instances with cell-scoped SQLCipher, recipient-encrypted SecretCredentialCell custody, separate IdentityVault/Keychain unlocking roots and verified recovery. The database process remains trusted; discovery never authorizes key use.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.database-key-custody.owner-control",
+        "lifecycle": "continuous",
+        "outcome": "Owner and independent recovery recipient reopen the correct cell database; wrong owner/domain/cell/recipient/version and expired sessions are denied.",
+        "successSignals": [
+          "Authorized primary and recovery unwrap the same root.",
+          "Replay, tampered envelopes, wrong scope and old pinned versions fail closed.",
+          "Lock closes all handles; lost publication replies resume the same checkpoint.",
+          "Prompt routing finds the explanatory configuration without exposing keys."
+        ],
+        "verifier": "CellDatabaseKeyCustodyTests and cell database encryption/isolation tests; signed Keychain host and independently administered deployment acceptance remain separate."
+      },
+      "matchingHints": {
+        "aliases": [
+          "database encryption",
+          "key custody",
+          "sikker nøkkellagring",
+          "hemmelighetscelle",
+          "kryptere SQLite",
+          "Keychain IdentityVault",
+          "recovery"
+        ],
+        "tokens": [
+          "database",
+          "sqlite",
+          "sqlcipher",
+          "encryption",
+          "kryptering",
+          "nøkkellagring",
+          "keychain",
+          "identityvault",
+          "recovery",
+          "hemmelighetscelle"
+        ],
+        "capabilityHints": [
+          "SecretCredential",
+          "cell:///SecretCredential",
+          "SQLCipher"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.root",
+      "parentRef": "purpose://human-agency",
+      "title": "Sverre lærer programmering og AI-orkestrering ved å lage og publisere egne spill i HAVEN",
+      "summary": "Sverre har laget og publisert minst ett spill han selv har bestemt innholdet i, og kan forklare med egne ord hva koden og AI-hjelperne gjorde.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.root",
+        "lifecycle": "continuous",
+        "outcome": "Sverre har laget og publisert minst ett spill han selv har bestemt innholdet i, og kan forklare med egne ord hva koden og AI-hjelperne gjorde.",
+        "successSignals": [
+          "Ett publisert spill med Sverre som skaper",
+          "Sverre forklarer tre endringer han ba om, og hva som skjedde i koden",
+          "Kjetil har godkjent publiseringen"
+        ],
+        "verifier": "T-R1: samtale med Sverre etter første publisering, notert i ACCEPT.md"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Sverre lærer programmering og AI-orkestrering ved å lage og publisere egne spill i HAVEN"
+        ],
+        "tokens": [
+          "egne",
+          "haven",
+          "lage",
+          "lærer",
+          "orkestrering",
+          "programmering",
+          "publisere",
+          "spill"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.documentation",
+      "parentRef": "purpose://candidate.game-workshop.root",
+      "title": "Dokumentasjon, instruksjoner og skills",
+      "summary": "Arbeidsbenk-assistenten er et eget dokumentert område som Claude, Codex og mennesker kan bygge videre på.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.documentation",
+        "lifecycle": "continuous",
+        "outcome": "Arbeidsbenk-assistenten er et eget dokumentert område som Claude, Codex og mennesker kan bygge videre på.",
+        "successSignals": [
+          "Området finnes i repoet og er lenket fra Book"
+        ],
+        "verifier": "T-H: lenkesjekk og inspeksjon"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Dokumentasjon, instruksjoner og skills"
+        ],
+        "tokens": [
+          "dokumentasjon",
+          "instruksjoner",
+          "skills"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.documentation.dedicated-area",
+      "parentRef": "purpose://candidate.game-workshop.documentation",
+      "title": "Eget område for arbeidsbenk-assistenten",
+      "summary": "Documentation/Arbeidsbenkassistent/ i CellScaffold beskriver mønsteret, kontrakten og profilformatet, og et Book-kapittel i CellProtocolDocuments beskriver protokolldelen.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.documentation.dedicated-area",
+        "lifecycle": "continuous",
+        "outcome": "Documentation/Arbeidsbenkassistent/ i CellScaffold beskriver mønsteret, kontrakten og profilformatet, og et Book-kapittel i CellProtocolDocuments beskriver protokolldelen.",
+        "successSignals": [
+          "Skillet mellom implementert og planlagt står i hver fil"
+        ],
+        "verifier": "T-H1: hver påstand om implementert oppførsel har fil:linje"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Eget område for arbeidsbenk-assistenten"
+        ],
+        "tokens": [
+          "arbeidsbenk",
+          "assistenten",
+          "eget",
+          "område"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.documentation.skills",
+      "parentRef": "purpose://candidate.game-workshop.documentation",
+      "title": "Skills for å bygge og bruke arbeidsbenker",
+      "summary": "To skills: «workbench-assistant-authoring» for å lage en ny arbeidsbenkprofil, og «spillverksted-mentor» for Claude og Codex som hjelper Sverre.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.documentation.skills",
+        "lifecycle": "continuous",
+        "outcome": "To skills: «workbench-assistant-authoring» for å lage en ny arbeidsbenkprofil, og «spillverksted-mentor» for Claude og Codex som hjelper Sverre.",
+        "successSignals": [
+          "Skillene er distribuert til Claude Code, Codex og Claude Desktop"
+        ],
+        "verifier": "T-H2: en ny tråd lager en profil for Developer Workbench bare ved hjelp av skillen"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Skills for å bygge og bruke arbeidsbenker"
+        ],
+        "tokens": [
+          "arbeidsbenker",
+          "bruke",
+          "bygge",
+          "skills"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.engine",
+      "parentRef": "purpose://candidate.game-workshop.root",
+      "title": "Spillmotor og sandkasse",
+      "summary": "Spillene lages med en motor valgt etter målte kriterier og kjører isolert fra resten av HAVEN.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.engine",
+        "lifecycle": "continuous",
+        "outcome": "Spillene lages med en motor valgt etter målte kriterier og kjører isolert fra resten av HAVEN.",
+        "successSignals": [
+          "Motorvalget er begrunnet i en tabell"
+        ],
+        "verifier": "T-D: motorvalgstabell med målinger i FORMAALSSPEC"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Spillmotor og sandkasse"
+        ],
+        "tokens": [
+          "sandkasse",
+          "spillmotor"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.engine.sandbox-isolation",
+      "parentRef": "purpose://candidate.game-workshop.engine",
+      "title": "Spillene kjører isolert fra HAVEN",
+      "summary": "Et spill kjører i en sandkasse uten tilgang til HAVEN-økten, informasjonskapsler eller data: iframe med sandbox og uten allow-same-origin i forhåndsvisning, og CSP-direktivet sandbox på publiserte spill.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.engine.sandbox-isolation",
+        "lifecycle": "continuous",
+        "outcome": "Et spill kjører i en sandkasse uten tilgang til HAVEN-økten, informasjonskapsler eller data: iframe med sandbox og uten allow-same-origin i forhåndsvisning, og CSP-direktivet sandbox på publiserte spill.",
+        "successSignals": [
+          "Spillkode kan ikke lese document.cookie eller kalle HAVEN-API-er",
+          "Publisert spill har eget, ugjennomsiktig opphav"
+        ],
+        "verifier": "T-D2: et ondsinnet testspill prøver å lese økt og kalle API; alt blir avvist"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Spillene kjører isolert fra HAVEN"
+        ],
+        "tokens": [
+          "fra",
+          "haven",
+          "isolert",
+          "kjører",
+          "spillene"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.engine.selection",
+      "parentRef": "purpose://candidate.game-workshop.engine",
+      "title": "Motorvalg: KAPLAY først, Phaser når spillene vokser",
+      "summary": "Første motor er KAPLAY (MIT, enkel og lesbar kode, kjører i nettleseren uten byggesteg). Phaser er neste trinn for større spill. Valget bekreftes ved at hjelperen lager fem fungerende småspill i hver.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.engine.selection",
+        "lifecycle": "continuous",
+        "outcome": "Første motor er KAPLAY (MIT, enkel og lesbar kode, kjører i nettleseren uten byggesteg). Phaser er neste trinn for større spill. Valget bekreftes ved at hjelperen lager fem fungerende småspill i hver.",
+        "successSignals": [
+          "Fem av fem testspill kjører i KAPLAY uten manuell retting",
+          "Sverre kan lese koden i et KAPLAY-spill"
+        ],
+        "verifier": "T-D1: fem bestillinger per motor, tell spill som kjører uten retting"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Motorvalg: KAPLAY først, Phaser når spillene vokser"
+        ],
+        "tokens": [
+          "først",
+          "kaplay",
+          "motorvalg",
+          "når",
+          "phaser",
+          "spillene",
+          "vokser"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.engine.swappable-adapter",
+      "parentRef": "purpose://candidate.game-workshop.engine",
+      "title": "Motoren kan byttes",
+      "summary": "Arbeidsbenken snakker med motoren gjennom en liten adapter (mal, forhåndsvisning, eksport), så et nytt motorvalg ikke krever ny arbeidsbenk.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.engine.swappable-adapter",
+        "lifecycle": "continuous",
+        "outcome": "Arbeidsbenken snakker med motoren gjennom en liten adapter (mal, forhåndsvisning, eksport), så et nytt motorvalg ikke krever ny arbeidsbenk.",
+        "successSignals": [
+          "To motorer har adapter"
+        ],
+        "verifier": "T-D3: samme spillprosjekt forhåndsvises med to adaptere"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Motoren kan byttes"
+        ],
+        "tokens": [
+          "byttes",
+          "motoren"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.learning",
+      "parentRef": "purpose://candidate.game-workshop.root",
+      "title": "Sverre forstår det han lager",
+      "summary": "Hvert steg i verkstedet lærer Sverre noe han kan vise, ikke bare noe AI har gjort for ham.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.learning",
+        "lifecycle": "continuous",
+        "outcome": "Hvert steg i verkstedet lærer Sverre noe han kan vise, ikke bare noe AI har gjort for ham.",
+        "successSignals": [
+          "Hver økt ender med én ting Sverre kan forklare"
+        ],
+        "verifier": "T-A: øktlogg med «dette lærte jeg» per økt"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Sverre forstår det han lager"
+        ],
+        "tokens": [
+          "forstår",
+          "han",
+          "lager",
+          "sverre"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.learning.explain-each-change",
+      "parentRef": "purpose://candidate.game-workshop.learning",
+      "title": "Hjelperen forklarer hver endring",
+      "summary": "Hver endring hjelperen foreslår kommer med en kort forklaring på barnespråk og en markering av hvilke linjer som endres.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.learning.explain-each-change",
+        "lifecycle": "continuous",
+        "outcome": "Hver endring hjelperen foreslår kommer med en kort forklaring på barnespråk og en markering av hvilke linjer som endres.",
+        "successSignals": [
+          "Forklaring og endrede linjer vises før Sverre godtar",
+          "Sverre kan be om «forklar enklere»"
+        ],
+        "verifier": "T-A2: ti forslag i prototypen har forklaring og markerte linjer"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Hjelperen forklarer hver endring"
+        ],
+        "tokens": [
+          "endring",
+          "forklarer",
+          "hjelperen",
+          "hver"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.learning.mentor-oversight",
+      "parentRef": "purpose://candidate.game-workshop.learning",
+      "title": "Kjetil følger med og veileder",
+      "summary": "Kjetil ser hva Sverre har bedt om, hva som ble godtatt og hvor han står i læringsstien, og kan legge igjen en kommentar.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.learning.mentor-oversight",
+        "lifecycle": "continuous",
+        "outcome": "Kjetil ser hva Sverre har bedt om, hva som ble godtatt og hvor han står i læringsstien, og kan legge igjen en kommentar.",
+        "successSignals": [
+          "Mentorvisning med øktlogg",
+          "Kommentarer fra Kjetil vises for Sverre neste gang"
+        ],
+        "verifier": "T-A3: Kjetil finner forrige økt på under ett minutt"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Kjetil følger med og veileder"
+        ],
+        "tokens": [
+          "følger",
+          "kjetil",
+          "veileder"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.learning.progression-path",
+      "parentRef": "purpose://candidate.game-workshop.learning",
+      "title": "Læringssti i fem nivåer",
+      "summary": "Verkstedet har fem nivåer som låses opp etter hvert: 1 Endre tall i et ferdig spill. 2 Bestille endringer fra hjelperen. 3 Lese og forklare koden hjelperen skrev. 4 Skrive egen kode som hjelperen ser over. 5 Dele et spill i oppgaver og fordele dem på flere AI-roller.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.learning.progression-path",
+        "lifecycle": "continuous",
+        "outcome": "Verkstedet har fem nivåer som låses opp etter hvert: 1 Endre tall i et ferdig spill. 2 Bestille endringer fra hjelperen. 3 Lese og forklare koden hjelperen skrev. 4 Skrive egen kode som hjelperen ser over. 5 Dele et spill i oppgaver og fordele dem på flere AI-roller.",
+        "successSignals": [
+          "Nivået vises i arbeidsbenken",
+          "Hvert nivå har én oppgave som avslutter det"
+        ],
+        "verifier": "T-A1: gå gjennom nivå 1–2 med Sverre i prototypen"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Læringssti i fem nivåer"
+        ],
+        "tokens": [
+          "fem",
+          "læringssti",
+          "nivåer"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.platform",
+      "parentRef": "purpose://candidate.game-workshop.root",
+      "title": "Eget scaffold? Ikke nå",
+      "summary": "Spillverkstedet bygges som celler og CellConfiguration i CellScaffold. Det skilles ut først når et målt kriterium slår til.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.platform",
+        "lifecycle": "continuous",
+        "outcome": "Spillverkstedet bygges som celler og CellConfiguration i CellScaffold. Det skilles ut først når et målt kriterium slår til.",
+        "successSignals": [
+          "Beslutningen og kriteriene står i FORMAALSSPEC §2"
+        ],
+        "verifier": "T-G: inspeksjon mot Scaffold_Product_Split_Plan_2026-07-10"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Eget scaffold? Ikke nå"
+        ],
+        "tokens": [
+          "eget",
+          "scaffold"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.platform.no-new-scaffold-yet",
+      "parentRef": "purpose://candidate.game-workshop.platform",
+      "title": "Ingen nytt scaffold nå, men egen sandkasse for spill",
+      "summary": "Arbeidsbenken, hjelperen og biblioteket lever i CellScaffold. Det eneste med en annen risikoprofil er brukerlaget spillkode, og den isoleres med sandkasse (D2) i stedet for et eget scaffold.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.platform.no-new-scaffold-yet",
+        "lifecycle": "continuous",
+        "outcome": "Arbeidsbenken, hjelperen og biblioteket lever i CellScaffold. Det eneste med en annen risikoprofil er brukerlaget spillkode, og den isoleres med sandkasse (D2) i stedet for et eget scaffold.",
+        "successSignals": [
+          "Ingen ny deploybar enhet i fase 1–2"
+        ],
+        "verifier": "T-G1: inspeksjon av at ingen ny Package-target er lagt til før kriteriet i G2 er målt"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Ingen nytt scaffold nå, men egen sandkasse for spill"
+        ],
+        "tokens": [
+          "egen",
+          "ingen",
+          "men",
+          "nytt",
+          "sandkasse",
+          "scaffold",
+          "spill"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.platform.split-out-criteria",
+      "parentRef": "purpose://candidate.game-workshop.platform",
+      "title": "Kriterier for å skille ut en spillvert",
+      "summary": "En egen spillvert (eget domene eller target) lages hvis ett av disse slår til: spill trenger lagring per spiller, trafikken fra spill påvirker resten av HAVEN, eller sandkassetesten T-D2 ikke kan bli grønn på samme domene.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.platform.split-out-criteria",
+        "lifecycle": "continuous",
+        "outcome": "En egen spillvert (eget domene eller target) lages hvis ett av disse slår til: spill trenger lagring per spiller, trafikken fra spill påvirker resten av HAVEN, eller sandkassetesten T-D2 ikke kan bli grønn på samme domene.",
+        "successSignals": [
+          "Kriteriene måles ved hver publiseringsfase"
+        ],
+        "verifier": "T-G2: måling ved fase 3"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Kriterier for å skille ut en spillvert"
+        ],
+        "tokens": [
+          "kriterier",
+          "skille",
+          "spillvert"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.project",
+      "parentRef": "purpose://candidate.game-workshop.root",
+      "title": "Prosjektadministrasjon for spillene",
+      "summary": "Hvert spill er et prosjekt med oppgaver, versjoner og status som både Sverre og Kjetil ser.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.project",
+        "lifecycle": "continuous",
+        "outcome": "Hvert spill er et prosjekt med oppgaver, versjoner og status som både Sverre og Kjetil ser.",
+        "successSignals": [
+          "Spillprosjekt vises i HAVEN Workbench"
+        ],
+        "verifier": "T-E: et spill fra idé til publisert har sporbare oppgaver og versjoner"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Prosjektadministrasjon for spillene"
+        ],
+        "tokens": [
+          "prosjektadministrasjon",
+          "spillene"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.project.child-readable-tasks",
+      "parentRef": "purpose://candidate.game-workshop.project",
+      "title": "Oppgaver Sverre forstår",
+      "summary": "Hjelperen gjør ønsker om til korte oppgaver i barnespråk («Få helten til å hoppe») som vises som en liste Sverre kan krysse av.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.project.child-readable-tasks",
+        "lifecycle": "continuous",
+        "outcome": "Hjelperen gjør ønsker om til korte oppgaver i barnespråk («Få helten til å hoppe») som vises som en liste Sverre kan krysse av.",
+        "successSignals": [
+          "Hver oppgave er knyttet til et formål"
+        ],
+        "verifier": "T-E3: Sverre leser opp og forklarer tre oppgaver"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Oppgaver Sverre forstår"
+        ],
+        "tokens": [
+          "forstår",
+          "oppgaver",
+          "sverre"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.project.versioned-changes",
+      "parentRef": "purpose://candidate.game-workshop.project",
+      "title": "Hver godtatt endring er en versjon",
+      "summary": "Hver endring Sverre godtar lagres som en versjon med hvem som ba om den, hva hjelperen foreslo og hva som ble godtatt. Han kan gå tilbake til en tidligere versjon.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.project.versioned-changes",
+        "lifecycle": "continuous",
+        "outcome": "Hver endring Sverre godtar lagres som en versjon med hvem som ba om den, hva hjelperen foreslo og hva som ble godtatt. Han kan gå tilbake til en tidligere versjon.",
+        "successSignals": [
+          "Angre virker etter ti endringer"
+        ],
+        "verifier": "T-E2: ti endringer, gå tilbake til nummer tre, spillet er likt versjon tre"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Hver godtatt endring er en versjon"
+        ],
+        "tokens": [
+          "endring",
+          "godtatt",
+          "hver",
+          "versjon"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.publishing",
+      "parentRef": "purpose://candidate.game-workshop.root",
+      "title": "Publisering via HAVEN",
+      "summary": "Et ferdig spill kan publiseres til en fast adresse i HAVEN etter Kjetils godkjenning.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.publishing",
+        "lifecycle": "continuous",
+        "outcome": "Et ferdig spill kan publiseres til en fast adresse i HAVEN etter Kjetils godkjenning.",
+        "successSignals": [
+          "Publisert spill åpnes uten innlogging"
+        ],
+        "verifier": "T-F: publiser et testspill og åpne det på en annen enhet"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Publisering via HAVEN"
+        ],
+        "tokens": [
+          "haven",
+          "publisering",
+          "via"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.publishing.child-privacy",
+      "parentRef": "purpose://candidate.game-workshop.publishing",
+      "title": "Ingen persondata om Sverre i publiserte spill",
+      "summary": "Publiserte spill viser bare et kunstnernavn Kjetil har godkjent. Spillene samler ikke inn data, og det finnes ingen chat med fremmede.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.publishing.child-privacy",
+        "lifecycle": "continuous",
+        "outcome": "Publiserte spill viser bare et kunstnernavn Kjetil har godkjent. Spillene samler ikke inn data, og det finnes ingen chat med fremmede.",
+        "successSignals": [
+          "Ingen nettverkskall fra spillet utenfor egen adresse"
+        ],
+        "verifier": "T-F3: inspeksjon av publisert spill og CSP connect-src"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Ingen persondata om Sverre i publiserte spill"
+        ],
+        "tokens": [
+          "ingen",
+          "persondata",
+          "publiserte",
+          "spill",
+          "sverre"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.publishing.guardian-approval",
+      "parentRef": "purpose://candidate.game-workshop.publishing",
+      "title": "Kjetil godkjenner hver publisering",
+      "summary": "Sverre kan be om publisering, men spillet blir offentlig først når Kjetil har godkjent den versjonen. Avpublisering kan begge gjøre.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.publishing.guardian-approval",
+        "lifecycle": "continuous",
+        "outcome": "Sverre kan be om publisering, men spillet blir offentlig først når Kjetil har godkjent den versjonen. Avpublisering kan begge gjøre.",
+        "successSignals": [
+          "Godkjenningen er bundet til versjonen"
+        ],
+        "verifier": "T-F2: publisering uten godkjenning avvises; endret versjon etter godkjenning krever ny godkjenning"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Kjetil godkjenner hver publisering"
+        ],
+        "tokens": [
+          "godkjenner",
+          "hver",
+          "kjetil",
+          "publisering"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game-workshop.publishing.public-address",
+      "parentRef": "purpose://candidate.game-workshop.publishing",
+      "title": "Publisert spill har egen adresse",
+      "summary": "Publiserte spill ligger under en egen rute (for eksempel /spill/navn) med CSP sandbox, ved siden av /pub.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game-workshop.publishing.public-address",
+        "lifecycle": "continuous",
+        "outcome": "Publiserte spill ligger under en egen rute (for eksempel /spill/navn) med CSP sandbox, ved siden av /pub.",
+        "successSignals": [
+          "Adressen virker på telefon og PC"
+        ],
+        "verifier": "T-F1: tre målinger av lastetid under fem sekunder"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Publisert spill har egen adresse"
+        ],
+        "tokens": [
+          "adresse",
+          "egen",
+          "publisert",
+          "spill"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.tool-library.root",
+      "parentRef": "purpose://candidate.game-workshop.root",
+      "title": "Verktøybibliotek: hva som finnes og hva det løser",
+      "summary": "Biblioteket svarer på «hva kan jeg bruke til dette formålet?» med oppføringer som sier hva de løser, for hvem, og med hvilken lisens.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.tool-library.root",
+        "lifecycle": "continuous",
+        "outcome": "Biblioteket svarer på «hva kan jeg bruke til dette formålet?» med oppføringer som sier hva de løser, for hvem, og med hvilken lisens.",
+        "successSignals": [
+          "Spørsmål med et formål gir oppføringer med begrunnelse"
+        ],
+        "verifier": "T-C: bibliotekoppslag for tjue formål gir minst én relevant oppføring per formål"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Verktøybibliotek: hva som finnes og hva det løser"
+        ],
+        "tokens": [
+          "finnes",
+          "hva",
+          "løser",
+          "verktøybibliotek"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game.catch-template",
+      "parentRef": "purpose://candidate.tool-library.root",
+      "title": "Start et fangespill",
+      "summary": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: start et fangespill.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game.catch-template",
+        "lifecycle": "continuous",
+        "outcome": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: start et fangespill.",
+        "successSignals": [
+          "Oppslag på purpose://candidate.game.catch-template i verktøybiblioteket gir minst én oppføring med lisens og kilde."
+        ],
+        "verifier": "T-C1 (validator) og T-C2 (oppslag på formålet gir minst én oppføring)"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Start et fangespill"
+        ],
+        "tokens": [
+          "fangespill",
+          "start"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game.character-art",
+      "parentRef": "purpose://candidate.tool-library.root",
+      "title": "Figurer og bakgrunner",
+      "summary": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: figurer og bakgrunner.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game.character-art",
+        "lifecycle": "continuous",
+        "outcome": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: figurer og bakgrunner.",
+        "successSignals": [
+          "Oppslag på purpose://candidate.game.character-art i verktøybiblioteket gir minst én oppføring med lisens og kilde."
+        ],
+        "verifier": "T-C1 (validator) og T-C2 (oppslag på formålet gir minst én oppføring)"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Figurer og bakgrunner"
+        ],
+        "tokens": [
+          "bakgrunner",
+          "figurer"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game.collectible-item",
+      "parentRef": "purpose://candidate.tool-library.root",
+      "title": "Ting å samle",
+      "summary": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: ting å samle.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game.collectible-item",
+        "lifecycle": "continuous",
+        "outcome": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: ting å samle.",
+        "successSignals": [
+          "Oppslag på purpose://candidate.game.collectible-item i verktøybiblioteket gir minst én oppføring med lisens og kilde."
+        ],
+        "verifier": "T-C1 (validator) og T-C2 (oppslag på formålet gir minst én oppføring)"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Ting å samle"
+        ],
+        "tokens": [
+          "samle",
+          "ting"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game.detect-collision",
+      "parentRef": "purpose://candidate.tool-library.root",
+      "title": "Merk når to ting treffer hverandre",
+      "summary": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: merk når to ting treffer hverandre.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game.detect-collision",
+        "lifecycle": "continuous",
+        "outcome": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: merk når to ting treffer hverandre.",
+        "successSignals": [
+          "Oppslag på purpose://candidate.game.detect-collision i verktøybiblioteket gir minst én oppføring med lisens og kilde."
+        ],
+        "verifier": "T-C1 (validator) og T-C2 (oppslag på formålet gir minst én oppføring)"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Merk når to ting treffer hverandre"
+        ],
+        "tokens": [
+          "hverandre",
+          "merk",
+          "når",
+          "ting",
+          "treffer"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game.gravity-and-jump",
+      "parentRef": "purpose://candidate.tool-library.root",
+      "title": "Tyngdekraft og hopp",
+      "summary": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: tyngdekraft og hopp.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game.gravity-and-jump",
+        "lifecycle": "continuous",
+        "outcome": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: tyngdekraft og hopp.",
+        "successSignals": [
+          "Oppslag på purpose://candidate.game.gravity-and-jump i verktøybiblioteket gir minst én oppføring med lisens og kilde."
+        ],
+        "verifier": "T-C1 (validator) og T-C2 (oppslag på formålet gir minst én oppføring)"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Tyngdekraft og hopp"
+        ],
+        "tokens": [
+          "hopp",
+          "tyngdekraft"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game.maze-template",
+      "parentRef": "purpose://candidate.tool-library.root",
+      "title": "Start et labyrintspill",
+      "summary": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: start et labyrintspill.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game.maze-template",
+        "lifecycle": "continuous",
+        "outcome": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: start et labyrintspill.",
+        "successSignals": [
+          "Oppslag på purpose://candidate.game.maze-template i verktøybiblioteket gir minst én oppføring med lisens og kilde."
+        ],
+        "verifier": "T-C1 (validator) og T-C2 (oppslag på formålet gir minst én oppføring)"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Start et labyrintspill"
+        ],
+        "tokens": [
+          "labyrintspill",
+          "start"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game.move-object",
+      "parentRef": "purpose://candidate.tool-library.root",
+      "title": "Flytt noe på skjermen",
+      "summary": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: flytt noe på skjermen.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game.move-object",
+        "lifecycle": "continuous",
+        "outcome": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: flytt noe på skjermen.",
+        "successSignals": [
+          "Oppslag på purpose://candidate.game.move-object i verktøybiblioteket gir minst én oppføring med lisens og kilde."
+        ],
+        "verifier": "T-C1 (validator) og T-C2 (oppslag på formålet gir minst én oppføring)"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Flytt noe på skjermen"
+        ],
+        "tokens": [
+          "flytt",
+          "noe",
+          "skjermen"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game.platformer-template",
+      "parentRef": "purpose://candidate.tool-library.root",
+      "title": "Start et hoppespill",
+      "summary": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: start et hoppespill.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game.platformer-template",
+        "lifecycle": "continuous",
+        "outcome": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: start et hoppespill.",
+        "successSignals": [
+          "Oppslag på purpose://candidate.game.platformer-template i verktøybiblioteket gir minst én oppføring med lisens og kilde."
+        ],
+        "verifier": "T-C1 (validator) og T-C2 (oppslag på formålet gir minst én oppføring)"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Start et hoppespill"
+        ],
+        "tokens": [
+          "hoppespill",
+          "start"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game.play-sound",
+      "parentRef": "purpose://candidate.tool-library.root",
+      "title": "Spill av lyd",
+      "summary": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: spill av lyd.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game.play-sound",
+        "lifecycle": "continuous",
+        "outcome": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: spill av lyd.",
+        "successSignals": [
+          "Oppslag på purpose://candidate.game.play-sound i verktøybiblioteket gir minst én oppføring med lisens og kilde."
+        ],
+        "verifier": "T-C1 (validator) og T-C2 (oppslag på formålet gir minst én oppføring)"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Spill av lyd"
+        ],
+        "tokens": [
+          "lyd",
+          "spill"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game.react-to-input",
+      "parentRef": "purpose://candidate.tool-library.root",
+      "title": "Reager på tastatur, mus og berøring",
+      "summary": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: reager på tastatur, mus og berøring.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game.react-to-input",
+        "lifecycle": "continuous",
+        "outcome": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: reager på tastatur, mus og berøring.",
+        "successSignals": [
+          "Oppslag på purpose://candidate.game.react-to-input i verktøybiblioteket gir minst én oppføring med lisens og kilde."
+        ],
+        "verifier": "T-C1 (validator) og T-C2 (oppslag på formålet gir minst én oppføring)"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Reager på tastatur, mus og berøring"
+        ],
+        "tokens": [
+          "berøring",
+          "mus",
+          "reager",
+          "tastatur"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game.show-score",
+      "parentRef": "purpose://candidate.tool-library.root",
+      "title": "Vis poeng og tekst",
+      "summary": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: vis poeng og tekst.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game.show-score",
+        "lifecycle": "continuous",
+        "outcome": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: vis poeng og tekst.",
+        "successSignals": [
+          "Oppslag på purpose://candidate.game.show-score i verktøybiblioteket gir minst én oppføring med lisens og kilde."
+        ],
+        "verifier": "T-C1 (validator) og T-C2 (oppslag på formålet gir minst én oppføring)"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Vis poeng og tekst"
+        ],
+        "tokens": [
+          "poeng",
+          "tekst",
+          "vis"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game.spawn-and-remove",
+      "parentRef": "purpose://candidate.tool-library.root",
+      "title": "Lag og fjern ting mens spillet går",
+      "summary": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: lag og fjern ting mens spillet går.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game.spawn-and-remove",
+        "lifecycle": "continuous",
+        "outcome": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: lag og fjern ting mens spillet går.",
+        "successSignals": [
+          "Oppslag på purpose://candidate.game.spawn-and-remove i verktøybiblioteket gir minst én oppføring med lisens og kilde."
+        ],
+        "verifier": "T-C1 (validator) og T-C2 (oppslag på formålet gir minst én oppføring)"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Lag og fjern ting mens spillet går"
+        ],
+        "tokens": [
+          "fjern",
+          "går",
+          "lag",
+          "mens",
+          "spillet",
+          "ting"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game.switch-scene",
+      "parentRef": "purpose://candidate.tool-library.root",
+      "title": "Bytt mellom start, spill og ferdig",
+      "summary": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: bytt mellom start, spill og ferdig.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game.switch-scene",
+        "lifecycle": "continuous",
+        "outcome": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: bytt mellom start, spill og ferdig.",
+        "successSignals": [
+          "Oppslag på purpose://candidate.game.switch-scene i verktøybiblioteket gir minst én oppføring med lisens og kilde."
+        ],
+        "verifier": "T-C1 (validator) og T-C2 (oppslag på formålet gir minst én oppføring)"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Bytt mellom start, spill og ferdig"
+        ],
+        "tokens": [
+          "bytt",
+          "ferdig",
+          "mellom",
+          "spill",
+          "start"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.game.timing",
+      "parentRef": "purpose://candidate.tool-library.root",
+      "title": "Gjør noe etter en stund eller igjen og igjen",
+      "summary": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: gjør noe etter en stund eller igjen og igjen.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.game.timing",
+        "lifecycle": "continuous",
+        "outcome": "Verktøybiblioteket har minst ett verktøy med lisens og kilde for: gjør noe etter en stund eller igjen og igjen.",
+        "successSignals": [
+          "Oppslag på purpose://candidate.game.timing i verktøybiblioteket gir minst én oppføring med lisens og kilde."
+        ],
+        "verifier": "T-C1 (validator) og T-C2 (oppslag på formålet gir minst én oppføring)"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Gjør noe etter en stund eller igjen og igjen"
+        ],
+        "tokens": [
+          "etter",
+          "gjør",
+          "igjen",
+          "noe",
+          "stund"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.tool-library.derived-from-sources",
+      "parentRef": "purpose://candidate.tool-library.root",
+      "title": "Biblioteket bygges fra kildene, ikke for hånd",
+      "summary": "Oppføringer for celler og GUI-elementer lages fra cellenes Explore-kontrakter, CellConfiguration-discovery og kapabilitetsindeksen. En oppføring som ikke lenger finnes i kilden, faller ut.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.tool-library.derived-from-sources",
+        "lifecycle": "continuous",
+        "outcome": "Oppføringer for celler og GUI-elementer lages fra cellenes Explore-kontrakter, CellConfiguration-discovery og kapabilitetsindeksen. En oppføring som ikke lenger finnes i kilden, faller ut.",
+        "successSignals": [
+          "Bygget feiler hvis en oppføring peker på noe som ikke finnes"
+        ],
+        "verifier": "T-C3: bygg biblioteket to ganger fra samme kilde gir samme resultat; fjernet celle forsvinner"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Biblioteket bygges fra kildene, ikke for hånd"
+        ],
+        "tokens": [
+          "biblioteket",
+          "bygges",
+          "fra",
+          "hånd",
+          "kildene"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.tool-library.open-licensed-game-content",
+      "parentRef": "purpose://candidate.tool-library.root",
+      "title": "Spillinnhold med åpne lisenser",
+      "summary": "Biblioteket har maler (plattform, labyrint, huskespill, regnespill), figurer og lyder med kjent åpen lisens, slik at Sverre kan bruke dem i publiserte spill.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.tool-library.open-licensed-game-content",
+        "lifecycle": "continuous",
+        "outcome": "Biblioteket har maler (plattform, labyrint, huskespill, regnespill), figurer og lyder med kjent åpen lisens, slik at Sverre kan bruke dem i publiserte spill.",
+        "successSignals": [
+          "Hver ressurs har lisens og kilde",
+          "Malene i Sverres spillrom er første innhold"
+        ],
+        "verifier": "T-C4: lisensfeltet er fylt og kontrollert for hver ressurs"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Spillinnhold med åpne lisenser"
+        ],
+        "tokens": [
+          "lisenser",
+          "spillinnhold",
+          "åpne"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.tool-library.purpose-first-lookup",
+      "parentRef": "purpose://candidate.tool-library.root",
+      "title": "Oppslag: formål først, tekstsøk etterpå",
+      "summary": "Oppslag går først via formålsrefs, så via ordsøk. Tekst til modellen hentes etter oppslag, aldri i det skjulte. Semantisk søk (vektorer) legges til bare hvis målinger viser at ordsøk ikke holder.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.tool-library.purpose-first-lookup",
+        "lifecycle": "continuous",
+        "outcome": "Oppslag går først via formålsrefs, så via ordsøk. Tekst til modellen hentes etter oppslag, aldri i det skjulte. Semantisk søk (vektorer) legges til bare hvis målinger viser at ordsøk ikke holder.",
+        "successSignals": [
+          "Hvert treff sier om det kom fra formål eller tekst"
+        ],
+        "verifier": "T-C2: treffrate med og uten tekstsøk på et uavhengig sett"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Oppslag: formål først, tekstsøk etterpå"
+        ],
+        "tokens": [
+          "etterpå",
+          "formål",
+          "først",
+          "oppslag",
+          "tekstsøk"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.tool-library.purpose-keyed-entries",
+      "parentRef": "purpose://candidate.tool-library.root",
+      "title": "Hver oppføring er merket med formål",
+      "summary": "Hver oppføring har purposeRefs, hva den løser, eksempler, lisens og alder. Den nøkles på purpose://-refs, ikke på fritekst.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.tool-library.purpose-keyed-entries",
+        "lifecycle": "continuous",
+        "outcome": "Hver oppføring har purposeRefs, hva den løser, eksempler, lisens og alder. Den nøkles på purpose://-refs, ikke på fritekst.",
+        "successSignals": [
+          "Ingen oppføring uten purposeRef",
+          "ConfigurationCatalog og Library får purposeRefs"
+        ],
+        "verifier": "T-C1: validator nekter oppføring uten purposeRef og lisens"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Hver oppføring er merket med formål"
+        ],
+        "tokens": [
+          "formål",
+          "hver",
+          "merket",
+          "oppføring"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.workbench-assistant.root",
+      "parentRef": "purpose://candidate.game-workshop.root",
+      "title": "Arbeidsbenk-assistenten (mønster for alle arbeidsbenker)",
+      "summary": "Det finnes én beskrevet og testet måte å lage en samtalehjelper for en arbeidsbenk på. Spillverkstedet er første bruker.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.workbench-assistant.root",
+        "lifecycle": "continuous",
+        "outcome": "Det finnes én beskrevet og testet måte å lage en samtalehjelper for en arbeidsbenk på. Spillverkstedet er første bruker.",
+        "successSignals": [
+          "Mønsteret er dokumentert i eget område",
+          "Spillverkstedet bruker mønsteret uten spesialkode i chatmotoren"
+        ],
+        "verifier": "T-B: kontrakt og fixtures validerer; spillverkstedets profil lastes uten kodeendring i chatmotoren"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Arbeidsbenk-assistenten (mønster for alle arbeidsbenker)"
+        ],
+        "tokens": [
+          "alle",
+          "arbeidsbenk",
+          "arbeidsbenker",
+          "assistenten",
+          "mønster"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.workbench-assistant.child-safe-dialogue",
+      "parentRef": "purpose://candidate.workbench-assistant.root",
+      "title": "Trygg samtale for et barn",
+      "summary": "Hjelperen svarer tilpasset alder, holder seg til verkstedet, ber ikke om personopplysninger, og bruker bare modeller Kjetil har valgt.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.workbench-assistant.child-safe-dialogue",
+        "lifecycle": "continuous",
+        "outcome": "Hjelperen svarer tilpasset alder, holder seg til verkstedet, ber ikke om personopplysninger, og bruker bare modeller Kjetil har valgt.",
+        "successSignals": [
+          "Eskaleringstak never_external eller ask_each_time for Sverre",
+          "Modell og leverandør vises i arbeidsbenken"
+        ],
+        "verifier": "T-B6: et sett med vanskelige meldinger gir avvisning eller omdirigering, gjennomgått av Kjetil"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Trygg samtale for et barn"
+        ],
+        "tokens": [
+          "barn",
+          "samtale",
+          "trygg"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.workbench-assistant.preview-before-change",
+      "parentRef": "purpose://candidate.workbench-assistant.root",
+      "title": "Viser hvordan det blir før noe endres",
+      "summary": "Hvert forslag vises i en forhåndsvisning ved siden av samtalen før brukeren godtar det. Det som er godtatt og det som er foreslått, kan sammenlignes.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.workbench-assistant.preview-before-change",
+        "lifecycle": "continuous",
+        "outcome": "Hvert forslag vises i en forhåndsvisning ved siden av samtalen før brukeren godtar det. Det som er godtatt og det som er foreslått, kan sammenlignes.",
+        "successSignals": [
+          "Forhåndsvisning oppdateres innen fem sekunder etter et forslag",
+          "Forkast tar tilbake forrige versjon"
+        ],
+        "verifier": "T-B2: måling av tid fra forslag til synlig forhåndsvisning, tre forsøk"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Viser hvordan det blir før noe endres"
+        ],
+        "tokens": [
+          "blir",
+          "endres",
+          "hvordan",
+          "noe",
+          "viser"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.workbench-assistant.propose-human-decides",
+      "parentRef": "purpose://candidate.workbench-assistant.root",
+      "title": "Foreslår, mennesket bestemmer",
+      "summary": "Modellen foreslår bare. Alle endringer skjer etter et klikk fra brukeren, og målcellen sjekker tilgang på nytt.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.workbench-assistant.propose-human-decides",
+        "lifecycle": "continuous",
+        "outcome": "Modellen foreslår bare. Alle endringer skjer etter et klikk fra brukeren, og målcellen sjekker tilgang på nytt.",
+        "successSignals": [
+          "Ingen skjulte modellkall, RAG-oppslag eller agenthandlinger",
+          "Et formål gir aldri rettigheter"
+        ],
+        "verifier": "T-B4: negative tester: endring uten klikk, feil bruker og ukjent formål blir avvist"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Foreslår, mennesket bestemmer"
+        ],
+        "tokens": [
+          "bestemmer",
+          "foreslår",
+          "mennesket"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.workbench-assistant.reusable-profile",
+      "parentRef": "purpose://candidate.workbench-assistant.root",
+      "title": "Andre arbeidsbenker kan ta det i bruk med en profil",
+      "summary": "En ny arbeidsbenk får sin hjelper ved å skrive en profil: formålsgren, bibliotek, forhåndsvisning, tillatte handlinger, tone og eskaleringstak. Ingen ny kode i chatmotoren.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.workbench-assistant.reusable-profile",
+        "lifecycle": "continuous",
+        "outcome": "En ny arbeidsbenk får sin hjelper ved å skrive en profil: formålsgren, bibliotek, forhåndsvisning, tillatte handlinger, tone og eskaleringstak. Ingen ny kode i chatmotoren.",
+        "successSignals": [
+          "Hjelpere registreres deklarativt, ikke i den faste switchen i PersonalCopilotCloudStore",
+          "Én arbeidsbenk til (Developer Workbench) har en profil"
+        ],
+        "verifier": "T-B5: to profiler lastes av samme motor; kontraktvalidator grønn"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Andre arbeidsbenker kan ta det i bruk med en profil"
+        ],
+        "tokens": [
+          "andre",
+          "arbeidsbenker",
+          "bruk",
+          "profil"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.workbench-assistant.select-tools-by-purpose",
+      "parentRef": "purpose://candidate.workbench-assistant.root",
+      "title": "Velger verktøy og GUI-elementer ut fra formål",
+      "summary": "For hvert formål foreslår hjelperen verktøy og GUI-elementer fra biblioteket som er merket med det formålet, og sier hvorfor.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.workbench-assistant.select-tools-by-purpose",
+        "lifecycle": "continuous",
+        "outcome": "For hvert formål foreslår hjelperen verktøy og GUI-elementer fra biblioteket som er merket med det formålet, og sier hvorfor.",
+        "successSignals": [
+          "Hvert forslag har en purposeRef og en bibliotekoppføring",
+          "Ingen forslag peker på noe som ikke finnes i biblioteket"
+        ],
+        "verifier": "T-B3: alle forslag i en testsamtale kan spores til en bibliotekoppføring"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Velger verktøy og GUI-elementer ut fra formål"
+        ],
+        "tokens": [
+          "elementer",
+          "formål",
+          "fra",
+          "gui",
+          "velger",
+          "verktøy"
+        ]
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.workbench-assistant.understand-intent",
+      "parentRef": "purpose://candidate.workbench-assistant.root",
+      "title": "Forstår hva brukeren vil lage, som formål",
+      "summary": "Det brukeren skriver blir klassifisert mot formålstreet først. Bare det som ikke passer, dekomponeres med modell. Hjelperen spør bare om det som endrer hva som lages.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.workbench-assistant.understand-intent",
+        "lifecycle": "continuous",
+        "outcome": "Det brukeren skriver blir klassifisert mot formålstreet først. Bare det som ikke passer, dekomponeres med modell. Hjelperen spør bare om det som endrer hva som lages.",
+        "successSignals": [
+          "Hver samtale har et formålstre med refs fra registeret",
+          "Ukjent formål gir et avklarende spørsmål, aldri en gjetning"
+        ],
+        "verifier": "T-B1: tjue barneformulerte ønsker gir riktig formål i minst femten, målt på et sett skrevet av noen som ikke har sett reglene"
+      },
+      "matchingHints": {
+        "aliases": [
+          "Forstår hva brukeren vil lage, som formål"
+        ],
+        "tokens": [
+          "brukeren",
+          "formål",
+          "forstår",
+          "hva",
+          "lage",
+          "vil"
+        ]
+      }
     }
   ],
   "facets": [

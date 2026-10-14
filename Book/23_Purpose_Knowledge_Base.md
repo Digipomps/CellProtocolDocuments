@@ -261,6 +261,8 @@ The accumulator should report:
 
 `purpose://candidate.tillitspakke-agentflaate.*` is used in the delivered WP1–WP10 of the [agent fleet trust package PDD](../Deliverables/PDD_tillitspakke-agentflaate_2026-09-08/TESTRESULT.md) (see [Chapter 36](36_Agent_Trust_Package.md)); these nodes remain candidates and require Kjetil's approval before promotion to canonical taxonomy.
 
+`purpose://candidate.game-workshop.*`, `purpose://candidate.tool-library.*`, `purpose://candidate.game.*` and `purpose://candidate.workbench-assistant.*` (48 nodes) come from the [game workshop PDD](../Deliverables/PDD_spillverksted_2026-10-09/STATUS.md). Kjetil approved them in the Formålstrær page on 2026-10-09, and they were added on 2026-10-14. The root hangs under `purpose://human-agency`. They are still candidates; adding them does not promote them to canonical runtime taxonomy.
+
 ## 9. Current Runtime Bridge
 
 `CellScaffold/Sources/App/Support/PurposeKnowledgeBase.swift` contains the first
@@ -321,3 +323,20 @@ Recommended next steps:
    hydrate a subtree only when compact context is insufficient.
 5. Add a candidate-intake record type with nearest-parent, evidence, confidence, and review-state fields.
 6. Keep runtime canonicalization conservative: automatic staging is allowed, automatic canonical mutation is not.
+
+## Database privacy and key custody candidate (2026-09-22)
+
+`purpose://access.audit.privacy.database-key-custody` is a candidate child of
+`purpose://access.audit.privacy`, with goal
+`goal.database-key-custody.owner-control`. Preserve owner-controlled access to
+private cell data and independent service instances through per-cell SQLCipher,
+recipient-encrypted key custody, a separate IdentityVault/Keychain unlocking
+root, explicit recovery and bounded local sessions. A model may discover and
+explain this solution; discovery supplies neither keys nor authorization.
+
+The candidate is represented in the machine-readable artifact, derived index,
+CellScaffold `PurposeKnowledgeBase` and the informational configuration
+`Private celledata og sikker nøkkellagring`. The [Book 25 database profile](25_SecretCredentialCell.md#implemented-database-key-profile-2026-09-22)
+records concrete APIs and verification limits. Shared multi-user server workloads,
+admin access, unattended delegation and hardware custody must not be inferred
+from a match on “database” or “keychain”.

@@ -335,3 +335,15 @@ is the planned administrator for CellScaffold staging; DiMy is planned for
 Palazzo and later the moved conference scaffolds. Production has its own data
 root and ceremony after staging verification. Publishing-access restoration
 and legal assessment of organizational affiliation remain separate work.
+
+## Binding refusal diagnostics (2026-10-07)
+
+GeneralCell's additive diagnostic contract is documented in
+`CellProtocol/Docs/Runtime_Binding_Refusals.md` on
+`fix/hd-0181-binding-refusal-reported` (not yet merged/released). Denied setup
+keeps the existing authorization policy, emits a refusal line, and appears in
+`registeredKeypathAudit().refused` with `ok=false`. An awaited refusal during
+the installation hook makes `ensureRuntimeReady()` throw instead of marking
+the cell ready. Historical refusals remain visible; the hook must await its
+setup work. Verification results belong to the a30 handoff, not this source
+inspection note.

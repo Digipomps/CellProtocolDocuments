@@ -458,3 +458,51 @@ Open:
    delegation before storage? The latter is stronger and should be preferred if
    the Agreement model carries it without a new evidence type. Implementation
    reports which was possible.
+
+
+## Verified revision pairing pitfall (2026-10-08)
+
+The k5 client baseline against CellProtocol revision
+`36959ae4a114503b08ff85785e0d73f865d4758e` exposed a source-mode mismatch:
+`CorrespondenceCell` rejects non-nil `sourceID` in `attachments.prepare` and
+rejects `attachments.probe`. The older HavenAgentD fixture still requires
+reference/fetch-on-demand success. These capabilities must not be described as
+working together on that pair; retain the failed assertions and reconcile the
+contract before release.
+
+That revision strips the filename from the attachment plan. A client must
+retain its original metadata in the encrypted, sender-signed inner envelope;
+using the host plan as the display metadata loses the filename. Also, reconnect
+with the same download directory requires retirement of the previous cache
+owner; closing only its socket leaves the per-profile lock held. k5's three
+focused tests verified filename preservation, explicit cache shutdown and the
+socket fixture's reconnect. They do not certify native onboarding, GUI,
+LAContext, the actual CellScaffold host, or a complete release gate.
+
+Evidence: `Deliverables/PDD_kryptert-korrespondanse-med-vedlegg-ut_2026-10-06/handoff/BOLK-3-RAPPORT.md`.
+
+
+### Pinned bridge proof lease race (k6, 2026-10-08)
+
+At CellProtocol `36959ae`, `BridgeIdentityProofAuthorization.permit` chooses the
+first matching entry of a dictionary of local operation leases. An active FEED
+lease and a transient SET lease can authorize the same identity-origin scope.
+If the chosen SET finishes, `BridgeBase.consumeResponse` completes that lease;
+`validateOriginSigning` then rejects the retained permit with `closed`, despite
+the FEED lease still being active. Do not remove this recheck or retry a rejected
+signature as a substitute for repairing lease selection/lifetime upstream.
+
+The client socket failure trace showed incoming sign request cid7 followed by
+the SET response cid3, with no sign response cid7 before closure. A separate
+client-side diagnostic, built against the unchanged pinned dependency using its
+internal testable API, demonstrated a SET-selected permit becoming invalid while
+a new permit could still select the FEED. This reproduces the lease mechanism;
+the live trace does not expose the actual selected permit ID, so their causal
+link remains a source-grounded diagnosis rather than directly observed state.
+Several instrumented runs passed; those passes do not establish a repair.
+
+Evidence: `HAVEN-Deploy/_handoff/KORR-UT/bolk3/k6-buffered-private.log` and
+`k6-lease-r2-private.log`; diagnostic source preserved in
+`_worktrees/havenagentd-korr-klient-20261007/Evidence/k6/CorrespondenceBridgeLeaseDiagnosticTests.swift`.
+No CellProtocol source or pin was changed in k6. A client gate must not be called
+reliably green while this observed failure remains unresolved.

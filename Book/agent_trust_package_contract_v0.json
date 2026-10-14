@@ -1,0 +1,546 @@
+{
+  "schema": "haven.agent-trust-package.contract.v0",
+  "status": {
+    "implementation": "implemented-with-limitations",
+    "lastVerifiedAgainstCode": "2026-09-09",
+    "scope": "WP1–WP10 in the local candidate code; WP12 documentation only. No deployment, Porthole parity or WP13 acceptance claim.",
+    "get": {
+      "trustPackage.state": "implemented",
+      "trustPackage.package": "implemented",
+      "trustPackage.packageSchema": "implemented",
+      "trustPackage.state.audit": "implemented",
+      "trustPackage.approved": "implemented",
+      "trustPackage.audit.receipts": "implemented"
+    },
+    "set": {
+      "trustPackage.fleet.set": "implemented",
+      "trustPackage.regenerate": "implemented",
+      "trustPackage.adjust.whitelist": "implemented",
+      "trustPackage.adjust.credentials": "implemented",
+      "trustPackage.adjust.webfetchWrite": "implemented",
+      "trustPackage.approve": "implemented",
+      "trustPackage.fleet.stop": "implemented",
+      "trustPackage.open.instruction": "implemented",
+      "trustPackage.open.receipt": "implemented",
+      "trustPackage.open.package": "implemented"
+    },
+    "notImplementedKeypaths": [],
+    "keypathStatusNote": "All GET/SET keypaths declared in this v0 contract have implemented handlers after WP10. No declared keypath remains a not-implemented stub. Implemented does not mean every payload or missing source succeeds; unsupported future keypaths are not invented here.",
+    "additionalImplementedOperations": [
+      {
+        "cell": "cell:///AgentTrustPackage",
+        "method": "GET",
+        "keypath": "configuration",
+        "grant": "r---",
+        "requester": "owner",
+        "status": "implemented"
+      },
+      {
+        "cell": "cell:///AgentTrustPackage",
+        "method": "GET",
+        "keypath": "configuration.audit",
+        "grant": "r---",
+        "requester": "owner",
+        "status": "implemented"
+      },
+      {
+        "cell": "cell:///WebFetch",
+        "method": "GET",
+        "keypath": "webFetch.ceiling",
+        "grant": "r---",
+        "requester": "any-admitted",
+        "status": "implemented"
+      },
+      {
+        "cell": "cell:///WebFetch",
+        "method": "SET",
+        "keypath": "webFetch.ceiling.set",
+        "grant": "rw--",
+        "requester": "proven owner",
+        "status": "implemented"
+      },
+      {
+        "cell": "cell:///WebFetch",
+        "method": "GET",
+        "keypath": "webFetch.fleetBinding",
+        "grant": "r---",
+        "requester": "proven owner",
+        "status": "implemented"
+      },
+      {
+        "cell": "cell:///WebFetch",
+        "method": "SET",
+        "keypath": "webFetch.fleetBinding",
+        "grant": "rw--",
+        "requester": "proven owner",
+        "status": "implemented"
+      },
+      {
+        "cell": "cell:///WebFetch",
+        "method": "GET",
+        "keypath": "webFetch.receipts",
+        "grant": "r---",
+        "requester": "proven owner",
+        "status": "implemented"
+      },
+      {
+        "cell": "cell:///PurposeBoundAIGateway",
+        "method": "GET",
+        "keypath": "ai.executionPolicy.ceiling",
+        "grant": "r---",
+        "requester": "owner",
+        "status": "implemented"
+      },
+      {
+        "cell": "cell:///PurposeBoundAIGateway",
+        "method": "SET",
+        "keypath": "ai.executionPolicy.ceiling.set",
+        "grant": "rw--",
+        "requester": "proven owner",
+        "status": "implemented"
+      },
+      {
+        "cell": "cell:///PurposeBoundAIGateway",
+        "method": "GET",
+        "keypath": "ai.fleetBinding",
+        "grant": "r---",
+        "requester": "proven owner",
+        "status": "implemented"
+      },
+      {
+        "cell": "cell:///PurposeBoundAIGateway",
+        "method": "SET",
+        "keypath": "ai.fleetBinding",
+        "grant": "rw--",
+        "requester": "proven owner",
+        "status": "implemented"
+      },
+      {
+        "cell": "cell:///PurposeBoundAIGateway",
+        "method": "GET",
+        "keypath": "ai.receipts",
+        "grant": "r---",
+        "requester": "proven owner",
+        "status": "implemented"
+      }
+    ],
+    "implementationLimits": [
+      "Projection is evidence only; purposes, packages and signed approvals never grant rights. Fleet selection is local and owner-scoped. Unverifiable EntityAnchor Contracts are omitted and state.verified=false reports the source gap.",
+      "PurposeBoundAIGateway has no readable current route/instruction. modelRoute and instruction are optional and absent there. Ordinary AIGateway state.draft is projected only as a draft; AIAssistantThread/persona instruction binding is not implemented.",
+      "adjust.credentials and adjust.webfetchWrite are implemented, but isOn=true always returns expansion_not_allowed for WebFetch v0. False retains allowCredentials=false and methods=[GET].",
+      "The first nonempty whitelist on an uninitialized WebFetch ceiling can be set within the template maximum; later trustPackage adjustments must be subsets of current patterns. Blank text/lines are invalid_pattern. Direct owner webFetch.ceiling.set remains a separate administration path.",
+      "Ceilings and bindings use existing per-instance Codable/resolver snapshots, not a new EntityAnchor ceiling table. Only approval records use signedAgreementEntity.commit. Multi-cell writes are not a distributed transaction.",
+      "fleet.set and approve do not automatically bind targets. Only explicitly bound WebFetch/PurposeBoundAIGateway invocations use the fail-closed port; unbound cells keep existing authorization/ceiling checks. fleet.stop blocks new admissions, not in-flight cancellation.",
+      "The packageDigest omits only its own top-level field. The compact package ceiling omits maxBytes/followRedirects; signed approval policyDigests bind the complete operational data, instance and permissions, so these changes still close the port.",
+      "ActionDecisionReceipt v1 has opaque destination/data/plan digests and signed checks, not a readable route/tools list. Unreadable AI input or missing intent can return without a receipt; narrowed effective policy versus template receipt digest is conservatively unknown_policy_version.",
+      "EffectReceipt stores host-only destination metadata, no URL path/query, port, redirect target, credential alias or caller-agent. credentialsUsed=false in v0. new_destination/credential_resolved can describe signed denied attempts, not completed effects.",
+      "Receipt stores are append-only at the API boundary, not a deletion-proof or hash-chained journal. Removal before first fleet collection cannot be detected. Source/snapshot/persistence gaps prevent an Overholdt audit result.",
+      "Snapshot/reload is tested; full host restart/durable disk I/O and Porthole/Binding navigation are not verified. WP10 full XCTest retained 46 known baseline-red test names; Swift Testing is not covered.",
+      "WP10 observed an existing Anthropic destination_not_allowed result from first-ceiling selection in the core authorizer. It was not fixed; positive production-path coverage used OpenAI. Fixture Anthropic metadata is synthetic."
+    ],
+    "notImplemented": {
+      "porthole-parity": "not-implemented",
+      "per-grant-v2": "not-implemented",
+      "multiparty-signing": "not-implemented",
+      "distributed-revocation": "not-implemented",
+      "purpose-bound-current-route-and-instruction-projection": "not-implemented",
+      "ai-assistant-thread-persona-instruction-projection": "not-implemented",
+      "full-ai-effect-reconstruction": "not-implemented",
+      "deletion-proof-receipt-journal": "not-implemented"
+    },
+    "fixturesBasePath": "Deliverables/PDD_tillitspakke-agentflaate_2026-09-08/contract",
+    "fixturesPathRule": "Resolve fixtures.* entries relative to fixturesBasePath from the CellProtocolDocuments repository root; the Book copy does not duplicate the fixture directory.",
+    "evidencePath": "Deliverables/PDD_tillitspakke-agentflaate_2026-09-08/TESTRESULT.md",
+    "documentationPath": "Book/36_Agent_Trust_Package.md",
+    "lessonRef": "lesson.planned-documented-as-implemented"
+  },
+  "cell": {
+    "name": "AgentTrustPackage",
+    "endpoint": "cell:///AgentTrustPackage",
+    "scope": "identityUnique",
+    "persistency": "persistant"
+  },
+  "principles": [
+    "WP8: stored package JSON is never authority. An unexpected package field quarantines the decoded cell as Ikke avledet; approve returns package_not_derived. Only successful explicit owner regeneration/selection clears the marker; untrusted JSON is not retained.",
+    "Pakken er en projeksjon av faktiske objekter (agreementTemplate, Contracts, CellExecutionPolicy, provider-rute, instruksjons-digest). Den skrives aldri for hånd.",
+    "Pakken gir ingen myndighet (A1 lås 6). En rett som står i pakken men ikke i template/Contract, finnes ikke.",
+    "Justering kan bare innsnevre. Templaten i cellen er taket.",
+    "Aldri nøkler, aldri prompt-tekst i pakken eller i state. Instruksjoner refereres med keypath + digest.",
+    "Ukjent feiler lukket: ceiling uten mønstre = deny all; pakke uten godkjent digest = flåten starter ikke."
+  ],
+  "get": {
+    "trustPackage.state": {
+      "returns": "AgentTrustPackageState",
+      "grant": "r---",
+      "requester": "owner"
+    },
+    "trustPackage.package": {
+      "returns": "AgentTrustPackage (kanonisk JSON)",
+      "grant": "r---",
+      "requester": "owner"
+    },
+    "trustPackage.packageSchema": {
+      "returns": "JSON Schema for AgentTrustPackage",
+      "grant": "r---",
+      "requester": "any-admitted"
+    },
+    "trustPackage.state.audit": {
+      "returns": "AgentTrustPackageAuditState",
+      "grant": "r---",
+      "requester": "owner",
+      "note": "WP10 verifies retained packageSnapshot against the signed approval digest. Unavailable sources or snapshot prevent an Overholdt status. Invalid/unsigned receipt adds unknown_policy_version. AI v1 destination remains opaque; uses signed ceiling checks and reasonCodes, not an invented readable route."
+    },
+    "trustPackage.approved": {
+      "returns": "AgentTrustPackageApproval (verified owner snapshot + immutable EntityAnchor record/receipt; revokedAt retained)",
+      "grant": "r---",
+      "requester": "owner"
+    },
+    "trustPackage.audit.receipts": {
+      "grant": "r---",
+      "requester": "owner",
+      "type": "object keyed by content digest; original EffectReceipt or ActionDecisionReceipt metadata",
+      "note": "WP10 append-only fleet collection; no SET/reset/trim; nested GET returns one receipt. Codable snapshot, not a tamper-proof journal."
+    }
+  },
+  "set": {
+    "trustPackage.fleet.set": {
+      "payload": {
+        "cellEndpoints": [
+          "cell:///…"
+        ]
+      },
+      "grant": "rw--",
+      "requester": "owner",
+      "effect": "regenerer pakke"
+    },
+    "trustPackage.regenerate": {
+      "payload": {},
+      "grant": "rw--",
+      "requester": "owner"
+    },
+    "trustPackage.adjust.whitelist": {
+      "payload": {
+        "text": "ett mønster per linje"
+      },
+      "grant": "rw--",
+      "requester": "owner",
+      "narrowOnly": true,
+      "denies": [
+        "expansion_not_allowed",
+        "invalid_pattern"
+      ],
+      "note": "WP6: first nonempty adjustment from an uninitialized/empty WebFetch ceiling narrows the template maximum. Afterwards every pattern must be a host/port subset of the current target list. Empty or blank lines are invalid_pattern; reapplying identical data is idempotent."
+    },
+    "trustPackage.adjust.credentials": {
+      "payload": {
+        "isOn": false
+      },
+      "grant": "rw--",
+      "requester": "owner",
+      "narrowOnly": true,
+      "note": "isOn=true avvises hvis templaten ikke gir credential-rett",
+      "denies": [
+        "expansion_not_allowed"
+      ]
+    },
+    "trustPackage.adjust.webfetchWrite": {
+      "payload": {
+        "isOn": false
+      },
+      "grant": "rw--",
+      "requester": "owner",
+      "narrowOnly": true,
+      "denies": [
+        "expansion_not_allowed"
+      ]
+    },
+    "trustPackage.approve": {
+      "payload": {
+        "packageDigest": "sha256:…"
+      },
+      "grant": "rw-s",
+      "requester": "owner",
+      "effect": "issuer-signert snapshot over digest i EntityAnchor",
+      "denies": [
+        "digest_mismatch",
+        "package_not_derived",
+        "approval_storage_unavailable",
+        "approval_commit_invalid",
+        "persistence_failed"
+      ],
+      "note": "WP7: re-read admitted sources, compare current regenerated packageDigest, sign canonical {schema,fleetID,packageDigest,approvedAt,policyDigests} inside a zero-Grant ownerSignedSnapshot Agreement; require verified signedAgreementEntity.commit. policyDigests bind runtime cell UUID, template permissions and complete operational ceilings (including WebFetch maxBytes). No new authority."
+    },
+    "trustPackage.fleet.stop": {
+      "payload": {},
+      "grant": "rw--",
+      "requester": "owner",
+      "effect": "godkjent digest trekkes tilbake → startport nekter",
+      "note": "WP7: retain current record and revokedAt in cell snapshot; previous records retained on subsequent approve. Stops new admissions; does not cancel an already admitted in-flight effect."
+    },
+    "trustPackage.open.instruction": {
+      "payload": {
+        "cellID": "…"
+      },
+      "grant": "r---",
+      "requester": "owner",
+      "effect": "navigasjonsreferanse til instruksjons-keypath",
+      "returns": {
+        "status": "navigate",
+        "endpoint": "cell:///…",
+        "keypath": "GET keypath; no target content"
+      }
+    },
+    "trustPackage.open.receipt": {
+      "payload": {
+        "receiptID": "…"
+      },
+      "grant": "r---",
+      "requester": "owner",
+      "returns": {
+        "status": "navigate",
+        "endpoint": "cell:///…",
+        "keypath": "GET keypath; no target content"
+      }
+    },
+    "trustPackage.open.package": {
+      "payload": {},
+      "grant": "r---",
+      "requester": "owner",
+      "returns": {
+        "status": "navigate",
+        "endpoint": "cell:///…",
+        "keypath": "GET keypath; no target content"
+      }
+    }
+  },
+  "types": {
+    "AgentTrustPackage": {
+      "schema": "haven.agent-trust-package.v0",
+      "fleetID": "string",
+      "generatedAt": "RFC3339",
+      "packageDigest": "sha256 over kanonisk JSON av alt under, domene haven.agent-trust-package.v0",
+      "cells": [
+        {
+          "id": "string",
+          "endpoint": "cell:///…",
+          "role": "agent | service | secrets",
+          "modelRoute": {
+            "providerID": "string",
+            "model": "string",
+            "hosting": "hosted | local",
+            "baseURLDigest": "sha256"
+          },
+          "instruction": {
+            "keypath": "cell:///…#…",
+            "digest": "sha256"
+          },
+          "templateGrants": [
+            {
+              "keypath": "string",
+              "permission": "rwxs-form"
+            }
+          ],
+          "contracts": [
+            {
+              "contractID": "uuid",
+              "subject": "identityRef",
+              "grants": [
+                "…"
+              ],
+              "expiresAt": "RFC3339",
+              "verified": true
+            }
+          ],
+          "ceiling": {
+            "destinations": [
+              "destination://…"
+            ],
+            "dataClasses": [
+              "data-class://…"
+            ],
+            "hostPatterns": [
+              "*.example.org"
+            ],
+            "methods": [
+              "GET"
+            ],
+            "https": true,
+            "allowCredentials": false,
+            "storage": false,
+            "disclosure": true,
+            "providerTools": "off"
+          },
+          "policy": {
+            "policyID": "string",
+            "policyVersion": "string",
+            "policyDigest": "sha256",
+            "configDigest": "sha256",
+            "taxonomyDigest": "sha256"
+          }
+        }
+      ],
+      "edges": [
+        {
+          "from": "cellID",
+          "to": "cellID",
+          "keypath": "string",
+          "permission": "rwxs-form"
+        }
+      ],
+      "reach": [
+        {
+          "agent": "cellID",
+          "path": [
+            "cellID",
+            "…"
+          ],
+          "destinations": [
+            "…"
+          ],
+          "credentials": false,
+          "permissions": "rwxs-form",
+          "summary": "string"
+        }
+      ]
+    },
+    "AgentTrustPackageState": {
+      "deniedAttempts": "integer — WP8: monotonic count of owner-denied trustPackage.adjust.* SETs; default 0 on legacy snapshots, owner-read only, no reset, no proposal/identity/secret contents. Codable snapshot; persistence failure does not undo the in-memory denial.",
+      "statusLabel": "string",
+      "summaryLabel": "string",
+      "packageDigestLabel": "string",
+      "approvalLabel": "string",
+      "fleet": {
+        "cells": [
+          {
+            "id": "…",
+            "title": "…",
+            "roleLabel": "…",
+            "hasModel": true,
+            "modelLabel": "…",
+            "hasInstruction": true,
+            "instructionLabel": "…",
+            "grantsLabel": "…",
+            "ceilingLabel": "…",
+            "providerToolsLabel": "…"
+          }
+        ]
+      },
+      "reach": [
+        {
+          "pathLabel": "…",
+          "summaryLabel": "…"
+        }
+      ],
+      "adjust": {
+        "whitelistText": "…",
+        "providerToolsLabel": "…"
+      },
+      "hasChangesSinceApproval": "bool — true when a stored approval digest differs from the current package; WP6 never creates approval"
+    },
+    "AgentTrustPackageAuditState": {
+      "statusLabel": "…",
+      "summaryLabel": "…",
+      "approvedDigestLabel": "…",
+      "violationsLabel": "…",
+      "violations": [
+        {
+          "id": "receiptID",
+          "kindLabel": "…",
+          "detailLabel": "…",
+          "whenAgentLabel": "…",
+          "receiptLabel": "…",
+          "kind": "ViolationKind"
+        }
+      ],
+      "receipts": [
+        {
+          "lineLabel": "…",
+          "resultLabel": "…",
+          "signatureLabel": "…"
+        }
+      ]
+    },
+    "ViolationKind": [
+      "new_destination",
+      "credential_resolved",
+      "data_class_outside",
+      "provider_tools_on",
+      "unknown_policy_version"
+    ],
+    "WebFetchCeiling": {
+      "schema": "haven.webfetch-ceiling.v0",
+      "hostPatterns": [
+        "string"
+      ],
+      "methods": [
+        "GET"
+      ],
+      "https": true,
+      "allowCredentials": false,
+      "followRedirects": false,
+      "maxBytes": 256000,
+      "matching": "`*.x` matcher subdomener av x, ikke x selv; eksakt vert bare seg selv; port må matche om oppgitt, ellers 443; tom liste = deny all; redirect til vert utenfor listen → denied(redirect_outside_whitelist) uten ny request"
+    }
+  },
+  "denyReasons": [
+    "ceiling_missing",
+    "ceiling_invalid",
+    "invalid_request",
+    "owner_required",
+    "access_denied",
+    "expansion_not_allowed",
+    "invalid_pattern",
+    "digest_mismatch",
+    "package_not_derived",
+    "package_not_approved",
+    "package_digest_mismatch",
+    "host_not_whitelisted",
+    "redirect_outside_whitelist",
+    "credential_not_granted",
+    "method_not_allowed",
+    "https_required",
+    "adjustment_target_missing",
+    "source_unavailable_or_invalid"
+  ],
+  "fixtures": {
+    "positive": [
+      "fixtures/fleet-webfetch.package.json",
+      "fixtures/fleet-webfetch.reach.json"
+    ],
+    "negative": [
+      "fixtures/neg-extra-grant.package.json",
+      "fixtures/neg-whitelist-cases.json",
+      "fixtures/neg-injection-outputs.json",
+      "fixtures/audit-two-violations.receipts.json"
+    ]
+  },
+  "fleetBinding": {
+    "purposeRef": "purpose://candidate.tillitspakke-agentflaate.godkjenning",
+    "keys": [
+      "WebFetch.webFetch.fleetBinding",
+      "PurposeBoundAIGateway.ai.fleetBinding"
+    ],
+    "get": {
+      "grant": "r---",
+      "requester": "proven owner"
+    },
+    "set": {
+      "grant": "rw--",
+      "requester": "proven owner",
+      "payload": {
+        "fleetID": "AgentTrustPackage cell UUID",
+        "endpoint": "cell:///AgentTrustPackage"
+      },
+      "clearPayload": null
+    },
+    "persistence": "Per-instance Codable data through existing CellResolver.persistCellSnapshot; malformed stored binding fails decoding.",
+    "startPort": "Unbound retains existing authority checks. Bound reads trustPackage.approved as verified runtime owner, verifies committed owner signature and fleet binding, then compares regenerated packageDigest and full per-cell policyDigests before credential/cache/network access.",
+    "denies": [
+      "package_not_approved",
+      "package_digest_mismatch",
+      "package_unavailable",
+      "package_approval_invalid"
+    ],
+    "authority": "Purpose and package never grant rights. A valid approval only locks the existing ceiling and permissions."
+  }
+}
