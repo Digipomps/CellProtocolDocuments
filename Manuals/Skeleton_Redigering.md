@@ -75,11 +75,11 @@ Denne manualen er ordnet etter hva du vil få til, ikke etter knapper.
 1. Åpne Porthole og trykk **Bibliotek** øverst til høyre.
 2. Søk etter flaten (navn, formål eller endepunkt) og trykk **Last inn**.
 3. Trykk **Rediger**. Tre paneler dukker opp:
-   - **Komponenter** – ferdige deler du kan legge inn.
-   - **Elementer** – treet av byggeklosser. Innrykket viser hva som ligger inni hva.
-   - **Inspektør** – detaljene for elementet du har valgt.
-4. Klikk et element i lerretet eller i **Elementer**. Det får en ramme, og
-   **Inspektør** viser type, plassering (`Path`, for eksempel `root.2.0`) og feltene.
+   - **Components** (komponenter) – ferdige deler du kan legge inn.
+   - **Elements** (elementer) – treet av byggeklosser. Innrykket viser hva som ligger inni hva.
+   - **Inspector** (inspektør) – detaljene for elementet du har valgt.
+4. Klikk et element i lerretet eller i **Elements**. Det får en ramme, og
+   **Inspector** viser type, plassering (`Path`, for eksempel `root.2.0`) og feltene.
 
 Panelene kan dras, kollapses og skjules. **Mer → Vis detaljer → Tilbakestill
 paneler** setter dem tilbake.
@@ -95,9 +95,9 @@ paneler** setter dem tilbake.
 **Formål:** Små justeringer av noe som allerede finnes.
 
 1. I **Rediger**, velg elementet.
-2. I **Inspektør → Parameters** endrer du innholdet, for eksempel `text` på en
+2. I **Inspector → Parameters** endrer du innholdet, for eksempel `text` på en
    tekst eller `label` på en knapp.
-3. I **Inspektør → Modifiers** endrer du utseende: `padding`, `background`,
+3. I **Inspector → Modifiers** endrer du utseende: `padding`, `background`,
    `cornerRadius`, `fontSize`, `foregroundColor`, `opacity` og lignende.
 4. Felt som ikke finnes ennå, legges til fra listen under feltene.
 5. Endringen vises med en gang i lerretet, men er bare en kladd til du trykker
@@ -120,7 +120,7 @@ stilklasser. Slike endringer må gjøres i Studio (se [7](#7-større-endringer-c
 **Med dra og slipp:**
 
 1. Trykk **Rediger**, og åpne **Bibliotek**.
-2. Under **Komponenter** finner du ferdige deler (Chat, AI Agent, Todo Planner,
+2. Under **Components** finner du ferdige deler (Chat, AI Agent, Todo Planner,
    RAG Assistant, m.fl.). Også hele konfigurasjoner med skeleton kan dras inn.
 3. Dra delen inn i lerretet. Områder som tar imot, lyser opp med
    **Legg til her** (eller **Legg til i rotnivå**).
@@ -143,7 +143,7 @@ sammensatte deler.
 ## 4. Fjerne noe
 
 1. Velg elementet.
-2. Trykk **Slett valgt node** i **Inspektør**. Roten kan ikke slettes.
+2. Trykk **Slett valgt node** i **Inspector**. Roten kan ikke slettes.
 3. Angre med **Angre** hvis det var feil.
 
 ---
@@ -195,7 +195,7 @@ Studio er en egen flate i biblioteket («Cell Configuration Studio», og som del
 «Cell Configuration Architect»).
 
 1. **Velg flate** i listen *Konfigurasjoner*.
-2. **Hent oppskriften:** I Porthole, **Rediger → Inspektør → Kopier working
+2. **Hent oppskriften:** I Porthole, **Rediger → Inspector → Kopier working
    CellConfiguration**. Lim inn i en tekstfil og gjør endringene der (eller be en
    AI-assistent om hjelp, se under).
 3. **Last opp utkastet** under *Privat utkast* (én JSON-fil, maks 512 KB, må ha
@@ -255,7 +255,7 @@ Agenten skal ikke bytte til **Vis** under forhåndsvisning (det lagrer, se 5).
 
 **Formål:** Vite at det du lagret faktisk fungerer for den som bruker flaten.
 
-- **Inspektør → Dokument** viser *Struktur OK*, eller advarsler som
+- **Inspector → Dokument** viser *Struktur OK*, eller advarsler som
   «Bindings uten matchende reference» (et element peker på en celle flaten ikke
   har koblet til) og «Ubrukte references».
 - *Struktur OK* betyr at oppskriften henger sammen. Det betyr **ikke** at alle
@@ -275,9 +275,9 @@ Agenten skal ikke bytte til **Vis** under forhåndsvisning (det lagrer, se 5).
 | **Bruk** er grå | Ingen endringer i kladden. | – |
 | Endringen forsvant etter at jeg byttet flate | Flaten var ikke kildebasert; endringen gjaldt bare økten. | Lagre via Studio (7). |
 | Endringen ble lagret selv om jeg ikke ville | Du trykket **Vis** med ulagrede endringer. | Forkast før du trykker Vis. Angre ved å redigere tilbake. |
-| Teksten er tom / knappen gjør ingenting | Feil `keypath`, eller cellen er ikke koblet til flaten. | Sjekk advarslene i **Inspektør → Dokument**. |
+| Teksten er tom / knappen gjør ingenting | Feil `keypath`, eller cellen er ikke koblet til flaten. | Sjekk advarslene i **Inspector → Dokument**. |
 | Ingen «Legg til her» dukker opp | Delen passer ikke i områdene flaten tilbyr. | Prøv rotnivå, eller be eieren åpne en slippsone. |
-| «Utdatert revisjon» | Noen lagret samtidig. | Last på nytt og gjør endringen igjen. |
+| «Editable configuration revision is stale …» | Noen lagret samtidig. | Last på nytt og gjør endringen igjen. |
 
 ---
 
