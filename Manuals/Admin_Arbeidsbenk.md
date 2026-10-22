@@ -4,7 +4,7 @@
 godkjenner også korrespondanse og invitasjoner her, og finner veien til
 adminflatene for hvert produkt.
 
-> Sjekket mot koden på CellScaffold `main` 0b776a4, 22. oktober 2026
+> Sjekket mot koden på CellScaffold `main` 1884a0d, 22. oktober 2026
 > (staging kjører 2026.10.12). Står det noe annet på skjermen enn her, er det
 > skjermen som gjelder. Si fra, så retter vi manualen.
 
@@ -54,7 +54,8 @@ ble oppdatert. Sjekk alltid miljøet før du konkluderer.
    `https://staging.haven.digipomps.org/admin`.
 2. Logg inn. Du havner på **Oversikt**.
 
-**Roller.** Det finnes tre roller. De er uavhengige: å ha én gir ikke de andre.
+**Roller.** Det finnes tre roller. **operator** og **security** gir også
+**observer**; operator og security gir ikke hverandre.
 
 | Rolle | Gir deg |
 |---|---|
@@ -62,8 +63,11 @@ ble oppdatert. Sjekk alltid miljøet før du konkluderer.
 | **operator** | i tillegg oppdatere vertsmålinger og prosessoversikt, og se deploy-klarhet |
 | **security** | se tilgangspolicy, utstedere, revokeringer og agentnøkler |
 
-Rollene gis av den som drifter serveren. Si fra til driftsansvarlig hvilken
-rolle du trenger og hvorfor. Det finnes ingen knapp for å be om rolle i dag.
+Rollene gis av den som drifter serveren. Mangler du tilgang til en side i
+kontrollplanet, viser den et panel **Tilgang mangler** med knappen
+**Be om tilgang**. Den registrerer en forespørsel; den gir ikke tilgang, og
+«Forespørsel registrert» betyr ikke at noen har godkjent den. Si også fra til
+driftsansvarlig hvilken rolle du trenger og hvorfor.
 
 > **Viktig:** Hvis kontrollplanet ikke svarer, viser siden et banner om det.
 > Da vises ingen tall i stedet for gamle tall. Tomme felter betyr «ukjent»,
@@ -238,7 +242,7 @@ du sjekke byggerevisjonen her (kapittel 3).
 |---|---|---|
 | se staging og prod side om side | ett miljø om gangen, uten releasenavn | åpne `/admin` på begge, og bruk deploykvitteringen |
 | deploye eller rulle tilbake | ikke her | bruk deployflyten |
-| be om en adminrolle | ingen knapp | si fra til driftsansvarlig |
+| få en adminrolle | **Be om tilgang** registrerer bare en forespørsel | si fra til driftsansvarlig, som gir rollen |
 | gi eller trekke tilbake tilgang | bare lesing | egen kvittert arbeidsflyt via driftsansvarlig |
 | slette gamle data eller celler | ingen sletteknapp | be driftsansvarlig, med godkjenning |
 | se testlista for staging | finnes ikke i admin | bruk HAVEN Workbench (se [Utvikler-arbeidsbenken](Utvikler_Arbeidsbenk.md#16-det-kan-du-ikke-gjøre-her-ennå)) |
@@ -249,4 +253,4 @@ du sjekke byggerevisjonen her (kapittel 3).
 `Sources/App/Cells/Agent/CorrespondenceApprovalConfigurationFactory.swift`,
 `Sources/App/Cells/Agent/CorrespondenceInvitationsConfigurationFactory.swift`,
 `Sources/App/Controllers/VaporAdminMVP.swift` (`/admin`, `/admin/development`), `Resources/Views/admin_development.leaf`.
-Roller settes med `MVP_ADMIN_OBSERVER_USER_IDS`, `MVP_ADMIN_OPERATOR_USER_IDS` og `MVP_ADMIN_SECURITY_USER_IDS` på serveren.
+Roller settes med `MVP_ADMIN_OBSERVER_USER_IDS`, `MVP_ADMIN_OPERATOR_USER_IDS` og `MVP_ADMIN_SECURITY_USER_IDS` på serveren (`Services/MVPAdminAccess.swift`). Kontrollplanets egne sider krever i tillegg AdminScaffold-rollebevis (`identity.proofs.scaffold.roles.admin.*`); tilgangspanelet er beskrevet i `Documentation/Operations/Admin_Access_Banner.md`.

@@ -17,4 +17,6 @@ friskt») og viser trinnene dit.
 - Hver manual har et kapittel «Det kan du ikke gjøre her ennå». Når en ting
   blir mulig, flyttes den derfra og inn i manualen.
 - Manualene er registrert i `Book/book_catalog.json` (gruppe `user-manuals`),
-  slik at de vises i Book-leseren og finnes av dokumentasjonssøket.
+  slik at de vises i Book-leseren og dokumentasjonssøket (HavenDocsMCP) når de
+  leses fra repoet. Det deployede scaffoldet kopierer foreløpig bare `Book/`, så
+  der kan de stå i lista uten å kunne åpnes.

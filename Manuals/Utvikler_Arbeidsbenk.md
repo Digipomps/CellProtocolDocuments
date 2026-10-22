@@ -4,7 +4,7 @@
 bestemmer hva som skal gjøres, flytter arbeid fremover og godkjenner formål før
 noe bygges.
 
-> Sjekket mot koden på CellScaffold `main` 0b776a4, 22. oktober 2026
+> Sjekket mot koden på CellScaffold `main` 1884a0d (med #344), 22. oktober 2026
 > (staging kjører 2026.10.12). Står det noe annet på skjermen enn her, er det
 > skjermen som gjelder. Si fra, så retter vi manualen.
 
@@ -29,13 +29,14 @@ noe bygges.
 
 ## Kart over arbeidsbenken
 
-Arbeidsbenken har ti faner. Navnene kommer rett fra systemet, derfor er noen på
+Arbeidsbenken har elleve faner. Navnene kommer rett fra systemet, derfor er noen på
 engelsk.
 
 | Fane | Bruk den når du vil … |
 |---|---|
 | **Prosjekter** | se prosjektene du har tilgang til og åpne et arbeidsrom |
-| **Formål** | lese og godkjenne et formålstre |
+| **Formål** | lese, rette og godkjenne et formålstre |
+| **Book 23** | lese de felles formålene i Book 23 og godkjenne eller avvise forslag til endringer |
 | **Hjelper** | endre hva AI-hjelperen kan og hvordan den forstår deg |
 | **Intake** | skrive inn en ny idé, feil eller oppgave |
 | **All** | søke i alle oppgavene |
@@ -112,7 +113,7 @@ funksjoner og mangler.
 
 **Fanen Triage.**
 
-- **Triage-kø** viser oppgaver som venter på at noen tar stilling til dem.
+- **Triage-koe** (Triage-kø) viser oppgaver som venter på at noen tar stilling til dem.
 - **Ready** viser det som er klart til å startes.
 - **Risiko og blokkere** viser oppgaver som er blokkert, som venter på andre
   oppgaver, eller som andre oppgaver venter på.
@@ -151,7 +152,7 @@ eller lagt bort.
 Trykk på en oppgave i en hvilken som helst liste. Detaljene viser:
 
 - **Type, status, prioritet og prosjekt** øverst.
-- **Status** og **Priority:** knapper for å endre dem. Bare de overgangene som
+- **Workflow** (status) og **Priority:** knapper for å endre dem. Bare de overgangene som
   er lov, vises.
 - **Subtasks:** delstegene og om de er gjort.
 - **Comments:** kommentarene.
@@ -228,9 +229,22 @@ formålstre. Du godkjenner formålene og målene, ikke koden.
 Beslutningen går til agenten som laget treet, og vises under **Beslutninger**.
 Kommer det en ny versjon av treet, står porten på «venter» igjen.
 
-**Legge inn et tre selv:** lim inn `tree.json` fra et PDD under
-**Legg inn et formålstre** og trykk **Legg inn treet**. Samme `id` gir en ny
-versjon av samme tre.
+**Rette treet:** trykk på et formål og velg **Rediger** for å endre tittel,
+mål og tegn, **Legg til underformål** for et nytt formål under det, eller
+**Fjern** for å ta bort formålet og alt under det (Book 23 endres ikke). Under
+**Legg til underformål** søker du blant formålene i Book 23 og i treet, eller
+skriver fritt og velger «Legg til … som nytt formål». Hver lagring gir en ny
+versjon av treet, og porten står på «venter» igjen.
+
+**Legge inn et tre selv:** lag `tree.json` fra FORMAALSSPEC §1 i PDD-mappen med
+`purpose_dev.py tree`, lim den inn under **Legg inn et formålstre** og trykk
+**Legg inn treet**. Samme `id` gir en ny versjon av samme tre.
+
+**Fanen Book 23** viser de felles formålene som trærne bygger på. Book 23
+endres aldri herfra: trykk på et formål for å foreslå en endring, et nytt
+underformål eller fjerning. Forslagene står under **Forslag til Book 23** med
+**Godkjenn**, **Avvis** og **Vis**. Et godkjent forslag føres inn i repoet for
+hånd og står da som «innført».
 
 ## 11. Dele et prosjekt med noen
 
@@ -239,14 +253,15 @@ Gå til **Prosjekter → Delinger og invitasjoner**.
 **Invitere:**
 
 1. Velg rolle: **Viewer** (kan se) eller **Editor** (kan endre).
-2. Fyll inn hvilket prosjekt det gjelder, mottakerens entitet og
+2. Fyll inn eierentiteten (for eksempel `entity://DiMy`), mottakerens entitet og
    **identity UUID**, hvor mange dager tilgangen skal vare, formålet med
    tilgangen og et kort notat.
 3. Trykk **Utsted engangslenke**, og send lenken til mottakeren.
 
 **Ta imot:** åpne lenken. Kom du ikke via lenken, lim inn koden under
-**Innløs invitasjon** og trykk **Innløs tilgang**. Etterpå finner du prosjektet
-under **Prosjekter**, og kan åpne det med **Åpne delt Workbench**.
+**Innloes Invitasjon** og trykk **Innloes tilgang** (skjermen skriver dem uten
+ø). Etterpå åpner du prosjektet under **Delt Workbench** på samme side, med
+knappen **Aapne delt Workbench**.
 
 **Audit** viser hvem som har fått og brukt tilgang.
 
@@ -301,13 +316,14 @@ til en komponent, se [Brukermanual – Skeleton-redigering](Skeleton_Redigering.
 | la hjelperen kommentere eller sette prioritet | avvises med forklaring | sett prioritet selv i detaljene |
 | invitere uten å kjenne mottakerens ID | ikke mulig | få identity UUID fra mottakeren |
 | se hva som er deployet | ikke her | se Admin-arbeidsbenken og deploykvitteringene |
+| dele fri tekst opp i formål med modellen | valget **Dekomponer … med modellen** finnes under **Legg til underformål**, men er ikke koblet til ennå | skriv formålene selv, eller be agenten lage treet |
 | laste inn staging-testlista som oppgaver | knappen **Last inn funn som arbeidspunkter** finnes i **HAVEN Workbench**, ikke her | åpne HAVEN Workbench og trykk knappen der én gang |
 
 ---
 
 **Kilde i koden** (for utviklere og dokumentasjonssøk): `CellScaffold/Sources/App/Cells/WorkItems/DeveloperWorkbenchConfiguration.swift`,
 `ConfigurationCatalogCell.workItemTrackerConfiguration()`, `Sources/App/Cells/WorkbenchHelper/`,
-`Sources/App/Cells/Purpose/PurposeReviewCell.swift`, `Sources/App/Cells/WorkbenchAccess/`.
-Celler: `cell:///WorkItem`, `cell:///WorkbenchHelper`, `cell:///PurposeReview`, `cell:///WorkbenchAccessGrant`.
+`Sources/App/Cells/Purpose/PurposeReviewCell.swift`, `Sources/App/Cells/Purpose/PurposeKnowledgeCell.swift`, `Sources/App/Cells/WorkbenchAccess/`.
+Celler: `cell:///WorkItem`, `cell:///WorkbenchHelper`, `cell:///PurposeReview`, `cell:///PurposeKnowledge`, `cell:///WorkbenchAccessGrant`.
 Tekniske kontrakter: `CellScaffold/Documentation/Operations/Developer_Workbench_AI_Hjelper_2026-10-09.md` og
 `Developer_Workbench_Formaalstre_2026-10-09.md`.
