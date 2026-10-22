@@ -13,6 +13,11 @@ Kommandoer
   lesson add TASKDIR          Interaktivt: legg til en lærdom i registeret (skriver til Book/haven_lessons_register_v0.json).
   judge TASKDIR --run RUN.json
                               Registrer G1-treff, repeatOf og håndhevelse; fortsett uten --run.
+  tree TASKDIR [--out PATH] [--gate G] [--title T] [--stdout]
+                              FORMAALSSPEC §1 som tree.json (haven.purpose-review.v0) for fanen «Formål» i
+                              Developer Workbench (cell:///PurposeReview). Standard: TASKDIR/formaalsside/tree.json.
+  treediff TASKDIR EXPORT.json
+                              Hva treet i Workbench (tree.json eller review.state) har endret i forhold til §1.
 
 Eksempel
   python3 Tools/PurposePackages/purpose_dev.py lookup --tags gui palazzo bestilling --surfaces skeleton
@@ -569,6 +574,10 @@ def main(argv):
     la = sub.add_parser("lesson"); la.add_argument("action", choices=["add"]); la.add_argument("taskdir")
     ju = sub.add_parser("judge", help="rask menneskevurdering av en frosset G1-liste")
     ju.add_argument("taskdir"); ju.add_argument("--run"); ju.add_argument("--batch-size", type=int, default=0, help="0 = alle; positivt tall for delrunder")
+    tr = sub.add_parser("tree", help="FORMAALSSPEC §1 som tree.json for Developer Workbench")
+    tr.add_argument("taskdir"); tr.add_argument("--out"); tr.add_argument("--gate", choices=GATES); tr.add_argument("--title"); tr.add_argument("--stdout", action="store_true")
+    td = sub.add_parser("treediff", help="hva treet i Workbench har endret i forhold til §1")
+    td.add_argument("taskdir"); td.add_argument("exported")
     a = ap.parse_args(argv)
     if a.cmd == "validate":
         return validate(a.taskdir)
@@ -580,6 +589,14 @@ def main(argv):
         return gates(a.taskdir)
     if a.cmd == "lesson":
         return lesson_add(a.taskdir)
+    if a.cmd in ("tree", "treediff"):
+        import purpose_tree
+        try:
+            if a.cmd == "tree":
+                return purpose_tree.write_tree(a.taskdir, a.out, a.gate, a.title, a.stdout)
+            return purpose_tree.diff_command(a.taskdir, a.exported)
+        except (ValueError, OSError, json.JSONDecodeError) as exc:
+            print("FEIL:", exc); return 1
     if a.cmd == "judge":
         from purpose_judgments import judge
         try:
