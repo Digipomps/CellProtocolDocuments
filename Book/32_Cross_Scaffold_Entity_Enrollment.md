@@ -22,7 +22,10 @@ The goal is simple:
 
 Implementation checkpoint, 2026-09-28: CellProtocol candidate
 [`980e8a2`](https://github.com/Digipomps/CellProtocol/pull/56) adds owner-attach
-entity presence. The human's domain-scoped identities represent the entity.
+entity presence. As of 2026-10-23 that pull request is not merged: the code
+exists only on its branch, not on CellProtocol `main`, so the owner-attach flow
+in this section is not in a released CellProtocol. The human's domain-scoped
+identities represent the entity.
 A receiving scaffold identity only signs an offer and receipt; it is never
 merged into the human entity. The earlier enrollment flow below is a separate
 draft for bounded service-capability delegation, not the user-facing meaning
@@ -51,7 +54,7 @@ notification permissions. The protocol is transport-independent; QR, Nearby,
 Sprout or a menu helper can lead a human to the native consent UI without owning
 its authorization decisions.
 
-Implementation sources are in `CellProtocol/Sources/CellBase/Identity/OwnerAttach*`
+On the PR #56 branch only, implementation sources are in `CellProtocol/Sources/CellBase/Identity/OwnerAttach*`
 and `Cells/GeneralCell/GeneralCell.swift`; the wire profile and adoption limits
 are in `CellProtocol/Docs/Owner_Attach_Entity_Presence.md`. Local full CellBase
 regression passed (1,311 tests, two skipped). This checkpoint does not claim

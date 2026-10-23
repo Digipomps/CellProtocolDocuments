@@ -69,7 +69,8 @@ Current limits:
 
 ## Optional host operations and availability
 
-In the owner-attach candidate described in [Chapter 32](32_Cross_Scaffold_Entity_Enrollment.md),
+In the owner-attach candidate described in [Chapter 32](32_Cross_Scaffold_Entity_Enrollment.md)
+(CellProtocol PR #56, not merged as of 2026-10-23; not on `main`),
 `entityExtension.ownerAttach.offer` (GET) and `.accept` (SET) are advertised only
 while `OwnerAttachExtensionRuntime` has an installed receiver. Keys, method
 contracts, legacy metadata, descriptions and keypath audit use the same live
