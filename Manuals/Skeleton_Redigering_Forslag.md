@@ -1,29 +1,20 @@
----
-doc_id: manual-skeleton-redigering-forslag
-title: Skeleton-redigering – brister og forslag til flateendringer
-repo: CellProtocolDocuments
-audience: human
-status: draft
-last_verified: 2026-10-22
----
-
 # Skeleton-redigering: brister og forslag
 
-Funnet under arbeidet med [brukermanualen](Skeleton_Redigering.md). Dette er
-**forslag**; ingenting er implementert. Hvert punkt trenger Kjetils ja før det
-bygges. Kodehenvisninger gjelder CellScaffold `main` 0b776a4 og CellProtocol
+Funnet under arbeidet med [brukermanualen](Skeleton_Redigering.md). Hvert punkt
+trenger Kjetils ja før det bygges. **Status 26.10.2026:** F1 og F2 er bygget i
+CellScaffold PR #349 (Kjetil valgte dem); resten er forslag. Kodehenvisninger gjelder CellScaffold `main` 0b776a4 og CellProtocol
 `main` 4252c82.
 
 ## Må fikses (fører til at folk mister eller lagrer arbeid uten å vite det)
 
-### F1. «Vis» lagrer ulagrede endringer i det stille
+### F1. «Vis» lagrer ulagrede endringer i det stille (bygget, CellScaffold #349)
 `editor.mode.set` med `view` kjører `applyWorkingDocument` når kladden er endret
 (`PortholeWebSessionSupport.swift`, case `editor.mode.set`). Brukeren tror **Vis**
 er «se resultatet», men det er «lagre».
 **Forslag:** Når kladden er endret, spør: *Lagre* / *Forkast* / *Fortsett å
 redigere*. Alternativt: la **Vis** beholde kladden urørt og bare skjule panelene.
 
-### F2. «Bruk» betyr to forskjellige ting uten at det vises
+### F2. «Bruk» betyr to forskjellige ting uten at det vises (bygget, CellScaffold #349)
 For kildebaserte flater lagrer **Bruk** varig i eiercellen. For alle andre setter
 den bare øktens konfigurasjon, som forsvinner når du bytter flate. I det siste
 tilfellet vises ingen banner (`resolveEditorAccessNotice` returnerer `null`).
