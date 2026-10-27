@@ -4,8 +4,9 @@
 bestemmer hva som skal gjøres, flytter arbeid fremover og godkjenner formål før
 noe bygges.
 
-> Sjekket mot koden på CellScaffold `main` 1884a0d (med #344), 22. oktober 2026
-> (staging kjører 2026.10.12). Står det noe annet på skjermen enn her, er det
+> Sjekket mot koden på CellScaffold `main` 2181841 (med #348), 27. oktober 2026.
+> Det som er nytt med #348 (krysse av delsteg, skrive kommentarer, norske
+> overskrifter i detaljene) kommer på staging med neste release. Står det noe annet på skjermen enn her, er det
 > skjermen som gjelder. Si fra, så retter vi manualen.
 
 ## Innhold
@@ -113,7 +114,7 @@ funksjoner og mangler.
 
 **Fanen Triage.**
 
-- **Triage-koe** (Triage-kø) viser oppgaver som venter på at noen tar stilling til dem.
+- **Triage-kø** viser oppgaver som venter på at noen tar stilling til dem.
 - **Ready** viser det som er klart til å startes.
 - **Risiko og blokkere** viser oppgaver som er blokkert, som venter på andre
   oppgaver, eller som andre oppgaver venter på.
@@ -151,17 +152,27 @@ eller lagt bort.
 
 Trykk på en oppgave i en hvilken som helst liste. Detaljene viser:
 
-- **Type, status, prioritet og prosjekt** øverst.
-- **Workflow** (status) og **Priority:** knapper for å endre dem. Bare de overgangene som
-  er lov, vises.
-- **Subtasks:** delstegene og om de er gjort.
-- **Comments:** kommentarene.
-- **Evidence:** lenker, testresultater og annen dokumentasjon.
-- **Dependencies:** hva oppgaven venter på, og hva som venter på den.
-- **Activity:** hva som har skjedd med oppgaven, og hvem som gjorde det.
+- **Oppgave:** type, status, prioritet og prosjekt øverst.
+- **Status** og **Prioritet:** knapper for å endre dem. Bare de overgangene
+  som er lov, vises.
+- **Ansvar og plan:** hvem som har oppgaven, hvilket team, merkelapper og
+  frist.
+- **Avhengigheter:** hva oppgaven venter på, og hva som venter på den.
+- **Kommentarer:** det andre har skrevet om oppgaven.
+- **Delsteg:** de mindre stegene og om de er gjort.
+- **Evidens:** lenker, testresultater og annen dokumentasjon.
+- **Aktivitet:** hva som har skjedd med oppgaven, og hvem som gjorde det.
 
-> **Merk:** I dag kan du bare endre status og prioritet her. Kommentarer,
-> delsteg og evidens kan du lese, men ikke legge til eller krysse av. Se
+**Krysse av et delsteg:** trykk **Kryss av** ved delsteget. Det blir merket
+**✓ Gjort**. Var det feil, trykk **Åpne igjen**.
+
+**Skrive en kommentar:**
+
+1. Trykk **Skriv kommentar** under Kommentarer.
+2. Skriv kommentaren i feltet som kommer fram, og trykk Enter.
+3. Trykk **Send kommentar**. Kommentaren vises under Kommentarer.
+
+> **Merk:** Evidens kan du lese her, men ikke legge til ennå. Se
 > [kapittel 16](#16-det-kan-du-ikke-gjøre-her-ennå).
 
 ## 8. La hjelperen gjøre ryddejobben
@@ -259,9 +270,9 @@ Gå til **Prosjekter → Delinger og invitasjoner**.
 3. Trykk **Utsted engangslenke**, og send lenken til mottakeren.
 
 **Ta imot:** åpne lenken. Kom du ikke via lenken, lim inn koden under
-**Innloes Invitasjon** og trykk **Innloes tilgang** (skjermen skriver dem uten
-ø). Etterpå åpner du prosjektet under **Delt Workbench** på samme side, med
-knappen **Aapne delt Workbench**.
+**Innløs invitasjon** og trykk **Innløs tilgang**. Etterpå åpner du prosjektet
+under **Delt arbeidsbenk** på samme side, med knappen **Åpne delt
+arbeidsbenk**.
 
 **Audit** viser hvem som har fått og brukt tilgang.
 
@@ -276,8 +287,9 @@ for hvert steg:
 2. **Planlegg og følg opp** – prosjektporteføljen med milepæler og releaser.
 3. **Koble kode og verifikasjon** – GitHub-synkronisering. Her knytter du
    pull requests, kildeversjon og testresultater til oppgaven.
-4. **Drift og deploy** – **Åpne Admin Workbench** tar deg til driftsflaten.
-   Den krever administratorrolle. Se
+4. **Drift og deploy** – **Åpne Admin-arbeidsbenken** tar deg til oversikten
+   der du ser om tjenesten er frisk og hvilken versjon som kjører. Den krever
+   en administratorrolle. Se
    [Brukermanual – Admin-arbeidsbenken](Admin_Arbeidsbenk.md).
 
 ## 13. Følge med på et spillverksted
@@ -310,8 +322,6 @@ til en komponent, se [Brukermanual – Skeleton-redigering](Skeleton_Redigering.
 
 | Du vil … | I dag | Hva du gjør i stedet |
 |---|---|---|
-| krysse av et delsteg | delstegene vises, men kan ikke krysses av | be agenten eller utvikleren oppdatere oppgaven |
-| skrive en kommentar på en oppgave | kommentarer vises, men kan ikke skrives | skriv i beskrivelsen når du fanger oppgaven, eller be agenten |
 | legge til evidens | evidens vises, men kan ikke legges til | legg lenken i beskrivelsen eller i kilden |
 | la hjelperen kommentere eller sette prioritet | avvises med forklaring | sett prioritet selv i detaljene |
 | invitere uten å kjenne mottakerens ID | ikke mulig | få identity UUID fra mottakeren |

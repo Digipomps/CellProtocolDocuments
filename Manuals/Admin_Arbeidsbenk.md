@@ -4,12 +4,12 @@
 godkjenner også korrespondanse og invitasjoner her, og finner veien til
 adminflatene for hvert produkt.
 
-> Sjekket mot koden på CellScaffold `main` 1884a0d, 22. oktober 2026
-> (staging kjører 2026.10.12). Står det noe annet på skjermen enn her, er det
+> Sjekket mot koden på CellScaffold `main` 2181841 (med #348), 27. oktober 2026.
+> De nye undertitlene fra #348 kommer på staging med neste release. Står det noe annet på skjermen enn her, er det
 > skjermen som gjelder. Si fra, så retter vi manualen.
 
-Arbeidsbenken heter **Kontrollplan** i menyen. Utvikler-arbeidsbenken kaller
-den **Admin Workbench**. Det er det samme.
+Arbeidsbenken heter **Kontrollplan** i menyen. Fra Utvikler-arbeidsbenken
+kommer du hit med knappen **Åpne Admin-arbeidsbenken** (fanen Arbeidsflyt).
 
 ## Innhold
 
