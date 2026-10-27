@@ -1,32 +1,3 @@
----
-doc_id: manual-skeleton-redigering
-title: Brukermanual – Endre en flate (skeleton-redigering)
-repo: CellProtocolDocuments
-owner: CellScaffold / Porthole
-audience: human
-status: draft
-last_verified: 2026-10-22
-source_code:
-  - CellScaffold/Public/js/porthole-webo.js
-  - CellScaffold/Sources/App/Controllers/PortholeWebSessionSupport.swift
-  - CellScaffold/Sources/App/Controllers/PortholeWebEditorSupport.swift
-  - CellScaffold/Sources/App/Cells/CellConfigurationStudio/CellConfigurationStudioCell.swift
-  - CellScaffold/scripts/skeleton-iterate.js
-  - CellProtocol/Sources/CellBase/Skeleton/SkeletonDescription.swift
-interfaces:
-  - editor.mode.set
-  - editor.selection.set
-  - editor.component.insert
-  - editor.working.setSkeleton
-  - editor.undo
-  - editor.redo
-  - editor.discard
-  - editor.apply
-  - cell:///CellConfigurationStudio
-  - applyEditableCellConfiguration
-  - resetEditableCellConfiguration
----
-
 # Endre en flate
 
 **Kort fortalt:** Alt du ser i HAVEN er en *flate*. Hver flate er beskrevet av en
@@ -156,9 +127,10 @@ sammensatte deler.
   Historikken gjelder fram til du trykker **Bruk** eller **Forkast**.
 - **Forkast endringer** kaster hele kladden og viser flaten slik den sist ble lagret.
 
-> ⚠️ **Viktig: «Vis» lagrer.** Trykker du **Vis** mens du har ulagrede endringer,
-> blir de lagret automatisk, akkurat som **Bruk**. Vil du *ikke* beholde
-> endringene, trykk **Forkast endringer** først, og deretter **Vis**.
+**Gå tilbake til visning:** Trykker du **Vis** mens du har ulagrede endringer,
+spør Porthole hva du vil: **Lagre og vis**, **Forkast og vis** eller
+**Fortsett å redigere**. Ingenting lagres uten at du velger det. Feiler
+lagringen, blir du værende i redigering og ser feilmeldingen.
 
 ---
 
@@ -172,7 +144,7 @@ Trykk **Bruk** i verktøylinjen. Hva som skjer, avhenger av flaten:
 |---------------|-------------------|
 | Banner **«Kildebasert redigering»** | Endringen lagres i eiercellen og overlever ny innlogging og omstart. |
 | Banner **«Kun lesing»** | Du kan ikke lagre. |
-| Ingen banner | Endringen gjelder **bare denne visningen** (denne Porthole-økten). Laster du en annen flate eller logger ut, er den borte. Bruk Studio (se 7) for å lagre en egen versjon. |
+| Banner **«Midlertidig redigering»**, knappen heter **Bruk midlertidig** | Endringen gjelder **bare denne visningen** (denne Porthole-økten). Laster du en annen flate eller logger ut, er den borte. Bruk Studio (se 7) for å lagre en egen versjon. |
 
 **Hvis noen andre har lagret i mellomtiden** får du en feil om utdatert revisjon.
 Last flaten på nytt, og gjør endringen igjen.
@@ -247,7 +219,9 @@ Resultatene ligger i `test-results/skeleton-iterate/…`. Å gjøre endringen
 permanent i Swift-koden (fabrikken) er et eget, bevisst steg etter at
 runtime-resultatet er godkjent.
 
-Agenten skal ikke bytte til **Vis** under forhåndsvisning (det lagrer, se 5).
+Agenten skal forkaste kladden (`editor.discard`) før den bytter til visning:
+serveren lagrer en endret kladd når modus settes til `view`. Web-skallet spør
+brukeren først, men API-et gjør det ikke.
 
 ---
 
@@ -274,7 +248,6 @@ Agenten skal ikke bytte til **Vis** under forhåndsvisning (det lagrer, se 5).
 | **Rediger** gir feilmelding | Flaten er «Kun lesing» for deg. | Be eieren om skrivetilgang. |
 | **Bruk** er grå | Ingen endringer i kladden. | – |
 | Endringen forsvant etter at jeg byttet flate | Flaten var ikke kildebasert; endringen gjaldt bare økten. | Lagre via Studio (7). |
-| Endringen ble lagret selv om jeg ikke ville | Du trykket **Vis** med ulagrede endringer. | Forkast før du trykker Vis. Angre ved å redigere tilbake. |
 | Teksten er tom / knappen gjør ingenting | Feil `keypath`, eller cellen er ikke koblet til flaten. | Sjekk advarslene i **Inspector → Dokument**. |
 | Ingen «Legg til her» dukker opp | Delen passer ikke i områdene flaten tilbyr. | Prøv rotnivå, eller be eieren åpne en slippsone. |
 | «Editable configuration revision is stale …» | Noen lagret samtidig. | Last på nytt og gjør endringen igjen. |
@@ -286,7 +259,6 @@ Agenten skal ikke bytte til **Vis** under forhåndsvisning (det lagrer, se 5).
 - Redigering finnes bare i Porthole på web, ikke i HAVEN-appen.
 - Paletten har bare sammensatte komponenter; enkeltelementer og flytting mangler.
 - Inspektøren endrer bare enkle verdier (tekst, tall, av/på).
-- **Vis** lagrer ulagrede endringer.
 - Ingen knapp for å tilbakestille til bibliotekets original.
 - CellConfiguration-JSON i Porthole kan bare leses og kopieres, ikke redigeres der.
 
