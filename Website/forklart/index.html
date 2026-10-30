@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="nb" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slik er HAVEN bygd – HAVEN</title>
+  <meta name="description" content="Entitet, identitet, celle, avtale, node og spor: hvordan HAVEN er bygd, med status for hver del og lenker til den tekniske beskrivelsen.">
+  <meta name="theme-color" content="#f4f3ee">
+  <meta property="og:title" content="Slik er HAVEN bygd – HAVEN">
+  <meta property="og:description" content="Entitet, identitet, celle, avtale, node og spor: hvordan HAVEN er bygd, med status for hver del og lenker til den tekniske beskrivelsen.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="/assets/haven-control-loop-20260803.webp">
+  <link rel="canonical" href="https://digipomps.org/forklart/">
+  <link rel="icon" href="/assets/favicon.svg?v=20260803b" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/site.css?v=20261030a">
+  <script src="/assets/site.js?v=20260803c" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#innhold">Hopp til innhold</a>
+  <header class="site-header">
+    <div class="nav-shell">
+      <a class="brand" href="/" aria-label="HAVEN – forsiden"><img class="brand-logo" src="/assets/haven-logo.png" width="1006" height="478" alt=""><span class="brand-byline">et arbeid fra Digipomps</span></a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="hovedmeny" data-nav-toggle>Meny</button>
+      <nav class="site-nav" id="hovedmeny" aria-label="Hovedmeny" data-site-nav data-open="false">
+        <a href="/">Start her</a><a href="/forklart/" aria-current="page">Slik er det bygd</a><a href="/forklart/status/">Status</a><a href="/forklart/forskning/">Forskning</a><a href="/artikler/">Artikler</a><a class="nav-cta" href="/#kontakt">Bli med</a>
+      </nav>
+    </div>
+  </header>
+  <main id="innhold">
+    <header class="page-hero"><div class="section-shell"><p class="eyebrow">Nivå 2 · Slik er HAVEN bygd</p><h1>Fra én idé til byggesteiner du kan kontrollere.</h1><p>På forsiden er HAVEN én idé: dataene blir hos deg, og den som vil bruke dem, må spørre. Her ser du hvordan det er tenkt bygd, steg for steg. Hvert steg sier om det finnes i kode i dag, og lenker videre til den tekniske beskrivelsen.</p><nav class="layer-nav" aria-label="Nivåer i forklaringen"><a href="/"><span>Nivå 1</span><strong>Forsiden</strong></a><a href="/forklart/" aria-current="page"><span>Nivå 2</span><strong>Slik er HAVEN bygd</strong></a><a href="/forklart/status/"><span>Nivå 3</span><strong>Hva finnes i dag</strong></a><a href="/forklart/forskning/"><span>Nivå 3</span><strong>Det vi ikke vet ennå</strong></a></nav></div></header>
+    <section class="site-section paper" id="entitet">
+      <div class="section-shell">
+        <header class="section-heading wide-heading">
+          <p class="eyebrow">1 · Entitet og identiteter</p>
+          <h2>Én person, mange ansikter.</h2>
+          <p>En person eller organisasjon kaller vi en <strong>entitet</strong>. Entiteten har én <strong>identitet</strong> per sammenheng, med egen nøkkel. Det beskytter personvernet: det finnes ingen global ID som noen kan slå opp.</p>
+        </header>
+        <div class="concept-diagram">
+          <figure class="diagram-panel">
+            <p class="card-kicker">Kari og hennes identiteter</p>
+            <div class="diagram-row" aria-hidden="true"><span class="diagram-box" data-kind="entity">Kari<small>entitet</small></span><span class="diagram-arrow">→</span>
+              <span class="diagram-stack"><span class="diagram-box" data-kind="built">jobb<small>egen nøkkel</small></span><span class="diagram-box" data-kind="built">nabolag<small>egen nøkkel</small></span><span class="diagram-box" data-kind="built">helse<small>egen nøkkel</small></span></span></div>
+            <figcaption>Én entitet, tre identiteter i tre domener.</figcaption>
+          </figure>
+          <div class="diagram-panel">
+            <p class="card-kicker">Det betyr</p>
+            <ul class="plain-list">
+              <li><strong>Ingen global ID.</strong> Ingen kan slå opp «hele Kari».</li>
+              <li><strong>Ingen automatisk kobling.</strong> Identitetene henger ikke sammen av seg selv.</li>
+              <li><strong>Kari kan koble dem selv</strong>, og trekke koblingen tilbake. Koblingene ligger hos henne, ikke i et felles register.</li>
+            </ul>
+          </div>
+        </div>
+        <p class="concept-meta"><span class="status-tag" data-status="built">Implementert</span> Domenebundne identiteter og kobling til samme entitet finnes i kode med tester.</p>
+        <p class="deeper-link"><a href="https://github.com/Digipomps/CellProtocolDocuments/blob/main/Book/03_Identity_Model.md">Gå dypere: identitetsmodellen i HAVEN-boka →</a></p>
+      </div>
+    </section>
+    <section class="site-section" id="cellen">
+      <div class="section-shell">
+        <header class="section-heading wide-heading">
+          <p class="eyebrow">2 · Cellen</p>
+          <h2>En liten tjeneste som passer på seg selv.</h2>
+          <p>Programvaren i HAVEN består av små <strong>celler</strong>. En celle eies av én identitet, holder sine egne data og har sine egne regler for hvem som får lese og skrive. Hvert kall til cellen har med seg hvem som spør.</p>
+        </header>
+        <div class="concept-diagram">
+          <figure class="diagram-panel">
+            <p class="card-kicker">Fire måter å snakke med en celle</p>
+            <div class="diagram-stack" aria-hidden="true">
+              <div class="diagram-row"><span class="diagram-box">Lytt<small>ta imot hendelser fra andre celler</small></span><span class="diagram-box">Send<small>sende hendelser til dem som lytter</small></span></div>
+              <span class="diagram-box" data-kind="built">Celle<small>eies av én identitet · reglene ligger i cellen</small></span>
+              <div class="diagram-row"><span class="diagram-box">Les og skriv<small>en navngitt verdi</small></span><span class="diagram-box">Utforsk<small>hva cellen har, og hva det krever</small></span></div>
+            </div>
+            <figcaption>I protokollen heter de Absorb, Emit, Meddle og Explore.</figcaption>
+          </figure>
+          <div class="diagram-panel">
+            <p class="card-kicker">Cellen avgjør selv</p>
+            <ol class="plain-list">
+              <li><strong>Er du eieren?</strong> Da får du tilgang.</li>
+              <li><strong>Hvis ikke: har du en gyldig avtale</strong> som dekker akkurat dette? Da får du tilgang innenfor avtalen.</li>
+              <li><strong>Ellers: avvist.</strong> Avslaget logges.</li>
+            </ol>
+            <p>Ingen sentral tjeneste blir spurt om lov. Sjekken skjer i cellen, ved hvert kall.</p>
+          </div>
+        </div>
+        <p class="concept-meta"><span class="status-tag" data-status="built">Implementert</span> Protokollen og tilgangssjekken finnes i åpen kode for Swift, og delvis i Python og Go.</p>
+        <p class="deeper-link"><a href="https://github.com/Digipomps/CellProtocolDocuments/blob/main/Book/02_Cell_Interfaces.md">Gå dypere: cellens grensesnitt →</a> · <a href="/bevis/tilgangskontroll/">Se testbeviset for tilgangssjekken →</a></p>
+      </div>
+    </section>
+    <section class="site-section paper" id="avtalen">
+      <div class="section-shell">
+        <header class="section-heading wide-heading">
+          <p class="eyebrow">3 · Avtale og formål</p>
+          <h2>Den eneste veien inn går gjennom en avtale.</h2>
+          <p>Alle andre enn eieren kommer inn gjennom en <strong>avtale</strong>. Den sier hva som skal brukes, hvorfor, og hvor lenge. Blir den godtatt, blir den en signert <strong>kontrakt</strong> som kan trekkes tilbake.</p>
+        </header>
+        <figure class="diagram-panel">
+          <p class="card-kicker">Fra forespørsel til kontrakt</p>
+          <div class="diagram-row" aria-hidden="true">
+            <span class="diagram-box" data-kind="built">Forespørsel<small>hva, hvorfor, vilkår</small></span><span class="diagram-arrow">→</span>
+            <span class="diagram-box">Passer den?<small>cellen har sagt hva den kan gi</small></span><span class="diagram-arrow">→</span>
+            <span class="diagram-box">Godkjent?<small>eieren, eller en regel eieren har satt</small></span><span class="diagram-arrow">→</span>
+            <span class="diagram-box">Vilkår oppfylt?<small>sjekkes ved hvert kall</small></span><span class="diagram-arrow">→</span>
+            <span class="diagram-box" data-kind="built">Kontrakt<small>signert, utløper, kan trekkes</small></span>
+          </div>
+          <figcaption>Formålet sier hva dataene skal brukes til. Retten til å bruke dem kommer bare fra kontrakten.</figcaption>
+        </figure>
+        <div class="boundary-box"><h3>Fem spørsmål som alltid bør kunne besvares</h3><p>Hvem ba om handlingen? Hva var formålet? Hva fikk den lov til? Hvor lenge gjaldt det? Hva skjedde faktisk? Avtalen er der svarene skal bo.</p></div>
+        <p class="concept-meta"><span class="status-tag" data-status="built">Implementert</span> Avtaler, kontrakter og tilganger finnes i kode med tester. Brukerflatene rundt dem er prototyper.</p>
+        <p class="deeper-link"><a href="https://github.com/Digipomps/CellProtocolDocuments/blob/main/Book/04_Agreements_Contracts.md">Gå dypere: avtaler og kontrakter →</a> · <a href="https://github.com/Digipomps/CellProtocolDocuments/blob/main/Book/09_Purpose_Interests.md">formål →</a> · <a href="/artikler/agent-pa-dine-vegne/">et helt eksempel →</a></p>
+      </div>
+    </section>
+    <section class="site-section" id="noder">
+      <div class="section-shell">
+        <header class="section-heading wide-heading">
+          <p class="eyebrow">4 · Noder og bro</p>
+          <h2>Ingen plattform i midten.</h2>
+          <p>Cellene kjører på <strong>noder</strong>. Nodene snakker direkte med hverandre over en <strong>bro</strong>. En celle på en annen node ser ut som en lokal celle, og den cellen avgjør fortsatt selv hvem som får gjøre hva.</p>
+        </header>
+        <figure class="diagram-panel">
+          <p class="card-kicker">To noder</p>
+          <div class="diagram-row" aria-hidden="true">
+            <span class="diagram-stack"><span class="diagram-box" data-kind="entity">Node A<small>Karis celler og nøkler</small></span></span>
+            <span class="diagram-stack"><span class="diagram-label">bro</span><span class="diagram-arrow">⇄</span><span class="diagram-label">bevis på hvem du er</span></span>
+            <span class="diagram-stack"><span class="diagram-box" data-kind="built">Node B<small>Jons celler avgjør selv</small></span></span>
+          </div>
+          <figcaption>Broen flytter bare meldinger. Nøkkelen blir hos Kari.</figcaption>
+        </figure>
+        <p class="concept-meta"><span class="status-tag" data-status="partial">Delvis</span> Noder og bro kjører i dag, men nodene driftes av HAVEN selv. At hvem som helst kan drive sin egen node, er målet, ikke dagens situasjon.</p>
+        <p class="deeper-link"><a href="https://github.com/Digipomps/CellProtocolDocuments/blob/main/Book/07_Scaffold_Runtime.md">Gå dypere: noden →</a> · <a href="https://github.com/Digipomps/CellProtocolDocuments/blob/main/Book/08_Bridging_Transport.md">broen →</a></p>
+      </div>
+    </section>
+    <section class="site-section paper" id="spor">
+      <div class="section-shell">
+        <header class="section-heading wide-heading">
+          <p class="eyebrow">5 · Hendelser og spor</p>
+          <h2>Det som skjer, skal kunne etterprøves.</h2>
+          <p>Cellene sender <strong>hendelser</strong> til hverandre. Hendelser kan pakkes i signerte konvolutter som peker bakover til den forrige, slik at et spor ikke kan endres i ettertid uten at det synes. Det er grunnlaget for kvitteringen du skal få.</p>
+        </header>
+        <figure class="diagram-panel">
+          <p class="card-kicker">Et spor av signerte konvolutter</p>
+          <div class="diagram-row" aria-hidden="true">
+            <span class="diagram-box" data-kind="muted">Konvolutt 1<small>innhold · signatur</small></span><span class="diagram-arrow">←</span>
+            <span class="diagram-box" data-kind="muted">Konvolutt 2<small>peker på 1</small></span><span class="diagram-arrow">←</span>
+            <span class="diagram-box" data-kind="muted">Konvolutt 3<small>peker på 2</small></span>
+          </div>
+          <figcaption>Stiplet: finnes som bibliotek med tester, men brukes ennå ikke i flyten mellom celler.</figcaption>
+        </figure>
+        <p class="concept-meta"><span class="status-tag" data-status="partial">Delvis</span> Signerte hendelser finnes i kode. Varig lagring og avspilling er ikke garantert ennå.</p>
+        <p class="deeper-link"><a href="https://github.com/Digipomps/CellProtocolDocuments/blob/main/Book/05_Flows_Lifecycle.md">Gå dypere: hendelser og livsløp →</a></p>
+      </div>
+    </section>
+    <section class="site-section" id="digipomps">
+      <div class="section-shell">
+        <header class="section-heading wide-heading">
+          <p class="eyebrow">6 · Hvem passer på reglene?</p>
+          <h2>Koden håndhever. Digipomps holder reglene åpne og etterprøvbare.</h2>
+          <p>I HAVEN er det cellen som sier nei, ikke et sentralt kontor. Men noen må forvalte reglene cellene følger, og sørge for at det går an å sjekke om en tjeneste faktisk følger dem. Den rollen har Stiftelsen Digipomps.</p>
+        </header>
+        <div class="concept-diagram">
+          <div class="diagram-panel">
+            <p class="card-kicker">Det Digipomps gjør i dag</p>
+            <ul class="plain-list">
+              <li><strong>Forvalter protokollen.</strong> CellProtocol er åpen kode, og reglene står i HAVEN-boka og i maskinlesbare kontrakter.</li>
+              <li><strong>Bygger håndhevelsen inn i koden.</strong> Tilgangssjekken i cellen, avtalen som eneste vei inn og tester som viser at feil forespørsler avvises.</li>
+              <li><strong>Drifter nodene.</strong> I dag kjører HAVEN-nodene hos oss. Det er en praktisk start, ikke målet.</li>
+              <li><strong>Holder seg selv til regning.</strong> Påstander får status, og rettelser føres i en offentlig logg.</li>
+            </ul>
+          </div>
+          <div class="diagram-panel">
+            <p class="card-kicker">Det vi bygger mot</p>
+            <ul class="plain-list">
+              <li><strong>Prøver alle kan kjøre.</strong> Åpne tester som viser om en tjeneste sier formålet, ber om minst mulig, gir kvittering og lar deg stoppe.</li>
+              <li><strong>Åpne lister over hvem som er betrodd.</strong> For eksempel hvilke utstedere eller ideelle organisasjoner som er godkjent. Godkjenningen skal kunne ses og etterprøves.</li>
+              <li><strong>Mindre makt hos oss over tid.</strong> Flere implementasjoner, flere som drifter noder, og mulighet til å forlate systemet.</li>
+              <li><strong>Et skille mot det kommersielle.</strong> Protokollen og grunnreglene skal være et fellesgode. Kommersielle tjenester, også DiMy, skal bygge på dem uten å eie dem.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="boundary-box"><p><strong>Grensen:</strong> En stiftelse gjør ikke programvaren sikker, og den gjør ikke Digipomps nøytral. Hvordan beslutninger fattes og kontrolleres uavhengig, er ikke publisert ennå. Det står som åpne oppgaver på <a href="/om/">om-siden</a>.</p></div>
+        <p class="concept-meta"><span class="status-tag" data-status="partial">Delvis</span> Håndhevelsen i koden finnes. Åpne samsvarsprøver, betrodde lister og uavhengig kontroll er ikke på plass.</p>
+        <p class="deeper-link"><a href="/artikler/fellesgoder-og-forvaltning/">Gå dypere: fellesgoder og forvaltning →</a> · <a href="/om/">om Stiftelsen Digipomps →</a></p>
+      </div>
+    </section>
+    <section class="site-section paper" id="videre">
+      <div class="section-shell">
+        <header class="section-heading wide-heading">
+          <p class="eyebrow">Videre</p>
+          <h2>Byggesteinene finnes. Mye av helheten gjenstår.</h2>
+          <p>To sider går et nivå dypere: én som skiller det som finnes i kode fra det som bare er planlagt, og én om spørsmålene vi ikke har svar på.</p>
+        </header>
+        <div class="path-grid">
+          <a class="path-card" href="/forklart/status/"><span class="path-number" aria-hidden="true">3</span><h3>Hva finnes i dag</h3><p>Funksjon for funksjon: i drift, implementert, delvis eller visjon.</p><span class="path-link">Se oversikten →</span></a>
+          <a class="path-card" href="/forklart/forskning/"><span class="path-number" aria-hidden="true">3</span><h3>Det vi ikke vet ennå</h3><p>Unik representasjon og personvernsikker simulering, med åpne forskningsspørsmål.</p><span class="path-link">Se spørsmålene →</span></a>
+          <a class="path-card" href="https://github.com/Digipomps/CellProtocolDocuments/tree/main/Book"><span class="path-number" aria-hidden="true">4</span><h3>HAVEN-boka</h3><p>Den tekniske beskrivelsen. Boka beskriver også planer, så sjekk mot koden.</p><span class="path-link">Åpne boka på GitHub →</span></a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <footer class="site-footer">
+    <div class="footer-shell">
+      <div><a class="brand" href="/"><img class="brand-logo" src="/assets/haven-logo.png" width="1006" height="478" alt="HAVEN"><span class="brand-byline">fra Stiftelsen Digipomps</span></a><p>Et åpent arbeid for en digisfære der teknologi tjener mennesker. Ingen analyseverktøy, informasjonskapsler eller tredjepartssporing på dette nettstedet.</p></div>
+      <nav class="footer-links" aria-label="Bunnmeny"><a href="/forklart/">Slik er det bygd</a><a href="/artikler/">Artikler</a><a href="/kilder/">Kilder og metode</a><a href="/om/">Om Digipomps</a><a href="/personvern/">Personvern</a><a href="/rettelser/">Rettelser</a><a href="https://github.com/Digipomps">GitHub</a><a href="mailto:digipomp@digipomps.org">Kontakt</a></nav>
+    </div>
+  </footer>
+</body>
+</html>
