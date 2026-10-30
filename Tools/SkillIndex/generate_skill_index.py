@@ -25,10 +25,11 @@ from typing import Any
 
 HOME = Path.home()
 SKILL_FILE_NAMES = ("SKILL.md", "Skill.md", "skill.md")
+# ~/ClaudesFiles/TilInfo er en dumpmappe for filer en økt eksplisitt får beskjed om å ta tak i.
+# Den er bevisst ikke med her og skal ikke inn i noen indeks.
 DEFAULT_ROOTS = {
     "user": HOME / ".claude/skills",
     "scaffold": HOME / "GitHub/CellScaffold/.claude/skills",
-    "tilinfo": HOME / "ClaudesFiles/TilInfo/haven-skills",
     "codex": HOME / ".codex/skills",
     "cpdocs": HOME / "GitHub/CellProtocolDocuments/.claude/skills",
 }

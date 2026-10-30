@@ -105,6 +105,10 @@ class IndexTests(unittest.TestCase):
         gen.main(["--no-defaults", "--root", f"a={self.a}", "--out", str(self.tmp / "out")])
         self.assertEqual((self.a / "x/SKILL.md").read_bytes(), before)
 
+    def test_tilinfo_dump_folder_is_never_a_default_root(self):
+        self.assertNotIn("tilinfo", {k.lower() for k in gen.DEFAULT_ROOTS})
+        self.assertFalse(any("TilInfo" in str(p) for p in gen.DEFAULT_ROOTS.values()))
+
     def test_no_absolute_home_paths_in_output(self):
         make_skill(self.a, "x", "Beskrivelse.")
         index = self.build()
