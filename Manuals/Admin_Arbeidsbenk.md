@@ -9,7 +9,9 @@ adminflatene for hvert produkt.
 > skjermen som gjelder. Si fra, så retter vi manualen.
 
 Arbeidsbenken heter **Kontrollplan** i menyen. Fra Utvikler-arbeidsbenken
-kommer du hit med knappen **Åpne Admin-arbeidsbenken** (fanen Arbeidsflyt).
+kommer du hit med knappen **Admin-arbeidsbenken** (fanen Prosjekter, kortet
+**Fra idé til levering**). Før neste staging-release heter knappen **Åpne
+Admin-arbeidsbenken** og står i fanen Arbeidsflyt.
 
 ## Innhold
 
@@ -245,7 +247,7 @@ du sjekke byggerevisjonen her (kapittel 3).
 | få en adminrolle | **Be om tilgang** registrerer bare en forespørsel | si fra til driftsansvarlig, som gir rollen |
 | gi eller trekke tilbake tilgang | bare lesing | egen kvittert arbeidsflyt via driftsansvarlig |
 | slette gamle data eller celler | ingen sletteknapp | be driftsansvarlig, med godkjenning |
-| se testlista for staging | finnes ikke i admin | bruk HAVEN Workbench (se [Utvikler-arbeidsbenken](Utvikler_Arbeidsbenk.md#16-det-kan-du-ikke-gjøre-her-ennå)) |
+| se testlista for staging | finnes ikke i admin | i [Utvikler-arbeidsbenken](Utvikler_Arbeidsbenk.md#2-se-hvor-du-kan-jobbe): **Prosjekter → Min arbeidsbenk → Last inn funn og staging-testlista** |
 
 ---
 

@@ -4,9 +4,11 @@
 bestemmer hva som skal gjøres, flytter arbeid fremover og godkjenner formål før
 noe bygges.
 
-> Sjekket mot koden på CellScaffold `main` 2181841 (med #348), 27. oktober 2026.
-> Det som er nytt med #348 (krysse av delsteg, skrive kommentarer, norske
-> overskrifter i detaljene) kommer på staging med neste release. Står det noe annet på skjermen enn her, er det
+> Sjekket mot koden på CellScaffold `main` 918b516 (med #351), 27. oktober 2026.
+> Det som er nytt med #351 (seks faner, filterknapper på tavla, norske
+> kolonnenavn, fanen Ny) kommer på staging med neste release. Til da ser du
+> de elleve gamle fanene der. At hjelperen forstår «vurderes» og «fast»,
+> kommer med #352. Står det noe annet på skjermen enn her, er det
 > skjermen som gjelder. Si fra, så retter vi manualen.
 
 ## Innhold
@@ -30,28 +32,21 @@ noe bygges.
 
 ## Kart over arbeidsbenken
 
-Arbeidsbenken har elleve faner. Navnene kommer rett fra systemet, derfor er noen på
-engelsk.
+Arbeidsbenken har seks faner.
 
 | Fane | Bruk den når du vil … |
 |---|---|
-| **Prosjekter** | se prosjektene du har tilgang til og åpne et arbeidsrom |
+| **Oppgaver** | se alt på tavla, filtrere, søke og dra kort mellom kolonner |
+| **Ny** | skrive inn en ny idé, feil eller oppgave |
+| **Prosjekter** | se prosjektene dine, sette opp arbeidsbenken, dele, og gå videre fra idé til levering |
 | **Formål** | lese, rette og godkjenne et formålstre |
 | **Book 23** | lese de felles formålene i Book 23 og godkjenne eller avvise forslag til endringer |
 | **Hjelper** | endre hva AI-hjelperen kan og hvordan den forstår deg |
-| **Intake** | skrive inn en ny idé, feil eller oppgave |
-| **All** | søke i alle oppgavene |
-| **Board** | se alt på en tavle og dra kort mellom kolonner |
-| **Triage** | sortere det som er nytt og se hva som blokkerer |
-| **Active** | se det som pågår, feil og mangler |
-| **Done** | se det som er ferdig, og lage en rask oppfølging |
-| **Arbeidsflyt** | gå videre til portefølje, GitHub og drift |
 
-På fanene Intake, All, Board, Triage, Active og Done står **AI-hjelperen** i en
-egen kolonne til høyre.
+På fanene Oppgaver og Ny står **AI-hjelperen** i en egen kolonne til høyre.
 
 Under fanene står **den valgte oppgaven** med detaljer. Den vises når du har
-trykket på en oppgave i en liste.
+trykket på et kort på tavla.
 
 ---
 
@@ -68,83 +63,113 @@ Arbeidsbenken viser bare det du selv eier og det andre har delt med deg.
 
 ## 2. Se hvor du kan jobbe
 
-**Fanen Prosjekter.**
+**Fanen Prosjekter.** Til venstre står prosjektene og veien fra idé til
+levering. Til høyre står din egen arbeidsbenk, deling og spillverksted.
 
-- **Tilgjengelige prosjekter** viser hvor mange prosjekter og porteføljer du
-  har tilgang til. Hvert prosjekt har status, eier og **Neste steg**.
+**Prosjektene dine**
+
+- Viser hvor mange prosjekter og porteføljer du har tilgang til. Hvert
+  prosjekt har status, eier og **Neste steg**.
 - Trykk **Åpne arbeidsrom** for å gå inn i et prosjekt. Knappen vises bare når
   du har lov til å åpne det.
 - **Utilgjengelige porteføljer** teller delinger som ikke lenger gjelder, for
   eksempel fordi tilgangen er trukket tilbake eller har gått ut.
-- Under **Arbeidsområder** åpner du **Min prosjektportefølje** for å lage egne
-  prosjekter, og **Delinger og invitasjoner** for å dele eller ta imot (se
-  [kapittel 11](#11-dele-et-prosjekt-med-noen)).
+
+**Min arbeidsbenk**
+
+- **Sett opp min arbeidsbenk** lager det du trenger for å komme i gang første
+  gang. Det er trygt å trykke igjen.
+- **Last inn funn og staging-testlista** legger funnene og punktene fra
+  staging-testlista inn som oppgaver på tavla. Punkter som alt finnes, blir
+  oppdatert, ikke lagt inn to ganger.
+- Under knappene står hva som skjedde sist, og hva du kan gjøre etterpå.
+- Knappene virker bare på din egen arbeidsbenk. På en arbeidsbenk som er delt
+  med deg, vises de ikke.
+
+**Deling**
+
+- **Delinger og invitasjoner**: del et prosjekt eller ta imot en invitasjon
+  (se [kapittel 11](#11-dele-et-prosjekt-med-noen)).
+- **Min prosjektportefølje**: lag og ordne egne prosjekter.
 
 Tilgangen sjekkes på nytt hver gang du åpner noe. Har noen trukket tilbake en
 deling, forsvinner prosjektet fra lista.
 
 ## 3. Få en idé eller feil inn før du glemmer den
 
-**Fanen Intake.**
+**Fanen Ny.**
 
 1. Skriv en kort **tittel**: hva det gjelder.
 2. Beskriv det i det store feltet. For en feil: hva du forventet, hva som
    skjedde, og hvor.
 3. Fyll inn **Prosjekt** og **Kilde** (for eksempel «staging-test» eller en
    lenke).
-4. Trykk **Fang work item**.
+4. Trykk **Lagre oppgaven**.
 
-Oppgaven havner i kolonnen **Inbox** på tavla. Kortet **Status** ved siden av
+Oppgaven havner i kolonnen **Innboks** på tavla. Kortet **Status** ved siden av
 viser hvor mange oppgaver du har, hvor mange som er åpne, blokkert, feil,
 funksjoner og mangler.
 
-> **Tips:** Du trenger ikke vite prioritet eller type når du fanger noe. Det
-> bestemmer du når du sorterer (kapittel 5).
+> **Tips:** Er du alt på tavla, kan du lage en oppgave rett i en kolonne
+> uten å bytte fane. Se [kapittel 6](#6-flytte-arbeid-fremover-på-tavla).
+> Du trenger ikke vite prioritet eller type når du fanger noe. Det bestemmer
+> du når du sorterer (kapittel 5).
 
 ## 4. Finne igjen en oppgave
 
-**Fanen All.**
+**Fanen Oppgaver**, søkefeltet over tavla.
 
 1. Skriv i søkefeltet. Du kan søke på tittel, ID, prosjekt, merkelapp, status
    eller prioritet.
-2. Trykk **Enter** for å søke. Tøm feltet og trykk Enter for å se alt igjen.
-3. Trykk på en oppgave for å åpne den (kapittel 7).
+2. Trykk **Enter**. Tavla viser bare kortene som passer, og tallene på
+   filterknappene teller bare dem.
+3. Tøm feltet og trykk Enter for å se alt igjen.
+4. Trykk på et kort for å åpne oppgaven (kapittel 7).
 
 ## 5. Bestemme hva som skal gjøres nå
 
-**Fanen Triage.**
+**Fanen Oppgaver**, filterknappene over tavla. Hver knapp viser hvor mange
+oppgaver som passer. Trykk på en knapp for å se bare dem. Trykk **Alle** for å
+se alt igjen.
 
-- **Triage-kø** viser oppgaver som venter på at noen tar stilling til dem.
-- **Ready** viser det som er klart til å startes.
-- **Risiko og blokkere** viser oppgaver som er blokkert, som venter på andre
-  oppgaver, eller som andre oppgaver venter på.
+| Knapp | Viser |
+|---|---|
+| **Alle** | alt |
+| **Trenger vurdering** | det som står i Innboks eller Vurderes |
+| **Pågår** | det som pågår |
+| **Feil** | åpne feil |
+| **Mangler** | åpne mangler (noe som er beskrevet, men ikke bygget) |
+| **Blokkert** | det som står fast, og åpne oppgaver som venter på en annen oppgave |
+| **Ferdig** | det som er ferdig eller droppet |
 
-Slik sorterer du en oppgave: trykk på den, og velg ny **status** og
-**prioritet** i detaljene (kapittel 7). Vil du flytte mange på én gang, be
-hjelperen om det (kapittel 8).
+Valget huskes for deg. Andre som ser samme tavle, får sitt eget valg.
 
-**Fanen Active** viser det som pågår, alle feil og alle mangler
-(«implementation gaps») hver for seg. **Fanen Done** viser det som er ferdig
-eller lagt bort.
+Slik sorterer du en oppgave: trykk **Trenger vurdering**, trykk på et kort, og
+velg ny **status** og **prioritet** i detaljene (kapittel 7). Eller dra kortet
+til en annen kolonne. Vil du flytte mange på én gang, be hjelperen om det
+(kapittel 8).
 
 ## 6. Flytte arbeid fremover på tavla
 
-**Fanen Board.** Tavla har én kolonne per status:
+**Fanen Oppgaver.** Tavla har én kolonne per status:
 
 | Kolonne | Betyr |
 |---|---|
-| **Inbox** | nytt, ikke sortert |
-| **Triage** | blir vurdert |
-| **Ready** | klart til å starte |
-| **In progress** | pågår |
-| **Blocked** | står fast |
-| **Done** | ferdig |
-| **Won't do** | bestemt at det ikke skal gjøres |
+| **Innboks** | nytt, ikke sortert |
+| **Vurderes** | blir vurdert |
+| **Klar** | klart til å starte |
+| **Pågår** | noen jobber med det |
+| **Fast** | står fast |
+| **Ferdig** | ferdig |
+| **Droppet** | bestemt at det ikke skal gjøres |
+
+**Ferdig** og **Droppet** er smale og viser bare hvor mange oppgaver de har.
 
 - **Flytt et kort:** dra det til en annen kolonne. Er flyttingen ikke lov,
   sier kolonnen hvorfor.
-- **Lag et kort rett i en kolonne:** skriv tittelen i feltet **Ny work item**
-  øverst, og trykk **+ Kolonnenavn** nederst i kolonnen du vil ha det i.
+- **Lag et kort rett i en kolonne:** skriv tittelen i feltet **Tittel på ny
+  oppgave** over tavla, og trykk **+ Ny i …** nederst i kolonnen du vil ha
+  det i, for eksempel **+ Ny i Klar**.
 - **Se detaljer:** trykk på kortet. Detaljene åpnes i en skuff ved kortet.
   Trykk **Lukk** for å lukke den.
 
@@ -177,14 +202,17 @@ Trykk på en oppgave i en hvilken som helst liste. Detaljene viser:
 
 ## 8. La hjelperen gjøre ryddejobben
 
-**Kolonnen ✨ Hjelper**, til høyre på arbeidsfanene. Hjelperen foreslår, du
+**Kolonnen ✨ Hjelper**, til høyre på fanene Oppgaver og Ny. Hjelperen foreslår, du
 bestemmer.
 
 1. Velg et **sett** øverst. Settet bestemmer hva hjelperen kan gjøre. For å
    flytte oppgaver bruker du settet **Denne flaten**.
 2. Skriv hva du vil ha gjort, for eksempel:
-   - «flytt alt fra intake til triage»
-   - «flytt den valgte til done»
+   - «flytt alt fra innboks til vurderes»
+   - «flytt den valgte til ferdig»
+
+   Bruk gjerne navnene på kolonnene. Hjelperen forstår også de engelske
+   navnene (inbox, triage, done …).
 3. Trykk **Send**.
 4. Hjelperen viser et **forslag** med hver oppgave som endres og hvorfor.
    Ingenting er endret ennå.
@@ -215,7 +243,7 @@ du selv har lov til.
   **+ Nytt sett**. Det nye settet bygger på det valgte og får de samme
   handlingene.
 - **Rediger:** skriv instruksjoner med vanlige ord, for eksempel
-  *«Når jeg sier «postkassa», mener jeg fanen intake.»*
+  *«Når jeg sier «postkassa», mener jeg kolonnen Innboks.»*
   Trykk **Lagre som ny versjon**, eller **Forkast utkast**.
 - **Tillatte handlinger** står under teksten. De kan ikke utvides ved å skrive
   instruksjoner. Teksten styrer bare hvordan hjelperen forstår deg.
@@ -259,7 +287,7 @@ hånd og står da som «innført».
 
 ## 11. Dele et prosjekt med noen
 
-Gå til **Prosjekter → Delinger og invitasjoner**.
+Gå til **Prosjekter → Deling → Delinger og invitasjoner**.
 
 **Invitere:**
 
@@ -280,21 +308,22 @@ arbeidsbenk**.
 
 ## 12. Fra idé til levering
 
-**Fanen Arbeidsflyt** viser veien et arbeid går, med en knapp til riktig sted
-for hvert steg:
+**Fanen Prosjekter**, kortet **Fra idé til levering**. Det viser veien et
+arbeid går, med én knapp for hvert steg:
 
-1. **Fang idéer og oppgaver** – idé-arbeidsrommet og oppgavelista.
-2. **Planlegg og følg opp** – prosjektporteføljen med milepæler og releaser.
-3. **Koble kode og verifikasjon** – GitHub-synkronisering. Her knytter du
-   pull requests, kildeversjon og testresultater til oppgaven.
-4. **Drift og deploy** – **Åpne Admin-arbeidsbenken** tar deg til oversikten
-   der du ser om tjenesten er frisk og hvilken versjon som kjører. Den krever
-   en administratorrolle. Se
+1. **Fang idéer og oppgaver** – **Idé-arbeidsrommet**, der idéer modnes før de
+   blir oppgaver. Nye oppgaver lager du i fanen **Ny**.
+2. **Planlegg i porteføljen** – **Åpne porteføljen** med milepæler og releaser.
+3. **Koble kode og tester** – **GitHub-synk**. Her knytter du pull requests,
+   kildeversjon og testresultater til oppgaven.
+4. **Se hva som kjører** – **Admin-arbeidsbenken** tar deg til oversikten der
+   du ser om tjenesten er frisk og hvilken versjon som kjører. Den krever en
+   administratorrolle. Se
    [Brukermanual – Admin-arbeidsbenken](Admin_Arbeidsbenk.md).
 
 ## 13. Følge med på et spillverksted
 
-For mentorer. Under **Prosjekter → Spillverksted – siste økter** ser du de
+For mentorer. Under **Prosjekter → Spillverksted – siste økter** (til høyre) ser du de
 siste øktene i spillprosjektet du følger: nivå, antall forslag, og hvor mange
 som ble tatt i bruk, forkastet eller rullet tilbake. Det krever lesetilgang til
 spillprosjektet.
@@ -309,9 +338,10 @@ til en komponent, se [Brukermanual – Skeleton-redigering](Skeleton_Redigering.
 | Ord | Betyr |
 |---|---|
 | **Work item / oppgave** | én ting som skal gjøres: idé, feil, funksjon, dokumentasjon, beslutning eller mangel |
-| **Intake / Inbox / new** | tre navn på det samme: nytt og ikke sortert |
-| **Triage** | vurdere og sortere nye oppgaver |
-| **Implementation gap** | noe som er beskrevet, men ikke bygget |
+| **Innboks** | nytt og ikke sortert. I eldre tekster heter det intake, inbox eller new |
+| **Vurderes** | oppgaven blir vurdert og sortert. Engelsk: triage |
+| **Fast** | oppgaven står fast. Engelsk: blocked |
+| **Mangel** | noe som er beskrevet, men ikke bygget. Engelsk: implementation gap |
 | **Evidence** | bevis: lenke, test, logg eller skjermbilde |
 | **Formålstre** | hva noe skal oppnå, delt opp i mindre mål |
 | **Port (G1, G2 …)** | et punkt der eieren må si ja før arbeidet går videre |
@@ -327,13 +357,13 @@ til en komponent, se [Brukermanual – Skeleton-redigering](Skeleton_Redigering.
 | invitere uten å kjenne mottakerens ID | ikke mulig | få identity UUID fra mottakeren |
 | se hva som er deployet | ikke her | se Admin-arbeidsbenken og deploykvitteringene |
 | dele fri tekst opp i formål med modellen | valget **Dekomponer … med modellen** finnes under **Legg til underformål**, men er ikke koblet til ennå | skriv formålene selv, eller be agenten lage treet |
-| laste inn staging-testlista som oppgaver | knappen **Last inn funn som arbeidspunkter** finnes i **HAVEN Workbench**, ikke her | åpne HAVEN Workbench og trykk knappen der én gang |
+| se ferdige eller droppede oppgaver én og én | kolonnene Ferdig og Droppet viser bare antallet | søk etter oppgaven i Work Item Tracker eller HAVEN Workbench |
 
 ---
 
 **Kilde i koden** (for utviklere og dokumentasjonssøk): `CellScaffold/Sources/App/Cells/WorkItems/DeveloperWorkbenchConfiguration.swift`,
-`ConfigurationCatalogCell.workItemTrackerConfiguration()`, `Sources/App/Cells/WorkbenchHelper/`,
+`ConfigurationCatalogCell.developerWorkbenchTaskBoard()` / `developerWorkbenchNewTask()` / `developerWorkbenchOwnerCard()`, `Sources/App/Cells/WorkItems/WorkItemCell.swift` (`board.setFilter`), `Sources/App/Cells/WorkbenchHelper/`,
 `Sources/App/Cells/Purpose/PurposeReviewCell.swift`, `Sources/App/Cells/Purpose/PurposeKnowledgeCell.swift`, `Sources/App/Cells/WorkbenchAccess/`.
-Celler: `cell:///WorkItem`, `cell:///WorkbenchHelper`, `cell:///PurposeReview`, `cell:///PurposeKnowledge`, `cell:///WorkbenchAccessGrant`.
+Celler: `cell:///WorkItem`, `cell:///WorkbenchOwnerSetup`, `cell:///WorkbenchHelper`, `cell:///PurposeReview`, `cell:///PurposeKnowledge`, `cell:///WorkbenchAccessGrant`.
 Tekniske kontrakter: `CellScaffold/Documentation/Operations/Developer_Workbench_AI_Hjelper_2026-10-09.md` og
 `Developer_Workbench_Formaalstre_2026-10-09.md`.
