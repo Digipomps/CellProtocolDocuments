@@ -1,4 +1,7 @@
-# Renderingserklæring
+# RENDERINGSERKLÆRING
+
+- Dagens skeleton-format kan ikke rendre dette nettstedet i det hele tatt: digipomps.org er håndskrevet HTML og CSS (egen typografi, klebrig toppmeny, kort-rutenett, artikkel-layout), ikke CellConfiguration. Det finnes derfor ingen `skeleton/`-mappe, og bildene er ikke Porthole-forhåndsvisninger.
+- Bildene er i stedet Chromium-render (Playwright) av selve HTML-filene, altså det samme som en nettleser viser; ingenting i bildene er mockup.
 
 Bildene i denne mappen er skjermbilder tatt med Chromium (Playwright) av de statiske HTML-filene i `Website/`, servert lokalt med `python3 -m http.server 4173` i Cowork-VM-en 2026-10-22. De er ikke Porthole-forhåndsvisninger: nettstedet er håndskrevet HTML og CSS, ikke CellConfiguration/skeleton, så det finnes ingen `skeleton/`-mappe å vise til.
 
