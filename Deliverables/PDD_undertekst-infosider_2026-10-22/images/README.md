@@ -13,3 +13,4 @@ Bildene i denne mappen er skjermbilder tatt med Chromium (Playwright) av de stat
 - Opptaksvei ved G3: samme skript, nå sjekket inn som `../tools/shots.js`, mot produksjon etter utrulling, samme selektorer og viewporter:
   `NODE_PATH=$(npm root -g) node Deliverables/PDD_undertekst-infosider_2026-10-22/tools/shots.js https://digipomps.org <utmappe> prod`
   (krever at skyøkten har digipomps.org som tillatt domene; skriptet går via `HTTPS_PROXY` når den er satt). Resultatet legges her som `prod-*.png` og sammenlignes med `etter-*.png` i ACCEPT.md#parity.
+- `prod-*.png` tatt 2026-11-04 med kommandoen over mot https://digipomps.org (produksjon = `origin/main` ef53d0e). `side-om-side-*.png` setter `etter-*.png` (venstre) og `prod-*.png` (høyre) sammen for ACCEPT.md#parity.

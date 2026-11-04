@@ -96,7 +96,25 @@ Resultat: **grønn** for «bildene finnes»; **Kjetils godkjenning (G1-GUI) vent
 ## test.gui.parity {#parity}
 Formål: purpose://gui.parity-with-approved-image.
 
-Resultat: **blocked** — krever at Kjetil har rullet ut (RELEASE_NOTE_2026-10-22.md). Tas som skjermbilder av https://digipomps.org/ , /artikler/ og /artikler/mennesket-forst/ i samme viewporter og legges i ACCEPT.md#parity.
+Kjørt 2026-11-04 fra skyøkt mot https://digipomps.org:
+
+```
+$ NODE_PATH=$(npm root -g) node Deliverables/PDD_undertekst-infosider_2026-10-22/tools/shots.js https://digipomps.org Deliverables/PDD_undertekst-infosider_2026-10-22/images prod
+ok prod-forside-seksjon.png
+ok prod-forside-seksjon-mobil.png
+ok prod-artikkeloversikt-kort.png
+ok prod-artikkel.png
+```
+
+Pikseldiff etter → prod (kanalavvik > 40):
+```
+forside-seksjon (1280, 799) (1280, 800) differing px>40: 22773 2.23 %
+forside-seksjon-mobil (390, 1255) (390, 1255) differing px>40: 6278 1.28 %
+artikkeloversikt-kort (528, 308) (528, 308) differing px>40: 0 0.0 %
+artikkel (704, 1428) (704, 1428) differing px>40: 0 0.0 %
+```
+
+Resultat: **grønn for innhold**, artikkel og kort 0 px. Forsiden avviker i linjebryting (orddeling fra PR #37s CSS), ikke i tekst; se ACCEPT.md#parity. Kjetils ord venter.
 
 ## Ikke relevante
 - test.gui.load-time, test.skeleton.no-unreachable-elements, test.skeleton.purpose-actions-reachable: ikke relevante, begrunnet i FORMAALSSPEC §5.
