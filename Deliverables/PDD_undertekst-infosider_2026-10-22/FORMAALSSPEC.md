@@ -258,7 +258,7 @@ Kapabiliteter og avhengigheter oppgaven bygger på (hver med kilde og hva den ik
 | test.docs-updated | purpose://quality.docs-in-same-change | Artikkelens «Sist faglig gjennomgått» er 22. oktober 2026; utgivelsesnotat finnes. | ACCEPT.md#docs | venter |
 | test.status-current | purpose://quality.work-is-visible | Sammenlign STATUS.md med filene i mappen. | ACCEPT.md#status | venter |
 | test.gui.reference-image-exists | purpose://gui.expectation-agreed-before-build | Fire etter-bilder i images/, hvert med sitt før-bilde; Kjetil godkjenner. | images/ | venter |
-| test.gui.parity | purpose://gui.parity-with-approved-image | Etter utrulling: skjermbilde av produksjonssidene i samme viewport (1280 og 390), side om side med etter-bildene. | ACCEPT.md#parity | grønn for innhold, orddelingsavvik venter på Kjetil |
+| test.gui.parity | purpose://gui.parity-with-approved-image | Etter utrulling: skjermbilde av produksjonssidene i samme viewport (1280 og 390), side om side med etter-bildene. | ACCEPT.md#parity | grønn; orddelingsavvik godtatt med G3 2026-11-04 |
 | test.gui.load-time | purpose://gui.surface-loads-in-time | Ikke relevant: statisk HTML uten ny ressurs; ingen Porthole-flate. | — | ikke relevant |
 | test.skeleton.no-unreachable-elements | purpose://gui.ways-in-are-reachable | Ikke relevant: nettstedet er håndskrevet HTML, ikke skeleton. | — | ikke relevant |
 | test.skeleton.purpose-actions-reachable | purpose://gui.ways-in-are-reachable | Ikke relevant: ingen handlinger endres; lenkene i seksjonen er uendret. | — | ikke relevant |

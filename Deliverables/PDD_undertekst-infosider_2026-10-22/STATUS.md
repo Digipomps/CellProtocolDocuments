@@ -7,7 +7,7 @@
 - G1: godkjent 2026-10-30        (formålsspesifikasjon godkjent av Kjetil)
 - G1-GUI: godkjent 2026-10-30        (rendret bilde godkjent — bare for GUI-oppgaver)
 - G2: venter        (plan godkjent; arbeidspakker 1:1 mot bladformål)
-- G3: venter        (akseptanse: forventning mot faktisk, alle avledede tester grønne)
+- G3: godkjent 2026-11-04        (akseptanse: forventning mot faktisk, alle avledede tester grønne)
 
 Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py validate <mappe>` nekter porter uten artefakter.
 
@@ -21,3 +21,4 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
 - 2026-10-27: Kjetil slo sammen PR #32 til main (919c391) uten gateord i tråden; sidene lå dermed klare for utrulling. digipomps.org er sperret av nettverkspolicyen fra skyøkten og Cowork-VM-en, så produksjon kunne ikke kontrolleres herfra.
 - 2026-10-30: Kjetil: «ja til G1 og G1-GUI». G1 og G1-GUI satt til godkjent. G2 ble aldri bedt om: implementeringen var liten og gikk rett i PR #32, som Kjetil slo sammen. G3 venter på at produksjonssidene kan kontrolleres (nettverkstilgang eller skjermbilder fra Kjetil).
 - 2026-11-04: G3-kontroll mot produksjon fra ny skyøkt (digipomps.org tillatt). Produksjon er byte-lik `origin/main` ef53d0e for de tre sidene og site.css. Underteksten står på alle tre. prod-*.png og side-om-side-*.png i images/; artikkel og kort 0 px avvik, forsiden avviker bare i orddeling fra PR #37s CSS. ACCEPT.md skrevet. G3 venter på Kjetils ord.
+- 2026-11-04: Kjetil: «ja til G3». G3 satt til godkjent. Orddelingsavviket på forsiden (CSS fra PR #37) ble lagt frem sammen med G3-spørsmålet og regnes som godtatt med det.

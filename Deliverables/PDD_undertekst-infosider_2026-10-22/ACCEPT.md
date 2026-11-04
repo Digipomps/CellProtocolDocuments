@@ -1,4 +1,4 @@
-# ACCEPT — undertekst infosider (G3 venter på Kjetil)
+# ACCEPT — undertekst infosider (G3 godkjent 2026-11-04)
 
 FORMAALSSPEC §1 og §5 rad for rad: forventet → faktisk, med evidens. G3 er Kjetils ord; denne fila er grunnlaget.
 
@@ -49,3 +49,5 @@ STATUS.md er oppdatert med denne runden; mappen har FORMAALSSPEC, STATUS, TESTRE
 ## Dom
 
 Alle formål oppfylt i produksjon. Ett kjent avvik (orddeling på forsiden fra PR #37s CSS) venter på Kjetils ord. G3 står som `venter` til Kjetil sier ja.
+
+**2026-11-04:** Kjetil: «ja til G3». Orddelingsavviket ble lagt frem i samme spørsmål og regnes som godtatt.
