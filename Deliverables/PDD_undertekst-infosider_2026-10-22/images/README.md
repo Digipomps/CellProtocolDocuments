@@ -10,4 +10,6 @@ Bildene i denne mappen er skjermbilder tatt med Chromium (Playwright) av de stat
 - Viewport 1280 × 900 for desktop, 390 × 900 for `*-mobil.png`; elementskjermbilde av `#mennesket-og-fellesskapet` (forsiden), `#mennesket-forst` (artikkeloversikten) og `article#mennesket-forst` (artikkelen).
 - `*-mobil.png` er tatt som helsideskjermbilde klippet til seksjonens rammeboks (sidekoordinater), ikke som elementskjermbilde: ved 390 px la den klebrige toppmenyen og hopp-til-innhold-lenken seg over toppen av seksjonen i et elementskjermbilde (sett 2026-10-22, første runde). Toppmenyen er dermed ikke med i mobilbildene.
 - Skrift og linjebryting kan avvike litt fra Kjetils nettleser; innholdet og plasseringen er det som godkjennes.
-- Opptaksvei ved G3: samme skript (`shots.js`, i Cowork-økten) mot `https://digipomps.org` etter utrulling, samme selektorer og viewporter.
+- Opptaksvei ved G3: samme skript, nå sjekket inn som `../tools/shots.js`, mot produksjon etter utrulling, samme selektorer og viewporter:
+  `NODE_PATH=$(npm root -g) node Deliverables/PDD_undertekst-infosider_2026-10-22/tools/shots.js https://digipomps.org <utmappe> prod`
+  (krever at skyøkten har digipomps.org som tillatt domene; skriptet går via `HTTPS_PROXY` når den er satt). Resultatet legges her som `prod-*.png` og sammenlignes med `etter-*.png` i ACCEPT.md#parity.
