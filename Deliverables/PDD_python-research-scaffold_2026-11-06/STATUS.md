@@ -47,3 +47,11 @@ WP1 kjørte prøvemetoden med 123 målinger og returnerte 612745. Jobben passert
 - [Kjøreeksempel og faktisk skjermbilde](https://github.com/Digipomps/PyResearchScaffold/tree/09030ab).
 - [Observerte Flow- og Agreement-svar](https://github.com/Digipomps/PyResearchScaffold/blob/09030ab/docs/evidence/demo-20261110/swift.json).
 - [PyCellProtocol med avtalehåndtering](https://github.com/Digipomps/PyCellProtocol/commit/a34c65975124ff56faa3e0d5d51f40c2af296758) og [Swift med avsluttende feed-feil](https://github.com/Digipomps/CellProtocol/commit/e3ea7a4ecab326bb632c0b572ac2efa4a01f1156).
+
+## WP2 datasettinntak 10. november 2026
+
+Brukeren bestilte «Fortsett med WP2. Implementer datasettinntak for det syntetiske kalibreringsdatasettet, og vis at en klient kan registrere det og lese det tilbake via CellBridge.»
+
+PyResearchScaffold 0.2.0 ved d83c9f1 implementerer en registrert DatasetCell med streng CSV- og metadatavalidering, atomisk SQLite-lagring og gjenlesing gjennom ResearchRuntime over CellBridge. Den separate klientprosessen registrerte 11 rader og leste begge filene tilbake byte for byte. Alle 91 tester besto fra installert wheel, inkludert 33 WP2-tester. Inputhashen var 7fe9e51e42da61cc7e951ad9250da6fe96901a7862ce787f3cf58e784c4253f0. De tidligere Swift Flow-/Agreement-kontrollene besto. WP3 analyse er neste arbeidspakke.
+
+[Kontrakt, kjøreoppskrift og testresultater](https://github.com/Digipomps/PyResearchScaffold/blob/d83c9f1/docs/WP2_DATASETS.md). Dette registrerer implementering og målinger. G3-avklaring står hos brukeren.
