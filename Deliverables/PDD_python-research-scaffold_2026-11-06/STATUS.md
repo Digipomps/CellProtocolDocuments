@@ -1,0 +1,49 @@
+# STATUS — Python-forskningsscaffold
+
+- surfaces: cell, python, scaffold, terminal
+- tags: python, reproducibility, research
+- Oppdrag: implementere med start i WP1; inkludert CellBridge-svar til andre scaffolds.
+- Planstatus: planforslag levert etter kildekontroll og uavhengig gjennomgang; tre funn rettet og kontrollert på nytt.
+- Produktstatus: WP1 lokal runtime og Python-scaffold CellBridge implementert/verifisert; native Swift get/set, autorisert Flow og avmelding er verifisert. Ubetinget Agreement-opptak og signert kvittering er verifisert 8. november. WP2–WP6 gjenstår.
+
+## Porter
+- G1: godkjent 2026-11-07
+- G1-GUI: venter — figurens visuelle referanse lages og vurderes ved implementeringsforberedelse; ingen app-GUI inngår i v1.
+- G2: godkjent 2026-11-07
+- G3: venter
+
+G1 og G2 følger brukerens eksplisitte plangodkjenning og implementeringsbestilling nedenfor. G3 er ikke godkjent av Codex.
+
+## Planbytter
+- 2026-11-06: samlet formål og plan levert i samme planoppdrag; ingen implementeringsstart.
+
+## Logg
+- 2026-11-06: kildeinspeksjon av PyCellProtocol på registrert revisjon, uten produktendringer eller runtime-kjøring.
+- WP1 er nå implementert; neste arbeidspakke er WP2.
+- 2026-11-06: planens regnefasit kontrollert; lokal portkonsistens uten feil. Global PDD-validator har fem eksisterende registerreferansefeil; se PLAN_REVIEW.md.
+
+## Godkjenning og presisering 2026-11-07
+
+> Ja, planen er godkjent. Begynn å implementere forskningsscaffoldet, og start med WP1: verifiser PyCellProtocol-grunnlaget og bygg den lokale runtimen. Den skal svare på CellBridge fra andre scaffolds.
+
+Dette utvider WP1 med inbound CellBridge. Lokal-only/no-listener-avgrensningen i opprinnelig plan er erstattet av WP1_ADDENDUM.md. G1-GUI og G3 er ikke godkjent; WP1 endrer ingen figurflate.
+
+- 2026-11-07: 46 upstream-tester, 54 WP1-tester og ren wheel-/separat-scaffold-test bestått. Ingen permanente tjenester startet. Native Swift-vault/resolver med protected get/set og typed denial bestått; se TESTRESULT_WP1.md. G3 står fortsatt åpen.
+
+## Oppfølging 7. november 2026
+
+Autorisert Swift Flow, siste avmelding og resultatlesing besto etter en avgrenset stopFeed-retting. 56 scaffold-tester besto. Ved uautorisert feed observerte Swift ingen Combine-avslutning etter serverens avslag. Full Agreement-paritet er motbevist. Se [paritetsrapporten](../../../PyResearchScaffold/docs/SWIFT_PARITY.md).
+
+## Agreement 8. november 2026
+
+PyCellProtocol 0.1.1 og forskningsscaffoldet besto fem målte Agreement-sammenligninger med native Swift. Se [rapporten](../../../PyResearchScaffold/docs/AGREEMENT_2026-11-08.md).
+
+- 2026-11-08: Swift ved e3ea7a4 leverte ACCESS_DENIED som avsluttende feil på to avviste feeds. En etterfølgende GET på samme WebSocket besto etter hvert avslag. [Før- og ettermåling](../../../PyResearchScaffold/docs/COMBINE_FLOW_2026-11-08.md).
+
+## Demonstrasjon 10. november 2026
+
+WP1 kjørte prøvemetoden med 123 målinger og returnerte 612745. Jobben passerte queued, running og completed. Nettleseren viste de to offentlige HTTP-operasjonene. Swift-proben mottok terminalt ACCESS_DENIED og leste tjenestestatus etterpå på samme WebSocket. De fem Agreement-sammenligningene, 52 protokolltester og 58 scaffold-tester besto. WP2 med datasettinntak er neste planlagte arbeidspakke.
+
+- [Kjøreeksempel og faktisk skjermbilde](https://github.com/Digipomps/PyResearchScaffold/tree/09030ab).
+- [Observerte Flow- og Agreement-svar](https://github.com/Digipomps/PyResearchScaffold/blob/09030ab/docs/evidence/demo-20261110/swift.json).
+- [PyCellProtocol med avtalehåndtering](https://github.com/Digipomps/PyCellProtocol/commit/a34c65975124ff56faa3e0d5d51f40c2af296758) og [Swift med avsluttende feed-feil](https://github.com/Digipomps/CellProtocol/commit/e3ea7a4ecab326bb632c0b572ac2efa4a01f1156).
