@@ -4,7 +4,7 @@
 - tags: python, reproducibility, research
 - Oppdrag: implementere med start i WP1; inkludert CellBridge-svar til andre scaffolds.
 - Planstatus: planforslag levert etter kildekontroll og uavhengig gjennomgang; tre funn rettet og kontrollert på nytt.
-- Produktstatus: WP1 lokal runtime og Python-scaffold CellBridge implementert/verifisert; native Swift get/set, autorisert Flow og avmelding er verifisert. Ubetinget Agreement-opptak og signert kvittering er verifisert 8. november. WP2–WP6 gjenstår.
+- Produktstatus: WP1 lokal runtime og Python-scaffold CellBridge implementert/verifisert; native Swift get/set, autorisert Flow og avmelding er verifisert. Ubetinget Agreement-opptak og signert kvittering er verifisert 8. november. WP2 datasettinntak og WP3 lineær regresjon er implementert og verifisert; WP4–WP6 gjenstår.
 
 ## Porter
 - G1: godkjent 2026-11-07
@@ -55,3 +55,14 @@ Brukeren bestilte «Fortsett med WP2. Implementer datasettinntak for det synteti
 PyResearchScaffold 0.2.0 ved d83c9f1 implementerer en registrert DatasetCell med streng CSV- og metadatavalidering, atomisk SQLite-lagring og gjenlesing gjennom ResearchRuntime over CellBridge. Den separate klientprosessen registrerte 11 rader og leste begge filene tilbake byte for byte. Alle 91 tester besto fra installert wheel, inkludert 33 WP2-tester. Inputhashen var 7fe9e51e42da61cc7e951ad9250da6fe96901a7862ce787f3cf58e784c4253f0. De tidligere Swift Flow-/Agreement-kontrollene besto. WP3 analyse er neste arbeidspakke.
 
 [Kontrakt, kjøreoppskrift og testresultater](https://github.com/Digipomps/PyResearchScaffold/blob/d83c9f1/docs/WP2_DATASETS.md). Dette registrerer implementering og målinger. G3-avklaring står hos brukeren.
+
+
+## WP3 lineær regresjon 11. november 2026
+
+Brukeren bestilte «Fortsett med WP3. Implementer lineær regresjonsanalyse av det registrerte kalibreringsdatasettet, verifiser resultatene mot den uavhengige fasiten, og vis at en klient kan starte analysen og lese resultatet via CellBridge.» Brukeren meldte også at den lokale nettsiden ikke var tilgjengelig.
+
+PyResearchScaffold 0.3.0 ved d0afa67 implementerer AnalysisCell og linear-regression/v1 over registrerte, identitetsavgrensede datasett. En separat CellBridge-klient registrerte 11 rader, startet analysen, mottok queued/running/completed og leste resultat og alle 11 residualer. Gjentatt requestId ga samme jobb-ID. Stigning 2 mV/V, konstantledd 1 mV, SSE 0,14 mV² og R² 22000/22007 ble kontrollert mot eksakt Fraction-regning; standardfeil og 95 % intervaller ble kontrollert med en separat Student-t-beregning. Alle 107 tester besto fra installert wheel, inkludert 16 WP3-tester. Swift Flow og de fem eksisterende Agreement-kontrollene besto.
+
+Den lokale API-visningen på port 8099 drives nå av launchd-brukertjenesten org.haven.pyresearch.local, konfigurert med RunAtLoad og KeepAlive. Running og HTTP ready/version 0.3.0/WP3 ble observert etter at oppstartskommandoen hadde avsluttet. Innlogging og maskinstart er ikke praktisk omstartstestet.
+
+[Kontrakt, tall, testbevis og kjøreoppskrift](https://github.com/Digipomps/PyResearchScaffold/blob/d0afa67/docs/WP3_ANALYSIS.md). Uavhengig dokumentgjennomgang kontrollerte påstandene mot koden og bevisfilene; en presisering om residualpaginering ble rettet. Neste arbeidspakke er WP4 figur. G3-avklaring står hos brukeren.
