@@ -4,7 +4,7 @@
 - tags: python, reproducibility, research
 - Oppdrag: implementere med start i WP1; inkludert CellBridge-svar til andre scaffolds.
 - Planstatus: planforslag levert etter kildekontroll og uavhengig gjennomgang; tre funn rettet og kontrollert på nytt.
-- Produktstatus: WP1 lokal runtime og Python-scaffold CellBridge implementert/verifisert; native Swift get/set, autorisert Flow og avmelding er verifisert. Ubetinget Agreement-opptak og signert kvittering er verifisert 8. november. WP2 datasettinntak og WP3 lineær regresjon er implementert og verifisert; WP4–WP6 gjenstår.
+- Produktstatus: WP1 lokal runtime og Python-scaffold CellBridge implementert/verifisert; native Swift get/set, autorisert Flow og avmelding er verifisert. Ubetinget Agreement-opptak og signert kvittering er verifisert 8. november. WP2 datasettinntak, WP3 lineær regresjon og WP4 figurproduksjon er implementert og verifisert; WP5–WP6 gjenstår.
 
 ## Porter
 - G1: godkjent 2026-11-07
@@ -66,3 +66,18 @@ PyResearchScaffold 0.3.0 ved d0afa67 implementerer AnalysisCell og linear-regres
 Den lokale API-visningen på port 8099 drives nå av launchd-brukertjenesten org.haven.pyresearch.local, konfigurert med RunAtLoad og KeepAlive. Running og HTTP ready/version 0.3.0/WP3 ble observert etter at oppstartskommandoen hadde avsluttet. Innlogging og maskinstart er ikke praktisk omstartstestet.
 
 [Kontrakt, tall, testbevis og kjøreoppskrift](https://github.com/Digipomps/PyResearchScaffold/blob/d0afa67/docs/WP3_ANALYSIS.md). Uavhengig dokumentgjennomgang kontrollerte påstandene mot koden og bevisfilene; en presisering om residualpaginering ble rettet. Neste arbeidspakke er WP4 figur. G3-avklaring står hos brukeren.
+
+
+## WP4 figurproduksjon 12. november 2026
+
+Brukeren bestilte «Fortsett med WP4. Implementer figurproduksjon fra regresjonsresultatet, vis kalibreringsdata med regresjonslinje og residualer, og verifiser at en klient kan hente figuren via CellBridge. Vis meg figuren.» Dette er implementeringsautorisasjon for WP4, ikke en registrert godkjenning av et bilde eller G3.
+
+PyResearchScaffold 0.4.0 ved a7871d8 implementerer FigureCell og calibration-figure/v1 fra et frosset fullført analyseresultat. PNG (1600 × 1280) og SVG viser 11 kalibreringspunkter, linjen y=1+2x og residualer med nullinje, enheter og kjøringsreferanser. En separat autentisert klient startet begge jobbene, fulgte Flow og hentet PNG/SVG i avgrensede CellBridge-svar med samlet størrelses-/SHA-256-kontroll. Filbytes og completed-hendelse lagres atomisk i den eksisterende SQLite-journalen.
+
+Alle 128 tester besto fra installert wheel, inkludert 21 WP4-tilfeller. Kontrollen omfatter uavhengig tallfasit for plotteobjekter, PNG/SVG-avkoding, layout, tilgangsgrenser, restart, timeout, avbrytelse, frosset analysesnapshot, korrupt figur og en SVG med 10 000 datapunkter hentet gjennom flere bridge-svar. PNG og SVG ble visuelt inspisert. G1-GUI/G3 er fortsatt ikke registrert godkjent; preview og faktisk klientfigur er bevart.
+
+Den vedvarende lokale tjenesten ble oppdatert til 0.4.0/WP4 og svarte ready etter omstart. Oppstartsskriptet bruker nå kickstart når eksisterende launchd-konfigurasjon er uendret, etter en observert bootstrap-feil rett etter bootout. Presis intern årsak er ikke målt.
+
+[Figur, kontrakt, klientkvittering og testbevis](../../../PyResearchScaffold/docs/WP4_FIGURES.md). Neste arbeidspakke er WP5 dokumentert kjøring, samlet rapport/artefaktpakke og verify. Den komplette WP5-pakken er ikke implementert av WP4.
+
+WP4 er pushet på codex/research-scaffold-wp4. Uavhengig dokumentkontroll fant én upresishet om antall viste R²-desimaler; dokumentasjonen skiller nå mellom lagret analyseverdi og avrundet figurtekst.
