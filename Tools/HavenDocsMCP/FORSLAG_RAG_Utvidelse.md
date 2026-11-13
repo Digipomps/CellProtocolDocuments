@@ -1,6 +1,7 @@
 # Forslag: utvide dokumentasjons-RAG-en (ikke vedtatt)
 
 Status: **forslag fra 2026-10-30, utarbeidet via Vegar til Kjetils team.** Ingenting her er vedtatt eller i bruk.
+Oppdatert 2026-11-13: Kjetil har svart (via Losen, 2026-11-07) at han vil utvide RAG-en og ber om prototypen som PR; de fem spørsmålene i §7 tas i gjennomgangen av PR-en. Tallene i §1 og §5 er kontrollert på nytt 2026-11-06.
 Dette dokumentet ligger bevisst utenfor `book_catalog.json`, så det ikke blir indeksert som kanonisk.
 Prototypen i denne grenen er kjørt mot lokale kloner og en testfixture. Den er ikke vurdert av eierne av repoene.
 
@@ -61,7 +62,7 @@ Eksempel fra kjøring: `implementation_status=decided` gir bare `V2-BESLUTTET-FO
 - Frontmatter `index: false`, eller `haven:index=false` i toppen av filen.
 - `Documentation/ClaudeSkills/desktop-src/**` (kopier av skills), `Documentation/Operations/correspondence-*/**`.
 
-Stibasert utelukking er grovt. `--lint-status` lister 5 indekserte filer hvis sti ligner korrespondanse: skillet `haven-assistant-correspondence`, `cp-docs/Docs/CorrespondenceAttachments.md`, og tre i `CellScaffold/Documentation/Operations/` (TLS/Nginx-status, `Korrespondanse_Invitasjoner_Runbook.md`, `Vegar_Victoria_Correspondence_Handoff_2026-07-31.md`). Den siste ser ut som en overlevering om en korrespondanse, ikke bare en funksjonsbeskrivelse, og bør sannsynligvis ut. Filnavn alene fanger ikke melding som ligger i filer uten slike navn; det er ikke undersøkt. **Eierne må avgjøre** hva som skal ut. På sikt er en tillatelsesliste per katalog tryggere enn en sperreliste.
+Stibasert utelukking er grovt. `--lint-status` lister 6 indekserte filer hvis sti ligner korrespondanse (2026-11-06): skillet `haven-assistant-correspondence`, `cp-docs/Docs/CorrespondenceAttachments.md`, `CellScaffold/Documentation/Correspondence/RelationshipHosting.md`, og tre i `CellScaffold/Documentation/Operations/` (TLS/Nginx-status, `Korrespondanse_Invitasjoner_Runbook.md`, `Vegar_Victoria_Correspondence_Handoff_2026-07-31.md`). Den siste ser ut som en overlevering om en korrespondanse, ikke bare en funksjonsbeskrivelse, og bør sannsynligvis ut. Filnavn alene fanger ikke melding som ligger i filer uten slike navn; det er ikke undersøkt. **Eierne må avgjøre** hva som skal ut. På sikt er en tillatelsesliste per katalog tryggere enn en sperreliste.
 
 ## 4. (c) Ferskhet i selve svaret
 
@@ -81,9 +82,9 @@ Prototypen kjører aldri `fetch`, `pull` eller noe annet som endrer klonen.
 
 - `EntityData.v2.schema.json` ligger i `cp-docs` og er første treff på filnavnet, merket `[decided]` med commit `a40ceeb` (2026-09-25). Før måtte det letes etter manuelt.
 - Book 37 viser `[mixed]` på kapittelnivå og `[decided]` på §7. Det er de to eneste Book-etikettene prototypen setter, begge hentet fra kapitlets egen tekst.
-- `lint`: 605 dokumenter `unknown`, 3 `decided`, 1 `mixed`, 1 `implemented`. 121 `unknown`-seksjoner sier «ikke implementert» i teksten. Det er størrelsen på etikettjobben.
+- `lint` (2026-11-06, 644 dokumenter): 639 `unknown`, 3 `decided`, 1 `mixed`, 1 `implemented`. 136 `unknown`-seksjoner sier «ikke implementert» i teksten. Det er størrelsen på etikettjobben. (2026-10-30 var tallene 610, 605 og 121; CellScaffold hadde da færre dokumenter lokalt.)
 - Ferskhet: `CellScaffold` står på `skill/correspondence-ledger-reference`, 293 commits bak `origin/main`. `CellProtocol` stod på `arendalsuka-navigationbar-icon-support`, `origin/main`-refen var fra 2026-10-26 og fjernrepoet hadde commits klonen ikke hadde (`--check-remote` fanget det).
-- `bcd45de` (`SkeletonElement.NavigationBar`-ikoner) ligger **bare** på feature-grenen `arendalsuka-navigationbar-icon-support`, ikke på `origin/main`. Et svar fra grenen vil derfor sitere kode som ikke er på main. Ferskhetslinjen viser grenen; den viser ennå ikke «commiten er ikke på main». Det er en åpenbar neste utvidelse.
+- `bcd45de` (`SkeletonElement.NavigationBar`-ikoner) ligger **bare** på feature-grenen `arendalsuka-navigationbar-icon-support`, ikke på `origin/main` (kontrollert med `git cherry`). `main` har fått ikon-støtte på annen måte (#42, `05926bc`), så funksjonen finnes der, men ikke som den commiten. Poenget her er at et svar hentet fra en feature-gren kan sitere kode som ikke er på main. Ferskhetslinjen viser grenen; den viser ennå ikke «commiten er ikke på main». Det er en åpenbar neste utvidelse.
 
 ## 6. Kjente begrensninger
 
@@ -91,7 +92,7 @@ Prototypen kjører aldri `fetch`, `pull` eller noe annet som endrer klonen.
 - JSON-skjema er én seksjon. Treff er riktige, men snippeten er grov.
 - `implemented` er ikke automatisk verifisert mot koden; prototypen har ingen kode-til-dokument-sjekk.
 - Regex-linten gir både falske positive og falske negative (f.eks. `EntityData.review.schema.json`, merket `implemented`, har en beskrivelse som nevner «ikke implementert»; bør sjekkes av eier).
-- Ytelse: 610 dokumenter parses én gang per prosess og cacher på filens mtime. Første søk tar rundt et sekund.
+- Ytelse: 644 dokumenter parses én gang per prosess og cacher på filens mtime. Første søk tar rundt et sekund.
 - Ikke dekket: CellScaffolds egne skills som *kilde til sannhet* (de indekseres bare som tekst), `Documentation/` i andre repoer (Binding, DiMyDocuments), og CellProtocolDocuments sin egen `Website/` og `Prompts/`.
 
 ## 7. Spørsmål til eierne
