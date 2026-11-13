@@ -97,6 +97,20 @@ They are not model-adaptive RAG prompts. Use `RAGPromptTransformerCell` and
 `Tools/RAGPromptTransformer` when retrieved RAG chunks must be packaged for a
 specific target model.
 
+## Prototype: extra sources, implementation status, freshness (proposal)
+
+Not agreed and off by default. See `FORSLAG_RAG_Utvidelse.md`.
+
+```bash
+python3 Tools/HavenDocsMCP/haven_docs_mcp.py --with-sources --search "EntityData.v2.schema.json"
+python3 Tools/HavenDocsMCP/haven_docs_mcp.py --source-report [--check-remote]
+python3 Tools/HavenDocsMCP/haven_docs_mcp.py --lint-status
+```
+
+Sources come from `sources.json`; sibling clones are found automatically, or set
+`HAVEN_CELLPROTOCOL_ROOT` / `HAVEN_CELLSCAFFOLD_ROOT`. The server only reads; it never runs
+`git fetch`/`pull`.
+
 ## Current Limits
 
 - Search is lexical and local, not vector RAG.

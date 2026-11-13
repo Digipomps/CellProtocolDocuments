@@ -1,0 +1,65 @@
+{
+  "version": 0,
+  "status": "proposal",
+  "note": "PROTOTYPE. Forslag til ekstra kildetyper. Ingenting her er vedtatt; eierne av repoene må godkjenne kilder, ekskluderinger og statusoverstyringer. Alle repoer leses bare.",
+  "sources": [
+    {
+      "id": "cp-docs",
+      "repo": "CellProtocol",
+      "root_env": "HAVEN_CELLPROTOCOL_ROOT",
+      "group": "cellprotocol-docs",
+      "owner": "Digipomps/CellProtocol",
+      "include": ["Docs/**/*.md", "Docs/**/*.schema.json"],
+      "exclude": [],
+      "base_ref": "origin/main",
+      "expected_branch": "main"
+    },
+    {
+      "id": "cellscaffold",
+      "repo": "CellScaffold",
+      "root_env": "HAVEN_CELLSCAFFOLD_ROOT",
+      "group": "cellscaffold-docs",
+      "owner": "Digipomps/CellScaffold",
+      "include": ["AGENTS.md", "Documentation/**/*.md", ".claude/skills/*/SKILL.md"],
+      "exclude": [
+        "Documentation/ClaudeSkills/desktop-src/**",
+        "Documentation/Operations/correspondence-*/**"
+      ],
+      "base_ref": "origin/main",
+      "expected_branch": "main"
+    }
+  ],
+  "exclude_global": [
+    "**/.git/**",
+    "**/.build/**",
+    "**/node_modules/**",
+    "**/.claude/worktrees/**",
+    "**/haven-correspondence/**",
+    "**/correspondence-ledger*",
+    "**/correspondence-inbox/**",
+    "**/*.eml"
+  ],
+  "status_overrides": [
+    {
+      "source": "cp-docs",
+      "paths": [
+        "Docs/EntityData-Review-2026-09-11/V2-BESLUTTET-FORM.md",
+        "Docs/EntityData-Review-2026-09-11/EntityData.v2.schema.json",
+        "Docs/EntityData-Review-2026-09-11/EntityData.v2.example.json",
+        "Docs/EntityData-Review-2026-09-11/EntityRepresentation.v2.schema.json"
+      ],
+      "implementation_status": "decided",
+      "status_basis": "doc-self-declared",
+      "evidence": "V2-BESLUTTET-FORM.md linje 7: «ingen Swift-implementasjon eller migrering er utført». Book/37 §7: «Ingen av dem er implementert i kode.»",
+      "set_by": "prototype-forslag (Claude, 2026-10-30); må bekreftes av eier"
+    },
+    {
+      "source": "cp-docs",
+      "paths": ["Docs/EntityData-Review-2026-09-11/EntityData.review.schema.json"],
+      "implementation_status": "implemented",
+      "status_basis": "doc-self-declared",
+      "evidence": "V2-BESLUTTET-FORM.md: «Urørt runtime-grunnlag; beskriver den undersøkte lagringsformen i koden.» Ikke kontrollert mot koden av prototypen.",
+      "set_by": "prototype-forslag (Claude, 2026-10-30); må bekreftes av eier"
+    }
+  ]
+}
