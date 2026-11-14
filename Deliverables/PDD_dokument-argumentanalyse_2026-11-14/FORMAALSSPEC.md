@@ -74,16 +74,19 @@ Avhengigheter (hver må måles før den egentlige testen):
 | ChatCell Agreement-vilkår | `CellBase/Cells/Chat/ChatCell.swift:1918` | | målt 28.10 i interop-matrisen (27/27) |
 | Modellspor for studenter | — | finnes ikke i dag | målt 14.11: **ingen** (lokal modell nede) |
 | AIGateway parallell orkestrering | `AIGatewayCell.swift:1678` | ikke kjørt i denne oppgaven | ikke målt |
-| Mermaid-eksport | `MermaidRendererCell.swift` | | ikke målt |
+| Mermaid-eksport | `MermaidRendererCell.swift` | På Linux trenger den `mmdc` (`MermaidNativeRenderer.swift`, `#if os(Linux)` detectCLI); om staging-imaget har den er ikke målt | ikke målt |
+| Grunnanalysens graf (TextReliability) | `results/eksempeltekst.analysis.json` | | **målt 14.11**: for eksempelteksten (7 setninger, tydelig konklusjon og motargument) ga `argument_graph` 1 node og 0 kanter; `argument_map` ga 1 konklusjon og 3 antatte støttekanter. Motargumentet P5 ble «faktapåstand», konklusjonen P7 «årsak» (ikke normativ). Grunnlinjen alene gir altså ikke en brukbar argumentgraf. |
+| Nettverksgraf som argumentkart | `skeleton-runtime.js:5502`, `SkeletonView.swift:2842` | | **målt 14.11 (web)**: bare valgt node har etikett, kanter uten tekst; se `images/analyserom-fylt-graf-laptop-v1.png` |
 
 ## 3. Forventningskontrakt — «Det du kommer til å se»
 
 | Leveranse | Type | Hvor | Referanse | Godkjent |
 |---|---|---|---|---|
-| Analyserom, tom tilstand (laptop + iPhone) | bilde | `images/` | `images/analyserom-tom-v1.png` | nei |
-| Analyserom med tekst, påstander, kilder og graf | bilde | `images/` | `images/analyserom-fylt-v1.png` | nei |
-| Analyserom med modellforslag til vurdering og chat | bilde | `images/` | `images/analyserom-modellforslag-v1.png` | nei |
-| Analyserom når modellen er nede (grunnlinje virker) | bilde | `images/` | `images/analyserom-uten-modell-v1.png` | nei |
+| Analyserom, tom tilstand | bilde | `images/` | `images/analyserom-tom-{laptop,iphone}-v1.png` | nei |
+| Påstander, kilder, markeringer og chat | bilde | `images/` | `images/analyserom-fylt-{laptop,iphone}-v1.png` | nei |
+| Argumentgraf | bilde | `images/` | `images/argumentkart-mockup-{laptop,iphone}-v1.png` (anbefalt), `images/analyserom-fylt-graf-*-v1.png` (dagens element) | nei |
+| Modellforslag til vurdering | bilde | `images/` | `images/analyserom-modellforslag-{laptop,iphone}-v1.png` | nei |
+| Modellen nede, grunnlinjen virker | bilde | `images/` | `images/analyserom-uten-modell-{laptop,iphone}-v1.png` | nei |
 | Celle i CellScaffold med tester, PR grønn i CI | kjørende kode | GitHub PR | — | nei |
 | Swift-port av TextReliability med paritetstest mot Python | testutdata | `TESTRESULT.md#paritet` | — | nei |
 | To studentkontoer bruker samme rom på staging (web + Binding) | kjørende flate + skjermbilder | `TESTRESULT.md#rot` | — | nei |
@@ -364,9 +367,12 @@ Avhengigheter (hver må måles før den egentlige testen):
 2. **PDF og Word i første runde?** Jeg anbefaler tekst og Markdown først. PDF-tekstuttrekk i Swift på Linux krever et nytt bibliotek og er et eget formål.
 3. **Modell:** skal modellhjelpen ta det sporet modelltilgangs-tråden velger (anbefalt: lokal modell nå, kvote senere), og ellers stå som «utilgjengelig»? Det er slik treet er bygget.
 
+4. **Hvordan skal argumentgrafen tegnes?** Dagens nettverkselement er laget for å utforske nettverk og er vanskelig å lese som argument (målt, se bildene). Jeg anbefaler en ny visningstype «argumentkart» i CellProtocol for web og CellApple, slik mockupen viser. Det er en ny skeleton-kapabilitet og trenger ditt ja. Alternativer: Mermaid-bilde (statisk, avhenger av `mmdc` på staging) eller dagens nettverkselement.
+
 ## 7. Iterasjoner
 
 | Runde | Dato | Endring |
 |---|---|---|
 | 1 | 2026-11-14 | Første tre til G1 |
+| 1b | 2026-11-14 | Bilder til G1-GUI i `images/`, målinger av grunngrafen og nettverkselementet i §2, spørsmål 4 |
 

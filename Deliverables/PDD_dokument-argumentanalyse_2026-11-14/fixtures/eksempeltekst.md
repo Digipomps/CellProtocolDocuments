@@ -1,0 +1,3 @@
+# Mobilforbud i skolen virker
+
+Ifølge en rapport fra Utdanningsdirektoratet har 70 % av skolene innført en form for mobilforbud. Elevene konsentrerer seg bedre når telefonen ligger i skapet, fordi varslene ikke avbryter undervisningen. Alle vet at sosiale medier gir mer mobbing. En studie fra Norges handelshøyskole fant at karakterene i matematikk økte etter forbudet, se https://www.nhh.no/forskning/mobilforbud. Kritikerne mener at forbudet tar fra elevene et viktig læringsverktøy. Men lærerne kan fortsatt bruke nettbrett i timene. Derfor bør alle skoler innføre et nasjonalt mobilforbud fra neste skoleår.

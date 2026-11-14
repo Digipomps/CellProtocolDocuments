@@ -17,3 +17,4 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
 ## Logg
 - 2026-11-14: opprettet
 - 2026-11-14: FORMAALSSPEC iterasjon 1 skrevet (11 formål, 12 formålstester). Treet lagt i Formålstrær-siden som trees/dokument-argumentanalyse-2026-11-14. Venter på G1 og svar på §6.
+- 2026-11-14: Bilder til G1-GUI rendret (images/README.md). Målt: grunngrafen og nettverkselementet holder ikke som argumentkart; spørsmål 4 lagt til.
