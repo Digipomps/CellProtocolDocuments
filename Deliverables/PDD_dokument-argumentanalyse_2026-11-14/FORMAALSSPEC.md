@@ -47,7 +47,7 @@ Rot: **Studentene kan sammen analysere en tekst og se hva den påstår, hva den 
 | purpose://candidate.tekstanalyse.inntak | Legge inn tekst | root | En deltaker limer inn tekst eller laster opp .txt/.md (≤ 1 MB); teksten lagres med kilde, tittel, hvem og når, og får sitatankre | T-INNTAK | candidate |
 | purpose://candidate.tekstanalyse.paastander | Påstander med sitat | root | Hver påstand peker på et ordrett sitat (tegnposisjon) i teksten, med type (faktisk, statistisk, kausal, normativ, prediktiv) og styrke | T-SITAT: 100 % av påstandene har et sitat som finnes ordrett i kilden | candidate |
 | purpose://candidate.tekstanalyse.kilder | Kildestatus per påstand | root | Hver påstand har status `kilde oppgitt` / `kilde mangler` / `ikke sjekkbar` / `sjekket av deltaker`; en lenke regnes aldri som støtte før noen har sjekket den | T-KILDE | candidate |
-| purpose://candidate.tekstanalyse.argumentgraf | Argumentgraf | root | Påstander vises som noder, støtte/motsigelse som kanter, konklusjoner markert; antatte kanter er merket som antatt; grafen kan eksporteres som Mermaid | T-GRAF: samme graf rendres på web og i Binding | candidate |
+| purpose://candidate.tekstanalyse.argumentgraf | Argumentgraf | root | Påstander vises som bokser i en ny visningstype «argumentkart» (konklusjon øverst, kanter merket støtter/angriper/tilbakeviser, antatte kanter stiplet, kildestatus i boksen), likt på web og i CellApple; kan eksporteres som Mermaid | T-GRAF: samme graf rendres på web og i Binding | candidate |
 | purpose://candidate.tekstanalyse.grunnlinje | Analyse uten modell | root | Den deterministiske analysen (Swift-port av TextReliability) gir påstander, kilder og en enkel graf uten noen modell, slik at flaten virker også når modellen er nede | T-PARITET: Swift-porten gir samme påstander som Python-verktøyet på fixturene | candidate |
 | purpose://candidate.tekstanalyse.modellhjelp | Modellstøttet argumentrekonstruksjon | root | Når et autorisert modellspor finnes: modellen foreslår påstander og relasjoner; forslag uten ordrett sitat avvises; forslagene er merket «modell» og kan godtas/avvises av deltakerne | T-MODELL-ANKER, T-MODELL-NEDE | candidate |
 | purpose://candidate.tekstanalyse.panel | Rådgiverpanel (valgfritt steg) | modellhjelp | Flere roller (påstandsuttrekker, kildegransker, djevelens advokat) kjøres via AIGateway parallell orkestrering med dommer; uenighet vises, ikke glattes ut | T-PANEL | candidate |
@@ -367,12 +367,13 @@ Avhengigheter (hver må måles før den egentlige testen):
 2. **PDF og Word i første runde?** Jeg anbefaler tekst og Markdown først. PDF-tekstuttrekk i Swift på Linux krever et nytt bibliotek og er et eget formål.
 3. **Modell:** skal modellhjelpen ta det sporet modelltilgangs-tråden velger (anbefalt: lokal modell nå, kvote senere), og ellers stå som «utilgjengelig»? Det er slik treet er bygget.
 
-4. **Hvordan skal argumentgrafen tegnes?** Dagens nettverkselement er laget for å utforske nettverk og er vanskelig å lese som argument (målt, se bildene). Jeg anbefaler en ny visningstype «argumentkart» i CellProtocol for web og CellApple, slik mockupen viser. Det er en ny skeleton-kapabilitet og trenger ditt ja. Alternativer: Mermaid-bilde (statisk, avhenger av `mmdc` på staging) eller dagens nettverkselement.
+4. **Besvart 2026-11-15 av Kjetil: ny visningstype «argumentkart».** Opprinnelig spørsmål: Hvordan skal argumentgrafen tegnes? Dagens nettverkselement er laget for å utforske nettverk og er vanskelig å lese som argument (målt, se bildene). Jeg anbefaler en ny visningstype «argumentkart» i CellProtocol for web og CellApple, slik mockupen viser. Det er en ny skeleton-kapabilitet og trenger ditt ja. Alternativer: Mermaid-bilde (statisk, avhenger av `mmdc` på staging) eller dagens nettverkselement.
 
 ## 7. Iterasjoner
 
 | Runde | Dato | Endring |
 |---|---|---|
 | 1 | 2026-11-14 | Første tre til G1 |
+| 1c | 2026-11-15 | Kjetil valgte ny visningstype «argumentkart» (spørsmål 4). Argumentgraf-formålet tegnes med den, i CellProtocol for web og CellApple. |
 | 1b | 2026-11-14 | Bilder til G1-GUI i `images/`, målinger av grunngrafen og nettverkselementet i §2, spørsmål 4 |
 
