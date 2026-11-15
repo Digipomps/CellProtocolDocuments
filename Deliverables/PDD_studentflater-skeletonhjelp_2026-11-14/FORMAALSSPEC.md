@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — studentflater skeletonhjelp
 
-Oppgavemappe: `PDD_studentflater-skeletonhjelp_2026-11-14` · Opprettet 2026-11-14 · Iterasjon 1 (ikke godkjent)
+Oppgavemappe: `PDD_studentflater-skeletonhjelp_2026-11-14` · Opprettet 2026-11-14 · Iterasjon 2 (G1 godkjent 2026-11-15)
 
 > Regel: ingen plan før G1 er godkjent av Kjetil. For GUI: ingen implementering før G1-GUI (rendret bilde) er godkjent.
 > Et dokument om leveransen teller aldri som leveransen.
@@ -40,10 +40,10 @@ Lest fra CellScaffold `8e8f8e0` (origin/main 13.11, samme som staging), CellProt
 | purpose://candidate.studentflater-skeletonhjelp.local-check | Sjekk et utkast lokalt | guide | `swift run skeleton-check <fil>` i CellProtocol dekoder en CellConfiguration-fil og skriver nåbarhetsfunn og nåbare handlinger; avslutter ≠0 ved funn | test.local-check.cli | candidate |
 | purpose://candidate.studentflater-skeletonhjelp.studio-audit | Studio sier fra når en flate skjuler sine egne veier inn | root | Når et utkast settes eller importeres i Studio, viser Studio nåbarhetsfunnene (element og tapte handlinger) ved siden av forhåndsvisningen | test.studio.audit | candidate |
 | purpose://candidate.studentflater-skeletonhjelp.model-draft | Modellen foreslår et utkast rett inn i Studio | root | Studenten skriver hva flaten skal gjøre, trykker «Lag utkast», og får et dekodbart, nåbarhetssjekket utkast i Studio-forhåndsvisningen. Ugyldig svar gir en forklaring, aldri et tomt utkast | test.model-draft.contract, test.model-draft.invalid | candidate |
-| purpose://candidate.studentflater-skeletonhjelp.model-route | Utkasthjelpen bruker den modellen studenten har tilgang til | model-draft | Samme handling virker med lokal modell, egen nøkkel eller tildelt kvote via AIGateway; uten modell sier flaten det og peker på guiden og malene | test.model-route.none, test.model-route.gateway | candidate |
+| purpose://candidate.studentflater-skeletonhjelp.model-route | Utkasthjelpen bruker den modellen studenten har tilgang til | model-draft | Samme handling virker via AIGateway med Mistral (EU, europeisk alternativ, Kjetil 15.11), lokal modell eller egen nøkkel; uten modell sier flaten det og peker på guiden og malene | test.model-route.none, test.model-route.gateway | candidate |
 | purpose://candidate.studentflater-skeletonhjelp.helper-routes | Workbench-hjelperen sender flate-bestillinger dit de kan gjøres | root | En bestilling om å lage eller endre en flate i settet «Denne flaten» gir et svar som peker på «Flater og GUI» / Studio, ikke «forsto ikke»; settet «Flater og GUI» har Studio-handlingene og en riktig «mangler»-liste | test.helper.routes | candidate |
-| purpose://candidate.studentflater-skeletonhjelp.share-draft | Del et utkast med en medstudent | root | Eieren av et Studio-utkast kan gi en navngitt person lesetilgang via en Agreement; den andre ser forhåndsvisningen i sin egen Porthole og i Binding | test.share.agreement-swift, test.share.binding | candidate |
-| purpose://candidate.studentflater-skeletonhjelp.discuss-draft | Snakk om utkastet i chat | share-draft | Et delt utkast kan sendes som lenke i en eksisterende gruppesamtale, og mottakerne åpner forhåndsvisningen derfra | test.share.chat-link | candidate |
+| purpose://candidate.studentflater-skeletonhjelp.co-edit-draft | Rediger samme utkast sammen | root | Eieren inviterer en navngitt person til et felles utkast via Agreement-vilkår (invitasjon akseptert). Begge kan endre samme utkast; en endring på en utdatert revisjon avvises med beskjed om hvem som endret sist, ingenting overskrives i stillhet. Begge ser forhåndsvisningen i Porthole og i Binding | test.coedit.agreement-swift, test.coedit.stale-write, test.coedit.binding | candidate |
+| purpose://candidate.studentflater-skeletonhjelp.discuss-draft | Snakk om utkastet i chat | co-edit-draft | Et felles utkast kan sendes som lenke i en gruppesamtale; et medlem som åpner lenken uten invitasjon får be om tilgang, ikke se innholdet | test.coedit.chat-link | candidate |
 
 Swift er referansen: Studio, hjelperen og delingen er Swift-celler i CellScaffold, og visningen skal virke i Binding (Swift) og i Porthole. Tilgang til et delt utkast avgjøres bare av Agreement-vilkår.
 
@@ -51,7 +51,7 @@ Swift er referansen: Studio, hjelperen og delingen er Swift-celler i CellScaffol
 
 Hva dette IKKE er:
 - Ikke nye skeleton-elementer eller ny renderer-semantikk. Kan studenten ikke få det de ber om med dagens format, sier flaten det.
-- Ikke samtidig redigering av samme utkast. Deling er lesing og kommentar (chat); den andre lager sin egen kopi for å endre.
+- Ikke sanntids-sammenslåing (CRDT) av samtidige tastetrykk. Felles redigering er revisjonsbasert: siste lagrede revisjon vinner bare hvis den bygger på forrige, ellers avvises den med beskjed.
 - Ikke publisering til offisielle flater. Studio-utkast forblir private eller delt med navngitte personer.
 - Ikke valget av hvilken modell studentene får. Det er Kjetils beslutning (tråd A / F); denne PDD-en virker med den ruten som finnes.
 - Ikke Butler i gruppesamtale (arbeidspakke F).
@@ -62,7 +62,9 @@ Hva dette IKKE er:
 | Studio-forhåndsvisning for en ny studentkonto | audit 14.11 | Målt i nettleser, ikke i Binding | ja; Binding **ikke målt** |
 | AIGateway `ai.invoke` for en studentkonto | AIGatewayCell.swift:472 | Ny konto har ingen rute (audit). Lokal Qwen på staging var nede | bare for model-draft; i dag **ikke tilgjengelig** |
 | `SkeletonReachabilityAudit` i CellBase | SkeletonReachabilityAudit.swift | Rot-scope-betingelser rapporteres, men renderer-oppførselen endres ikke | ja |
-| DraftVersion og Agreement-deling | CellConfigurationStudioCell.swift (`draft.create`, `version.get`) | Ingen delingsvei i dag | for share-draft; **ikke målt** |
+| DraftVersion og Agreement-deling | CellConfigurationStudioCell.swift (`draft.create`, `version.get`) | Ingen delingsvei i dag | for co-edit-draft; **ikke målt** |
+| Gjenbrukbar invitasjon/opptak via Agreement (InvitationAdmission) | PDD_dele-dokumenter_2026-11-14 (foreslått, G1 ikke godkjent 14.11) | Felles utkast bør bruke samme mekanisme som delte dokumenter, ikke en egen | for co-edit-draft; **avhengighet** |
+| Mistral-rute i AIGateway | CellScaffold AIGatewayModels.swift:1017 (`mistral-large-4`, api.mistral.ai), ButlerProviderCatalog.swift:7-10 (`mistral-small-2603`, api.eu.mistral.ai) | Finnes i kode; om studentkontoer får bruke den, avgjøres i tråden for modelltilgang | for model-route; **ikke målt** |
 | Gruppesamtale (chat) med lenker | ChatCell / Invite Chat på staging | Sara-demoen 12.11 viste chat; lenke til et delt utkast er ikke prøvd | for discuss-draft; **ikke målt** |
 
 ## 3. Forventningskontrakt — «Det du kommer til å se»
@@ -74,7 +76,7 @@ Hva dette IKKE er:
 | `skeleton-check` kjørt på et godt og et dårlig eksempel | testutdata | TESTRESULT.md#local-check | — | nei |
 | Studio med «Beskriv flaten» + «Lag utkast» og nåbarhetsfunn, tom / utfylt / feil | bilde | images/studio-utkast-{tom,utfylt,feil}-v1.png | rendres etter G1 | nei |
 | Workbench-hjelperen svarer på «lag en flate som viser oppgavene mine» | bilde + testutdata | images/hjelper-flate-v1.png, TESTRESULT.md#helper | rendres etter G1 | nei |
-| Delt utkast sett fra medstudentens konto, web og Binding | bilde | images/delt-utkast-{web,binding}-v1.png | rendres etter G1 | nei |
+| Felles utkast: to redaktører, avvist utdatert lagring, web og Binding | bilde | images/felles-utkast-{web,konflikt,binding}-v1.png | rendres etter G1 | nei |
 | Kjørende flyt på staging for en ny studentkonto | kjørende flate | staging, via FORESPOERSEL til Deploy etter verifisert bygg | — | nei |
 
 ## 4. Tilknyttede formålspakker og lærdommer (auto fra purpose_dev.py lookup)
@@ -241,17 +243,22 @@ Hva dette IKKE er:
 | test.model-route.none | model-route | Konto uten rute: knappen gir «ingen modell tilgjengelig» med lenke til guiden, ingen tom tilstand | TESTRESULT.md#model-route | venter |
 | test.model-route.gateway | model-route | Ekte kall via AIGateway med den ruten Kjetil velger, på staging | TESTRESULT.md#model-route | blocked (ingen rute) |
 | test.helper.routes | helper-routes | Planner-test: «lag en flate som viser oppgavene mine» i «Denne flaten» → peker på «Flater og GUI»; i «Flater og GUI» → Studio-handling foreslås | TESTRESULT.md#helper | venter |
-| test.share.agreement-swift | share-draft | Swift-celletest: navngitt person får lese via Agreement-vilkår; fremmed nektes; tilbakekalt nektes | TESTRESULT.md#share | venter |
-| test.share.binding | share-draft | Binding viser det delte utkastet (snapshot-korpus eller kjørende app) | TESTRESULT.md#share | venter |
-| test.share.chat-link | discuss-draft | Lenke i gruppesamtale åpner forhåndsvisningen for et medlem | TESTRESULT.md#share | venter |
-| test.e2e.student-flow | root | Playwright på staging med to ferske kontoer: beskriv → utkast → lagre → del → se | TESTRESULT.md#e2e | venter |
+| test.coedit.agreement-swift | co-edit-draft | Swift-celletest: invitert person kan endre via Agreement-vilkår; fremmed nektes; tilbakekalt nektes. Samme semantikk i Python/Go hvis cellen portes | TESTRESULT.md#coedit | venter |
+| test.coedit.stale-write | co-edit-draft | To redaktører lagrer på samme revisjon; den andre avvises med navnet på den første, og utkastet er den førstes | TESTRESULT.md#coedit | venter |
+| test.coedit.binding | co-edit-draft | Binding viser og lagrer det felles utkastet (snapshot-korpus og kjørende app) | TESTRESULT.md#coedit | venter |
+| test.coedit.chat-link | discuss-draft | Lenke i gruppesamtale: invitert åpner utkastet, ikke-invitert får «be om tilgang» uten innhold | TESTRESULT.md#coedit | venter |
+| test.e2e.student-flow | root | Playwright på staging med to ferske kontoer: beskriv → utkast → lagre → inviter → begge endrer → se | TESTRESULT.md#e2e | venter |
 | test.reachability.shipped | studio-audit, helper-routes | Nye/endrede flater (Studio, Workbench) gjennom `testNoLocalSurfaceHidesItsOwnWaysIn` | TESTRESULT.md#reachability | venter |
 
 ## 6. Åpne spørsmål til Kjetil
 
-1. **Rekkefølge.** Forslag: guide, offentlig skill, `skeleton-check` og Studio-audit først (virker uten modell), så hjelper-rettingen, så modell-utkast, så deling. Ok?
-2. **Deling.** Er «les + chat, egen kopi for å endre» riktig første steg, eller vil du ha felles redigering av samme utkast?
-3. **`skeleton-check` i CellProtocol.** Et nytt kjørbart mål i det offentlige repoet. Ok å legge det der (krever tag/pin-runde), eller heller et skript i CellProtocolDocuments som bruker CellBase som avhengighet?
+Besvart 15.11.2026:
+1. Rekkefølge: ok (uten modell først, så modellutkast, så felles redigering).
+2. Deling: **felles redigering av samme utkast**.
+3. `skeleton-check` legges i CellProtocol.
+4. (Tillegg) Tilby Mistral som europeisk modellalternativ.
+
+Ingen åpne spørsmål som endrer treet.
 
 ## 7. Revisjonslogg
 
@@ -259,3 +266,4 @@ Hva dette IKKE er:
 |---|---|---|---|
 | 0 | 2026-11-14 | Opprettet | Losen |
 | 1 | 2026-11-14 | §0-§3, §5, §6 skrevet fra kode på origin/main | Claude (tråd «Gi studentene hjelp til å designe egne flater») |
+| 2 | 2026-11-15 | G1 godkjent av Kjetil med svarene i §6: deling endret til felles redigering (co-edit-draft), Mistral i model-route, avhengighet til InvitationAdmission fra PDD_dele-dokumenter | Claude |
