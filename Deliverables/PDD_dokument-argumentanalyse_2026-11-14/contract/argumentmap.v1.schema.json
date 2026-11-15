@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "haven.visualization.argumentmap.v1",
+  "title": "Visualization kind \"argumentmap\" (argumentkart)",
+  "description": "Spec for SkeletonVisualization(kind: \"argumentmap\"). Rendered by CellScaffold web (skeleton-runtime.js) and CellApple (SkeletonView). Layered top-down: conclusions on the first row, each node below the node it points to. The renderer never infers relations; it draws what the cell sends.",
+  "type": "object",
+  "required": ["nodes", "edges"],
+  "properties": {
+    "revision": {"type": "string"},
+    "selectedID": {"type": "string"},
+    "legend": {"type": "string", "description": "Short explanation shown above the map."},
+    "nodes": {
+      "type": "array", "maxItems": 200,
+      "items": {
+        "type": "object", "required": ["id", "role", "title"],
+        "properties": {
+          "id": {"type": "string"},
+          "role": {"enum": ["conclusion", "premise", "counter", "rebuttal", "assumption", "context"]},
+          "title": {"type": "string", "description": "e.g. «P7 · Konklusjon · normativ»"},
+          "body": {"type": "string", "description": "Short paraphrase or quote, renderer truncates to 3 lines."},
+          "status": {"type": "string", "description": "Source status line, e.g. «Kilde mangler»."},
+          "statusTone": {"enum": ["neutral", "warning", "ok", "alert"]},
+          "detail": {"type": "string", "description": "Marks line, e.g. «2 enig · 1 uenig»."},
+          "inferred": {"type": "boolean", "description": "Node itself was inferred (dashed border)."}
+        }
+      }
+    },
+    "edges": {
+      "type": "array", "maxItems": 400,
+      "items": {
+        "type": "object", "required": ["source", "target", "relation"],
+        "properties": {
+          "source": {"type": "string"},
+          "target": {"type": "string"},
+          "relation": {"enum": ["supports", "attacks", "rebuts", "context"]},
+          "label": {"type": "string", "description": "Shown on the edge; defaults to the Norwegian relation name."},
+          "inferred": {"type": "boolean", "description": "Dashed and grey; e.g. heuristic or model proposal not yet accepted."}
+        }
+      }
+    }
+  },
+  "x-action": "Tapping a node sends {\"selectedID\": <id>} to actionKeypath; stateKeypath holds the selection. Same contract as kind network.",
+  "x-limits": "Cycles are drawn as upward edges without changing rows. Unknown role/relation falls back to premise/context. Empty nodes shows «Ingen påstander ennå»."
+}
