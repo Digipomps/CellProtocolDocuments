@@ -69,7 +69,7 @@ Avhengigheter. Hver må virke før den egentlige testen kjøres (`lesson.corr-ap
 | Avhengighet | Verifier | Tilstand 15.11 |
 |---|---|---|
 | Lokal Qwen svarer fra staging-appen | Ett kall fra app-containeren til Qwen-ruten gir svar, målt på staging | **ikke målt, kjent nede** (tråd A, venter på Deploy) |
-| Mistral med dagsgrense per student | En ny studentkonto på staging får svar fra Mistral, og kall nummer grense+1 avvises med kvotekode | **ikke målt** (tråd «Gi studentene Mistral med dagsgrense», pågår) |
+| Mistral med dagsgrense per student | En ny studentkonto på staging får svar fra Mistral, og kall nummer grense+1 avvises med kvotekode | **ikke målt** (tråd «Gi studentene Mistral med dagsgrense», CellProtocolDocuments PR #42, G1 venter). Kontrakt foreslått der: kallet går med den spørrendes identitet; hvert svar og avslag har `quota` (`remainingTodayMinorUnits`, `dailyLimitMinorUnits`, `remainingCallsToday`, `dailyCallLimit`, `resetsAt`); avslagskoder `student_quota_exhausted_today`, `student_quota_exhausted_term`, `service_budget_exhausted`, `not_eligible`. Grensen er i kroner, så «13 av 20 igjen» er en øvre grense |
 | Samtaler med to studenter virker på staging | To nye kontoer: invitasjonslenke, godta, meldinger begge veier | målt 12.11 i tråden «Bevis at felles chat med Sara og Petter virker» (staging `4e629fb3`); ikke målt på dagens staging |
 | Samtaler-tråder er `ChatCell` med Agreement-adgang | `test.modellchat.samtale-er-chatcell` | **mangler** (§6 spm. 1) |
 | Felles adgangsdel i CellBase (fra dokumentdeling) | Kjetil valgte 15.11 en delt adgangsdel i CellBase for dokumenter (`InvitationAdmission`). Gjenbrukes her hvis den lander først | under arbeid i tråden «La studenter dele dokumenter med hverandre», G1 venter |
@@ -367,4 +367,5 @@ Lærdommene som styrer denne PDD-en mest, og hvor de er brukt:
 
 | Iterasjon | Dato | Hva endret seg |
 |---|---|---|
+| 1b | 2026-11-15 | §2: Mistral-kvotens svar- og avslagskontrakt fra PR #42 lagt inn. Feilmeldingen i chatten bruker avslagskodene derfra |
 | 1 | 2026-11-15 | Første utkast: formålstre, avhengigheter med tilstand, forventningskontrakt, tester, fire åpne spørsmål. Seks bilder rendret fra skeleton-JSON |
