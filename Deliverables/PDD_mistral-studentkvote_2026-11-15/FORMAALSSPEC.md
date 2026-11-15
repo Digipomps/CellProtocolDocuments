@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — Mistral med dagsgrense for studentene
 
-Oppgavemappe: `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/PDD_mistral-studentkvote_2026-11-15/` · Opprettet 2026-11-15 · Iterasjon 1 (ikke godkjent)
+Oppgavemappe: `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/PDD_mistral-studentkvote_2026-11-15/` · Opprettet 2026-11-15 · Iterasjon 2 (ikke godkjent)
 
 Målt mot: CellScaffold `9612217` (origin/main 15.11 01:58), CellProtocol `14fd9dc` (main), CellProtocolDocuments `c99467a`. Staging kjører CellScaffold `8e8f8e05` (audit 14.11).
 
@@ -51,6 +51,7 @@ Rot: **Hver student kan bruke en språkmodell i HAVEN hver dag uten egen nøkkel
 | purpose://candidate.mistral-studentkvote.synlig | Studenten ser modell og kvote | root | Ved hvert svar står hvilken modell som svarte (lokal / Mistral EU) og hva som er igjen i dag og i semesteret; når kvoten er brukt, står det når den fornyes | T-SYNLIG + bilder (G1-GUI) | candidate |
 | purpose://candidate.mistral-studentkvote.drift | Operatøren styrer og ser kostnaden | root | Kjetil kan slå Mistral av/på, sette dagsgrense og tak, og se forbruk per student og totalt i `/admin/ai-usage`; leverandørmodus krever eksplisitt bekreftelse | T-DRIFT | candidate |
 | purpose://candidate.mistral-studentkvote.en-port | Én port for alle studentverktøy | root | Kallimachos, Butler og de nye flatene (tekstanalyse, skrivehjelp, skeletonhjelp, felles chat) spør samme Swift-funksjon om studentens modell, i stedet for å bygge hver sin rute | T-EN-PORT: grep + test at hvert verktøy går gjennom porten | candidate |
+| purpose://candidate.mistral-studentkvote.svarform | Felles svarform for kvote | en-port | Kallet går alltid med den spørrende studentens identitet og trekker fra hens kvote. Hvert svar og hvert avslag har `quota` med `remainingTodayMinorUnits`, `dailyLimitMinorUnits`, `remainingCallsToday` og `dailyCallLimit` (antatt antall kall ut fra taket per kall), `resetsAt`. Avslag har egen kode: `student_quota_exhausted_today`, `student_quota_exhausted_term`, `service_budget_exhausted`, `not_eligible` | T-SVARFORM | candidate |
 
 ## 2. Avgrensning og avhengigheter
 
@@ -326,6 +327,7 @@ Avhengigheter (hver måles før den egentlige testen):
 | T-STENGT | openai-stengt | XCTest med transportspion: studentkonto + «kapabel» gir null kall til `api.openai.com` | TESTRESULT.md#stengt | venter |
 | T-SYNLIG | synlig | Skjermbilde web + Binding mot godkjente bilder | ACCEPT.md#parity | venter |
 | T-DRIFT | drift | XCTest: leverandørmodus uten bekreftelse avvises; Mistral-nøkkel godtas, OpenAI-nøkkel i Mistral-felt avvises; forbruk per student i ledger | TESTRESULT.md#drift | venter |
+| T-SVARFORM | svarform | XCTest: to studenter i samme felles chat; hver trekker fra egen kvote; avslag har riktig kode og tall | TESTRESULT.md#svarform | venter |
 | T-EN-PORT | en-port | grep etter direkte ruter til leverandører i studentverktøyene + test at Kallimachos går gjennom porten | TESTRESULT.md#en-port | venter |
 | test.build / test.regression | pakker | `swift build --build-tests` og `ci/run-tests.sh` på Linux i CI og på Mac | TESTRESULT.md#build | venter |
 | test.cell.auth-negative | pakker | Inngår i T-HVEM | TESTRESULT.md#auth | venter |
@@ -344,4 +346,5 @@ Avhengigheter (hver måles før den egentlige testen):
 | Iterasjon | Dato | Hva endret seg | Hvem |
 |---|---|---|---|
 | 0 | 2026-11-15 | Opprettet | Losen |
+| 2 | 2026-11-15 | Nytt formål `svarform` etter ønske fra tråden «La språkmodellen delta i felles chat» (PR #43): identitet per spørrer, egne avslagskoder, gjenstående i kroner og kall | Claude |
 | 1 | 2026-11-15 | Brief-audit mot kode (to påstander motsagt: tjenesten er bare OpenAI, og dagsgrensen er samlet, ikke per student), 10 formål, 11 formålstester, 5 spørsmål | Claude |
