@@ -60,6 +60,7 @@ Finnes ikke: `Markdown`, `Chart` (bruk `Visualization`), `Video`, `Map`, `Table`
 - En `keypath` leser fra cellen: `todo.activeItems` er lista over aktive gjøremål.
 - En `Button` med `keypath: "todo.toggleTodo"` skriver til cellen. Inne i en liste kan knappen ta verdien fra raden med `payloadKeypath: "id"`.
 - Inne i en `List` leser `keypath` fra raden: `title` er tittelen på det gjøremålet raden viser.
+- `flowElementSkeleton` i en `List` må være en `VStack`. Web-rendereren avviser alt annet, også en `HStack` eller en `Text` alene.
 
 Hvilke keypaths en celle har, finner du i **Cell Configuration Architect** under katalogkontraktene, eller i cellens kildekode.
 
@@ -85,34 +86,82 @@ Ber du assistenten om «et panel som viser gjøremålene mine og lar meg krysse 
 {
   "name": "Mitt gjøremålspanel",
   "cellReferences": [
-    { "endpoint": "cell:///Todo", "label": "todo", "subscribeFeed": true, "subscriptions": [], "setKeysAndValues": [] }
+    {
+      "endpoint": "cell:///Todo",
+      "label": "todo",
+      "subscribeFeed": true,
+      "subscriptions": [],
+      "setKeysAndValues": []
+    }
   ],
   "skeleton": {
     "VStack": [
-      { "Text": { "text": "Mine gjøremål" } },
-      { "List": {
+      {
+        "Text": {
+          "text": "Mine gjøremål"
+        }
+      },
+      {
+        "List": {
           "keypath": "todo.activeItems",
           "flowElementSkeleton": {
-            "HStack": [
-              { "Text": { "keypath": "title" } },
-              { "Text": { "keypath": "dueText" } },
-              { "Button": { "keypath": "todo.toggleTodo", "label": "Ferdig", "payloadKeypath": "id" } }
+            "VStack": [
+              {
+                "HStack": [
+                  {
+                    "Text": {
+                      "keypath": "title"
+                    }
+                  },
+                  {
+                    "Text": {
+                      "keypath": "dueText"
+                    }
+                  },
+                  {
+                    "Button": {
+                      "keypath": "todo.toggleTodo",
+                      "label": "Ferdig",
+                      "payloadKeypath": "id"
+                    }
+                  }
+                ]
+              }
             ]
           }
-      } },
-      { "Section": {
-          "header": { "Text": { "text": "Fullført" } },
+        }
+      },
+      {
+        "Section": {
+          "header": {
+            "Text": {
+              "text": "Fullført"
+            }
+          },
           "content": [
-            { "List": { "keypath": "todo.completedItems",
-                        "flowElementSkeleton": { "Text": { "keypath": "title" } } } }
+            {
+              "List": {
+                "keypath": "todo.completedItems",
+                "flowElementSkeleton": {
+                  "VStack": [
+                    {
+                      "Text": {
+                        "keypath": "title"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           ]
-      } }
+        }
+      }
     ]
   }
 }
 ```
 
-`Todo` er din egen celle (én per identitet), så panelet viser bare dine gjøremål. Eksempelet er laget fra koden og ikke prøvd på staging ennå.
+`Todo` er din egen celle (én per identitet), så panelet viser bare dine gjøremål. Eksempelet er rendret med web-rendereren fra CellScaffold, med testdata. Det er ikke prøvd på staging ennå.
 
 ## 5. Feller du bør kjenne
 

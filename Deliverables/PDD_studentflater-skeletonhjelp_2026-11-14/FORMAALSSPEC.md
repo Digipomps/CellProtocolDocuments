@@ -74,10 +74,20 @@ Hva dette IKKE er:
 | Studentguide «Lag din egen flate» | fil | /mnt/project-files/masterhaven26/LAG_DIN_EGEN_FLATE.md og CellProtocolDocuments (PR) | — | nei |
 | Oppdatert offentlig skeleton-skill | fil (PR) | CellProtocol commons/skills/cellconfiguration-skeleton-authoring/ | — | nei |
 | `skeleton-check` kjørt på et godt og et dårlig eksempel | testutdata | TESTRESULT.md#local-check | — | nei |
-| Studio med «Beskriv flaten» + «Lag utkast» og nåbarhetsfunn, tom / utfylt / feil | bilde | images/studio-utkast-{tom,utfylt,feil}-v1.png | rendres etter G1 | nei |
-| Workbench-hjelperen svarer på «lag en flate som viser oppgavene mine» | bilde + testutdata | images/hjelper-flate-v1.png, TESTRESULT.md#helper | rendres etter G1 | nei |
-| Felles utkast: to redaktører, avvist utdatert lagring, web og Binding | bilde | images/felles-utkast-{web,konflikt,binding}-v1.png | rendres etter G1 | nei |
+| Studio med «Beskriv flaten» + «Lag utkast» og nåbarhetsfunn, tom / utfylt / feil | bilde | images/studio-utkast-{tom,utfylt,feil}{,-iphone}-v1.png | skeleton/studio-hjelp.skeleton.json | nei |
+| Workbench-hjelperen svarer på «lag en flate som viser oppgavene mine» | bilde + testutdata | images/hjelper-flate{,-iphone}-v1.png, TESTRESULT.md#helper | images/kilde/states.js (helperSkeleton) | nei |
+| Felles utkast: to redaktører, avvist utdatert lagring, web og Binding | bilde | images/felles-utkast-konflikt{,-iphone}-v1.png (web); Binding etter implementering | skeleton/studio-hjelp.skeleton.json | nei |
 | Kjørende flyt på staging for en ny studentkonto | kjørende flate | staging, via FORESPOERSEL til Deploy etter verifisert bygg | — | nei |
+
+### Hva bildene viser og ikke viser (G1-GUI, 2026-11-15)
+
+Bildene er rendret med den ekte web-rendereren (CellScaffold `8e8f8e0` Public/js/skeleton-runtime.js + porthole-webo.css) fra `skeleton/studio-hjelp.skeleton.json`, med testdata i `images/kilde/states.js`. Kjør: `node images/kilde/render.js <CellScaffold> images`.
+
+- Forhåndsvisningen er tegnet inn direkte: utkastets skeleton (`skeleton/utkast-gjoremal.cellconfiguration.json`) settes inn der Studio skal vise det. Hvordan Studio i dag viser et utkast i Porthole er ikke endret her.
+- Hjelper-bildet er en forenklet flate med de nye svarene og knappene, ikke Workbench-skjelettet fra `DeveloperWorkbenchConfiguration.swift`.
+- Binding (Swift): ingen bilder. Skyøkten har ingen Swift-verktøykjede; Binding-bilder tas etter implementering (test.coedit.binding).
+- Det nye skjelettet bruker bare elementer som finnes i dag: Section, VStack, HStack, Text, TextArea, TextField, Button, List. Ingen betingelser på toppnivå; funn og konflikter er lister som er tomme når det ikke er noe å vise.
+- Funn under: `flowElementSkeleton` må være en VStack (web avviser HStack/Text). Eksempelet i studentguiden er rettet.
 
 ## 4. Tilknyttede formålspakker og lærdommer (auto fra purpose_dev.py lookup)
 
@@ -267,3 +277,4 @@ Ingen åpne spørsmål som endrer treet.
 | 0 | 2026-11-14 | Opprettet | Losen |
 | 1 | 2026-11-14 | §0-§3, §5, §6 skrevet fra kode på origin/main | Claude (tråd «Gi studentene hjelp til å designe egne flater») |
 | 2 | 2026-11-15 | G1 godkjent av Kjetil med svarene i §6: deling endret til felles redigering (co-edit-draft), Mistral i model-route, avhengighet til InvitationAdmission fra PDD_dele-dokumenter | Claude |
+| 3 | 2026-11-15 | G1-GUI-bilder rendret (5 tilstander × laptop/iPhone), skeleton/ og images/kilde/ lagt til | Claude |
