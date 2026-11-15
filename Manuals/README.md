@@ -9,6 +9,7 @@ friskt») og viser trinnene dit.
 | [Utvikler-arbeidsbenken](Utvikler_Arbeidsbenk.md) | fanger idéer og feil, styrer arbeid i prosjekter og godkjenner formål |
 | [Admin-arbeidsbenken](Admin_Arbeidsbenk.md) | passer på at HAVEN kjører, og godkjenner tilgang |
 | [Skeleton-redigering](Skeleton_Redigering.md) | endrer hvordan en flate ser ut |
+| [Lag din egen flate](Student_Lag_din_egen_flate.md) | er student og vil lage egne dashboards og flater med hjelp fra en KI-assistent |
 
 ## Slik holdes manualene riktige
 
