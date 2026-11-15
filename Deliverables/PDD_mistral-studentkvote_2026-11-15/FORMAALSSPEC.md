@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — Mistral med dagsgrense for studentene
 
-Oppgavemappe: `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/PDD_mistral-studentkvote_2026-11-15/` · Opprettet 2026-11-15 · Iterasjon 2 (ikke godkjent)
+Oppgavemappe: `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/PDD_mistral-studentkvote_2026-11-15/` · Opprettet 2026-11-15 · Iterasjon 3 (ikke godkjent)
 
 Målt mot: CellScaffold `9612217` (origin/main 15.11 01:58), CellProtocol `14fd9dc` (main), CellProtocolDocuments `c99467a`. Staging kjører CellScaffold `8e8f8e05` (audit 14.11).
 
@@ -12,6 +12,12 @@ Målt mot: CellScaffold `9612217` (origin/main 15.11 01:58), CellProtocol `14fd9
 Kjetils valg 15.11.2026 01:12Z på beslutningskortet i tråden «Sikre studentene språkmodellverktøy i HAVEN»:
 
 > Lokal modell + Mistral-kvote
+
+Kjetil 15.11.2026 22:26Z i tråden «Sikre studentene språkmodellverktøy i HAVEN» (ordrett):
+
+> Vi må fange og si ifra på en god måte for brukeren at den ikke er tilgjengelig. Men hvorfor er det nede? Det oppfyller vel neppe formålet dens. Kjører den på ren cpu? Kallimachos bør bruke noe nyere enn 4o-mini. Men vi kan godt få det inn i DiMy's liste over tilgjengelige modeller - sammen med mistral og anthropic, hvor vi belaster mikrobetlinger for tokenbruk. Om det ikke er modent nok til å kjøre mikrobetalinger  må det fikses. Vi må også kjøre kvalitetstester med språkmodell drevet Kallimachos. (Bruk anledningen til å forbedre native matching også. )
+
+Denne oppgaven tar delen «hostede modeller i DiMys liste, belastet med mikrobetaling for tokenbruk», med Mistral først og studentenes kvote som første bruker. Den lokale modellen (hvorfor nede, CPU) og kvalitetstestene og native matching i Kallimachos hører til andre tråder (se §2).
 
 Kortets innhold slik det ble lagt fram: gratis lokal Qwen som standard, Mistral på operatørens nøkkel med dagsgrense per student, og OpenAI-ruten (gpt-4o-mini) i Kallimachos «kapabel modell» stenges for studentkontoer.
 
@@ -33,17 +39,24 @@ Kortets innhold slik det ble lagt fram: gratis lokal Qwen som standard, Mistral 
 | #433 (Codex, utkast) lar Kallimachos bruke egen nøkkel eller en DiMy-ressurs | retrieved | CellScaffold PR #433, oppdatert 13.11, åpen |
 | #435 (Codex) kobler Butler-invoke til PaymentGate og den låste Mistral-ruten | retrieved | CellScaffold PR #435, åpen; sier selv at realtransporten avviser EU-endepunktet |
 | #440 gjør sikker nøkkelinnlegging nåbar fra Biblioteket | retrieved | CellScaffold PR #440, merget 15.11 00:49 |
+| DiMy har en liste over modeller | retrieved | `Sources/App/Cells/ModelCatalog/` og `Resources/ModelCatalog/model-catalog.v1.json` (gjennomgått 06.11): OpenAI, Anthropic, Mistral, Google, lokal. Den er en oversikt med status og anbefalinger; den sier ikke hvilke modeller DiMy *tilbyr* med pris, og har ingen pris per modell |
+| gpt-4o-mini er gammel | retrieved | Katalogen merker `gpt-4o-mini` som `retiring`; `mistral-small-2603` er `current`, `claude-haiku-5-5` og `claude-sonnet-5-5` er `current` |
+| Mikrobetaling per kall finnes | retrieved, med to parallelle spor | (a) `FirstPartyAIService`: reservasjon i PaymentGate, måling av faktiske tokens, avregning, signert kvittering, avstemming. Bare OpenAI. (b) Butler S3c (#435, Codex): egen journal, PaymentGate-reservasjon, oppgjør, kvittering, låst til Mistral EU. Ingen av dem er koblet til Kallimachos eller modellkatalogen |
+| Studentkvoten er regulatorisk lav risiko | retrieved (intern matrise, ikke juridisk råd) | `DiMyDocuments/ValueRedistribution/02_PRODUCT_VARIANT_AND_REGULATORY_MATRIX.md`: «Usage quota … Tillatt i v0», ikke overførbar, ingen innløsning, ingen ekstern aksept. Offisielle kilder sist sjekket i prosjektet 02.05.2026; ikke sjekket på nytt i denne økten (nettet når dem ikke herfra) |
 | Mistral-prisen | recalled | Butler-fixturen (17.10, historisk): 155 810 / 623 238 cost ticks per 1000 input/output ≈ 1,6 kr / 6,2 kr per million tokens inkl. påslag. Ikke gjeldende pris |
 
 ## 1. Formålstre
 
-Rot: **Hver student kan bruke en språkmodell i HAVEN hver dag uten egen nøkkel og uten å betale, og operatøren vet hva det høyst kan koste.**
+Rot: **DiMy tilbyr hostede modeller fra en liste, og hvert kall belastes med mikrobetaling for faktisk tokenbruk. Første bruker er studentene: de får Mistral på en kvote operatøren gir, med dagsgrense, uten egen nøkkel og uten å betale selv.**
 
 | purposeRef | Tittel | Forelder | Goal (outcome) | Verifier | Status |
 |---|---|---|---|---|---|
 | purpose://candidate.mistral-studentkvote.root | Modell for studentene innen en kjent kostnad | — | En student uten egen nøkkel får svar fra en modell i HAVEN; summen operatøren kan betale per student per døgn og totalt er satt og håndhevet | T-ROT: to studentkontoer bruker modellen på staging, web og Binding; den tredje kontoen (ikke student) får ikke Mistral | candidate |
+| purpose://candidate.mistral-studentkvote.dimy-liste | Modeller DiMy tilbyr | root | Modellkatalogen sier for hver modell om DiMy tilbyr den, med leverandør, endepunkt, region og tokenpris. Bare modeller merket som tilbudt kan kalles på DiMys regning. Mistral `mistral-small-2603` (EU) først; Anthropic og en nyere OpenAI-modell legges til med samme mekanisme og slås på hver for seg | T-LISTE: `catalog.offered` gir bare tilbudte modeller; et kall mot en modell som ikke er tilbudt avvises før transport | candidate |
+| purpose://candidate.mistral-studentkvote.mikrobetaling | Ett målespor for alle hostede modeller | root | Alle kall til en tilbudt modell går gjennom samme målespor: reservasjon i PaymentGate før kall, faktiske tokens fra svaret, pris fra katalogens tariff, avregning og signert kvittering, avstemming ved ukjent utfall. Ingen kall uten reservasjon. Førstepartstjenesten gjøres leverandøruavhengig; Butler-sporet (#435) og dette sporet skal ende som ett | T-MIKRO: samme fixture gir samme belastning og kvittering for Mistral og OpenAI; uten kvote ingen transport | candidate |
+| purpose://candidate.mistral-studentkvote.kallimachos-modell | Kallimachos bruker en nyere modell fra listen | root | Kallimachos «kapabel» velger modell fra DiMys liste (ikke `gpt-4o-mini`) og belastes gjennom målesporet | T-KALLIMACHOS-MODELL | candidate |
 | purpose://candidate.mistral-studentkvote.hvem | Hvem er student | root | En konto er student bare når den oppfyller vilkårene i en Agreement for kullet (invitasjon akseptert, samme vilkårstype som ChatCell). Eieren kan trekke tilbake; da stopper neste kall | T-HVEM: positiv + tre negative (fremmed, tilbaketrukket, utløpt) | candidate |
-| purpose://candidate.mistral-studentkvote.mistral | Mistral som leverandør i førstepartstjenesten | root | Tjenesten kan kalle Mistral (chat completions, fast URL, ingen omdirigering, ingen fallback til annen leverandør) og leser faktiske brukstall fra svaret; nøkkelen lagres forseglet og vises aldri | T-MISTRAL (fake transport + fixture), T-MISTRAL-LIVE (ett ekte kall etter Kjetils ja) | candidate |
+| purpose://candidate.mistral-studentkvote.mistral | Mistral som leverandør i førstepartstjenesten | mikrobetaling | Tjenesten kan kalle Mistral (chat completions, fast URL, ingen omdirigering, ingen fallback til annen leverandør) og leser faktiske brukstall fra svaret; nøkkelen lagres forseglet og vises aldri | T-MISTRAL (fake transport + fixture), T-MISTRAL-LIVE (ett ekte kall etter Kjetils ja) | candidate |
 | purpose://candidate.mistral-studentkvote.dagsgrense | Dagsgrense per student | root | Ingen student kan bruke mer enn grensen per døgn (Europe/Oslo). Kallet som ville gått over, avvises før leverandøren kalles. Tjenestens samlede døgnbudsjett gjelder i tillegg | T-DAG: 20 kall på grensen gir nøyaktig så mange som får plass; neste avvises uten leverandørkall; ny dag åpner igjen | candidate |
 | purpose://candidate.mistral-studentkvote.tak | Totaltak per student (semester) | root | Operatøren utsteder en ikke-overførbar kvote per student ved opptak; når den er brukt, stopper Mistral for den studenten | T-TAK (bruker eksisterende `issuePrepaid` + `payment_required`) | candidate |
 | purpose://candidate.mistral-studentkvote.lokal-forst | Lokal modell først | root | Når den lokale modellen svarer, brukes den, gratis og uten å røre kvoten. Mistral brukes når studenten velger det eller den lokale er nede. Uten noen modell faller flaten tilbake til svar uten modell, med beskjed | T-LOKAL (lokal oppe / nede / kvote tom) | candidate |
@@ -56,6 +69,9 @@ Rot: **Hver student kan bruke en språkmodell i HAVEN hver dag uten egen nøkkel
 ## 2. Avgrensning og avhengigheter
 
 Hva dette IKKE er:
+- Ikke å finne ut hvorfor den lokale modellen er nede eller om den kjører på CPU. Det eies av tråden «Få språkmodellen på staging tilbake».
+- Ikke kvalitetstester av Kallimachos med modell eller bedre native matching. Det er egne oppgaver i tråden «Sikre studentene språkmodellverktøy i HAVEN».
+- Ikke ekte innbetaling (Stripe/Vipps) eller lommebok. Kvoten er en ikke-overførbar brukskvote fra én utsteder, uten innløsning og uten ekstern aksept (matrisens «Usage quota», v0). Overføring mellom studenter, innløsning eller aksept hos andre er harde stopp. Dette er ikke juridisk råd.
 - Ikke ekte betaling fra studentene. Kvoten er operatørfinansiert, ikke-overførbar og kan ikke innløses (samme vilkår som `issuePrepaid`).
 - Ikke å få den lokale Qwen-modellen opp på staging. Det eies av tråden «Få språkmodellen på staging tilbake»; her brukes den når den svarer.
 - Ikke Butlers betalte modell (#435) eller Kallimachos med egen nøkkel/DiMy-ressurs (#433). De er Codex sitt arbeid; denne oppgaven skal ikke duplisere dem, og koordineres med eierne (se §6 sp. 4).
@@ -317,6 +333,9 @@ Avhengigheter (hver måles før den egentlige testen):
 
 | testRef | Formål | Hvordan | Evidens | Status |
 |---|---|---|---|---|
+| T-LISTE | dimy-liste | XCTest mot katalogen: tilbudt/ikke tilbudt; kall mot ikke tilbudt modell gir avslag og spion = 0 | TESTRESULT.md#liste | venter |
+| T-MIKRO | mikrobetaling | XCTest: fixture for Mistral og OpenAI gir riktig pris, avregning og kvittering; uten kvote `payment_required` og spion = 0; ukjent utfall går til avstemming | TESTRESULT.md#mikro | venter |
+| T-KALLIMACHOS-MODELL | kallimachos-modell | XCTest: «kapabel» gir en modell fra listen med status `current`, ikke `gpt-4o-mini`, og går gjennom målesporet | TESTRESULT.md#kallimachos | venter |
 | T-ROT | root | To studentkontoer og én vanlig konto på staging (web + Binding); spør Kallimachos med «kapabel» | ACCEPT.md#rot | venter |
 | T-HVEM | hvem | XCTest: student med akseptert invitasjon får `mistral-quota`; fremmed, tilbaketrukket og utløpt får `none`; samme vilkår evaluert i PyCellProtocol/GoCellProtocol-fixturen | TESTRESULT.md#hvem | venter |
 | T-MISTRAL | mistral | XCTest med injisert transport: riktig URL, header, body (`max_tokens`, ingen verktøy), parsing av `usage.prompt_tokens/completion_tokens`; omdirigering avvises; manglende usage gir avstemming, ikke gjetting | TESTRESULT.md#mistral | venter |
@@ -335,16 +354,17 @@ Avhengigheter (hver måles før den egentlige testen):
 
 ## 6. Åpne spørsmål til Kjetil
 
-1. **Beløp.** Forslag: dagsgrense 3 kr per student, semestertak 100 kr per student, samlet døgnbudsjett for tjenesten 50 kr. Med fixtureprisen (≈ 6 kr per million svartokens) er 3 kr i døgnet flere hundre lange svar. Stemmer nivået?
-2. **Hvem er student.** Forslag: en Agreement «MasterHAVEN26-modellkvote» som du (eieren) sender som invitasjon; den som aksepterer er student til 30.06.2027 eller til du trekker den tilbake. Alternativ: gjenbruk en eksisterende gruppe hvis du har en for studentene.
-3. **OpenAI-ruten i Kallimachos.** Kortet sa «stenges for studentkontoer». I dag er den åpen for *enhver* ny konto etter samtykke. Forslag: steng den for alle kontoer uten særskilt tildeling, slik at ingen ny konto kan bruke operatørens OpenAI-nøkkel.
-4. **Forholdet til Codex-arbeidet.** Forslag: jeg bygger porten og dagsgrensen i førstepartstjenesten (operatørfinansiert), og #435 (Butler, betalt) og #433 (egen nøkkel/DiMy) bruker porten når de lander. Jeg legger en kort melding til Codex-eierne i deres PR-er om dette, uten å endre filene deres. Greit?
-5. **Modell.** Forslag: `mistral-small` på EU-endepunktet, som Butler-katalogen (`mistral-small-2603`, `https://api.eu.mistral.ai`), og ingen fallback til annen leverandør.
+1. **Beløp.** Forslag: dagsgrense 3 kr per student, semestertak 100 kr per student, samlet døgnbudsjett 50 kr. Med fixtureprisen (≈ 6 kr per million svartokens) er 3 kr i døgnet flere hundre lange svar.
+2. **Hvem er student.** Forslag: en Agreement «MasterHAVEN26-modellkvote» du sender som invitasjon, gyldig til 30.06.2027 eller til du trekker den tilbake.
+3. **OpenAI-ruten i Kallimachos.** Forslag: steng den direkte OpenAI-ruten for alle kontoer, og la «kapabel» gå gjennom DiMys liste og målesporet. Da betaler ingen ny konto med din nøkkel uten kvote.
+4. **Ett målespor.** Det finnes to: førstepartstjenesten og Butler S3c (#435, Codex). Forslag: jeg gjør førstepartstjenesten leverandøruavhengig og knytter den til katalogen, og ber Codex-eieren av #435 om å la Butler bruke samme spor når #435 lander, i stedet for et tredje. Greit, eller vil du at #435 skal være sporet?
+5. **Første modeller i DiMys liste.** Forslag: Mistral `mistral-small-2603` (EU) nå. Deretter `claude-haiku-5-5` og en OpenAI-modell som katalogen merker `current`, hver slått på med ditt ja og en tariff.
 
 ## 7. Revisjonslogg
 
 | Iterasjon | Dato | Hva endret seg | Hvem |
 |---|---|---|---|
 | 0 | 2026-11-15 | Opprettet | Losen |
+| 3 | 2026-11-15 | Kjetils retning 22:26Z: modeller i DiMys liste med mikrobetaling for tokenbruk. Ny rot, tre nye formål (dimy-liste, mikrobetaling, kallimachos-modell), regulatorisk klassifisering i §2, spørsmål 3–5 skrevet om | Claude |
 | 2 | 2026-11-15 | Nytt formål `svarform` etter ønske fra tråden «La språkmodellen delta i felles chat» (PR #43): identitet per spørrer, egne avslagskoder, gjenstående i kroner og kall | Claude |
 | 1 | 2026-11-15 | Brief-audit mot kode (to påstander motsagt: tjenesten er bare OpenAI, og dagsgrensen er samlet, ikke per student), 10 formål, 11 formålstester, 5 spørsmål | Claude |
