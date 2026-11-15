@@ -1,0 +1,448 @@
+{
+ "VStack": {
+  "elements": [
+   {
+    "HStack": {
+     "elements": [
+      {
+       "Text": {
+        "text": "Skrivehjelp",
+        "modifiers": {
+         "fontSize": 18,
+         "fontWeight": "700",
+         "foregroundColor": "#21332c"
+        }
+       }
+      },
+      {
+       "Text": {
+        "keypath": "document.assistPanel.routeLine",
+        "modifiers": {
+         "fontSize": 13,
+         "foregroundColor": "#50675b"
+        }
+       }
+      }
+     ],
+     "spacing": 14
+    }
+   },
+   {
+    "Text": {
+     "keypath": "document.assistPanel.disclosure",
+     "modifiers": {
+      "fontSize": 13,
+      "foregroundColor": "#50675b"
+     }
+    }
+   },
+   {
+    "List": {
+     "keypath": "document.assistPanel.notices",
+     "elements": [],
+     "flowElementSkeleton": {
+      "VStack": {
+       "elements": [
+        {
+         "Text": {
+          "keypath": "title",
+          "modifiers": {
+           "fontWeight": "700",
+           "fontSize": 14,
+           "foregroundColor": "#21332c"
+          }
+         }
+        },
+        {
+         "Text": {
+          "keypath": "text",
+          "modifiers": {
+           "fontSize": 14,
+           "foregroundColor": "#21332c"
+          }
+         }
+        },
+        {
+         "HStack": {
+          "elements": [
+           {
+            "Button": {
+             "keypath": "document.assist.noop",
+             "label": "",
+             "modifiers": {
+              "cornerRadius": 6,
+              "padding": 8,
+              "borderWidth": 1,
+              "borderColor": "#28774b",
+              "background": "#28774b",
+              "foregroundColor": "#ffffff",
+              "fontSize": 14
+             },
+             "keypathKeypath": "actionKeypath",
+             "labelKeypath": "actionLabel",
+             "payloadKeypath": "actionPayload"
+            }
+           }
+          ],
+          "modifiers": {
+           "visibility": {
+            "when": {
+             "scope": "item",
+             "keypath": "actionLabel",
+             "exists": true
+            }
+           }
+          }
+         }
+        }
+       ],
+       "spacing": 6,
+       "modifiers": {
+        "padding": 12,
+        "cornerRadius": 8,
+        "borderWidth": 1,
+        "borderColor": "#f0cf9a",
+        "background": "#fff4e5"
+       }
+      }
+     }
+    }
+   },
+   {
+    "Picker": {
+     "label": "Tekst modellen skal se",
+     "placeholder": "Velg avsnitt",
+     "keypath": "document.assistPanel.passages",
+     "optionLabelKeypath": "label",
+     "selectionValueKeypath": "id",
+     "selectionStateKeypath": "document.assistPanel.selectedPassageId",
+     "selectionActionKeypath": "document.assist.selectPassage",
+     "selectionPayloadMode": "item_id",
+     "elements": [],
+     "modifiers": {
+      "background": "#FFFFFF",
+      "foregroundColor": "#21332c",
+      "borderColor": "#ccd8cf",
+      "borderWidth": 1,
+      "cornerRadius": 6,
+      "fontSize": 15
+     }
+    }
+   },
+   {
+    "List": {
+     "keypath": "document.assistPanel.selection",
+     "elements": [],
+     "flowElementSkeleton": {
+      "VStack": {
+       "elements": [
+        {
+         "Text": {
+          "keypath": "label",
+          "modifiers": {
+           "fontSize": 12,
+           "foregroundColor": "#6b6440"
+          }
+         }
+        },
+        {
+         "Text": {
+          "keypath": "text",
+          "modifiers": {
+           "fontSize": 15,
+           "foregroundColor": "#21332c",
+           "fontFamilies": [
+            "Georgia",
+            "serif"
+           ]
+          }
+         }
+        }
+       ],
+       "spacing": 4,
+       "modifiers": {
+        "padding": 10,
+        "background": "#fdf8e6",
+        "borderWidth": 1,
+        "borderColor": "#ecd98f",
+        "cornerRadius": 6
+       }
+      }
+     }
+    }
+   },
+   {
+    "VStack": {
+     "elements": [
+      {
+       "TextArea": {
+        "editorMode": "plain",
+        "minLines": 2,
+        "maxLines": 6,
+        "placeholder": "Hva vil du ha hjelp til?",
+        "sourceKeypath": "document.assistPanel.draft",
+        "targetKeypath": "document.assist.setDraft",
+        "modifiers": {
+         "background": "#FFFFFF",
+         "borderColor": "#ccd8cf",
+         "borderWidth": 1,
+         "cornerRadius": 6,
+         "fontSize": 15,
+         "padding": 8,
+         "foregroundColor": "#21332c"
+        }
+       }
+      },
+      {
+       "HStack": {
+        "elements": [
+         {
+          "Button": {
+           "keypath": "document.assist.ask",
+           "label": "Be om forslag",
+           "modifiers": {
+            "cornerRadius": 6,
+            "padding": 8,
+            "borderWidth": 1,
+            "borderColor": "#28774b",
+            "background": "#28774b",
+            "foregroundColor": "#ffffff",
+            "fontSize": 14
+           },
+           "payload": {
+            "mode": "propose"
+           }
+          }
+         },
+         {
+          "Button": {
+           "keypath": "document.assist.ask",
+           "label": "Be om forklaring",
+           "modifiers": {
+            "cornerRadius": 6,
+            "padding": 8,
+            "borderWidth": 1,
+            "borderColor": "#ccd8cf",
+            "background": "#f3f7f3",
+            "foregroundColor": "#244734",
+            "fontSize": 14
+           },
+           "payload": {
+            "mode": "explain"
+           }
+          }
+         },
+         {
+          "Button": {
+           "keypath": "document.assist.ask",
+           "payload": {
+            "mode": "guide"
+           },
+           "label": "Bare bruksråd",
+           "modifiers": {
+            "cornerRadius": 6,
+            "padding": 8,
+            "borderWidth": 1,
+            "borderColor": "#ccd8cf",
+            "background": "#f3f7f3",
+            "foregroundColor": "#244734",
+            "fontSize": 14
+           }
+          }
+         }
+        ],
+        "spacing": 8
+       }
+      }
+     ],
+     "spacing": 8
+    }
+   },
+   {
+    "List": {
+     "keypath": "document.assistPanel.entries",
+     "elements": [],
+     "flowElementSkeleton": {
+      "VStack": {
+       "elements": [
+        {
+         "Text": {
+          "keypath": "who",
+          "modifiers": {
+           "fontSize": 13,
+           "foregroundColor": "#50675b"
+          }
+         }
+        },
+        {
+         "Text": {
+          "keypath": "question",
+          "modifiers": {
+           "fontSize": 15,
+           "foregroundColor": "#21332c"
+          }
+         }
+        },
+        {
+         "VStack": {
+          "elements": [
+           {
+            "Text": {
+             "keypath": "answer",
+             "modifiers": {
+              "fontSize": 15,
+              "foregroundColor": "#182a21",
+              "fontFamilies": [
+               "Georgia",
+               "serif"
+              ]
+             }
+            }
+           }
+          ],
+          "modifiers": {
+           "padding": 10,
+           "background": "#eef6f0",
+           "borderWidth": 1,
+           "borderColor": "#cfe3d5",
+           "cornerRadius": 6
+          }
+         }
+        },
+        {
+         "VStack": {
+          "elements": [
+           {
+            "Text": {
+             "keypath": "staleText",
+             "modifiers": {
+              "fontSize": 14,
+              "foregroundColor": "#21332c"
+             }
+            }
+           }
+          ],
+          "modifiers": {
+           "padding": 10,
+           "background": "#fff4e5",
+           "borderWidth": 1,
+           "borderColor": "#f0cf9a",
+           "cornerRadius": 6,
+           "visibility": {
+            "when": {
+             "scope": "item",
+             "keypath": "state",
+             "equals": "stale"
+            }
+           }
+          }
+         }
+        },
+        {
+         "Text": {
+          "keypath": "outcome",
+          "modifiers": {
+           "fontSize": 13,
+           "foregroundColor": "#28774b"
+          }
+         }
+        },
+        {
+         "HStack": {
+          "elements": [
+           {
+            "Button": {
+             "keypath": "document.assist.apply",
+             "label": "Bruk forslaget",
+             "modifiers": {
+              "cornerRadius": 6,
+              "padding": 8,
+              "borderWidth": 1,
+              "borderColor": "#28774b",
+              "background": "#28774b",
+              "foregroundColor": "#ffffff",
+              "fontSize": 14
+             },
+             "payloadKeypath": "ref"
+            }
+           },
+           {
+            "Button": {
+             "keypath": "document.assist.dismiss",
+             "label": "Forkast",
+             "modifiers": {
+              "cornerRadius": 6,
+              "padding": 8,
+              "borderWidth": 1,
+              "borderColor": "#ccd8cf",
+              "background": "#f3f7f3",
+              "foregroundColor": "#244734",
+              "fontSize": 14
+             },
+             "payloadKeypath": "ref"
+            }
+           }
+          ],
+          "spacing": 8,
+          "modifiers": {
+           "visibility": {
+            "when": {
+             "scope": "item",
+             "keypath": "state",
+             "equals": "open"
+            }
+           }
+          }
+         }
+        },
+        {
+         "HStack": {
+          "elements": [
+           {
+            "Button": {
+             "keypath": "document.assist.retry",
+             "label": "Be om nytt forslag",
+             "modifiers": {
+              "cornerRadius": 6,
+              "padding": 8,
+              "borderWidth": 1,
+              "borderColor": "#ccd8cf",
+              "background": "#f3f7f3",
+              "foregroundColor": "#244734",
+              "fontSize": 14
+             },
+             "payloadKeypath": "ref"
+            }
+           }
+          ],
+          "modifiers": {
+           "visibility": {
+            "when": {
+             "scope": "item",
+             "keypath": "state",
+             "equals": "stale"
+            }
+           }
+          }
+         }
+        }
+       ],
+       "spacing": 6,
+       "modifiers": {
+        "padding": 14,
+        "cornerRadius": 8,
+        "borderWidth": 1,
+        "borderColor": "#dee5df",
+        "background": "#fbfcf9"
+       }
+      }
+     }
+    }
+   }
+  ],
+  "spacing": 12,
+  "modifiers": {
+   "padding": 4
+  }
+ }
+}

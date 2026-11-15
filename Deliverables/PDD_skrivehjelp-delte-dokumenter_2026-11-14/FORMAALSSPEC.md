@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — skrivehjelp delte dokumenter
 
-Oppgavemappe: `PDD_skrivehjelp-delte-dokumenter_2026-11-14` · Opprettet 2026-11-14 · Iterasjon 1 (ikke godkjent)
+Oppgavemappe: `PDD_skrivehjelp-delte-dokumenter_2026-11-14` · Opprettet 2026-11-14 · Iterasjon 2 (G1 godkjent 2026-11-15)
 
 > Regel: ingen plan før G1 er godkjent av Kjetil. For GUI: ingen implementering før G1-GUI (rendret bilde) er godkjent.
 > Et dokument om leveransen teller aldri som leveransen.
@@ -75,10 +75,10 @@ Avhengigheter. Hver skal være målt før G1 der det går, ellers står det «ik
 
 | # | Leveranse | Type | Hvor | Referanse |
 |---|---|---|---|---|
-| 1 | Skrivehjelp-panelet med forslag i felles logg, laptop og iPhone | bilde → kjørende flate | Dokument på staging, to studentkontoer | `images/skrivehjelp-forslag-laptop-v1.png`, `images/skrivehjelp-forslag-iphone-v1.png` |
-| 2 | Modellhjelp av (eier ser knappen for å slå den på) | bilde → kjørende flate | samme | `images/skrivehjelp-av-laptop-v1.png`, `images/skrivehjelp-av-iphone-v1.png` |
-| 3 | Ingen modell valgt + foreldet forslag | bilde → kjørende flate | samme | `images/skrivehjelp-feil-laptop-v1.png`, `images/skrivehjelp-feil-iphone-v1.png` |
-| 4 | Samme panel i Binding (Swift) | screenshot | Binding mot staging | lages etter svar på §6 spm. 3 |
+| 1 | Skrivehjelp-panelet med forslag i felles logg, laptop og iPhone | bilde → kjørende flate | Dokument på staging, to studentkontoer | `images/skrivehjelp-forslag-laptop-v2.png`, `images/skrivehjelp-forslag-iphone-v2.png` (v1 erstattet 15.11) |
+| 2 | Modellhjelp av (eier ser knappen for å slå den på) | bilde → kjørende flate | samme | `images/skrivehjelp-av-laptop-v2.png`, `images/skrivehjelp-av-iphone-v2.png` (v1 erstattet 15.11) |
+| 3 | Ingen modell valgt + foreldet forslag | bilde → kjørende flate | samme | `images/skrivehjelp-feil-laptop-v2.png`, `images/skrivehjelp-feil-iphone-v2.png` (v1 erstattet 15.11) |
+| 4 | Samme panel i Binding (Swift) | screenshot | Binding mot staging | `skeleton/skrivehjelp-panel.v1.json` rendret i Binding; editoren og chatten viser fortsatt «støttes ikke ennå» der |
 | 5 | Opptak (Playwright-video) av to studenter: spør, se forslag, bruk det | video + TESTRESULT | staging | test.skrivehjelp.e2e-to-studenter |
 | 6 | Grønne tester i CellScaffold (Swift) for cellen, tilgang og forslag | testutdata | CI på PR-en | TESTRESULT.md#build, #regression, #auth |
 
@@ -354,9 +354,17 @@ Lærdommene som styrer denne oppgaven mest:
 3. **Binding (Swift).** Dokumenteditoren finnes bare på web; Binding viser «støttes ikke ennå». To veier: (a) skrivehjelp-panelet bygges av vanlige skeleton-elementer (liste, tekstfelt, knapper) som Binding allerede tegner, så logg, spørsmål og «Bruk forslaget» virker i Binding med en gang, mens selve editoren fortsatt er web; (b) full native dokumenteditor i CellApple, som er en stor egen jobb. Jeg anbefaler (a) her og (b) som egen tråd.
 4. **Påslag per dokument.** Forslag: eieren slår modellhjelp på per dokument, alle deltakerne ser det. Vil du heller at hver deltaker må samtykke før deres tekst kan sendes? Det er strengere, men sinker gruppen.
 
+
+**Svar fra Kjetil 2026-11-15 02.08: «G1 ok, følg anbefalingene».** Det betyr:
+1. Den som spør bruker sin egen modellrute nå; operatørruten kobles inn senere gjennom samme rutevalg.
+2. Deling av dokumenter er egen tråd («La studenter dele dokumenter med hverandre», startet 14.11).
+3. (a): skrivehjelp-panelet bygges av vanlige skeleton-elementer som Binding tegner. Full native dokumenteditor er egen tråd (ikke startet ennå).
+4. Eieren slår modellhjelp på per dokument, og alle deltakerne ser det.
+
 ## 7. Revisjonslogg
 
 | Iterasjon | Dato | Hva endret seg | Hvem |
 |---|---|---|---|
 | 0 | 2026-11-14 | Opprettet | Losen |
 | 1 | 2026-11-14 | §0 audit mot kode, §1 tre med 10 formål, §2 avhengigheter, §3 forventningskontrakt, 6 bilder, §6 fire spørsmål | Claude (tråden «Gi studentene skrivehjelp i delte dokumenter») |
+| 2 | 2026-11-15 | G1 godkjent. §6 besvart. swift-native-formålet låst til vei (a). Bilder v2 fra skeleton-JSON | Claude |

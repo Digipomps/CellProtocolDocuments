@@ -18,3 +18,16 @@ Skriptene ligger i `kilde/`.
 - Binding (Swift) rendrer verken `richDocument`, `documentHelp` eller `documentChat`: `CellApple/.../SkeletonView.swift:2593` viser «Visualization kind '…' støttes ikke ennå». Ingen Binding-bilde er laget før §6 spørsmål 3 er besvart.
 - Markeringen i editoren (blå bakgrunn på den markerte setningen) vises ikke i bildene; i ekte flate er det Quills vanlige markering.
 - Navn (Sara, Petter, Kari) er eksempler. I dag viser loggen identitets-ID, ikke navn.
+
+## v2 (2026-11-15): rendret fra skeleton-JSON
+
+Etter G1 valgte Kjetil vei (a): panelet bygges av vanlige skeleton-elementer, så det også virker i Binding.
+`skrivehjelp-*-v2.png` er rendret fra `skeleton/dokument-med-skrivehjelp.v1.json` med `Public/js/skeleton-runtime.js`
+fra CellScaffold `9612217` (main 15.11) og tilstandene i `skeleton/tilstander.v1.json`. Skript: `skeleton/render-v2.js`.
+
+- Ekte: hele panelet er vanlige elementer (Text, Picker, TextArea, Button, List med radknapper og `visibility` på radnivå). Ingenting er injisert.
+- Knappeprobe (`skeleton/knappeprobe-v2.jsonl`): hver knapp sendte riktig keypath og nyttelast, f.eks. `document.assist.apply` med `{"entryId":"e2"}` fra raden.
+- Tilstandene (`document.assistPanel`) er tegnet data. Cellen som lager dem finnes ikke ennå.
+- Ikke rendret i Binding ennå. Panelet bruker bare elementer CellApple tegner, men editoren (`richDocument`) og dokumentchatten (`documentChat`) vises der fortsatt som «støttes ikke ennå».
+- Avvik fra v1: «Spør modellen» er ikke deaktivert uten modell. Knappen står, og cellen svarer med varselet «Ingen forespørsel er sendt», fordi en deaktivert knapp må styres av en betingelse på toppnivå, som Binding ikke evaluerer pålitelig (skeleton-skillen, reachability.md). Etiketten over avsnittsvelgeren er blek i dagens web-tema.
+- Teksten som sendes velges i «Tekst modellen skal se»: et avsnitt, eller det du har markert i editoren (web). Binding har ingen editor ennå, så der velger man avsnitt.
