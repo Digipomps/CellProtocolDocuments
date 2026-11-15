@@ -17,3 +17,4 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
 ## Logg
 - 2026-11-15: opprettet
 - 2026-11-15: iterasjon 1 av FORMAALSSPEC og 6 bilder rendret fra skeleton-JSON. G1 og G1-GUI bedt om. Venter også på svar på §6 (hvor samtalen bor, hvem må si ja, ekstern modell, Python/Go).
+- 2026-11-15 11.31 Oslo: Kjetil valgte §6 spm. 1 (a): Samtaler flyttes til ChatCell. G1 og G1-GUI er fortsatt ikke godkjent.
