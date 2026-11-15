@@ -18,3 +18,4 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
 - 2026-11-14: opprettet
 - 2026-11-14: iterasjon 1 av FORMAALSSPEC (audit, tre med 12 formål, §6 fire spørsmål); G1 bedt om. Bilder (G1-GUI) lages etter svar på §6.
 - 2026-11-15: Kjetil valgte «Felles del i CellBase» (§6 spm. 1). G1 venter fortsatt.
+- 2026-11-15: 10 bilder til G1-GUI rendret (images/README.md); G1-GUI bedt om.

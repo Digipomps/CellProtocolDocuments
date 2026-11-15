@@ -84,9 +84,9 @@ Avhengigheter. Hver skal være målt før G1 der det går, ellers står det «ik
 
 | # | Leveranse | Type | Hvor | Referanse | Godkjent |
 |---|---|---|---|---|---|
-| 1 | «Dokumenter»: mine dokumenter, delt med meg, ventende invitasjoner, laptop og iPhone | bilde → kjørende flate | staging, to studentkontoer | `images/dokumenter-fylt-{laptop,iphone}-v1.png`, `images/dokumenter-tom-{laptop,iphone}-v1.png` (lages etter G1) | nei |
-| 2 | Inviter-panelet i et dokument: velg person, velg rolle, deltakerliste med «Fjern» | bilde → kjørende flate | samme | `images/inviter-{laptop,iphone}-v1.png` (lages etter G1) | nei |
-| 3 | Den invitertes visning: invitasjon med Godta / Avslå, og avslag for en som ikke er invitert | bilde → kjørende flate | samme | `images/invitasjon-{laptop,iphone}-v1.png`, `images/ingen-tilgang-{laptop,iphone}-v1.png` (lages etter G1) | nei |
+| 1 | «Dokumenter»: mine dokumenter, delt med meg, ventende invitasjoner, laptop og iPhone | bilde → kjørende flate | staging, to studentkontoer | `images/dokumenter-fylt-{laptop,iphone}-v1.png`, `images/dokumenter-tom-{laptop,iphone}-v1.png` | nei |
+| 2 | Inviter-panelet i et dokument: velg person, velg rolle, deltakerliste med «Fjern» | bilde → kjørende flate | samme | `images/inviter-{laptop,iphone}-v1.png` | nei |
+| 3 | Den invitertes visning: invitasjon med Godta / Avslå, og avslag for en som ikke er invitert | bilde → kjørende flate | samme | `images/invitasjon-{laptop,iphone}-v1.png`, `images/ingen-tilgang-{laptop,iphone}-v1.png` | nei |
 | 4 | Samme flater i Binding (Swift) | screenshot | Binding mot staging | lages i P5 | nei |
 | 5 | Opptak (Playwright-video) av A inviterer B, B godtar og skriver, C avvises | video + TESTRESULT | staging | test.dele.e2e-to-studenter | nei |
 | 6 | Grønne tester: CellProtocol (Swift) for den felles opptaksdelen, CellScaffold for dokument og bibliotek, Python og Go for fixtures | testutdata | CI på PR-ene | TESTRESULT.md#build, #regression, #auth, #interop | nei |
@@ -364,3 +364,4 @@ Alle flatene i rad 1–3 bygges av vanlige skeleton-elementer (liste, tekst, kna
 | 0 | 2026-11-14 | Opprettet med `purpose_dev.py new` | Claude |
 | 1 | 2026-11-14 | §0 audit mot kode i CellScaffold, CellProtocol, PyCellProtocol, GoCellProtocol; §1 tre med 12 formål; §2 avhengigheter; §3 forventningskontrakt; §5 tester; §6 fire spørsmål | Claude (tråden «La studenter dele dokumenter med hverandre») |
 | 1b | 2026-11-15 | §6 spm. 1 besluttet av Kjetil: felles opptaksdel i CellBase. G1 fortsatt ikke gitt; spm. 2–4 åpne | Claude |
+| 1c | 2026-11-15 | 10 bilder til G1-GUI i `images/`, rendret med ekte web-renderer (`skeleton/render.js`) | Claude |
