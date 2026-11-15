@@ -1,0 +1,76 @@
+{
+  "name": "Mitt gjøremålspanel",
+  "cellReferences": [
+    {
+      "endpoint": "cell:///Todo",
+      "label": "todo",
+      "subscribeFeed": true,
+      "subscriptions": [],
+      "setKeysAndValues": []
+    }
+  ],
+  "skeleton": {
+    "VStack": [
+      {
+        "Text": {
+          "text": "Mine gjøremål"
+        }
+      },
+      {
+        "List": {
+          "keypath": "todo.activeItems",
+          "flowElementSkeleton": {
+            "VStack": [
+              {
+                "HStack": [
+                  {
+                    "Text": {
+                      "keypath": "title"
+                    }
+                  },
+                  {
+                    "Text": {
+                      "keypath": "dueText"
+                    }
+                  },
+                  {
+                    "Button": {
+                      "keypath": "todo.toggleTodo",
+                      "label": "Ferdig",
+                      "payloadKeypath": "id"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "Section": {
+          "header": {
+            "Text": {
+              "text": "Fullført"
+            }
+          },
+          "content": [
+            {
+              "List": {
+                "keypath": "todo.completedItems",
+                "flowElementSkeleton": {
+                  "VStack": [
+                    {
+                      "Text": {
+                        "keypath": "title"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
