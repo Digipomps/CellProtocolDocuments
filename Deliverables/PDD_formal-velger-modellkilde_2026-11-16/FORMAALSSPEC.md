@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — La formålet velge språkmodellkilde
 
-Oppgavemappe: `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/PDD_formal-velger-modellkilde_2026-11-16/` · Opprettet 2026-11-16 · Iterasjon 1 (ikke godkjent)
+Oppgavemappe: `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/PDD_formal-velger-modellkilde_2026-11-16/` · Opprettet 2026-11-16 · Iterasjon 2 (ikke godkjent)
 
 Målt mot: CellScaffold `0b42ea5` (main 16.11), CellProtocolDocuments `e7808fe`. Vertsfakta fra tråden «Få språkmodellen på staging tilbake» (lest 16.11 med Kjetils ja).
 
@@ -32,6 +32,9 @@ Lesning: Når noen sier «jeg vil ha støtte av en språkmodell», skal HAVEN fi
 | Tilgang til en celle avgjøres bare av Agreement-vilkår, likt i Swift, Python og Go | retrieved (Kjetils regel 28.10) | prosjektminnet `haven-access-via-agreement` |
 | Python og Go har ingen AIGateway eller modellvelger | retrieved (15.11) | prosjektminnet `haven-model-in-group-chat-pdd` |
 | Et formål gir aldri rettigheter | retrieved | lærdom `lesson.purpose-never-grants-rights` |
+| Serveren ser bare `providerID` fra laptopen, ikke hva slags maskin eller rolle den har | retrieved | `NativeLocalModelBridge.swift` `acceptRegistration`: leser bare `contractID` og `providerID`. Samme funn i staging-trådens gjennomgang `/Users/kjetil/Build/Digipomps/HAVEN/MasterHAVEN26/sprakmodell-staging-2026-11-16/ENTITET_OG_FORMAAL.md` |
+| AgentD merker modellen som test (`test-playground` / `isExperimental`), men det når aldri kildevalget | recalled (fra staging-trådens gjennomgang, ikke lest her) | `ENTITET_OG_FORMAAL.md` over; finnes ikke i CellScaffold (grep gir null treff), ligger i AgentD |
+| Det finnes et register over entitetens enheter med rolle og kapabilitet | **contradicted** | `ENTITET_OG_FORMAAL.md` over. Maskinprofil F1 i Sprout-PDD-en er nevnt som grunnlag; ikke lest her |
 
 ## 1. Formålstre
 
@@ -47,6 +50,7 @@ Rot: **Når en person ber om støtte fra en språkmodell, velger HAVEN en kilde 
 | purpose://candidate.formal-velger-modellkilde.hardt-filter | Krav først, rangering etterpå | root | `route(...)` fjerner kilder som ikke oppfyller formålets krav **før** ordrangeringen. Ordrangering og personvernpreferanse velger bare blant kilder som består | T-FILTER: «privat og norsk» i tjeneste-for-andre gir aldri laptop eller uprøvd lokal LLM; i utvikle-og-teste kan laptopen vinne som i dag | candidate |
 | purpose://candidate.formal-velger-modellkilde.laptop-utvikling | Laptopen er god til utvikling | formal-krav | Eieren kan velge sin egen laptop (AgentD) for utvikle-og-teste og egen bruk. Svaret merkes «din maskin, bare for deg». Laptopen tilbys aldri andre, heller ikke gjennom en tjeneste eieren driver | T-LAPTOP: eier ja; student nei (som i dag, `activeProviderID`); Kallimachos med eier som operatør nei | candidate |
 | purpose://candidate.formal-velger-modellkilde.tjeneste-for-andre | En tjeneste andre bruker står på egne ben | formal-krav | Kallimachos, studentflatene og felles chat bruker bare kilder som er der når eieren sover: hostede modeller fra DiMys liste med kvote (eies av tråden «Mistral med dagsgrense»), eller en `operator_host`-modell som er målt å holde svartidskravet. Kallimachos «lokal» mot `127.0.0.1:8083` slutter å regnes som tilgjengelig før den er målt | T-TJENESTE: Kallimachos på staging med lokal nede velger hostet rute eller sier fra; spion viser null kall til `127.0.0.1:8083` når helsen er ukjent | candidate |
+| purpose://candidate.formal-velger-modellkilde.enhetsregister | Entitetens enheter med rolle | kilde-fakta | Entiteten har et register over sine enheter (laptop, telefon, vert) med rolle (`utvikling`, `personlig`, `tjeneste`) og kapabilitet (modell, GPU/CPU, om den er oppe når eieren sover). Laptopen melder rollen sin ved paring, sammen med AgentDs eget testmerke, slik at serveren vet mer enn `providerID`. Bygger på maskinprofil F1 i Sprout-PDD-en | T-ENHET: paret laptop med testmerke gir `servingClass: personal_device`, rolle `utvikling`; uten melding gir `unknown`, aldri `tjeneste` | candidate |
 | purpose://candidate.formal-velger-modellkilde.malt-helse | Tilgjengelig betyr målt | kilde-fakta | En kilde regnes som tilgjengelig bare når en måling siste N minutter har lyktes (lett helsesjekk, ikke et ekte spørsmål). Erklæringer som `gatewayConnected: true` og «trusted loopback» teller ikke | T-HELSE: ingen måling → `unknown` → ikke valgt for tjeneste-for-andre; målt ok → valgt; målt feil → ikke valgt og grunnen logges | candidate |
 | purpose://candidate.formal-velger-modellkilde.tilgang-via-agreement | Formålet gir ingen tilgang | root | En kilde personen ikke har Agreement til, blir aldri kandidat, uansett formål. Formålet kan bare snevre inn | test.cell.auth-negative: fremmed spørrer, utløpt Agreement, `purpose://prompt.unknown` gir ingen kandidat | candidate |
 | purpose://candidate.formal-velger-modellkilde.ingen-egnet | Ærlig når ingen egner seg | root | Når ingen kilde består, får personen en kort beskjed som sier hvilket krav som mangler («ingen modell er oppe nå som kan svare deg uten Kjetils maskin»), og svaret uten modell. Bruker beskjedkortet fra CellScaffold #445 | T-INGEN + bilde (G1-GUI) | candidate |
@@ -71,6 +75,7 @@ Avhengigheter (hvert steg før det som endres, målt eller merket):
 | Kallimachos lokal på staging | `KallimachosAdvisorCell.swift:107` | | målt 14.11 og 16.11: **svarer aldri** |
 | Formålskontekst fra Perspective når velgeren | `PersonalCopilotCloudStore.swift:10896` `chatPurposeContext(for:)` | hvilke formål personer faktisk har valgt | **ikke målt** (hva staging-kontoene har i Perspective) |
 | Vertsfakta | `ARBEIDSFLYT.md` over | | målt 16.11 |
+| Maskinprofil (F1, Sprout-PDD) og AgentDs testmerke | Sprout-PDD; HAVENAgentD | ikke lest i denne økten | **ikke målt** |
 | DiMys liste med pris og region | PDD Mistral-kvote | finnes ikke ennå | ikke bygget |
 | Beskjedkort for utilgjengelig modell | CellScaffold #445 | utkast | ikke landet |
 | Swift-bygg i skyen | Docker `swift:6.1-noble` | App bygger ikke i skyen (DiMy privat) | ScaffoldKit bygger; App-tester kjøres i CI |
@@ -332,6 +337,7 @@ Avhengigheter (hvert steg før det som endres, målt eller merket):
 | T-FILTER | hardt-filter | XCTest: tjeneste-for-andre + «privat og norsk» gir aldri `agent_local_model` eller umålt `local_llm`; utvikle-og-teste beholder dagens rangering | TESTRESULT.md#filter | venter |
 | T-LAPTOP | laptop-utvikling | XCTest: eier får laptop med merket «din maskin, bare for deg»; student får ikke; Kallimachos med eier som operatør får ikke | TESTRESULT.md#laptop | venter |
 | T-TJENESTE | tjeneste-for-andre | XCTest med transportspion: Kallimachos uten målt lokal helse gjør null kall til `127.0.0.1:8083`; hostet rute eller beskjed | TESTRESULT.md#tjeneste | venter |
+| T-ENHET | enhetsregister | XCTest: registrering med rolle og testmerke gir riktige fakta; gammel AgentD uten rolle gir `unknown` | TESTRESULT.md#enhet | venter |
 | T-HELSE | malt-helse | XCTest: ingen måling / målt ok / målt feil / måling eldre enn N min | TESTRESULT.md#helse | venter |
 | T-INGEN | ingen-egnet | XCTest: alle kilder feiler kravene → svar uten modell + beskjed med navngitt krav; skjermbilde mot godkjent bilde | TESTRESULT.md#ingen, ACCEPT.md#parity | venter |
 | T-FORKLART | forklart-valg | XCTest: kvittering har `purposeRef`, `servingClass`, `requirementsRevision` | TESTRESULT.md#forklart | venter |
@@ -354,4 +360,5 @@ Avhengigheter (hvert steg før det som endres, målt eller merket):
 | Iterasjon | Dato | Hva endret seg | Hvem |
 |---|---|---|---|
 | 0 | 2026-11-16 | Opprettet | Losen |
+| 2 | 2026-11-16 | Fra staging-trådens gjennomgang av entiteten: tre audit-rader (serveren ser bare `providerID`, AgentDs testmerke når ikke valget, ingen enhetsregister); nytt formål `enhetsregister` med T-ENHET; maskinprofil F1 som avhengighet. `serviceContinuityStatus` dekkes allerede av `malt-helse`/`formal-krav`. 14 formål, 13 formålstester | Claude |
 | 1 | 2026-11-16 | Brief-audit mot CellScaffold `0b42ea5`. Én påstand i startforslaget motsagt: laptopen tilbys ikke studenter i dag (`activeProviderID` sjekker entitet). Hullet er tjenester for andre som peker på erklærte, umålte kilder (Kallimachos lokal) og at ordrangering kan overstyre egnethet. 13 formål, 12 formålstester, 4 spørsmål | Claude |
