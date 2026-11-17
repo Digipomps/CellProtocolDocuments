@@ -17,3 +17,4 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
 ## Logg
 - 2026-11-17: opprettet; FORMAALSSPEC iterasjon 0 sendt til Kjetil for G1
 - 2026-11-17: G1 godkjent av Kjetil 13:34Z uten endringer; anbefalingene i §6 gjelder. Han ba i tillegg om en vurdering av trådadministrasjon (TRAADADMINISTRASJON.md).
+- 2026-11-17: Kjetil 13:36Z la til hjelp til studenten (Sara) og generell HAVEN-hjelp. FORMAALSSPEC iterasjon 1: grenen haven-help.* som fase 2, ikke godkjent ennå. Bilder til G1-GUI (fase 1) sendt.

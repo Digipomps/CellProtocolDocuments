@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — workbench modellvalg og laering
 
-Oppgavemappe: `PDD_workbench-modellvalg-og-laering_2026-11-17` · Opprettet 2026-11-17 · Iterasjon 0 (G1 godkjent 2026-11-17)
+Oppgavemappe: `PDD_workbench-modellvalg-og-laering_2026-11-17` · Opprettet 2026-11-17 · Iterasjon 1 (G1 godkjent 2026-11-17 for iterasjon 0; grenen `haven-help.*` venter på Kjetils ord)
 
 > Regel: ingen plan før G1 er godkjent av Kjetil. For GUI: ingen implementering før G1-GUI (rendret bilde) er godkjent.
 > Et dokument om leveransen teller aldri som leveransen.
@@ -10,6 +10,12 @@ Oppgavemappe: `PDD_workbench-modellvalg-og-laering_2026-11-17` · Opprettet 2026
 Kjetil, 2026-11-17 13:08Z, i tråden om AI-hjelperen i Developer Workbench:
 
 > Vi må koble inn en språkmodell her med api-nøkkel. Jeg vil kunne velge enkelt mellom alle jeg har. Men nå vil jeg teste anthropic fordi vi får litt credits til testing. All språkmodell bruk jeg gjør mens jeg utvikler bør også brukes for å bygge kunnskap og å trene formålsanalysen.
+
+Kjetil, 2026-11-17 13:36Z (tillegg, iterasjon 1):
+
+> Jeg vil også at vi skal tilby språkmodellhjelp til studenten (Sara) for å konstruere sitt eget dashboard og genrell hjelp til alt HAVEN.
+
+Sara er studenten i konferansereisen (`Sources/App/Resources/ConferenceDemo/conference-demo.personas.json`).
 
 Funn i koden (CellScaffold `origin/main` 814fba3, lest av Losen i skyen 2026-11-17):
 
@@ -23,6 +29,9 @@ Funn i koden (CellScaffold `origin/main` 814fba3, lest av Losen i skyen 2026-11-
 | Modellbruk blir tatt vare på | delvis. Hvert kall gir en post i et regnskapsjournal i minnet og en `usage-meter`-hendelse med leverandør, modell og tokens. Ledetekst og svar lagres bevisst **ikke** (avvisningsliste). | `AIGatewayCell.swift` (`attachAccountingJournal`, `recordUsageMeterEvent`), `Support/UsageMetering/UsageMeterContracts.swift` |
 | Noe mater modellbruk inn i formålsanalysen | **unavailable.** Ingen kode samler bestilling, svar og utfall som eksempler for formålsmatching. | søk i `Sources/` etter purposeAnalysis, training, corpus |
 | Staging har `HAVEN_CREDENTIAL_MASTER_KEY` og slipper ut til `api.anthropic.com` | **ikke målt.** Nøkkellagring og kall feiler uten begge. | — |
+| En annen enn eieren kan få modellhjelp uten egen nøkkel | retrieved. Spillverkstedet har en felles modell: vertens nøkkel, med dagsgrense per konto (`GameWorkshopSharedModel`, `invokeWithHostedKey`). | `Sources/App/Cells/GameWorkshop/GameHelperCell.swift` (`askModel`) |
+| Hjelperen kan lage eller endre en flate fra ord | **unavailable.** Settet «Flater og GUI» har ingen handlinger. Det mangler en cellehandling for forhåndsvisning og lagring av skjelett (B2, flyttet til fase 2 i `PDD_workbench-ai-helper_2026-10-09/STATUS.md`). | `Sources/App/Cells/WorkbenchHelper/WorkbenchHelperPlanner.swift` |
+| Hjelperen kan svare fra HAVEN-dokumentasjonen | **unavailable.** Settet «Dokumentasjon» har ingen handlinger; lesende søk som cellehandling mangler. | samme fil |
 
 Det koden ikke kan i dag er funn, ikke premisser: valg av aktiv modell, skjult nøkkelfelt og læringsloggen er arbeidspakker.
 
@@ -38,6 +47,10 @@ Det koden ikke kan i dag er funn, ikke premisser: valg av aktiv modell, skjult n
 | `purpose://candidate.workbench-modellvalg.laer` | Utviklingsbruk blir læring | root, og `purpose://purpose-taxonomy.capture-and-place` | Hvert modellkall fra Developer Workbench lagres hos eieren som et eksempel: bestilling, sett, modell, svar, formålet hjelperen landet på, og hva eieren gjorde (utførte, forkastet, angret). | T-L1 | candidate |
 | `purpose://candidate.workbench-modellvalg.tren-formaalsanalysen` | Eksemplene trener formålsanalysen | `purpose://candidate.workbench-modellvalg.laer` | Eksemplene eieren har godkjent eksporteres som testsett for formålsmatchingen (formatet `haven-prompt-purpose-testing` bruker), og som nye ord i settenes instruksjoner. Treffraten måles før og etter. | T-L2, T-L3 | candidate |
 | `purpose://self-determination.data.manner` (eksisterende) | Eieren styrer bruken av sine data | — | Læringsloggen ligger bare i eierens entitet, kan slås av, ses og slettes, og deles ikke uten at eieren eksporterer. | T-P1 | Book 23 |
+| `purpose://candidate.haven-help.root` | Språkmodellhjelp for alle i HAVEN (fase 2) | `purpose://human-agency` | En som ikke er utvikler, får hjelp av en modell der hen står, uten egen nøkkel, og ser alltid forslaget før noe endres. | T-H1 | candidate, iterasjon 1 |
+| `purpose://candidate.haven-help.own-dashboard` | Studenten bygger sitt eget dashboard med ord | haven-help.root | Sara beskriver hva hun vil se («vis øktene mine i dag og hvem jeg bør møte»), får en forhåndsvisning av dashbordet, og lagrer det som sitt eget. | T-H2 | candidate, iterasjon 1 |
+| `purpose://candidate.haven-help.ask-haven` | Generell hjelp til alt i HAVEN | haven-help.root, `purpose://knowledge.explain-policy` | Spørsmål om HAVEN får svar med hvor svaret står. Vet den ikke, sier den det. | T-H3 | candidate, iterasjon 1 |
+| `purpose://candidate.haven-help.shared-model` | Felles modell med tak | haven-help.root | Den som ikke har egen nøkkel bruker en modell verten har valgt i «Mine modeller», med dagsgrense per person; den som har egen, bruker sin. | T-H4 | candidate, iterasjon 1 |
 
 Rettigheter: et formål gir ingen tilgang. Modellen får fortsatt ingen verktøy, og handlingene står fast per sett.
 
@@ -56,6 +69,11 @@ Hva dette IKKE er:
 | Kjetils Anthropic-nøkkel med kreditt | Kjetil | Han limer den selv inn i det skjulte feltet. Losen ser den aldri. | ja |
 | WorkbenchHelperCell og settene | PR #305 (merget) | Handlingene per sett er uendret | ja |
 | Butler BYOK-lageret | `ButlerProviderConfigurationStore.swift` | Gjenbrukes som «Mine modeller». Butler-invoke åpnes ikke av dette. | ja |
+| Cellehandling for forhåndsvisning og lagring av skjelett (fase 2) | mangler; B2 i AI-hjelper-PDD-en | Uten den kan ingen bygge et dashboard fra ord. Må bygges først. | ja, for own-dashboard |
+| Lesende søk i dokumentasjonen som cellehandling (fase 2) | mangler | Uten den kan hjelperen ikke vise hvor svaret står. | ja, for ask-haven |
+| Felles modell med dagsgrense | `GameWorkshopSharedModel` | Finnes bare for spillverkstedet. Gjøres felles. | ja, for shared-model |
+
+Faser: fase 1 er modellvalg, Anthropic og læring for eieren i Developer Workbench (bildene til G1-GUI). Fase 2 er hjelpen til Sara og generell HAVEN-hjelp; den får egne bilder og egen G1-GUI. Et mislykket steg i fase 2 skal ikke stoppe fase 1.
 
 ## 3. Forventningskontrakt — «Det du kommer til å se»
 
@@ -320,6 +338,10 @@ Hva dette IKKE er:
 | T-L3 | tren-formaalsanalysen | Kjør formålsmatchingen mot testsettet før og etter at eksemplene er tatt inn; skriv treffraten. | `TESTRESULT.md#formaalsanalyse` | venter |
 | T-P1 | self-determination.data.manner | Celletest: bryter av gir ingen nye poster; «Slett» tømmer; en annen identitet får `not_authorized`. | CI | venter |
 | T-R1 | root | Akseptanse i staging: T-A2 og T-L1 i samme økt. | `ACCEPT.md` | venter |
+| T-H2 | haven-help.own-dashboard | Fase 2. Som Sara i staging: én setning gir forhåndsvisning, «Lagre» gir et dashboard som åpner igjen. Håndgrep telles fra bildene. | `TESTRESULT.md#student` | venter |
+| T-H3 | haven-help.ask-haven | Fase 2. Ti spørsmål om HAVEN, hvert svar har kilde eller «vet ikke»; kontrollert mot dokumentene. | `TESTRESULT.md#student` | venter |
+| T-H4 | haven-help.shared-model | Fase 2. Celletest: uten egen nøkkel brukes fellesmodellen; over dagsgrensen avvises kallet med klar melding; vertens nøkkel står aldri i svar eller logg. | CI | venter |
+| T-H1 | haven-help.root | Fase 2. Akseptanse: T-H2 og T-H3 i samme økt som Sara. | `ACCEPT.md` | venter |
 
 ## 6. Åpne spørsmål til Kjetil
 
@@ -330,9 +352,12 @@ Hvert spørsmål har en anbefaling. Svarer du bare «G1 godkjent», gjelder anbe
 3. **Hvilken bruk fanges?** Anbefalt for fase 1: alle modellkall fra Developer Workbench gjennom HAVEN. Claude Code- og Codex-øktene dine kan tas inn senere som import, i en egen fase.
 4. **Hvor lenge ligger eksemplene?** Anbefalt: i din entitet til du sletter dem, med bryter av/på. Nøkler lagres aldri der.
 5. **Hvilken Anthropic-modell som standard?** Anbefalt: `claude-sonnet-5-5`. `claude-haiku-5-5` legges også inn som billigere valg for testing.
+6. **(Iterasjon 1) Hvem betaler for Saras modellkall?** Anbefalt: verten deler én av sine modeller som fellesmodell, med dagsgrense per person, slik spillverkstedet gjør. Alternativ: Sara må legge inn egen nøkkel.
+7. **(Iterasjon 1) Blir Saras bruk læring?** Anbefalt: ja, men hos Sara, i hennes entitet, med samme bryter. Verten ser bare antall kall mot dagsgrensen.
 
 ## 7. Revisjonslogg
 
 | Iterasjon | Dato | Hva endret seg | Hvem |
 |---|---|---|---|
 | 0 | 2026-11-17 | Opprettet. §0–§3, §5 og §6 skrevet fra koden på CellScaffold 814fba3. | Losen |
+| 1 | 2026-11-17 | Etter G1: Kjetil la til hjelp til studenten (Sara) og generell HAVEN-hjelp. Ny gren `haven-help.*` som fase 2, tre funn i §0, tre avhengigheter i §2, T-H1–T-H4, spørsmål 6 og 7. Fase 1 er uendret. Grenen er ikke godkjent ennå. | Losen |
