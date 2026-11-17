@@ -109,9 +109,27 @@ def composition_context(kb, pk, taskdir=None):
 
 # ---------------------------------------------------------------- validate
 
+def observable_errors(kb, pk):
+    """Maskinlesbare mål (`observable`) på Book 23-noder, pakkeformål og derivedTests
+    må holde seg til ordlisten i purpose_observable.py (PDD formaal-som-gui-test)."""
+    from purpose_observable import validate_observables
+    errors = []
+    for n in kb.get("nodes", []):
+        errors += validate_observables(n, n.get("purposeRef", "?"))
+    for p in pk.get("packages", []):
+        pref = p.get("packageRef", "?")
+        for n in p.get("purposes", []):
+            nref = n.get("purposeRef", "?")
+            errors += validate_observables(n, f"{pref}/{nref}")
+            for t in n.get("derivedTests") or []:
+                errors += validate_observables(t, f"{pref}/{nref}/{t.get('testRef', '?')}")
+    return errors
+
+
 def validate(taskdir=None):
     kb, pk, ls = load_all()
     errors, warnings = [], []
+    errors.extend(observable_errors(kb, pk))
     composition, _ = composition_context(kb, pk, taskdir)
     comp_errors, comp_warnings = composition.validate()
     errors.extend(comp_errors)
