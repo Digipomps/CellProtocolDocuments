@@ -300,6 +300,25 @@ TESTRESULT.md under the anchors the tests name (`#build`, `#regression`,
 reason — never silently dropped. `pkg.std.everything-works` is always attached:
 build, full regression, docs in the same change, STATUS.md current.
 
+### Observable goals on GUI elements (PDD formaal-som-gui-test, 2026-11-17)
+
+A leaf purpose that an interactive element serves names its goal in machine-readable
+form: `SkeletonModifiers.purposeRef` on the element (CellProtocol #83) and a manifest
+`haven.skeleton-purpose-manifest.v0` per surface listing, per element purpose, the
+elements and an `observable` list from the closed vocabulary in Book 35 §2.2a
+(`opensTab`, `dispatches`, `showsState`, `insertsWidget`, `navigatesTo`,
+`changesState`; validated by `Tools/PurposePackages/purpose_observable.py`, enforced by
+`purpose_dev.py validate`). The tests then follow from the goals instead of being
+invented: a generic Playwright driver (`playwright/purpose-driver.spec.js`) performs the
+web goals, a Swift test performs `changesState` against the cells, and both write a
+`haven.purpose-coverage-report.v0` that `review.importCoverage` on `cell:///PurposeReview`
+turns into coverage per purpose in the Formålstre tab. Pilot: Spillverksted
+(`spillverksted.purposes.v1.json`, CellScaffold #434, #455). Rules decided by Kjetil
+2026-11-08: the vocabulary grows only through the lessons register; a red test for an
+element without a purpose applies to the pilot surface first; coverage grants no right.
+When a PDD adds a surface, write its manifest in §1b and let the §5 tests be the driver,
+the cell test and the coverage view, not a hand-written list.
+
 ### Verification and landing tools (queue-run on the Mac)
 
 - `HAVEN-Deploy/_handoff/LANDING/land-cellprotocol.sh <spec>` runs the full `swift test` on a clean export of `origin/main` against the worktree, checks that every bundle completes, and blocks on any new failure. The test-count difference must equal the number of new test methods. It then commits and pushes to main.
