@@ -51,6 +51,35 @@ then name what is missing. A model may select among candidates; it never mints
 and `evidence` is an intention and fails validation. Status at run time:
 `venter | grønn | rød | blocked`.
 
+### 2.2a Observable goal (`observable`, since 2026-11-09)
+
+A purpose that sits on a GUI element (`SkeletonModifiers.purposeRef`, CellProtocol
+`Docs/Skeleton_Purpose_Ref_Contract.md`) or on a cell action may carry an optional
+list `observable`, on the node itself or on a derived test. Each entry is an object
+with `kind` from a closed vocabulary and the arguments that word requires. A generic
+runner (Playwright for Porthole web, a Swift test for cells) reads the list and
+performs it; `purpose_dev.py validate` rejects anything outside the vocabulary
+(`Tools/PurposePackages/purpose_observable.py`).
+
+| kind | required | optional | what the runner checks |
+|---|---|---|---|
+| `opensTab` | `tab` | | the Tabs element's `activeTabStateKeypath` becomes `tab` |
+| `dispatches` | `actionKeypath` | `payloadShape` (key → `string|integer|number|bool|object|list|null`) | the element sends that action, with a payload of that shape |
+| `showsState` | `keypath` | `equals` | the value at `keypath` is visible, optionally equal to `equals` |
+| `insertsWidget` | `widgetKind` | | a component of that kind appears on the surface |
+| `navigatesTo` | `configuration` | | that configuration opens |
+| `changesState` | `keypath` | `equals` | after the action the cell's state at `keypath` changed, optionally to `equals` |
+
+```json
+{ "purposeRef": "purpose://candidate.game-workshop.project.create-from-wish",
+  "observable": [ { "kind": "dispatches", "actionKeypath": "gameHelper.ask", "payloadShape": { "text": "string" } },
+                  { "kind": "showsState", "keypath": "gameHelper.helper.state.message" } ] }
+```
+
+The vocabulary grows only through the lessons register, when a pilot shows a word is
+missing (decided by Kjetil 2026-11-08, PDD `formaal-som-gui-test`). An `observable`
+never grants a right; it says what a test may expect to see.
+
 ### 2.3 Purpose package (`haven.purpose-package-set.v0`)
 
 `Book/haven_purpose_packages_v0.json`. A package is a reusable bundle:
