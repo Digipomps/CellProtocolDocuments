@@ -23,3 +23,4 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
 - 2026-11-17: PLAN.md skrevet (18 arbeidspakker). Venter på G2.
 - 2026-11-17: G2 godkjent av Kjetil. Implementering startet med WP0–WP2.
 - 2026-11-17: WP1–WP4 skrevet. CellScaffold utkast-PR #454 (egnethetskontrakt, kildefakta, hardt filter). TESTRESULT.md startet. Tillegg i kontrakten: servingClass requester_device (Apple Intelligence på enheten spørreren sitter ved).
+- 2026-11-17: WP5, WP6, WP8 og WP9 på vertssiden skrevet (CellScaffold #454, `b533ecd`): cellen `LocalModelAvailability`, erklær og trekk tilbake, hendelser, målt helse. 41 tester grønne i isolert pakke. Merk: etter denne endringen vises ikke laptop-modellen før HavenAgentD sender erklæringen (WP7, ikke skrevet). Neste: CI-resultat, så WP7 og WP10.
