@@ -2811,6 +2811,96 @@
       ],
       "severity": "major",
       "source": "Deliverables/PDD_perspective-context-events_2026-10-09"
+    },
+    {
+      "lessonRef": "lesson.gui-image-number-from-another-source",
+      "date": "2026-11-17",
+      "symptom": "G1-GUI-bildet for dekningsvisningen sa «21 elementer»; den bygde flaten sa 19. Oppdaget i ACCEPT (parity), ikke før.",
+      "cause": "Tallet i bildet ble regnet fra skjelettet (21 forekomster med purposeRef), mens visningen teller manifestet (19 elementer; to knapper står to steder i skjelettet). Bildet og flaten brukte to kilder for samme tall.",
+      "prevention": "Hvert tall i et G1-GUI-bilde regnes av samme kode og samme data som flaten kommer til å bruke, eller merkes som plassholder i §3 med kilden oppgitt. Sammenlign tallene i bildet mot datakilden før bildet sendes til godkjenning.",
+      "purposeRefs": [
+        "purpose://test.acceptance",
+        "purpose://gui.quality.functional-accessible"
+      ],
+      "tags": [
+        "gui",
+        "pdd",
+        "parity",
+        "image"
+      ],
+      "severity": "minor",
+      "source": "Deliverables/PDD_formaal-som-gui-test_2026-11-08"
+    },
+    {
+      "lessonRef": "lesson.placeholder-text-in-approved-image",
+      "date": "2026-11-17",
+      "symptom": "Dialogen i det godkjente bildet viste rapportnavnet «coverage/spillverksted-2026-11-09.json»; den bygde flaten viser kjørerens ekte reportRef «playwright/purpose-driver». Avviket måtte godkjennes i ettertid.",
+      "cause": "Kandidat-treet bak bildet hadde en oppdiktet streng der den ekte verdien ikke fantes ennå.",
+      "prevention": "Ingen oppdiktede strenger i et G1-GUI-bilde: bruk den verdien kjøreren faktisk skriver, eller sett «eksempel» synlig i bildet og list strengen i §3 som noe som vil endre seg.",
+      "purposeRefs": [
+        "purpose://test.acceptance"
+      ],
+      "tags": [
+        "gui",
+        "pdd",
+        "image"
+      ],
+      "severity": "minor",
+      "source": "Deliverables/PDD_formaal-som-gui-test_2026-11-08"
+    },
+    {
+      "lessonRef": "lesson.await-inside-xctunwrap-autoclosure",
+      "date": "2026-11-17",
+      "symptom": "To Mac-bygg (1047 s kaldt + 207 s) gikk tapt på `try XCTUnwrap(object(try await state(...)))` i en ny Swift-test: «'async' call in an autoclosure that does not support concurrency».",
+      "cause": "XCTUnwrap tar en autoclosure; await kan ikke stå inne i den. Fellen var kjent fra CellScaffold #343 (2026-10-22), men ble ikke sjekket før bygget ble satt i kø.",
+      "prevention": "Før en Swift-test sendes til bygg: `grep -n 'XCTUnwrap(.*await' Tests/` skal være tomt; await på egen linje, så XCTUnwrap på verdien. Legg sjekken i jobben som første steg.",
+      "purposeRefs": [
+        "purpose://quality"
+      ],
+      "tags": [
+        "swift",
+        "test",
+        "ci",
+        "mac"
+      ],
+      "severity": "major",
+      "source": "Deliverables/PDD_formaal-som-gui-test_2026-11-08"
+    },
+    {
+      "lessonRef": "lesson.denied-is-thrown-not-returned",
+      "date": "2026-11-17",
+      "symptom": "Negativ test ventet `{\"error\": \"not_authorized\"}` fra cellen når en fremmed identitet skrev; testen falt med «caught error: denied(...)» fra GeneralCell.",
+      "cause": "Resolveren avviser en fremmed før cellens egen handler kjører og kaster CellAuthorizationError.denied; cellens `not_authorized`-svar nås bare av requestere som slipper gjennom resolveren.",
+      "prevention": "Negative tilgangstester bruker do/catch, godtar både kastet `denied` og svarobjekt, og leser tilstanden etterpå for å vise at ingenting endret seg.",
+      "purposeRefs": [
+        "purpose://quality"
+      ],
+      "tags": [
+        "swift",
+        "test",
+        "cell",
+        "authorization"
+      ],
+      "severity": "minor",
+      "source": "Deliverables/PDD_formaal-som-gui-test_2026-11-08"
+    },
+    {
+      "lessonRef": "lesson.mac-worktree-vanishes-between-days",
+      "date": "2026-11-17",
+      "symptom": "Agentkø-jobber ble avvist med «cwd does not exist: tmp/cs-pdd-formaal-20261112»; arbeidstreet fra fem dager før var ryddet bort (ledig disk gikk fra 20 til 58 GiB).",
+      "cause": "Arbeidstrær under HAVEN/tmp ryddes av andre tråder eller Kjetil; en tråd kan ikke anta at dens arbeidstre lever fra dag til dag.",
+      "prevention": "Hver byggekjede starter med en egen jobb i primærsjekkouten: `git fetch origin main` + `git worktree prune` + `git worktree add --detach ../tmp/<navn>-<dato> origin/main`; først deretter bundle-fetch og bygg. Kaldt bygg koster ca. 17 min, så kjør kjeden tidlig.",
+      "purposeRefs": [
+        "purpose://quality"
+      ],
+      "tags": [
+        "mac",
+        "agentkoe",
+        "worktree",
+        "ci"
+      ],
+      "severity": "minor",
+      "source": "Deliverables/PDD_formaal-som-gui-test_2026-11-08"
     }
   ]
 }
