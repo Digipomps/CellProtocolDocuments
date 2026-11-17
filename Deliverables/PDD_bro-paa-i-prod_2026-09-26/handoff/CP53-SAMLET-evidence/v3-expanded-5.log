@@ -1,0 +1,306 @@
+warning: /Users/kjetil/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/kjetil/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: '_wt-bro-kanal-auth-20260927': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Using on-disk description]
+[1 / 96] HavenPerspectiveSchemas-product
+[1 / 167] HavenCommonsTests-product
+[1 / 57] _NIODataStructures
+[2 / 7] CellBaseTests-product
+[5 / 10] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:18:14: warning: concurrently-executed local function 'data' must be marked as '@Sendable'; this is an error in the Swift 6 language mode
+  16 |     private func checkFullVector(_ name: String) async throws {
+  17 |         let v = try Self.vectors(name)
+  18 |         func data(_ name: String) -> Data { v[name]! }
+     |              `- warning: concurrently-executed local function 'data' must be marked as '@Sendable'; this is an error in the Swift 6 language mode
+  19 |         let endpoint = try A.decode(P.Endpoint.self, from: data("endpoint"))
+  20 |         let ih = try A.decode(P.Hello.self, from: data("hello0")), rh = try A.decode(P.Hello.self, from: data("hello1"))
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:250:54: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 248 |         i = try BridgeChannelTransport(underlying: it, peerEndpoint: endpoint, role: .initiator, owner: io,
+ 249 |             limits: limits, source: UUID().uuidString, disclosurePolicy: policy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 250 |             recheckPolicy: recheck, wallClock: clock.date, monotonic: clock.uptime) { [id] gate, session in
+     |                                                      `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 251 |                 if let factory, factoryRole == .initiator { return try await factory(gate, session) }
+ 252 |                 id.created(); gate.setDelegate(id)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:250:77: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 248 |         i = try BridgeChannelTransport(underlying: it, peerEndpoint: endpoint, role: .initiator, owner: io,
+ 249 |             limits: limits, source: UUID().uuidString, disclosurePolicy: policy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 250 |             recheckPolicy: recheck, wallClock: clock.date, monotonic: clock.uptime) { [id] gate, session in
+     |                                                                             `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 251 |                 if let factory, factoryRole == .initiator { return try await factory(gate, session) }
+ 252 |                 id.created(); gate.setDelegate(id)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:258:63: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 256 |         r = try BridgeChannelTransport(underlying: rt, peerEndpoint: endpoint, role: .responder, owner: ro,
+ 257 |             limits: limits, source: UUID().uuidString, disclosurePolicy: responderPolicy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 258 |             recheckPolicy: responderRecheck, wallClock: clock.date, monotonic: clock.uptime) { [rd] gate, session in
+     |                                                               `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 259 |                 if let factory, factoryRole == .responder { return try await factory(gate, session) }
+ 260 |                 rd.created(); gate.setDelegate(rd)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:258:86: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 256 |         r = try BridgeChannelTransport(underlying: rt, peerEndpoint: endpoint, role: .responder, owner: ro,
+ 257 |             limits: limits, source: UUID().uuidString, disclosurePolicy: responderPolicy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 258 |             recheckPolicy: responderRecheck, wallClock: clock.date, monotonic: clock.uptime) { [rd] gate, session in
+     |                                                                                      `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 259 |                 if let factory, factoryRole == .responder { return try await factory(gate, session) }
+ 260 |                 rd.created(); gate.setDelegate(rd)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:828:35: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 826 |         operation = try P.Operation(owner: owner, endpoint: gate.session.peerEndpoint!, role: role,
+ 827 |             generation: UUID().uuidString, policy: .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 828 |             wallClock: pair.clock.date, monotonic: pair.clock.uptime, ephemeral: privateKey)
+     |                                   `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 829 |     }
+ 830 |     func advance(to step: Int) async throws {
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:828:63: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 826 |         operation = try P.Operation(owner: owner, endpoint: gate.session.peerEndpoint!, role: role,
+ 827 |             generation: UUID().uuidString, policy: .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 828 |             wallClock: pair.clock.date, monotonic: pair.clock.uptime, ephemeral: privateKey)
+     |                                                               `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 829 |     }
+ 830 |     func advance(to step: Int) async throws {
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:907:88: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 905 | extension BridgePeerV3Tests {
+ 906 |     func testValidAEADInnerMutationsCloseRealGateReleaseQuotaAndPreserveHealthySibling() async throws {
+ 907 |         let quotaClock = V3Clock(), limits = BridgeChannelLimits(monotonic: quotaClock.uptime)
+     |                                                                                        `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 908 |         let sibling = try V3GatePair(limits: limits), healthy = try await sibling.start()
+ 909 |         for step in 1...5 { try await sibling.step(step) }; try await healthy.value
+[9 / 12] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:500:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 498 |         // concerns A's physical route, and preserves the receive sequence.
+ 499 |         _ = try pair.pb.gate.openPeerFrame(heldRequest.data)
+ 500 |         let pendingCommand = await bridge.auditor.loadBridgeCommandForCommandId(1)
+     |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 501 |         XCTAssertNotNil(pendingCommand)
+ 502 |         let forged = BridgeCommand(cmd: "response", payload: .string("from-c"), cid: 1,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:506:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 504 |         try await pc.gate.sendData(A.encode(forged))
+ 505 |         try await pair.deliverNext()
+ 506 |         let stillPending = await bridge.auditor.loadBridgeCommandForCommandId(1)
+     |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 507 |         XCTAssertNotNil(stillPending, "C's response must not consume B's pending cid")
+ 508 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:532:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 530 |             await pair.pb.bridge!.sendCommand(command: .description, identity: pair.b.owner, payload: nil)
+ 531 |             let oldCommand = try await pair.next(), captured = try pair.receiver(oldCommand)
+ 532 |             let firstCID = await pair.pb.bridge!.auditor.loadBridgeCommandForCommandId(1)
+     |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 533 |             XCTAssertEqual(firstCID?.cid, 1)
+ 534 |             try await pair.deliver(oldCommand)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:541:26: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 539 |             await fresh.1.bridge!.sendCommand(command: .description, identity: pair.b.owner, payload: nil)
+ 540 |             let newCommand = try await pair.next()
+ 541 |             let newCID = await fresh.1.bridge!.auditor.loadBridgeCommandForCommandId(1)
+     |                          `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 542 |             XCTAssertEqual(firstCID?.cid, newCID?.cid, "Actual Base cid reuse")
+ 543 |             // A callback already captured by an old transport cannot close the new one.
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:865:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 863 |                 XCTAssertNotEqual(oldKey, freshKey)
+ 864 |                 let request = BridgeCommand(cmd: "description", identity: pair.a.owner.publicIdentitySnapshot(), payload: nil, cid: 1)
+ 865 |                 let stored = await fresh.0.bridge!.auditor.storeBridgeCommand(request, for: 1)
+     |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 866 |                 XCTAssertTrue(stored)
+ 867 |                 // M knows the public new generation and the expected counter.
+
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+[10 / 13] CellBaseTests-product
+[12 / 15] CellBaseTests-product
+[14 / 18] CellBaseTests-product
+[15 / 18] CellBaseTests-product
+[16 / 18] CellBaseTests-product
+Build complete! (7,42 sek)
+Test Suite 'Selected tests' started at 2026-09-29 08:18:02.372.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-09-29 08:18:02.373.
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-09-29 08:18:02.373.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 08:18:02.373.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 08:18:02.438.
+Test Suite 'CellNearbyTests.xctest' started at 2026-09-29 08:18:02.438.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-09-29 08:18:02.438.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 08:18:02.438.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 08:18:02.506.
+Test Suite 'CellBaseTests.xctest' started at 2026-09-29 08:18:02.506.
+Test Suite 'BridgePeerV3Tests' started at 2026-09-29 08:18:02.506.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testActiveInitiatorCanReadResponderButUnrelatedRelayDHCannot]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testActiveInitiatorCanReadResponderButUnrelatedRelayDHCannot]' passed (0.004 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testAuthenticatedInnerFieldMutationsRequireMACSignatureAndFrozenContext]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testAuthenticatedInnerFieldMutationsRequireMACSignatureAndFrozenContext]' passed (0.054 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCanonicalEnvelopeAndPaddingRejectEveryAlternativeEncoding]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCanonicalEnvelopeAndPaddingRejectEveryAlternativeEncoding]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCloseAndDirectRevokeWinBeforePhysicalSendAdmission]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCloseAndDirectRevokeWinBeforePhysicalSendAdmission]' passed (0.051 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryHelloFieldAndLegacyProfileFailsBeforeDisclosure]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryHelloFieldAndLegacyProfileFailsBeforeDisclosure]' passed (0.014 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryOutOfOrderHandshakeMessageAndTamperedTagIsTerminal]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryOutOfOrderHandshakeMessageAndTamperedTagIsTerminal]' passed (0.025 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testExplicitDisclosurePolicyRejectsBeforeInitiatorSigning]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testExplicitDisclosurePolicyRejectsBeforeInitiatorSigning]' passed (0.106 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testFinalFinishedReservationSurvivesHeldPhysicalClose]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testFinalFinishedReservationSurvivesHeldPhysicalClose]' passed (0.042 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testHandshakeQuotasStayBoundedAndFinalFinishedWaitsForAuthenticatedProgress]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testHandshakeQuotasStayBoundedAndFinalFinishedWaitsForAuthenticatedProgress]' passed (0.032 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentDHLegsCannotSpliceProofOrFinishedEvenWithSameIdentities]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentDHLegsCannotSpliceProofOrFinishedEvenWithSameIdentities]' passed (0.136 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentFullHandshakeAndAllKeyPurposes]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentFullHandshakeAndAllKeyPurposes]' passed (0.023 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLateM1SendCompletionCannotUndoAuthenticatedProgress]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLateM1SendCompletionCannotUndoAuthenticatedProgress]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLiveMixedAlgorithmsFixedLengthsAndSameKeyReflection]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLiveMixedAlgorithmsFixedLengthsAndSameKeyReflection]' passed (0.235 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerLateFactoryTransportBindingRetiresSubscriptionAndDeinitializesForBothRoles]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerLateFactoryTransportBindingRetiresSubscriptionAndDeinitializesForBothRoles]' passed (0.216 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerMuxHeldPhysicalSubmissionFencesReusedIDAndCIDWhileSiblingWorks]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerMuxHeldPhysicalSubmissionFencesReusedIDAndCIDWhileSiblingWorks]' passed (0.043 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringEitherFactoryRetiresResultWithoutReady]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringEitherFactoryRetiresResultWithoutReady]' passed (0.037 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringVaultLookupOrSigningStopsDisclosure]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringVaultLookupOrSigningStopsDisclosure]' passed (0.088 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRegisteredRemoteRevocationAndSuspendedPolicyPreventLocalDisclosure]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRegisteredRemoteRevocationAndSuspendedPolicyPreventLocalDisclosure]' passed (0.033 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRetiredSignerCannotAffectFreshChannelWithSameIdentity]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRetiredSignerCannotAffectFreshChannelWithSameIdentity]' passed (0.022 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testScannerStopDisconnectAndOwnerCloseDiscardSuspendedSignerInBothRoles]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testScannerStopDisconnectAndOwnerCloseDiscardSuspendedSignerInBothRoles]' passed (1.151 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedFactoryIsRetiredOnceAndNeverPublishesReady]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedFactoryIsRetiredOnceAndNeverPublishesReady]' passed (0.065 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedPolicySendAndFactoryExpireForBothRolesWithoutLatePublication]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedPolicySendAndFactoryExpireForBothRolesWithoutLatePublication]' passed (0.208 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedSignerStormKeepsWorkUntilReturnAndRejectsLimitPlusOne]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedSignerStormKeepsWorkUntilReturnAndRejectsLimitPlusOne]' passed (0.047 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedVaultExistenceAndSignerCannotSurviveCloseRevokeOrExpiry]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedVaultExistenceAndSignerCannotSurviveCloseRevokeOrExpiry]' passed (0.849 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testValidAEADInnerMutationsCloseRealGateReleaseQuotaAndPreserveHealthySibling]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testValidAEADInnerMutationsCloseRealGateReleaseQuotaAndPreserveHealthySibling]' passed (2.256 seconds).
+Test Suite 'BridgePeerV3Tests' passed at 2026-09-29 08:18:08.249.
+	 Executed 25 tests, with 0 failures (0 unexpected) in 5.740 (5.743) seconds
+Test Suite 'CellBaseTests.xctest' passed at 2026-09-29 08:18:08.249.
+	 Executed 25 tests, with 0 failures (0 unexpected) in 5.740 (5.743) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 08:18:08.249.
+	 Executed 25 tests, with 0 failures (0 unexpected) in 5.740 (5.744) seconds
+Inited radar service with peerId: <MCPeerID: 0x768e9bc0c0 DisplayName = HAVEN-firstc18>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc0d0 DisplayName = HAVEN-secondc1>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc120 DisplayName = HAVEN-firstc18>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc130 DisplayName = HAVEN-secondc1>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc160 DisplayName = HAVEN-firstb10>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc170 DisplayName = HAVEN-secondb1>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc1b0 DisplayName = HAVEN-firstb10>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc1c0 DisplayName = HAVEN-secondb1>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc1e0 DisplayName = HAVEN-first76a>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc1f0 DisplayName = HAVEN-second76>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc230 DisplayName = HAVEN-first76a>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc240 DisplayName = HAVEN-second76>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc260 DisplayName = HAVEN-first35e>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc270 DisplayName = HAVEN-second35>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc2b0 DisplayName = HAVEN-first35e>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc2c0 DisplayName = HAVEN-second35>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc2e0 DisplayName = HAVEN-firste86>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc2f0 DisplayName = HAVEN-seconde8>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc330 DisplayName = HAVEN-firste86>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc340 DisplayName = HAVEN-seconde8>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc360 DisplayName = HAVEN-first54c>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc370 DisplayName = HAVEN-second54>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc3b0 DisplayName = HAVEN-first54c>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc3c0 DisplayName = HAVEN-second54>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc3e0 DisplayName = HAVEN-first9f4>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc3f0 DisplayName = HAVEN-second9f>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc430 DisplayName = HAVEN-first9f4>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc440 DisplayName = HAVEN-second9f>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc460 DisplayName = HAVEN-firstc9e>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc470 DisplayName = HAVEN-secondc9>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc4a0 DisplayName = HAVEN-firstc9e>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc4b0 DisplayName = HAVEN-secondc9>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc4c0 DisplayName = HAVEN-first9fe>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc4d0 DisplayName = HAVEN-second9f>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc510 DisplayName = HAVEN-first9fe>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc520 DisplayName = HAVEN-second9f>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc540 DisplayName = HAVEN-first24f>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc550 DisplayName = HAVEN-second24>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc590 DisplayName = HAVEN-first24f>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc5a0 DisplayName = HAVEN-second24>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc5c0 DisplayName = HAVEN-first93b>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc5d0 DisplayName = HAVEN-second93>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc610 DisplayName = HAVEN-first93b>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc620 DisplayName = HAVEN-second93>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc640 DisplayName = HAVEN-first028>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc650 DisplayName = HAVEN-second02>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc690 DisplayName = HAVEN-first028>
+Inited radar service with peerId: <MCPeerID: 0x768e9bc6a0 DisplayName = HAVEN-second02>
+V3 gate mutation M2/endpoint.initiator
+V3 gate mutation M2/endpoint.responder
+V3 gate mutation M2/endpoint.setupID
+V3 gate mutation M2/endpoint.domain
+V3 gate mutation M2/identity.uuid
+V3 gate mutation M2/identity.algorithm
+V3 gate mutation M2/identity.curve
+V3 gate mutation M2/identity.publicKey
+V3 gate mutation M2/proof.sessionID
+V3 gate mutation M2/proof.generation
+V3 gate mutation M2/proof.signature
+V3 gate mutation M2/signed.resource
+V3 gate mutation M2/signed.audience
+V3 gate mutation M2/signed.domain
+V3 gate mutation M2/signed.nonce
+V3 gate mutation M2/signed.issuedAt
+V3 gate mutation M2/signed.expiresAt
+V3 gate mutation M2/signed.action
+V3 gate mutation M2/identityMAC
+V3 gate mutation M2/extra
+V3 gate mutation M2/padding
+V3 gate mutation M2/jsonLength
+V3 gate mutation M2/tag
+V3 gate mutation M3/endpoint.initiator
+V3 gate mutation M3/endpoint.responder
+V3 gate mutation M3/endpoint.setupID
+V3 gate mutation M3/endpoint.domain
+V3 gate mutation M3/identity.uuid
+V3 gate mutation M3/identity.algorithm
+V3 gate mutation M3/identity.curve
+V3 gate mutation M3/identity.publicKey
+V3 gate mutation M3/proof.sessionID
+V3 gate mutation M3/proof.generation
+V3 gate mutation M3/proof.signature
+V3 gate mutation M3/signed.resource
+V3 gate mutation M3/signed.audience
+V3 gate mutation M3/signed.domain
+V3 gate mutation M3/signed.nonce
+V3 gate mutation M3/signed.issuedAt
+V3 gate mutation M3/signed.expiresAt
+V3 gate mutation M3/signed.action
+V3 gate mutation M3/identityMAC
+V3 gate mutation M3/extra
+V3 gate mutation M3/padding
+V3 gate mutation M3/jsonLength
+V3 gate mutation M3/tag
+V3 gate mutation M4/ack.sessionID
+V3 gate mutation M4/ack.generation
+V3 gate mutation M4/ack.transcriptDigest
+V3 gate mutation M4/verifyData
+V3 gate mutation M4/extra
+V3 gate mutation M4/padding
+V3 gate mutation M4/jsonLength
+V3 gate mutation M4/tag
+V3 gate mutation M5/ack.sessionID
+V3 gate mutation M5/ack.generation
+V3 gate mutation M5/ack.transcriptDigest
+V3 gate mutation M5/verifyData
+V3 gate mutation M5/extra
+V3 gate mutation M5/padding
+V3 gate mutation M5/jsonLength
+V3 gate mutation M5/tag

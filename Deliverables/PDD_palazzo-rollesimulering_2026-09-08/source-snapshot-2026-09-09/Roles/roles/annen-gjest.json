@@ -1,0 +1,84 @@
+{
+  "role": "annen-gjest",
+  "principal": "guest:{other_guest_id}",
+  "note": "Rollen som beviser personverngrensen. Alt den når av første gjests data er en lekkasje, ikke et funn.",
+  "purposes": [
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.annen.own-entity",
+      "title": "Annen gjest leser sin egen entitet",
+      "calibration": "positive",
+      "action": {
+        "method": "GET",
+        "path": "/api/entity/state"
+      },
+      "expect": {
+        "access": "allowed",
+        "state": {
+          "path": "value",
+          "op": "ne",
+          "value": null
+        }
+      },
+      "null_principal_may_reach": true
+    },
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.annen.first-guest-insight",
+      "title": "Annen gjest spør etter første gjests innsikt",
+      "calibration": "null",
+      "action": {
+        "method": "POST",
+        "path": "/api/insight/query",
+        "json": {
+          "value": {
+            "subject": "{guest_cell}",
+            "keypaths": [
+              "entity.constraints.current"
+            ]
+          }
+        }
+      },
+      "expect": {
+        "access": "denied"
+      },
+      "why": "Riktig stopp: ingen avtale mellom disse to gjestene."
+    },
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.annen.first-guest-records",
+      "title": "Annen gjest leser første gjests oppføringer direkte",
+      "action": {
+        "method": "POST",
+        "path": "/api/cell/get",
+        "json": {
+          "value": {
+            "cell": "{guest_cell}",
+            "keypath": "entity.records"
+          }
+        }
+      },
+      "expect": {
+        "access": "denied"
+      },
+      "stop_is": "riktig",
+      "why": "Riktig stopp: eierskap. Kommer den gjennom, er det personvernlekkasje og kjøringen skal feile hardt."
+    },
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.annen.first-guest-reactions",
+      "title": "Annen gjest leser første gjests artikkelreaksjoner",
+      "action": {
+        "method": "POST",
+        "path": "/api/cell/get",
+        "json": {
+          "value": {
+            "cell": "{guest_cell}",
+            "keypath": "entity.article.reactions"
+          }
+        }
+      },
+      "expect": {
+        "access": "denied"
+      },
+      "stop_is": "riktig",
+      "why": "Riktig stopp: reaksjonene er gjestens egne."
+    }
+  ]
+}

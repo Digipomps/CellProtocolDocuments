@@ -1,0 +1,40 @@
+{
+  "name": "palazzo_remember_contract_v0",
+  "lastVerifiedAgainstCode": null,
+  "purposeRef": "purpose://candidate.palazzo-husk.root",
+  "invariant": "Ingen felt fra gjestens post krysser grensen ut over explanation; ingen treff synlig for huset uten innsyn-grant; ingen match fra poster med source != self.",
+  "types": {
+    "PalazzoMenuSignal": { "id": "string", "version": "integer>=1", "dishID": "string", "title": "string", "tags": "[string] non-empty lowercased", "validFrom": "ISO8601", "validUntil": "ISO8601|null", "kind": "\"menuChange\"" },
+    "PalazzoMatch": { "id": "string", "signalRef": { "id": "string", "version": "integer" }, "signalTitle": "string", "sourceRecordID": "string", "verdict": "positive|negative|undecided", "explanation": "string", "state": "pending|insightGranted|actionGranted|declined|expired|revoked", "grants": "[{grant: insight|action, standing: bool, agreementID: string, decidedAt: ISO8601}]", "issuedAt": "ISO8601" },
+    "PalazzoTrustPacket": { "allowlistKeys": ["schema", "signalRef", "verdict", "explanation", "provenanceHash", "grantRefs", "sittingRef", "issuedAt", "guestIdentityUUID", "signature"], "schema": "palazzo.trustPacket.v1", "provenanceHash": "sha256(canonical JSON of source record) hex", "signature": "guest identity signature over canonical JSON of all other allowlist keys" }
+  },
+  "keypaths": {
+    "PalazzoContent": {
+      "content.draft.tags.pending": { "op": "get", "access": "owner", "returns": "[{id, dishTitle, dishDescription, proposedTagsText, status: proposed|approved|skipped}]" },
+      "content.draft.tags.approve": { "op": "set", "access": "owner", "input": { "dishID": "string", "tags": "[string]" }, "rule": "tags tomme → invalid_payload" },
+      "content.draft.tags.skip": { "op": "set", "access": "owner", "input": { "dishID": "string" } },
+      "content.signals": { "op": "get", "access": "ownerPublishedRead", "returns": "[PalazzoMenuSignal]", "rule": "bare retter med status approved; uendret rett beholder id+version" },
+      "content.configuration": { "op": "get", "access": "owner", "returns": "CellConfiguration (hus-tagger.json)" }
+    },
+    "PalazzoEntity": {
+      "match.refresh": { "op": "set", "access": "owner", "input": {}, "returns": { "new": "integer", "total": "integer" } },
+      "match.pending": { "op": "get", "access": "owner-only", "returns": "[PalazzoMatch state==pending]" },
+      "match.expired": { "op": "get", "access": "owner-only" },
+      "match.shared": { "op": "get", "access": "owner-only", "returns": "[PalazzoMatch + packet]" },
+      "match.open": { "op": "set", "access": "owner", "input": { "matchID": "string" }, "effect": "consent.request kind=match" },
+      "match.dismiss": { "op": "set", "access": "owner", "input": { "matchID": "string" } },
+      "match.decide": { "op": "set", "access": "owner", "input": { "matchID": "string", "grant": "insight|action", "decision": "approve|decline", "standing": "bool?" }, "effect": "approve → gjeste-utstedt kontrakt keypath match.<id>.verdict|action; standing → policy consent.policy.match.menuChange.<grant>; insight approve → TrustPacket utstedes og sendes house.remember.receive" },
+      "match.revoke": { "op": "set", "access": "owner", "input": { "matchID": "string" }, "effect": "kontrakter tilbakekalles, house.remember.revoke" },
+      "insight.query.interests.match": { "op": "set", "access": "policy", "returns": { "status": "deprecated", "replacedBy": "match.*" }, "rule": "aldri matches/score" }
+    },
+    "PalazzoHouse": {
+      "house.remember.receive": { "op": "set", "access": "requester == packet.guestIdentityUUID", "input": "PalazzoTrustPacket", "rule": "verify() må være grønn; ellers invalid_packet" },
+      "house.remember.list": { "op": "get", "access": "hus|staff", "returns": "[{guestUUID, sittingRef, explanation, signalTitle, hasActionGrant, issuedAt}]" },
+      "house.remember.revoke": { "op": "set", "access": "requester == packet.guestIdentityUUID", "input": { "matchID": "string" } }
+    },
+    "PalazzoStaffShell": {
+      "staff.state.lastBrief.remembered": { "op": "get (del av staff.state)", "returns": "[{line, actionLabel}]", "rule": "line = «explanation» → signalTitle; actionLabel kun når hasActionGrant" }
+    }
+  },
+  "fixtures": "contract/fixtures/*.json"
+}

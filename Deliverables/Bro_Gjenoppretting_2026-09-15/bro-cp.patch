@@ -1,0 +1,274 @@
+diff --git a/Sources/CellBase/Cells/CellResolver/CellResolver.swift b/Sources/CellBase/Cells/CellResolver/CellResolver.swift
+index c7f4a02..6958047 100644
+--- a/Sources/CellBase/Cells/CellResolver/CellResolver.swift
++++ b/Sources/CellBase/Cells/CellResolver/CellResolver.swift
+@@ -111,6 +111,11 @@ private struct ProvenRemoteBridgePrincipal: Sendable {
+     let signingKeyFingerprint: String
+     let homeVaultReference: String
+     let requester: Identity
++    /// The signed origin proof this principal was established with. It used to
++    /// be computed and thrown away, which meant a remote host had no way to
++    /// learn who was connecting. Kept so the bridge URL can carry it.
++    let authorityChallenge: Data
++    let authoritySignature: Data
+ }
+ 
+ private struct RemoteCellBridgeCacheEntry {
+@@ -133,6 +138,10 @@ private enum RemoteCellBridgeRouteError: Error {
+ public class CellResolver: CellResolverProtocol {
+     /// Keeps the signing-challenge scope bounded while retaining a deterministic
+     /// binding to the complete transport endpoint (including contract query data).
++    public static let remoteBridgeAuthorityDomain = "cellprotocol.remote-bridge"
++    public static let remoteBridgeAuthorityAction = "resolve"
++    public static let remoteBridgeAuthorityAudience = "CellResolver"
++
+     public static func remoteBridgeAuthorityChallengeResource(
+         for logicalEndpoint: String
+     ) -> String {
+@@ -1583,7 +1592,8 @@ public class CellResolver: CellResolverProtocol {
+     private func remoteWebSocketConnectionURL(
+         from cellEndpointURL: URL,
+         publisherUUID: String,
+-        route: RemoteCellHostRoute
++        route: RemoteCellHostRoute,
++        additionalQueryItems: [URLQueryItem] = []
+     ) throws -> URL {
+         guard let host = cellEndpointURL.host else {
+             throw CellResolverError.invalidRemoteCellReference(endpoint: cellEndpointURL.absoluteString)
+@@ -1618,6 +1628,22 @@ public class CellResolver: CellResolverProtocol {
+         components.host = host
+         components.port = cellEndpointURL.port
+         components.path = websocketPath
++        // The dedicated per-Cell bridge carries the same caller-supplied query
++        // items as the legacy `remoteWebSocketEndpoint` path and the multiplex
++        // session URL. Without this, a host that authenticates the upgrade has
++        // no way to learn who is connecting: `LightweightBridgeTransport` opens
++        // the socket with `URLSession.webSocketTask(with: url)`, so the URL is
++        // the only channel a credential can travel on.
++        var queryItems = additionalQueryItems
++        if let queryItemsProvider = CellBase.remoteWebSocketQueryItemsProvider {
++            queryItems.append(contentsOf: queryItemsProvider(cellEndpointURL))
++        }
++        queryItems = queryItems.filter { item in
++            item.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
++        }
++        if queryItems.isEmpty == false {
++            components.queryItems = queryItems
++        }
+ 
+         guard let websocketURL = components.url else {
+             throw CellResolverError.failedToCreateUrlEndpoint(from: cellEndpointURL.absoluteString)
+@@ -2199,7 +2225,17 @@ public class CellResolver: CellResolverProtocol {
+             finalizedConnectionURL = try remoteWebSocketConnectionURL(
+                 from: endpointUrl,
+                 publisherUUID: cellBridgeUUID,
+-                route: route
++                route: route,
++                additionalQueryItems: [
++                    URLQueryItem(
++                        name: "bridge_proof",
++                        value: Self.remoteBridgeBase64URL(principal.authorityChallenge)
++                    ),
++                    URLQueryItem(
++                        name: "bridge_signature",
++                        value: Self.remoteBridgeBase64URL(principal.authoritySignature)
++                    )
++                ]
+             )
+         case .multiplexedV2:
+             guard let transportType = withStateLock({ transports[transportScheme] }) else {
+@@ -2323,14 +2359,11 @@ public class CellResolver: CellResolverProtocol {
+         ownedRequester.publicSecureKey = requester.publicSecureKey
+         ownedRequester.publicKeyAgreementSecureKey = requester.publicKeyAgreementSecureKey
+         ownedRequester.homeVaultReference = requester.homeVaultReference
+-        let provedControl = await IdentitySigningChallenge.proveControl(
+-            of: ownedRequester,
+-            domain: "cellprotocol.remote-bridge",
+-            resource: Self.remoteBridgeAuthorityChallengeResource(for: logicalEndpoint),
+-            action: "resolve",
+-            audience: "CellResolver"
++        let authority = await proveRemoteBridgeAuthority(
++            for: ownedRequester,
++            logicalEndpoint: logicalEndpoint
+         )
+-        guard provedControl,
++        guard let authority,
+               let signingKeyFingerprint = ownedRequester.signingPublicKeyFingerprint,
+               signingKeyFingerprint.isEmpty == false,
+               let homeVaultReference = ownedRequester.homeVaultReference,
+@@ -2341,10 +2374,65 @@ public class CellResolver: CellResolverProtocol {
+             identityUUID: ownedRequester.uuid.lowercased(),
+             signingKeyFingerprint: signingKeyFingerprint,
+             homeVaultReference: homeVaultReference,
+-            requester: ownedRequester
++            requester: ownedRequester,
++            authorityChallenge: authority.challenge,
++            authoritySignature: authority.signature
+         )
+     }
+ 
++    /// Same checks `IdentitySigningChallenge.proveControl` performs, but it
++    /// returns the signed challenge and its signature rather than a Bool. The
++    /// proof is what a remote host needs in order to authenticate the caller;
++    /// discarding it was why the bridge could only ever be unauthenticated.
++    private func proveRemoteBridgeAuthority(
++        for identity: Identity,
++        logicalEndpoint: String,
++        now: Date = Date()
++    ) async -> (challenge: Data, signature: Data)? {
++        guard let vault = identity.identityVault,
++              let homeVaultReference = identity.homeVaultReference,
++              await vault.identityVaultReference() == homeVaultReference,
++              identity.signingPublicKeyFingerprint != nil,
++              await vault.identityExistInVault(identity),
++              let nonce = await vault.randomBytes64(),
++              nonce.count >= IdentitySigningChallenge.minimumNonceBytes,
++              nonce.count <= IdentitySigningChallenge.maximumNonceBytes else {
++            return nil
++        }
++        do {
++            let data = try IdentitySigningChallenge.signingData(
++                for: identity,
++                trustedIdentity: identity,
++                domain: Self.remoteBridgeAuthorityDomain,
++                resource: Self.remoteBridgeAuthorityChallengeResource(for: logicalEndpoint),
++                action: Self.remoteBridgeAuthorityAction,
++                audience: Self.remoteBridgeAuthorityAudience,
++                nonce: nonce,
++                issuedAt: now
++            )
++            _ = try IdentitySigningChallenge.validateSigningData(data, for: identity, now: now)
++            guard let signature = try await identity.sign(data: data),
++                  IdentityPublicKeySignatureVerifier.verify(
++                    signature: signature,
++                    messageData: data,
++                    identity: identity
++                  ) else {
++                return nil
++            }
++            return (challenge: data, signature: signature)
++        } catch {
++            return nil
++        }
++    }
++
++    /// Base64url without padding, matching what the scaffold decodes.
++    static func remoteBridgeBase64URL(_ data: Data) -> String {
++        data.base64EncodedString()
++            .replacingOccurrences(of: "+", with: "-")
++            .replacingOccurrences(of: "/", with: "_")
++            .replacingOccurrences(of: "=", with: "")
++    }
++
+     private func cacheKeyComponent(_ value: String) -> String {
+         "\(value.utf8.count):\(value)"
+     }
+@@ -2858,6 +2946,24 @@ public class CellResolver: CellResolverProtocol {
+     ) {
+         withStateLock { remoteRouteInstalledHookForTesting = hook }
+     }
++
++    /// The exact URL a dedicated per-Cell bridge connects to. Exposed so a test
++    /// can assert what actually reaches the socket, rather than asserting the
++    /// pieces the builder is assembled from.
++    func remoteWebSocketConnectionURLForTesting(
++        endpoint: String,
++        publisherUUID: String,
++        route: RemoteCellHostRoute
++    ) throws -> URL {
++        guard let endpointURL = URL(string: endpoint) else {
++            throw CellResolverError.failedToCreateUrlEndpoint(from: endpoint)
++        }
++        return try remoteWebSocketConnectionURL(
++            from: endpointURL,
++            publisherUUID: publisherUUID,
++            route: route
++        )
++    }
+ #endif
+ 
+     public func unregisterRemoteCellHost(_ host: String) {
+diff --git a/Tests/CellBaseTests/BridgeTests.swift b/Tests/CellBaseTests/BridgeTests.swift
+index 3c63f54..4915550 100644
+--- a/Tests/CellBaseTests/BridgeTests.swift
++++ b/Tests/CellBaseTests/BridgeTests.swift
+@@ -7,7 +7,7 @@ import Combine
+ #else
+ import OpenCombine
+ #endif
+-@testable import CellBase
++@_spi(Testing) @testable import CellBase
+ 
+ final class BridgeTests: XCTestCase {
+     private actor RemoteRouteInstallationGate {
+@@ -176,6 +176,70 @@ final class BridgeTests: XCTestCase {
+         super.tearDown()
+     }
+ 
++    /// The dedicated per-Cell bridge is the path HAVEN actually uses. A host that
++    /// authenticates the upgrade can only learn who is connecting from the URL,
++    /// because `LightweightBridgeTransport` opens the socket with
++    /// `URLSession.webSocketTask(with:)` and cannot attach request headers.
++    /// Before 2026-09-02 the provider was applied to the legacy endpoint path and
++    /// to the multiplex session URL, but not here, so a credential silently never
++    /// reached the server.
++    func testDedicatedBridgeConnectionURLCarriesProvidedQueryItems() throws {
++        let resolver = CellResolver.makeIsolatedForTesting()
++        CellBase.remoteWebSocketQueryItemsProvider = { _ in
++            [
++                URLQueryItem(name: "proof", value: "abc123"),
++                URLQueryItem(name: "", value: "dropped"),
++                URLQueryItem(name: "kid", value: "key-1")
++            ]
++        }
++
++        let url = try resolver.remoteWebSocketConnectionURLForTesting(
++            endpoint: "cell://example.haven.local/ConfigurationCatalog",
++            publisherUUID: "11111111-2222-3333-4444-555555555555",
++            route: RemoteCellHostRoute(
++                websocketEndpoint: "bridgehead",
++                schemePreference: .wss,
++                pathLayout: .endpointThenPublisherUUID
++            )
++        )
++
++        let components = try XCTUnwrap(URLComponents(url: url, resolvingAgainstBaseURL: false))
++        XCTAssertEqual(components.scheme, "wss")
++        XCTAssertEqual(components.host, "example.haven.local")
++        XCTAssertEqual(
++            components.path,
++            "/bridgehead/ConfigurationCatalog/11111111-2222-3333-4444-555555555555"
++        )
++        let items: [URLQueryItem] = try XCTUnwrap(components.queryItems)
++        let names: [String] = items.map { $0.name }.sorted()
++        XCTAssertEqual(names, ["kid", "proof"])
++        XCTAssertEqual(items.first(where: { $0.name == "proof" })?.value, "abc123")
++        XCTAssertFalse(items.contains(where: { $0.name.isEmpty }), "Blank query names must be dropped")
++    }
++
++    /// No provider means no query string at all — an unauthenticated host must not
++    /// start seeing a stray `?` appear on its bridge URLs.
++    func testDedicatedBridgeConnectionURLHasNoQueryWithoutProvider() throws {
++        let resolver = CellResolver.makeIsolatedForTesting()
++        CellBase.remoteWebSocketQueryItemsProvider = nil
++
++        let url = try resolver.remoteWebSocketConnectionURLForTesting(
++            endpoint: "cell://example.haven.local/ConfigurationCatalog",
++            publisherUUID: "11111111-2222-3333-4444-555555555555",
++            route: RemoteCellHostRoute(
++                websocketEndpoint: "bridgehead",
++                schemePreference: .wss,
++                pathLayout: .endpointThenPublisherUUID
++            )
++        )
++
++        XCTAssertNil(URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems)
++        XCTAssertEqual(
++            url.absoluteString,
++            "wss://example.haven.local/bridgehead/ConfigurationCatalog/11111111-2222-3333-4444-555555555555"
++        )
++    }
++
+     func testBridgeCommandRoundTripStringPayload() throws {
+         let identity = TestFixtures.makeIdentity(displayName: "tester")
+         let command = BridgeCommand(cmd: Command.get.rawValue, identity: identity, payload: .string("hello"), cid: 7)

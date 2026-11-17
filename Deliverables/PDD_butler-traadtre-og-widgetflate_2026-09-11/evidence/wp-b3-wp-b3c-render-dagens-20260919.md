@@ -1,0 +1,8 @@
+STATUS: KJØRT (exit 0) — dagens-fylt
+B3-RENDER {"width":2000,"height":1250,"error":null,"text":"Samtale\nAktivt\nMer\nTråder\n4 samtaler\n▾\nButler\n0\n▾\nArendalsuka 2026\n41\n▾\nProgram og sesjoner\n34\n▸\nSponsorsamtale\ngren\n12\n▸\nPressemelding\ngren\n5\n▸\nDeltakerliste\n7\n▾\nPalazzo Comunale\n23\n▸\nMenyutkast\ngren"}
+  ✓  1 playwright/zz-b3-visual.spec.js:38:3 › render dagens-fylt 2000x1250 (1.3s)
+B3-RENDER {"width":780,"height":1688,"error":null,"text":"Samtale\nAktivt\nMer\nTråder\n4 samtaler\n▾\nButler\n0\n▾\nArendalsuka 2026\n41\n▾\nProgram og sesjoner\n34\n▸\nSponsorsamtale\ngren\n12\n▸\nPressemelding\ngren\n5\n▸\nDeltakerliste\n7\n▾\nPalazzo Comunale\n23\n▸\nMenyutkast\ngren"}
+  ✓  2 playwright/zz-b3-visual.spec.js:38:3 › render dagens-fylt 780x1688 (1.0s)
+  2 passed (2.8s)
+dagens-fylt-2000x1250.png
+dagens-fylt-780x1688.png

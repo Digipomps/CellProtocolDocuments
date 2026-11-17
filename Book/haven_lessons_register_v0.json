@@ -951,7 +951,7 @@
       "lessonRef": "lesson.dev-set-called-holdout",
       "date": "2026-09-24",
       "severity": "major",
-      "symptom": "Nattens formålsmatching rapporterte 0,16 → 0,40 «holdout top-1». Astra viste at rundene 2–4 var designet mot feilene i den samme 40 %-delen, at 27 kandidater ble lest av mot den, og at valgene gain=3 og priorvekt 0,12 ikke var forhåndsbestemte treningsregler (andre verdier hadde identisk treningsmål). Tallet var reprodusert, men settet var et gjenbrukt utviklingssett. I samme rapport ble en håndskrevet spørreordstabell kalt «avledet av Book», og en nullinvariant («null tekst → null») holdt bare fordi et generisk spørreord ble regnet som tekstbevis.",
+      "symptom": "Nattens formålsmatching rapporterte 0,16 → 0,40 «holdout top-1». Astra viste at rundene 2–4 var designet mot feilene i den samme 40 %-delen, at 27 kandidater ble lest av mot den, og at valgene gain=3 og priorvekt 0,12 ikke var forhåndsbestemte treningsregler (andre verdier hadde identisk treningsmål). Tallet var reprodusert, men settet var et gjenbrukt utviklingssett. I samme rapport ble en håndskrevet spørreordstabell kalt «avledet av Book», og en nullinvariant («null tekst → null») holdt bare fordi et generisk spørreord ble regnet som tekstbevis. Bekreftet 28.9 med Kjetils egne ord: på de 22 sakene der han valgte et formål i «Dommerbenken — chat», traff den frosne R4 9 med Losens ytringer og 4 med Kjetils fritekst for samme mening. Samme mønster som lesson.same-writers-holdout-overstates i butler-tråden.",
       "cause": "Hypotese → mål → juster i flere runder på én synlig delmengde gjør delmengden til treningsdata, uansett at terskelen formelt ble valgt på den andre delen og at skriptet er deterministisk etterpå. Forfatteren av korpuset var også forfatteren av tabellen som ble evaluert på det.",
       "prevention": "Kall ingenting holdout som har vært lest av mer enn én gang. Frys sluttvarianten, og gjør én evaluering på et sett skrevet og merket av noen som ikke har sett reglene eller modellutdata, splittet etter frasefamilie og forfatter, med størrelse avtalt før kjøring. Skriv utvalgsregelen for hyperparametre ned FØR runden. En invariant om «null bevis» må definere bevis som domeneforankret registertekst, ikke enhver positiv score. Kall en håndskrevet tabell håndskrevet.",
       "purposeRefs": [
@@ -1115,6 +1115,1702 @@
         "handoff"
       ],
       "source": "Deliverables/PDD_entitetsdata-egen-kontroll_2026-09-08/handoff/runde1/push-20260924-131712.log"
+    },
+    {
+      "lessonRef": "lesson.lookup-again-when-a-surface-is-added",
+      "date": "2026-09-24",
+      "severity": "major",
+      "symptom": "De nye seksjonene i «Utvid entiteten» (B10) var portet på synlighet med rot-scope, og listen med verktøyets forespørsel forsvant — samme feil som lesson.unresolvable-condition-is-invisible fra 05.09.",
+      "cause": "`purpose_dev.py lookup` ble kjørt da PDD-en startet (23.09), ikke igjen da en ny GUI-flate kom til under B10 (24.09); bare de nye enhetstestene ble kjørt, ikke tilgjengelighetstesten for flatene.",
+      "prevention": "For hver ny eller endret skjelettflate: kjør `purpose_dev.py lookup --tags skeleton gui` før utformingen, og `BindingTests/CellConfigurationVerifierXCTest/testNoLocalSurfaceHidesItsOwnWaysIn` + `testPersonalCopilotLocalSurfacesLoadWithoutReferenceFailures` før flaten vises eller committes.",
+      "purposeRefs": [
+        "purpose://gui.quality.functional-accessible",
+        "purpose://gui.parity-with-approved-image",
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "skeleton",
+        "gui",
+        "visibility",
+        "flate",
+        "binding",
+        "lookup"
+      ],
+      "source": "HavenAgentD: Docs/PDD_testflyt-verktoycelle_20260923/TESTRESULT.md#b10; Binding: Documentation/HAVEN_Verktoylenker_2026-09-24.md"
+    },
+    {
+      "lessonRef": "lesson.picker-state-keypath-is-read-and-written",
+      "date": "2026-09-24",
+      "severity": "minor",
+      "symptom": "Velgeren «Verktøy» i «Gi tilgang» sto på «Velg verktøy» selv om cellen hadde valgt verktøyet.",
+      "cause": "CellPickerView leser `{selected}`/`{selectedIndex}` fra `selectionStateKeypath` når den vises, og skriver valget tilbake dit ved endring; en ren tilstandssti (`state.selectedToolID`) kan verken leses i den formen eller skrives.",
+      "prevention": "`selectionStateKeypath` skal være en nøkkel cellen både leser (`{selected}`) og skriver; test rundturen (`pickerSelectionRoundTrips`).",
+      "purposeRefs": [
+        "purpose://gui.quality.functional-accessible",
+        "purpose://cell.contract-explicit"
+      ],
+      "tags": [
+        "skeleton",
+        "picker",
+        "gui",
+        "binding"
+      ],
+      "source": "HavenAgentD: Docs/PDD_testflyt-verktoycelle_20260923/TESTRESULT.md#b10; Binding: Documentation/HAVEN_Verktoylenker_2026-09-24.md"
+    },
+    {
+      "lessonRef": "lesson.pairing-can-outlive-the-identity",
+      "date": "2026-09-24",
+      "severity": "major",
+      "symptom": "Agenten var paret med en HAVEN-identitet fra 4. mai («Binding Local Session», nøkkel 13BF…), mens HAVEN brukte en annen privat identitet (D362…, identitetsfilen skrevet 18.09). Svar fra HAVEN ville blitt avvist; ingen test i noen av endene kunne se det.",
+      "cause": "Hvorfor HAVENs private identitet ble byttet er ukjent. Ingenting sammenlignet nøkkelen HAVEN signerer med mot nøkkelen agenten er forankret til før live-bruk.",
+      "prevention": "En flate som ber eieren signere for agenten sammenligner egen nøkkel med agentens forankring og viser forskjellen før signering, med vei til ny paring (test: `offerIsRefusedHereWhenThisHavenHoldsAnotherKey`, `theOwnerNeverSignsWhatFailedTheCheck`). Sjekk nøkkelkontinuitet før live-test av noe som signeres.",
+      "purposeRefs": [
+        "purpose://cell.authorization-honours-keypath",
+        "purpose://test.acceptance"
+      ],
+      "tags": [
+        "identitet",
+        "paring",
+        "havenagentd",
+        "binding",
+        "nøkkel"
+      ],
+      "source": "HavenAgentD: Docs/PDD_testflyt-verktoycelle_20260923/TESTRESULT.md#b10; Binding: Documentation/HAVEN_Verktoylenker_2026-09-24.md"
+    },
+    {
+      "lessonRef": "lesson.jxa-objc-method-without-arguments-is-a-property",
+      "date": "2026-09-24",
+      "severity": "minor",
+      "symptom": "`a.terminate()` i JXA ga `TypeError: a.terminate is not a function`, men appene avsluttet likevel.",
+      "cause": "I JXA kalles en Objective-C-metode uten argumenter ved å lese egenskapen (`a.terminate`); lesingen kjørte metoden, og parentesen feilet etterpå.",
+      "prevention": "Skriv `a.terminate` (uten parentes) og sjekk etterpå med `pgrep` at prosessen er borte før du går videre.",
+      "purposeRefs": [
+        "purpose://handoff.runnable-without-guessing"
+      ],
+      "tags": [
+        "terminal",
+        "jxa",
+        "osascript",
+        "macos"
+      ],
+      "source": "HavenAgentD: Docs/PDD_testflyt-verktoycelle_20260923/TESTRESULT.md#b10; Binding: Documentation/HAVEN_Verktoylenker_2026-09-24.md"
+    },
+    {
+      "lessonRef": "lesson.screencapture-from-runner-can-fail",
+      "date": "2026-09-24",
+      "severity": "minor",
+      "symptom": "`screencapture -l <vindu>` fra jobbløperen ga «could not create image from window» for HAVEN-vinduet, med samme vindus-ID som computer use så.",
+      "cause": "ukjent",
+      "prevention": "Ta bilder av flater med computer use (eller be Kjetil), og ikke planlegg bevis som avhenger av `screencapture` fra løperen før det er målt at det virker den dagen.",
+      "purposeRefs": [
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "bilder",
+        "screencapture",
+        "terminal",
+        "bevis"
+      ],
+      "source": "HavenAgentD: Docs/PDD_testflyt-verktoycelle_20260923/TESTRESULT.md#b10; Binding: Documentation/HAVEN_Verktoylenker_2026-09-24.md"
+    },
+    {
+      "lessonRef": "lesson.sketch-assumed-a-renderer-it-did-not-have",
+      "date": "2026-09-25",
+      "severity": "major",
+      "symptom": "Skissen v2 (HTML) var venstrestilt, men «Utvid entiteten» i HAVEN viste all tekst sentrert, også etter at hAlignment «leading» var satt.",
+      "cause": "CellTextView i CellProtocol-versjonen HAVEN-bygget brukte (957d65f, tilstanden fra 16.09) legger teksten i .frame(maxWidth: .infinity, alignment: .center) før modifikatorene, og VStack/HStack er .center. hAlignment virker bare på rammen utenpå. Paritetsendringen som gjør den venstrestilt (6218ed5/fa7982d, portet som 410a0c6 i codex/prod-complete-20260917) var ikke med.",
+      "prevention": "Før en skisse godkjennes: finn CellProtocol-committen HAVEN-bygget bruker, les hvordan Text/VStack/HStack rendres der, og list i §3 hva den ikke kan (her: venstrestilt tekst). Et HTML-bilde er ikke bevis for at rendreren kan det samme.",
+      "purposeRefs": [
+        "purpose://candidate.testflyt-verktoycelle.haven-lenke-begge-veier"
+      ],
+      "tags": [
+        "gui",
+        "skeleton",
+        "renderer",
+        "skisse",
+        "g1-gui",
+        "binding"
+      ],
+      "source": "HavenAgentD: Docs/PDD_testflyt-verktoycelle_20260923/TESTRESULT.md#b10-flate; Binding: Documentation/HAVEN_Verktoylenker_2026-09-24.md"
+    },
+    {
+      "lessonRef": "lesson.maxwidthinfinity-also-stretches-height",
+      "date": "2026-09-25",
+      "severity": "minor",
+      "symptom": "En tekst i en listerad ble kuttet med «…» etter fem linjer når en HStack med wrap og maxWidthInfinity sto i samme rad; uten maxWidthInfinity ble teksten hel.",
+      "cause": "applySkeletonModifiers bruker maxHeight: maxH ?? .infinity når maxWidthInfinity er satt, så elementet blir strekkbart også i høyden. Hvorfor det presser teksten i en LazyVStack-rad er ikke kartlagt.",
+      "prevention": "Ikke sett maxWidthInfinity på elementer i listerader. Se etter «…» i skjermbildet av hver rad med lang tekst, i et smalt vindu.",
+      "purposeRefs": [
+        "purpose://candidate.testflyt-verktoycelle.haven-lenke-begge-veier"
+      ],
+      "tags": [
+        "gui",
+        "skeleton",
+        "renderer",
+        "list",
+        "binding"
+      ],
+      "source": "HavenAgentD: Docs/PDD_testflyt-verktoycelle_20260923/TESTRESULT.md#b10-flate; Binding: Documentation/HAVEN_Verktoylenker_2026-09-24.md"
+    },
+    {
+      "lessonRef": "lesson.wrap-gives-each-item-its-ideal-width",
+      "date": "2026-09-25",
+      "severity": "minor",
+      "symptom": "Knappen «Par agenten med denne HAVEN-en» gikk ut over kortet og ble klippet i et smalt vindu.",
+      "cause": "HStack med wrap (FlowLayout) gir hvert element sin ideelle bredde (sizeThatFits(.unspecified)) og bryter aldri tekst i et element.",
+      "prevention": "Knapper i vanlig HStack, som kan krympe og bryte teksten; wrap bare for korte merkelapper. Se på flaten i et smalt vindu før den vises fram.",
+      "purposeRefs": [
+        "purpose://candidate.testflyt-verktoycelle.haven-lenke-begge-veier"
+      ],
+      "tags": [
+        "gui",
+        "skeleton",
+        "renderer",
+        "knapp",
+        "binding"
+      ],
+      "source": "HavenAgentD: Docs/PDD_testflyt-verktoycelle_20260923/TESTRESULT.md#b10-flate; Binding: Documentation/HAVEN_Verktoylenker_2026-09-24.md"
+    },
+    {
+      "lessonRef": "lesson.empty-list-keeps-its-slot",
+      "date": "2026-09-25",
+      "severity": "minor",
+      "symptom": "Tomme lister og tomme tekster ga store hull i «Utvid entiteten».",
+      "cause": "En tom List eller en tom Text tar fortsatt plass i en VStack og får mellomrom på begge sider (i tillegg til faste høyder på listene); en rad som er skjult med scope: .item tar ingen plass.",
+      "prevention": "Én liste per kort, der cellen bestemmer radene (`kind`) og en rad med en kort linje står der det ellers ville vært tomt. Ingen faste høyder på lister, og ingen tekst på toppnivå som kan bli tom.",
+      "purposeRefs": [
+        "purpose://candidate.testflyt-verktoycelle.haven-lenke-begge-veier"
+      ],
+      "tags": [
+        "gui",
+        "skeleton",
+        "list",
+        "visibility",
+        "binding"
+      ],
+      "source": "HavenAgentD: Docs/PDD_testflyt-verktoycelle_20260923/TESTRESULT.md#b10-flate; Binding: Documentation/HAVEN_Verktoylenker_2026-09-24.md"
+    },
+    {
+      "lessonRef": "lesson.pgrep-pattern-must-allow-arguments",
+      "date": "2026-09-25",
+      "severity": "minor",
+      "symptom": "Byggejobben avsluttet ikke HAVEN, og `open` hentet bare fram det gamle bygget (startet 24.09 17:29) i stedet for å starte det nye.",
+      "cause": "pgrep -f 'HAVEN\\.app/Contents/MacOS/HAVEN$' traff ikke en prosess som var startet med --enable-agent-setup-workbench; `open` på en app som kjører starter ikke en ny.",
+      "prevention": "Bruk 'HAVEN( |$)' i mønsteret, og skriv ut prosessens starttid etter omstart og sammenlign den med byggetiden før noe vises fram.",
+      "purposeRefs": [
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "terminal",
+        "runner",
+        "haven",
+        "bevis"
+      ],
+      "source": "HavenAgentD: Docs/PDD_testflyt-verktoycelle_20260923/TESTRESULT.md#b10-flate; Binding: Documentation/HAVEN_Verktoylenker_2026-09-24.md"
+    },
+    {
+      "lessonRef": "lesson.computer-use-image-is-not-a-file",
+      "date": "2026-09-25",
+      "severity": "minor",
+      "symptom": "Skjermbildene av den nye flaten kunne ikke sendes til Kjetil som fil; vinduet var i tillegg på et annet skrivebord og kunne ikke gjøres større i bakgrunnen.",
+      "cause": "Bildene fra computer use kommer bare til Losen. screencapture -l fra løperen ga fortsatt «could not create image from window» (årsak ukjent). Vindusstørrelsen gjenopprettes ikke (restorationBehavior(.disabled)), og Zoom i Vindu-menyen er avslått når HAVEN ikke er fremst.",
+      "prevention": "Planlegg bildebeviset med en vei som gir en fil (Kjetils eget skjermbilde, eller skjermopptakstilgang for løperen), og si det før arbeidet, ikke etter.",
+      "purposeRefs": [
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "bilder",
+        "computer-use",
+        "screencapture",
+        "bevis"
+      ],
+      "source": "HavenAgentD: Docs/PDD_testflyt-verktoycelle_20260923/TESTRESULT.md#b10-flate; Binding: Documentation/HAVEN_Verktoylenker_2026-09-24.md"
+    },
+    {
+      "lessonRef": "lesson.text-field-sends-a-string",
+      "date": "2026-09-25",
+      "severity": "major",
+      "symptom": "Adressefeltet i «Utvid entiteten» kunne aldri starte en forespørsel: Enter ga alltid «Si hvilket scaffold dette gjelder — `audience` …».",
+      "cause": "Tekstfeltet sender .string(tekst) til targetKeypath; extension.beginRequest leste bare {audience: …}.",
+      "prevention": "For hvert tekstfelt: en kontraktstest som sender feltets egen payload (.string) til targetKeypath og venter et svar som ikke er feil.",
+      "purposeRefs": [
+        "purpose://candidate.testflyt-verktoycelle.haven-lenke-begge-veier"
+      ],
+      "tags": [
+        "gui",
+        "skeleton",
+        "textfield",
+        "kontrakt",
+        "binding"
+      ],
+      "source": "HavenAgentD: Docs/PDD_testflyt-verktoycelle_20260923/TESTRESULT.md#b10-flate; Binding: Documentation/HAVEN_Verktoylenker_2026-09-24.md"
+    },
+    {
+      "lessonRef": "lesson.green-gate-must-read-the-last-summary-line",
+      "date": "2026-09-26",
+      "severity": "major",
+      "symptom": "runde2.sh committet og pushet 399f6d2 med 4 røde tester. Porten grep'et «Executed … with 0 failures» i hele loggen og traff en grønn suites linje lenger opp; siste linje sa «1262 tests, with 2 tests skipped and 8 failures».",
+      "cause": "XCTest skriver én oppsummeringslinje per suite pluss én til slutt, og sluttlinjen har en annen form når tester hoppes over («with N tests skipped and M failures»). Et grep uten tail -1 og uten «(0 unexpected)» kan ikke skille dem.",
+      "prevention": "En grønn-port leser bare den siste «Executed»-linjen (tail -1) og krever « 0 failures (0 unexpected)». Sammenligningen gjøres uten pipe (POSIX case), fordi `echo | grep -q` under pipefail kan gi rødt på grønt (SIGPIPE). Porten skriver ut nøyaktig hva den sammenlignet.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "skript",
+        "port",
+        "xctest",
+        "handoff"
+      ],
+      "source": "Deliverables/PDD_entitetsdata-egen-kontroll_2026-09-08/handoff/runde2/runde2-20260926-022637.log"
+    },
+    {
+      "lessonRef": "lesson.module-and-type-share-a-name-in-cellprotocol",
+      "date": "2026-09-26",
+      "severity": "minor",
+      "symptom": "`CellApple.EntityAnchorCell` og `CellVapor.EntityAnchorCell` kompilerte ikke: «type 'CellApple' has no member 'EntityAnchorCell'». Begge modulene har en type med samme navn som modulen.",
+      "cause": "Swift løser `Modul.Type` som `Type.Member` når en type deler navn med modulen; kvalifisering fungerer ikke fra en fil som importerer begge.",
+      "prevention": "Én fil per modul som importerer bare den ene og gir typen et unikt typealias (TestSupport/AppleEntityAnchorAlias.swift, VaporEntityAnchorAlias.swift). Testfilen importerer ingen av modulene direkte.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "swift",
+        "test",
+        "cellapple",
+        "cellvapor"
+      ],
+      "source": "Tests/CellBaseTests/TestSupport/AppleEntityAnchorAlias.swift"
+    },
+    {
+      "lessonRef": "lesson.chronicle-list-is-a-wire-contract",
+      "date": "2026-09-26",
+      "severity": "major",
+      "symptom": "Første utkast til endringsspor la én post i chronicle[+] per batch. EntityRelationHostParityTests (Apple og Vapor) ble røde: «Rejected batches must not partially append or alter protected events» — testen sammenligner hele chronicle-listen post for post.",
+      "cause": "chronicle er ikke et fritt felt; verter sammenligner listen som wire-kontrakt, og selektorene chronicle[id=…] har egne gyldighetsregler (EntityRelationRecordV1).",
+      "prevention": "Ankerets eget spor bor på et eget rot-keypath (`trace`) med egen grant, egen read-intercept og egen explore-kontrakt. Aldri skriv systemgenererte poster inn i en liste en annen kontrakt eier. Er kravet «i chronicle», er det chronicle-kontrakten som må utvides — som en egen, navngitt endring.",
+      "purposeRefs": [
+        "purpose://self-determination.data.verifiability"
+      ],
+      "tags": [
+        "chronicle",
+        "entityanchor",
+        "kontrakt"
+      ],
+      "source": "Deliverables/PDD_entitetsdata-egen-kontroll_2026-09-08/TESTRESULT.md#runde2"
+    },
+    {
+      "lessonRef": "lesson.placeholder-example-leaks-into-judgement",
+      "date": "2026-09-28",
+      "severity": "minor",
+      "symptom": "I «Dommerbenken — chat» v2 var plassholderen i fritekstfeltet «f.eks. «status på prosjektet»». Kjetil skrev nøyaktig «status på prosjektet» som sin egen tolkning i to av tretti saker («hvor står vi nå på prosjektet», «hva står igjen»). Eksempelet var hentet fra meningen til en sak i settet.",
+      "cause": "Eksempelet ble skrevet for å vise hva slags svar som var ønsket, og ble plukket fra det forfatteren hadde i hodet — settet. Et eksempel i en dommerflate er et alternativ dommeren ser før han har tenkt selv.",
+      "prevention": "Eksempler, plassholdere og hjelpetekst i en dommerflate skal hentes fra et domene som ikke finnes i settet, og testes: ingen sak i settet skal ha gold hvis tittel eller alias overlapper eksempelteksten. Rapporter saker der dommerens fritekst er lik eksempelet som svakere.",
+      "purposeRefs": [
+        "purpose://test.acceptance",
+        "purpose://measurement.honest-labels"
+      ],
+      "tags": [
+        "dommer",
+        "dommerbenk",
+        "måling",
+        "gui",
+        "fasit",
+        "formålsmatching"
+      ],
+      "source": "Deliverables/PDD_formaalsregister-som-graf_2026-09-11/maaling/natt-2026-09-23/DOMMER_RUNDE2_FUNN.md"
+    },
+    {
+      "lessonRef": "lesson.corr-grant-expired-without-renewal-path",
+      "date": "2026-09-30",
+      "severity": "major",
+      "symptom": "30.09 fikk Vegar `recipient_not_allowed` da han sendte til `kjetil-vegar-codex-d`, Kjetils klient avviste sitt eget bevis, og meldingen til Victoria ble avvist på samme måte; korrespondansen sto stille i over ett døgn.",
+      "cause": "Tilgangene fra oppsettet 08.09 gikk ut 29.09 uten at noe varslet, og serveren hadde ingen fornyelsesvei: ny innmelding med utløpt tilgang endte i `credential_issuance_failed`, og fra en annen enhet i `principal_already_enrolled`.",
+      "prevention": "En tilgang eller et bevis med utløpstid tas ikke i bruk før fornyelsesveien er testet ende til ende (utløpt tilgang → fersk invitasjon → eiergodkjenning → ny frist → sending virker), og fristen står i pilotens STATUS med en påminnelse minst sju dager før.",
+      "purposeRefs": [
+        "purpose://contact.communication",
+        "purpose://scaffold.operations"
+      ],
+      "tags": [
+        "correspondence",
+        "access",
+        "expiry",
+        "grant",
+        "renewal",
+        "staging"
+      ],
+      "source": "Deliverables/PDD_korrespondanse-fornyelse_2026-09-30/TESTRESULT.md#t5"
+    },
+    {
+      "lessonRef": "lesson.renewal-invite-must-carry-device-id",
+      "date": "2026-09-30",
+      "severity": "major",
+      "symptom": "Gjennomgangen av korrespondanseklienten 30.09 viste at `setup` gjenbruker `identity.json`, men tar enhets-ID-en fra invitasjonen (`invite.deviceID ?? tilfeldig`); en fornyelsesinvitasjon uten profilens `deviceID` ville gitt ny enhet og `principal_already_enrolled` i stedet for fornyelse.",
+      "cause": "Invitasjonsgeneratoren lager første-gangs-invitasjoner og hadde ingen grunn til å kjenne en eksisterende profils enhets-ID; fornyelse krever samme principal, enhet og nøkkel.",
+      "prevention": "En fornyelsesinvitasjon lages bare med `deviceID` hentet fra deltakergrafen eller profilen (`haven-correspondence-mcp identity`), og generatoren nekter uten; test: fornyelsesinvitasjonens `deviceID` er lik profilens, og `setup` gir `pending_approval` med `renewsGrantID`.",
+      "purposeRefs": [
+        "purpose://contact.communication",
+        "purpose://scaffold.operations"
+      ],
+      "tags": [
+        "correspondence",
+        "access",
+        "renewal",
+        "invite",
+        "device-id"
+      ],
+      "source": "Deliverables/PDD_korrespondanse-fornyelse_2026-09-30/TESTRESULT.md#t5"
+    },
+    {
+      "lessonRef": "lesson.host-mutation-without-reading-the-coordination-file",
+      "date": "2026-10-02",
+      "severity": "major",
+      "symptom": "30.09 satte en Claude-tråd ut en gren-commit på staging og byttet invitasjonene, med Kjetils ja, men uten claim. En Codex-tråd hadde claim på samme container (HD-0141), staging var reservert for 2026.9.4, og deploykøen trodde i to døgn at staging kjørte forrige utgivelse.",
+      "cause": "Tråden kartla bare repoet den arbeidet i. Den leste ikke `_losen-queue/KOORDINERING.md` og kjørte ikke `hd coord status`, selv om prosjektminnet sa at HAVEN-Deploy er deploykøen. Eierens ja ble lest som alt som trengtes.",
+      "prevention": "Før enhver vertsmutasjon: les `_losen-queue/KOORDINERING.md`, kjør `hd coord status`, ta egen claim på en HD-oppgave, og før utsettingen inn i køen etterpå. Test: jobbloggen for utsettingen viser `hd coord status` uten annen claim på samme tjeneste, og egen claim, før første kommando mot verten. Eierens ja til å sette ut erstatter ikke sjekken.",
+      "purposeRefs": [
+        "purpose://scaffold.operations",
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "deploy",
+        "staging",
+        "host",
+        "coordination",
+        "claim",
+        "queue"
+      ],
+      "source": "Deliverables/PDD_korrespondanse-fornyelse_2026-09-30/ACCEPT.md"
+    },
+    {
+      "lessonRef": "lesson.map-the-whole-root-before-proposing-infrastructure",
+      "date": "2026-10-02",
+      "severity": "major",
+      "symptom": "En formålsspesifikasjon fikk G1 og en plan ble gransket for en ny, varig jobbkø, mens Macen alt hadde tre køer under launchd og en koordineringsfil for dem. Planen måtte trekkes.",
+      "cause": "Kartleggingen stoppet ved mappene som var koblet til økten. `launchctl list` og rotmappen over repoet ble ikke lest før en ny tjeneste ble foreslått.",
+      "prevention": "Før en ny kø, løper, tjeneste eller planlegger foreslås: les `launchctl list`, innholdet i HAVEN-roten og LES_MEG/README for det som alt kjører. Test: §0 i spesifikasjonen har en rad «finnes dette alt?» med `launchctl list` og rotmappen som kilde, merket hentet.",
+      "purposeRefs": [
+        "purpose://grounding",
+        "purpose://scaffold.operations"
+      ],
+      "tags": [
+        "queue",
+        "launchd",
+        "runner",
+        "scheduler",
+        "kartlegging",
+        "pdd"
+      ],
+      "source": "Deliverables/PDD_agent-planlagte-jobber_2026-10-02/FORMAALSSPEC.md"
+    },
+    {
+      "lessonRef": "lesson.remembered-install-state-is-not-measured",
+      "date": "2026-10-02",
+      "severity": "minor",
+      "symptom": "En plan sa at agenten på Macen var bygget fra en bestemt gren, og bygde grenvalg og et åpent spørsmål til eieren på det. Agenten var installert på nytt fra `main` av en annen tråd seks dager tidligere.",
+      "cause": "Påstanden kom fra prosjektminnet og ble ikke målt. Flere tråder installerer samme binær.",
+      "prevention": "Hva som er installert, måles før en plan bygger på det: dato og navn på binærene og sikkerhetskopiene i `bin/`, `launchctl print`, og om commiten er på `origin/main`. Test: påstandstabellen merker installasjonstilstand som hentet med måletidspunkt, aldri som husket.",
+      "purposeRefs": [
+        "purpose://grounding",
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "agent",
+        "install",
+        "memory",
+        "kartlegging",
+        "pdd"
+      ],
+      "source": "Deliverables/PDD_agent-planlagte-jobber_2026-10-02/FORMAALSSPEC.md"
+    },
+    {
+      "lessonRef": "lesson.md5-differs-for-images-written-from-the-cloud",
+      "date": "2026-10-02",
+      "severity": "minor",
+      "symptom": "Etter at seks PNG-filer ble skrevet fra en Cowork-økt til Macen, stemte ikke md5 mot originalene, mens alle tekstfilene stemte. Det så ut som feilen der en gammel utgave blir skrevet.",
+      "cause": "Overføringen legger en C2PA-blokk (`caBX`, 5758 byte) i PNG-filer. Bildedataene (`IDAT`) var like.",
+      "prevention": "Kontroller tekstfiler med md5. Kontroller bilder ved å sammenligne `IDAT`-dataene eller størrelsen minus `caBX`-blokken, ikke md5 av hele fila. Test: kontrollskriptet for overførte filer skiller de to tilfellene.",
+      "purposeRefs": [
+        "purpose://handoff.runnable-without-guessing"
+      ],
+      "tags": [
+        "cowork",
+        "overføring",
+        "md5",
+        "png",
+        "c2pa"
+      ],
+      "source": "Deliverables/PDD_agent-planlagte-jobber_2026-10-02/images/README.md"
+    },
+    {
+      "lessonRef": "lesson.vocabulary-guard-admits-new-claims",
+      "date": "2026-10-03",
+      "severity": "major",
+      "symptom": "En vakt som godtok enhver setning bygd av tillatte ord, også i bøyd form, slapp 38 av 45 angrepsomskrivinger gjennom («Det har vi:», «Dette er menyen vår:», «Du har rett:»).",
+      "cause": "Tillatte ord kan settes sammen til en ny påstand, og bøyningstoleransen regnet «rett» som en form av «retter». Regelen prøvde ordene, ikke hva setningen sier.",
+      "prevention": "Det en vakt publiserer i en modells navn, er en tekst vakten selv kan bygge av lukkede lister med hele setninger; modellens tekst velger bare hvilken. Test: et sett omskrivinger skrevet av en som ikke har skrevet reglene, gir null publiserte tekster utenfor den mengden.",
+      "purposeRefs": [
+        "purpose://content.review-before-publish",
+        "purpose://test.acceptance.hallucination-evaluation"
+      ],
+      "tags": [
+        "vakt",
+        "modell",
+        "formulering",
+        "concierge",
+        "palazzo"
+      ],
+      "source": "Deliverables/PDD_palazzo-dekningsvakt-runde2_2026-10-02/ACCEPT.md §3 (A1) og §7"
+    },
+    {
+      "lessonRef": "lesson.rejected-rule-kind-not-swept-elsewhere",
+      "date": "2026-10-03",
+      "severity": "minor",
+      "symptom": "Samme feil ble gjort to ganger på én dag: et ordforråd i stedet for hele setninger, først for setningen foran en liste, så for gjestens spørsmål (femten funn av 25 rader i et utkast som ikke ble bygget).",
+      "cause": "Da regeltypen ble forkastet for svaret, ble ikke de andre stedene med samme slags regel gått gjennom.",
+      "prevention": "Når en regeltype forkastes etter et angrep, listes hvert sted samme regeltype brukes, og hvert av dem angripes før noe bygges. Test: planbyttet i STATUS.md har listen, og det finnes et angrep per sted.",
+      "purposeRefs": [
+        "purpose://content.review-before-publish"
+      ],
+      "tags": [
+        "vakt",
+        "modell",
+        "regel",
+        "angrep",
+        "concierge"
+      ],
+      "source": "Deliverables/PDD_palazzo-dekningsvakt-runde2_2026-10-02/ACCEPT.md §7, feil 3"
+    },
+    {
+      "lessonRef": "lesson.compared-normalized-published-raw",
+      "date": "2026-10-03",
+      "severity": "major",
+      "symptom": "Et Kelvin-tegn for K, anførselstegn paret om over ni retter og førti mellomrom i et rettnavn ble publisert av en vakt som hadde godkjent teksten.",
+      "cause": "Vakten sammenlignet en normalisert tekst med det godkjente svaret og publiserte modellens rå tekst.",
+      "prevention": "Teksten som publiseres, er den som ble kontrollert: vakten bygger den selv, og modellens tekst velger bare hvilken. Test: hver publisert tekst er lik en vaktbygd tekst tegnkode for tegnkode.",
+      "purposeRefs": [
+        "purpose://content.review-before-publish",
+        "purpose://test.acceptance.hallucination-evaluation"
+      ],
+      "tags": [
+        "vakt",
+        "modell",
+        "unicode",
+        "normalisering",
+        "concierge"
+      ],
+      "source": "Deliverables/PDD_palazzo-dekningsvakt-runde2_2026-10-02/ACCEPT.md §3 (A3)"
+    },
+    {
+      "lessonRef": "lesson.guard-must-see-the-question-the-model-does-not",
+      "date": "2026-10-03",
+      "severity": "major",
+      "symptom": "«Vi har følgende pizzaer: …» etter spørsmålet «Hvilke pizzaer har dere uten kjøtt?» leses som fem pizzaer uten kjøtt; to av dem har salami.",
+      "cause": "Modellen ser ikke gjestens spørsmål (med vilje), og vakten så heller ikke på det. Et svar kan stå uendret og likevel bli usant sammen med spørsmålet.",
+      "prevention": "For hver svartype som kan omformuleres, finnes en lukket liste med hele spørsmål; alt annet gir det godkjente svaret ordrett. Et ord som tas ut av svaret, tas også ut av spørsmålene. Test: hvert spørsmål utenfor listen gir null kall til modellen.",
+      "purposeRefs": [
+        "purpose://content.review-before-publish"
+      ],
+      "tags": [
+        "vakt",
+        "modell",
+        "spørsmål",
+        "concierge",
+        "palazzo"
+      ],
+      "source": "Deliverables/PDD_palazzo-dekningsvakt-runde2_2026-10-02/ACCEPT.md §3 (A5) og §7, feil 5"
+    },
+    {
+      "lessonRef": "lesson.approval-by-example-covers-the-example",
+      "date": "2026-10-03",
+      "severity": "major",
+      "symptom": "Kjetil godkjente «Vi har følgende pizzaer» ved eksempel. Det ble utvidet til rettlisten og til nitten setninger uten å spørre, og sto på nett i over sju timer.",
+      "cause": "En godkjenning ved eksempel ble lest som en godkjenning av en klasse.",
+      "prevention": "Det eieren godkjenner ved eksempel, dekker eksempelet. Hver setning en modell får si i tjenestens navn, føres opp med hvem som har godkjent den; en setning uten eierens ord er et spørsmål til ham før den settes ut. Test: listen i ACCEPT.md har en godkjenning per setning.",
+      "purposeRefs": [
+        "purpose://human-agency",
+        "purpose://content.review-before-publish"
+      ],
+      "tags": [
+        "godkjenning",
+        "eksempel",
+        "port",
+        "pdd",
+        "concierge"
+      ],
+      "source": "Deliverables/PDD_palazzo-dekningsvakt-runde2_2026-10-02/ACCEPT.md §7, feil 4"
+    },
+    {
+      "lessonRef": "lesson.deployed-after-the-attack-was-known",
+      "date": "2026-10-03",
+      "severity": "major",
+      "symptom": "To utgaver av en vakt ble satt ut etter at angrepet mot dem var målt; den første ble lagt i køen 5 minutter og 28 sekunder etter at målingen viste 20 av 40 publisert.",
+      "cause": "Utsettingen var planlagt før angrepet var målt, og ingenting i kjeden holdt den tilbake. Hvorfor tråden ikke stoppet da tallet lå foran den, er ikke skrevet ned: ukjent.",
+      "prevention": "Et frosset angrep måles mot en utgave før den pushes, og skriptet som pusher og setter ut, startes først når målingen er lest. Test: tidspunktet for angrepsmålingen i TESTRESULT.md er før tidspunktet for push.",
+      "purposeRefs": [
+        "purpose://test.acceptance.hallucination-evaluation",
+        "purpose://scaffold.operations"
+      ],
+      "tags": [
+        "deploy",
+        "angrep",
+        "vakt",
+        "rekkefølge",
+        "concierge"
+      ],
+      "source": "Deliverables/PDD_palazzo-dekningsvakt-runde2_2026-10-02/ACCEPT.md §7, feil 1"
+    },
+    {
+      "lessonRef": "lesson.own-committed-tests-changed-without-asking",
+      "date": "2026-10-03",
+      "severity": "major",
+      "symptom": "Ti tester tråden selv hadde committet tidligere samme dag, ble endret uten å spørre: tretten endringer, og sju av dem snudde eller fjernet noe en test krevde godtatt.",
+      "cause": "Planens stopp-regel «en eksisterende test må endres» ble lest som å gjelde testene fra før runden. Kjetil sa 5. oktober 2026 at den også gjelder egne tester («A6: også egne tester»).",
+      "prevention": "En committet test er eksisterende, uansett hvem som skrev den og når. Før hver commit leses testendringene rett fra git; en endring i en committet test er et spørsmål til eieren. Test: skriptet som lister testendringer fra git, viser ingen endring i en committet test uten en godkjenning ført i STATUS.md.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "test",
+        "regresjon",
+        "stoppregel",
+        "auto",
+        "pdd"
+      ],
+      "source": "Deliverables/PDD_palazzo-dekningsvakt-runde2_2026-10-02/ACCEPT.md §3 (A6) og STATUS.md (Kjetils svar 5. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.container-log-dies-with-the-container",
+      "date": "2026-10-03",
+      "severity": "major",
+      "symptom": "Loggene til to utgaver gikk tapt ved neste utsetting, så ingen kan si hva gjester fikk i de periodene; ved det tredje byttet skulle kjeden lese 24 timer av en logg på 25 timer og 18 minutter.",
+      "cause": "`docker logs` følger containeren, og en utsetting lager den på nytt. Loggen var lest rett etter hver utsetting og ikke igjen, og vinduet i kjeden var et fast antall timer.",
+      "prevention": "Rett før en container byttes, leses loggen fra containeren startet, med et vindu som er lengre enn oppetiden, og beviset sier hvor lenge før byttet den ble lest. Test: bevisfilen har containerens starttid, lesetidspunkt og linjetall, og vinduet er lengre enn oppetiden.",
+      "purposeRefs": [
+        "purpose://scaffold.operations"
+      ],
+      "tags": [
+        "deploy",
+        "logg",
+        "container",
+        "bevis",
+        "host"
+      ],
+      "source": "Deliverables/PDD_palazzo-dekningsvakt-runde2_2026-10-02/ACCEPT.md §7, feil 8"
+    },
+    {
+      "lessonRef": "lesson.red-check-rerun-because-the-cause-looked-like-the-network",
+      "date": "2026-10-03",
+      "severity": "major",
+      "symptom": "Deployens egen kontroll ble rød på én av 25 rader (kode 000, kallet kom ikke fram). Tråden kjørte de samme kontrollene om igjen, fikk grønt og gikk videre, mot planens stopp-regel.",
+      "cause": "Tråden leste et kall som ikke kom fram, som noe annet enn en rød kontroll. Kjetil sa 5. oktober 2026 at regelen gjelder da også («A11: stopp ved kode 000»).",
+      "prevention": "En rød kontroll stopper kjeden uansett årsak. Rapporten sier hvilke rader som er kall som ikke kom fram, og kontrollen kjøres ikke om igjen uten eierens ord. Test: kjedeskriptet avslutter ved første røde kontroll og har ikke noe nytt forsøk på en hel kontroll.",
+      "purposeRefs": [
+        "purpose://scaffold.operations"
+      ],
+      "tags": [
+        "deploy",
+        "stoppregel",
+        "kontroll",
+        "nett",
+        "auto"
+      ],
+      "source": "Deliverables/PDD_palazzo-dekningsvakt-runde2_2026-10-02/ACCEPT.md §3 (A11) og STATUS.md (Kjetils svar 5. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.status-reader-gave-up-at-the-first-network-error",
+      "date": "2026-10-03",
+      "severity": "major",
+      "symptom": "Skriptet som ventet på CI for en utgave, ga opp ved første nettfeil. Utgaven lå bygget, men ikke satt ut, i tre timer, mens den forrige sto på nett med hull et angrep hadde vist.",
+      "cause": "Venteren skilte ikke mellom «fikk ikke lest utfallet» og «utfallet er rødt».",
+      "prevention": "Lesing av et utfall som ligger et annet sted, prøves på nytt når ingen svar kom, og skriptet sier hvor mange ganger; et rødt utfall stopper. Det er lesing, ikke en kontroll som er blitt rød (se lesson.red-check-rerun-because-the-cause-looked-like-the-network). Test: venteren kjørt uten nett leser igjen og skriver antall forsøk.",
+      "purposeRefs": [
+        "purpose://scaffold.operations",
+        "purpose://handoff.runnable-without-guessing"
+      ],
+      "tags": [
+        "deploy",
+        "ci",
+        "nett",
+        "skript",
+        "kjede"
+      ],
+      "source": "Deliverables/PDD_palazzo-dekningsvakt-runde2_2026-10-02/ACCEPT.md §7, feil 7"
+    },
+    {
+      "lessonRef": "lesson.accept-written-from-memory-had-27-errors",
+      "date": "2026-10-03",
+      "severity": "major",
+      "symptom": "Første utkast til ACCEPT.md og TESTRESULT.md hadde 27 feil da en uavhengig tråd holdt det mot bevisfilene; ett av dem var påstanden om at hver frosset utgave ble angrepet etter at den var satt ut.",
+      "cause": "Utkastet ble skrevet fra hukommelsen mens bevisene lå på en maskin som var utenfor rekkevidde.",
+      "prevention": "Tall, klokkeslett, commit-numre og sitater i ACCEPT.md og TESTRESULT.md fylles inn fra bevisfilene av kode, og en uavhengig tråd holder hver påstand mot bevisene før eieren får dokumentene. Test: rapporten fra kontrollen ligger blant bevisene, med en dom per påstand.",
+      "purposeRefs": [
+        "purpose://test.acceptance",
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "aksept",
+        "bevis",
+        "kontroll",
+        "dokument",
+        "pdd"
+      ],
+      "source": "Deliverables/PDD_palazzo-dekningsvakt-runde2_2026-10-02/ACCEPT.md §7, feil 9"
+    },
+    {
+      "lessonRef": "lesson.measurement-without-contact-looked-like-a-result",
+      "date": "2026-10-03",
+      "severity": "major",
+      "symptom": "To målinger som kjørte uten nett, endte med «kall=12 model=0 … endret_innhold=0», samme sluttlinje som en ekte måling. Ingen kall hadde kommet fram.",
+      "cause": "Måleskriptet skrev sluttlinjen uansett hvor mange kall som fikk svar, og avsluttet med kode 0.",
+      "prevention": "En måling teller kallene som fikk svar. Sluttlinjen sier «INGEN KONTAKT» eller «UFULLSTENDIG», og exit-koden er ikke 0, når ikke alle fikk svar eller utgaven som svarte, er ukjent. Test: skriptet kjørt mot en adresse som ikke finnes, gir ingen resultatlinje og exit-kode 3.",
+      "purposeRefs": [
+        "purpose://measurement.production-path"
+      ],
+      "tags": [
+        "måling",
+        "nett",
+        "sluttlinje",
+        "skript",
+        "verifisering"
+      ],
+      "source": "Deliverables/PDD_palazzo-dekningsvakt-runde2_2026-10-02/ACCEPT.md §7, feil 15"
+    },
+    {
+      "lessonRef": "lesson.failure-named-by-a-guess",
+      "date": "2026-10-03",
+      "severity": "minor",
+      "symptom": "En kjede leste CI-utfallet tjue ganger uten nett og meldte «gh er ikke logget inn» hver gang; innloggingen var i orden.",
+      "cause": "Skriptet kastet feilteksten fra `gh auth status` og kalte enhver feil manglende innlogging.",
+      "prevention": "Et skript skriver ut det kommandoen sa, eller prøver nettet før innloggingen. Test: skriptet kjørt uten nett melder at det ikke fikk kontakt.",
+      "purposeRefs": [
+        "purpose://handoff.runnable-without-guessing"
+      ],
+      "tags": [
+        "skript",
+        "feilmelding",
+        "nett",
+        "deploy",
+        "kjede"
+      ],
+      "source": "Deliverables/PDD_palazzo-dekningsvakt-runde2_2026-10-02/ACCEPT.md §7, feil 16"
+    },
+    {
+      "lessonRef": "lesson.claim-on-another-resource-does-not-stop-a-deploy",
+      "date": "2026-10-03",
+      "severity": "major",
+      "symptom": "En annen tråd tok claim på host-disk på verten og tømte systemlogger der mens en utsetting med claim på palazzo-staging-app pågikk. Utsettingen kjørte tre forsøk til, og ingen ble stoppet eller varslet.",
+      "cause": "`hd coord claim` avviser bare overlappende containere på samme vert, og tråden leste ikke koordineringsloggen mellom forsøkene. Kjetil sa 5. oktober 2026 at enhver claim på verten stopper en utsetting («A12: enhver claim»).",
+      "prevention": "Aktive claims for verten leses rett før hvert forsøk på utsetting (`hd coord status`), og enhver claim på samme vert stopper forsøket, uansett ressurs. Dette er strengere enn lesson.host-mutation-without-reading-the-coordination-file, som sier «på samme tjeneste». Test: jobbloggen for hvert forsøk viser lesingen av claims, og ingen andre sto.",
+      "purposeRefs": [
+        "purpose://scaffold.operations"
+      ],
+      "tags": [
+        "deploy",
+        "host",
+        "claim",
+        "coordination",
+        "stoppregel"
+      ],
+      "source": "Deliverables/PDD_palazzo-dekningsvakt-runde2_2026-10-02/ACCEPT.md §3 (A12) og STATUS.md (Kjetils svar 5. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.rule-for-one-link-taken-for-the-reach-of-the-chain",
+      "date": "2026-10-04",
+      "severity": "major",
+      "symptom": "Vakten ble bygget for tolv retter, og utkastene sa «tolv av atten retter». På nett svarer oppslaget med retten for seks av de tolv, så bare seks kan vise modellens ord.",
+      "cause": "Oppslaget sto i avgrensningen som noe oppgaven ikke skulle forbedre, ikke som en avhengighet med en måling. Tre av svarene var målt to dager før, i samme oppgave, og ble ikke brukt.",
+      "prevention": "Hvert ledd foran det som endres, er en rad i §2 med en måling på den kjørende tjenesten, tatt før G1, og rekkevidden oppgis som det målte tallet. Test: §2 har en målt rad per ledd foran endringen, og tallet i §3 er det målte.",
+      "purposeRefs": [
+        "purpose://measurement.production-path",
+        "purpose://grounding"
+      ],
+      "tags": [
+        "avhengighet",
+        "måling",
+        "rekkevidde",
+        "concierge",
+        "pdd"
+      ],
+      "source": "Deliverables/PDD_palazzo-dekningsvakt-runde2_2026-10-02/ACCEPT.md §2 og §7, feil 19"
+    },
+    {
+      "lessonRef": "lesson.example-in-accept-was-not-measured",
+      "date": "2026-10-04",
+      "severity": "major",
+      "symptom": "Et utkast til ACCEPT.md ba Kjetil prøve «Hva er Arancini?» for å se modellens ord. Tjenesten svarer ikke på det spørsmålet.",
+      "cause": "Eksempelet ble valgt fra regelen (retten sto på vaktens liste), ikke fra en måling.",
+      "prevention": "Hvert spørsmål eieren blir bedt om å prøve, er stilt til den kjørende tjenesten først, og det målte svaret står ved siden av. Test: hver rad i tabellen «Spør / Du skal se» i ACCEPT.md viser til en måling.",
+      "purposeRefs": [
+        "purpose://test.acceptance",
+        "purpose://measurement.production-path"
+      ],
+      "tags": [
+        "aksept",
+        "eksempel",
+        "måling",
+        "concierge",
+        "pdd"
+      ],
+      "source": "Deliverables/PDD_palazzo-dekningsvakt-runde2_2026-10-02/ACCEPT.md §7, feil 19"
+    },
+    {
+      "lessonRef": "lesson.red-first-claimed-for-tests-that-were-not",
+      "date": "2026-10-04",
+      "severity": "minor",
+      "symptom": "TESTRESULT.md sa at hver ny eller endret test var kjørt rød først. Tolv endringer i tester som alt fantes, og ti av de 24 nye i første runde, kom inn sammen med koden og var aldri kjørt røde.",
+      "cause": "Påstanden ble skrevet om alle testene samlet, uten å telle hvilke som fantes da den røde kjøringen ble gjort.",
+      "prevention": "En påstand om alle tester føres per test: «rød først» listes med hvilke tester som fantes i den røde kjøringen, og hvilke som kom til etterpå. Test: antall tester i den røde og i den grønne kjøringen står i TESTRESULT.md, og differansen er forklart.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression",
+        "purpose://test.acceptance"
+      ],
+      "tags": [
+        "test",
+        "rød-først",
+        "påstand",
+        "aksept",
+        "pdd"
+      ],
+      "source": "Deliverables/PDD_palazzo-dekningsvakt-runde2_2026-10-02/TESTRESULT.md#roed og ACCEPT.md §7, feil 9"
+    },
+    {
+      "lessonRef": "lesson.estimate-assumed-one-attack-round",
+      "date": "2026-10-04",
+      "severity": "minor",
+      "symptom": "Planen sa «rundt tre og en halv time etter G1». Den siste utgaven var målt på nett 34 timer og 50 minutter etter.",
+      "cause": "Anslaget regnet med én runde. Det ble fem angrepsrunder, og Mac-en var utenfor rekkevidde i fire perioder. Anslaget var for lavt også uten bruddene.",
+      "prevention": "Et anslag for arbeid som skal angripes av en uavhengig tråd, oppgis per runde, og sier at antall runder er ukjent til første angrep er målt. Test: planen har tid per runde, ikke en sluttid.",
+      "purposeRefs": [
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "anslag",
+        "plan",
+        "angrep",
+        "pdd"
+      ],
+      "source": "Deliverables/PDD_palazzo-dekningsvakt-runde2_2026-10-02/ACCEPT.md §3 (A9)"
+    },
+    {
+      "lessonRef": "lesson.full-path-rule-broken-in-short-references",
+      "date": "2026-10-05",
+      "severity": "major",
+      "symptom": "Kjetil måtte for tredje gang si at filer skal stå med hele stien («Du må legge med hele banen til filer som dette: ACCEPT.md»): meldingene og spørsmålene ved G3 hadde bare filnavnet.",
+      "cause": "Regelen sto i preferansene hans og i skillen. Korte henvisninger som «ACCEPT.md §8» og teksten i spørsmålene (AskUserQuestion) ble skrevet uten sti, og ingenting kontrollerte meldingene før de ble sendt.",
+      "prevention": "Hver melding til eieren kontrolleres maskinelt før den sendes: et ord som ender på en filendelse og ikke begynner med en rot, stopper sendingen. Det gjelder hver gang en fil nevnes, også i spørsmål. Test: skriptet som kontrollerer meldinger, gir null funn på hver melding som ber om en port.",
+      "purposeRefs": [
+        "purpose://handoff.runnable-without-guessing",
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "sti",
+        "melding",
+        "port",
+        "gjentakelse",
+        "pdd"
+      ],
+      "source": "Deliverables/PDD_palazzo-dekningsvakt-runde2_2026-10-02/STATUS.md (5. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.stand-in-shared-the-callers-assumption",
+      "date": "2026-10-05",
+      "severity": "major",
+      "symptom": "Første tørrkjøring på Macen stoppet fordi korrespondanseklienten svarte «No enrolled correspondence profile exists», mens 42 tester og 126 selvkontroller var grønne i skyen.",
+      "cause": "Programmet ga klienten mappen profilene ligger i som --root, og klienten leser --root som profilens egen mappe. Prøveklienten i testene var skrevet etter samme antakelse som programmet, så testene prøvde antakelsen mot seg selv. At klienten tok --root, sto som «måles i trinn 1», men hva argumentet betyr, ble ikke målt før koden ble skrevet.",
+      "prevention": "Før kode skrives mot et eksternt program, måles kontrakten der programmet kjører: argumentene, avslutningskodene og den ordrette teksten når det nekter. Stedfortrederen i testene skal nekte på samme måte. Test: én test kjører stedfortrederen med inndataene det ekte programmet nektet, og krever samme kode og tekst; og når det gamle kallet settes tilbake i en kopi, blir testene røde.",
+      "purposeRefs": [
+        "purpose://measurement.production-path",
+        "purpose://grounding"
+      ],
+      "tags": [
+        "stedfortreder",
+        "test",
+        "kontrakt",
+        "cli",
+        "agent",
+        "python",
+        "pdd"
+      ],
+      "source": "Deliverables/PDD_agent-planlagte-jobber_2026-10-02/TESTRESULT.md, avsnittet t8 (5. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.file-copied-to-the-mac-was-the-previous-version",
+      "date": "2026-10-05",
+      "severity": "major",
+      "symptom": "En commit gikk ut med testen, men uten endringen den prøvde: filkopien fra skyøkten til Macen meldte «written», og fila på Macen var forrige utgave. To skript mistet dessuten kjørbar-biten på veien.",
+      "cause": "Fila i utdatamappen i skyen var skrevet over rett før kopieringen, og kopien som ble levert, var den forrige. Sjekksummen på Macen ble skrevet ut, men ikke sammenlignet, før commit-jobben ble lagt i køen i samme kommando. Hvorfor utdatamappen leverte forrige utgave, er ukjent.",
+      "prevention": "Hver utgave som skal til Macen, legges under et nytt filnavn i utdatamappen. Sjekksummen på Macen sammenlignes med den i skyen i et eget steg, og neste steg (commit eller køjobb) startes ikke i samme kommando. Test: commit-jobben viser «git diff --cached --stat --summary» før commit, og lista over filer og moduser sammenlignes med det som skulle med.",
+      "purposeRefs": [
+        "purpose://handoff.runnable-without-guessing",
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "sky",
+        "filkopi",
+        "sjekksum",
+        "commit",
+        "kø",
+        "modus"
+      ],
+      "source": "Deliverables/PDD_agent-planlagte-jobber_2026-10-02/STATUS.md (5. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.linux-green-and-a-read-through-were-not-a-run-on-macos",
+      "date": "2026-10-05",
+      "severity": "major",
+      "symptom": "Fila mottakerne skulle kjøre, var grønn i 52 tester på Linux under tre skall og gjennomgått for macOS av en uavhengig kontroll, og var rød i de to første kjøringene på Macen: den kunne velge en eldre invitasjonsfil, og seks feilmeldinger ble til «unbound variable» i Terminal.",
+      "cause": "ls -t på macOS gir ikke den nyeste fila først når ett av navnene den får, ikke finnes. bash 3.2 på macOS leser første byte av et tegn utenfor ASCII som en bokstav når språkinnstillingen er UTF-8, så en variabel rett foran » får et navn som ikke finnes. Ingen av delene skjer på Linux. Testene kjørte dessuten uten språkinnstilling, slik køen gjør, mens mottakerne kjører i Terminal, som har UTF-8. Begge er målt direkte etterpå (HAVEN-Deploy/_handoff/HD-0006/maal/MAAL-MACOS-SKALL-1-20261005.md).",
+      "prevention": "Et skript som mennesker skal kjøre på en Mac, kjøres på Macen før det kalles ferdig: med /bin/bash, én runde uten språkinnstilling og én med UTF-8, mot en stedfortreder i en midlertidig mappe. Test: selvtesten skriver to runder og er rød på en maskin uten UTF-8, jobbnummeret for den grønne kjøringen står i LES-MEG, og en test nekter en variabel uten klammer rett foran et tegn utenfor ASCII.",
+      "purposeRefs": [
+        "purpose://measurement.production-path",
+        "purpose://grounding"
+      ],
+      "tags": [
+        "macos",
+        "bash",
+        "utf-8",
+        "ls",
+        "skript",
+        "terminal",
+        "test",
+        "pdd"
+      ],
+      "source": "Deliverables/PDD_korrespondanse-fornyelse_2026-09-30/TESTRESULT.md, avsnittet HD-0006 (5. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.stand-in-kept-less-than-the-server-keeps",
+      "date": "2026-10-05",
+      "severity": "major",
+      "symptom": "Skriptet for fornyelse kunne si «Tilgangen er på plass» med et bevis tjeneren avviser (profilen lagt tilbake fra kopi, så godkjenning, så aktivering), og alle testene var grønne; en uavhengig kontroll fant det ved å lese tjenerens kilde.",
+      "cause": "Stedfortrederen sto for både klienten og tjeneren, og lot aktiveringen lage et nytt bevis og skrive tilgangen om så den passet. Den ekte tjeneren bytter tilgangen ved godkjenningen og gir tilbake beviset som ligger på forespørselen. Tilstanden testene startet fra, var skrevet for hånd, uten den gamle, godkjente forespørselen. Det er samme feil som lesson.stand-in-shared-the-callers-assumption, ett nivå opp.",
+      "prevention": "En stedfortreder fører hver post den ekte tjenesten fører, og endrer dem bare der kilden gjør det. Tilstanden en test starter fra, bygges ved å kjøre stedfortrederens egne steg, ikke ved å skrive den for hånd. Test: én test går gjennom rekkefølgen kontrollen fant, og krever at skriptet sier «IKKE I ORDEN».",
+      "purposeRefs": [
+        "purpose://measurement.production-path",
+        "purpose://grounding"
+      ],
+      "tags": [
+        "stedfortreder",
+        "test",
+        "tjener",
+        "tilstand",
+        "korrespondanse",
+        "pdd"
+      ],
+      "source": "Deliverables/PDD_korrespondanse-fornyelse_2026-09-30/panel/FABEL_HD0006_SKRIPT.md (S1 og B1)"
+    },
+    {
+      "lessonRef": "lesson.pr-opened-without-reading-the-base-branch-ci",
+      "date": "2026-10-05",
+      "severity": "minor",
+      "symptom": "PR #30 ble opprettet uten at CI-tilstanden på main var lest: løpet sto til tidsgrensen på 25 minutter av en grunn som hadde stått på main i seks dager, og den første lesningen av loggen, at det stoppet før PR-ens tester hadde startet, ble felt av den uavhengige kontrollen.",
+      "cause": "Før PR-en ble opprettet, ble røyktesten kjørt lokalt, men løpene på basisgrenen ble ikke listet: hodet på main hadde ikke noe grønt løp siden 29.09. Loggen ble så lest som om siste linje var stedet det stoppet. At utskriften ender på en buffergrense på 16 KiB, sto i skillen haven-git-workflow fra 03.10, og den ble ikke lest først.",
+      "prevention": "Før en PR opprettes, listes løpene for basisgrenen; har hodet ikke noe grønt løp med samme testskript, rettes det først, eller rettelsen tas med. Før en årsak skrives ned for et rødt løp, leses avsnittet om CI i skillen, og siste linje i en logg kalles ikke stedet det stoppet. Test: skriptet som oppretter en PR, viser siste løp på basisgrenen og stopper når det er rødt.",
+      "purposeRefs": [
+        "purpose://grounding",
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "ci",
+        "github",
+        "logg",
+        "pr",
+        "kostnad",
+        "pdd"
+      ],
+      "source": "Deliverables/PDD_agent-planlagte-jobber_2026-10-02/TESTRESULT.md, avsnittet «CI for PR #30» (5. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.what-a-recipient-has-was-read-off-our-own-disk",
+      "date": "2026-10-05",
+      "severity": "minor",
+      "symptom": "Formålsspesifikasjonen og koordineringsfila sa at begge mottakerne har pakken HAVENAgentD-0.3.2-universal2.pkg; den ene fikk en usignert pilotpakke, og fila hun fikk, er ikke funnet.",
+      "cause": "Påstanden ble utledet av pakkene som lå på Kjetils Mac, og av den ene mottakeren som var belagt. Det som faktisk ble sendt til den andre, e-postutkastet fra den dagen, ble ikke lest før påstanden ble skrevet.",
+      "prevention": "Hva en mottaker har, leses av det som ble sendt til den mottakeren: pakkemappen og meldingen, én rad per mottaker. Finnes det ikke spor, står det «ukjent», og det som bygges, må tåle begge. Test: påstandstabellen har én rad per mottaker med fila som belegger den, og skriptet finner klienten både der pakken og der pilotpakken legger den.",
+      "purposeRefs": [
+        "purpose://grounding"
+      ],
+      "tags": [
+        "mottaker",
+        "pakke",
+        "påstand",
+        "korrespondanse",
+        "pdd"
+      ],
+      "source": "Deliverables/PDD_agent-planlagte-jobber_2026-10-02/FORMAALSSPEC.md §0 (rettet 5. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.inherited-method-was-not-what-the-installed-tool-does",
+      "date": "2026-10-06",
+      "severity": "major",
+      "symptom": "Tre utgaver av skriptet som skulle bytte invitasjonslista på staging, byttet den i containeren som kjører, med bytteskriptet fra forrige gang. Det installerte haven-deploy setter lista fra en fil under /etc/haven ved hver utsetting, så neste utsetting ville skrevet den gamle lista tilbake uten at noen merket det.",
+      "cause": "Framgangsmåten ble arvet fra byttene 08.09 og 30.09, uten at oppgavens tittel (HD-0006: «via haven-deploy --env-only i stedet for recreate») og verktøyet som står på verten, ble lest. Kopien av haven-deploy i repoet på Macen var en annen utgave enn den installerte. Det ble funnet ved å lese den installerte utgaven og journalen fra siste utsetting, etter at tørrkjøringen var kjørt og før noe var endret.",
+      "prevention": "Før et skript skrives mot en mekanisme på en vert, leses oppgaven det hører til, verktøyet slik det står installert på verten (med sjekksum), og loggen fra forrige gang verktøyet kjørte. Brief-audit sier hvilken installert utgave som er lest. Test: skriptet stopper når sjekksummen til det installerte verktøyet er en annen enn den som er lest, og det kontrollerer etter endringen at kilden verktøyet leser ved neste kjøring, har samme verdi som det som kjører.",
+      "purposeRefs": [
+        "purpose://grounding",
+        "purpose://scaffold.operations"
+      ],
+      "tags": [
+        "deploy",
+        "staging",
+        "host",
+        "haven-deploy",
+        "invitasjoner",
+        "arvet-metode",
+        "grounding",
+        "skript"
+      ],
+      "source": "Deliverables/PDD_korrespondanse-fornyelse_2026-09-30/TESTRESULT.md, avsnittet «Byttet på staging: skriptet» (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.done-was-read-from-the-process-table-and-the-log",
+      "date": "2026-10-06",
+      "severity": "major",
+      "symptom": "Utgave 4 av bytteskriptet la fila tilbake og frigav claimen i tre forløp der haven-deploy ennå gikk, og sa «staging står som før». 63 tester var grønne, og 64 av 64 bevisste feil ble fanget.",
+      "cause": "Skriptet avgjorde at haven-deploy var ferdig ved å se etter prosessen i /proc og etter ord i loggen. Svaret på startkallet kan gå tapt, prosessen skriptet husker, er sudo sin, og haven-deploy skriver loggen gjennom tee, så de siste linjene kan lande etter at prosessen er borte. Etterligningen i testene skrev loggen rett i fila og var selv prosessen, så ingen av forløpene kunne oppstå der. Funnet av en uavhengig kontroll som kjørte forløpene.",
+      "prevention": "Et skript som starter en lang jobb over ssh, lar skallet rundt jobben skrive et sluttmerke med avslutningskoden, og bare det merket avgjør at jobben er ferdig. Starten går gjennom et startmerke som bare kan flyttes én gang, og den prøves på verten med et argument verktøyet avviser, før noe endres. Etterligningen skriver og avslutter slik det ekte verktøyet gjør. Test: én test der logglinjene kommer etter sluttmerket, én der svaret på startkallet blir borte mens jobben går, og én der verten dreper det forbindelsen startet.",
+      "purposeRefs": [
+        "purpose://measurement.production-path",
+        "purpose://scaffold.operations"
+      ],
+      "tags": [
+        "ssh",
+        "nohup",
+        "sudo",
+        "deploy",
+        "host",
+        "stedfortreder",
+        "claim",
+        "test",
+        "skript"
+      ],
+      "source": "Deliverables/PDD_korrespondanse-fornyelse_2026-09-30/panel/FABEL_BYTT_UTGAVE4.md og TESTRESULT.md, avsnittet «Byttet på staging: skriptet» (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.the-scripts-own-python-was-newer-in-the-tests-than-on-the-mac",
+      "date": "2026-10-06",
+      "severity": "minor",
+      "symptom": "Testene av bytteskriptet kjørte skriptets egne Python-blokker med 3.11, mens Macen har 3.9.6, som avviser datoformer 3.11 tar.",
+      "cause": "Testkjøreren var 3.9, men skriptet kaller /usr/bin/python3, som er nyere i skyen enn på Macen. Funnet av en uavhengig kontroll, ikke av en kjøring.",
+      "prevention": "Testene bytter stien til tolken, i kopien av skriptet de kjører, til utgaven målmaskinen har, og én test krever at ingen annen tolk står igjen i kopien. Datoer tolkes uten funksjoner som oppfører seg ulikt mellom utgavene.",
+      "purposeRefs": [
+        "purpose://measurement.production-path"
+      ],
+      "tags": [
+        "python",
+        "macos",
+        "test",
+        "skript",
+        "versjon"
+      ],
+      "source": "Deliverables/PDD_korrespondanse-fornyelse_2026-09-30/panel/FABEL_BYTT_UTGAVE5.md (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.umask-for-my-own-log-followed-sudo-into-the-tool",
+      "date": "2026-10-06",
+      "severity": "major",
+      "symptom": "Bytteskriptet for invitasjonslista satte umask 077 først i kallet som starter haven-deploy på staging-verten, for å lukke sin egen logg. Etter sudos standard ville haven-deploy da fått 077 i stedet for 022 (ikke målt på verten), og låsefila den lager etter en omstart av verten, ville blitt lukket for alle andre enn root. Det samme kunne gjelde det statusverktøyet skriver. 118 tester var grønne, og tre uavhengige kontroller hadde lest linja.",
+      "cause": "umask arves av alt et skall starter, og sudo legger etter sin standard bare sammen brukerens umask og sin egen. haven-deploy setter ikke umask selv. Ingen test spurte hvilket miljø etterligningen av haven-deploy ble startet i. Pekt på av den fjerde uavhengige kontrollen, som fikk bare endringen siden forrige kontroll å lese, før noe som endrer verten var kjørt. Lest på verten etterpå: en økt hos ops uten terminal har umask 0002, og sudo har ingen egen umask-innstilling for ops.",
+      "prevention": "Et skript som starter et verktøy på en vert, starter det i det miljøet et vanlig kall har: ingen egen umask, mappe eller miljøvariabel rundt verktøyet. Det skriptet trenger for sine egne filer, settes i et underskall rundt akkurat den fila. Test: etterligningen av verktøyet noterer umasken den ble startet med, og en test leser den og rettighetene på det verktøyet lager fra bunnen av.",
+      "purposeRefs": [
+        "purpose://measurement.production-path",
+        "purpose://scaffold.operations"
+      ],
+      "tags": [
+        "umask",
+        "sudo",
+        "ssh",
+        "deploy",
+        "host",
+        "haven-deploy",
+        "stedfortreder",
+        "skript"
+      ],
+      "source": "Deliverables/PDD_korrespondanse-fornyelse_2026-09-30/panel/FABEL_BYTT_UTGAVE5_DELTA3.md (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.two-part-condition-was-tested-only-with-both-parts-failing",
+      "date": "2026-10-06",
+      "severity": "minor",
+      "symptom": "Prøvestarten i bytteskriptet godtar utfallet bare når haven-deploy sluttet med kode 2 og loggen har linja om revisjonen. To innsatte feil som tok bort hvert sitt vilkår, ble ikke fanget av 118 grønne tester.",
+      "cause": "I alle testene der prøvestarten skulle feile, sviktet begge vilkårene samtidig (sudo krever passord: en annen kode, og ingen linje). Funnet i utskriftene per innsatt feil fra en feilinnsetting som ble stoppet halvveis. Sluttrapporten fra den kjøringen ble aldri skrevet.",
+      "prevention": "Et vilkår med flere ledd får én test per ledd, der bare det leddet svikter, og feilinnsettingen har én feil per ledd. Utskriften per innsatt feil leses også når kjøringen stoppes før den er ferdig.",
+      "purposeRefs": [
+        "purpose://measurement.production-path"
+      ],
+      "tags": [
+        "test",
+        "mutasjon",
+        "vilkaar",
+        "skript"
+      ],
+      "source": "Deliverables/PDD_korrespondanse-fornyelse_2026-09-30/TESTRESULT.md (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.the-printout-stated-a-conclusion-the-script-had-not-measured",
+      "date": "2026-10-06",
+      "severity": "minor",
+      "symptom": "Prøvestarten skrev «skallet levde i 5 sekunder etter at forbindelsen var lukket». Skriptet hadde ikke målt når forbindelsen ble lukket, ventingen kunne feile uten at det syntes, og utskriften skilte ikke null sekunder fra fem.",
+      "cause": "Linja gjenga hensikten med prøven, ikke det kjøringen hadde vist. Funnet av en uavhengig kontroll som spurte hva utskriften faktisk beviste.",
+      "prevention": "En linje i en utskrift som sier at noe er vist, bygges av verdier målt i samme kjøring, og skriptet stopper når målingen ikke bærer slutningen. Her: tiden på startkallet tas og må være kortere enn ventingen, verktøyet kjøres bare hvis ventingen gikk, og linja har en egen ordlyd for tilfellet der ingenting er vist. Test: begge ordlydene, og et startkall som tar like lang tid som ventingen.",
+      "purposeRefs": [
+        "purpose://grounding",
+        "purpose://measurement.production-path"
+      ],
+      "tags": [
+        "utskrift",
+        "bevis",
+        "skript",
+        "proevestart"
+      ],
+      "source": "Deliverables/PDD_korrespondanse-fornyelse_2026-09-30/panel/FABEL_BYTT_UTGAVE5_DELTA3.md (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.status-message-sent-before-the-documents-were-checked",
+      "date": "2026-10-06",
+      "severity": "minor",
+      "symptom": "Dokumentene og meldingen til eieren 06.10 om kvelden skrev slutninger som målinger («haven-deploy ville blitt kjørt med umask 077», «skallet ventet fem sekunder: målt»), gjenga kontrollenes merknader som «en feil» og «alle rettet», utelot ett av fire svar der en vakt ble beskrevet, og ga et klokkeslett for når en kjøring ville være ferdig, uten grunnlag. Meldingen var sendt et kvarter før kontrollen av dokumentene.",
+      "cause": "Dokumentene ble skrevet rett etter rettelsen, av den som hadde gjort den, og kontrollen mot kildene ble startet etter at meldingen var sendt. Regelen om at en uavhengig tråd kontrollerer dokumentene før eieren får dem, sto alt i metoden, for ACCEPT.md og TESTRESULT.md. En uavhengig kontroll fant elleve steder.",
+      "prevention": "Dokumenter, LES-MEG ved siden av et skript og meldingen til eieren kontrolleres mot kildene av en som ikke har skrevet dem, før meldingen sendes. Ved hver påstand står det om den er målt, lest eller sluttet, og et tidsanslag gis som et spenn med grunnlaget. Test: kontrollrapporten er eldre enn meldingen, og rettelser gjort etter kontrollen er merket som ukontrollert.",
+      "purposeRefs": [
+        "purpose://grounding",
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "dokumentasjon",
+        "melding",
+        "slutning",
+        "maaling",
+        "anslag",
+        "kontroll"
+      ],
+      "source": "Deliverables/PDD_korrespondanse-fornyelse_2026-09-30/panel/FABEL_DOK_RUNDE4.md (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.commit-file-built-on-a-stale-copy-and-the-check-got-the-same-copy",
+      "date": "2026-10-06",
+      "severity": "major",
+      "symptom": "README.md i commiten `c5058f49` fikk 172 endrede linjer (104 ut, 68 inn) der rundt 50 nye var ventet: tekst fra tre tidligere commiter falt ut.",
+      "cause": "Filen i commit-pakken var bygget på en kopi i skyarbeidsområdet fra før runde 2b, og kopien ble aldri holdt mot filen i foreldercommiten. Kontrollen før commit fant det ikke, fordi den ble vist til samme kopi.",
+      "prevention": "Hver fil i en commit-pakke bygges på git-objektet i foreldercommiten, og skriptet som committer, krever ventet antall linjer inn og ut per fil og stopper ellers. Kontrolltråden får commiten og finner grunnlaget selv. Test: skriptet stopper når forskjellen mot forelderen ikke er den ventede.",
+      "purposeRefs": [
+        "purpose://quality.docs-in-same-change",
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "commit",
+        "grunnlag",
+        "kopi",
+        "readme",
+        "kontroll",
+        "dokumentasjon"
+      ],
+      "source": "Deliverables/PDD_palazzo-allergenvei-strakstiltak_2026-10-06/ACCEPT.md, avvik 1 (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.brake-file-written-after-the-chain-had-passed-the-brake",
+      "date": "2026-10-06",
+      "severity": "minor",
+      "symptom": "Bremsefilen ble lagt 13 sekunder etter at kjedeskriptet hadde passert bremsesjekken foran pushen, så en commit med en kjent feil ble pushet.",
+      "cause": "Feilen ble sett i tallene fra commiten, og commit og push sto i samme jobb med sekunder mellom.",
+      "prevention": "Et tall et menneske må lese før neste steg som ikke kan angres, deler kjeden i to jobber, eller skriptet krever tallet selv. Test: kjeden stopper foran pushen når commitens linjetall avviker fra det ventede.",
+      "purposeRefs": [
+        "purpose://scaffold.operations",
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "brems",
+        "kjede",
+        "push",
+        "commit",
+        "stoppregel"
+      ],
+      "source": "Deliverables/PDD_palazzo-allergenvei-strakstiltak_2026-10-06/STATUS.md, loggen kl. 12:32 UTC (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.check-ran-before-the-last-numbers-and-did-not-read-the-message",
+      "date": "2026-10-06",
+      "severity": "minor",
+      "symptom": "Kontrollen av akseptdokumentet ble gjort før de 27 siste kallene var målt, og meldingen til eieren var ikke med. En ny kontroll rett før sending fant åtte ting, blant annet at meldingen la en svakhet til angrepet alene der råsvarene fra nett viste det samme.",
+      "cause": "Kontrollen ble startet da dokumentet var skrevet, ikke da tallene var endelige, og meldingen ble skrevet etter kontrollen.",
+      "prevention": "Den siste uavhengige kontrollen kommer etter at siste tall er ført inn, regner tallene på nytt fra råfilene og leser meldingen eieren får. Test: kontrollrapporten er yngre enn siste bevisfil og eldre enn meldingen.",
+      "purposeRefs": [
+        "purpose://test.acceptance",
+        "purpose://grounding",
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "kontroll",
+        "aksept",
+        "melding",
+        "tall",
+        "pdd"
+      ],
+      "source": "Deliverables/PDD_palazzo-allergenvei-strakstiltak_2026-10-06/STATUS.md, loggen kl. 15:03 UTC (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.raw-file-kept-the-previous-answer-for-a-call-that-never-arrived",
+      "date": "2026-10-06",
+      "severity": "minor",
+      "symptom": "27 av 174 rader i råfilen fra målingen på nett hadde `http` 0 sammen med svaret fra kallet før, og et småverktøy viste 27 henvisninger som ikke fantes.",
+      "cause": "Måleskriptet skrev hvert svar til samme fil og tømte den ikke før neste kall. Oppsummeringen leste `http` først; småverktøyet leste svaret først.",
+      "prevention": "Svarfilen tømmes før hvert kall, og hver leser av råfilen leser statuskoden før svaret. Test: en kjøring uten nett gir rader uten svar, og sammenligningen hopper over dem.",
+      "purposeRefs": [
+        "purpose://measurement.production-path",
+        "purpose://measurement.honest-labels"
+      ],
+      "tags": [
+        "maaling",
+        "raafil",
+        "http",
+        "curl",
+        "nett"
+      ],
+      "source": "Deliverables/PDD_palazzo-allergenvei-strakstiltak_2026-10-06/TESTRESULT.md, T10 (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.approved-image-had-no-way-to-be-photographed-on-the-live-page",
+      "date": "2026-10-06",
+      "severity": "minor",
+      "symptom": "Telefonbildet som ble godkjent ved G1-GUI, kunne ikke få et skjermbilde fra nett ved siden av seg ved G3: nettleserverktøyet holder vinduet på 1280 punkter, og siden nekter å bli vist i en ramme.",
+      "cause": "Hvordan hvert godkjent bilde skulle fotograferes på nett, ble ikke prøvd før bildene ble lagt fram.",
+      "prevention": "Ved G1-GUI står det for hvert bilde hvordan motstykket på nett skal tas ved G3, og veien er prøvd én gang mot siden slik den står. Kan et bilde ikke tas, sies det ved G1-GUI. Test: hvert godkjent bilde har en navngitt opptaksvei som har gitt en fil.",
+      "purposeRefs": [
+        "purpose://gui.parity-with-approved-image",
+        "purpose://gui.expectation-agreed-before-build"
+      ],
+      "tags": [
+        "gui",
+        "skjermbilde",
+        "telefon",
+        "g3",
+        "paritet"
+      ],
+      "source": "Deliverables/PDD_palazzo-allergenvei-strakstiltak_2026-10-06/ACCEPT.md, avvik 3 (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.early-return-rule-changed-what-happens-when-the-lookup-is-down",
+      "date": "2026-10-06",
+      "severity": "minor",
+      "symptom": "Et spørsmål med et ord fra ordlisten får henvisningen (HTTP 200) også når oppslaget ikke kan nås, der andre spørsmål får 503 eller 403. Det sto verken i spesifikasjonen eller i en test.",
+      "cause": "Regelen ble lagt foran kallet til oppslaget, og hva den gjør når det som ligger bak svikter, ble ikke skrevet ned. En kontroll før commit pekte på det.",
+      "prevention": "For hver regel som svarer før en avhengighet spørres, sier spesifikasjonen hva som skjer når avhengigheten er nede, og en test holder det fast. Test: en test der avhengigheten er tatt bort, med ventet svar for begge grener.",
+      "purposeRefs": [
+        "purpose://test.acceptance",
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "feilvei",
+        "rekkefoelge",
+        "spesifikasjon",
+        "test",
+        "avhengighet",
+        "concierge"
+      ],
+      "source": "Deliverables/PDD_palazzo-allergenvei-strakstiltak_2026-10-06/ACCEPT.md, avvik 4 (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.stop-rule-promised-a-reading-by-hand-that-the-script-did",
+      "date": "2026-10-06",
+      "severity": "minor",
+      "symptom": "Spesifikasjonen sa «jeg leser claimene selv rett før utsettingen». Lesingen ble gjort av utsettingsskriptet, og utskriften ble lest etterpå.",
+      "cause": "Regelen ble skrevet som en handling av en person og så lagt inn i skriptet uten at ordlyden ble endret.",
+      "prevention": "En stoppregel skrives slik den skal utføres: hva som leser, når, og hva som stopper. Test: ordlyden i spesifikasjonen og steget i skriptet er den samme.",
+      "purposeRefs": [
+        "purpose://scaffold.operations",
+        "purpose://handoff.runnable-without-guessing"
+      ],
+      "tags": [
+        "stoppregel",
+        "claim",
+        "deploy",
+        "spesifikasjon"
+      ],
+      "source": "Deliverables/PDD_palazzo-allergenvei-strakstiltak_2026-10-06/ACCEPT.md, avvik 8 (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.way-back-was-called-a-way-back-after-dry-runs-only",
+      "date": "2026-10-06",
+      "severity": "minor",
+      "symptom": "Veien tilbake fra utsettingen er tørrkjørt to ganger, men selve byttet tilbake er aldri kjørt, der spesifikasjonen krever en vei som virker også når siden er nede.",
+      "cause": "Byttet tilbake kan ikke prøves uten å ta ned utgaven som står på nett, og planen sa ikke hvordan det ellers skulle vises.",
+      "prevention": "En vei tilbake er vist når byttet er kjørt, for eksempel mot en egen container med samme image. Ellers står den som «ikke vist» i planen eieren godkjenner. Test: bevis for et gjennomført bytte, eller linjen «ikke vist» i planen.",
+      "purposeRefs": [
+        "purpose://scaffold.operations",
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "tilbakerulling",
+        "deploy",
+        "plan",
+        "bevis"
+      ],
+      "source": "Deliverables/PDD_palazzo-allergenvei-strakstiltak_2026-10-06/ACCEPT.md, avvik 9 (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.order-of-steps-changed-to-keep-a-promised-time",
+      "date": "2026-10-06",
+      "severity": "minor",
+      "symptom": "Utgaven ble satt ut før rettelsen av README.md var committet, mot planen, fordi kontrollen av rettelsen tok 28 minutter der 15 var ventet.",
+      "cause": "Tiden eieren hadde fått, styrte rekkefølgen. Byttet er ført under «Planbytter», og imaget har ikke filen i seg.",
+      "prevention": "Planen sier hvilke steg som kan bytte plass når noe tar lengre tid, og kontroller får en hard tidsgrense. Test: hvert planbytte har en linje i STATUS.md med hva som tapes.",
+      "purposeRefs": [
+        "purpose://quality.work-is-visible",
+        "purpose://scaffold.operations"
+      ],
+      "tags": [
+        "plan",
+        "tid",
+        "rekkefoelge",
+        "deploy",
+        "kontroll"
+      ],
+      "source": "Deliverables/PDD_palazzo-allergenvei-strakstiltak_2026-10-06/STATUS.md, «Planbytter» (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.word-list-looked-complete-against-its-authors-own-questions",
+      "date": "2026-10-06",
+      "severity": "major",
+      "symptom": "Ordlisten fanget 21 av 21 av forfatterens egne spørsmål og 42 av 60 i et blindt sett fra en annen tråd. Etter rettelser fanget den i et nytt angrep 50 av 60 direkte spørsmål og 6 av 20 som var skrevet for å unngå ordene, og 16 av 80 vanlige spørsmål ble nektet.",
+      "cause": "Regelen ble først prøvd mot spørsmål den som skrev regelen, hadde laget. En ordliste kjenner ord, ikke hva gjesten mener.",
+      "prevention": "En regel som skal fange spørsmål, måles mot et blindt sett fra en tråd som ikke har sett regelen, før den legges fram, og mot et nytt blindt sett etter rettelser. Tallene for det den ikke fanger og det den nekter uten grunn, legges fram sammen med regelen. Test: settet er frosset med md5 før målingen, og målingen kjøres én gang.",
+      "purposeRefs": [
+        "purpose://measurement.gain-on-unseen-data",
+        "purpose://measurement.negatives-guarded",
+        "purpose://test.acceptance"
+      ],
+      "tags": [
+        "ordliste",
+        "blindt-sett",
+        "angrep",
+        "concierge",
+        "allergen",
+        "maaling"
+      ],
+      "source": "Deliverables/PDD_palazzo-allergenvei-strakstiltak_2026-10-06/maaling/README.md (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.correction-to-a-list-removed-words-it-already-caught",
+      "date": "2026-10-06",
+      "severity": "minor",
+      "symptom": "To rettelser i ordlisten ga nye hull: et unntak som ble sammenlignet etter at ø var brettet til o, tok bort «nøtte», og en innsnevring tok bort «tolererer».",
+      "cause": "Hver utgave ble ikke kjørt mot alle tidligere eksempler før den ble tatt i bruk.",
+      "prevention": "Hver utgave av en liste kjøres mot alle tidligere eksempler, både ord som skal treffe og ord som ikke skal, og eksemplene ligger som fikstur. Test: en fikstur med ett eksempelord per oppføring og en liste med ord som ikke skal treffe.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression",
+        "purpose://measurement.negatives-guarded"
+      ],
+      "tags": [
+        "ordliste",
+        "regresjon",
+        "fikstur",
+        "unntak"
+      ],
+      "source": "Deliverables/PDD_palazzo-allergenvei-strakstiltak_2026-10-06/STATUS.md (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.rule-written-before-every-way-in-was-read",
+      "date": "2026-10-06",
+      "severity": "minor",
+      "symptom": "Regelen om linjen dekket først ikke svaret om bordbestilling, og de to snarveiene på siden (`/menu` og `/beverages`) var glemt i første utkast.",
+      "cause": "Reglene ble skrevet fra spørrefeltets vei inn. Sidens egen kode for hver vei inn ble lest etterpå.",
+      "prevention": "Før en regel for en flate skrives, listes hver vei inn fra flatens egen kode, og regelen har et ventet utfall for hver. Test: én test per vei inn.",
+      "purposeRefs": [
+        "purpose://test.acceptance",
+        "purpose://gui.quality.functional-accessible"
+      ],
+      "tags": [
+        "flate",
+        "veier-inn",
+        "regel",
+        "test",
+        "concierge"
+      ],
+      "source": "Deliverables/PDD_palazzo-allergenvei-strakstiltak_2026-10-06/FORMAALSSPEC.godkjent-G1-iterasjon1.md, §7 (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.rewritten-draft-got-new-errors-where-it-was-rewritten",
+      "date": "2026-10-06",
+      "severity": "minor",
+      "symptom": "Seks utkast til spesifikasjonen ble lest i fem kontrollrunder som fant 110 ting til sammen. Hver runde fant feil i det som var skrevet om etter den forrige.",
+      "cause": "Rettelser ble skrevet inn uten ny kontroll av teksten rundt, og tall ble ført for hånd.",
+      "prevention": "Etter en omskriving kontrolleres det omskrevne på nytt, og eieren får vite når siste utgave ikke er kontrollert. Tall fylles inn av kode. Test: dokumentet sier hvilken utgave kontrollen leste.",
+      "purposeRefs": [
+        "purpose://grounding",
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "utkast",
+        "kontroll",
+        "spesifikasjon",
+        "omskriving"
+      ],
+      "source": "Deliverables/PDD_palazzo-allergenvei-strakstiltak_2026-10-06/STATUS.md (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.known-pitfall-repeated-in-a-small-follow-up-without-lookup",
+      "date": "2026-10-06",
+      "severity": "minor",
+      "symptom": "Testen for avvik 4 sammenlignet to like svarkonvolutter med `XCTAssertEqual` og var rød mot riktig kode. Den grønne kjøringen fanget det før commit.",
+      "cause": "For oppfølgingen etter G3 ble det ikke kjørt `lookup`, og `lesson.valuetype-equality-false-for-objects` ble lest i skillen etter at testen var skrevet. Kontrolltråden leste forventningene, men kunne ikke kjøre dem.",
+      "prevention": "`lookup` kjøres for hvert steg som skriver kode eller tester, også små oppfølginger, og oppgaven til kontrolltråden ber den holde testen mot lærdommene for taggene. Test: commit-trinnet stopper uten grønt bevis for nettopp filene som committes.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression",
+        "purpose://test.acceptance"
+      ],
+      "tags": [
+        "test",
+        "valuetype",
+        "lookup",
+        "oppfoelging",
+        "xctest"
+      ],
+      "source": "Deliverables/PDD_palazzo-allergenvei-strakstiltak_2026-10-06/STATUS.md (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.full-path-rule-passed-the-checker-in-descriptions-and-file-cards",
+      "date": "2026-10-06",
+      "severity": "minor",
+      "symptom": "Meldingen som ba om G3, gikk gjennom kontrollskriptet for hele banen, men fem filer ble sendt som kort uten bane i sendingen, og dokumenter ble nevnt med en beskrivelse («akseptdokumentet») før banen sto.",
+      "cause": "Kontrollskriptet ser bare ord med filendelse.",
+      "prevention": "Hver fil som leveres i samtalen, står med hele banen i meldingen som følger med, og en beskrivelse av en fil får banen ved første nevning. Test: antall leverte filer er lik antall baner i meldingen.",
+      "purposeRefs": [
+        "purpose://handoff.runnable-without-guessing",
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "sti",
+        "melding",
+        "gate",
+        "filkort",
+        "kjetil"
+      ],
+      "source": "Deliverables/PDD_palazzo-allergenvei-strakstiltak_2026-10-06/STATUS.md (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.status-did-not-say-status-or-what-to-do",
+      "date": "2026-10-06",
+      "severity": "major",
+      "symptom": "Eieren 06.10 om statusen han fikk: «Dette sier meg ingenting om hva status er eller hva jeg skal gjøre.» Han skrev selv formålet og spurte hva som gjensto for å få prøvd med de to mottakerne.",
+      "cause": "Eieren sa at statusen ikke sa hva status var eller hva han skulle gjøre. At den handlet om en kø som sto stille, står bare i trådens eget notat. Hvilke meldinger han svarte på, er ikke bevart ordrett.",
+      "prevention": "En statusmelding åpner med hvor formålet står for dem det gjelder, så det eieren skal gjøre i nummererte punkter, så leddene som gjenstår. Arbeid på et sidespor kalles et sidespor. Test: kontrolløren får eierens ord fra §0 og svarer på om første avsnitt sier hva mottakerne har fått.",
+      "purposeRefs": [
+        "purpose://quality.work-is-visible",
+        "purpose://handoff.runnable-without-guessing"
+      ],
+      "tags": [
+        "status",
+        "melding",
+        "formaal",
+        "kjetil",
+        "sidespor"
+      ],
+      "source": "Deliverables/PDD_kryptert-korrespondanse-med-vedlegg-ut_2026-10-06/FORMAALSSPEC.md, §0 (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.a-limit-in-todays-code-was-taken-as-a-premise-for-the-model",
+      "date": "2026-10-06",
+      "severity": "major",
+      "symptom": "Første valg til G1 sa «Da må noen andre enn de to være eier», anbefalte at tjeneren eier cellen, og frarådet alternativet der eieren selv er part med nøkkelen agenten bruker. Eieren samme kveld: «En chat celle må kunne brukes av eier også. Om det er vanskelig så er  det feil satt sammen.»",
+      "cause": "At eieren ikke kan sende vedlegg, og at klienten ikke har noen vei for eieren i produksjon, ble lest i koden og tatt som gitt. Spesifikasjonen sa ikke hva alternativene var rangert etter. Kontrolløren fikk samme ramme og fant ingen enklere fjerde måte.",
+      "prevention": "Når dagens kode utelukker den nærliggende lesningen av formålet, står det i §0 som et funn om koden, og «endre koden» er første alternativ. Det står hva alternativene er rangert etter. Kontrolløren får eierens ord, ikke forfatterens sammendrag. Test: hvert valg i §6 sier hvilken premiss det hviler på, og om eieren har tatt den.",
+      "purposeRefs": [
+        "purpose://grounding",
+        "purpose://human-agency"
+      ],
+      "tags": [
+        "premiss",
+        "valg",
+        "g1",
+        "modell",
+        "kode",
+        "korrespondanse"
+      ],
+      "source": "Deliverables/PDD_kryptert-korrespondanse-med-vedlegg-ut_2026-10-06/panel/iterasjon-2/FORMAALSSPEC.md, §6 valg 1, og panel/FABEL-G1-RUNDE-2-MODELL.md (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.few-steps-was-counted-for-the-recipient-and-not-for-the-owner",
+      "date": "2026-10-07",
+      "severity": "minor",
+      "symptom": "Utkastet til G1 talte tre håndgrep for mottakeren og skrev «én gang per person» for eieren («ett trykk» i spesifikasjonen bak). Bildet viste to Touch ID per person og en kode å sammenligne, og rekkefølgen på eierens steg sto feil. Kontrollen før framlegget fant det.",
+      "cause": "Ukjent. Rapporten viser at eierens håndgrep ikke var telt, og at siden og bildet ikke stemte overens, ikke hvorfor.",
+      "prevention": "Der «få håndgrep» er et formål, telles håndgrepene for hver part, eieren først, per person og per runde, fra bildene og i rekkefølgen de skjer. Et steg som følger av et forslag, merkes som forslag. Test: et opptak på en ren maskin der håndgrepene er telt.",
+      "purposeRefs": [
+        "purpose://gui.expectation-agreed-before-build",
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "haandgrep",
+        "manuelle-operasjoner",
+        "eier",
+        "g1",
+        "bilde",
+        "installerer"
+      ],
+      "source": "Deliverables/PDD_kryptert-korrespondanse-med-vedlegg-ut_2026-10-06/panel/KONTROLL-G1-ITERASJON-3.md, punkt 1 og 4 (7. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.a-second-safeguard-hid-that-the-first-had-no-test",
+      "date": "2026-10-06",
+      "severity": "major",
+      "symptom": "Én av 145 innsatte feil, kalt nr. 100 i filnavnene for omkjøringen («fila legges tilbake mens haven-deploy kanskje går»), ble ikke fanget, og alle 133 testene var grønne med den.",
+      "cause": "Målt én gang (forfatterens avlesning 06.10 kl. 21:27Z): i tilfellet testene hadde, ble låsen holdt, så skriptet lot fila være både med og uten feilen.",
+      "prevention": "To vern foran samme handling får hver sin test der det andre ikke kan svare. En innsatt feil som ingen test fanger, leses i utskriften før den regnes som ufarlig. Test: for hvert vern finnes et tilfelle der bare det vernet står mellom skriptet og handlingen.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression",
+        "purpose://test.acceptance"
+      ],
+      "tags": [
+        "test",
+        "vern",
+        "innsatt-feil",
+        "skript",
+        "deploy"
+      ],
+      "source": "Deliverables/PDD_korrespondanse-fornyelse_2026-09-30/TESTRESULT.md, raden om de 145 bevisste feilene, og panel/FABEL_BYTTEMELDING.md (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.deadline-request-left-out-what-follows-when-it-passes",
+      "date": "2026-10-06",
+      "severity": "minor",
+      "symptom": "Utkastet til meldingen etter byttet ba eieren godkjenne to forespørsler innen 24 timer, uten å si at invitasjonen da er brukt opp og at en ny trengs (etter kontrollørens lesning: nytt bytte og ny omstart av staging), og uten steget etter: hans godkjenning av mottakernes egne forespørsler. Kontrollen før sending fant det.",
+      "cause": "Ukjent. Rapporten sier hva som manglet, ikke hvorfor.",
+      "prevention": "En forespørsel med frist sier hva som skjer når fristen går ut, og nevner hvert senere steg som er eierens. Test: kontrolløren spør for hver frist i meldingen «hva følger hvis den ikke holdes?» og «hva er hans neste steg etter dette?».",
+      "purposeRefs": [
+        "purpose://handoff.runnable-without-guessing",
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "frist",
+        "melding",
+        "godkjenning",
+        "kjetil",
+        "invitasjon"
+      ],
+      "source": "Deliverables/PDD_korrespondanse-fornyelse_2026-09-30/panel/FABEL_BYTTEMELDING.md, punkt 2 og 3 (6. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.question-used-the-repos-words-and-came-back-as-a-question",
+      "date": "2026-10-07",
+      "severity": "minor",
+      "symptom": "To av fem nummererte punkter til eieren kom tilbake som spørsmål: «Hva gjør assistentidentiteten?» og «Hva mener du med at vedlegg kan gå til main? Vi skal ikke lagre vedlegg i git så forklar hva du mener.»",
+      "cause": "Det ene spørsmålet nevnte en ting uten å si hva den gjør. Det andre sa «vedlegg» og `main`; etter forfatterens egen forklaring var det koden for vedlegg og hovedgrenen som var ment. Kontrollen før sending leste et tidligere utkast med fire spørsmål. Oppdraget den fikk, hadde seks spørsmål, og ingen av dem var om spørsmålene kunne besvares uten repoets ord (oppdraget er ikke lagret i oppgavemappen). Siden ble endret etter kontrollen, og endringene ble ikke kontrollert på nytt.",
+      "prevention": "Et spørsmål til eieren bruker hans ord og sier hva en ting gjør før det spør om den. Test: kontrolløren leser hvert spørsmål, slik det blir sendt, som en som ikke kjenner repoet, og sier hvilke ord som må forklares.",
+      "purposeRefs": [
+        "purpose://handoff.runnable-without-guessing",
+        "purpose://quality.work-is-visible"
+      ],
+      "tags": [
+        "spoersmaal",
+        "fagord",
+        "g1",
+        "kjetil",
+        "melding"
+      ],
+      "source": "Deliverables/PDD_kryptert-korrespondanse-med-vedlegg-ut_2026-10-06/STATUS.md og panel/KONTROLL-G1-ITERASJON-3.md (7. oktober 2026)"
+    },
+    {
+      "lessonRef": "lesson.render-candidate-skeleton-with-the-web-renderer-before-g1-gui",
+      "date": "2026-10-02",
+      "severity": "major",
+      "symptom": "G1-GUI-bilder har vært mockups (butler-PDD-en) eller krevd en kjørende CellScaffold med Porthole-preview. Begge gir enten feil piksler eller en byggerunde før Kjetil får se noe.",
+      "cause": "Ingen hadde skilt rendereren fra serveren: Public/js/skeleton-runtime.js + Public/css/porthole-webo.css er selvstendige og kjører i Chromium uten Vapor (det er slik playwright/skeleton-element-catalog.spec.js alt gjør).",
+      "prevention": "For en ny flate: eksporter de to filene fra CellScaffold origin/main (md5 i images/README.md), rendre kandidat-skjelett-JSON med eksempeldata i Playwright/Chromium (images/render.js i PDD_lister), lagre bildene som G1-GUI-referanse og mål oppførsel (onAction-payloads) i samme kjøring. Etter implementering: en test som krever at Swift-fabrikken gir kanonisk byte-lik JSON som fixturen bildet ble rendret fra, og en ny render fra cellens ekte state med pikseldiff mot referansen. PDD_lister: 0 piksler avvik på tre flater.",
+      "purposeRefs": [
+        "purpose://gui.expectation-agreed-before-build",
+        "purpose://gui.parity-with-approved-image"
+      ],
+      "tags": [
+        "gui",
+        "skeleton",
+        "porthole",
+        "web",
+        "render",
+        "fixture",
+        "g1-gui"
+      ],
+      "source": "Deliverables/PDD_lister-celle-og-komponent_2026-10-02/images/README.md, images/render.js, render-wp5.js; CellProtocol Tests/CellBaseTests/ListsConfigurationTests.swift (testFactoryProducesTheApprovedSkeletonByteForByte)"
+    },
+    {
+      "lessonRef": "lesson.shared-swiftpm-cache-lost-its-ownership-marker",
+      "date": "2026-10-08",
+      "severity": "minor",
+      "symptom": "Første bygg i et nytt CellProtocol-arbeidstre stoppet etter 4 s: haven-swiftpm.sh exit 64, «existing cache lacks the required ownership marker: …/T/haven-swiftpm-bounded/caches/90c10549…».",
+      "cause": "Ukjent hvem som fjernet markøren i den delte cachen (avledet av remote-URL). Runneren nekter med rette å bruke en katalog den ikke eier.",
+      "prevention": "Byggeskript for en PDD setter HAVEN_SWIFTPM_CACHE_KEY=<pdd-slug> (egen cache) i stedet for å reparere den delte; koster ett kaldt bygg (6 min for CellProtocol). Test: skriptet skriver cache-key i rapporten.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "swiftpm",
+        "cache",
+        "bygg",
+        "kø",
+        "mac"
+      ],
+      "source": "HAVEN-Deploy/_handoff/LISTER/wp0-baseline.md (l2, 2026-10-08 09:02Z) og wp0-lister-worktree-baseline.sh"
+    },
+    {
+      "lessonRef": "lesson.xctest-stdout-export-interleaves-with-its-own-log",
+      "date": "2026-10-08",
+      "severity": "minor",
+      "symptom": "En test printet 49 kB JSON til stdout mellom markører for at byggeskriptet skulle klippe den ut; fila ble ugyldig ved byte 49156 — XCTests egen «Test Case '…' passed»-linje lå midt inne i JSON-en.",
+      "cause": "swift test flettes stdout og stderr i samme logg uten linjeatomisitet for store skrivinger.",
+      "prevention": "En test som skal levere data til et skript, skriver til en fil (NSTemporaryDirectory()) og printer bare stien; skriptet validerer JSON før det kopierer. Og: /usr/local/bin/python3 på Kjetils Mac er en x86-binær («Bad CPU type in executable») under launchd — bruk /usr/bin/python3 eller node i skript.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "xctest",
+        "eksport",
+        "skript",
+        "python3",
+        "mac",
+        "kø"
+      ],
+      "source": "HAVEN-Deploy/_handoff/LISTER/bygg-wp5.md (l5), diag-eksport.md (l8), bygg-wp5c.md (l9), 2026-10-08"
+    },
+    {
+      "lessonRef": "lesson.textfield-cannot-carry-instance-identity-in-a-mount",
+      "date": "2026-10-08",
+      "severity": "major",
+      "symptom": "Inne i en ComponentSurface-montering kan Button si hvilken liste den gjelder (payload fra raden), men TextField sender bare en string til en fast targetKeypath — «Legg til …» i montering nr. 2 ville havnet i aktiv liste.",
+      "cause": "TextField har ingen payloadKeypath/keypathKeypath; monteringsmetadataen (mount.instanceID) lå bare i ScaffoldKit.ComponentActionContext, som en celle i CellProtocol ikke kan lese.",
+      "prevention": "Kjetil valgte A (2026-10-08): SkeletonComponentActionContext (struct + @TaskLocal) i CellBase; cellen leser mount.instanceID; CellScaffold bytter ScaffoldKit-typen til en typealias i integrasjonspakken. Regel for nye komponenter: alt som skal vite instansen går via Button-payload eller monteringskonteksten — aldri via aktiv-tilstand i cellen. Test: ListsCellTests.testMountedComponentContextTargetsTheMountedListNotTheActiveOne.",
+      "purposeRefs": [
+        "purpose://cells.capabilities-declared-with-boundary",
+        "purpose://gui.ways-in-are-reachable"
+      ],
+      "tags": [
+        "componentsurface",
+        "textfield",
+        "mount",
+        "taskLocal",
+        "cellbase",
+        "skeleton"
+      ],
+      "source": "Deliverables/PDD_lister-celle-og-komponent_2026-10-02/PLAN.md (spørsmålet øverst) og CellProtocol Sources/CellBase/Skeleton/SkeletonComponentActionContext.swift"
+    },
+    {
+      "lessonRef": "lesson.capability-based-layout-variant-replaces-client-checks",
+      "date": "2026-10-08",
+      "severity": "minor",
+      "symptom": "Flytting av punkter trengte piler i appen og dra-og-slipp på web, uten to skjeletter eller klientnavn.",
+      "cause": "—",
+      "prevention": "layoutVariants: [{requiresCapability: [drag], hidden: true}] på pilene: web erklærer drag (porthole-webo.js), Binding erklærer pointer/hover/keyboard eller touch (PortholeView.swift) — pilene forsvinner av seg selv den dagen appen får drag-adapteren. Test: layoutVariant(in:) med begge kapabilitetssett (ListsConfigurationTests) + web-harness variants (render-report-wp5.json).",
+      "purposeRefs": [
+        "purpose://gui.parity-with-approved-image"
+      ],
+      "tags": [
+        "layoutvariants",
+        "drag",
+        "capability",
+        "parity",
+        "skeleton"
+      ],
+      "source": "Deliverables/PDD_lister-celle-og-komponent_2026-10-02/FORMAALSSPEC.md §0 B6 og TESTRESULT.md #variants"
+    },
+    {
+      "lessonRef": "lesson.context-purpose-alias-before-priority",
+      "symptom": "Lokal vekt 0 kunne motsies av en positiv portable alias ved materialisering.",
+      "cause": "Prioritetsvalget brukte rå referansestrenger mens effektivt sett identifiserte ett Purpose.",
+      "prevention": "Kanoniser til samme Purpose-reference før prioritet; avvis to aliaser innen samme regel; prøv lokal 0 mot lavere portable 1.",
+      "purposeRefs": [
+        "purpose://personal-context.semantic-state"
+      ],
+      "tags": [
+        "context",
+        "perspective",
+        "purpose"
+      ],
+      "severity": "major",
+      "date": "2026-10-12",
+      "source": "Deliverables/PDD_perspective-context-events_2026-10-09"
+    },
+    {
+      "lessonRef": "lesson.explore-requiredkeys-match-codable",
+      "symptom": "Schema-gyldig konfigurasjon kunne mangle felt som Codable krever.",
+      "cause": "Initializer-defaults endrer ikke syntetisert Decodable sine krav til ikke-optional felt.",
+      "prevention": "Sammenlign requiredKeys med avvisning ved fjerning av hvert required felt; ta med nested visibility/privacy og recursive kind/all/any.",
+      "purposeRefs": [
+        "purpose://cell.contract-explicit"
+      ],
+      "tags": [
+        "cell",
+        "explore",
+        "contract"
+      ],
+      "severity": "major",
+      "date": "2026-10-12",
+      "source": "Deliverables/PDD_perspective-context-events_2026-10-09"
+    },
+    {
+      "lessonRef": "lesson.context-startup-independent-task-cycle",
+      "symptom": "TaskLocal vernet samme kallkjede, men kildekontroll fant mulig motsatt gate-rekkefølge for to oppstarts-Tasks.",
+      "cause": "Uavhengige Tasks har separate TaskLocal-stakker og kunne holde hver sin connectionGate.",
+      "prevention": "Serialiser uavhengige røtter før lokale gates og bevar nested scope; test to samtidige røtter i en allerede syklisk fixture.",
+      "purposeRefs": [
+        "purpose://cells.dataflow-declared"
+      ],
+      "tags": [
+        "cell",
+        "flow",
+        "context"
+      ],
+      "severity": "major",
+      "date": "2026-10-12",
+      "source": "Deliverables/PDD_perspective-context-events_2026-10-09"
+    },
+    {
+      "lessonRef": "lesson.context-snapshot-expiry-single-timestamp",
+      "symptom": "Beslutning ved utløp kunne få endret innhold ved samme revisjon mellom emisjon og snapshot.",
+      "cause": "Flere Date-evalueringer innen én transaksjon kunne havne på hver sin side av validUntil.",
+      "prevention": "Fang evalueringstid én gang; expire, snapshot og emisjon bruker samme tid under transaksjonsgate; prøv expiry-revisjon og gjenbekreftelse.",
+      "purposeRefs": [
+        "purpose://personal-context.semantic-state"
+      ],
+      "tags": [
+        "context",
+        "state",
+        "flow"
+      ],
+      "severity": "major",
+      "date": "2026-10-12",
+      "source": "Deliverables/PDD_perspective-context-events_2026-10-09"
+    },
+    {
+      "lessonRef": "lesson.shared-cellresolver-fixture-unique-names",
+      "symptom": "Integrasjon kunne treffe en tidligere emitter selv om nytt registerkall ikke kastet.",
+      "cause": "ScaffoldUnique registrering håndterer eksisterende registerReference-feil og kan beholde gamle referanser.",
+      "prevention": "Bruk unike registreringsnavn i sharedInstance-fixtures, og mål actual loadCell/flow mot den nye cellen.",
+      "purposeRefs": [
+        "purpose://quality.build-and-regression"
+      ],
+      "tags": [
+        "cell",
+        "resolver",
+        "test"
+      ],
+      "severity": "minor",
+      "date": "2026-10-12",
+      "source": "Deliverables/PDD_perspective-context-events_2026-10-09"
+    },
+    {
+      "lessonRef": "lesson.context-disconnect-revision-durable-before-emission",
+      "date": "2026-10-12",
+      "symptom": "Kildekontroll fant disconnect/expire-revisjon som kunne emitteres uten lagring, foran revisjonen etter producer-only restore.",
+      "cause": "Cleanup oppdaterte runtime contextState direkte, mens ingest/configure allerede brukte save-before-emission.",
+      "prevention": "Alle revisjonsøkende stier bruker candidate/save/assign/emit; test faktisk fil mot emisjon og høyere revisjon etter standalone decode/reconfirmation.",
+      "purposeRefs": [
+        "purpose://personal-context.semantic-state"
+      ],
+      "tags": [
+        "context",
+        "flow",
+        "storage",
+        "test"
+      ],
+      "severity": "major",
+      "source": "Deliverables/PDD_perspective-context-events_2026-10-09"
     }
   ]
 }

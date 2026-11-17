@@ -1,0 +1,5 @@
+Referansebilder: `<flate>-<tilstand>-v<n>.png`. Bare bilder Kjetil har godkjent i FORMAALSSPEC.md §3 teller.
+
+Renderingserklæring (2026-09-25): `verk-forvaltet-v1.png` og `verk-bekreftet-v1.png` er rendret fra den **ekte** HTML-en som `PublicationHTML.renderWorks` lager (skrevet av `PublicationPublicSurfaceTests.testWorksPagesRenderPortfolioWithoutPriceOrForms` på main `4db0b1d6`+AP1), med to endringer: (1) linjen «Lagt inn av Digipomps med kunstnerens samtykke. Ikke bekreftet av kunstneren ennå.» satt inn med sidens eksisterende `.note`-stil i den forvaltede varianten, (2) bildene erstattet med forhåndsvisningene fra sindrehustveit.com (1500 px). Bildet til «Batikk (Slumbering Stones)» ble ikke hentet (nedlastingen feilet) og vises som tom rute. Kilde-HTML: `verk-forvaltet.html`, `verk-bekreftet.html`. Chromium, 1100 px bredde, lyst tema.
+
+Overtakelsessiden (2026-09-26): `overta-foer-v1.png` og `overta-etter-v1.png` er HTML-mockup i verk-sidens egen stil (samme CSS som `PublicationHTML`). Siden finnes ikke i koden ennå. Datoene er eksempler. Kilde: `overta-foer.html`, `overta-etter.html`.

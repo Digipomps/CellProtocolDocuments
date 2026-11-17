@@ -1,0 +1,4887 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "haven.butler-purpose-graph.v1",
+  "description": "E1 alternative B design contract, not an implemented cell or a completed WP8 agreement. WP8 must adopt this exact import/export payload before source handover. See E1-KART.md and E1-MIGRERING-TIL-REGISTER.md.",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "haven.butler-purpose-graph.v1"
+    },
+    "contentHash": {
+      "$ref": "#/$defs/sha256"
+    },
+    "content": {
+      "$ref": "#/$defs/graphContent"
+    }
+  },
+  "required": [
+    "schema",
+    "contentHash",
+    "content"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "composition": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "allOf"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "sequence"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "firstOf"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "anyOf"
+            },
+            "min": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "invariant"
+            },
+            "over": {
+              "type": "string",
+              "pattern": "^purpose://.+"
+            }
+          },
+          "required": [
+            "kind",
+            "over"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "node": {
+      "type": "object",
+      "properties": {
+        "purposeRef": {
+          "type": "string",
+          "pattern": "^purpose://.+"
+        },
+        "parentRef": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^purpose://.+"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "composition": {
+          "$ref": "#/$defs/composition"
+        },
+        "childOrder": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^purpose://.+"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "purposeRef"
+      ],
+      "additionalProperties": true,
+      "description": "Existing purpose node fields are retained. Non-leaves require composition semantically; omission is a migration warning in purpose_dev validate. childOrder lists all direct children once and is required for sequence and firstOf. No composition default.",
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "composition"
+            ],
+            "properties": {
+              "composition": {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "sequence",
+                      "firstOf"
+                    ]
+                  }
+                },
+                "required": [
+                  "kind"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "childOrder"
+            ]
+          }
+        }
+      ]
+    },
+    "purposeRef": {
+      "type": "string",
+      "pattern": "^purpose://[A-Za-z0-9][A-Za-z0-9._/-]*$"
+    },
+    "nonemptyString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "phraseList": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/nonemptyString"
+      }
+    },
+    "unitInterval": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "bookNode": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/node"
+        },
+        {
+          "type": "object",
+          "required": [
+            "purposeRef",
+            "parentRef",
+            "title",
+            "summary",
+            "status",
+            "goal",
+            "matchingHints"
+          ],
+          "properties": {
+            "purposeRef": {
+              "$ref": "#/$defs/purposeRef"
+            },
+            "parentRef": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/purposeRef"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": {
+              "$ref": "#/$defs/nonemptyString"
+            },
+            "summary": {
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "active",
+                "draft",
+                "candidate"
+              ]
+            },
+            "goal": {
+              "type": "object",
+              "required": [
+                "goalRef",
+                "lifecycle",
+                "outcome",
+                "successSignals",
+                "verifier"
+              ],
+              "properties": {
+                "goalRef": {
+                  "$ref": "#/$defs/nonemptyString"
+                },
+                "lifecycle": {
+                  "$ref": "#/$defs/nonemptyString"
+                },
+                "outcome": {
+                  "$ref": "#/$defs/nonemptyString"
+                },
+                "successSignals": {
+                  "$ref": "#/$defs/phraseList"
+                },
+                "verifier": {
+                  "$ref": "#/$defs/nonemptyString"
+                }
+              },
+              "additionalProperties": true
+            },
+            "matchingHints": {
+              "type": "object",
+              "properties": {
+                "aliases": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/nonemptyString"
+                  }
+                },
+                "tokens": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/nonemptyString"
+                  }
+                }
+              },
+              "required": [
+                "aliases",
+                "tokens"
+              ],
+              "additionalProperties": true
+            },
+            "aliases": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/purposeRef"
+              }
+            },
+            "interests": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/nonemptyString"
+              }
+            },
+            "capabilityHints": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/nonemptyString"
+              }
+            },
+            "facetRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/purposeRef"
+              }
+            }
+          },
+          "additionalProperties": true
+        }
+      ],
+      "description": "Book 23 fields unchanged, including goal.goalRef, matchingHints.aliases/tokens and optional ref aliases. No Butler consumer parameters here. Upstream composition definitions copied as-is; extensions preserved, not inferred."
+    },
+    "sourceRef": {
+      "type": "object",
+      "required": [
+        "id",
+        "status",
+        "checkedAt",
+        "appliesTo"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "path": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "domain": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "status": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "checkedAt": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "appliesTo": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonemptyString"
+          }
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "path"
+          ]
+        },
+        {
+          "required": [
+            "url"
+          ]
+        }
+      ],
+      "additionalProperties": true,
+      "description": "Preserve Book sourceRefs, including historical checkedAt; migration time does not replace source provenance."
+    },
+    "knowledgeBase": {
+      "type": "object",
+      "required": [
+        "schema",
+        "rootPurposeRef",
+        "nodes",
+        "sourceRefs"
+      ],
+      "properties": {
+        "schema": {
+          "const": "haven.purpose-knowledge-base.v0"
+        },
+        "rootPurposeRef": {
+          "$ref": "#/$defs/purposeRef"
+        },
+        "nodes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/bookNode"
+          }
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        }
+      },
+      "additionalProperties": true,
+      "description": "Whole declared Book/register snapshot, including schemaRef, facets, compatibility and nodeDefaults unchanged. E1 does not reconcile the runtime taxonomy or infer parents."
+    },
+    "endpointHint": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^cell:///[A-Za-z][A-Za-z0-9._/-]*$"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "binding": {
+              "enum": [
+                "adminOverview",
+                "adminEntry"
+              ]
+            }
+          },
+          "required": [
+            "binding"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "description": "Literal local endpoint OR closed binding to existing AdminControlPlaneRouting.current.endpoint(for:) code. No host, credentials, function name or expression supplied by data. Resolve once in pinned environment input. Preserve the baseline static-lexicon initialization phase/lifetime for resolved bindings; do not re-read mutable routing configuration per analysis. Pin the resulting environment snapshot."
+    },
+    "lexiconEntry": {
+      "type": "object",
+      "properties": {
+        "entryID": {
+          "enum": [
+            "lex.01",
+            "lex.02",
+            "lex.03",
+            "lex.04",
+            "lex.05",
+            "lex.06",
+            "lex.07",
+            "lex.08",
+            "lex.09",
+            "lex.10",
+            "lex.11",
+            "lex.12",
+            "lex.13",
+            "lex.14",
+            "lex.15",
+            "lex.16",
+            "lex.17",
+            "lex.18",
+            "lex.19",
+            "lex.20",
+            "lex.21",
+            "lex.22",
+            "lex.23",
+            "lex.24",
+            "lex.25",
+            "lex.26",
+            "lex.27"
+          ]
+        },
+        "purposeRef": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "label": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "queryPhrases": {
+          "$ref": "#/$defs/phraseList"
+        },
+        "requiredQueryTokenGroups": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/phraseList"
+          }
+        },
+        "resourceHints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonemptyString"
+          }
+        },
+        "endpointHints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/endpointHint"
+          }
+        },
+        "scoreBoost": {
+          "$ref": "#/$defs/unitInterval"
+        }
+      },
+      "required": [
+        "entryID",
+        "purposeRef",
+        "label",
+        "queryPhrases",
+        "requiredQueryTokenGroups",
+        "resourceHints",
+        "endpointHints",
+        "scoreBoost"
+      ],
+      "additionalProperties": false
+    },
+    "artifactSource": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "additionalProperties": false
+    },
+    "helper_invite": {
+      "type": "object",
+      "properties": {
+        "suppressionMarkers": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "inviter",
+              "invite",
+              "legg til",
+              "add",
+              "ta med"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14716,
+            "lineEnd": 14716,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "listExclusions": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "gjøremål",
+              "gjoremal",
+              "liste",
+              "list",
+              "to-do",
+              "todo",
+              "oppgave",
+              "kalender",
+              "calendar",
+              "tittel",
+              "bilde",
+              "leverandør",
+              "leverandor",
+              "organisasjon",
+              "organization",
+              "samarbeidspartner"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14720,
+            "lineEnd": 14721,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "explicitPhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "inviter",
+              "invite"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14722,
+            "lineEnd": 14722,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "addPhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "legg til",
+              "add ",
+              "ta med"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14725,
+            "lineEnd": 14725,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "conversationPhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "inn i denne samtalen",
+              "inn i samtalen",
+              "med i tråden",
+              "med i traden",
+              "loop in",
+              "bring in",
+              "må inn i haven",
+              "ma inn i haven",
+              "needs to see what we"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14729,
+            "lineEnd": 14729,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "suppressionMarkers",
+        "listExclusions",
+        "explicitPhrases",
+        "addPhrases",
+        "conversationPhrases"
+      ],
+      "additionalProperties": false,
+      "description": "lowercased; negation first; listExclusions only affect addPhrases. Original-text regex and boolean returns remain code.",
+      "x-function": "isInviteIntent",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+        "lineStart": 14714,
+        "lineEnd": 14733,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "helper_poll": {
+      "type": "object",
+      "properties": {
+        "suppressionMarkers": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "avstem",
+              "poll",
+              "stemme",
+              "vote",
+              "voting"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14737,
+            "lineEnd": 14737,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "civicExclusions": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "kommune",
+              "kommunen",
+              "folkeavstemning",
+              "referendum",
+              "høring",
+              "horing",
+              "innbygger",
+              "municipality",
+              "citizens",
+              "bomring"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14741,
+            "lineEnd": 14741,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "meetingPlaceExclusions": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "treffes",
+              "møtes",
+              "motes",
+              "møtested",
+              "motested",
+              "meet up",
+              "meeting spot",
+              "kaia",
+              "sentrum"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14746,
+            "lineEnd": 14746,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "groupChoicePhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "flertallet",
+              "majority",
+              "la gjengen velge",
+              "la alle velge",
+              "spørre alle",
+              "sporre alle",
+              "spør alle",
+              "si sin mening"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14749,
+            "lineEnd": 14749,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "cannotAgreePhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "ikke bli enige",
+              "ikke blir enige",
+              "aldri å bli enige",
+              "aldri a bli enige",
+              "can't agree",
+              "cant agree",
+              "never agree",
+              "ever agree",
+              "different opinion",
+              "greie ikkje bestemme"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14750,
+            "lineEnd": 14750,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "alternativePhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              " eller ",
+              " or ",
+              "møterom",
+              "moterom",
+              "where to eat",
+              "dato",
+              "klokka"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14751,
+            "lineEnd": 14751,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "exactTokens": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "poll",
+              "polling",
+              "stemme",
+              "vote",
+              "voting"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14759,
+            "lineEnd": 14763,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "tokenPrefixes": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "avstem",
+              "votering",
+              "stemmegivning"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14764,
+            "lineEnd": 14766,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "suppressionMarkers",
+        "civicExclusions",
+        "meetingPlaceExclusions",
+        "groupChoicePhrases",
+        "cannotAgreePhrases",
+        "alternativePhrases",
+        "exactTokens",
+        "tokenPrefixes"
+      ],
+      "additionalProperties": false,
+      "description": "lowercased; negation and two global exclusions; groupChoice OR (cannotAgree AND alternative); exact token/prefix fallback.",
+      "x-function": "isPollIntent",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+        "lineStart": 14735,
+        "lineEnd": 14768,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "helper_videoMeeting": {
+      "type": "object",
+      "properties": {
+        "suppressionMarkers": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "video",
+              "call",
+              "samtale",
+              "møte",
+              "mote",
+              "meeting"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14775,
+            "lineEnd": 14775,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "directPhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "videochat",
+              "video chat",
+              "videosamtale",
+              "videomøte",
+              "jitsi"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14778,
+            "lineEnd": 14778,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "directScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.84
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14779,
+            "lineEnd": 14779,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "expandedPhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "video call",
+              "videocall",
+              "start video",
+              "starte video",
+              "on screen",
+              "på skjermen",
+              "pa skjermen",
+              "facetime",
+              "see his face",
+              "see her face",
+              "sett kollegaen",
+              "se kollegaen"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14782,
+            "lineEnd": 14782,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "expandedScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.84
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14783,
+            "lineEnd": 14783,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "callWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "call",
+              "samtale",
+              "prat"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14785,
+            "lineEnd": 14785,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "immediateWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "right now",
+              "med en gang",
+              "akkurat nå",
+              "akkurat na",
+              "jump on",
+              "hop on"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14786,
+            "lineEnd": 14786,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "immediateScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.8
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14787,
+            "lineEnd": 14787,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "deviceWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "kamera",
+              "camera",
+              "mic",
+              "mikrofon"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14789,
+            "lineEnd": 14789,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "deviceScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.76
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14790,
+            "lineEnd": 14790,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "suppressionMarkers",
+        "directPhrases",
+        "directScore",
+        "expandedPhrases",
+        "expandedScore",
+        "callWords",
+        "immediateWords",
+        "immediateScore",
+        "deviceWords",
+        "deviceScore"
+      ],
+      "additionalProperties": false,
+      "description": "lowercased; negation then direct, expanded, call AND immediate, device; first return, otherwise zero.",
+      "x-function": "videoMeetingIntentScore",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+        "lineStart": 14770,
+        "lineEnd": 14793,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "helper_scheduleMeeting": {
+      "type": "object",
+      "properties": {
+        "suppressionMarkers": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "møte",
+              "mote",
+              "meeting",
+              "book",
+              "schedule",
+              "planlegg"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14798,
+            "lineEnd": 14798,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "meetingWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "møte",
+              "mote",
+              "meeting",
+              "kaffe",
+              "coffee",
+              "a call",
+              "samles",
+              "sitte ned",
+              "sitja ned",
+              "same room",
+              "ta en prat"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14802,
+            "lineEnd": 14802,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "schedulingWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "sett opp",
+              "book",
+              "schedule",
+              "planlegg",
+              "neste uke",
+              "neste veke",
+              "i morgen",
+              "tomorrow",
+              "kl.",
+              "kl ",
+              "tidspunkt",
+              "find a time",
+              "denne uka",
+              "this week",
+              "next week",
+              "mandag",
+              "tirsdag",
+              "onsdag",
+              "torsdag",
+              "fredag",
+              "monday",
+              "tuesday",
+              "wednesday",
+              "thursday",
+              "friday",
+              "set up"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14803,
+            "lineEnd": 14804,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "combinedScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.84
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14806,
+            "lineEnd": 14806,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "explicitPhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "sett opp møte",
+              "schedule meeting"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14808,
+            "lineEnd": 14808,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "explicitScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.86
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14809,
+            "lineEnd": 14809,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "suppressionMarkers",
+        "meetingWords",
+        "schedulingWords",
+        "combinedScore",
+        "explicitPhrases",
+        "explicitScore"
+      ],
+      "additionalProperties": false,
+      "description": "lowercased; negation; meeting AND scheduling before explicit phrase. schedule meeting remains 0.84, never max over branches.",
+      "x-function": "scheduleMeetingIntentScore",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+        "lineStart": 14795,
+        "lineEnd": 14812,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "helper_project": {
+      "type": "object",
+      "properties": {
+        "suppressionMarkers": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "prosjekt",
+              "project",
+              "felles ide",
+              "felles idé",
+              "shared idea"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14816,
+            "lineEnd": 14816,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "publishExclusions": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "synlig offentlig",
+              "synlig for alle",
+              "publiser",
+              "publish",
+              "make this public",
+              "legge ut"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14820,
+            "lineEnd": 14820,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "workSignals": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "oppgavehåndtering",
+              "oppgavehandtering",
+              "utestående",
+              "utestaende",
+              "oversikt",
+              "hvor prosjektet er",
+              "dele det jeg ønsker",
+              "dele det jeg onsker",
+              "share"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14823,
+            "lineEnd": 14833,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "projectWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "prosjekt",
+              "project"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14834,
+            "lineEnd": 14834,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "workScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.88
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14836,
+            "lineEnd": 14836,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "generalPhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "prosjekt",
+              "project",
+              "felles ide",
+              "felles idé",
+              "shared idea"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14838,
+            "lineEnd": 14838,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "generalScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.78
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14839,
+            "lineEnd": 14839,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "workspacePhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "samles et sted",
+              "samles ett sted",
+              "samlet et sted",
+              "samle alt",
+              "set up the workspace",
+              "workspace for it",
+              "nowhere organized",
+              "put all this work",
+              "sette i gang et",
+              "i gang med heile",
+              "i gang med hele",
+              "fiks strukturen",
+              "starter noe helt nytt",
+              "mapper og greier",
+              "kicking off new",
+              "new initiative"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14842,
+            "lineEnd": 14843,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "workspaceScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.8
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14844,
+            "lineEnd": 14844,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "suppressionMarkers",
+        "publishExclusions",
+        "workSignals",
+        "projectWords",
+        "workScore",
+        "generalPhrases",
+        "generalScore",
+        "workspacePhrases",
+        "workspaceScore"
+      ],
+      "additionalProperties": false,
+      "description": "lowercased; negation and publish exclusions stop all; project AND work, general project, workspace in that order.",
+      "x-function": "projectIntentScore",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+        "lineStart": 14814,
+        "lineEnd": 14847,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "helper_ideaCapture": {
+      "type": "object",
+      "properties": {
+        "suppressionMarkers": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "ide",
+              "idea",
+              "skriv ned",
+              "capture idea",
+              "note this idea"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14853,
+            "lineEnd": 14853,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "capturePhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "jeg har en ide",
+              "ma skrive ned",
+              "skriv ned",
+              "hva om vi",
+              "capture idea",
+              "note this idea"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14856,
+            "lineEnd": 14856,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "captureScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.86
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14857,
+            "lineEnd": 14857,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "notePhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "note it down",
+              "note this",
+              "noter en",
+              "skrive ned",
+              "en tanke om",
+              "noter denne",
+              "noter det",
+              "had a thought",
+              "fikk en tanke",
+              "fikk noe kult",
+              "i hodet na",
+              "brilliant thought",
+              "don't want to lose it",
+              "dont want to lose it",
+              "ikke la meg glemme",
+              "before i forget",
+              "slipping away",
+              "lagre det"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14860,
+            "lineEnd": 14860,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "noteScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.86
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14861,
+            "lineEnd": 14861,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "fallbackTokens": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "ide",
+              "idea"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14865,
+            "lineEnd": 14865,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "fallbackExclusions": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "no idea"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14865,
+            "lineEnd": 14865,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "fallbackScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.7
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14866,
+            "lineEnd": 14866,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "suppressionMarkers",
+        "capturePhrases",
+        "captureScore",
+        "notePhrases",
+        "noteScore",
+        "fallbackTokens",
+        "fallbackExclusions",
+        "fallbackScore"
+      ],
+      "additionalProperties": false,
+      "description": "nb_NO folding/lowercase; negation then capture, note, token fallback with local no-idea exclusion.",
+      "x-function": "ideaCaptureIntentScore",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+        "lineStart": 14849,
+        "lineEnd": 14869,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "helper_todo": {
+      "type": "object",
+      "properties": {
+        "aiExclusions": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "modell",
+              "model",
+              "provider",
+              "aigateway",
+              "ai gateway",
+              "glm",
+              "gml",
+              "nanogpt"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14873,
+            "lineEnd": 14882,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "suppressionMarkers": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "todo",
+              "to-do",
+              "oppgave",
+              "task",
+              "ansvar",
+              "action item"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14885,
+            "lineEnd": 14885,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "genericPhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "todo",
+              "to-do",
+              "oppgave",
+              "task",
+              "ansvar",
+              "action item"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14888,
+            "lineEnd": 14888,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "genericScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.78
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14889,
+            "lineEnd": 14889,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "listPhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "gjøremål",
+              "gjoremal",
+              "huskeliste",
+              "to my list",
+              "my to-do",
+              "to-do list",
+              "todo list",
+              "på lista mi",
+              "på listen min",
+              "pa lista mi",
+              "pa listen min"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14892,
+            "lineEnd": 14892,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "listScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.84
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14893,
+            "lineEnd": 14893,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "rememberPhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "husk at jeg må",
+              "husk at jeg ma",
+              "husk at æ må"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14895,
+            "lineEnd": 14895,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "rememberScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.8
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14896,
+            "lineEnd": 14896,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "delegatePhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "kan noen ta",
+              "hvem tar"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14898,
+            "lineEnd": 14898,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "delegateScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.74
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14899,
+            "lineEnd": 14899,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "aiExclusions",
+        "suppressionMarkers",
+        "genericPhrases",
+        "genericScore",
+        "listPhrases",
+        "listScore",
+        "rememberPhrases",
+        "rememberScore",
+        "delegatePhrases",
+        "delegateScore"
+      ],
+      "additionalProperties": false,
+      "description": "lowercased; AI exclusion before negation. generic, list, remember, delegate; todo list stays 0.78.",
+      "x-function": "todoIntentScore",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+        "lineStart": 14871,
+        "lineEnd": 14902,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "helper_reminder": {
+      "type": "object",
+      "properties": {
+        "suppressionMarkers": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "minn",
+              "påminn",
+              "remind",
+              "reminder"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14906,
+            "lineEnd": 14906,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "directPhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "minn meg",
+              "minn oss",
+              "påminn",
+              "remind me",
+              "remind us",
+              "reminder"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14909,
+            "lineEnd": 14909,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "directScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.82
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14910,
+            "lineEnd": 14910,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "notifyWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "minne meg",
+              "minne oss",
+              "vekk meg",
+              "gi meg beskjed",
+              "si ifra",
+              "sier ifra",
+              "ping me",
+              "ping meg",
+              "varsle meg",
+              "passe på det",
+              "wake me",
+              "nudge me"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14913,
+            "lineEnd": 14913,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "loseTrackWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "lose track of time",
+              "mister tidsoversikten",
+              "mister tida",
+              "glemmer tiden",
+              "går glipp av"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14914,
+            "lineEnd": 14914,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "notifyScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.82
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14916,
+            "lineEnd": 14916,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "loseTrackScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.8
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14916,
+            "lineEnd": 14916,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "suppressionMarkers",
+        "directPhrases",
+        "directScore",
+        "notifyWords",
+        "loseTrackWords",
+        "notifyScore",
+        "loseTrackScore"
+      ],
+      "additionalProperties": false,
+      "description": "lowercased; negation, direct, then (notify OR loseTrack) AND mentionsClockTime. notify wins overlap; clock predicate stays code.",
+      "x-function": "reminderIntentScore",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+        "lineStart": 14904,
+        "lineEnd": 14919,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "helper_guidedOnboarding": {
+      "type": "object",
+      "properties": {
+        "suppressionMarkers": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "onboard",
+              "onboarding",
+              "registrering",
+              "konferanseprofil",
+              "conference profile",
+              "aigateway",
+              "ai gateway",
+              "aiagentcell",
+              "ai agent cell",
+              "rådgiverpanel",
+              "radgiverpanel",
+              "advisor panel",
+              "modellgateway",
+              "model gateway",
+              "provider",
+              "api key",
+              "api-noekkel",
+              "api nøkkel",
+              "api nokkel",
+              "egen nøkkel",
+              "egen nokkel",
+              "egne nøkler",
+              "egne nokler",
+              "byok",
+              "spørreskjema",
+              "sporreundersokelse",
+              "brukerundersøkelse",
+              "user survey",
+              "questionnaire"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14931,
+            "lineEnd": 14961,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "gatewayWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "aigateway",
+              "ai gateway",
+              "aiagentcell",
+              "ai agent cell",
+              "rådgiverpanel",
+              "radgiverpanel",
+              "advisor panel",
+              "modellgateway",
+              "model gateway",
+              "llm gateway",
+              "openai-kompatibel",
+              "openai compatible",
+              "egen nøkkel",
+              "egen nokkel",
+              "egne nøkler",
+              "egne nokler",
+              "api key",
+              "api-noekkel",
+              "api nøkkel",
+              "api nokkel",
+              "byok"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14965,
+            "lineEnd": 14987,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "statusWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "vis",
+              "hvilke",
+              "hva er",
+              "status",
+              "konfigurasjon",
+              "konfigurasjonen",
+              "configuration",
+              "configured"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14988,
+            "lineEnd": 14997,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "setupWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "konfigurer",
+              "konfigurere",
+              "sett opp",
+              "sette opp",
+              "setup",
+              "configure",
+              "bruk",
+              "velg",
+              "provider",
+              "modell",
+              "model",
+              "api key",
+              "api-noekkel",
+              "api nøkkel",
+              "api nokkel",
+              "egen nøkkel",
+              "egen nokkel",
+              "egne nøkler",
+              "egne nokler",
+              "byok"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14998,
+            "lineEnd": 15019,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "strongSetupWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "konfigurer",
+              "konfigurere",
+              "sett opp",
+              "sette opp",
+              "setup",
+              "configure",
+              "api key",
+              "api-noekkel",
+              "api nøkkel",
+              "api nokkel",
+              "egen nøkkel",
+              "egen nokkel",
+              "egne nøkler",
+              "egne nokler",
+              "byok"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15020,
+            "lineEnd": 15036,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "gatewayScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.91
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15038,
+            "lineEnd": 15038,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "questionnaireWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "spørreskjema",
+              "sporreundersokelse",
+              "spørreundersøkelse",
+              "brukerundersøkelse",
+              "brukerundersokelse",
+              "user survey",
+              "survey",
+              "questionnaire",
+              "betalingsvilje",
+              "payment willingness",
+              "smertepunkt",
+              "pain point",
+              "pain points",
+              "behov"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15040,
+            "lineEnd": 15055,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "questionnaireSetupWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "lag",
+              "lage",
+              "opprett",
+              "opprette",
+              "start",
+              "kjør",
+              "kjor",
+              "hjelp",
+              "bygg",
+              "create",
+              "make",
+              "run"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15056,
+            "lineEnd": 15069,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "questionnaireScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.86
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15071,
+            "lineEnd": 15071,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "modelNotConnectedPhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "kobla på ein språkmodell",
+              "kobla pa ein sprakmodell",
+              "koble til en modell",
+              "koble til modell",
+              "koble til en språkmodell",
+              "koble til en sprakmodell",
+              "connect a language model",
+              "connected a language model",
+              "mangler vel en modell",
+              "modell koblet til",
+              "hooked up",
+              "kobla til",
+              "koblet til noe",
+              "ikke koblet",
+              "svarer rart",
+              "svarer ingenting fornuftig",
+              "respond intelligently",
+              "nøkkel jeg skulle skrive inn",
+              "nokkel jeg skulle skrive inn",
+              "api-nøkkel",
+              "api-nokkel",
+              "apinøkkel",
+              "apinokkel"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15074,
+            "lineEnd": 15080,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "gettingStartedPhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "komme i gang",
+              "kommer i gang",
+              "hjelp meg i gang",
+              "get started",
+              "help me set up",
+              "walk me through the setup",
+              "hjelpa meg med oppsettet",
+              "hjelpe meg med oppsettet"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15081,
+            "lineEnd": 15081,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "modelScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.92
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15085,
+            "lineEnd": 15085,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "otherSurfaceWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "arendalsuka",
+              "konferanse",
+              "conference",
+              "programmet",
+              "appen hjelper"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15089,
+            "lineEnd": 15089,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "gettingStartedScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.8
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15091,
+            "lineEnd": 15091,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "onboardingWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "onboard",
+              "onboarding",
+              "bli onboardet",
+              "onboardes",
+              "registrering",
+              "registrere meg",
+              "sette opp profil",
+              "konferanseprofil",
+              "conference profile"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15093,
+            "lineEnd": 15103,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "conferenceWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "konferanse",
+              "conference"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15104,
+            "lineEnd": 15104,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "conferenceScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.9
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15106,
+            "lineEnd": 15106,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "onboardingScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.74
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15109,
+            "lineEnd": 15109,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "suppressionMarkers",
+        "gatewayWords",
+        "statusWords",
+        "setupWords",
+        "strongSetupWords",
+        "gatewayScore",
+        "questionnaireWords",
+        "questionnaireSetupWords",
+        "questionnaireScore",
+        "modelNotConnectedPhrases",
+        "gettingStartedPhrases",
+        "modelScore",
+        "otherSurfaceWords",
+        "gettingStartedScore",
+        "onboardingWords",
+        "conferenceWords",
+        "conferenceScore",
+        "onboardingScore"
+      ],
+      "additionalProperties": false,
+      "description": "normalizedAssistantText; negation then gateway AND explicitSetup AND (!status OR strongSetup), questionnaire AND setup, modelNotConnected AND !status, gettingStarted AND !otherSurface, onboarding AND conference, onboarding. All exception scopes and order stay code.",
+      "x-function": "guidedOnboardingIntentScore",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+        "lineStart": 14929,
+        "lineEnd": 15112,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "helper_capabilityDiscoveryOnboarding": {
+      "type": "object",
+      "properties": {
+        "phrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "hva kan du hjelpe meg med",
+              "hva kan co-piloten hjelpe meg med",
+              "hva kan copiloten hjelpe meg med",
+              "hvilke muligheter har jeg",
+              "hvilke muligheter finnes",
+              "hva kan jeg gjøre i haven",
+              "hva finnes i haven",
+              "vis meg mulighetene i haven",
+              "what can you help me with",
+              "what can haven do for me",
+              "what are my options"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15116,
+            "lineEnd": 15128,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "score": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.92
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15132,
+            "lineEnd": 15132,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "phrases",
+        "score"
+      ],
+      "additionalProperties": false,
+      "description": "normalizedAssistantText; one phrases list for suppression markers and positive match; score or zero.",
+      "x-function": "capabilityDiscoveryOnboardingIntentScore",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+        "lineStart": 15114,
+        "lineEnd": 15133,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "helper_advisoryReport": {
+      "type": "object",
+      "properties": {
+        "suppressionMarkers": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "rådgiver",
+              "radgiver",
+              "rådgiverpanel",
+              "radgiverpanel",
+              "advisor",
+              "advisory",
+              "vurdering",
+              "vurdere",
+              "evaluer",
+              "evaluering",
+              "rapport",
+              "analyse",
+              "kritisk gjennomgang"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15247,
+            "lineEnd": 15261,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "advisorPhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "bruk rådgiverne",
+              "bruk radgiverne",
+              "rådgiverpanelet",
+              "radgiverpanelet",
+              "rådgivningspanelet",
+              "radgivningspanelet",
+              "advisory panel",
+              "advisor panel",
+              "få rådgiverne",
+              "fa radgiverne",
+              "spør rådgiverne",
+              "spor radgiverne"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15265,
+            "lineEnd": 15278,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "reportWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "rapport",
+              "oppsummering",
+              "markdown",
+              "pdf",
+              "eksporter"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15279,
+            "lineEnd": 15285,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "panelPhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "panel assessment",
+              "sett sammen et panel",
+              "sette sammen et panel",
+              "different perspectives",
+              "few different perspectives",
+              "flere sider",
+              "kloke hoder",
+              "own judgement",
+              "own judgment",
+              "second opinion",
+              "godt fundert",
+              "skikkelig fundert"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15287,
+            "lineEnd": 15287,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "panelScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.84
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15289,
+            "lineEnd": 15289,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "shortAssessmentPhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "trenger en vurdering"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15291,
+            "lineEnd": 15291,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "shortAssessmentPrefixes": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "en vurdering"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15291,
+            "lineEnd": 15291,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "shortAssessmentScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.8
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15292,
+            "lineEnd": 15292,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "assessmentPhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "jeg trenger en vurdering av",
+              "trenger en vurdering av",
+              "vurdering av",
+              "vurdere om",
+              "vurder om",
+              "evaluer",
+              "evaluering av",
+              "analyse av",
+              "kritisk gjennomgang",
+              "gå igjennom",
+              "ga igjennom"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15294,
+            "lineEnd": 15306,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "advisorCombinedScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.92
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15308,
+            "lineEnd": 15308,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "advisorScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.86
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15311,
+            "lineEnd": 15311,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "assessmentReportScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.84
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15314,
+            "lineEnd": 15314,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "assessmentScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.76
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15317,
+            "lineEnd": 15317,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "suppressionMarkers",
+        "advisorPhrases",
+        "reportWords",
+        "panelPhrases",
+        "panelScore",
+        "shortAssessmentPhrases",
+        "shortAssessmentPrefixes",
+        "shortAssessmentScore",
+        "assessmentPhrases",
+        "advisorCombinedScore",
+        "advisorScore",
+        "assessmentReportScore",
+        "assessmentScore"
+      ],
+      "additionalProperties": false,
+      "description": "normalizedAssistantText; negation, panel, short assessment phrase/prefix, advisor AND (assessment OR report), advisor, assessment AND report, assessment. First return; prefix remains anchored.",
+      "x-function": "advisoryReportIntentScore",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+        "lineStart": 15245,
+        "lineEnd": 15320,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "helper_uncertainGoalClarification": {
+      "type": "object",
+      "properties": {
+        "suppressionMarkers": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "vet ikke",
+              "usikker",
+              "hvor starter",
+              "hvor begynner",
+              "hvordan kommer",
+              "hvordan bør",
+              "hvordan bor",
+              "hva bør",
+              "hva bor",
+              "hva skal",
+              "hvilket verktøy",
+              "hvilket verktoy",
+              "hvilken flate",
+              "hjelp meg å finne ut",
+              "hjelp meg a finne ut",
+              "don't know how",
+              "dont know how",
+              "not sure how",
+              "where do i start",
+              "what should i do",
+              "which tool"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15353,
+            "lineEnd": 15375,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "strongPhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "jeg vet ikke hvordan",
+              "jeg vet ikke hva",
+              "jeg vet ikke hvilket",
+              "jeg vet ikke hvilken",
+              "jeg er usikker på hvordan",
+              "jeg er usikker pa hvordan",
+              "usikker på hvordan",
+              "usikker pa hvordan",
+              "hvor starter jeg",
+              "hvor begynner jeg",
+              "hvordan kommer jeg i gang",
+              "hjelp meg å finne ut",
+              "hjelp meg a finne ut",
+              "hjelp meg å velge",
+              "hjelp meg a velge",
+              "hva bør jeg gjøre",
+              "hva bor jeg gjore",
+              "hvilket verktøy bør jeg bruke",
+              "hvilket verktoy bor jeg bruke",
+              "which tool should i use",
+              "i don't know how",
+              "i dont know how",
+              "i am not sure how",
+              "i'm not sure how",
+              "help me figure out",
+              "where do i start"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15380,
+            "lineEnd": 15407,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "strongScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.9
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15409,
+            "lineEnd": 15409,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "uncertaintyWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "vet ikke",
+              "usikker",
+              "uklart",
+              "hjelp meg",
+              "don't know",
+              "dont know",
+              "not sure"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15412,
+            "lineEnd": 15420,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "goalWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "hvordan",
+              "hva",
+              "hvilket",
+              "hvilken",
+              "komme i gang",
+              "få til",
+              "fa til",
+              "gjøre",
+              "gjore",
+              "løse",
+              "lose",
+              "lage",
+              "bygge",
+              "opprette",
+              "sette opp",
+              "konfigurere",
+              "finne",
+              "bruke",
+              "how",
+              "what",
+              "build",
+              "create",
+              "configure",
+              "solve",
+              "start"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15421,
+            "lineEnd": 15447,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "combinedScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.78
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15450,
+            "lineEnd": 15450,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "suppressionMarkers",
+        "strongPhrases",
+        "strongScore",
+        "uncertaintyWords",
+        "goalWords",
+        "combinedScore"
+      ],
+      "additionalProperties": false,
+      "description": "normalizedAssistantText; negation, strong phrases, uncertainty AND goal words; otherwise zero.",
+      "x-function": "uncertainGoalClarificationIntentScore",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+        "lineStart": 15351,
+        "lineEnd": 15454,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "helper_capabilityGap": {
+      "type": "object",
+      "properties": {
+        "suppressionMarkers": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "mangler",
+              "burde",
+              "ønsker",
+              "onsker",
+              "trenger",
+              "feature",
+              "funksjon"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15547,
+            "lineEnd": 15547,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "explicitPhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "mangler en funksjon",
+              "mangler funksjon",
+              "burde kunne",
+              "burde ha",
+              "skulle ønske",
+              "skulle onske",
+              "jeg ønsker at",
+              "jeg onsker at",
+              "kan dere lage",
+              "kan vi legge til",
+              "trenger en funksjon",
+              "finnes det en måte",
+              "finnes det en mate",
+              "feature request",
+              "send forslag",
+              "meld behov"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15550,
+            "lineEnd": 15567,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "explicitScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.88
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15569,
+            "lineEnd": 15569,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "gapPhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "should build",
+              "should add",
+              "you guys should",
+              "i keep needing",
+              "savner",
+              "there's no way to",
+              "theres no way to",
+              "no way to do this",
+              "finnes ikke ennå",
+              "finnes ikke enna",
+              "ikke finnes ennå",
+              "ikke finnes enna",
+              "ikke finnes noen",
+              "er det mulig å få til",
+              "er det mulig a fa til",
+              "dark mode",
+              "export-to-pdf",
+              "wish there was",
+              "needs dark",
+              "haven needs"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15572,
+            "lineEnd": 15574,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "gapScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.8
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15576,
+            "lineEnd": 15576,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "desireWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "mangler",
+              "burde",
+              "ønsker",
+              "onsker",
+              "trenger",
+              "feature",
+              "funksjon",
+              "capability"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15578,
+            "lineEnd": 15578,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "productWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "cellprotocol",
+              "skeleton",
+              "porthole",
+              "binding",
+              "scaffold",
+              "haven",
+              "dimy",
+              "chat",
+              "celle",
+              "cell",
+              "workflow",
+              "automatisering"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15579,
+            "lineEnd": 15579,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "combinedScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.76
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15581,
+            "lineEnd": 15581,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "suppressionMarkers",
+        "explicitPhrases",
+        "explicitScore",
+        "gapPhrases",
+        "gapScore",
+        "desireWords",
+        "productWords",
+        "combinedScore"
+      ],
+      "additionalProperties": false,
+      "description": "lowercased; negation, explicit gap, other gap phrases, desire AND product; otherwise zero.",
+      "x-function": "capabilityGapIntentScore",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+        "lineStart": 15545,
+        "lineEnd": 15584,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "helper_workItem": {
+      "type": "object",
+      "properties": {
+        "suppressionMarkers": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "bug",
+              "feil",
+              "fungerer",
+              "virker",
+              "fix",
+              "fiks",
+              "regresjon",
+              "regression"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15588,
+            "lineEnd": 15588,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "capturePhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "registrer feil",
+              "logg feil",
+              "legg inn feil",
+              "feilbeskrivelse",
+              "bugrapport",
+              "registrer bug",
+              "logg bug",
+              "bug report",
+              "report bug",
+              "lag work item",
+              "opprett work item",
+              "registrer work item",
+              "legg inn som bug",
+              "legg inn som feil",
+              "report a bug",
+              "log this bug",
+              "log a bug",
+              "file a bug",
+              "bug i ",
+              "fant en feil",
+              "meld fra om",
+              "melde fra om",
+              "må registreres",
+              "ma registreres"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15591,
+            "lineEnd": 15617,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "captureScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.9
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15619,
+            "lineEnd": 15619,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "productWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "chat",
+              "co-pilot",
+              "copilot",
+              "porthole",
+              "binding",
+              "cellscaffold",
+              "cellprotocol",
+              "skeleton",
+              "staging",
+              "mermaid",
+              "library",
+              "konfigurasjon",
+              "cellconfiguration",
+              "appen",
+              "app ",
+              "knappen",
+              "innlogging",
+              "login",
+              "eksporten",
+              "rapportmodulen",
+              "modulen"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15622,
+            "lineEnd": 15645,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "failureWords": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "something went wrong",
+              "load failed",
+              "request timed out",
+              "timeout",
+              "kunne ikke lastes",
+              "could not be loaded",
+              "fungerer ikke",
+              "virker ikke",
+              "feiler",
+              "feilet",
+              "regresjon",
+              "regression",
+              "knappen virker ikke",
+              "knappene virker ikke",
+              "tekst forsvinner",
+              "mister teksten",
+              "crasher",
+              "krasjer",
+              "kraesjer",
+              "kræsjer",
+              "crash",
+              "froze",
+              "fryser",
+              "broken",
+              "gjor ikke det den skal",
+              "gjør ikke det den skal",
+              "noe galt"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15646,
+            "lineEnd": 15675,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "failureScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.84
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15677,
+            "lineEnd": 15677,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "fixPhrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "må fikses",
+              "ma fikses",
+              "skal fikses"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15679,
+            "lineEnd": 15679,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "fixWithProductScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.78
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15680,
+            "lineEnd": 15680,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "fixWithoutProductScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.62
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15680,
+            "lineEnd": 15680,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "suppressionMarkers",
+        "capturePhrases",
+        "captureScore",
+        "productWords",
+        "failureWords",
+        "failureScore",
+        "fixPhrases",
+        "fixWithProductScore",
+        "fixWithoutProductScore"
+      ],
+      "additionalProperties": false,
+      "description": "normalizedAssistantText; negation, capture, product AND failure, fix phrases with product-dependent score. All order remains code.",
+      "x-function": "workItemIntentScore",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+        "lineStart": 15586,
+        "lineEnd": 15683,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "helper_moderation": {
+      "type": "object",
+      "properties": {
+        "phrases": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "rapporter",
+              "blokker",
+              "block user",
+              "misbruk",
+              "abuse",
+              "report user",
+              "report message",
+              "report abuse",
+              "report this user",
+              "report this message"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15687,
+            "lineEnd": 15698,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "score": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.9
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 15700,
+            "lineEnd": 15700,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "phrases",
+        "score"
+      ],
+      "additionalProperties": false,
+      "description": "lowercased; phrase match or zero. Baseline has no negation guard; E1 must not add one.",
+      "x-function": "moderationIntentScore",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+        "lineStart": 15685,
+        "lineEnd": 15703,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "rule_profilePublish": {
+      "type": "object",
+      "properties": {
+        "floor": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.78
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1564,
+            "lineEnd": 1564,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "floor"
+      ],
+      "additionalProperties": false,
+      "description": "Exact purpose/endpoint; personal.profile.page.create OR personal.public-presence.publish; max(score, floor).",
+      "x-ruleID": "S01",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+        "lineStart": 1562,
+        "lineEnd": 1565,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "rule_conferenceAgenda": {
+      "type": "object",
+      "properties": {
+        "floor": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.6
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1570,
+            "lineEnd": 1570,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "floor"
+      ],
+      "additionalProperties": false,
+      "description": "Exact purpose/endpoint; conference.agenda.view; max(score, floor).",
+      "x-ruleID": "S02",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+        "lineStart": 1566,
+        "lineEnd": 1571,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "rule_configurationAuthoring": {
+      "type": "object",
+      "properties": {
+        "add": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.18
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1575,
+            "lineEnd": 1575,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "floor": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.86
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1575,
+            "lineEnd": 1575,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "workspaceCap": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.56
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1577,
+            "lineEnd": 1577,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "add",
+        "floor",
+        "workspaceCap"
+      ],
+      "additionalProperties": false,
+      "description": "Exact; purpose://capability.construct-cellconfiguration; normalized name cell configuration architect: max(score + add, floor); else ai agent workspace: min(score, workspaceCap).",
+      "x-ruleID": "S03",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+        "lineStart": 1572,
+        "lineEnd": 1579,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "rule_activityDashboard": {
+      "type": "object",
+      "properties": {
+        "add": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.18
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1582,
+            "lineEnd": 1582,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "floor": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.94
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1582,
+            "lineEnd": 1582,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "add",
+        "floor"
+      ],
+      "additionalProperties": false,
+      "description": "Exact; dashboard routing purpose AND exact combinedConfigurationName; max(score + add, floor).",
+      "x-ruleID": "S04",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+        "lineStart": 1580,
+        "lineEnd": 1583,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "rule_adminOperations": {
+      "type": "object",
+      "properties": {
+        "add": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.18
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1587,
+            "lineEnd": 1587,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "floor": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.86
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1587,
+            "lineEnd": 1587,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "otherAdminCap": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.72
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1590,
+            "lineEnd": 1590,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "add",
+        "floor",
+        "otherAdminCap"
+      ],
+      "additionalProperties": false,
+      "description": "Exact; admin.scaffold-operations.observe; admin control plane overview: add then floor; else admin copilot workspace OR admin cell dashboard: cap.",
+      "x-ruleID": "S05",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+        "lineStart": 1584,
+        "lineEnd": 1592,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "rule_adminCleanup": {
+      "type": "object",
+      "properties": {
+        "add": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.18
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1596,
+            "lineEnd": 1596,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "floor": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.86
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1596,
+            "lineEnd": 1596,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "workspaceCap": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.72
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1598,
+            "lineEnd": 1598,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "add",
+        "floor",
+        "workspaceCap"
+      ],
+      "additionalProperties": false,
+      "description": "Exact; admin.cell-lifecycle.cleanup-review; admin cell dashboard: add then floor; else admin copilot workspace: cap.",
+      "x-ruleID": "S06",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+        "lineStart": 1593,
+        "lineEnd": 1600,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "rule_aiGateway": {
+      "type": "object",
+      "properties": {
+        "add": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.2
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1605,
+            "lineEnd": 1605,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "floor": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.88
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1605,
+            "lineEnd": 1605,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "add",
+        "floor"
+      ],
+      "additionalProperties": false,
+      "description": "Exact; personal.ai.gateway.configure; normalized name ai agent workspace OR normalized endpoint contains cell aigateway; add then floor.",
+      "x-ruleID": "S07",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+        "lineStart": 1601,
+        "lineEnd": 1607,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "rule_kallimachosAdvisor": {
+      "type": "object",
+      "properties": {
+        "add": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.2
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1616,
+            "lineEnd": 1616,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "floor": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.88
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1616,
+            "lineEnd": 1616,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "add",
+        "floor"
+      ],
+      "additionalProperties": false,
+      "description": "Exact; knowledge.demo.kallimachos; endpoint equals KallimachosAdvisorContract.endpoint case-insensitively; add then floor.",
+      "x-ruleID": "S08",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+        "lineStart": 1608,
+        "lineEnd": 1618,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "rule_adminCredential": {
+      "type": "object",
+      "properties": {
+        "add": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.2
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1623,
+            "lineEnd": 1623,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "floor": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.88
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1623,
+            "lineEnd": 1623,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "add",
+        "floor"
+      ],
+      "additionalProperties": false,
+      "description": "Exact; admin.identity.vc.request; normalized name access requirement prompt OR endpoint contains cell accessrequirementprompt; add then floor.",
+      "x-ruleID": "S09",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+        "lineStart": 1619,
+        "lineEnd": 1625,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "rule_arendalsukaIntroduction": {
+      "type": "object",
+      "properties": {
+        "add": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.2
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1629,
+            "lineEnd": 1629,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "floor": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.92
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1629,
+            "lineEnd": 1629,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "atlasCap": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.84
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1631,
+            "lineEnd": 1631,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "add",
+        "floor",
+        "atlasCap"
+      ],
+      "additionalProperties": false,
+      "description": "Exact; arendalsuka.companion.introduce; publisher endpoint: add then floor; else EventAtlas: cap.",
+      "x-ruleID": "S10",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+        "lineStart": 1626,
+        "lineEnd": 1633,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "rule_arendalsukaParticipant": {
+      "type": "object",
+      "properties": {
+        "add": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.18
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1638,
+            "lineEnd": 1638,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "floor": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.9
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1638,
+            "lineEnd": 1638,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "atlasCap": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.84
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1641,
+            "lineEnd": 1641,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "add",
+        "floor",
+        "atlasCap"
+      ],
+      "additionalProperties": false,
+      "description": "Exact; text contains arendalsuka AND isArendalsukaParticipantPurpose; publisher: add then floor; else EventAtlas AND !mentionsArendalsukaAtlasMaintenance: cap. May follow S10.",
+      "x-ruleID": "S11",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+        "lineStart": 1634,
+        "lineEnd": 1643,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "rule_dashboardAfterLexicon": {
+      "type": "object",
+      "properties": {
+        "floor": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.96
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1657,
+            "lineEnd": 1657,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "architectCap": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.88
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1662,
+            "lineEnd": 1662,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "floor",
+        "architectCap"
+      ],
+      "additionalProperties": false,
+      "description": "After loop if dashboard intent matched; exact combinedConfigurationName: floor; else architect: cap. Not inside S04.",
+      "x-ruleID": "P01",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+        "lineStart": 1653,
+        "lineEnd": 1664,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "rule_artistSalesAfterLexicon": {
+      "type": "object",
+      "properties": {
+        "artTerms": {
+          "$ref": "#/$defs/phraseList",
+          "examples": [
+            [
+              "art",
+              "artist",
+              "artwork",
+              "exhibition",
+              "gallery",
+              "kunst",
+              "kunstner",
+              "kunstverk",
+              "utstilling",
+              "galleri"
+            ]
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1667,
+            "lineEnd": 1670,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "floor": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.9
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1672,
+            "lineEnd": 1672,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "cap": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.74
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1678,
+            "lineEnd": 1678,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "artTerms",
+        "floor",
+        "cap"
+      ],
+      "additionalProperties": false,
+      "description": "After P01; exact ArtistSales endpoint; artTerms substring in normalized prompt: floor, otherwise cap. Context boost follows.",
+      "x-ruleID": "P02",
+      "x-source": {
+        "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+        "lineStart": 1666,
+        "lineEnd": 1680,
+        "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+      }
+    },
+    "thresholds": {
+      "type": "object",
+      "properties": {
+        "render": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.6
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 1862,
+            "lineEnd": 1862,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "suggest": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.72
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 1863,
+            "lineEnd": 1863,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "autofill": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.85
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 1864,
+            "lineEnd": 1864,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "directResource": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.82
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 5377,
+            "lineEnd": 5377,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "candidateMinimum": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.5
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 13746,
+            "lineEnd": 13746,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "candidateTieTolerance": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.02
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 13765,
+            "lineEnd": 13765,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "render",
+        "suggest",
+        "autofill",
+        "directResource",
+        "candidateMinimum",
+        "candidateTieTolerance"
+      ],
+      "additionalProperties": false
+    },
+    "baseWeights": {
+      "type": "object",
+      "properties": {
+        "invite": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.78
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14289,
+            "lineEnd": 14289,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "poll": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.76
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14291,
+            "lineEnd": 14291,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "resourceRouter": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.72
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14293,
+            "lineEnd": 14293,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "meetingVideo": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.62
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14295,
+            "lineEnd": 14295,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "agentAction": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.64
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14297,
+            "lineEnd": 14297,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "scheduleMeeting": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.62
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14299,
+            "lineEnd": 14299,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "guidedOnboarding": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.74
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14301,
+            "lineEnd": 14301,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "advisoryReport": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.72
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14303,
+            "lineEnd": 14303,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "personalAgentPrefix": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.64
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14305,
+            "lineEnd": 14305,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "ideaCapture": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.7
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14307,
+            "lineEnd": 14307,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "workItem": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.72
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14309,
+            "lineEnd": 14309,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "projectTodoReminder": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.58
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14311,
+            "lineEnd": 14311,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "capabilityRequest": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.58
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14313,
+            "lineEnd": 14313,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "moderation": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            1.0
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14315,
+            "lineEnd": 14315,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "fallback": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.5
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 14317,
+            "lineEnd": 14317,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "invite",
+        "poll",
+        "resourceRouter",
+        "meetingVideo",
+        "agentAction",
+        "scheduleMeeting",
+        "guidedOnboarding",
+        "advisoryReport",
+        "personalAgentPrefix",
+        "ideaCapture",
+        "workItem",
+        "projectTodoReminder",
+        "capabilityRequest",
+        "moderation",
+        "fallback"
+      ],
+      "additionalProperties": false
+    },
+    "scoring": {
+      "type": "object",
+      "properties": {
+        "successIncrement": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.05
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 11665,
+            "lineEnd": 11665,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "failureDecrement": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.04
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 11665,
+            "lineEnd": 11665,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "rawScaleBase": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.75
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 13745,
+            "lineEnd": 13745,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "personalWeightScale": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.25
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 13745,
+            "lineEnd": 13745,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "inviteRawScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.86
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 13729,
+            "lineEnd": 13729,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "pollRawScore": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.86
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift",
+            "lineStart": 13730,
+            "lineEnd": 13730,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "purposeCandidateBase": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.72
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1044,
+            "lineEnd": 1044,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "matchedOrdinalPenalty": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.04
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1044,
+            "lineEnd": 1044,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "genericResourceCap": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.08
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1648,
+            "lineEnd": 1648,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        },
+        "genericResourceScale": {
+          "$ref": "#/$defs/unitInterval",
+          "examples": [
+            0.2
+          ],
+          "x-source": {
+            "path": "CellScaffold/Sources/App/Support/ChatPurposeResourceRouter.swift",
+            "lineStart": 1648,
+            "lineEnd": 1648,
+            "commit": "adf48d4615d1ed143d5bdc190fcf63e266214c8f"
+          }
+        }
+      },
+      "required": [
+        "successIncrement",
+        "failureDecrement",
+        "rawScaleBase",
+        "personalWeightScale",
+        "inviteRawScore",
+        "pollRawScore",
+        "purposeCandidateBase",
+        "matchedOrdinalPenalty",
+        "genericResourceCap",
+        "genericResourceScale"
+      ],
+      "additionalProperties": false
+    },
+    "butlerFacet": {
+      "type": "object",
+      "properties": {
+        "facetID": {
+          "const": "haven.butler-routing.v1"
+        },
+        "runtimeContract": {
+          "type": "object",
+          "properties": {
+            "predicateVersion": {
+              "$ref": "#/$defs/nonemptyString"
+            },
+            "evaluatorVersion": {
+              "$ref": "#/$defs/nonemptyString"
+            },
+            "catalogContractVersion": {
+              "$ref": "#/$defs/nonemptyString"
+            }
+          },
+          "required": [
+            "predicateVersion",
+            "evaluatorVersion",
+            "catalogContractVersion"
+          ],
+          "additionalProperties": false
+        },
+        "lexicon": {
+          "type": "array",
+          "minItems": 27,
+          "maxItems": 27,
+          "items": {
+            "$ref": "#/$defs/lexiconEntry"
+          },
+          "description": "Ordered; every one of the 27 entryIDs exactly once. Reordering changes identity and requires evaluation. New entries require a schema/runtime contract revision.",
+          "allOf": [
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.01"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.02"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.03"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.04"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.05"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.06"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.07"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.08"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.09"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.10"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.11"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.12"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.13"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.14"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.15"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.16"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.17"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.18"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.19"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.20"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.21"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.22"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.23"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.24"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.25"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.26"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "entryID": {
+                    "const": "lex.27"
+                  }
+                },
+                "required": [
+                  "entryID"
+                ]
+              },
+              "minContains": 1,
+              "maxContains": 1
+            }
+          ]
+        },
+        "router": {
+          "type": "object",
+          "properties": {
+            "specialRules": {
+              "type": "object",
+              "properties": {
+                "profilePublish": {
+                  "$ref": "#/$defs/rule_profilePublish"
+                },
+                "conferenceAgenda": {
+                  "$ref": "#/$defs/rule_conferenceAgenda"
+                },
+                "configurationAuthoring": {
+                  "$ref": "#/$defs/rule_configurationAuthoring"
+                },
+                "activityDashboard": {
+                  "$ref": "#/$defs/rule_activityDashboard"
+                },
+                "adminOperations": {
+                  "$ref": "#/$defs/rule_adminOperations"
+                },
+                "adminCleanup": {
+                  "$ref": "#/$defs/rule_adminCleanup"
+                },
+                "aiGateway": {
+                  "$ref": "#/$defs/rule_aiGateway"
+                },
+                "kallimachosAdvisor": {
+                  "$ref": "#/$defs/rule_kallimachosAdvisor"
+                },
+                "adminCredential": {
+                  "$ref": "#/$defs/rule_adminCredential"
+                },
+                "arendalsukaIntroduction": {
+                  "$ref": "#/$defs/rule_arendalsukaIntroduction"
+                },
+                "arendalsukaParticipant": {
+                  "$ref": "#/$defs/rule_arendalsukaParticipant"
+                },
+                "dashboardAfterLexicon": {
+                  "$ref": "#/$defs/rule_dashboardAfterLexicon"
+                },
+                "artistSalesAfterLexicon": {
+                  "$ref": "#/$defs/rule_artistSalesAfterLexicon"
+                }
+              },
+              "required": [
+                "profilePublish",
+                "conferenceAgenda",
+                "configurationAuthoring",
+                "activityDashboard",
+                "adminOperations",
+                "adminCleanup",
+                "aiGateway",
+                "kallimachosAdvisor",
+                "adminCredential",
+                "arendalsukaIntroduction",
+                "arendalsukaParticipant",
+                "dashboardAfterLexicon",
+                "artistSalesAfterLexicon"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "specialRules"
+          ],
+          "additionalProperties": false
+        },
+        "helpers": {
+          "type": "object",
+          "properties": {
+            "invite": {
+              "$ref": "#/$defs/helper_invite"
+            },
+            "poll": {
+              "$ref": "#/$defs/helper_poll"
+            },
+            "videoMeeting": {
+              "$ref": "#/$defs/helper_videoMeeting"
+            },
+            "scheduleMeeting": {
+              "$ref": "#/$defs/helper_scheduleMeeting"
+            },
+            "project": {
+              "$ref": "#/$defs/helper_project"
+            },
+            "ideaCapture": {
+              "$ref": "#/$defs/helper_ideaCapture"
+            },
+            "todo": {
+              "$ref": "#/$defs/helper_todo"
+            },
+            "reminder": {
+              "$ref": "#/$defs/helper_reminder"
+            },
+            "guidedOnboarding": {
+              "$ref": "#/$defs/helper_guidedOnboarding"
+            },
+            "capabilityDiscoveryOnboarding": {
+              "$ref": "#/$defs/helper_capabilityDiscoveryOnboarding"
+            },
+            "advisoryReport": {
+              "$ref": "#/$defs/helper_advisoryReport"
+            },
+            "uncertainGoalClarification": {
+              "$ref": "#/$defs/helper_uncertainGoalClarification"
+            },
+            "capabilityGap": {
+              "$ref": "#/$defs/helper_capabilityGap"
+            },
+            "workItem": {
+              "$ref": "#/$defs/helper_workItem"
+            },
+            "moderation": {
+              "$ref": "#/$defs/helper_moderation"
+            }
+          },
+          "required": [
+            "invite",
+            "poll",
+            "videoMeeting",
+            "scheduleMeeting",
+            "project",
+            "ideaCapture",
+            "todo",
+            "reminder",
+            "guidedOnboarding",
+            "capabilityDiscoveryOnboarding",
+            "advisoryReport",
+            "uncertainGoalClarification",
+            "capabilityGap",
+            "workItem",
+            "moderation"
+          ],
+          "additionalProperties": false
+        },
+        "thresholds": {
+          "$ref": "#/$defs/thresholds"
+        },
+        "baseWeights": {
+          "$ref": "#/$defs/baseWeights"
+        },
+        "scoring": {
+          "$ref": "#/$defs/scoring"
+        }
+      },
+      "required": [
+        "facetID",
+        "runtimeContract",
+        "lexicon",
+        "router",
+        "helpers",
+        "thresholds",
+        "baseWeights",
+        "scoring"
+      ],
+      "additionalProperties": false
+    },
+    "graphContent": {
+      "type": "object",
+      "properties": {
+        "knowledgeBase": {
+          "$ref": "#/$defs/knowledgeBase"
+        },
+        "consumerFacets": {
+          "type": "object",
+          "properties": {
+            "butler": {
+              "$ref": "#/$defs/butlerFacet"
+            }
+          },
+          "required": [
+            "butler"
+          ],
+          "additionalProperties": false
+        },
+        "provenance": {
+          "type": "object",
+          "properties": {
+            "sourceCommit": {
+              "$ref": "#/$defs/commit"
+            },
+            "sourceArtifacts": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/artifactSource"
+              }
+            }
+          },
+          "required": [
+            "sourceCommit",
+            "sourceArtifacts"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "knowledgeBase",
+        "consumerFacets",
+        "provenance"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "x-contentHash": {
+    "algorithm": "SHA-256",
+    "canonicalization": "RFC8785-JCS",
+    "input": "JCS({\"schema\": document.schema, \"content\": document.content}) encoded as UTF-8, no BOM or trailing newline",
+    "output": "sha256: followed by 64 lowercase hex digits",
+    "included": "All content: nodes, source provenance, complete ordered lists, consumer parameter names and values, runtime contract versions and sourceCommit. No default insertion, array sorting, ref rewriting or string normalization.",
+    "excluded": "Only root contentHash. Mutable pointers, approvals, reports, receipts, environment endpoint resolutions and entity-owned learning are outside this document.",
+    "reference": "https://www.rfc-editor.org/rfc/rfc8785"
+  },
+  "x-semanticValidation": [
+    "Reject duplicate object keys, invalid Unicode, non-finite numbers, unknown consumer fields and runtime contract versions.",
+    "Reject missing/duplicate lexicon entryIDs, empty phrases and empty token groups. endpointHints=[] is valid. Each of the 27 entryIDs must occur once.",
+    "Validate unique node purposeRefs, root/parents, declared composition and facet semantics against the pinned upstream contract. Never derive edges from ref text.",
+    "Noncanonical routing refs remain only in the Butler facet. Never manufacture purpose:// aliases, parentRefs or Goals.",
+    "Validate contentHash, schema/dependency artifact hashes, runtime compatibility and catalog bindings before publishing an immutable version.",
+    "No person nodes, entity weights, messages or learning events in graph import. Content/privacy validation is required beyond JSON Schema.",
+    "Require 0 <= render <= suggest <= autofill <= 1 and 0 < candidateTieTolerance <= 1. Operations and phases stay in code."
+  ]
+}

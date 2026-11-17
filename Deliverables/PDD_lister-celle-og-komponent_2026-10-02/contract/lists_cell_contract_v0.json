@@ -1,0 +1,407 @@
+{
+ "version": 0,
+ "status": "draft (G2 venter)",
+ "lastUpdated": "2026-10-02",
+ "lastVerifiedAgainstCode": null,
+ "cell": {
+  "name": "ListsCell",
+  "module": "CellBase (CellProtocol)",
+  "endpoint": "cell:///Lists",
+  "sourceFile": "Sources/CellBase/Cells/Lists/ListsCell.swift",
+  "grantArea": "lists",
+  "ownerGrant": "rw--",
+  "persistancy": "persistant",
+  "responsibility": "Eier brukerens navngitte lister (handleliste, huskeliste, idéliste …) med punkter som kan krysses av og flyttes; utførte punkter ligger alltid i bunn. Leverer samme sjekkliste-skjelett som flate («Mine lister») og som komponentmontering per liste."
+ },
+ "referenceLabelConvention": {
+  "label": "my",
+  "example": "my.lists.state → ListsCell.get(\"lists.state\")",
+  "note": "Alle nøkler under er cellens egne (uten referanse-label)."
+ },
+ "targetListRule": {
+  "order": [
+   "eksplisitt listId i payload",
+   "ComponentActionContext.mount.instanceID (CellBase TaskLocal, valg A)",
+   "activeListId"
+  ],
+  "appliesTo": [
+   "lists.item.add (string)",
+   "lists.list.rename (string)",
+   "lists.list.clearDone (bool/true)"
+  ],
+  "errorWhenNone": "no_target_list"
+ },
+ "get": [
+  {
+   "keypath": "lists.state",
+   "returns": "ListsStatePayload",
+   "access": "r--- på lists",
+   "note": "Rot-intercept: nestede keypaths (lists.state.lists, lists.state.activeAsRows, lists.state.mountsById.<id>) løses av GeneralCell.resolveNestedValue."
+  }
+ ],
+ "set": [
+  {
+   "keypath": "lists.list.create",
+   "expects": "ListCreateRequest",
+   "returns": "MutationResult",
+   "effect": "Ny liste nederst; blir aktiv."
+  },
+  {
+   "keypath": "lists.list.select",
+   "expects": "ListSelectRequest",
+   "returns": "MutationResult",
+   "effect": "Setter activeListId. Godtar List-valgpayload fra rendereren ({selected: id})."
+  },
+  {
+   "keypath": "lists.list.rename",
+   "expects": "ListRenameRequest",
+   "returns": "MutationResult",
+   "effect": "Nytt navn på mål-listen (targetListRule)."
+  },
+  {
+   "keypath": "lists.list.remove",
+   "expects": "ListRef",
+   "returns": "MutationResult",
+   "effect": "Sletter listen og punktene; ny aktiv = første gjenværende eller null."
+  },
+  {
+   "keypath": "lists.list.clearDone",
+   "expects": "ListRefOrTrue",
+   "returns": "MutationResult",
+   "effect": "Sletter alle utførte punkter i mål-listen."
+  },
+  {
+   "keypath": "lists.item.add",
+   "expects": "ItemAddRequest",
+   "returns": "MutationResult",
+   "effect": "Nytt punkt sist blant de åpne i mål-listen. Blank tittel → invalid_title."
+  },
+  {
+   "keypath": "lists.item.update",
+   "expects": "ItemUpdateRequest",
+   "returns": "MutationResult",
+   "effect": "Ny tittel på punktet."
+  },
+  {
+   "keypath": "lists.item.toggle",
+   "expects": "ItemRef",
+   "returns": "MutationResult",
+   "effect": "done ↔ !done; avkrysset → sist i utført-sonen med doneAtEpochMs; angret → sist i åpen-sonen, doneAtEpochMs fjernes."
+  },
+  {
+   "keypath": "lists.item.move",
+   "expects": "ItemMoveRequest",
+   "returns": "MutationResult",
+   "effect": "Flytter innenfor åpen-sonen: direction up/down (no-op i kanten, status ok) eller slipp-payload (dratt punkt legges foran målet). Utført punkt → item_done_cannot_move."
+  },
+  {
+   "keypath": "lists.item.remove",
+   "expects": "ItemRef",
+   "returns": "MutationResult",
+   "effect": "Sletter punktet."
+  }
+ ],
+ "schemas": {
+  "ListsStatePayload": {
+   "type": "object",
+   "required": [
+    "status",
+    "cell",
+    "schemaVersion",
+    "stateVersion",
+    "updatedAtEpochMs",
+    "activeListId",
+    "lists",
+    "activeAsRows",
+    "emptyHint",
+    "notice",
+    "mountsById",
+    "counts"
+   ],
+   "properties": {
+    "status": "string(ok)",
+    "cell": "string(Lists)",
+    "schemaVersion": "string(haven.lists.state.v1)",
+    "stateVersion": "integer",
+    "updatedAtEpochMs": "integer",
+    "activeListId": "string|null",
+    "lists": "[ListRow]",
+    "activeAsRows": "[ListView] (0 eller 1)",
+    "emptyHint": "[{text}] (0 eller 1)",
+    "notice": "[{text}] (0 eller 1)",
+    "mountsById": "{<listId>: SkeletonComponentMount}",
+    "counts": "{lists, open, done}"
+   }
+  },
+  "ListRow": {
+   "type": "object",
+   "required": [
+    "id",
+    "title",
+    "kind",
+    "isActive",
+    "openCount",
+    "doneCount",
+    "summaryText",
+    "selectPayload",
+    "mount"
+   ]
+  },
+  "ListView": {
+   "type": "object",
+   "required": [
+    "id",
+    "title",
+    "kind",
+    "isActive",
+    "openCount",
+    "doneCount",
+    "summaryText",
+    "items",
+    "emptyRows",
+    "doneRows",
+    "removeListPayload",
+    "clearDonePayload",
+    "selectPayload"
+   ]
+  },
+  "ItemRow": {
+   "type": "object",
+   "required": [
+    "id",
+    "title",
+    "done",
+    "createdAtEpochMs",
+    "updatedAtEpochMs",
+    "togglePayload",
+    "moveUpPayload",
+    "moveDownPayload",
+    "removePayload",
+    "dragPayload",
+    "dropPayload"
+   ],
+   "optional": [
+    "doneAtEpochMs",
+    "titleColor (bare når done: #8E8E93)"
+   ]
+  },
+  "SkeletonComponentMount": {
+   "type": "object",
+   "required": [
+    "componentID",
+    "revision",
+    "sourceCellEndpoint",
+    "skeleton",
+    "item"
+   ],
+   "fixed": {
+    "componentID": "haven.lists.checklist",
+    "revision": "1",
+    "sourceCellEndpoint": "cell:///Lists"
+   }
+  },
+  "ListCreateRequest": {
+   "oneOf": [
+    {
+     "type": "string",
+     "nonEmpty": true
+    },
+    {
+     "type": "object",
+     "required": [
+      "title"
+     ],
+     "optional": [
+      "kind (shopping|reminders|ideas|custom; default custom)"
+     ]
+    }
+   ]
+  },
+  "ListSelectRequest": {
+   "oneOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "object",
+     "required": [
+      "listId"
+     ]
+    },
+    {
+     "type": "object",
+     "required": [
+      "selected"
+     ],
+     "note": "renderer-payload; selected er id-string eller objekt med id"
+    }
+   ]
+  },
+  "ListRenameRequest": {
+   "oneOf": [
+    {
+     "type": "string",
+     "nonEmpty": true,
+     "note": "→ targetListRule"
+    },
+    {
+     "type": "object",
+     "required": [
+      "listId",
+      "title"
+     ]
+    }
+   ]
+  },
+  "ListRef": {
+   "oneOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "object",
+     "required": [
+      "listId"
+     ]
+    }
+   ]
+  },
+  "ListRefOrTrue": {
+   "oneOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "object",
+     "required": [
+      "listId"
+     ]
+    },
+    {
+     "type": "bool",
+     "note": "true → targetListRule"
+    }
+   ]
+  },
+  "ItemAddRequest": {
+   "oneOf": [
+    {
+     "type": "string",
+     "nonEmpty": true,
+     "note": "→ targetListRule"
+    },
+    {
+     "type": "object",
+     "required": [
+      "title"
+     ],
+     "optional": [
+      "listId"
+     ]
+    }
+   ]
+  },
+  "ItemUpdateRequest": {
+   "type": "object",
+   "required": [
+    "listId",
+    "itemId",
+    "title"
+   ]
+  },
+  "ItemRef": {
+   "type": "object",
+   "required": [
+    "listId",
+    "itemId"
+   ]
+  },
+  "ItemMoveRequest": {
+   "oneOf": [
+    {
+     "type": "object",
+     "required": [
+      "listId",
+      "itemId",
+      "direction"
+     ],
+     "values": {
+      "direction": [
+       "up",
+       "down"
+      ]
+     }
+    },
+    {
+     "type": "object",
+     "required": [
+      "dragPayload",
+      "dropTargetPayload"
+     ],
+     "note": "webens slipp-payload; begge er ItemRef; samme listId"
+    }
+   ]
+  },
+  "MutationResult": {
+   "oneOf": [
+    {
+     "type": "object",
+     "required": [
+      "status",
+      "stateVersion"
+     ],
+     "fixed": {
+      "status": "ok"
+     },
+     "optional": [
+      "listId",
+      "itemId",
+      "activeListId"
+     ]
+    },
+    {
+     "type": "object",
+     "required": [
+      "status",
+      "code",
+      "message"
+     ],
+     "fixed": {
+      "status": "error"
+     }
+    }
+   ]
+  }
+ },
+ "errorCodes": [
+  "invalid_payload",
+  "invalid_title",
+  "no_target_list",
+  "list_not_found",
+  "item_not_found",
+  "item_done_cannot_move",
+  "lists_snapshot_unverified"
+ ],
+ "denial": {
+  "otherRequester": "denied (CellAuthorizationError via validateAccess)",
+  "unknownKeypath": "KeyValueErrors.notFound"
+ },
+ "invariants": [
+  "items == åpne(manuell rekkefølge) + utførte(doneAtEpochMs stigende) etter enhver mutasjon",
+  "stateVersion øker med 1 per vellykket mutasjon",
+  "encode→decode gir byte-lik lists.state (kanonisk JSON)",
+  "mountsById[id].item.id == id og mountsById[id].skeleton == checklistSkeleton(\"lists.\")",
+  "lists[n].mount == mountsById[lists[n].id]"
+ ],
+ "testRequirements": [
+  "test.lists.cell.crud",
+  "test.lists.cell.persist",
+  "test.cell.auth-negative",
+  "test.lists.order.toggle",
+  "test.lists.order.invariant",
+  "test.lists.order.move",
+  "test.lists.order.clear",
+  "test.lists.component.same-skeleton",
+  "test.cell.contract-fixtures"
+ ]
+}

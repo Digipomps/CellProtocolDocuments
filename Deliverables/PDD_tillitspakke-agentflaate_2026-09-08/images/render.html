@@ -1,0 +1,103 @@
+<!doctype html><html lang="no"><head><meta charset="utf-8">
+<style>
+:root{--ink:#1d2430;--muted:#5f6b7a;--line:#dfe4ea;--paper:#f6f7f9;--card:#ffffff;--blue:#2457c5;--blue-soft:#e9effb;--red:#b3261e;--red-soft:#fbeae9;--green:#1f7a4d;--green-soft:#e6f4ec;--amber:#8a5a00;--amber-soft:#fff4d6}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,"SF Pro Text","Helvetica Neue",Inter,system-ui,sans-serif;font-size:15px;line-height:1.35}
+.phone{width:390px;min-height:844px;background:var(--paper);position:relative;overflow:hidden}
+.desktop{width:1180px;min-height:860px;background:var(--paper)}
+.desktop .cols{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:20px 24px}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#fff;border-bottom:1px solid var(--line);font-size:13px;color:var(--muted)}
+.topbar b{color:var(--ink);font-size:15px}
+.section{margin-bottom:14px}
+.section>h2{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;font-weight:600}
+.vstack{display:flex;flex-direction:column}.hstack{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center}
+.t-headline{font-weight:600;font-size:16px}.t-body{font-size:15px}.t-caption{font-size:12.5px;color:var(--muted)}
+.b{font-weight:700}
+.tp-mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:11.5px;color:var(--muted);word-break:break-all}
+.tp-cell-card{background:var(--card);border:1px solid var(--line)}
+.tp-reach-row{background:var(--blue-soft)}
+.tp-violation-card{background:var(--red-soft);border:1px solid #efc9c6}
+.tp-violation-card .t-headline{color:var(--red)}
+.tp-receipt-row{background:var(--card);border:1px solid var(--line)}
+button{font:inherit;font-size:14px;padding:8px 12px;border-radius:10px;border:1.5px solid var(--blue);background:#fff;color:var(--blue);display:inline-flex;gap:6px;align-items:center;margin-top:4px}
+button.primary{background:var(--blue);color:#fff}
+button.danger{border-color:var(--red);color:var(--red)}
+textarea{font:inherit;width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;min-height:56px;font-family:"SF Mono",Menlo,monospace;font-size:13px}
+.toggle{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.sw{width:44px;height:26px;border-radius:13px;background:#c9ced6;position:relative;flex:none}.sw.on{background:var(--green)}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff}.sw.on::after{left:21px}
+hr{border:0;border-top:1px solid var(--line);margin:4px 0}
+.status-ok .t-headline{color:var(--green)}.status-warn .t-headline{color:var(--amber)}.status-err .t-headline{color:var(--red)}
+.pad{padding:16px}
+.empty{padding:14px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:13.5px;background:#fff}
+</style></head><body><div id="root"></div>
+<script>
+const params=new URLSearchParams(location.search);const view=params.get('view');const layout=params.get('layout')||'phone';
+function el(t,c,txt){const e=document.createElement(t);if(c)e.className=c;if(txt!=null)e.textContent=txt;return e}
+function get(data,kp){if(kp==null)return '';if(kp in data)return data[kp];const parts=kp.split('.');let v=data;for(const p of parts){if(v==null)return '';v=v[p]}return v==null?'':v}
+function visible(m,data){if(!m||!m.visibility||!m.visibility.when)return true;const w=m.visibility.when;if(w.scope==='item'&&w.keypath!=null){const v=get(data,w.keypath);if('equals' in w)return v===w.equals;if('exists' in w)return (v!==''&&v!=null)===w.exists;}return true}
+function mods(node,m){if(!m)return;if(m.padding)node.style.padding=m.padding+'px';if(m.cornerRadius)node.style.borderRadius=m.cornerRadius+'px';if(m.maxWidthInfinity)node.style.width='100%';if(m.styleClasses)m.styleClasses.forEach(c=>node.classList.add(c));if(m.hAlignment==='leading')node.style.alignItems='flex-start';node.style.boxSizing='border-box'}
+function render(sk,data){
+ const [k,v]=Object.entries(sk)[0];
+ switch(k){
+  case 'Section':{const s=el('div','section');s.appendChild(Object.assign(el('h2'),{textContent:v.header.Text.text}));const c=el('div','vstack');c.style.gap='8px';v.content.forEach(x=>c.appendChild(render(x,data)));s.appendChild(c);return s}
+  case 'VStack':{const s=el('div','vstack');s.style.gap=(v.spacing||0)+'px';mods(s,v.modifiers);v.elements.forEach(x=>s.appendChild(render(x,data)));return s}
+  case 'HStack':{const s=el('div','hstack');s.style.gap=(v.spacing||0)+'px';mods(s,v.modifiers);v.elements.forEach(x=>s.appendChild(render(x,data)));return s}
+  case 'Text':{const m=v.modifiers||{};if(!visible(m,data)){return el('span')}const t=el('div','t-'+(m.fontStyle||'body')+(m.fontWeight==='bold'?' b':''),v.text!=null?v.text:String(get(data,v.keypath)));if(m.styleClasses)m.styleClasses.forEach(c=>t.classList.add(c));if(t.textContent==='')t.style.display='none';return t}
+  case 'Button':{if(!visible(v.modifiers,data)){return el('span')}const b=el('button',null,v.label);if(/Godkjenn pakke/.test(v.label))b.classList.add('primary');if(/Stopp/.test(v.label))b.classList.add('danger');b.title=v.keypath;return b}
+  case 'List':{const s=el('div','vstack');s.style.gap='10px';const rows=get(data,v.keypath)||[];if(rows.length===0&&data.__emptyText){s.appendChild(el('div','empty',data.__emptyText))}rows.forEach(r=>s.appendChild(render(v.flowElementSkeleton,r)));return s}
+  case 'Divider':return el('hr');
+  case 'TextField':{const i=el('input');i.value=get(data,v.sourceKeypath)||'';i.placeholder=v.placeholder||'';return i}
+  case 'TextArea':{const i=el('textarea');i.value=get(data,v.sourceKeypath)||'';i.placeholder=v.placeholder||'';return i}
+  case 'Toggle':{const w=el('div','toggle');w.appendChild(el('div','t-body',v.label));const on=(data.__toggles&&data.__toggles[v.keypath])??v.isOn;w.appendChild(el('div','sw'+(on?' on':'')));return w}
+  default:return el('div',null,'[?'+k+']')
+ }
+}
+async function load(n){const j=await (await fetch('skeleton/'+n+'.json')).json();return j.skeleton}
+const D='sha256:7c1e…a9f2';const D2='sha256:3b80…41cd';
+const fleet=[
+ {id:'aigateway',hasModel:true,hasInstruction:true,title:'AIGateway (agent)',roleLabel:'cell:///PurposeBoundAIGateway · rolle: agent',modelLabel:'Modell: anthropic / claude-sonnet-5 · hosted, https',instructionLabel:'Instruksjon: cell:///AssistantPersona#persona.text · sha256:91ab…e07d',grantsLabel:'Grants: ai.invokePurposeBound rw-- · web.fetch --x- (WebFetch)',ceilingLabel:'Ceiling: destinasjon = anthropic · data = user-prompt, system-instruction · storage: nei · disclosure: ja',providerToolsLabel:'Leverandørverktøy (web search, kodekjøring): AV — bundet i forespørselen'},
+ {id:'webfetch',hasModel:false,hasInstruction:false,title:'WebFetch (tjeneste)',roleLabel:'cell:///WebFetch · rolle: tjeneste',modelLabel:'Ingen modell',instructionLabel:'Instruksjon: —',grantsLabel:'Template: web.fetch rw-- · web.setURLDraft rw-- · state r---',ceilingLabel:'Ceiling: kun GET · https · whitelist: *.digipomps.org, *.wikipedia.org, docs.claude.com · credentials: NEI',providerToolsLabel:''},
+ {id:'cred',hasModel:false,hasInstruction:false,title:'ScopedCredential (tjeneste)',roleLabel:'cell:///ScopedCredential · rolle: hemmeligheter',modelLabel:'Ingen modell',instructionLabel:'Instruksjon: —',grantsLabel:'Template: credentials r--- (kun eier) · credential.upsert rw-- (kun eier)',ceilingLabel:'Ceiling: ingen celle i flåten har Grant hit. Aliaser finnes: anthropic (1)',providerToolsLabel:''}
+];
+const reach=[
+ {pathLabel:'AIGateway → anthropic (leverandør)',summaryLabel:'Kan sende: prompt + systeminstruksjon. Kan ikke: lagre svar hos oss (s = nei), bruke leverandørverktøy, nå andre leverandører.'},
+ {pathLabel:'AIGateway → WebFetch → 3 domenemønstre',summaryLabel:'Kan lese (GET, https, ≤ 256 KB) fra *.digipomps.org, *.wikipedia.org, docs.claude.com. Kan ikke: POST, andre verter, redirect ut, bruke credentials.'},
+ {pathLabel:'AIGateway → ScopedCredential',summaryLabel:'Ingen vei. Ingen Grant. Modellen ser aldri en nøkkel.'}
+];
+const adjust={whitelistText:'*.digipomps.org\n*.wikipedia.org\ndocs.claude.com',providerToolsLabel:'Leverandørverktøy: alltid av for hostede ruter (kan ikke slås på her — det er en forespørsels-ceiling, ikke et valg)'};
+function head(root,title,sub){const t=el('div','topbar');const l=el('div');l.appendChild(el('b',null,title));l.appendChild(el('div',null,sub));t.appendChild(l);t.appendChild(el('div',null,'Kjetil · eier'));root.appendChild(t)}
+(async()=>{
+ const root=document.getElementById('root');const frame=el('div',layout==='desktop'?'desktop':'phone');root.appendChild(frame);
+ const pad=el('div',layout==='desktop'?'cols':'pad');
+ const forSk=await load('tillitspakke-for');const etterSk=await load('tillitspakke-etter');
+ const splitCols=(node)=>{if(layout!=='desktop')return node;const c1=el('div'),c2=el('div');const secs=[...node.children];secs.forEach((s,i)=>(i<2?c1:c2).appendChild(s));const w=el('div');w.style.display='contents';w.appendChild(c1);w.appendChild(c2);return w};
+ if(view==='for-tom'){head(frame,'Tillitspakke','CellScaffold · ingen flåte konfigurert');
+  const data={trustPackage:{state:{statusLabel:'Ingen flåte konfigurert',summaryLabel:'Legg til en agent-celle (f.eks. PurposeBoundAIGateway) i flåten, så genereres pakken herfra — fra cellenes templates, Contracts og ceilings. Ingenting skrives for hånd.',packageDigestLabel:'',approvalLabel:'',fleet:{cells:[]},reach:[],adjust:{whitelistText:'',providerToolsLabel:adjust.providerToolsLabel}}},__emptyText:'Tomt — ingen celler i flåten.'};
+  const n=render(forSk,data);n.classList.add('status-warn');pad.appendChild(splitCols(n));}
+ if(view==='for-fylt'){head(frame,'Tillitspakke','CellScaffold · flåte «Research-assistent» · utkast');
+  const data={trustPackage:{state:{statusLabel:'Utkast — ikke godkjent',summaryLabel:'3 celler · 1 agent · 1 modellrute · 2 Grants ut fra agenten. Generert 08.09.2026 10:12 fra templates, Contracts og ceilings.',packageDigestLabel:'Pakke-digest '+D,approvalLabel:'Ikke godkjent. Flåten kan ikke starte før pakke-digesten er signert av deg.',fleet:{cells:fleet},reach:reach,adjust:adjust}}};
+  pad.appendChild(splitCols(render(forSk,data)));}
+ if(view==='for-feil'){head(frame,'Tillitspakke','CellScaffold · flåte «Research-assistent»');
+  const data={trustPackage:{state:{statusLabel:'Avvik: gjeldende policy ≠ godkjent pakke',summaryLabel:'Whitelisten for WebFetch er endret etter godkjenning (nytt mønster: *.example.org). Flåten er stoppet til ny pakke er godkjent.',packageDigestLabel:'Gjeldende '+D2+' · godkjent '+D,approvalLabel:'Godkjent 08.09.2026 10:31 av deg — gjelder ikke lenger for gjeldende policy.',fleet:{cells:[fleet[0],{...fleet[1],ceilingLabel:'Ceiling: kun GET · https · whitelist: *.digipomps.org, *.wikipedia.org, docs.claude.com, *.example.org (NY — ikke i godkjent pakke) · credentials: NEI'},fleet[2]]},reach:[reach[0],{pathLabel:'AIGateway → WebFetch → 4 domenemønstre (1 nytt)',summaryLabel:'*.example.org er lagt til etter godkjenning. Ikke dekket av signert pakke.'},reach[2]],adjust:{...adjust,whitelistText:adjust.whitelistText+'\n*.example.org'}}}};
+  const n=render(forSk,data);n.classList.add('status-err');pad.appendChild(splitCols(n));}
+ if(view==='etter-ok'){head(frame,'Etterprøving','CellScaffold · flåte «Research-assistent»');
+  const data={trustPackage:{state:{audit:{statusLabel:'Overholdt — 0 avvik',summaryLabel:'Siden godkjenning 08.09.2026 10:31: 6 effekter (4 provider-kall, 2 fetch). Alle kvitteringer matcher pakke-digesten og er signert av cellen.',approvedDigestLabel:'Godkjent pakke '+D+' · kvitteringer verifisert mot samme digest',violationsLabel:'Ingen avvik.',violations:[],receipts:[
+   {lineLabel:'10:44 · AIGateway → anthropic · ai.invokePurposeBound',resultLabel:'decision: allowed · execution: completed · data: user-prompt, system-instruction · verktøy: av',signatureLabel:'Signatur: cell:///PurposeBoundAIGateway ✓ verifisert'},
+   {lineLabel:'10:44 · AIGateway → WebFetch → docs.claude.com',resultLabel:'decision: allowed · execution: completed · GET · 41 KB · credentials: nei',signatureLabel:'Signatur: cell:///WebFetch ✓ verifisert'},
+   {lineLabel:'10:39 · AIGateway → WebFetch → no.wikipedia.org',resultLabel:'decision: allowed · execution: completed · GET · 118 KB · credentials: nei',signatureLabel:'Signatur: cell:///WebFetch ✓ verifisert'}
+  ]}}},__emptyText:'Ingen avvik siden godkjenning.'};
+  const n=render(etterSk,data);n.classList.add('status-ok');pad.appendChild(splitCols(n));}
+ if(view==='etter-brudd'){head(frame,'Etterprøving','CellScaffold · flåte «Research-assistent»');
+  const data={trustPackage:{state:{audit:{statusLabel:'2 avvik fra godkjent pakke',summaryLabel:'Siden godkjenning 08.09.2026 10:31: 7 effekter forsøkt, 5 innenfor, 2 nektet av cellene og logget som avvik. Ingen av de to nådde nettverket.',approvedDigestLabel:'Godkjent pakke '+D,violationsLabel:'Hvert avvik er en effekt som ikke var i pakken. Cellen nektet; her ser du at det ble forsøkt.',violations:[
+   {id:'r-1042',kindLabel:'Ny destinasjon utenfor whitelist',detailLabel:'WebFetch: GET https://api.example.org/v1/prices — vert matcher ikke *.digipomps.org, *.wikipedia.org, docs.claude.com. Nektet før nettverk.',whenAgentLabel:'10:52 · agent: AIGateway · opphav: modellsvar (proposal)',receiptLabel:'receipt r-1042 · decision: denied · execution: not-started · signert av cell:///WebFetch ✓'},
+   {id:'r-1043',kindLabel:'Credential forsøkt løst opp',detailLabel:'WebFetch: alias «anthropic» etterspurt i fetch — Grant gir ikke credential-rett. Nektet før oppslag i ScopedCredential (0 oppslag).',whenAgentLabel:'10:52 · agent: AIGateway · opphav: modellsvar (proposal)',receiptLabel:'receipt r-1043 · decision: denied · execution: not-started · signert av cell:///WebFetch ✓'}
+  ],receipts:[
+   {lineLabel:'10:52 · AIGateway → WebFetch → api.example.org',resultLabel:'decision: DENIED (whitelist) · execution: not-started',signatureLabel:'Signatur: cell:///WebFetch ✓ verifisert'},
+   {lineLabel:'10:52 · AIGateway → WebFetch (credential)',resultLabel:'decision: DENIED (no credential grant) · execution: not-started',signatureLabel:'Signatur: cell:///WebFetch ✓ verifisert'},
+   {lineLabel:'10:44 · AIGateway → anthropic · ai.invokePurposeBound',resultLabel:'decision: allowed · execution: completed · verktøy: av',signatureLabel:'Signatur: cell:///PurposeBoundAIGateway ✓ verifisert'}
+  ]}}}};
+  const n=render(etterSk,data);n.classList.add('status-err');pad.appendChild(splitCols(n));}
+ frame.appendChild(pad);
+ document.title='ready';
+})();
+</script></body></html>

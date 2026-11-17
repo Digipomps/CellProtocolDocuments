@@ -1,0 +1,112 @@
+diff --git a/Sources/App/Cells/Agent/AssistantCorrespondenceCell.swift b/Sources/App/Cells/Agent/AssistantCorrespondenceCell.swift
+index fe624c3c..b5eeae47 100644
+--- a/Sources/App/Cells/Agent/AssistantCorrespondenceCell.swift
++++ b/Sources/App/Cells/Agent/AssistantCorrespondenceCell.swift
+@@ -743,7 +743,9 @@ final class AssistantCorrespondenceCell: GeneralCell, PortholeRuntimeBindingEnsu
+       return error("invalid_signature", "Enrollment signature did not verify.")
+     }
+ 
++    let revokedPrincipals = revokedPrincipalIDs()
+     let mutation = stateQueue.sync { () -> EnrollmentMutation in
++      var renewsGrantID: String? = nil
+       if var existing = grantsByPrincipalID[payload.principalID] {
+         guard existing.identityUUID == payload.identityUUID,
+           existing.deviceID == payload.deviceID,
+@@ -755,13 +757,26 @@ final class AssistantCorrespondenceCell: GeneralCell, PortholeRuntimeBindingEnsu
+               "principal_already_enrolled",
+               "This principal is already bound to another device identity or Entity."))
+         }
+-        existing.entityRef = payload.entityRef
+-        existing.approvalRequestID =
+-          existing.approvalRequestID ?? "legacy-\(existing.grantID)"
+-        existing.approvalReceiptID =
+-          existing.approvalReceiptID ?? "migration-existing-grant-\(existing.grantID)"
+-        grantsByPrincipalID[payload.principalID] = existing
+-        return .existingGrant(existing)
++        if AssistantCorrespondenceCell.grantAwaitsRenewal(
++          existing, revokedPrincipalIDs: revokedPrincipals, now: now)
++        {
++          // En tilgang som er utløpt, eller som går ut innen `renewalWindow`, fornyes ikke
++          // her. Samme principal, enhet, nøkkel og entitet med en fersk invitasjon gir en ny
++          // tilgangsforespørsel, og først eierens godkjenning erstatter tilgangen. Fram til
++          // da er en aktiv tilgang fortsatt aktiv. Uten dette ga en utløpt mottaker
++          // `recipient_not_allowed` hos avsenderen og `credential_issuance_failed` ved
++          // ny innmelding, uten noen vei tilbake (30.09.2026), og en tilgang kunne ikke
++          // fornyes før den hadde gått ut (01.10.2026).
++          renewsGrantID = existing.grantID
++        } else {
++          existing.entityRef = payload.entityRef
++          existing.approvalRequestID =
++            existing.approvalRequestID ?? "legacy-\(existing.grantID)"
++          existing.approvalReceiptID =
++            existing.approvalReceiptID ?? "migration-existing-grant-\(existing.grantID)"
++          grantsByPrincipalID[payload.principalID] = existing
++          return .existingGrant(existing)
++        }
+       }
+       let requestsForPrincipal = accessRequestsByID.values.filter {
+         $0.principalID == payload.principalID
+@@ -820,7 +835,8 @@ final class AssistantCorrespondenceCell: GeneralCell, PortholeRuntimeBindingEnsu
+         decidedByParticipantID: nil,
+         decidedByDeviceID: nil,
+         approvalReceiptID: nil,
+-        accessCredential: nil
++        accessCredential: nil,
++        renewsGrantID: renewsGrantID
+       )
+       accessRequestsByID[accessRequest.accessRequestID] = accessRequest
+       return .accessRequest(accessRequest, created: true)
+@@ -1656,6 +1672,29 @@ final class AssistantCorrespondenceCell: GeneralCell, PortholeRuntimeBindingEnsu
+     }
+   }
+ 
++  /// Hvor lenge før fristen en fersk invitasjon kan fornye en tilgang. Kjetil valgte
++  /// 01.10.2026 fornyelse før fristen, slik at fornyelsen kan gjøres på et avtalt tidspunkt
++  /// den siste uka i stedet for etter at tilgangen har gått ut.
++  static let renewalWindow: TimeInterval = 7 * 24 * 60 * 60
++
++  /// En tilgang venter på fornyelse når den er utløpt eller går ut innen `renewalWindow`,
++  /// og verken tilgangen eller principalen er tilbakekalt. Lenger fra fristen oppfører en
++  /// aktiv tilgang seg som før, og en tilbakekalt tilgang kan ikke komme tilbake gjennom en
++  /// invitasjon.
++  static func grantAwaitsRenewal(
++    _ grant: AssistantCorrespondenceGrant,
++    revokedPrincipalIDs: Set<String>,
++    now: Date
++  ) -> Bool {
++    guard grant.revokedAt == nil,
++      revokedPrincipalIDs.contains(grant.principalID) == false,
++      let expiresAt = grant.expiresAt
++    else {
++      return false
++    }
++    return expiresAt <= now.addingTimeInterval(renewalWindow)
++  }
++
+   private func activeGrant(principalID: String, now: Date) -> AssistantCorrespondenceGrant? {
+     guard revokedPrincipalIDs().contains(principalID) == false else { return nil }
+     return stateQueue.sync {
+@@ -1918,6 +1957,9 @@ final class AssistantCorrespondenceCell: GeneralCell, PortholeRuntimeBindingEnsu
+       "approvalReceiptID": accessRequest.approvalReceiptID.map(ValueType.string) ?? .null,
+       "decisionChannel": accessRequest.decisionChannel.map(ValueType.string) ?? .null,
+     ]
++    if let renewsGrantID = accessRequest.renewsGrantID {
++      object["renewsGrantID"] = .string(renewsGrantID)
++    }
+     if includeCredential, let credential = accessRequest.accessCredential {
+       object["accessCredential"] = .object(credentialObject(credential))
+     }
+diff --git a/Sources/App/Cells/Agent/AssistantCorrespondenceContracts.swift b/Sources/App/Cells/Agent/AssistantCorrespondenceContracts.swift
+index 1ac34785..e134dfd7 100644
+--- a/Sources/App/Cells/Agent/AssistantCorrespondenceContracts.swift
++++ b/Sources/App/Cells/Agent/AssistantCorrespondenceContracts.swift
+@@ -208,6 +208,9 @@ struct AssistantCorrespondenceAccessRequestRecord: Codable, Equatable, Sendable
+   var authorizedByAdminUserID: String? = nil
+   var approvalReceiptID: String?
+   var accessCredential: AssistantCorrespondenceAccessCredential?
++  /// Tilgangen denne forespørselen fornyer, når en utløpt tilgang fornyes med en fersk
++  /// invitasjon. `nil` for en første innmelding. Eieren skal kunne se hva som fornyes.
++  var renewsGrantID: String? = nil
+ }
+ 
+ struct AssistantCorrespondenceAccessCredentialPayload: Codable, Equatable, Sendable {

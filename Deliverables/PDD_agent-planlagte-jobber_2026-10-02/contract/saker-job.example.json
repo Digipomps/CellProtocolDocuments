@@ -1,0 +1,159 @@
+{
+  "contractVersion": 1,
+  "generatedAt": "2026-10-14T07:12:07Z",
+  "sources": [
+    {
+      "source": "intent-review",
+      "state": "read",
+      "lastAttemptAt": "2026-10-14T07:12:07Z",
+      "lastReadAt": "2026-10-14T07:12:07Z"
+    },
+    {
+      "source": "scaffold-queue",
+      "state": "not-configured",
+      "lastAttemptAt": "2026-10-14T07:12:07Z",
+      "lastReadAt": null,
+      "reason": "Godkjenningskøen i scaffolden er ikke koblet til denne agenten ennå. Åpne scaffold-admin for tilgang og påfyll."
+    },
+    {
+      "source": "agent-health",
+      "state": "read",
+      "lastAttemptAt": "2026-10-14T07:12:07Z",
+      "lastReadAt": "2026-10-14T07:12:07Z"
+    },
+    {
+      "source": "job",
+      "state": "read",
+      "lastAttemptAt": "2026-10-14T07:12:07Z",
+      "lastReadAt": "2026-10-14T07:12:07Z"
+    },
+    {
+      "source": "correspondence",
+      "state": "read",
+      "lastAttemptAt": "2026-10-14T07:12:07Z",
+      "lastReadAt": "2026-10-14T07:12:07Z"
+    },
+    {
+      "source": "tool-link",
+      "state": "read",
+      "lastAttemptAt": "2026-10-14T07:12:07Z",
+      "lastReadAt": "2026-10-14T07:12:07Z"
+    }
+  ],
+  "challenges": [
+    {
+      "id": "job:scheduled:regresjon-havenagentd:approval:6bcd7cab4b4d",
+      "source": "job",
+      "kind": "intent-approval",
+      "title": "Claude ber om en planlagt jobb: «Regresjon HavenAgentD»",
+      "detail": "Legger en jobb i køen .agent-spool, 2 steg i HavenAgentD/.worktrees/regresjon: git fetch origin main; swift test --no-parallel. Hverdager kl. 02:00 norsk tid. Første gang tir. 13.10. kl. 02:00. Slutter 11.11. Regnes som feilet uten svar etter 180 min.",
+      "requestedBy": {
+        "displayName": "Claude",
+        "didKey": null
+      },
+      "subject": "køjobb: git fetch, swift test · hverdager kl. 02:00 · til 11.11.",
+      "createdAt": "2026-10-12T08:04:00Z",
+      "needsHuman": true,
+      "answerPath": "ScheduledJobApprovalService.decide",
+      "responses": [
+        {
+          "id": "approve",
+          "label": "Godkjenn"
+        },
+        {
+          "id": "reject",
+          "label": "Avvis",
+          "destructive": true
+        },
+        {
+          "id": "open",
+          "label": "Åpne"
+        }
+      ],
+      "handleAt": {
+        "venue": "admin-window",
+        "reason": "Hele jobben, med hvert steg ordrett, står i adminvinduet. Du kan godkjenne eller avvise både der og her."
+      }
+    },
+    {
+      "id": "job:scheduled:korrespondanse-frist:attention",
+      "source": "job",
+      "kind": "agent-attention",
+      "title": "Planlagt jobb feilet: Fristvarsel",
+      "detail": "Kjøringen kl. 09:00 ga status 1. Siste linje: Fikk ikke lest tilgangsbeviset for kjetil-d. Loggen ligger i Logs/ScheduledJobs/korrespondanse-frist/.",
+      "subject": "kl. 09:00 · programmet ga status 1",
+      "createdAt": "2026-10-14T07:00:03Z",
+      "needsHuman": true,
+      "answerPath": "ScheduledJobApprovalService.acknowledge",
+      "responses": [
+        {
+          "id": "approve",
+          "label": "Kvitter"
+        },
+        {
+          "id": "open",
+          "label": "Åpne"
+        }
+      ],
+      "handleAt": {
+        "venue": "admin-window",
+        "reason": "Siste kjøring står i adminvinduet. Du kan kvittere både der og her."
+      }
+    },
+    {
+      "id": "job:scheduled:regresjon-havenagentd:attention",
+      "source": "job",
+      "kind": "agent-attention",
+      "title": "Planlagt jobb ble passert: Regresjon HavenAgentD",
+      "detail": "To planlagte tidspunkt passerte mens Macen sov eller var av. Jobben ble kjørt én gang kl. 07:42, og den gikk bra.",
+      "subject": "passert 2 ganger, kjørt kl. 07:42",
+      "createdAt": "2026-10-13T00:00:00Z",
+      "needsHuman": true,
+      "answerPath": "ScheduledJobApprovalService.acknowledge",
+      "responses": [
+        {
+          "id": "approve",
+          "label": "Kvitter"
+        },
+        {
+          "id": "reject",
+          "label": "Stopp jobben",
+          "destructive": true
+        },
+        {
+          "id": "open",
+          "label": "Åpne"
+        }
+      ],
+      "handleAt": {
+        "venue": "admin-window",
+        "reason": "Siste kjøring står i adminvinduet. Du kan kvittere eller stoppe både der og her."
+      }
+    },
+    {
+      "id": "job:scheduler:stopped",
+      "source": "job",
+      "kind": "agent-attention",
+      "title": "Planleggeren går ikke",
+      "detail": "Siste livstegn var onsdag kl. 23:51. Ingen planlagte jobber kjører før den er i gang igjen. 3 jobber venter.",
+      "subject": "siste livstegn onsdag kl. 23:51",
+      "createdAt": "2026-10-14T06:03:00Z",
+      "needsHuman": true,
+      "answerPath": "ScheduledJobsStatus.worker",
+      "responses": [
+        {
+          "id": "open",
+          "label": "Åpne"
+        },
+        {
+          "id": "dismiss-today",
+          "label": "Ignorer i dag"
+        }
+      ],
+      "handleAt": {
+        "venue": "admin-window",
+        "reason": "Planleggeren må startes på denne maskinen."
+      }
+    }
+  ]
+}

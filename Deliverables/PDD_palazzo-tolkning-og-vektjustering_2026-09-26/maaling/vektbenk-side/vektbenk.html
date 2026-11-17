@@ -1,0 +1,309 @@
+<title>Palazzos vektbenk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: kontrollpanel øverst (tall + ferdige valg), så sju gjestekort i rutenett; hvert kort viser tilbud som søyler mot terskelen. */
+:root{
+  --bg:#f6f5f7; --panel:#ffffff; --ink:#1f1a22; --muted:#625a68; --line:#e2dde5;
+  --aub:#5b2a5e; --aub-soft:#efe4f0; --good:#23703a; --good-soft:#e2f1e6;
+  --bad:#b23a1c; --bad-soft:#f8e3dc; --warn:#8a5a00; --warn-soft:#f7ecd4; --bar:#8d5a91;
+  --f-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#17141a; --panel:#211c25; --ink:#ece6ef; --muted:#a79dae; --line:#373040;
+  --aub:#d39bd6; --aub-soft:#3a2940; --good:#7fcf95; --good-soft:#1f3326; --bad:#f08a6c; --bad-soft:#3d2219;
+  --warn:#e3b45a; --warn-soft:#3a2d14; --bar:#b67fba; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17141a; --panel:#211c25; --ink:#ece6ef; --muted:#a79dae; --line:#373040;
+  --aub:#d39bd6; --aub-soft:#3a2940; --good:#7fcf95; --good-soft:#1f3326; --bad:#f08a6c; --bad-soft:#3d2219;
+  --warn:#e3b45a; --warn-soft:#3a2d14; --bar:#b67fba; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body)}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:28px 48px;display:grid;gap:22px}
+h1{font:700 clamp(28px,4vw,40px)/1.05 var(--f-display);margin:0;letter-spacing:-.01em;text-wrap:balance}
+.lede{margin:6px 0 0;color:var(--muted);max-width:68ch}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;gap:16px}
+.presets{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.presets .lbl{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-right:4px}
+button{font:500 14px var(--f-body);border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:8px 12px;cursor:pointer}
+button:hover{border-color:var(--aub)}
+button:focus-visible,input:focus-visible,summary:focus-visible,textarea:focus-visible{outline:2px solid var(--aub);outline-offset:2px}
+button.on{background:var(--aub);border-color:var(--aub);color:var(--panel)}
+button.primary{background:var(--aub);color:var(--panel);border-color:var(--aub);font-weight:600}
+button:disabled{opacity:.5;cursor:default}
+.sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px 22px}
+.sl{display:grid;gap:2px;min-width:0}
+.sl .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.sl label{font-weight:600;font-size:14px}
+.sl .val{font-size:14px;color:var(--aub)}
+.sl .help{font-size:12.5px;color:var(--muted)}
+.sl input{width:100%;accent-color:var(--aub)}
+.sl.key label::after{content:"avgjør mest";margin-left:8px;font:500 10.5px var(--f-body);text-transform:uppercase;letter-spacing:.07em;color:var(--aub);background:var(--aub-soft);padding:1px 6px;border-radius:99px;vertical-align:2px}
+.score{display:flex;flex-wrap:wrap;gap:10px 28px;align-items:baseline;border-top:1px solid var(--line);padding-top:14px}
+.big{font:700 30px/1 var(--f-display)}
+.score .cap{font-size:13px;color:var(--muted)}
+.warnline{color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:8px 12px;font-size:13.5px}
+.choose{display:flex;flex-wrap:wrap;gap:10px;align-items:center;border-top:1px solid var(--line);padding-top:14px}
+.choose textarea{flex:1 1 260px;min-width:0;font:14px var(--f-body);border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);padding:8px 10px;resize:vertical;min-height:40px}
+.saved{font-size:13.5px;color:var(--muted)}
+.saved b{color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:10px;align-content:start;min-width:0}
+.card h3{margin:0;font:600 18px/1.2 var(--f-display);display:flex;justify-content:space-between;gap:10px;align-items:start}
+.card .purpose{margin:0;color:var(--muted);font-size:13.5px}
+.pill{font:600 12px var(--f-body);padding:2px 9px;border-radius:99px;white-space:nowrap}
+.pill.ok{background:var(--good-soft);color:var(--good)}
+.pill.no{background:var(--bad-soft);color:var(--bad)}
+.taps{display:flex;flex-wrap:wrap;gap:5px;align-items:center;font-size:12.5px}
+.tap{border-radius:6px;padding:2px 7px;border:1px solid var(--aub)}
+.tap.W{background:var(--aub);color:var(--panel)}
+.tap.I{color:var(--aub)}
+.tap.N{border-color:var(--muted);color:var(--muted);text-decoration:line-through}
+.arrow{color:var(--muted)}
+.sub{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0}
+.offers{display:grid;gap:6px}
+.offer{display:grid;grid-template-columns:minmax(0,9.5em) 1fr auto;gap:8px;align-items:center;font-size:13.5px}
+.offer .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.offer.bad .t{color:var(--bad)}
+.track{position:relative;height:12px;background:var(--bg);border-radius:3px}
+.fill{position:absolute;left:0;top:0;bottom:0;background:var(--bar);border-radius:3px}
+.thr{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink)}
+.none{font-size:13.5px;color:var(--muted)}
+.meta{font-size:13px;color:var(--muted)}
+.meta b{color:var(--ink);font-weight:500}
+.reason{font-size:13px;color:var(--bad)}
+details{font-size:13px}
+details summary{cursor:pointer;color:var(--aub)}
+details table{border-collapse:collapse;width:100%;margin-top:6px}
+details td{padding:3px 4px;border-top:1px solid var(--line);vertical-align:top}
+.tblwrap{overflow-x:auto}
+.explain{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.explain div{min-width:0}
+.explain h4{margin:0 0 3px;font:600 15px var(--f-display)}
+.explain p{margin:0;font-size:13.5px;color:var(--muted)}
+.foot{font-size:12.5px;color:var(--muted);max-width:90ch}
+@media (prefers-reduced-motion:no-preference){.fill{transition:width .15s ease}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Palazzos vektbenk</h1>
+    <p class="lede">Endre tallene og se straks hva de sju simulerte gjestene får tilbudt. Når du er fornøyd, trykker du «Velg disse tallene», så setter Codex dem inn i koden (WP6).</p>
+  </header>
+
+  <section class="panel" aria-label="Tallene">
+    <div class="presets" role="group" aria-label="Ferdige sett">
+      <span class="lbl">Start fra</span>
+      <button type="button" data-preset="kode">Foreløpige tall i koden</button>
+      <button type="button" data-preset="A">A · Anbefalt</button>
+      <button type="button" data-preset="B">B · Som A, terskel 0,02</button>
+      <span class="meta" id="presetNote">C = dine egne tall: dra i en glidebryter.</span>
+    </div>
+    <div class="sliders" id="sliders"></div>
+    <div class="warnline" id="mono" hidden></div>
+    <div class="score">
+      <div><div class="big num" id="okCount">–</div><div class="cap">formål oppfylt</div></div>
+      <div><div class="big num" id="redCount">–</div><div class="cap">røde flagg (fikk tilbud i dag, får ingen nå)</div></div>
+      <div><div class="big num" style="color:var(--muted)">3/7</div><div class="cap">i dag (gammel matcher)</div></div>
+    </div>
+    <div class="choose">
+      <textarea id="note" rows="1" placeholder="Kommentar til valget (valgfritt)"></textarea>
+      <button type="button" class="primary" id="save">Velg disse tallene</button>
+      <span class="saved" id="saved">Ingen tall er valgt ennå.</span>
+    </div>
+  </section>
+
+  <section class="grid" id="guests" aria-label="Gjestene"></section>
+
+  <section class="panel" aria-label="Hva tallene betyr">
+    <div class="explain">
+      <div><h4>Summen</h4><p>Hvert trykk gir en styrke. En artikkel får styrken ganget med andelen av emnene sine den deler med artikkelen du trykket på. Ett felles emne av sju gir 1/7. «Ikke for meg» trekker fra.</p></div>
+      <div><h4>Terskel</h4><p>Minste sum som gir et tilbud. Den svarte streken i søylene. Lik terskelen er nok. En artikkel du selv har avvist direkte, er alltid stengt.</p></div>
+      <div><h4>Negativ vekt</h4><p>Hvor mye «Ikke for meg» teller mot beslektede artikler. 1 er full styrke, 0,5 er halv.</p></div>
+      <div><h4>Tilnærming og forsterkning</h4><p>Ved nytt trykk på samme artikkel flyttes styrken så stor del av veien mot det nye målet. Like trykk på rad løfter målet mot taket 1. Siste trykk bestemmer alltid fortegnet.</p></div>
+    </div>
+    <p class="foot">Siden regner med samme formel som koden (WP3). Den er kontrollert mot vektbenken fra 29.9: alle 90 sett × 7 gjester, 630 av 630 like, med samme tilbud, rekkefølge, summer og stengte artikler. Artiklene og emnene er de åtte Sicilia-artiklene fra testdataene. Et sett der mange «Interessant» kan gi sterkere mål enn «Vil smake», avvises av koden. Siden varsler om det.</p>
+  </section>
+</div>
+
+<script>
+// Vektmodellen fra WP3 (PalazzoWeightPolicy + PalazzoSignalGraphMatcher), gjengitt for siden.
+const ARTICLES = {
+  "art-arancini": {t:"Arancini", tags:["arancini","catania","fritert","gatemat","palermo","ris","safran"]},
+  "art-cannoli": {t:"Cannoli", tags:["cannoli","dessert","fritert","kandisert","palermo","pistasj","ricotta"]},
+  "art-caponata": {t:"Caponata", tags:["agrodolce","antipasto","aubergine","caponata","kapers","oliven","vegetar"]},
+  "art-etna-vin": {t:"Etna-vin", tags:["carricante","etna","hvitvin","nerello mascalese","rødvin","vin","vulkan"]},
+  "art-granita": {t:"Granita", tags:["brioche","dessert","frokost","granita","kaffe","mandel","messina","sitron"]},
+  "art-pasta-alla-norma": {t:"Pasta alla Norma", tags:["aubergine","basilikum","catania","norma","pasta","ricotta salata","tomat"]},
+  "art-pasta-con-le-sarde": {t:"Pasta con le sarde", tags:["bucatini","fennikel","fisk","palermo","pasta","rosiner","safran","sardiner"]},
+  "art-pistasj-bronte": {t:"Pistasj fra Bronte", tags:["bronte","dop","etna","gelato","nøtter","pesto","pistasj"]}
+};
+const R = {W:"wantToTaste", I:"interesting", N:"notForMe"};
+const GUESTS = [
+  {name:"Ombestemmer seg", formaal:"Vil få beslektet matinnhold etter at hun likevel vil smake caponata.",
+   taps:[["art-caponata","I"],["art-caponata","N"],["art-caponata","W"]], skalFaa:["art-pasta-alla-norma"], skalIkkeFaa:["art-caponata"], ref:[]},
+  {name:"Palermo, men ikke fritert", formaal:"Vil oppdage mer fra Palermo uten å få tilbud om fritert mat.",
+   taps:[["art-arancini","I"],["art-cannoli","N"]], skalFaa:["art-pasta-con-le-sarde"], skalIkkeFaa:["fritert"], ref:["art-pasta-alla-norma"]},
+  {name:"Vegetar", formaal:"Vil oppdage vegetarisk mat og unngå tilbud med fisk eller kjøtt.",
+   taps:[["art-caponata","W"],["art-pasta-con-le-sarde","N"]], skalFaa:["art-pasta-alla-norma"], skalIkkeFaa:["fisk","sardiner","art-arancini"], ref:[]},
+  {name:"Trykker mye «Interessant»", formaal:"Vil fortsette å oppdage innhold etter mange ulike Interessant-trykk.",
+   taps:[["art-arancini","I"],["art-caponata","I"],["art-pasta-alla-norma","I"],["art-pistasj-bronte","I"],["art-granita","I"]],
+   skalFaa:["art-cannoli","art-etna-vin","art-pasta-con-le-sarde"], skalIkkeFaa:["art-arancini","art-caponata","art-pasta-alla-norma","art-pistasj-bronte","art-granita"],
+   ref:["art-arancini","art-cannoli","art-caponata","art-etna-vin","art-pasta-alla-norma","art-pasta-con-le-sarde"]},
+  {name:"Bare «Ikke for meg»", formaal:"Vil slippe tilbud som bygger på hennes avvisninger alene.",
+   taps:[["art-arancini","N"],["art-cannoli","N"],["art-pasta-con-le-sarde","N"]], skalFaa:[], skalIkkeFaa:Object.keys(ARTICLES), ref:[]},
+  {name:"Samme knapp flere ganger", formaal:"Vil få beslektet innhold når hun gjentar at hun vil smake caponata.",
+   taps:[["art-caponata","W"],["art-caponata","W"],["art-caponata","W"]], skalFaa:["art-pasta-alla-norma"], skalIkkeFaa:["art-caponata"], ref:["art-pasta-alla-norma"]},
+  {name:"Ett «Interessant»-trykk", formaal:"Vil få minst ett beslektet tilbud etter ett eneste Interessant-trykk.",
+   taps:[["art-caponata","I"]], skalFaa:["art-pasta-alla-norma"], skalIkkeFaa:["art-caponata"], ref:["art-pasta-alla-norma"]}
+];
+function isMonotone(p){ return p.interesting + p.reinforce*(p.cap - p.interesting) <= p.wantToTaste + 1e-12; }
+function run(guest, p){
+  const st = {};
+  for (const [a, r] of guest.taps){
+    const prev = st[a];
+    const n = prev && prev.r === r ? prev.n + 1 : 0;
+    const base = p[R[r]];
+    const goal = base + p.reinforce*(p.cap - base)*n/(n+1);
+    const m = prev ? prev.m + p.approach*(goal - prev.m) : goal;
+    st[a] = {r, n, m};
+  }
+  const offers = [], closed = [];
+  for (const [a, v] of Object.entries(st)) if (v.r === "N") closed.push(a);
+  for (const c of Object.keys(ARTICLES)){
+    if (st[c]) continue;
+    const tc = ARTICLES[c].tags; let s = 0, hit = false, parts = [];
+    for (const [a, v] of Object.entries(st)){
+      const ov = ARTICLES[a].tags.filter(x => tc.includes(x));
+      if (!ov.length) continue; hit = true;
+      const sign = v.r === "N" ? -1 : 1;
+      const contrib = sign * v.m * ov.length / tc.length * (sign < 0 ? p.negativeScale : 1);
+      s += contrib; parts.push({from:a, r:v.r, tags:ov, contrib});
+    }
+    if (hit && s >= p.threshold) offers.push({id:c, sum:s, parts});
+  }
+  offers.sort((x,y) => y.sum - x.sum || (x.id < y.id ? -1 : 1));
+  closed.sort();
+  return {offers, closed, state: st};
+}
+function judge(guest, res){
+  const ids = res.offers.map(o => o.id);
+  const faaOk = guest.skalFaa.length === 0 || guest.skalFaa.some(x => ids.includes(x));
+  const brudd = [];
+  for (const o of res.offers) for (const x of guest.skalIkkeFaa)
+    if (o.id === x || ARTICLES[o.id].tags.includes(x)) brudd.push(o.id + (o.id === x ? "" : " (" + x + ")"));
+  const rodt = ids.length === 0 && guest.ref.length > 0;
+  return {ok: faaOk && brudd.length === 0, faaOk, brudd, rodt};
+}
+if (typeof module !== "undefined") module.exports = {ARTICLES, GUESTS, run, judge, isMonotone};
+
+const SLIDERS = [
+  {k:"threshold", l:"Terskel", min:0, max:0.3, step:0.01, key:true, help:"Minste sum som gir et tilbud."},
+  {k:"negativeScale", l:"Negativ vekt", min:0, max:1, step:0.05, key:true, help:"Hvor mye «Ikke for meg» trekker ned beslektede artikler."},
+  {k:"approach", l:"Tilnærming", min:0.1, max:1, step:0.05, help:"Hvor langt et nytt trykk på samme artikkel flytter styrken."},
+  {k:"reinforce", l:"Forsterkning", min:0, max:0.6, step:0.05, help:"Hvor mye like trykk på rad løfter målet."},
+  {k:"wantToTaste", l:"Grunnstyrke: Vil smake", min:0, max:1, step:0.05, help:"Styrken ved første «Vil smake»."},
+  {k:"interesting", l:"Grunnstyrke: Interessant", min:0, max:1, step:0.05, help:"Styrken ved første «Interessant»."},
+  {k:"notForMe", l:"Grunnstyrke: Ikke for meg", min:0, max:1, step:0.05, help:"Styrken ved første «Ikke for meg», før negativ vekt."}
+];
+const PRESETS = {
+  kode:{approach:0.5,threshold:0.05,negativeScale:1,reinforce:0.25,wantToTaste:0.8,interesting:0.5,notForMe:1,ownWords:1,cap:1},
+  A:{approach:0.5,threshold:0,negativeScale:0.5,reinforce:0.25,wantToTaste:0.8,interesting:0.5,notForMe:1,ownWords:1,cap:1},
+  B:{approach:0.5,threshold:0.02,negativeScale:0.5,reinforce:0.25,wantToTaste:0.8,interesting:0.5,notForMe:1,ownWords:1,cap:1}
+};
+const NOTES = {kode:"Tallene som står i koden nå (sett S041).", A:"Sett S032 fra benken: 7 av 7.", B:"Som A, men uten tilbud der pluss og minus går i null."};
+const LABEL = {W:"Vil smake", I:"Interessant", N:"Ikke for meg"};
+let p = {...PRESETS.A}, presetName = "A";
+const fmt = (x, d=3) => x.toLocaleString("nb-NO", {minimumFractionDigits:0, maximumFractionDigits:d});
+const title = id => ARTICLES[id].t;
+
+const slHost = document.getElementById("sliders");
+for (const s of SLIDERS){
+  const d = document.createElement("div"); d.className = "sl" + (s.key ? " key" : "");
+  d.innerHTML = `<div class="top"><label for="s-${s.k}">${s.l}</label><span class="val num" id="v-${s.k}"></span></div>
+    <input type="range" id="s-${s.k}" min="${s.min}" max="${s.max}" step="${s.step}">
+    <span class="help">${s.help}</span>`;
+  slHost.appendChild(d);
+  d.querySelector("input").addEventListener("input", e => { p[s.k] = parseFloat(e.target.value); presetName = matchPreset(); render(); });
+}
+function matchPreset(){ for (const [n, v] of Object.entries(PRESETS)) if (Object.keys(v).every(k => Math.abs(v[k]-p[k]) < 1e-9)) return n; return "C"; }
+document.querySelectorAll("[data-preset]").forEach(b => b.addEventListener("click", () => { p = {...PRESETS[b.dataset.preset]}; presetName = b.dataset.preset; render(); }));
+
+function render(){
+  for (const s of SLIDERS){ document.getElementById("s-"+s.k).value = p[s.k]; document.getElementById("v-"+s.k).textContent = fmt(p[s.k], 2); }
+  document.querySelectorAll("[data-preset]").forEach(b => b.classList.toggle("on", b.dataset.preset === presetName));
+  document.getElementById("presetNote").textContent = presetName === "C" ? "C · dine egne tall." : NOTES[presetName];
+  const mono = document.getElementById("mono");
+  mono.hidden = isMonotone(p);
+  mono.textContent = "Koden godtar ikke dette settet: gjentatte «Interessant» kan da gi sterkere mål enn «Vil smake» (Interessant + Forsterkning × (1 − Interessant) må være høyst Vil smake).";
+  let ok = 0, red = 0; const host = document.getElementById("guests"); host.innerHTML = "";
+  const results = GUESTS.map(g => { const r = run(g, p); const j = judge(g, r); if (j.ok) ok++; if (j.rodt) red++; return [g, r, j]; });
+  const maxSum = Math.max(0.3, p.threshold + 0.05, ...results.flatMap(([, r]) => r.offers.map(o => o.sum)));
+  for (const [g, r, j] of results){
+    const today = judge(g, {offers: g.ref.map(id => ({id}))});
+    const c = document.createElement("article"); c.className = "card";
+    const taps = g.taps.map(([a, rx]) => `<span class="tap ${rx}" title="${LABEL[rx]}">${title(a)} · ${LABEL[rx]}</span>`).join('<span class="arrow">→</span>');
+    const reasons = [];
+    if (!j.faaOk) reasons.push("Får ikke " + g.skalFaa.map(title).join(" eller ") + ".");
+    if (j.brudd.length) reasons.push("Får noe hun ikke skal: " + j.brudd.map(b => title(b.split(" ")[0]) + (b.includes("(") ? " " + b.slice(b.indexOf("(")) : "")).join(", ") + ".");
+    if (j.rodt) reasons.push("Rødt flagg: fikk tilbud i dag, får ingen nå.");
+    const bad = new Set(j.brudd.map(b => b.split(" ")[0]));
+    const offers = r.offers.length ? r.offers.map(o => {
+      const w = Math.max(0, o.sum) / maxSum * 100, t = p.threshold / maxSum * 100;
+      const rows = o.parts.map(pt => `<tr><td>${title(pt.from)} (${LABEL[pt.r]})</td><td>${pt.tags.join(", ")}</td><td class="num">${pt.contrib >= 0 ? "+" : ""}${fmt(pt.contrib)}</td></tr>`).join("");
+      return `<div class="offer${bad.has(o.id) ? " bad" : ""}"><span class="t" title="${title(o.id)}">${title(o.id)}</span>
+        <span class="track" aria-hidden="true"><span class="fill" style="width:${w}%"></span><span class="thr" style="left:${t}%"></span></span>
+        <span class="num">${fmt(o.sum)}</span></div>
+        <details><summary>Hvordan summen blir til</summary><div class="tblwrap"><table><tbody>${rows}</tbody></table></div></details>`;
+    }).join("") : `<div class="none">Ingen tilbud.</div>`;
+    c.innerHTML = `<h3><span>${g.name}</span><span class="pill ${j.ok ? "ok" : "no"}">${j.ok ? "Oppfylt" : "Ikke oppfylt"}</span></h3>
+      <p class="purpose">${g.formaal}</p>
+      <div class="taps">${taps}</div>
+      ${reasons.length ? `<div class="reason">${reasons.join(" ")}</div>` : ""}
+      <p class="sub">Tilbud, høyest sum først</p>
+      <div class="offers">${offers}</div>
+      <div class="meta">Stengt: <b>${r.closed.length ? r.closed.map(title).join(", ") : "ingen"}</b></div>
+      <div class="meta">I dag: <b>${g.ref.length ? g.ref.map(title).join(", ") : "ingen tilbud"}</b> · ${today.ok ? "oppfylt" : "ikke oppfylt"}</div>`;
+    host.appendChild(c);
+  }
+  document.getElementById("okCount").textContent = ok + "/7";
+  document.getElementById("redCount").textContent = red;
+  document.getElementById("save").disabled = !isMonotone(p) || !dbRef;
+}
+
+// Valget lagres i sidens delte lager, der Losen leser det.
+let dbRef = null;
+const savedEl = document.getElementById("saved");
+function showSaved(d){
+  if (!d) { savedEl.textContent = "Ingen tall er valgt ennå."; return; }
+  const when = d.valgtTid ? new Date(d.valgtTid).toLocaleString("nb-NO", {dateStyle:"short", timeStyle:"short"}) : "";
+  savedEl.innerHTML = `Valgt ${when}: <b>${d.navn}</b> · terskel ${fmt(d.tall.threshold,2)}, negativ vekt ${fmt(d.tall.negativeScale,2)}, tilnærming ${fmt(d.tall.approach,2)}, forsterkning ${fmt(d.tall.reinforce,2)} · ${d.oppfylt}/7 oppfylt.`;
+}
+(async () => {
+  let db = null;
+  try { db = window.claude && window.claude.use ? await window.claude.use("db") : null; } catch (e) { db = null; }
+  if (!db) { savedEl.textContent = "Valget kan ikke lagres i denne visningen. Skriv tallene til Losen i chatten."; render(); return; }
+  dbRef = db.doc("valg/gjeldende");
+  dbRef.onSnapshot(s => showSaved(s.exists ? s.data() : null), () => { savedEl.textContent = "Klarte ikke å lese det lagrede valget."; });
+  render();
+})();
+document.getElementById("save").addEventListener("click", async () => {
+  if (!dbRef) return;
+  const btn = document.getElementById("save"); btn.disabled = true; btn.textContent = "Lagrer …";
+  const res = GUESTS.map(g => judge(g, run(g, p)));
+  try {
+    await dbRef.set({navn: presetName === "C" ? "C · egne tall" : (presetName === "kode" ? "Foreløpige tall i koden" : presetName + (presetName === "A" ? " · Anbefalt" : " · terskel 0,02")),
+      tall: {...p}, oppfylt: res.filter(x => x.ok).length, rodeFlagg: res.filter(x => x.rodt).length,
+      kommentar: document.getElementById("note").value.trim(), valgtTid: new Date().toISOString()});
+    btn.textContent = "Valgt";
+    setTimeout(() => { btn.textContent = "Velg disse tallene"; btn.disabled = !isMonotone(p); }, 1600);
+  } catch (e) {
+    btn.textContent = "Velg disse tallene"; btn.disabled = false;
+    savedEl.textContent = "Valget ble ikke lagret (" + (e && e.code ? e.code : "ukjent feil") + "). Prøv igjen, eller skriv tallene til Losen i chatten.";
+  }
+});
+render();
+</script>

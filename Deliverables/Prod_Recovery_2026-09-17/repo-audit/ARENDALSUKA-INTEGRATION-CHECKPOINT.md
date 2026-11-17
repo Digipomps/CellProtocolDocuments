@@ -1,0 +1,9 @@
+# Arendalsuka integration checkpoint — 2026-09-18T12:38:14.234459+00:00
+
+Butler PR249 merged after exact CI35340192540 SUCCESS. Actual main e3ae9fc0526e3582128a0ae88ab2d93d5bd5f2d8 has the tested candidate tree. Main image release35344266565 is active; publication verifier12947 follows it. No new container deployment yet. Last public staging/production verification at12:09UTC was87256f9a.
+
+Arendalsuka PR250 is published at7a585b82fabb8edb3dde31cf0753d9663d54a458, rebased onto Butler main. Full Linux build and189 tests passed, with all10 suite processes exit0; log logs/arendalsuka-main-integration.log.11Node tests and coverage/literal/diff guards passed;55pins unchanged. Four actual browser stories passed in1.2min against /health/build proving this exact SHA: rich profile desktop/mobile persistence plus3existing Butler stories. Log logs/arendalsuka-main-integration-browser.log. Owned synthetic server/container haven-arendalsuka-main-integration-proof stopped. CI35345494062 is followed by native watcher8775. Clean source, no diagnostic prints. Earlier Atlas timeout remains unexplained; later full runs passed, including this integration.
+
+CP optional NavigationBar icon work now in isolated CellProtocol-navigation-icons branch codex/prod-navigation-icons-20260918, based onmainb5b7282b with oldbcd45de cherry-picked asa2096c8. Local additions preserve text-only size/accessibility, test legacy encoding/actionbindings/invalidtypes, document the wire field. Full native managed-cache build/test is active4411, log cellprotocol-navigation-icons-tests.log. Do not edit while it runs. No CP PR/pin update yet.
+
+Remaining feature commits are listed in RELEASE-NEXT-STEPS.md. Do not replace current identity or bilateral-consent contracts with the older participant-chat implementation. Preserve original dirty trees and stashes.

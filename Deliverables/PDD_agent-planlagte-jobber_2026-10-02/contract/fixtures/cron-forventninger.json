@@ -1,0 +1,573 @@
+{
+  "schema": "haven.scheduled-job-cron-fixtures.v1",
+  "beskrivelse": "Forventede tidspunkt (UTC) for cron-uttrykk i en navngitt tidssone. Laget med contract/cron_reference.py og kontrollert med en uavhengig framgangsmåte (minutt for minutt i UTC). `after` er eksklusiv, `until` er inklusiv. Brukes av T1.",
+  "gyldige": [
+    {
+      "name": "klokkeslett som ikke finnes kjøres rett etter hoppet (28.03.2027)",
+      "cron": "30 2 28 3 *",
+      "timeZone": "Europe/Oslo",
+      "after": "2027-01-01T00:00:00Z",
+      "expect": [
+        "2027-03-28T01:00:00Z",
+        "2028-03-28T00:30:00Z"
+      ],
+      "grunnlag": "resonnert for hånd"
+    },
+    {
+      "name": "første klokkeslett etter hoppet er uberørt",
+      "cron": "30 3 28 3 *",
+      "timeZone": "Europe/Oslo",
+      "after": "2027-01-01T00:00:00Z",
+      "expect": [
+        "2027-03-28T01:30:00Z"
+      ],
+      "grunnlag": "resonnert for hånd"
+    },
+    {
+      "name": "klokkeslett som finnes to ganger kjøres én gang (25.10.2026)",
+      "cron": "30 2 25 10 *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-01T00:00:00Z",
+      "expect": [
+        "2026-10-25T00:30:00Z",
+        "2027-10-25T00:30:00Z"
+      ],
+      "grunnlag": "resonnert for hånd"
+    },
+    {
+      "name": "hvert minutt over skiftet til vintertid",
+      "cron": "* * * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-25T00:57:00Z",
+      "expect": [
+        "2026-10-25T00:58:00Z",
+        "2026-10-25T00:59:00Z",
+        "2026-10-25T01:00:00Z",
+        "2026-10-25T01:01:00Z",
+        "2026-10-25T01:02:00Z"
+      ],
+      "grunnlag": "resonnert for hånd"
+    },
+    {
+      "name": "hvert minutt over skiftet til sommertid",
+      "cron": "* * * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2027-03-28T00:58:00Z",
+      "expect": [
+        "2027-03-28T00:59:00Z",
+        "2027-03-28T01:00:00Z",
+        "2027-03-28T01:01:00Z"
+      ],
+      "grunnlag": "resonnert for hånd"
+    },
+    {
+      "name": "løpende uttrykk kjører ikke i timen som ikke finnes",
+      "cron": "*/10 2 * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2027-03-27T23:00:00Z",
+      "expect": [
+        "2027-03-29T00:00:00Z",
+        "2027-03-29T00:10:00Z"
+      ],
+      "grunnlag": "resonnert for hånd"
+    },
+    {
+      "name": "fristvarselet kl. 09:00 følger lokal tid over skiftet",
+      "cron": "0 9 * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-23T00:00:00Z",
+      "expect": [
+        "2026-10-23T07:00:00Z",
+        "2026-10-24T07:00:00Z",
+        "2026-10-25T08:00:00Z",
+        "2026-10-26T08:00:00Z"
+      ],
+      "grunnlag": "resonnert for hånd"
+    },
+    {
+      "name": "hverdager kl. 02:00",
+      "cron": "0 2 * * 1-5",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-08T22:00:00Z",
+      "expect": [
+        "2026-10-09T00:00:00Z",
+        "2026-10-12T00:00:00Z",
+        "2026-10-13T00:00:00Z"
+      ],
+      "grunnlag": "resonnert for hånd"
+    },
+    {
+      "name": "skuddårsdag finnes innen åtte år",
+      "cron": "0 0 29 2 *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-01-01T00:00:00Z",
+      "expect": [
+        "2028-02-28T23:00:00Z"
+      ],
+      "grunnlag": "resonnert for hånd"
+    },
+    {
+      "name": "søndag som 0",
+      "cron": "0 12 * * 0",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-01T00:00:00Z",
+      "expect": [
+        "2026-10-04T10:00:00Z",
+        "2026-10-11T10:00:00Z",
+        "2026-10-18T10:00:00Z"
+      ],
+      "grunnlag": "regnet ut av referansen"
+    },
+    {
+      "name": "søndag som 7",
+      "cron": "0 12 * * 7",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-01T00:00:00Z",
+      "expect": [
+        "2026-10-04T10:00:00Z",
+        "2026-10-11T10:00:00Z",
+        "2026-10-18T10:00:00Z"
+      ],
+      "grunnlag": "regnet ut av referansen"
+    },
+    {
+      "name": "dag i måneden eller ukedag",
+      "cron": "0 0 13 * 5",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-11-01T00:00:00Z",
+      "expect": [
+        "2026-11-05T23:00:00Z",
+        "2026-11-12T23:00:00Z",
+        "2026-11-19T23:00:00Z",
+        "2026-11-26T23:00:00Z",
+        "2026-12-03T23:00:00Z"
+      ],
+      "grunnlag": "regnet ut av referansen"
+    },
+    {
+      "name": "lister, områder og steg",
+      "cron": "5,35 8-10/2 * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-02T00:00:00Z",
+      "expect": [
+        "2026-10-02T06:05:00Z",
+        "2026-10-02T06:35:00Z",
+        "2026-10-02T08:05:00Z",
+        "2026-10-02T08:35:00Z",
+        "2026-10-03T06:05:00Z"
+      ],
+      "grunnlag": "regnet ut av referansen"
+    },
+    {
+      "name": "to faste klokkeslett i hoppet gir én kjøring",
+      "cron": "0,30 2 28 3 *",
+      "timeZone": "Europe/Oslo",
+      "after": "2027-01-01T00:00:00Z",
+      "expect": [
+        "2027-03-28T01:00:00Z",
+        "2028-03-28T00:00:00Z"
+      ],
+      "grunnlag": "regnet ut av referansen"
+    },
+    {
+      "name": "fast time med løpende minutt kjører i begge timene",
+      "cron": "*/10 2 25 10 *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-01T00:00:00Z",
+      "expect": [
+        "2026-10-25T00:00:00Z",
+        "2026-10-25T00:10:00Z",
+        "2026-10-25T00:20:00Z",
+        "2026-10-25T00:30:00Z",
+        "2026-10-25T00:40:00Z",
+        "2026-10-25T00:50:00Z",
+        "2026-10-25T01:00:00Z",
+        "2026-10-25T01:10:00Z",
+        "2026-10-25T01:20:00Z",
+        "2026-10-25T01:30:00Z",
+        "2026-10-25T01:40:00Z",
+        "2026-10-25T01:50:00Z"
+      ],
+      "grunnlag": "regnet ut av referansen"
+    },
+    {
+      "name": "annen sone: New York over skiftet 01.11.2026",
+      "cron": "30 1 1 11 *",
+      "timeZone": "America/New_York",
+      "after": "2026-10-01T00:00:00Z",
+      "expect": [
+        "2026-11-01T05:30:00Z"
+      ],
+      "grunnlag": "regnet ut av referansen"
+    },
+    {
+      "name": "UTC har ingen skift",
+      "cron": "0 0 * * *",
+      "timeZone": "UTC",
+      "after": "2026-10-24T12:00:00Z",
+      "expect": [
+        "2026-10-25T00:00:00Z",
+        "2026-10-26T00:00:00Z"
+      ],
+      "grunnlag": "regnet ut av referansen"
+    },
+    {
+      "name": "stjerne sist i lista gir også løpende uttrykk",
+      "cron": "5,*/10 2 25 10 *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-24T22:00:00Z",
+      "expect": [
+        "2026-10-25T00:00:00Z",
+        "2026-10-25T00:05:00Z",
+        "2026-10-25T00:10:00Z",
+        "2026-10-25T00:20:00Z",
+        "2026-10-25T00:30:00Z",
+        "2026-10-25T00:40:00Z",
+        "2026-10-25T00:50:00Z",
+        "2026-10-25T01:00:00Z",
+        "2026-10-25T01:05:00Z",
+        "2026-10-25T01:10:00Z",
+        "2026-10-25T01:20:00Z",
+        "2026-10-25T01:30:00Z",
+        "2026-10-25T01:40:00Z",
+        "2026-10-25T01:50:00Z"
+      ],
+      "grunnlag": "regnet ut av referansen og kontrollert minutt for minutt"
+    },
+    {
+      "name": "stjerne først i lista: samme tidspunkt som over",
+      "cron": "*/10,5 2 25 10 *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-24T22:00:00Z",
+      "expect": [
+        "2026-10-25T00:00:00Z",
+        "2026-10-25T00:05:00Z",
+        "2026-10-25T00:10:00Z",
+        "2026-10-25T00:20:00Z",
+        "2026-10-25T00:30:00Z",
+        "2026-10-25T00:40:00Z",
+        "2026-10-25T00:50:00Z",
+        "2026-10-25T01:00:00Z",
+        "2026-10-25T01:05:00Z",
+        "2026-10-25T01:10:00Z",
+        "2026-10-25T01:20:00Z",
+        "2026-10-25T01:30:00Z",
+        "2026-10-25T01:40:00Z",
+        "2026-10-25T01:50:00Z"
+      ],
+      "grunnlag": "regnet ut av referansen og kontrollert minutt for minutt"
+    },
+    {
+      "name": "to faste timer rundt hoppet gir én kjøring 28.03.2027",
+      "cron": "0 2,3 28 3 *",
+      "timeZone": "Europe/Oslo",
+      "after": "2027-01-01T00:00:00Z",
+      "expect": [
+        "2027-03-28T01:00:00Z",
+        "2028-03-28T00:00:00Z"
+      ],
+      "grunnlag": "regnet ut av referansen og kontrollert minutt for minutt"
+    },
+    {
+      "name": "etter er strengt, også med sekunder",
+      "cron": "* * * * *",
+      "timeZone": "UTC",
+      "after": "2026-10-24T00:00:30Z",
+      "expect": [
+        "2026-10-24T00:01:00Z",
+        "2026-10-24T00:02:00Z"
+      ],
+      "grunnlag": "regnet ut av referansen og kontrollert minutt for minutt"
+    },
+    {
+      "name": "etter lik et tidspunkt tar det neste",
+      "cron": "0 9 * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-23T07:00:00Z",
+      "expect": [
+        "2026-10-24T07:00:00Z"
+      ],
+      "grunnlag": "regnet ut av referansen og kontrollert minutt for minutt"
+    }
+  ],
+  "tellinger": [
+    {
+      "name": "120 minutter mellom 00:00Z og 02:00Z ved vintertid",
+      "cron": "* * * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-24T23:59:00Z",
+      "until": "2026-10-25T01:59:00Z",
+      "count": 120
+    },
+    {
+      "name": "120 minutter mellom 00:00Z og 02:00Z ved sommertid",
+      "cron": "* * * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2027-03-27T23:59:00Z",
+      "until": "2027-03-28T01:59:00Z",
+      "count": 120
+    },
+    {
+      "name": "fast klokkeslett 02:30 gir én kjøring 25.10.2026",
+      "cron": "30 2 * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-24T22:00:00Z",
+      "until": "2026-10-25T22:00:00Z",
+      "count": 1
+    },
+    {
+      "name": "fast klokkeslett 02:30 gir én kjøring 28.03.2027",
+      "cron": "30 2 * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2027-03-27T23:00:00Z",
+      "until": "2027-03-28T22:00:00Z",
+      "count": 1
+    },
+    {
+      "name": "løpende i time 2 gir tolv kjøringer 25.10.2026",
+      "cron": "*/10 2 * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-24T22:00:00Z",
+      "until": "2026-10-25T22:00:00Z",
+      "count": 12
+    },
+    {
+      "name": "løpende i time 2 gir ingen kjøring 28.03.2027",
+      "cron": "*/10 2 * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2027-03-27T23:00:00Z",
+      "until": "2027-03-28T22:00:00Z",
+      "count": 0
+    },
+    {
+      "name": "0-59 i minuttfeltet er fast: 60 kjøringer 25.10.2026",
+      "cron": "0-59 2 * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-24T22:00:00Z",
+      "until": "2026-10-25T22:00:00Z",
+      "count": 60
+    },
+    {
+      "name": "* i minuttfeltet er løpende: 120 kjøringer 25.10.2026",
+      "cron": "* 2 * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-24T22:00:00Z",
+      "until": "2026-10-25T22:00:00Z",
+      "count": 120
+    },
+    {
+      "name": "0-59 i minuttfeltet, timen som ikke finnes: én kjøring 28.03.2027",
+      "cron": "0-59 2 * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2027-03-27T23:00:00Z",
+      "until": "2027-03-28T22:00:00Z",
+      "count": 1
+    },
+    {
+      "name": "stjerne hvor som helst i lista: 14 kjøringer 25.10.2026",
+      "cron": "5,*/10 2 * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-24T22:00:00Z",
+      "until": "2026-10-25T22:00:00Z",
+      "count": 14
+    },
+    {
+      "name": "to faste timer rundt hoppet: én kjøring 28.03.2027",
+      "cron": "0 2,3 * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2027-03-27T23:00:00Z",
+      "until": "2027-03-28T22:00:00Z",
+      "count": 1
+    },
+    {
+      "name": "løpende timefelt: 13 kjøringer døgnet time 2 kommer to ganger (25.10.2026)",
+      "cron": "30 */2 * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-24T21:59:00Z",
+      "until": "2026-10-25T22:59:00Z",
+      "count": 13
+    },
+    {
+      "name": "løpende timefelt: 11 kjøringer døgnet time 2 mangler (28.03.2027)",
+      "cron": "30 */2 * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2027-03-27T22:59:00Z",
+      "until": "2027-03-28T21:59:00Z",
+      "count": 11
+    },
+    {
+      "name": "fast timefelt med de samme timene: 12 kjøringer 25.10.2026",
+      "cron": "30 0-23/2 * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-24T21:59:00Z",
+      "until": "2026-10-25T22:59:00Z",
+      "count": 12
+    },
+    {
+      "name": "fast timefelt med de samme timene: 12 kjøringer 28.03.2027, den som mangler går kl. 03:00",
+      "cron": "30 0-23/2 * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2027-03-27T22:59:00Z",
+      "until": "2027-03-28T21:59:00Z",
+      "count": 12
+    }
+  ],
+  "ugyldige": [
+    {
+      "cron": "0 0 31 2 *",
+      "timeZone": "Europe/Oslo",
+      "hvorfor": "ingen 31. februar: ingen tidspunkt innen åtte år"
+    },
+    {
+      "cron": "0 0 30 2 *",
+      "timeZone": "Europe/Oslo",
+      "hvorfor": "ingen 30. februar"
+    },
+    {
+      "cron": "60 * * * *",
+      "timeZone": "Europe/Oslo",
+      "hvorfor": "minutt utenfor 0-59"
+    },
+    {
+      "cron": "* 24 * * *",
+      "timeZone": "Europe/Oslo",
+      "hvorfor": "time utenfor 0-23"
+    },
+    {
+      "cron": "* * * *",
+      "timeZone": "Europe/Oslo",
+      "hvorfor": "fire felt"
+    },
+    {
+      "cron": "* * * * * *",
+      "timeZone": "Europe/Oslo",
+      "hvorfor": "seks felt"
+    },
+    {
+      "cron": "0 0 * * 8",
+      "timeZone": "Europe/Oslo",
+      "hvorfor": "ukedag utenfor 0-7"
+    },
+    {
+      "cron": "*/0 * * * *",
+      "timeZone": "Europe/Oslo",
+      "hvorfor": "steg 0"
+    },
+    {
+      "cron": "5-2 * * * *",
+      "timeZone": "Europe/Oslo",
+      "hvorfor": "område baklengs"
+    },
+    {
+      "cron": "5/2 * * * *",
+      "timeZone": "Europe/Oslo",
+      "hvorfor": "steg uten område"
+    },
+    {
+      "cron": "@daily",
+      "timeZone": "Europe/Oslo",
+      "hvorfor": "makroer støttes ikke"
+    },
+    {
+      "cron": "0 0 1 JAN *",
+      "timeZone": "Europe/Oslo",
+      "hvorfor": "navn støttes ikke"
+    },
+    {
+      "cron": "0 0 * * MON",
+      "timeZone": "Europe/Oslo",
+      "hvorfor": "navn støttes ikke"
+    },
+    {
+      "cron": "0,,5 * * * *",
+      "timeZone": "Europe/Oslo",
+      "hvorfor": "tomt ledd"
+    },
+    {
+      "cron": "0 9 * * *",
+      "timeZone": "Europe/Olso",
+      "hvorfor": "ukjent tidssone"
+    },
+    {
+      "cron": "0 9 * * *",
+      "timeZone": "",
+      "hvorfor": "tom tidssone"
+    },
+    {
+      "cron": "0 9 * * *",
+      "timeZone": "CET",
+      "hvorfor": "forkortelser og eldre navn uten skråstrek støttes ikke"
+    },
+    {
+      "cron": "0 9 * * *",
+      "timeZone": "GMT+2",
+      "hvorfor": "avstand til GMT er ikke et sonenavn"
+    }
+  ],
+  "korteste-avstand": [
+    {
+      "cron": "*/15 * * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-01T00:00:00Z",
+      "until": "2026-10-31T00:00:00Z",
+      "seconds": 900.0,
+      "hvorfor": "kvarter"
+    },
+    {
+      "cron": "*/5 * * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-01T00:00:00Z",
+      "until": "2026-10-31T00:00:00Z",
+      "seconds": 300.0,
+      "hvorfor": "for ofte"
+    },
+    {
+      "cron": "0,10 * * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-01T00:00:00Z",
+      "until": "2026-10-31T00:00:00Z",
+      "seconds": 600.0,
+      "hvorfor": "for ofte"
+    },
+    {
+      "cron": "0 * * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-01T00:00:00Z",
+      "until": "2026-10-31T00:00:00Z",
+      "seconds": 3600.0,
+      "hvorfor": "hver time"
+    },
+    {
+      "cron": "0 9 * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-01T00:00:00Z",
+      "until": "2026-10-31T00:00:00Z",
+      "seconds": 86400.0,
+      "hvorfor": "vintertidsskiftet gir 25 timer, aldri under 24"
+    },
+    {
+      "cron": "0 9 * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2027-03-01T00:00:00Z",
+      "until": "2027-03-31T00:00:00Z",
+      "seconds": 82800.0,
+      "hvorfor": "sommertidsskiftet gir 23 timer"
+    },
+    {
+      "cron": "10 2,3 * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2026-10-01T00:00:00Z",
+      "until": "2026-10-31T00:00:00Z",
+      "seconds": 3600.0,
+      "hvorfor": "levetiden går ikke over hoppet: godtas"
+    },
+    {
+      "cron": "10 2,3 * * *",
+      "timeZone": "Europe/Oslo",
+      "after": "2027-03-01T00:00:00Z",
+      "until": "2027-03-31T00:00:00Z",
+      "seconds": 600.0,
+      "hvorfor": "levetiden går over hoppet 28.03: 02:10 flyttes til 03:00, og 03:10 er ti minutter etter"
+    }
+  ]
+}

@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HAVEN Ark — prototype</title>
+<style>
+:root{
+  --bg:#EFEFF4; --card:#fff; --ink:#11131A; --ink2:#3F4654; --mut:#6B7280; --mut2:#8A91A0;
+  --line:#E6E8EE; --line2:#EDEFF3; --sel:#1D4ED8; --selbg:#E8EFFE; --selbg2:#DCE7FD;
+  --pend:#FFFBEB; --pendline:#FDE68A; --pendink:#78350F; --hdr:#F7F8FA;
+  --row:28px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,"SF Pro Text","Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;overflow:hidden}
+
+header{padding:14px 20px 12px;border-bottom:1px solid var(--line);background:var(--card);flex:0 0 auto}
+h1{font-size:16px;font-weight:650;letter-spacing:-.2px}
+header .sub{font-size:12.5px;color:var(--mut);margin-top:2px}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:11px}
+.btn{border:1px solid #D6DAE3;background:#fff;color:#29303D;border-radius:8px;padding:6px 11px;font-size:12.5px;font-weight:550;cursor:pointer}
+.btn:hover{background:#F7F8FA}
+.btn.pri{background:#1F2937;color:#fff;border-color:#1F2937}
+.btn.pri:hover{background:#333d4e}
+.btn.warn{background:#FEF3C7;border-color:#FDE68A;color:var(--pendink)}
+.spacer{flex:1}
+.count{font-size:12px;color:var(--mut2);font-variant-numeric:tabular-nums}
+
+/* ---- sheet shell ---- */
+.wrap{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;background:var(--card)}
+.corner-and-head{display:flex;flex:0 0 auto;border-bottom:1px solid #D6DAE3;background:var(--hdr);position:relative;z-index:3}
+.headscroll{overflow:hidden;flex:1 1 auto}
+.headinner{display:flex;height:var(--row)}
+.frozen-head{display:flex;height:var(--row);border-right:1px solid #B9C0CE;background:var(--hdr);flex:0 0 auto;position:relative;z-index:4;box-shadow:3px 0 6px -3px rgba(17,19,26,.16)}
+
+.body{flex:1 1 auto;min-height:0;display:flex;position:relative}
+.frozen-col{overflow:hidden;flex:0 0 auto;border-right:1px solid #B9C0CE;background:#FCFCFD;position:relative;z-index:2;box-shadow:3px 0 6px -3px rgba(17,19,26,.16)}
+.scrollarea{overflow:auto;flex:1 1 auto;position:relative}
+.canvas{position:relative}
+.rowsholder{position:absolute;left:0;top:0;right:0;will-change:transform}
+
+.cell{height:var(--row);line-height:calc(var(--row) - 1px);padding:0 8px;border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);
+  font-size:12.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 0 auto;background:#fff;cursor:cell}
+.cell.num{text-align:right;font-variant-numeric:tabular-nums;font-family:"SF Mono",ui-monospace,Menlo,monospace;font-size:12px}
+.cell.mono{font-family:"SF Mono",ui-monospace,Menlo,monospace;font-size:12px;color:#1D4ED8}
+.cell.zebra{background:#FCFCFD}
+.cell.sel{background:var(--selbg);box-shadow:inset 0 0 0 1px var(--sel)}
+.cell.inrange{background:var(--selbg2)}
+.cell.pending{background:var(--pend);box-shadow:inset 0 0 0 1px var(--pendline)}
+.cell.pending::after{content:"";position:absolute}
+.rowline{display:flex;position:absolute;left:0}
+.rowhead{height:var(--row);line-height:calc(var(--row) - 1px);padding:0 8px;border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);
+  font-size:11.5px;color:var(--mut2);text-align:right;font-variant-numeric:tabular-nums;background:#FCFCFD;flex:0 0 auto}
+.rowhead.sel{background:#EAF0FE;color:#1D4ED8;font-weight:650}
+
+.hcell{height:var(--row);line-height:calc(var(--row) - 1px);padding:0 8px;border-right:1px solid #D6DAE3;font-size:11px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;color:var(--mut2);white-space:nowrap;overflow:hidden;flex:0 0 auto;position:relative;user-select:none}
+.hcell .grip{position:absolute;top:0;right:-3px;width:7px;height:100%;cursor:col-resize;z-index:5}
+.hcell .grip:hover{background:rgba(29,78,216,.25)}
+.hcell.act{color:#1D4ED8;background:#EAF0FE}
+
+.editor{position:absolute;z-index:9;border:2px solid var(--sel);background:#fff;font:12.5px/1 -apple-system,"SF Pro Text",sans-serif;padding:0 7px;outline:none;border-radius:2px}
+
+/* ---- status + inspector ---- */
+footer{flex:0 0 auto;border-top:1px solid var(--line);background:var(--card);padding:8px 20px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;font-size:11.5px;color:var(--mut)}
+footer b{color:var(--ink2);font-weight:650;font-variant-numeric:tabular-nums}
+.dot{width:6px;height:6px;border-radius:99px;background:#22C55E;display:inline-block;margin-right:5px}
+
+.panel{position:fixed;right:0;top:0;bottom:0;width:430px;max-width:90vw;background:var(--card);border-left:1px solid var(--line);
+  box-shadow:-8px 0 30px rgba(0,0,0,.08);padding:20px;overflow:auto;transform:translateX(100%);transition:transform .22s ease;z-index:20}
+.panel.open{transform:none}
+.panel h2{font-size:14px;font-weight:650;margin-bottom:3px}
+.panel .ph{font-size:12.5px;color:var(--mut);margin-bottom:16px}
+.panel h3{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mut2);margin:18px 0 8px}
+.panel p{font-size:12.5px;color:var(--ink2);line-height:1.55;margin-bottom:9px}
+pre{background:#F7F8FA;border:1px solid var(--line);border-radius:9px;padding:12px;font:10.5px/1.5 "SF Mono",ui-monospace,Menlo,monospace;
+  color:#29303D;overflow-x:auto;white-space:pre}
+.closex{position:absolute;right:16px;top:16px;border:none;background:#F1F2F6;border-radius:7px;width:26px;height:26px;cursor:pointer;color:#4B5261;font-size:14px}
+.pendlist{border:1px solid var(--pendline);background:var(--pend);border-radius:10px;padding:11px 13px;font-size:12.5px;color:var(--pendink);line-height:1.5}
+.pendlist .it{font-family:"SF Mono",ui-monospace,Menlo,monospace;font-size:11.5px;margin-top:6px}
+.empty{color:var(--mut);font-size:12.5px;border:1px dashed #D6DAE3;border-radius:10px;padding:14px;text-align:center;background:#FAFBFC}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>HAVEN Ark — virtualisert tabell, prototype</h1>
+  <div class="sub">Ikke en flate i Binding. Dette er en kjørende modell av interaksjonen og datakontrakten, for å avgjøre formatet før noe skrives i Swift.</div>
+  <div class="toolbar">
+    <button class="btn" id="b1k">1 000 rader</button>
+    <button class="btn" id="b50k">50 000 rader</button>
+    <button class="btn" id="b250k">250 000 rader</button>
+    <button class="btn" id="bautofit">Tilpass bredde</button>
+    <button class="btn" id="bfreeze">Lås 1 kolonne</button>
+    <span class="spacer"></span>
+    <span class="count" id="pendcount"></span>
+    <button class="btn warn" id="bpend">Forslag</button>
+    <button class="btn pri" id="bspec">Datakontrakt</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="corner-and-head">
+    <div class="frozen-head" id="frozenHead"></div>
+    <div class="headscroll" id="headScroll"><div class="headinner" id="headInner"></div></div>
+  </div>
+  <div class="body">
+    <div class="frozen-col" id="frozenCol"><div class="canvas" id="frozenCanvas"><div class="rowsholder" id="frozenRows"></div></div></div>
+    <div class="scrollarea" id="scroll"><div class="canvas" id="canvas"><div class="rowsholder" id="rows"></div></div></div>
+  </div>
+</div>
+
+<footer>
+  <span><span class="dot"></span>Rader totalt <b id="sTotal">0</b></span>
+  <span>Vindu hentet fra cellen <b id="sWindow">–</b></span>
+  <span>Celler i DOM <b id="sDom">0</b></span>
+  <span>Tegnetid <b id="sFrame">–</b></span>
+  <span>Merket <b id="sSel">–</b></span>
+  <span class="spacer"></span>
+  <span>Piltaster flytter · Enter/dobbeltklikk redigerer · Shift+klikk merker område · dra i kolonnekanten</span>
+</footer>
+
+<div class="panel" id="panelSpec">
+  <button class="closex" data-close="panelSpec">×</button>
+  <h2>Datakontrakten</h2>
+  <div class="ph">Det avgjørende valget er ikke hvordan rutenettet tegnes, men hvordan radene hentes.</div>
+
+  <h3>Slik er det i dag</h3>
+  <p><code>SkeletonGrid.getItems()</code> gjør ett kall og forventer hele lista tilbake
+  (<code>SkeletonDescription.swift:2372</code>). <code>SkeletonList.elements</code> er også en hel
+  <code>ValueTypeList</code>. Det finnes ingen offset, ingen grense, ingen markør. Et ark med 250 000 rader
+  betyr 250 000 <code>ValueType</code>-objekter i minnet før første rad vises.</p>
+
+  <h3>Forslaget</h3>
+  <p>Rendereren ber om det vinduet den faktisk skal tegne, og cellen svarer med akkurat det.
+  Samme mønster som <code>selectionActionKeypath</code> allerede bruker: skjelettet kaller ingen funksjon,
+  det leser en keypath og fyrer av en handling.</p>
+  <pre id="specjson"></pre>
+  <p>Cellen eier dermed sidepolitikken, og det er riktig sted: bare cellen vet om dataene ligger lokalt,
+  ligger hos en annen entitet, eller er et levende søk.</p>
+
+  <h3>Bredder er tilstand, ikke måling</h3>
+  <p>Dette er grepet som gjør resten mulig. SwiftUI-ens <code>Grid</code> måler alle barna sine for å finne
+  kolonnebredden — den kan ikke brukes her uansett hvor pen den er. Regneark gjør det motsatte: bredden er
+  en lagret verdi brukeren drar i, og «tilpass bredde» er en eksplisitt handling som ser på de radene som
+  allerede er hentet. Da trengs ingen måling, og <code>LazyVStack</code> kan holde seg lat.</p>
+
+  <h3>En redigering er et forslag</h3>
+  <p>Når arket står over entitetsdata, er en celleendring en mutasjon av entitetsdata. Da gjelder regelen
+  fra <code>PDD_entitetsdata-egen-kontroll</code>: arket foreslår, eieren signerer. Prøv å redigere en celle —
+  endringen blir stående gul til den er signert. Over data som ikke er entitetsdata skriver arket rett.</p>
+</div>
+
+<div class="panel" id="panelPend">
+  <button class="closex" data-close="panelPend">×</button>
+  <h2>Foreslåtte endringer</h2>
+  <div class="ph">Ingenting er skrevet. Hver rad her er et forslag som venter på din signatur.</div>
+  <div id="pendbody"></div>
+</div>
+
+<script>
+/* ============================================================
+   Kolonner. Bredde er tilstand — ikke noe som måles fra innhold.
+   ============================================================ */
+const COLS = [
+  {key:'navn',   label:'Navn',            w:150, kind:'text'},
+  {key:'epost',  label:'E-post',          w:190, kind:'mono'},
+  {key:'tlf',    label:'Telefon',         w:105, kind:'num'},
+  {key:'gruppe', label:'Gruppe',          w:120, kind:'text'},
+  {key:'rolle',  label:'Rolle i kontekst',w:145, kind:'text'},
+  {key:'siden',  label:'Relasjon siden',  w:124, kind:'num'},
+  {key:'kilde',  label:'Kilde',           w:120, kind:'text'},
+  {key:'bekr',   label:'Bekreftet',       w:92,  kind:'text'},
+  {key:'moter',  label:'Møter',           w:62,  kind:'num'},
+  {key:'sist',   label:'Sist kontakt',    w:100, kind:'num'},
+  {key:'vei',    label:'Nærmeste vei',    w:165, kind:'text'},
+  {key:'ledd',   label:'Ledd',            w:56,  kind:'num'},
+  {key:'domene', label:'IdentityDomain',  w:158, kind:'mono'},
+  {key:'avtale', label:'Avtale',          w:130, kind:'text'},
+  {key:'formaal',label:'Formål',          w:175, kind:'mono'},
+  {key:'utlop',  label:'Utløper',         w:100, kind:'num'},
+  {key:'felt',   label:'Delte felt',      w:78,  kind:'num'},
+  {key:'sync',   label:'Synk mot kilde',  w:112, kind:'text'},
+  {key:'notat',  label:'Notat',           w:210, kind:'text'},
+  {key:'endret', label:'Sist endret',     w:100, kind:'num'}
+];
+const ROWH = 28, ROWHEADW = 58, OVERSCAN = 8;
+
+/* ============================================================
+   En simulert celle bak keypathen. Den svarer bare på vinduer.
+   Poenget er at den ALDRI leverer hele settet.
+   ============================================================ */
+const FORNAVN=['Vegar','Victoria','Kjetil','Ingrid','Anders','Marit','Håkon','Silje','Tor','Astrid','Jonas','Kari','Emil','Nora','Sindre','Liv','Rune','Hanne','Bjørn','Elin'];
+const ETTER=['Johansen','Berg','Lund','Haugen','Dahl','Moen','Aas','Solberg','Bakken','Nygård','Strand','Vik','Holm','Ruud','Eide','Fjeld'];
+const GRUPPE=['Bokprosjekt','Konferanse 2026','Familie','Digipomps','Nabolag','Styret','Fagnettverk'];
+const ROLLE=['medforfatter','fagfelle','redaktør','deltaker','arrangør','vert','gjest','korrekturleser'];
+const KILDE=['adressebok','nærhetsskann','introduksjon','register','visittkort'];
+const BEKR=['bekreftet','ubekreftet','påstand'];
+const AVTALE=['gjensidig v1','ensidig lese','utløpt','ingen'];
+const SYNC=['fra kilden','lokal kopi','avslått'];
+const VEI=['direkte','via Victoria K.','via Anders B.','via register (DiMy)','via Marit L.','ingen kjent vei'];
+
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function pick(r,arr){return arr[Math.floor(r()*arr.length)]}
+
+// Denne funksjonen er stand-in for cellen. Den får et vindu og gir et vindu.
+let FETCHES = 0, LASTWIN = '–';
+function fetchWindow(offset, limit){
+  FETCHES++;
+  const out = [];
+  const end = Math.min(offset+limit, STATE.total);
+  for(let i=offset;i<end;i++){
+    const r = mulberry(i*2654435761 % 2147483647);
+    const fn = pick(r,FORNAVN), en = pick(r,ETTER);
+    const yr = 2015 + Math.floor(r()*11);
+    out.push({
+      __i:i,
+      navn: fn+' '+en,
+      epost: (fn+'.'+en).toLowerCase().replace(/[æøå]/g,c=>({'æ':'ae','ø':'o','å':'a'}[c]))+'@'+pick(r,['gmail.com','dimy.io','uio.no','icloud.com','proton.me']),
+      tlf: '9'+String(Math.floor(r()*9000000)+1000000),
+      gruppe: pick(r,GRUPPE),
+      rolle: pick(r,ROLLE),
+      siden: yr+'-'+String(1+Math.floor(r()*12)).padStart(2,'0'),
+      kilde: pick(r,KILDE),
+      bekr: pick(r,BEKR),
+      moter: Math.floor(r()*40),
+      sist: (2026-Math.floor(r()*2))+'-'+String(1+Math.floor(r()*9)).padStart(2,'0')+'-'+String(1+Math.floor(r()*28)).padStart(2,'0'),
+      vei: pick(r,VEI),
+      ledd: 1+Math.floor(r()*3),
+      domene: pick(r,['bok.dimy.io','konf26.no','privat','styret.dimy.io']),
+      avtale: pick(r,AVTALE),
+      formaal: 'purpose://'+pick(r,['contact.introduction','contact.followup','event.participation','project-work.work-items']),
+      utlop: r()<.4 ? '—' : (2027+Math.floor(r()*2))+'-01-01',
+      felt: 2+Math.floor(r()*7),
+      sync: pick(r,SYNC),
+      notat: pick(r,['Delte telefonnummer med annen rad','Kom fra bokprosjektimporten','Bekreftet ved nærhetsskann','Avslo invitasjon 2026-04','—','Metadata hentet fra register']),
+      endret: '2026-0'+(1+Math.floor(r()*9))+'-1'+Math.floor(r()*9)
+    });
+  }
+  LASTWIN = offset+'–'+(end-1)+' ('+(end-offset)+' rader)';
+  return out;
+}
+
+/* ============================================================
+   Tilstand
+   ============================================================ */
+const STATE = {
+  total: 50000,
+  widths: COLS.map(c=>c.w),
+  frozen: 1,
+  cache: new Map(),     // offset-blokk -> rader
+  blockSize: 200,
+  sel: {r:0, c:0, r2:0, c2:0},
+  pending: new Map(),   // "r:c" -> {row, col, from, to}
+};
+
+function getRow(i){
+  const b = Math.floor(i/STATE.blockSize);
+  let blk = STATE.cache.get(b);
+  if(!blk){ blk = fetchWindow(b*STATE.blockSize, STATE.blockSize); STATE.cache.set(b, blk);
+    if(STATE.cache.size > 60){ const first = STATE.cache.keys().next().value; STATE.cache.delete(first); } }
+  return blk[i - b*STATE.blockSize];
+}
+
+/* ============================================================
+   Elementer
+   ============================================================ */
+const $ = s=>document.querySelector(s);
+const scroll=$('#scroll'), canvas=$('#canvas'), rowsHolder=$('#rows');
+const frozenColEl=$('#frozenCol'), frozenCanvas=$('#frozenCanvas'), frozenRows=$('#frozenRows');
+const headScroll=$('#headScroll'), headInner=$('#headInner'), frozenHead=$('#frozenHead');
+
+function frozenWidth(){ let w = ROWHEADW; for(let i=0;i<STATE.frozen;i++) w += STATE.widths[i]; return w; }
+function scrollWidth(){ let w=0; for(let i=STATE.frozen;i<COLS.length;i++) w += STATE.widths[i]; return w; }
+
+function buildHeads(){
+  frozenHead.innerHTML=''; headInner.innerHTML='';
+  const corner=document.createElement('div');
+  corner.className='hcell'; corner.style.width=ROWHEADW+'px'; corner.textContent='';
+  frozenHead.appendChild(corner);
+  COLS.forEach((c,i)=>{
+    const d=document.createElement('div');
+    d.className='hcell'; d.style.width=STATE.widths[i]+'px'; d.textContent=c.label; d.dataset.col=i;
+    const g=document.createElement('div'); g.className='grip'; g.dataset.grip=i; d.appendChild(g);
+    (i<STATE.frozen?frozenHead:headInner).appendChild(d);
+  });
+  frozenHead.style.width=frozenWidth()+'px';
+  frozenColEl.style.width=frozenWidth()+'px';
+  headInner.style.width=scrollWidth()+'px';
+  canvas.style.width=scrollWidth()+'px';
+}
+
+let domCells=0, lastFrame=0;
+function render(){
+  const t0=performance.now();
+  const top=scroll.scrollTop, h=scroll.clientHeight;
+  const first=Math.max(0, Math.floor(top/ROWH)-OVERSCAN);
+  const last=Math.min(STATE.total-1, Math.ceil((top+h)/ROWH)+OVERSCAN);
+
+  canvas.style.height=(STATE.total*ROWH)+'px';
+  frozenCanvas.style.height=(STATE.total*ROWH)+'px';
+  const offY=first*ROWH;
+  rowsHolder.style.transform='translateY('+offY+'px)';
+  frozenRows.style.transform='translateY('+offY+'px)';
+
+  const s=STATE.sel;
+  const r1=Math.min(s.r,s.r2), r2=Math.max(s.r,s.r2), c1=Math.min(s.c,s.c2), c2=Math.max(s.c,s.c2);
+
+  let a='', b='', n=0;
+  for(let i=first;i<=last;i++){
+    const row=getRow(i); if(!row) continue;
+    const zeb=(i%2)?' zebra':'';
+    // frozen part
+    b+='<div class="rowline" style="top:'+((i-first)*ROWH)+'px">';
+    b+='<div class="rowhead'+(i>=r1&&i<=r2?' sel':'')+'" style="width:'+ROWHEADW+'px">'+(i+1)+'</div>';
+    for(let c=0;c<STATE.frozen;c++) b+=cellHTML(row,i,c,zeb,r1,r2,c1,c2), n++;
+    b+='</div>';
+    // scrolling part
+    a+='<div class="rowline" style="top:'+((i-first)*ROWH)+'px">';
+    for(let c=STATE.frozen;c<COLS.length;c++) a+=cellHTML(row,i,c,zeb,r1,r2,c1,c2), n++;
+    a+='</div>';
+  }
+  rowsHolder.innerHTML=a; frozenRows.innerHTML=b;
+  domCells=n; lastFrame=performance.now()-t0;
+  status();
+}
+
+function cellHTML(row,i,c,zeb,r1,r2,c1,c2){
+  const col=COLS[c];
+  const key=i+':'+c;
+  const pend=STATE.pending.get(key);
+  let cls='cell'+zeb+(col.kind==='num'?' num':col.kind==='mono'?' mono':'');
+  const isCur=(i===STATE.sel.r && c===STATE.sel.c);
+  const inR=(i>=r1&&i<=r2&&c>=c1&&c<=c2);
+  if(pend) cls+=' pending'; else if(isCur) cls+=' sel'; else if(inR) cls+=' inrange';
+  const v=pend? pend.to : String(row[col.key]);
+  return '<div class="'+cls+'" style="width:'+STATE.widths[c]+'px" data-r="'+i+'" data-c="'+c+'">'+esc(v)+'</div>';
+}
+function esc(s){return String(s).replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
+
+function status(){
+  $('#sTotal').textContent=STATE.total.toLocaleString('nb-NO');
+  $('#sWindow').textContent=LASTWIN;
+  $('#sDom').textContent=domCells.toLocaleString('nb-NO');
+  $('#sFrame').textContent=lastFrame.toFixed(1)+' ms';
+  const s=STATE.sel;
+  const nr=Math.abs(s.r2-s.r)+1, nc=Math.abs(s.c2-s.c)+1;
+  $('#sSel').textContent = (nr*nc>1) ? (nr+'×'+nc+' celler') : ('rad '+(s.r+1)+', '+COLS[s.c].label);
+  const p=STATE.pending.size;
+  $('#pendcount').textContent = p? (p+' venter på signatur') : '';
+}
+
+/* ---- scroll sync ---- */
+scroll.addEventListener('scroll',()=>{
+  headScroll.scrollLeft=scroll.scrollLeft;
+  frozenColEl.scrollTop=scroll.scrollTop;
+  render();
+},{passive:true});
+
+/* ---- selection ---- */
+function onCellDown(e){
+  const t=e.target.closest('.cell'); if(!t) return;
+  const r=+t.dataset.r, c=+t.dataset.c;
+  if(e.shiftKey){ STATE.sel.r2=r; STATE.sel.c2=c; }
+  else { STATE.sel={r,c,r2:r,c2:c}; }
+  render();
+}
+scroll.addEventListener('mousedown',onCellDown);
+frozenColEl.addEventListener('mousedown',onCellDown);
+scroll.addEventListener('dblclick',e=>{const t=e.target.closest('.cell'); if(t) beginEdit(+t.dataset.r,+t.dataset.c);});
+frozenColEl.addEventListener('dblclick',e=>{const t=e.target.closest('.cell'); if(t) beginEdit(+t.dataset.r,+t.dataset.c);});
+
+window.addEventListener('keydown',e=>{
+  if(document.querySelector('.editor')) return;
+  const s=STATE.sel; let {r,c}=s; let moved=true;
+  if(e.key==='ArrowDown') r=Math.min(STATE.total-1,r+1);
+  else if(e.key==='ArrowUp') r=Math.max(0,r-1);
+  else if(e.key==='ArrowRight'||e.key==='Tab') c=Math.min(COLS.length-1,c+1);
+  else if(e.key==='ArrowLeft') c=Math.max(0,c-1);
+  else if(e.key==='PageDown') r=Math.min(STATE.total-1,r+30);
+  else if(e.key==='PageUp') r=Math.max(0,r-30);
+  else if(e.key==='Enter'){ beginEdit(s.r,s.c); e.preventDefault(); return; }
+  else moved=false;
+  if(!moved) return;
+  e.preventDefault();
+  if(e.shiftKey){ s.r2=r; s.c2=c; } else { STATE.sel={r,c,r2:r,c2:c}; }
+  ensureVisible(r,c); render();
+});
+
+function ensureVisible(r,c){
+  const y=r*ROWH;
+  if(y<scroll.scrollTop) scroll.scrollTop=y;
+  else if(y+ROWH>scroll.scrollTop+scroll.clientHeight) scroll.scrollTop=y+ROWH-scroll.clientHeight;
+  if(c>=STATE.frozen){
+    let x=0; for(let i=STATE.frozen;i<c;i++) x+=STATE.widths[i];
+    if(x<scroll.scrollLeft) scroll.scrollLeft=x;
+    else if(x+STATE.widths[c]>scroll.scrollLeft+scroll.clientWidth) scroll.scrollLeft=x+STATE.widths[c]-scroll.clientWidth;
+  }
+}
+
+/* ---- editing = a proposal, never a write ---- */
+function beginEdit(r,c){
+  const host = c<STATE.frozen ? frozenColEl : scroll;
+  const el = host.querySelector('.cell[data-r="'+r+'"][data-c="'+c+'"]');
+  if(!el) return;
+  const rect=el.getBoundingClientRect();
+  const inp=document.createElement('input');
+  inp.className='editor';
+  inp.style.left=rect.left+'px'; inp.style.top=rect.top+'px';
+  inp.style.width=rect.width+'px'; inp.style.height=rect.height+'px';
+  const cur=STATE.pending.get(r+':'+c);
+  inp.value = cur? cur.to : String(getRow(r)[COLS[c].key]);
+  document.body.appendChild(inp); inp.focus(); inp.select();
+  const commit=(ok)=>{
+    const to=inp.value; inp.remove();
+    if(ok){
+      const from=String(getRow(r)[COLS[c].key]);
+      if(to!==from) STATE.pending.set(r+':'+c,{r,c,from,to});
+      else STATE.pending.delete(r+':'+c);
+      renderPending();
+    }
+    render();
+  };
+  inp.addEventListener('keydown',ev=>{ if(ev.key==='Enter'){commit(true);} else if(ev.key==='Escape'){commit(false);} ev.stopPropagation(); });
+  inp.addEventListener('blur',()=>commit(true));
+}
+
+function renderPending(){
+  const body=$('#pendbody');
+  if(STATE.pending.size===0){ body.innerHTML='<div class="empty">Ingen forslag. Rediger en celle, så havner endringen her — ikke i entitetsdataene.</div>'; status(); return; }
+  let h='<div class="pendlist"><b>'+STATE.pending.size+' endring'+(STATE.pending.size>1?'er':'')+' venter på din signatur.</b> Arket har ikke skrevet noe.';
+  [...STATE.pending.values()].slice(0,12).forEach(p=>{
+    h+='<div class="it">rad '+(p.r+1)+' · '+COLS[p.c].key+': «'+esc(p.from)+'» → «'+esc(p.to)+'»</div>';
+  });
+  if(STATE.pending.size>12) h+='<div class="it">… og '+(STATE.pending.size-12)+' til</div>';
+  h+='</div><div style="margin-top:14px;display:flex;gap:8px"><button class="btn pri" id="bsign">Signer alle</button><button class="btn" id="bdrop">Forkast</button></div>';
+  h+='<p style="margin-top:14px;font-size:12.5px;color:#6B7280;line-height:1.55">Signering ville sendt én <code>entity.batchPersist</code>-konvolutt med alle endringene og ett chronicle-innslag, slik den godkjente formålsspesifikasjonen krever. Denne prototypen signerer ingenting.</p>';
+  body.innerHTML=h;
+  $('#bsign').onclick=()=>{ alert('Prototypen signerer ikke. I Binding ville dette krevd bevis for autentisering mot egen Entitet.'); };
+  $('#bdrop').onclick=()=>{ STATE.pending.clear(); renderPending(); render(); };
+  status();
+}
+
+/* ---- column resize: width is state ---- */
+let drag=null;
+document.addEventListener('mousedown',e=>{
+  const g=e.target.closest('.grip'); if(!g) return;
+  drag={col:+g.dataset.grip, x0:e.clientX, w0:STATE.widths[+g.dataset.grip]};
+  document.body.style.cursor='col-resize'; e.preventDefault();
+});
+window.addEventListener('mousemove',e=>{
+  if(!drag) return;
+  STATE.widths[drag.col]=Math.max(42, drag.w0+(e.clientX-drag.x0));
+  buildHeads(); render();
+});
+window.addEventListener('mouseup',()=>{ if(drag){drag=null; document.body.style.cursor='';} });
+
+/* ---- autofit samples only what is loaded ---- */
+function autofit(){
+  const probe=document.createElement('span');
+  probe.style.cssText='position:absolute;visibility:hidden;white-space:nowrap;font:12.5px -apple-system,sans-serif';
+  document.body.appendChild(probe);
+  const top=scroll.scrollTop;
+  const first=Math.floor(top/ROWH), last=Math.min(STATE.total-1, first+200);
+  COLS.forEach((col,c)=>{
+    probe.textContent=col.label; let w=probe.offsetWidth+30;
+    for(let i=first;i<=last;i++){ const row=getRow(i); if(!row) continue;
+      probe.textContent=String(row[col.key]); w=Math.max(w, probe.offsetWidth+18); }
+    STATE.widths[c]=Math.min(260, w);
+  });
+  probe.remove(); buildHeads(); render();
+}
+
+/* ---- toolbar ---- */
+function setTotal(n){ STATE.total=n; STATE.cache.clear(); STATE.pending.clear(); STATE.sel={r:0,c:0,r2:0,c2:0}; scroll.scrollTop=0; renderPending(); buildHeads(); render(); }
+$('#b1k').onclick=()=>setTotal(1000);
+$('#b50k').onclick=()=>setTotal(50000);
+$('#b250k').onclick=()=>setTotal(250000);
+$('#bautofit').onclick=autofit;
+$('#bfreeze').onclick=()=>{ STATE.frozen = STATE.frozen===1?3:1; $('#bfreeze').textContent='Lås '+(STATE.frozen===1?'1':'3')+' kolonne'+(STATE.frozen===1?'':'r'); buildHeads(); render(); };
+$('#bspec').onclick=()=>$('#panelSpec').classList.toggle('open');
+$('#bpend').onclick=()=>{ renderPending(); $('#panelPend').classList.toggle('open'); };
+document.querySelectorAll('.closex').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.close).classList.remove('open'));
+
+$('#specjson').textContent = JSON.stringify({
+  Sheet: {
+    rowCountKeypath: "relations.state.rowCount",
+    windowKeypath: "relations.state.window",
+    windowRequestActionKeypath: "relations.action.requestWindow",
+    columnsKeypath: "relations.state.columns",
+    columnWidthsKeypath: "relations.state.columnWidths",
+    frozenColumnCount: 1,
+    selectionKeypath: "relations.state.selection",
+    selectionActionKeypath: "relations.action.select",
+    editProposalActionKeypath: "relations.action.proposeCellChange"
+  }
+}, null, 2);
+
+buildHeads(); renderPending(); render();
+window.addEventListener('resize',()=>{buildHeads();render()});
+</script>
+</body>
+</html>

@@ -1,0 +1,458 @@
+Build capacity: 70.6 GiB free (7%); reserving 10 GiB leaves 60.6 GiB (6%).
+warning: /Users/kjetil/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/kjetil/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: 'bigint': /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/.build/checkouts/BigInt/Package.swift:18:19: warning: 'v4' is deprecated: watchOS 9.0 is the oldest supported version [#DeprecatedDeclaration]
+16 |         .iOS(.v12),
+17 |         .tvOS(.v12),
+18 |         .watchOS(.v4),
+   |                   `- warning: 'v4' is deprecated: watchOS 9.0 is the oldest supported version [#DeprecatedDeclaration]
+19 |         .macCatalyst(.v13),
+20 |         .visionOS(.v1),
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+warning: '_wt-bro-kanal-auth-20260927': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Constructing description]
+[Pre-planning 1 / 3614]
+[Planning 1369 / 3614]
+[Planning 1883 / 3614]
+[Planning 3541 / 3614]
+[Planning deferred tasks]
+[Constructing 1578 / 8669]
+[Starting]
+[1 / 101] CellVapor-product
+[1 / 202] CombineHelpers-product
+[1 / 105] OrderedCollections
+[14 / 48] NIOSSL
+[16 / 24] CellApple
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/EntityRadar/EntityScannerCell.swift:190:25: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 188 |             guard let self, self.isAdvertisementOwner(requester),
+ 189 |                   await self.validateAccess("r---", at: "advertisement", for: requester) else { return .string("denied") }
+ 190 |             let value = await self.advertisementExchange.currentPublication
+     |                         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 191 |             return value.flatMap { self.valueType(from: $0) } ?? .null
+ 192 |         })
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/EntityRadar/EntityScannerCell.swift:199:17: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 197 |             try ad.validate()
+ 198 |             if self.connectService == nil { try await self.startConnectService(requester: requester) }
+ 199 |             try await self.advertisementExchange.publish(ad)
+     |                 `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 200 |             self.pushScannerEvent(topic: "scanner.advertisement.changed", title: "Nearby Sharing Changed",
+ 201 |                 payload: ["active": .bool(true)], requesterOverride: requester)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/EntityRadar/EntityScannerCell.swift:207:17: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 205 |             guard let self, self.isAdvertisementOwner(requester),
+ 206 |                   await self.validateAccess("-w--", at: "withdrawAdvertisement", for: requester) else { return .string("denied") }
+ 207 |             try await self.advertisementExchange.publish(nil)
+     |                 `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 208 |             self.pushScannerEvent(topic: "scanner.advertisement.changed", title: "Nearby Sharing Changed",
+ 209 |                 payload: ["active": .bool(false)], requesterOverride: requester)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/EntityRadar/EntityScannerCell.swift:528:9: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 526 | 
+ 527 |     func stopConnectService(requester: Identity) async {
+ 528 |         await advertisementExchange.stop()
+     |         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 529 |         let service = connectService
+ 530 |         connectService = nil
+
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+[18 / 26] CellApple
+[20 / 28] CellApple
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:255:9: warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+253 | struct SkeletonBorderShape: Shape {
+254 |     let radius: CGFloat
+255 |     let edges: [SkeletonEdge]?
+    |         `- warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+256 |     let rtl: Bool
+257 |     func path(in rect: CGRect) -> Path {
+
+CellBase.SkeletonEdge:1:13: note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+1 | public enum SkeletonEdge : String, Codable {
+  |             `- note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+2 |     case top
+3 |     case leading
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:5:1: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  3 | 
+  4 | import SwiftUI
+  5 | import CellBase
+    | `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  6 | #if os(macOS)
+  7 | import AppKit
+
+[#AddPreconcurrencyImport]: <https://docs.swift.org/compiler/documentation/diagnostics/add-preconcurrency-import>
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift:341:56: warning: '20.0' is not a valid version number for watchOS
+339 |         try await registerEntityScannerResolve(on: resolver)
+340 | 
+341 |         if #available(macOS 26.0, iOS 27.0, tvOS 27.0, watchOS 20.0, *) {
+    |                                                        `- warning: '20.0' is not a valid version number for watchOS
+342 |             try await registerResolve(
+343 |                 on: resolver,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift:385:36: warning: conformance of 'CellType' to protocol 'Emit' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+383 |         do {
+384 |             if let persistency {
+385 |                 try await resolver.addCellResolve(
+    |                                    `- warning: conformance of 'CellType' to protocol 'Emit' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+386 |                     name: name,
+387 |                     cellScope: cellScope,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift:385:36: warning: conformance of 'CellType' to protocol 'OwnerInstantiable' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+383 |         do {
+384 |             if let persistency {
+385 |                 try await resolver.addCellResolve(
+    |                                    `- warning: conformance of 'CellType' to protocol 'OwnerInstantiable' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+386 |                     name: name,
+387 |                     cellScope: cellScope,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift:393:36: warning: conformance of 'CellType' to protocol 'Emit' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+391 |                 )
+392 |             } else {
+393 |                 try await resolver.addCellResolve(
+    |                                    `- warning: conformance of 'CellType' to protocol 'Emit' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+394 |                     name: name,
+395 |                     cellScope: cellScope,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift:393:36: warning: conformance of 'CellType' to protocol 'OwnerInstantiable' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+391 |                 )
+392 |             } else {
+393 |                 try await resolver.addCellResolve(
+    |                                    `- warning: conformance of 'CellType' to protocol 'OwnerInstantiable' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+394 |                     name: name,
+395 |                     cellScope: cellScope,
+
+[#IsolatedConformances]: <https://docs.swift.org/compiler/documentation/diagnostics/isolated-conformances>
+[24 / 42] CellApple
+[26 / 42] CellApple
+[39 / 44] CellApple-product
+[39 / 44] CellBaseTests-product
+[44 / 53] CellBaseTests-product
+[45 / 53] CellBaseTests-product
+[46 / 53] CellBaseTests-product
+[47 / 53] CellBaseTests-product
+[48 / 53] CellBaseTests-product
+[52 / 58] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:18:14: warning: concurrently-executed local function 'data' must be marked as '@Sendable'; this is an error in the Swift 6 language mode
+  16 |     private func checkFullVector(_ name: String) async throws {
+  17 |         let v = try Self.vectors(name)
+  18 |         func data(_ name: String) -> Data { v[name]! }
+     |              `- warning: concurrently-executed local function 'data' must be marked as '@Sendable'; this is an error in the Swift 6 language mode
+  19 |         let endpoint = try A.decode(P.Endpoint.self, from: data("endpoint"))
+  20 |         let ih = try A.decode(P.Hello.self, from: data("hello0")), rh = try A.decode(P.Hello.self, from: data("hello1"))
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:250:54: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 248 |         i = try BridgeChannelTransport(underlying: it, peerEndpoint: endpoint, role: .initiator, owner: io,
+ 249 |             limits: limits, source: UUID().uuidString, disclosurePolicy: policy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 250 |             recheckPolicy: recheck, wallClock: clock.date, monotonic: clock.uptime) { [id] gate, session in
+     |                                                      `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 251 |                 if let factory, factoryRole == .initiator { return try await factory(gate, session) }
+ 252 |                 id.created(); gate.setDelegate(id)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:250:77: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 248 |         i = try BridgeChannelTransport(underlying: it, peerEndpoint: endpoint, role: .initiator, owner: io,
+ 249 |             limits: limits, source: UUID().uuidString, disclosurePolicy: policy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 250 |             recheckPolicy: recheck, wallClock: clock.date, monotonic: clock.uptime) { [id] gate, session in
+     |                                                                             `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 251 |                 if let factory, factoryRole == .initiator { return try await factory(gate, session) }
+ 252 |                 id.created(); gate.setDelegate(id)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:258:63: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 256 |         r = try BridgeChannelTransport(underlying: rt, peerEndpoint: endpoint, role: .responder, owner: ro,
+ 257 |             limits: limits, source: UUID().uuidString, disclosurePolicy: responderPolicy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 258 |             recheckPolicy: responderRecheck, wallClock: clock.date, monotonic: clock.uptime) { [rd] gate, session in
+     |                                                               `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 259 |                 if let factory, factoryRole == .responder { return try await factory(gate, session) }
+ 260 |                 rd.created(); gate.setDelegate(rd)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:258:86: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 256 |         r = try BridgeChannelTransport(underlying: rt, peerEndpoint: endpoint, role: .responder, owner: ro,
+ 257 |             limits: limits, source: UUID().uuidString, disclosurePolicy: responderPolicy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 258 |             recheckPolicy: responderRecheck, wallClock: clock.date, monotonic: clock.uptime) { [rd] gate, session in
+     |                                                                                      `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 259 |                 if let factory, factoryRole == .responder { return try await factory(gate, session) }
+ 260 |                 rd.created(); gate.setDelegate(rd)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:828:35: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 826 |         operation = try P.Operation(owner: owner, endpoint: gate.session.peerEndpoint!, role: role,
+ 827 |             generation: UUID().uuidString, policy: .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 828 |             wallClock: pair.clock.date, monotonic: pair.clock.uptime, ephemeral: privateKey)
+     |                                   `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 829 |     }
+ 830 |     func advance(to step: Int) async throws {
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:828:63: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 826 |         operation = try P.Operation(owner: owner, endpoint: gate.session.peerEndpoint!, role: role,
+ 827 |             generation: UUID().uuidString, policy: .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 828 |             wallClock: pair.clock.date, monotonic: pair.clock.uptime, ephemeral: privateKey)
+     |                                                               `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 829 |     }
+ 830 |     func advance(to step: Int) async throws {
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:934:88: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 932 | extension BridgePeerV3Tests {
+ 933 |     func testValidAEADInnerMutationsCloseRealGateReleaseQuotaAndPreserveHealthySibling() async throws {
+ 934 |         let quotaClock = V3Clock(), limits = BridgeChannelLimits(monotonic: quotaClock.uptime)
+     |                                                                                        `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 935 |         let sibling = try V3GatePair(limits: limits), healthy = try await sibling.start()
+ 936 |         for step in 1...5 { try await sibling.step(step) }; try await healthy.value
+[54 / 58] CellBaseTests-product
+[55 / 58] CellBaseTests-product
+[56 / 58] CellBaseTests-product
+Build complete! (9,49 sek)
+Test Suite 'Selected tests' started at 2026-09-29 08:32:33.456.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-09-29 08:32:33.457.
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-09-29 08:32:33.457.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 08:32:33.457.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 08:32:33.522.
+Test Suite 'CellNearbyTests.xctest' started at 2026-09-29 08:32:33.523.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-09-29 08:32:33.523.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 08:32:33.523.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 08:32:33.594.
+Test Suite 'CellBaseTests.xctest' started at 2026-09-29 08:32:33.594.
+Test Suite 'BridgePeerV3Tests' started at 2026-09-29 08:32:33.594.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testActiveInitiatorCanReadResponderButUnrelatedRelayDHCannot]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testActiveInitiatorCanReadResponderButUnrelatedRelayDHCannot]' passed (0.005 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testAuthenticatedInnerFieldMutationsRequireMACSignatureAndFrozenContext]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testAuthenticatedInnerFieldMutationsRequireMACSignatureAndFrozenContext]' passed (0.055 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCanonicalEnvelopeAndPaddingRejectEveryAlternativeEncoding]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCanonicalEnvelopeAndPaddingRejectEveryAlternativeEncoding]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCloseAndDirectRevokeWinBeforePhysicalSendAdmission]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCloseAndDirectRevokeWinBeforePhysicalSendAdmission]' passed (0.058 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryHelloFieldAndLegacyProfileFailsBeforeDisclosure]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryHelloFieldAndLegacyProfileFailsBeforeDisclosure]' passed (0.014 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryOutOfOrderHandshakeMessageAndTamperedTagIsTerminal]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryOutOfOrderHandshakeMessageAndTamperedTagIsTerminal]' passed (0.029 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testExplicitDisclosurePolicyRejectsBeforeInitiatorSigning]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testExplicitDisclosurePolicyRejectsBeforeInitiatorSigning]' passed (0.130 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testFinalFinishedReservationSurvivesHeldPhysicalClose]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testFinalFinishedReservationSurvivesHeldPhysicalClose]' passed (0.049 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testHandshakeQuotasStayBoundedAndFinalFinishedWaitsForAuthenticatedProgress]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testHandshakeQuotasStayBoundedAndFinalFinishedWaitsForAuthenticatedProgress]' passed (0.046 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentDHLegsCannotSpliceProofOrFinishedEvenWithSameIdentities]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentDHLegsCannotSpliceProofOrFinishedEvenWithSameIdentities]' passed (0.175 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentFullHandshakeAndAllKeyPurposes]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentFullHandshakeAndAllKeyPurposes]' passed (0.024 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLateM1SendCompletionCannotUndoAuthenticatedProgress]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLateM1SendCompletionCannotUndoAuthenticatedProgress]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLiveMixedAlgorithmsFixedLengthsAndSameKeyReflection]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLiveMixedAlgorithmsFixedLengthsAndSameKeyReflection]' passed (0.290 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerLateFactoryTransportBindingRetiresSubscriptionAndDeinitializesForBothRoles]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerLateFactoryTransportBindingRetiresSubscriptionAndDeinitializesForBothRoles]' passed (0.207 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerMuxHeldPhysicalSubmissionFencesReusedIDAndCIDWhileSiblingWorks]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerMuxHeldPhysicalSubmissionFencesReusedIDAndCIDWhileSiblingWorks]' passed (0.050 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringEitherFactoryRetiresResultWithoutReady]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringEitherFactoryRetiresResultWithoutReady]' passed (0.059 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringVaultLookupOrSigningStopsDisclosure]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringVaultLookupOrSigningStopsDisclosure]' passed (0.067 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRegisteredRemoteRevocationAndSuspendedPolicyPreventLocalDisclosure]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRegisteredRemoteRevocationAndSuspendedPolicyPreventLocalDisclosure]' passed (0.024 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRetiredSignerCannotAffectFreshChannelWithSameIdentity]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRetiredSignerCannotAffectFreshChannelWithSameIdentity]' passed (0.024 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testScannerStopDisconnectAndOwnerCloseDiscardSuspendedSignerInBothRoles]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testScannerStopDisconnectAndOwnerCloseDiscardSuspendedSignerInBothRoles]' passed (0.801 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedFactoryIsRetiredOnceAndNeverPublishesReady]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedFactoryIsRetiredOnceAndNeverPublishesReady]' passed (0.039 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedPolicySendAndFactoryExpireForBothRolesWithoutLatePublication]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedPolicySendAndFactoryExpireForBothRolesWithoutLatePublication]' passed (0.175 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedSignerStormKeepsWorkUntilReturnAndRejectsLimitPlusOne]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedSignerStormKeepsWorkUntilReturnAndRejectsLimitPlusOne]' passed (0.046 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedVaultExistenceAndSignerCannotSurviveCloseRevokeOrExpiry]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedVaultExistenceAndSignerCannotSurviveCloseRevokeOrExpiry]' passed (0.677 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testValidAEADInnerMutationsCloseRealGateReleaseQuotaAndPreserveHealthySibling]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testValidAEADInnerMutationsCloseRealGateReleaseQuotaAndPreserveHealthySibling]' passed (2.916 seconds).
+Test Suite 'BridgePeerV3Tests' passed at 2026-09-29 08:32:39.562.
+	 Executed 25 tests, with 0 failures (0 unexpected) in 5.965 (5.968) seconds
+Test Suite 'ScannerNearbyInteractionTests' started at 2026-09-29 08:32:39.562.
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testCloseRevokeDisconnectAndStopInvalidateAndDiscardQueuedAndLateCallbacks]' started.
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testCloseRevokeDisconnectAndStopInvalidateAndDiscardQueuedAndLateCallbacks]' passed (0.184 seconds).
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testConcurrentPeersKeepTokensSessionsAndResultsOnTheirAuthenticatedPeer]' started.
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testConcurrentPeersKeepTokensSessionsAndResultsOnTheirAuthenticatedPeer]' passed (0.048 seconds).
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testGenericCellFeedCannotInstallOrReplaceNearbyToken]' started.
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testGenericCellFeedCannotInstallOrReplaceNearbyToken]' passed (0.021 seconds).
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testPrincipalSetupTargetAndVersionRejectBeforeCreatingOrRunningNI]' started.
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testPrincipalSetupTargetAndVersionRejectBeforeCreatingOrRunningNI]' passed (0.032 seconds).
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testReconnectRejectsOldTokenContextAndCallbacksWithoutTouchingNewSession]' started.
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testReconnectRejectsOldTokenContextAndCallbacksWithoutTouchingNewSession]' passed (0.068 seconds).
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testSuspensionTimeoutAndInvalidationNeverCreateReplacementSessionOrReuseOldCallback]' started.
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testSuspensionTimeoutAndInvalidationNeverCreateReplacementSessionOrReuseOldCallback]' passed (0.039 seconds).
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testWrongTokenBindingOnRealWireClosesOnlyOffendingChannel]' started.
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testWrongTokenBindingOnRealWireClosesOnlyOffendingChannel]' passed (0.043 seconds).
+Test Suite 'ScannerNearbyInteractionTests' passed at 2026-09-29 08:32:39.998.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.436 (0.436) seconds
+Test Suite 'CellBaseTests.xctest' passed at 2026-09-29 08:32:39.998.
+	 Executed 32 tests, with 0 failures (0 unexpected) in 6.401 (6.404) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 08:32:39.998.
+	 Executed 32 tests, with 0 failures (0 unexpected) in 6.401 (6.405) seconds
+Inited radar service with peerId: <MCPeerID: 0x762a9780b0 DisplayName = HAVEN-first1db>
+Inited radar service with peerId: <MCPeerID: 0x762a9780c0 DisplayName = HAVEN-second1d>
+Inited radar service with peerId: <MCPeerID: 0x762a978110 DisplayName = HAVEN-first1db>
+Inited radar service with peerId: <MCPeerID: 0x762a978120 DisplayName = HAVEN-second1d>
+Inited radar service with peerId: <MCPeerID: 0x762a978150 DisplayName = HAVEN-first1a9>
+Inited radar service with peerId: <MCPeerID: 0x762a978160 DisplayName = HAVEN-second1a>
+Inited radar service with peerId: <MCPeerID: 0x762a9781a0 DisplayName = HAVEN-first1a9>
+Inited radar service with peerId: <MCPeerID: 0x762a9781b0 DisplayName = HAVEN-second1a>
+Inited radar service with peerId: <MCPeerID: 0x762a9781d0 DisplayName = HAVEN-firstc14>
+Inited radar service with peerId: <MCPeerID: 0x762a9781e0 DisplayName = HAVEN-secondc1>
+Inited radar service with peerId: <MCPeerID: 0x762a978220 DisplayName = HAVEN-firstc14>
+Inited radar service with peerId: <MCPeerID: 0x762a978230 DisplayName = HAVEN-secondc1>
+Inited radar service with peerId: <MCPeerID: 0x762a978250 DisplayName = HAVEN-first596>
+Inited radar service with peerId: <MCPeerID: 0x762a978260 DisplayName = HAVEN-second59>
+Inited radar service with peerId: <MCPeerID: 0x762a9782a0 DisplayName = HAVEN-first596>
+Inited radar service with peerId: <MCPeerID: 0x762a9782b0 DisplayName = HAVEN-second59>
+Inited radar service with peerId: <MCPeerID: 0x762a9782d0 DisplayName = HAVEN-first67c>
+Inited radar service with peerId: <MCPeerID: 0x762a9782e0 DisplayName = HAVEN-second67>
+Inited radar service with peerId: <MCPeerID: 0x762a978320 DisplayName = HAVEN-first67c>
+Inited radar service with peerId: <MCPeerID: 0x762a978330 DisplayName = HAVEN-second67>
+Inited radar service with peerId: <MCPeerID: 0x762a978350 DisplayName = HAVEN-firstd0e>
+Inited radar service with peerId: <MCPeerID: 0x762a978360 DisplayName = HAVEN-secondd0>
+Inited radar service with peerId: <MCPeerID: 0x762a9783a0 DisplayName = HAVEN-firstd0e>
+Inited radar service with peerId: <MCPeerID: 0x762a9783b0 DisplayName = HAVEN-secondd0>
+Inited radar service with peerId: <MCPeerID: 0x762a9783d0 DisplayName = HAVEN-firsta3b>
+Inited radar service with peerId: <MCPeerID: 0x762a9783e0 DisplayName = HAVEN-seconda3>
+Inited radar service with peerId: <MCPeerID: 0x762a978040 DisplayName = HAVEN-firsta3b>
+Inited radar service with peerId: <MCPeerID: 0x762a978420 DisplayName = HAVEN-seconda3>
+Inited radar service with peerId: <MCPeerID: 0x762a978430 DisplayName = HAVEN-first763>
+Inited radar service with peerId: <MCPeerID: 0x762a978440 DisplayName = HAVEN-second76>
+Inited radar service with peerId: <MCPeerID: 0x762a978480 DisplayName = HAVEN-first763>
+Inited radar service with peerId: <MCPeerID: 0x762a978490 DisplayName = HAVEN-second76>
+Inited radar service with peerId: <MCPeerID: 0x762a9784b0 DisplayName = HAVEN-first9f4>
+Inited radar service with peerId: <MCPeerID: 0x762a9784c0 DisplayName = HAVEN-second9f>
+Inited radar service with peerId: <MCPeerID: 0x762a978500 DisplayName = HAVEN-first9f4>
+Inited radar service with peerId: <MCPeerID: 0x762a978510 DisplayName = HAVEN-second9f>
+Inited radar service with peerId: <MCPeerID: 0x762a978530 DisplayName = HAVEN-first40b>
+Inited radar service with peerId: <MCPeerID: 0x762a978540 DisplayName = HAVEN-second40>
+Inited radar service with peerId: <MCPeerID: 0x762a978580 DisplayName = HAVEN-first40b>
+Inited radar service with peerId: <MCPeerID: 0x762a978590 DisplayName = HAVEN-second40>
+Inited radar service with peerId: <MCPeerID: 0x762a9785b0 DisplayName = HAVEN-first9df>
+Inited radar service with peerId: <MCPeerID: 0x762a9785c0 DisplayName = HAVEN-second9d>
+Inited radar service with peerId: <MCPeerID: 0x762a978600 DisplayName = HAVEN-first9df>
+Inited radar service with peerId: <MCPeerID: 0x762a978610 DisplayName = HAVEN-second9d>
+Inited radar service with peerId: <MCPeerID: 0x762a978630 DisplayName = HAVEN-first8cb>
+Inited radar service with peerId: <MCPeerID: 0x762a978640 DisplayName = HAVEN-second8c>
+Inited radar service with peerId: <MCPeerID: 0x762a978680 DisplayName = HAVEN-first8cb>
+Inited radar service with peerId: <MCPeerID: 0x762a978690 DisplayName = HAVEN-second8c>
+V3 gate mutation M1/hello.profile
+V3 gate mutation M1/hello.role
+V3 gate mutation M1/hello.ephemeralPublicKey
+V3 gate mutation M1/hello.nonce
+V3 gate mutation M1/hello.generation
+V3 gate mutation M1/hello.issuedAtMilliseconds
+V3 gate mutation M1/hello.missing
+V3 gate mutation M1/hello.extra
+V3 gate mutation M2/hello.profile
+V3 gate mutation M2/hello.role
+V3 gate mutation M2/hello.ephemeralPublicKey
+V3 gate mutation M2/hello.nonce
+V3 gate mutation M2/hello.generation
+V3 gate mutation M2/hello.issuedAtMilliseconds
+V3 gate mutation M2/hello.missing
+V3 gate mutation M2/hello.extra
+V3 gate mutation M2/endpoint.initiator
+V3 gate mutation M2/endpoint.responder
+V3 gate mutation M2/endpoint.setupID
+V3 gate mutation M2/endpoint.domain
+V3 gate mutation M2/identity.uuid
+V3 gate mutation M2/identity.algorithm
+V3 gate mutation M2/identity.curve
+V3 gate mutation M2/identity.publicKey
+V3 gate mutation M2/proof.sessionID
+V3 gate mutation M2/proof.generation
+V3 gate mutation M2/proof.signature
+V3 gate mutation M2/signed.resource
+V3 gate mutation M2/signed.audience
+V3 gate mutation M2/signed.domain
+V3 gate mutation M2/signed.nonce
+V3 gate mutation M2/signed.issuedAt
+V3 gate mutation M2/signed.expiresAt
+V3 gate mutation M2/signed.action
+V3 gate mutation M2/identityMAC
+V3 gate mutation M2/extra
+V3 gate mutation M2/padding
+V3 gate mutation M2/jsonLength
+V3 gate mutation M2/tag
+V3 gate mutation M2/selfConsistentEndpoint.initiator
+V3 gate mutation M2/selfConsistentEndpoint.responder
+V3 gate mutation M2/selfConsistentEndpoint.setupID
+V3 gate mutation M2/selfConsistentEndpoint.domain
+V3 gate mutation M3/endpoint.initiator
+V3 gate mutation M3/endpoint.responder
+V3 gate mutation M3/endpoint.setupID
+V3 gate mutation M3/endpoint.domain
+V3 gate mutation M3/identity.uuid
+V3 gate mutation M3/identity.algorithm
+V3 gate mutation M3/identity.curve
+V3 gate mutation M3/identity.publicKey
+V3 gate mutation M3/proof.sessionID
+V3 gate mutation M3/proof.generation
+V3 gate mutation M3/proof.signature
+V3 gate mutation M3/signed.resource
+V3 gate mutation M3/signed.audience
+V3 gate mutation M3/signed.domain
+V3 gate mutation M3/signed.nonce
+V3 gate mutation M3/signed.issuedAt
+V3 gate mutation M3/signed.expiresAt
+V3 gate mutation M3/signed.action
+V3 gate mutation M3/identityMAC
+V3 gate mutation M3/extra
+V3 gate mutation M3/padding
+V3 gate mutation M3/jsonLength
+V3 gate mutation M3/tag
+V3 gate mutation M3/selfConsistentEndpoint.initiator
+V3 gate mutation M3/selfConsistentEndpoint.responder
+V3 gate mutation M3/selfConsistentEndpoint.setupID
+V3 gate mutation M3/selfConsistentEndpoint.domain
+V3 gate mutation M4/ack.sessionID
+V3 gate mutation M4/ack.generation
+V3 gate mutation M4/ack.transcriptDigest
+V3 gate mutation M4/verifyData
+V3 gate mutation M4/extra
+V3 gate mutation M4/padding
+V3 gate mutation M4/jsonLength
+V3 gate mutation M4/tag
+V3 gate mutation M5/ack.sessionID
+V3 gate mutation M5/ack.generation
+V3 gate mutation M5/ack.transcriptDigest
+V3 gate mutation M5/verifyData
+V3 gate mutation M5/extra
+V3 gate mutation M5/padding
+V3 gate mutation M5/jsonLength
+V3 gate mutation M5/tag
+Inited radar service with peerId: <MCPeerID: 0x762a9786b0 DisplayName = HAVEN-firstb5f>
+Inited radar service with peerId: <MCPeerID: 0x762a9786c0 DisplayName = HAVEN-secondb5>
+Inited radar service with peerId: <MCPeerID: 0x762a9786d0 DisplayName = HAVEN-thirdf89>
+Inited radar service with peerId: <MCPeerID: 0x762a978710 DisplayName = HAVEN-firstd56>
+Inited radar service with peerId: <MCPeerID: 0x762a978720 DisplayName = HAVEN-secondd5>
+Inited radar service with peerId: <MCPeerID: 0x762a978730 DisplayName = HAVEN-third887>
+Inited radar service with peerId: <MCPeerID: 0x762a978770 DisplayName = HAVEN-firstabc>
+Inited radar service with peerId: <MCPeerID: 0x762a978780 DisplayName = HAVEN-secondab>
+Inited radar service with peerId: <MCPeerID: 0x762a978790 DisplayName = HAVEN-thirdf5f>
+Inited radar service with peerId: <MCPeerID: 0x762a9787d0 DisplayName = HAVEN-first374>
+Inited radar service with peerId: <MCPeerID: 0x762a9787e0 DisplayName = HAVEN-second37>
+Inited radar service with peerId: <MCPeerID: 0x762a9787f0 DisplayName = HAVEN-third1a1>
+Inited radar service with peerId: <MCPeerID: 0x762a978830 DisplayName = HAVEN-first76b>
+Inited radar service with peerId: <MCPeerID: 0x762a978840 DisplayName = HAVEN-second76>
+Inited radar service with peerId: <MCPeerID: 0x762a978850 DisplayName = HAVEN-thirdf68>
+Inited radar service with peerId: <MCPeerID: 0x762a978890 DisplayName = HAVEN-firsteb4>
+Inited radar service with peerId: <MCPeerID: 0x762a9788a0 DisplayName = HAVEN-secondeb>
+Inited radar service with peerId: <MCPeerID: 0x762a9788d0 DisplayName = HAVEN-firstf64>
+Inited radar service with peerId: <MCPeerID: 0x762a9788e0 DisplayName = HAVEN-secondf6>
+Inited radar service with peerId: <MCPeerID: 0x762a9788f0 DisplayName = HAVEN-third0a4>
+Inited radar service with peerId: <MCPeerID: 0x762a978930 DisplayName = HAVEN-first104>
+Inited radar service with peerId: <MCPeerID: 0x762a978940 DisplayName = HAVEN-second10>
+Inited radar service with peerId: <MCPeerID: 0x762a978970 DisplayName = HAVEN-firstde3>
+Inited radar service with peerId: <MCPeerID: 0x762a978980 DisplayName = HAVEN-secondde>
+Inited radar service with peerId: <MCPeerID: 0x762a9789b0 DisplayName = HAVEN-first533>
+Inited radar service with peerId: <MCPeerID: 0x762a9789c0 DisplayName = HAVEN-second53>
+Inited radar service with peerId: <MCPeerID: 0x762a9789d0 DisplayName = HAVEN-third310>
+
+COMMAND_EXIT=0

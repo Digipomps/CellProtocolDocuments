@@ -1,0 +1,257 @@
+{
+  "version": 0,
+  "status": "draft",
+  "lastUpdated": "2026-09-03",
+  "chapter": "34_Audio_Analysis_Cell.md",
+  "cell": {
+    "name": "AudioAnalysisCell",
+    "endpoint": "cell:///media/audio-analysis/<opaque-cell-id>",
+    "flowTopic": "haven.media.audio",
+    "responsibility": "Turn an audio file into a typed record of transcript and musical metadata, where every field carries its own provenance and can be checked without trusting the method that produced it.",
+    "instancing": "one cell per owning entity; analyses are documents under it, addressed by contentHash"
+  },
+  "coreRule": {
+    "statement": "A measurement, an inference and an opinion are three different kinds of claim and never share a field.",
+    "why": "Most audio tooling flattens DSP output, classifier output and model prose into one blob of 'metadata'. The consumer then cannot tell 117.5 BPM (reproducible from the file) from 'uplifting' (a classifier at 0.72) from 'sounds like a village brass band on a bright morning' (a language model's sentence). HAVEN's claim discipline (Ch. 27, Ch. 29) applies to audio exactly as to text: hide the recipe, never the proof."
+  },
+  "provenanceTiers": [
+    {
+      "tier": "computed",
+      "meaning": "Deterministic DSP. Same input gives the same output. Reproducible by a third party with the named tool and version.",
+      "requires": [
+        "tool",
+        "toolVersion",
+        "params"
+      ],
+      "confidence": "not applicable — never emit a confidence for a computed field"
+    },
+    {
+      "tier": "inferred",
+      "meaning": "A model assigned a label from a declared vocabulary.",
+      "requires": [
+        "model",
+        "modelVersion",
+        "labelVocabulary",
+        "confidence"
+      ],
+      "confidence": "required, 0..1, calibration method named"
+    },
+    {
+      "tier": "model_opinion",
+      "meaning": "Free prose from a language model. Not checkable, not a fact about the file.",
+      "requires": [
+        "model",
+        "modelVersion",
+        "prompt"
+      ],
+      "confidence": "never — an opinion with a number on it is worse than an opinion"
+    },
+    {
+      "tier": "declared",
+      "meaning": "Supplied by the owner or the file's own metadata tags. Not verified.",
+      "requires": [
+        "source"
+      ],
+      "confidence": "not applicable"
+    }
+  ],
+  "layers": {
+    "L1_signal": {
+      "tier": "computed",
+      "tools": [
+        "ffprobe",
+        "librosa",
+        "essentia"
+      ],
+      "fields": [
+        "durationSeconds",
+        "codec",
+        "sampleRate",
+        "channels",
+        "bitRate",
+        "tempoBPM",
+        "keyEstimate",
+        "keyCorrelation",
+        "rmsMeanDBFS",
+        "peakDBFS",
+        "dynamicsStdDB",
+        "spectralCentroidHz",
+        "onsetDensityPerSecond",
+        "segmentBoundariesSeconds"
+      ],
+      "honesty": [
+        "tempoBPM may be half or double the perceived tempo; emit tempoOctaveAmbiguous when the autocorrelation second peak is within 15 percent",
+        "keyEstimate by profile correlation confuses a major key with its relative minor; always emit keyCorrelation and never present the key as settled below 0.8",
+        "peakDBFS at or near 0.0 means the file is limited at the ceiling; loudness comparisons across such files are not meaningful and the record says so via limitedAtCeiling"
+      ]
+    },
+    "L2_transcript": {
+      "tier": "computed_then_inferred",
+      "note": "The transcript is model output, so it is inferred; the alignment timestamps it carries are computed from that output and inherit its uncertainty. Never promote a transcript to computed.",
+      "pipeline": [
+        "optional source separation (Demucs) to isolate the vocal stem",
+        "speech-to-text on the stem, not the mix",
+        "optional diarization"
+      ],
+      "models": [
+        {
+          "id": "Whisper-Large-V3",
+          "provider": "nanogpt",
+          "pricePerMinuteUSD": 0.0005,
+          "note": "default"
+        },
+        {
+          "id": "gpt-4o-mini-transcribe",
+          "provider": "nanogpt",
+          "pricePerMinuteUSD": 0.003,
+          "note": "accents and noise"
+        },
+        {
+          "id": "Wizper",
+          "provider": "nanogpt",
+          "pricePerMinuteUSD": 0.01
+        },
+        {
+          "id": "Elevenlabs-STT",
+          "provider": "nanogpt",
+          "pricePerMinuteUSD": 0.03,
+          "note": "async, diarization"
+        }
+      ],
+      "honesty": [
+        "speech-to-text models are trained on speech, not singing; a transcript of sung material is marked contentType=sung and its reliability is reported as reduced",
+        "run source separation before transcription whenever contentType is sung, and record whether it was run",
+        "an inaudible passage is emitted as inaudible, never as a guess; a guessed word inside quotation marks is a fabricated quote"
+      ]
+    },
+    "L3_understanding": {
+      "tier": "inferred or model_opinion",
+      "taggers": [
+        {
+          "id": "CLAP",
+          "kind": "zero-shot audio-text",
+          "note": "caller supplies the label vocabulary; preferred because the taxonomy is explicit and owned"
+        },
+        {
+          "id": "essentia-mtg-jamendo",
+          "kind": "trained tagger",
+          "note": "mood, genre, instrument, danceability"
+        },
+        {
+          "id": "MERT",
+          "kind": "representation",
+          "note": "for downstream heads"
+        }
+      ],
+      "audioLLM": [
+        {
+          "id": "gemini",
+          "note": "documented for music and emotion; 32 tokens per second of audio; up to 9.5 hours",
+          "tier": "model_opinion"
+        }
+      ],
+      "honesty": [
+        "a mood or genre label is inferred and carries the vocabulary it was drawn from; a label without its vocabulary is meaningless",
+        "prose from an audio LLM is model_opinion and is never mined for structured fields",
+        "no field in this layer may be presented as a property of the music; it is a property of a model's response to the music"
+      ]
+    }
+  },
+  "record": {
+    "identity": {
+      "contentHash": "sha256 of the audio bytes",
+      "note": "the analysis is addressed by what was analysed, so a re-encode is a different subject"
+    },
+    "fieldShape": {
+      "value": "any",
+      "tier": "computed|inferred|model_opinion|declared",
+      "producer": {
+        "tool_or_model": "string",
+        "version": "string",
+        "params_or_prompt": "object|string"
+      },
+      "confidence": "number, only for inferred",
+      "computedAt": "iso8601"
+    },
+    "rule": "A consumer may render any field only together with its tier. A UI that shows the value and hides the tier is a contract violation, not a design choice."
+  },
+  "agreementTemplate": {
+    "note": "Analysis is a service on the owner's material. External surfaces get the narrowest thing that works.",
+    "grants": [
+      {
+        "keypath": "analysis",
+        "permission": "r---",
+        "returns": "the typed record for one contentHash"
+      },
+      {
+        "keypath": "analyze",
+        "permission": "-w--",
+        "kind": "action",
+        "input": {
+          "audioRef": "cell reference or owner-scoped blob id",
+          "layers": [
+            "L1",
+            "L2",
+            "L3"
+          ],
+          "labelVocabulary": "optional, required for L3 tagging"
+        },
+        "note": "never accepts a URL supplied by an external caller; the audio must already be owner material"
+      },
+      {
+        "keypath": "vocabulary",
+        "permission": "r---",
+        "returns": "label vocabularies this cell will tag against"
+      }
+    ],
+    "neverGranted": [
+      "the raw audio bytes",
+      "other entities' analyses",
+      "provider credentials",
+      "arbitrary model or endpoint selection by the caller"
+    ]
+  },
+  "privacy": {
+    "rule": "Audio is among the most revealing material a person holds. Voices identify people who never consented to analysis.",
+    "requirements": [
+      "the record stores derived fields and never the audio itself",
+      "a transcript of a recording containing identifiable third parties is treated as their data too; diarization labels are speaker-relative (Speaker 1) and never resolved to a person by this cell",
+      "no third-party provider call happens without a declared purpose covering it; the record names every provider the bytes were sent to",
+      "retention follows purpose (Ch. 21 §2.8); the default for an analysis outlives neither the audio nor the purpose that justified it"
+    ]
+  },
+  "denialReasons": [
+    "audioNotOwnerMaterial",
+    "purposeNotAllowed",
+    "vocabularyMissingForTagging",
+    "providerNotDeclared",
+    "layerNotGranted",
+    "unsupportedFormat",
+    "fileTooLargeForProvider"
+  ],
+  "flowEvents": [
+    "analysis.started",
+    "analysis.layerCompleted",
+    "analysis.completed",
+    "analysis.providerCalled",
+    "analysis.expired"
+  ],
+  "operationalNotes": [
+    "NanoGPT direct upload stops at 3 MB; above that use audioUrl, or downmix with ffmpeg -ac 1 -b:a 64k first. The record states which path was used because it affects transcript quality.",
+    "provider pricing is per minute of audio; cost is predictable from durationSeconds before the call and should be reported to the owner in advance for long material"
+  ],
+  "testRequirements": [
+    "every field in an emitted record carries a tier and a producer; a record missing either is rejected by the cell, not by the consumer",
+    "no computed field carries a confidence, and no inferred field lacks one",
+    "the same audio bytes analysed twice at L1 produce identical values",
+    "a transcript of sung material without source separation is marked reduced reliability",
+    "an inferred label emitted without its labelVocabulary is rejected",
+    "the analyze action refuses an externally supplied URL",
+    "the record names every provider the audio bytes were sent to"
+  ],
+  "openQuestions": [
+    "does an analysis inherit the audio's Agreement, or hold its own? inheriting is simpler and keeps revocation aligned; holding its own allows sharing a mood tag without sharing the recording",
+    "should L3 prose be stored at all, or generated on demand and never persisted? storing it makes an unverifiable sentence durable, which is exactly what the tiering is meant to discourage",
+    "should tempoBPM and keyEstimate be re-derived on read rather than stored, since they are cheap and their tool versions change?"
+  ]
+}

@@ -1,0 +1,269 @@
+[
+  {
+    "command": [
+      "git",
+      "-C",
+      "CellProtocol",
+      "rev-parse",
+      "origin/main"
+    ],
+    "exit": 0,
+    "stdout": "81601a6f835252aba7e99d43786fb5d67227c245\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "CellProtocol",
+      "merge-base",
+      "--is-ancestor",
+      "b5b7282",
+      "origin/main"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "CellProtocol",
+      "merge-base",
+      "--is-ancestor",
+      "a00e3a0",
+      "origin/main"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "CellProtocol",
+      "show",
+      "-s",
+      "--format=fuller",
+      "b5b7282"
+    ],
+    "exit": 0,
+    "stdout": "commit b5b7282b495e96a7899a189087592581426f4bfb\nAuthor:     kjetilh <kjetilh@mac.com>\nAuthorDate: Fri Sep 18 00:13:56 2026 +0200\nCommit:     GitHub <noreply@github.com>\nCommitDate: Fri Sep 18 00:13:56 2026 +0200\n\n    Integrate existing runtime features for the production recovery (#40)\n    \n    * Model a relation as entity data, with the address kept out of it\n    \n    relations.validatedContacts.<id> already holds, fail-closed, how to\n    reach a person. EntityRelationRecordV1 adds relations.records.<id> for\n    everything else the tie is: where it came from and when, what the\n    person does in which of my contexts, declared and inferred interests\n    apart, channels as opaque refs, standing, evidence of contact as\n    references to credentials, and a running interaction summary. The\n    validator refuses any channel ref that reads as an address, so the\n    record can follow the entity to another surface without becoming a\n    contact list on the way.\n    \n    Interactions are chronicle entries, chronicle[id=relation-event-\u2026],\n    bound to their relation at the keypath; the record keeps only the sum.\n    applying(_:chronicleRef:) is pure so the summary can be tested without\n    a store. A metadata-mode event drops its summary in the initialiser\n    and is refused by the validator if one is smuggled in afterwards.\n    \n    EntityRelationReachPlanner turns a record into \u00abhow do I start a\n    conversation with this person\u00bb: chat if they have an entity,\n    correspondence if the channel exists, nearby while it is fresh, else an\n    invitation on the address we hold. A resend inside seven days is named\n    as one. Pure and deterministic, so the app, the butler and the scaffold\n    give the same answer for the same person.\n    \n    EntityAnchorCell admits the namespace through the batch path only,\n    rejects direct writes to it, and serves the value-free schema at\n    entityRelationSchema.\n    \n    Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>\n    Claude-Session: https://claude.ai/code/session_0166zoWBapoQ3R6iiJrhd2xx\n    \n    * Refuse to become the owner's vault before the owner has authenticated\n    \n    A dismissed Face ID sheet returned from initialize() exactly like a\n    successful one. Callers then made IdentityVault the default vault, asked\n    it for the \"private\" identity, and got a freshly minted one with no key\n    material behind it \u2014 so every identity-unique cell failed owner\n    validation and the app told Kjetil, truthfully but uselessly, that the\n    local HAVEN cells could not be validated. authenticatedRuntimeIsReady\n    agreed everything was fine, because it only checked the vault's type.\n    \n    isAuthenticated is now the honest answer, set only after the owner\n    authenticated and the identities loaded. authenticatev2 throws when the\n    passcode fallback returns false or no policy can be evaluated, instead\n    of returning as though nothing happened. AppInitializer keeps whatever\n    vault is active until isAuthenticated says otherwise.\n    \n    EntityScanner becomes identityUnique. Scaffold-unique meant one instance\n    owned by whichever identity happened to create it, and every other\n    identity \u2014 the verifier's, the authenticated one after Face ID \u2014 was\n    denied encounters and radar outright. Only one identity drives local\n    surfaces at a time, so nothing is actually shared by making the\n    scanner's encounters belong to their owner.\n    \n    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n    Claude-Session: https://claude.ai/code/session_0166zoWBapoQ3R6iiJrhd2xx\n    \n    * Draw the nearby scanner as a radar instead of a stack of blocks\n    \n    The scanner surface listed its findings. A list is the wrong shape for\n    \"who is near me, and how near\": distance and bearing are the whole\n    point, and they were text.\n    \n    RadarEntityLedger folds the scanner's flow events into one current\n    picture \u2014 pure value semantics, so the view model on a screen and the\n    cell that emits the events hold the same picture, and the cell can hand\n    it to a skeleton without a view model in between. RadarViewModel now\n    delegates to it rather than keeping a second copy.\n    \n    Visualization(kind: \"radar\") draws that picture: range rings with metres\n    on them, a sweep while scanning, blips that burn when just heard and\n    fade as they go quiet, and the nearest distance as one large number.\n    A bearing we do not have is drawn as a dashed arc at the right radius,\n    never as a confident dot somewhere \u2014 a guessed angle must not look\n    measured. Tapping a blip writes scanner.select. The radar polls once a\n    second while on screen; every other visualization still refreshes on\n    mutation only, as before.\n    \n    EntityScannerCell serves that spec at `radar` and takes the selection\n    at `select`, so a surface gets the whole thing from two keypaths.\n    \n    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n    Claude-Session: https://claude.ai/code/session_0166zoWBapoQ3R6iiJrhd2xx\n    \n    * Report the parts of a skeleton the person will never see\n    \n    A visibility condition that cannot be resolved evaluates to false, which is\n    indistinguishable from one that is legitimately not met. So an element gated\n    on data the renderer does not have at that position never appears, nothing\n    reports it, and the surface looks finished while doing nothing.\n    \n    That is not hypothetical. HAVEN's Relations workbench shipped with seven\n    root-level sections gated on `relations.state\u2026`, `contactImport.state\u2026` and\n    `invitation.state\u2026`. At root the renderer passes no value \u2014 SkeletonView\n    defaults userInfoValue to nil \u2014 so every gate was false and the owner got a\n    title over an empty card. Twelve actions were unreachable, among them\n    picking a file and committing an import. Every existing test was green,\n    because every existing test reads through porthole.get, and that is not the\n    path the renderer uses to decide visibility.\n    \n    SkeletonReachabilityAudit answers the question a schema check cannot: will\n    anyone ever see this. It decides by calling the renderer's own condition\n    evaluation with the renderer's own root inputs, so it cannot drift from what\n    the screen does. Scope carries the whole argument: at root nothing resolves,\n    while inside a List/Grid/Reference row the row's value is passed down, so\n    conditions there are answerable at runtime and are left alone.\n    \n    Findings name what the owner loses, not that a node is hidden \u2014\n    `lostActionKeypaths` is what turns a structural finding into a purpose\n    finding. reachableActionKeypaths gives the other half: the set an\n    expectation contract can be checked against, so \"the owner can import a\n    file\" becomes something a test can hold.\n    \n    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n    Claude-Session: https://claude.ai/code/session_0166zoWBapoQ3R6iiJrhd2xx\n    \n    * Land the CorrespondenceCell, envelope types, Agreement templates and contract tests\n    \n    Fire kildefiler og kontraktstestene har ligget utracket i arbeidstreet siden\n    2. og 7. september. S6 forutsetter en landet revisjon som inneholder dem.\n    \n    M\u00e5lt natt til 9. september, mot dette arbeidstreet:\n    swift build --build-tests: exit 0\n    7 av 7 CorrespondenceCellTests passerer\n    \n    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>\n    Claude-Session: https://claude.ai/code/session_019mpvrWDd5nFPfPXaba7tyX\n    \n    * feat(crypto): add attachmentStreamV1 with authenticated chunk finalization\n    \n    * Add bounded Network discovery for personal entity invitations\n    \n    * fix(bridge): presentert deskriptor gir aldri lokal signeringsvault (HD-0080, WP-S1 bridge-provenance)\n    \n    * test(bridge): fang peer-avslaget slik BridgeIdentityVault pakker det (HD-0080)\n    \n    * wip(tillitspakke): land the agent trust package, nearby proofs and node-model work\n    \n    AgentTrustPackage, EffectReceipt and ReceiptSignature with tests; nearby\n    advertisement exchange and proof session; EntityRepresentation/Interest/Purpose\n    codec work including nodeIdentifier preservation and EntityRelationPerspective;\n    skeleton localization runtime.\n    \n    Not build-verified. Branch commit only \u2014 nothing here reaches main until it is.\n    \n    * Integrate existing native skeleton layout parity fixes\n    \n    Port 6218ed591387c7f2899a4441186e4877398def59 and fa7982d7fd5ecb3156ad2e576b9860e2ff3aca51 layout hunks while preserving current dynamic modifiers and localization. The resolver prefetch from 6218ed5 is already integrated.\n    \n    * Keep private scanner state owner-only and make trust fixtures self-contained\n    \n    Remove radar/select from restored agreement templates, deny non-owner reads and selections, and keep selection details out of shared flow. Preserve existing agreement surface sentinel. Full regression exposed these gaps; all 23 affected tests now pass.\n    \n    * Measure the exact candidate in runtime capacity CI\n    \n    * Synchronize web style parity inventory with integrated surfaces\n    \n    ---------\n    \n    Co-authored-by: Kjetil Hustveit <kjetil@digipomps.org>\n    Co-authored-by: Claude Fable 5.1 <noreply@anthropic.com>\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "CellProtocol",
+      "show",
+      "b5b7282:Package.swift"
+    ],
+    "exit": 0,
+    "stdout": "// swift-tools-version:5.8\n// SPDX-License-Identifier: Apache-2.0\n// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors\n\n// The swift-tools-version declares the minimum version of Swift required to build this package.\n\nimport PackageDescription\n\nlet package = Package(\n    name: \"CellProtocol\",\n    platforms: [\n        .macOS(.v13), .iOS(.v16), .tvOS(.v13)\n    ],\n    products: [\n        // Products define the executables and libraries a package produces, and make them visible to other packages.\n        .library(name: \"CellBase\", targets: [\"CellBase\"]),\n        .library(name: \"CellNearby\", targets: [\"CellNearby\"]),\n        .library(name: \"CombineHelpers\", targets: [\"CombineHelpers\"]),\n        .library(name: \"CodableHelpers\", targets: [\"CodableHelpers\"]),\n        .library(name: \"CellApple\", targets: [\"CellApple\"]),\n        .library(name: \"CellVapor\", targets: [\"CellVapor\"]),\n        .library(name: \"HavenCoreSchemas\", targets: [\"HavenCoreSchemas\"]),\n        .library(name: \"HavenPerspectiveSchemas\", targets: [\"HavenPerspectiveSchemas\"]),\n        .library(name: \"TaxonomyResolver\", targets: [\"TaxonomyResolver\"]),\n        .library(name: \"KeyPathResolver\", targets: [\"KeyPathResolver\"]),\n        .executable(name: \"haven-commons\", targets: [\"HavenCommonsCLI\"]),\n        .executable(name: \"CellRuntimeBenchmarks\", targets: [\"CellRuntimeBenchmarks\"]),\n    ],\n    dependencies: [\n        .package(url: \"https://github.com/krzyzanowskim/CryptoSwift.git\", from: \"1.4.1\"),\n        .package(url: \"https://github.com/OpenCombine/OpenCombine.git\", from: \"0.13.0\"),\n        .package(url: \"https://github.com/apple/swift-crypto.git\", from: \"4.5.2\"),\n        .package(url: \"https://github.com/GiacomoLeopizzi/random-swift\", from: \"1.0.0\"),\n        .package(url: \"https://github.com/vapor/vapor.git\", from: \"4.0.1\"),\n        // CellVapor explicitly retains these products so SwiftPM cannot prune\n        // their security floors when this package is consumed downstream.\n        .package(url: \"https://github.com/apple/swift-nio.git\", from: \"2.101.0\"),\n        .package(url: \"https://github.com/apple/swift-nio-ssl.git\", from: \"2.37.2\"),\n        .package(url: \"https://github.com/apple/swift-nio-http2.git\", from: \"1.45.0\"),\n        .package(\n            url: \"https://github.com/Digipomps/FileUtils-c.git\",\n            revision: \"26f365ca39955ee693e138ef028560df3bdf218c\"\n        ),\n        .package(url: \"https://github.com/apple/swift-collections.git\", \"1.1.0\" ..< \"2.0.0\"),\n        .package(url: \"https://github.com/attaswift/BigInt.git\", from: \"5.4.0\"),\n    ],\n    targets: [\n        .target(name: \"CellNearby\", path: \"Packages/CellNearby/Sources/CellNearby\"),\n        .testTarget(name: \"CellNearbyTests\", dependencies: [\"CellNearby\"], path: \"Packages/CellNearby/Tests/CellNearbyTests\"),\n        .target(name: \"CombineHelpers\",\n                dependencies: [\n                    \"OpenCombine\",\n                    .product(name: \"OpenCombineFoundation\", package: \"OpenCombine\"),\n                    .product(name: \"OpenCombineDispatch\", package: \"OpenCombine\"),\n                ]),\n        .target(name: \"CodableHelpers\"),\n        .target(\n            name: \"CellBase\",\n            dependencies: [\n                \"OpenCombine\",\n                .product(name: \"OpenCombineFoundation\", package: \"OpenCombine\"),\n                .product(name: \"OpenCombineDispatch\", package: \"OpenCombine\"),\n                .product(name: \"Crypto\", package: \"swift-crypto\"),\n                .product(name: \"Random\", package: \"random-swift\"),\n                .product(name: \"CryptoSwift\", package: \"CryptoSwift\"),\n                .product(name: \"Collections\", package: \"swift-collections\"),\n                .product(name: \"BigInt\", package: \"bigint\"),\n                .target(name: \"HavenCoreSchemas\"),\n                .target(name: \"CombineHelpers\"),\n                .target(name: \"CodableHelpers\"),\n                .target(name: \"KeyPathResolver\"),\n            ]),\n        .target(name: \"CellApple\",\n                dependencies: [\n                    .target(name: \"CellBase\"),\n                    .target(name: \"CombineHelpers\"),\n                    .target(name: \"CodableHelpers\"),\n                    .product(name: \"CFileUtils\", package: \"fileutils-c\"),\n                ],\n                resources: [.copy(\"Resources/haven-localization.js\"), .copy(\"Resources/haven-localization-NOTICES.txt\")]),\n        .target(name: \"CellVapor\",\n                dependencies: [\n                    .target(name: \"CellBase\"),\n                    .product(name: \"Crypto\", package: \"swift-crypto\"),\n                    .product(name: \"Vapor\", package: \"vapor\"),\n                    .product(name: \"NIOCore\", package: \"swift-nio\"),\n                    .product(name: \"NIOSSL\", package: \"swift-nio-ssl\"),\n                    .product(name: \"NIOHTTP2\", package: \"swift-nio-http2\"),\n                    .product(name: \"CFileUtils\", package: \"fileutils-c\"),\n                ]),\n        .target(\n            name: \"HavenCoreSchemas\",\n            path: \"commons/schemas/haven.core/Sources/HavenCoreSchemas\"\n        ),\n        .target(\n            name: \"HavenPerspectiveSchemas\",\n            dependencies: [\n                .target(name: \"HavenCoreSchemas\"),\n            ],\n            path: \"commons/schemas/haven.perspective/Sources/HavenPerspectiveSchemas\"\n        ),\n        .target(\n            name: \"TaxonomyResolver\",\n            dependencies: [\n                .target(name: \"HavenCoreSchemas\"),\n            ],\n            path: \"commons/resolver/taxonomy-resolver/Sources/TaxonomyResolver\"\n        ),\n        .target(\n            name: \"KeyPathResolver\",\n            dependencies: [\n                .target(name: \"HavenCoreSchemas\"),\n                .target(name: \"TaxonomyResolver\"),\n            ],\n            path: \"commons/resolver/keypath-resolver/Sources/KeyPathResolver\"\n        ),\n        .target(\n            name: \"PurposeInterestBenchmarkSupport\",\n            dependencies: [\n                .target(name: \"CellBase\"),\n                .target(name: \"HavenPerspectiveSchemas\"),\n            ],\n            path: \"commons/benchmarks/purpose-interest/Sources/PurposeInterestBenchmarkSupport\"\n        ),\n        .executableTarget(\n            name: \"ReferenceLoadBenchmark\",\n            dependencies: [\n                .target(name: \"CellBase\"),\n            ]\n        ),\n        .executableTarget(\n            name: \"HavenCommonsCLI\",\n            dependencies: [\n                .target(name: \"KeyPathResolver\"),\n                .target(name: \"PurposeInterestBenchmarkSupport\"),\n            ],\n            path: \"commons/cli/haven-commons/Sources/haven-commons\"\n        ),\n        .executableTarget(\n            name: \"CellRuntimeBenchmarks\",\n            dependencies: [\n                .target(name: \"CellBase\"),\n                .target(name: \"CellVapor\"),\n            ],\n            path: \"Benchmarks/CellRuntimeBenchmarks\"\n        ),\n//        .target(name: \"CellVaporV2\",\n//                dependencies: [\n//                    .product(name: \"Vapor\", package: \"vapor\"),\n//                ]),\n        .testTarget(\n            name: \"CellBaseTests\",\n            dependencies: [\n                \"CellBase\",\n                .target(name: \"CodableHelpers\"),\n                .target(name: \"HavenPerspectiveSchemas\"),\n                .target(name: \"PurposeInterestBenchmarkSupport\"),\n                \"CellApple\",\n                .target(name: \"CellVapor\", condition: .when(platforms: [.macOS])),\n            ],\n            exclude: [\"Fixtures\"]\n        ),\n        .testTarget(\n            name: \"HavenCommonsTests\",\n            dependencies: [\n                .target(name: \"TaxonomyResolver\"),\n                .target(name: \"KeyPathResolver\"),\n                .target(name: \"HavenPerspectiveSchemas\"),\n            ],\n            path: \"Tests/HavenCommonsTests\"\n        ),\n    ]\n)\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "CellProtocol",
+      "show",
+      "4107d27:Package.swift"
+    ],
+    "exit": 0,
+    "stdout": "// swift-tools-version:5.8\n// SPDX-License-Identifier: Apache-2.0\n// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors\n\n// The swift-tools-version declares the minimum version of Swift required to build this package.\n\nimport PackageDescription\n\nlet package = Package(\n    name: \"CellProtocol\",\n    platforms: [\n        .macOS(.v13), .iOS(.v16), .tvOS(.v13)\n    ],\n    products: [\n        // Products define the executables and libraries a package produces, and make them visible to other packages.\n        .library(name: \"CellBase\", targets: [\"CellBase\"]),\n        .library(name: \"CombineHelpers\", targets: [\"CombineHelpers\"]),\n        .library(name: \"CodableHelpers\", targets: [\"CodableHelpers\"]),\n        .library(name: \"CellApple\", targets: [\"CellApple\"]),\n        .library(name: \"CellVapor\", targets: [\"CellVapor\"]),\n        .library(name: \"HavenCoreSchemas\", targets: [\"HavenCoreSchemas\"]),\n        .library(name: \"HavenPerspectiveSchemas\", targets: [\"HavenPerspectiveSchemas\"]),\n        .library(name: \"TaxonomyResolver\", targets: [\"TaxonomyResolver\"]),\n        .library(name: \"KeyPathResolver\", targets: [\"KeyPathResolver\"]),\n        .executable(name: \"haven-commons\", targets: [\"HavenCommonsCLI\"]),\n    ],\n    dependencies: [\n        .package(url: \"https://github.com/krzyzanowskim/CryptoSwift.git\", from: \"1.4.1\"),\n        .package(url: \"https://github.com/OpenCombine/OpenCombine.git\", from: \"0.13.0\"),\n        .package(url: \"https://github.com/apple/swift-crypto.git\", \"1.0.0\" ..< \"4.0.0\"),\n        .package(url: \"https://github.com/GiacomoLeopizzi/random-swift\", from: \"1.0.0\"),\n        .package(url: \"https://github.com/vapor/vapor.git\", from: \"4.0.1\"),\n        .package(\n            url: \"https://github.com/Digipomps/FileUtils-c.git\",\n            revision: \"26f365ca39955ee693e138ef028560df3bdf218c\"\n        ),\n        .package(url: \"https://github.com/apple/swift-collections.git\", \"1.1.0\" ..< \"2.0.0\"),\n        .package(url: \"https://github.com/attaswift/BigInt.git\", from: \"5.4.0\"),\n    ],\n    targets: [\n        .target(name: \"CombineHelpers\",\n                dependencies: [\n                    \"OpenCombine\",\n                    .product(name: \"OpenCombineFoundation\", package: \"OpenCombine\"),\n                    .product(name: \"OpenCombineDispatch\", package: \"OpenCombine\"),\n                ]),\n        .target(name: \"CodableHelpers\"),\n        .target(\n            name: \"CellBase\",\n            dependencies: [\n                \"OpenCombine\",\n                .product(name: \"OpenCombineFoundation\", package: \"OpenCombine\"),\n                .product(name: \"OpenCombineDispatch\", package: \"OpenCombine\"),\n                .product(name: \"Crypto\", package: \"swift-crypto\"),\n                .product(name: \"Random\", package: \"random-swift\"),\n                .product(name: \"CryptoSwift\", package: \"CryptoSwift\"),\n                .product(name: \"Collections\", package: \"swift-collections\"),\n                .product(name: \"BigInt\", package: \"bigint\"),\n                .target(name: \"HavenCoreSchemas\"),\n                .target(name: \"CombineHelpers\"),\n                .target(name: \"CodableHelpers\"),\n                .target(name: \"KeyPathResolver\"),\n            ]),\n        .target(name: \"CellApple\",\n                dependencies: [\n                    .target(name: \"CellBase\"),\n                    .target(name: \"CombineHelpers\"),\n                    .target(name: \"CodableHelpers\"),\n                    .product(name: \"CFileUtils\", package: \"fileutils-c\"),\n                ]),\n        .target(name: \"CellVapor\",\n                dependencies: [\n                    .target(name: \"CellBase\"),\n                    .product(name: \"Crypto\", package: \"swift-crypto\"),\n                    .product(name: \"Vapor\", package: \"vapor\"),\n                    .product(name: \"CFileUtils\", package: \"fileutils-c\"),\n                ]),\n        .target(\n            name: \"HavenCoreSchemas\",\n            path: \"commons/schemas/haven.core/Sources/HavenCoreSchemas\"\n        ),\n        .target(\n            name: \"HavenPerspectiveSchemas\",\n            dependencies: [\n                .target(name: \"HavenCoreSchemas\"),\n            ],\n            path: \"commons/schemas/haven.perspective/Sources/HavenPerspectiveSchemas\"\n        ),\n        .target(\n            name: \"TaxonomyResolver\",\n            dependencies: [\n                .target(name: \"HavenCoreSchemas\"),\n            ],\n            path: \"commons/resolver/taxonomy-resolver/Sources/TaxonomyResolver\"\n        ),\n        .target(\n            name: \"KeyPathResolver\",\n            dependencies: [\n                .target(name: \"HavenCoreSchemas\"),\n                .target(name: \"TaxonomyResolver\"),\n            ],\n            path: \"commons/resolver/keypath-resolver/Sources/KeyPathResolver\"\n        ),\n        .target(\n            name: \"PurposeInterestBenchmarkSupport\",\n            dependencies: [\n                .target(name: \"CellBase\"),\n                .target(name: \"HavenPerspectiveSchemas\"),\n            ],\n            path: \"commons/benchmarks/purpose-interest/Sources/PurposeInterestBenchmarkSupport\"\n        ),\n        .executableTarget(\n            name: \"HavenCommonsCLI\",\n            dependencies: [\n                .target(name: \"KeyPathResolver\"),\n                .target(name: \"PurposeInterestBenchmarkSupport\"),\n            ],\n            path: \"commons/cli/haven-commons/Sources/haven-commons\"\n        ),\n//        .target(name: \"CellVaporV2\",\n//                dependencies: [\n//                    .product(name: \"Vapor\", package: \"vapor\"),\n//                ]),\n        .testTarget(\n            name: \"CellBaseTests\",\n            dependencies: [\n                \"CellBase\",\n                .target(name: \"CodableHelpers\"),\n                .target(name: \"HavenPerspectiveSchemas\"),\n                .target(name: \"PurposeInterestBenchmarkSupport\"),\n                \"CellApple\",\n                .target(name: \"CellVapor\", condition: .when(platforms: [.macOS])),\n            ],\n            exclude: [\"Fixtures\"]\n        ),\n        .testTarget(\n            name: \"HavenCommonsTests\",\n            dependencies: [\n                .target(name: \"TaxonomyResolver\"),\n                .target(name: \"KeyPathResolver\"),\n                .target(name: \"HavenPerspectiveSchemas\"),\n            ],\n            path: \"Tests/HavenCommonsTests\"\n        ),\n    ]\n)\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "CellProtocol",
+      "log",
+      "origin/main",
+      "--format=%H %ad %s",
+      "--date=iso-strict",
+      "-S",
+      "CorrespondenceOuterEnvelope",
+      "--",
+      "Sources"
+    ],
+    "exit": 0,
+    "stdout": "b5b7282b495e96a7899a189087592581426f4bfb 2026-09-18T00:13:56+02:00 Integrate existing runtime features for the production recovery (#40)\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "CellProtocol",
+      "log",
+      "origin/main",
+      "--format=%H %ad %s",
+      "--date=iso-strict",
+      "-S",
+      "CorrespondenceStoredEnvelope",
+      "--",
+      "Sources"
+    ],
+    "exit": 0,
+    "stdout": "b5b7282b495e96a7899a189087592581426f4bfb 2026-09-18T00:13:56+02:00 Integrate existing runtime features for the production recovery (#40)\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "CellProtocol",
+      "log",
+      "origin/main",
+      "--format=%H %ad %s",
+      "--date=iso-strict",
+      "-S",
+      "CorrespondenceOpenedEnvelope",
+      "--",
+      "Sources"
+    ],
+    "exit": 0,
+    "stdout": "b5b7282b495e96a7899a189087592581426f4bfb 2026-09-18T00:13:56+02:00 Integrate existing runtime features for the production recovery (#40)\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "CellProtocol",
+      "log",
+      "origin/main",
+      "--format=%H %ad %s",
+      "--date=iso-strict",
+      "-S",
+      "CorrespondencePreparedEnvelope",
+      "--",
+      "Sources"
+    ],
+    "exit": 0,
+    "stdout": "b5b7282b495e96a7899a189087592581426f4bfb 2026-09-18T00:13:56+02:00 Integrate existing runtime features for the production recovery (#40)\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "CellProtocol",
+      "log",
+      "origin/main",
+      "--format=%H %ad %s",
+      "--date=iso-strict",
+      "-S",
+      "CorrespondenceSendRequest",
+      "--",
+      "Sources"
+    ],
+    "exit": 0,
+    "stdout": "b5b7282b495e96a7899a189087592581426f4bfb 2026-09-18T00:13:56+02:00 Integrate existing runtime features for the production recovery (#40)\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "CellProtocol",
+      "log",
+      "origin/main",
+      "--format=%H %ad %s",
+      "--date=iso-strict",
+      "-S",
+      "CorrespondenceAgreementTemplates",
+      "--",
+      "Sources"
+    ],
+    "exit": 0,
+    "stdout": "b5b7282b495e96a7899a189087592581426f4bfb 2026-09-18T00:13:56+02:00 Integrate existing runtime features for the production recovery (#40)\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "CellProtocol",
+      "log",
+      "origin/main",
+      "--format=%H %ad %s",
+      "--date=iso-strict",
+      "-S",
+      "CorrespondenceEnvelopeUtility",
+      "--",
+      "Sources"
+    ],
+    "exit": 0,
+    "stdout": "b5b7282b495e96a7899a189087592581426f4bfb 2026-09-18T00:13:56+02:00 Integrate existing runtime features for the production recovery (#40)\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "CellProtocol",
+      "grep",
+      "-n",
+      "-E",
+      "public (struct|enum) (CorrespondenceOuterEnvelope|CorrespondenceStoredEnvelope|CorrespondenceOpenedEnvelope|CorrespondencePreparedEnvelope|CorrespondenceSendRequest|CorrespondenceAgreementTemplates|CorrespondenceEnvelopeUtility)",
+      "4107d27",
+      "--",
+      "Sources"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "CellProtocol",
+      "grep",
+      "-n",
+      "-E",
+      "public (struct|enum) (CorrespondenceOuterEnvelope|CorrespondenceStoredEnvelope|CorrespondenceOpenedEnvelope|CorrespondencePreparedEnvelope|CorrespondenceSendRequest|CorrespondenceAgreementTemplates|CorrespondenceEnvelopeUtility)",
+      "b5b7282^",
+      "--",
+      "Sources"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "CellProtocol",
+      "grep",
+      "-n",
+      "-E",
+      "public (struct|enum) (CorrespondenceOuterEnvelope|CorrespondenceStoredEnvelope|CorrespondenceOpenedEnvelope|CorrespondencePreparedEnvelope|CorrespondenceSendRequest|CorrespondenceAgreementTemplates|CorrespondenceEnvelopeUtility)",
+      "b5b7282",
+      "--",
+      "Sources"
+    ],
+    "exit": 0,
+    "stdout": "b5b7282:Sources/CellBase/Cells/Correspondence/CorrespondenceAgreementTemplates.swift:6:public enum CorrespondenceAgreementTemplates {\nb5b7282:Sources/CellBase/Cells/Correspondence/CorrespondenceEnvelope.swift:17:public struct CorrespondenceOuterEnvelope: Codable, Equatable, Sendable {\nb5b7282:Sources/CellBase/Cells/Correspondence/CorrespondenceEnvelope.swift:116:public struct CorrespondencePreparedEnvelope: Codable, Equatable, Sendable {\nb5b7282:Sources/CellBase/Cells/Correspondence/CorrespondenceEnvelope.swift:132:public struct CorrespondenceSendRequest: Codable, Equatable, Sendable {\nb5b7282:Sources/CellBase/Cells/Correspondence/CorrespondenceEnvelope.swift:156:public struct CorrespondenceStoredEnvelope: Codable, Equatable, Sendable {\nb5b7282:Sources/CellBase/Cells/Correspondence/CorrespondenceEnvelope.swift:166:public struct CorrespondenceOpenedEnvelope {\nb5b7282:Sources/CellBase/Cells/Correspondence/CorrespondenceEnvelope.swift:178:public enum CorrespondenceEnvelopeUtility {\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "HavenAgentD/.build-correspondence-pilot/arm64/checkouts/Sprout",
+      "show",
+      "473d6998bf5417c6355de053fe806ebdf91383e6:Package.swift"
+    ],
+    "exit": 0,
+    "stdout": "// swift-tools-version: 6.0\nimport PackageDescription\n\nvar products: [Product] = [\n    .library(name: \"SproutCore\", targets: [\"SproutCore\"]),\n    .library(name: \"SproutCrypto\", targets: [\"SproutCrypto\"]),\n    .library(name: \"SproutEconomics\", targets: [\"SproutEconomics\"]),\n    .library(name: \"SproutStorage\", targets: [\"SproutStorage\"]),\n    .library(name: \"SproutTransport\", targets: [\"SproutTransport\"]),\n    .library(name: \"SproutBridge\", targets: [\"SproutBridge\"]),\n    .library(name: \"SproutResolverAdapter\", targets: [\"SproutResolverAdapter\"]),\n    .library(name: \"SproutAdminSupport\", targets: [\"SproutAdminSupport\"]),\n    .library(name: \"SproutAppSupport\", targets: [\"SproutAppSupport\"]),\n    .executable(name: \"sprout-cli\", targets: [\"sproutCLI\"]),\n    .executable(name: \"sprout\", targets: [\"sproutCLI\"]),\n    .executable(name: \"sprout-updater\", targets: [\"sproutUpdater\"]),\n    .executable(name: \"sprout-admin\", targets: [\"sproutAdmin\"])\n]\n\nvar targets: [Target] = [\n        .target(\n            name: \"SproutCrypto\",\n            dependencies: [\n                .product(name: \"Crypto\", package: \"swift-crypto\")\n            ],\n            path: \"Packages/SproutCrypto/Sources/SproutCrypto\"\n        ),\n        .target(\n            name: \"SproutEconomics\",\n            dependencies: [\"SproutTransport\"],\n            path: \"Packages/SproutEconomics/Sources/SproutEconomics\"\n        ),\n        .target(\n            name: \"SproutStorage\",\n            dependencies: [\"SproutCrypto\"],\n            path: \"Packages/SproutStorage/Sources/SproutStorage\"\n        ),\n        .target(\n            name: \"SproutTransport\",\n            dependencies: [\"SproutCrypto\"],\n            path: \"Packages/SproutTransport/Sources/SproutTransport\"\n        ),\n        .target(\n            name: \"SproutResolverAdapter\",\n            dependencies: [\"SproutCrypto\", \"SproutEconomics\"],\n            path: \"Packages/SproutResolverAdapter/Sources/SproutResolverAdapter\"\n        ),\n        .target(\n            name: \"SproutAdminSupport\",\n            dependencies: [\n                \"SproutCrypto\",\n                \"SproutResolverAdapter\",\n                \"SproutCore\",\n                .product(name: \"Crypto\", package: \"swift-crypto\")\n            ],\n            path: \"Packages/SproutAdminSupport/Sources/SproutAdminSupport\"\n        ),\n        .target(\n            name: \"SproutBridge\",\n            dependencies: [\n                \"SproutCrypto\",\n                \"SproutTransport\"\n            ],\n            path: \"Packages/SproutBridge/Sources/SproutBridge\"\n        ),\n        .target(\n            name: \"SproutCore\",\n            dependencies: [\n                \"SproutCrypto\",\n                \"SproutStorage\",\n                \"SproutTransport\",\n                \"SproutBridge\",\n                \"SproutResolverAdapter\"\n            ],\n            path: \"Packages/SproutCore/Sources/SproutCore\"\n        ),\n        .target(\n            name: \"SproutAppSupport\",\n            dependencies: [\n                \"SproutCore\",\n                \"SproutCrypto\"\n            ],\n            path: \"Packages/SproutAppSupport/Sources/SproutAppSupport\"\n        ),\n        .executableTarget(\n            name: \"sproutCLI\",\n            dependencies: [\n                \"SproutCore\",\n                \"SproutCrypto\",\n                \"SproutEconomics\",\n                \"SproutBridge\",\n                \"SproutResolverAdapter\",\n                \"SproutStorage\"\n            ],\n            path: \"Apps/sprout-cli/Sources/sprout-cli\"\n        ),\n        .executableTarget(\n            name: \"sproutUpdater\",\n            dependencies: [\n                \"SproutCore\",\n                \"SproutCrypto\"\n            ],\n            path: \"Apps/sprout-updater/Sources/sprout-updater\"\n        ),\n        .executableTarget(\n            name: \"sproutAdmin\",\n            dependencies: [\n                \"SproutAdminSupport\",\n                \"SproutCrypto\",\n                \"SproutResolverAdapter\"\n            ],\n            path: \"Apps/sprout-admin/Sources/sprout-admin\"\n        ),\n        .testTarget(\n            name: \"SproutCryptoTests\",\n            dependencies: [\"SproutCrypto\"],\n            path: \"Tests/SproutCryptoTests\"\n        ),\n        .testTarget(\n            name: \"SproutEconomicsTests\",\n            dependencies: [\"SproutEconomics\"],\n            path: \"Tests/SproutEconomicsTests\"\n        ),\n        .testTarget(\n            name: \"SproutCoreTests\",\n            dependencies: [\n                \"SproutCore\",\n                \"SproutCrypto\",\n                \"SproutEconomics\",\n                \"SproutBridge\",\n                \"SproutResolverAdapter\",\n                \"SproutStorage\",\n                \"SproutTransport\"\n            ],\n            path: \"Tests/SproutCoreTests\"\n        ),\n        .testTarget(\n            name: \"SproutAppSupportTests\",\n            dependencies: [\n                \"SproutAppSupport\",\n                \"SproutCore\",\n                \"SproutCrypto\",\n                \"SproutResolverAdapter\"\n            ],\n            path: \"Tests/SproutAppSupportTests\"\n        ),\n        .testTarget(\n            name: \"SproutBridgeTests\",\n            dependencies: [\"SproutBridge\", \"SproutCrypto\"],\n            path: \"Tests/SproutBridgeTests\"\n        ),\n        .testTarget(\n            name: \"SproutAdminSupportTests\",\n            dependencies: [\n                \"SproutAdminSupport\",\n                \"SproutCrypto\",\n                \"SproutCore\",\n                \"SproutResolverAdapter\"\n            ],\n            path: \"Tests/SproutAdminSupportTests\"\n        )\n]\n\n#if os(macOS)\nproducts.append(.executable(name: \"sprout-macos\", targets: [\"sproutMacOS\"]))\ntargets.append(\n    .executableTarget(\n        name: \"sproutMacOS\",\n        dependencies: [\"SproutAppSupport\"],\n        path: \"Apps/sprout-macos/Sources/sprout-macos\"\n    )\n)\n#endif\n\nlet package = Package(\n    name: \"sprout\",\n    platforms: [\n        .macOS(.v13),\n        .iOS(.v16)\n    ],\n    products: products,\n    dependencies: [\n        .package(url: \"https://github.com/apple/swift-crypto.git\", from: \"3.15.1\")\n    ],\n    targets: targets\n)\n",
+    "stderr": ""
+  }
+]

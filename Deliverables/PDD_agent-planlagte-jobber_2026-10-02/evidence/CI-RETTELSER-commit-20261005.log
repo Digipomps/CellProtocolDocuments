@@ -1,0 +1,106 @@
+job planlagte-jobber-ci-rettelser-commit-20261005 started 2026-10-05T19:38:49+00:00 in /Users/kjetil/Build/Digipomps/HAVEN/HavenAgentD/.worktrees/planlagte-jobber-20261002
+
+=== STEP foer: git status --short --branch
+## claude/planlagte-jobber-20261002...origin/claude/planlagte-jobber-20261002
+ M Docs/ScheduledEvents.md
+ M Sources/HavenAgentRuntime/ScheduledEventService.swift
+ M Sources/HavenMacAutomation/BoundedProcessRunner.swift
+ M Tests/HavenAgentRuntimeTests/ScheduledEventScheduleTests.swift
+ M Tests/HavenMacAutomationTests/BoundedProcessRunnerTests.swift
+=== STEP foer: ok exit=0 in 0.1s
+
+=== STEP hode: git rev-parse HEAD
+653fb87a0a0b43658af427f28b0e4a4c6f5f58a8
+=== STEP hode: ok exit=0 in 0.0s
+
+=== STEP stil: git diff --check
+=== STEP stil: ok exit=0 in 0.1s
+
+=== STEP legg-til: git add -- Docs/ScheduledEvents.md Sources/HavenAgentRuntime/ScheduledEventService.swift Sources/HavenMacAutomation/BoundedProcessRunner.swift Tests/HavenAgentRuntimeTests/ScheduledEventScheduleTests.swift Tests/HavenMacAutomationTests/BoundedProcessRunnerTests.swift
+=== STEP legg-til: ok exit=0 in 0.1s
+
+=== STEP klar: git diff --cached --stat --summary
+ Docs/ScheduledEvents.md                            |   8 +-
+ .../HavenAgentRuntime/ScheduledEventService.swift  |  83 +++++-
+ .../HavenMacAutomation/BoundedProcessRunner.swift  |   8 +-
+ .../ScheduledEventScheduleTests.swift              | 326 +++++++++++++++++----
+ .../BoundedProcessRunnerTests.swift                |  63 +++-
+ 5 files changed, 397 insertions(+), 91 deletions(-)
+=== STEP klar: ok exit=0 in 0.0s
+
+=== STEP commit: git commit -m Scheduler: a worker that outlived its service, rounds that were skipped, and four smaller faults
+
+CI for this branch stood until the 25-minute limit. An independent review
+of why found that the same stop is on main and on another branch, before
+any of the tests here, so the faults below are not what made CI red. They
+are what could have given the same symptom, and two of them are on main
+today.
+
+- The worker loop went through `self?` for both the round and the sleep.
+  A service that was let go of without stop() left a loop that never
+  waited and kept a thread for the rest of the process. The loop now holds
+  the service only while a round runs and sleeps through a copy of the
+  closure, and deinit cancels the worker. (On main today.)
+- runDueEvents() returned at once, having done nothing, when a round was
+  already running. It now waits for that round and then makes its own,
+  with its own look at the clock. (On main today.)
+- start() on a service whose worker already runs took the worker's own
+  run for an interrupted one and counted it twice. Only the call that
+  takes the worker lock recovers interrupted runs.
+- The lock on the state file was waited for without end, on a thread
+  Swift concurrency shares. The wait is now five seconds, and the change
+  then fails with "Cannot take the lock".
+- BoundedProcessRunner: a poll interval of zero made its loop spin. The
+  pause is never below a hundredth of a second.
+- Tests. In ScheduledEventScheduleTests, a test that starts a worker and
+  can fail before it reaches stop() now stops the worker on every way
+  out. The two such tests in ScheduledEventServiceTests are main's and
+  are left as they are; the first point makes them harmless. The process
+  tests have time limits of 1.5 seconds instead of 0.3 and 0.4, the suite
+  that changes signal handling for the whole process is serialized, and
+  a child that is left behind on purpose is killed also when the test
+  fails early.
+
+Four new tests, one for each of the first four points. Each goes red when
+its correction is taken out again (tried on Linux, Swift 6.2.3).
+
+macOS, this tree, Swift 6.4: swift build --build-tests without warnings,
+the scheduler suites three times and swift test --no-parallel twice: 398
+tests in 59 suites, none failed. The compiled tests also pass through the
+runner from 5dc229f on codex/file-provenance-20261002, in 28 of its 120
+seconds. Linux: the 75 tests in the four scheduler suites, ten runs of ten.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01NB8DrCWT7ToEcd6fwmXxda
+
+[claude/planlagte-jobber-20261002 ffe1aae] Scheduler: a worker that outlived its service, rounds that were skipped, and four smaller faults
+ 5 files changed, 397 insertions(+), 91 deletions(-)
+=== STEP commit: ok exit=0 in 0.1s
+
+=== STEP logg: git log --oneline -7
+ffe1aae Scheduler: a worker that outlived its service, rounds that were skipped, and four smaller faults
+653fb87 Installer output: the change that 04168c9 describes
+04168c9 Installer output: keep the punctuation around a masked identifier
+081d52d Correspondence watch: start the client with the profile's own directory
+9af7811 Scheduler: cron in a named time zone, bounded runs and counted misses
+1ee0abb Add the correspondence watch: unread mail and expiring access as menu bar cases
+ea558ba Merge pull request #27 from Digipomps/claude/mcp-oncomplete-20260929
+=== STEP logg: ok exit=0 in 0.0s
+
+=== STEP innhold: git show --stat --format=%H%n%an <%ae>%n%cI%n%s HEAD
+ffe1aae0bcc0a77ab64f9a8fe72e297ecf1a0a29
+Kjetil Hustveit <kjetil@digipomps.org>
+2026-10-05T21:38:50+02:00
+Scheduler: a worker that outlived its service, rounds that were skipped, and four smaller faults
+
+ Docs/ScheduledEvents.md                            |   8 +-
+ .../HavenAgentRuntime/ScheduledEventService.swift  |  83 +++++-
+ .../HavenMacAutomation/BoundedProcessRunner.swift  |   8 +-
+ .../ScheduledEventScheduleTests.swift              | 326 +++++++++++++++++----
+ .../BoundedProcessRunnerTests.swift                |  63 +++-
+ 5 files changed, 397 insertions(+), 91 deletions(-)
+=== STEP innhold: ok exit=0 in 0.1s
+
+=== STEP etter: git status --short --branch
+## claude/planlagte-jobber-20261002...origin/claude/planlagte-jobber-20261002 [ahead 1]
+=== STEP etter: ok exit=0 in 0.1s

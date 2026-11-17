@@ -1,0 +1,864 @@
+warning: /Users/kjetil/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/kjetil/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: '_wt-bro-kanal-auth-20260927': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Provisioning 1 / 169]
+[Using on-disk description]
+[1 / 113] OpenCombineFoundation
+[1 / 43] HavenCommonsTests-product
+[2 / 25] CellBase
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/Cells/Bridging/BridgeBase.swift:762:53: warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+ 748 |         self.connectPublisher = connectPublisher
+ 749 |         
+ 750 |         Task {
+     |              |- note: 'self' implicitly strongly captured here
+     |              `- note: add 'self' as a capture list item to silence
+ 751 |             if let identity = context.identity,
+ 752 |                let connectPublisher = self.connectPublisher
+     :
+ 760 |                         connectPublisher.send(completion: .failure(ConnectError.cancelled ))
+ 761 |                     })
+ 762 |                     .sink(receiveCompletion: {[weak self] completion in
+     |                                                     |- warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+     |                                                     `- note: explicitly assign the capture list item to silence
+ 763 |                         bridgeLog("Connect callback publisher completed")
+ 764 |                         connectPublisher.send(completion: .finished)
+
+[#ImplicitStrongCapture]: <https://docs.swift.org/compiler/documentation/diagnostics/implicit-strong-capture>
+[4 / 27] CellBase
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PersistingCells/EntityRelationRecordV1.swift:321:16: warning: stored property 'entityRepresentation' of 'Sendable'-conforming struct 'EntityRelationRecord' contains non-Sendable type 'EntityRepresentation'; this is an error in the Swift 6 language mode
+ 319 |     /// Canonical owner-held knowledge when present. The legacy subject/tags/
+ 320 |     /// purposeRefs remain readable for existing clients and import adapters.
+ 321 |     public var entityRepresentation: EntityRepresentation?
+     |                `- warning: stored property 'entityRepresentation' of 'Sendable'-conforming struct 'EntityRelationRecord' contains non-Sendable type 'EntityRepresentation'; this is an error in the Swift 6 language mode
+ 322 | 
+ 323 |     public init(
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/EntityRepresentation.swift:61:14: note: class 'EntityRepresentation' does not conform to the 'Sendable' protocol
+ 59 | 
+ 60 | 
+ 61 | public class EntityRepresentation:  PerspectiveNodeImpl {
+    |              `- note: class 'EntityRepresentation' does not conform to the 'Sendable' protocol
+ 62 | 
+ 63 |     var fulfilled: Fullfilled = Fullfilled() // Until Interests and Purposes are moved
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/ClaimComposition.swift:36:16: warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimCounter' has non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 34 | public struct ClaimCounter: Codable, Equatable, Sendable {
+ 35 |     public var role: ClaimCounterRole
+ 36 |     public var composition: ClaimComposition
+    |                `- warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimCounter' has non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 37 | 
+ 38 |     public init(role: ClaimCounterRole, composition: ClaimComposition) {
+    :
+187 | }
+188 | 
+189 | public indirect enum ClaimComposition: Codable, Equatable {
+    |                      `- note: consider making enum 'ClaimComposition' conform to the 'Sendable' protocol
+190 |     case claim(ClaimCompositionLeaf)
+191 |     // allOf: linked premises, weakest link decides the score.
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/ClaimDefinition.swift:91:16: warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimDefinition' contains non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 89 |     public var goalID: String?
+ 90 |     public var supports: [ClaimSupportNode]
+ 91 |     public var composition: ClaimComposition?
+    |                `- warning: stored property 'composition' of 'Sendable'-conforming struct 'ClaimDefinition' contains non-Sendable type 'ClaimComposition'; this is an error in the Swift 6 language mode
+ 92 |     public var tags: [String]
+ 93 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/ClaimComposition.swift:189:22: note: consider making enum 'ClaimComposition' conform to the 'Sendable' protocol
+187 | }
+188 | 
+189 | public indirect enum ClaimComposition: Codable, Equatable {
+    |                      `- note: consider making enum 'ClaimComposition' conform to the 'Sendable' protocol
+190 |     case claim(ClaimCompositionLeaf)
+191 |     // allOf: linked premises, weakest link decides the score.
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/PerspectiveEntityProjection.swift:30:16: warning: stored property 'entities' of 'Sendable'-conforming struct 'PerspectiveEntityProjection' contains non-Sendable type 'Weight<EntityRepresentation>'; this is an error in the Swift 6 language mode
+ 28 |     /// delayed write cannot resurrect entities a newer one removed.
+ 29 |     public let epoch: Int
+ 30 |     public let entities: [Weight<EntityRepresentation>]
+    |                `- warning: stored property 'entities' of 'Sendable'-conforming struct 'PerspectiveEntityProjection' contains non-Sendable type 'Weight<EntityRepresentation>'; this is an error in the Swift 6 language mode
+ 31 | 
+ 32 |     public init(source: String, epoch: Int, entities: [Weight<EntityRepresentation>]) {
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/Weight.swift:13:15: note: consider making generic struct 'Weight' conform to the 'Sendable' protocol
+ 11 | import Foundation
+ 12 | 
+ 13 | public struct Weight<T: PerspectiveNode & Codable> :  Weighted, Codable {
+    |               `- note: consider making generic struct 'Weight' conform to the 'Sendable' protocol
+ 14 |     
+ 15 |     
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/PurposeAndInterest/RelationalLearningModels.swift:95:16: warning: stored property 'payload' of 'Sendable'-conforming struct 'RelationalLearningEventEnvelope' contains non-Sendable type 'ValueType'; this is an error in the Swift 6 language mode
+ 93 |     public var schemaVersion: String
+ 94 |     public var emittedAt: TimeInterval
+ 95 |     public var payload: Object
+    |                `- warning: stored property 'payload' of 'Sendable'-conforming struct 'RelationalLearningEventEnvelope' contains non-Sendable type 'ValueType'; this is an error in the Swift 6 language mode
+ 96 | 
+ 97 |     public init(eventType: RelationalLearningEventType,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/ValueTypes/ValueType.swift:11:22: note: consider making enum 'ValueType' conform to the 'Sendable' protocol
+  9 | #endif
+ 10 | 
+ 11 | public indirect enum ValueType: Codable {
+    |                      `- note: consider making enum 'ValueType' conform to the 'Sendable' protocol
+ 12 |     case flowElement(FlowElement)
+ 13 |     case bool(Bool)
+[8 / 24]
+[14 / 17] CellVapor-product
+[15 / 17] ReferenceLoadBenchmark-product
+[16 / 17] CellBaseTests-product
+[18 / 20] CellBaseTests-product
+[21 / 21] haven-commons-product
+Build complete! (5,86 sek)
+Test Suite 'Selected tests' started at 2026-09-29 03:24:37.036.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-09-29 03:24:37.037.
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-09-29 03:24:37.037.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 03:24:37.037.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 03:24:37.101.
+Test Suite 'CellNearbyTests.xctest' started at 2026-09-29 03:24:37.101.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-09-29 03:24:37.102.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 03:24:37.102.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 03:24:37.162.
+Test Suite 'CellBaseTests.xctest' started at 2026-09-29 03:24:37.163.
+Test Suite 'AppleBridgeTransportTests' started at 2026-09-29 03:24:37.163.
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testCopiedRealLocalKeyOnCommandAndResponseNeverObtainsSigner]' started.
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testCopiedRealLocalKeyOnCommandAndResponseNeverObtainsSigner]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testDisconnectAndErrorCleanupUnregisterDelegateOnlyOnce]' started.
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testDisconnectAndErrorCleanupUnregisterDelegateOnlyOnce]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testIncomingCommandResponseAndUnknownCommandRouteWithoutCrash]' started.
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testIncomingCommandResponseAndUnknownCommandRouteWithoutCrash]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testInjectedConnectionBecomesDelegateAndSendsBinaryByDefault]' started.
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testInjectedConnectionBecomesDelegateAndSendsBinaryByDefault]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testMissingDelegateNeverFallsBackToAppleVault]' started.
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testMissingDelegateNeverFallsBackToAppleVault]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testOversizedInboundPayloadIsRejectedBeforeDecode]' started.
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testOversizedInboundPayloadIsRejectedBeforeDecode]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testSendDataUsesTextFramesWhenConfigured]' started.
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testSendDataUsesTextFramesWhenConfigured]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testSendDataWithoutConnectionCleansUpOnlyOnce]' started.
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testSendDataWithoutConnectionCleansUpOnlyOnce]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testSendFailureCleansUpAndRethrows]' started.
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testSendFailureCleansUpAndRethrows]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testTransportDiagnosticsNeverLogErrorDescriptionsOrPayloads]' started.
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testTransportDiagnosticsNeverLogErrorDescriptionsOrPayloads]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testVisitingIdentityUsesBridgeIdentityVaultWhenDelegateIsBridge]' started.
+Test Case '-[CellBaseTests.AppleBridgeTransportTests testVisitingIdentityUsesBridgeIdentityVaultWhenDelegateIsBridge]' passed (0.000 seconds).
+Test Suite 'AppleBridgeTransportTests' passed at 2026-09-29 03:24:37.167.
+	 Executed 11 tests, with 0 failures (0 unexpected) in 0.004 (0.004) seconds
+Test Suite 'BridgeCanonicalKeyQuotaTests' started at 2026-09-29 03:24:37.167.
+Test Case '-[CellBaseTests.BridgeCanonicalKeyQuotaTests testCanonicalKeyNormalizesP256AndEd25519ButPreservesAuthorizationPrincipal]' started.
+Test Case '-[CellBaseTests.BridgeCanonicalKeyQuotaTests testCanonicalKeyNormalizesP256AndEd25519ButPreservesAuthorizationPrincipal]' passed (0.007 seconds).
+Test Case '-[CellBaseTests.BridgeCanonicalKeyQuotaTests testConnectionQuotaRejectsManyUUIDsAndEncodingsWithoutUndercountingForWSAndPeer]' started.
+Test Case '-[CellBaseTests.BridgeCanonicalKeyQuotaTests testConnectionQuotaRejectsManyUUIDsAndEncodingsWithoutUndercountingForWSAndPeer]' passed (0.034 seconds).
+Test Case '-[CellBaseTests.BridgeCanonicalKeyQuotaTests testOperationFeedAndChannelQuotasShareCanonicalKeyAcrossWSAndPeerAndRetainLeases]' started.
+Test Case '-[CellBaseTests.BridgeCanonicalKeyQuotaTests testOperationFeedAndChannelQuotasShareCanonicalKeyAcrossWSAndPeerAndRetainLeases]' passed (0.031 seconds).
+Test Case '-[CellBaseTests.BridgeCanonicalKeyQuotaTests testVerifiedHandshakeRateSurvivesUUIDEncodingDomainAndTransportRotation]' started.
+Test Case '-[CellBaseTests.BridgeCanonicalKeyQuotaTests testVerifiedHandshakeRateSurvivesUUIDEncodingDomainAndTransportRotation]' passed (0.033 seconds).
+Test Suite 'BridgeCanonicalKeyQuotaTests' passed at 2026-09-29 03:24:37.273.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.106 (0.106) seconds
+Test Suite 'BridgeChannelAuthenticationTests' started at 2026-09-29 03:24:37.273.
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testBoundedReplayStoreDoesNotEvictUnexpiredUsedNonce]' started.
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testBoundedReplayStoreDoesNotEvictUnexpiredUsedNonce]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testCanonicalDecodeRejectsIgnoredAndDuplicateFieldsAndOversize]' started.
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testCanonicalDecodeRejectsIgnoredAndDuplicateFieldsAndOversize]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testCanonicalEndpointRejectsInsecureNonlocalAndAmbiguousTargets]' started.
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testCanonicalEndpointRejectsInsecureNonlocalAndAmbiguousTargets]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testClientRejectsNoncanonicalTranscriptMutationsBeforeSigning]' started.
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testClientRejectsNoncanonicalTranscriptMutationsBeforeSigning]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testConnectLeaseCannotSignTwiceOrAfterCancellation]' started.
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testConnectLeaseCannotSignTwiceOrAfterCancellation]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testDeadlineRecheckedAfterVerificationAndRevocation]' started.
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testDeadlineRecheckedAfterVerificationAndRevocation]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testDescriptorAloneAndForgedSignatureCannotActivate]' started.
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testDescriptorAloneAndForgedSignatureCannotActivate]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testImmutablePrincipalRejectsSameUUIDWithAnotherKeyNilAndAnotherUUID]' started.
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testImmutablePrincipalRejectsSameUUIDWithAnotherKeyNilAndAnotherUUID]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testMonotonicChannelExpiryWithStationaryWallClock]' started.
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testMonotonicChannelExpiryWithStationaryWallClock]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testProofFromOtherInstanceOrBeforeRestartNeverMatchesNewPendingState]' started.
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testProofFromOtherInstanceOrBeforeRestartNeverMatchesNewPendingState]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testQuotasAreGlobalPerSourceAndPerProvenKeyAndReleaseOnClose]' started.
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testQuotasAreGlobalPerSourceAndPerProvenKeyAndReleaseOnClose]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testRateLimitsSurviveCloseAndDoNotUseUnprovedVictimIdentity]' started.
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testRateLimitsSurviveCloseAndDoNotUseUnprovedVictimIdentity]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testReplayWrongConnectionGenerationAndParallelConsume]' started.
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testReplayWrongConnectionGenerationAndParallelConsume]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testRoundTripHasOnlyPublicIdentityAndDoesNotConsultServerVault]' started.
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testRoundTripHasOnlyPublicIdentityAndDoesNotConsultServerVault]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testSelfConsistentClockSkewBoundariesAndExcessiveValidity]' started.
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testSelfConsistentClockSkewBoundariesAndExcessiveValidity]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testSelfConsistentWrongPublisherBridgeIDHostEnvironmentAndDomainAreRejected]' started.
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testSelfConsistentWrongPublisherBridgeIDHostEnvironmentAndDomainAreRejected]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testSharedResourceQuotasAndPendingAuditReleaseWithoutEviction]' started.
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testSharedResourceQuotasAndPendingAuditReleaseWithoutEviction]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testSuspendedLocalSignerCannotReturnProofAfterCancelOrClockExpiry]' started.
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testSuspendedLocalSignerCannotReturnProofAfterCancelOrClockExpiry]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testVerifyingConnectionRetainsPreAuthQuotaUntilActivation]' started.
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testVerifyingConnectionRetainsPreAuthQuotaUntilActivation]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testWallClockExpiryAndBackwardSkewCannotExtendMonotonicLease]' started.
+Test Case '-[CellBaseTests.BridgeChannelAuthenticationTests testWallClockExpiryAndBackwardSkewCannotExtendMonotonicLease]' passed (0.001 seconds).
+Test Suite 'BridgeChannelAuthenticationTests' passed at 2026-09-29 03:24:37.287.
+	 Executed 20 tests, with 0 failures (0 unexpected) in 0.014 (0.014) seconds
+Test Suite 'BridgeChannelLifetimeQuotaTests' started at 2026-09-29 03:24:37.287.
+Test Case '-[CellBaseTests.BridgeChannelLifetimeQuotaTests testDisconnectRetainsPolicyAndFactoryAdmissionUntilNoncooperativeWorkReturns]' started.
+Test Case '-[CellBaseTests.BridgeChannelLifetimeQuotaTests testDisconnectRetainsPolicyAndFactoryAdmissionUntilNoncooperativeWorkReturns]' passed (0.004 seconds).
+Test Case '-[CellBaseTests.BridgeChannelLifetimeQuotaTests testHangingPhysicalSendRetainsGlobalBytesAfterDisconnectAndReleasesOnlyOnReturn]' started.
+Test Case '-[CellBaseTests.BridgeChannelLifetimeQuotaTests testHangingPhysicalSendRetainsGlobalBytesAfterDisconnectAndReleasesOnlyOnReturn]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.BridgeChannelLifetimeQuotaTests testManyKeysCannotEscapeGlobalCellFeedChannelAndSendLimitsByDisconnecting]' started.
+Test Case '-[CellBaseTests.BridgeChannelLifetimeQuotaTests testManyKeysCannotEscapeGlobalCellFeedChannelAndSendLimitsByDisconnecting]' passed (0.023 seconds).
+Test Case '-[CellBaseTests.BridgeChannelLifetimeQuotaTests testMuxOpenRejectOpenKeepsExistingChannelReservationUntilOwnerCloses]' started.
+Test Case '-[CellBaseTests.BridgeChannelLifetimeQuotaTests testMuxOpenRejectOpenKeepsExistingChannelReservationUntilOwnerCloses]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeChannelLifetimeQuotaTests testPendingSendBarrierMatchesResponseFieldsIndependentOfJSONKeyOrder]' started.
+Test Case '-[CellBaseTests.BridgeChannelLifetimeQuotaTests testPendingSendBarrierMatchesResponseFieldsIndependentOfJSONKeyOrder]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeChannelLifetimeQuotaTests testPhysicalCloseRetainsConnectionReservationUntilAdapterReturns]' started.
+Test Case '-[CellBaseTests.BridgeChannelLifetimeQuotaTests testPhysicalCloseRetainsConnectionReservationUntilAdapterReturns]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeChannelLifetimeQuotaTests testRejectedLeaseNeverReleasesExistingOwnerForFeedAndChannelPerKeyAndGlobal]' started.
+Test Case '-[CellBaseTests.BridgeChannelLifetimeQuotaTests testRejectedLeaseNeverReleasesExistingOwnerForFeedAndChannelPerKeyAndGlobal]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeChannelLifetimeQuotaTests testWallExpiryDuringAwaitedPhysicalSendFailsAndReleasesBytesOnReturn]' started.
+Test Case '-[CellBaseTests.BridgeChannelLifetimeQuotaTests testWallExpiryDuringAwaitedPhysicalSendFailsAndReleasesBytesOnReturn]' passed (0.001 seconds).
+Test Suite 'BridgeChannelLifetimeQuotaTests' passed at 2026-09-29 03:24:37.322.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.035 (0.035) seconds
+Test Suite 'BridgeChannelProcessTests' started at 2026-09-29 03:24:37.322.
+Test Case '-[CellBaseTests.BridgeChannelProcessTests testIsolatedServerWorker]' started.
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgeChannelProcessTests.swift:15: -[CellBaseTests.BridgeChannelProcessTests testIsolatedServerWorker] : Test skipped - Subprocess worker; exercised by testSeparateServerProcessHasNoClientSecretInWirePersistenceOrLogs
+Test Case '-[CellBaseTests.BridgeChannelProcessTests testIsolatedServerWorker]' skipped (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeChannelProcessTests testSeparateServerProcessHasNoClientSecretInWirePersistenceOrLogs]' started.
+Test Case '-[CellBaseTests.BridgeChannelProcessTests testSeparateServerProcessHasNoClientSecretInWirePersistenceOrLogs]' passed (0.543 seconds).
+Test Suite 'BridgeChannelProcessTests' passed at 2026-09-29 03:24:37.866.
+	 Executed 2 tests, with 1 test skipped and 0 failures (0 unexpected) in 0.544 (0.544) seconds
+Test Suite 'BridgeChannelSequenceTests' started at 2026-09-29 03:24:37.866.
+Test Case '-[CellBaseTests.BridgeChannelSequenceTests testClientRejectsWellFormedWrongOrderRepeatedAndUnknownAuthenticationFrames]' started.
+Test Case '-[CellBaseTests.BridgeChannelSequenceTests testClientRejectsWellFormedWrongOrderRepeatedAndUnknownAuthenticationFrames]' passed (0.308 seconds).
+Test Case '-[CellBaseTests.BridgeChannelSequenceTests testServerRejectsWellFormedWrongOrderRepeatedAndUnknownAuthenticationFrames]' started.
+Test Case '-[CellBaseTests.BridgeChannelSequenceTests testServerRejectsWellFormedWrongOrderRepeatedAndUnknownAuthenticationFrames]' passed (0.021 seconds).
+Test Suite 'BridgeChannelSequenceTests' passed at 2026-09-29 03:24:38.196.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.329 (0.330) seconds
+Test Suite 'BridgeChannelTransportTests' started at 2026-09-29 03:24:38.196.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testAll29CommandsAndSeparateResponsesFailBeforeLookupOrCellInBothDirections]' started.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testAll29CommandsAndSeparateResponsesFailBeforeLookupOrCellInBothDirections]' passed (0.007 seconds).
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testAuthenticatedFeedStopsAtChannelRevocation]' started.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testAuthenticatedFeedStopsAtChannelRevocation]' passed (0.194 seconds).
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testAuthenticatedTransportPreservesCellGetSetFeedScopePurposeAndRevocation]' started.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testAuthenticatedTransportPreservesCellGetSetFeedScopePurposeAndRevocation]' passed (0.043 seconds).
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testCellActionsEnforceXGrantAndRealAttachWithPermissionDomainExpiryAndPurposeParity]' started.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testCellActionsEnforceXGrantAndRealAttachWithPermissionDomainExpiryAndPurposeParity]' passed (0.030 seconds).
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testClosingPendingMultiplexOpenPreservesAuthenticatedSibling]' started.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testClosingPendingMultiplexOpenPreservesAuthenticatedSibling]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testConcurrentFeedStartHasOneAdmissionAndCloseWinsSuspendedSubscription]' started.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testConcurrentFeedStartHasOneAdmissionAndCloseWinsSuspendedSubscription]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testConcurrentGetDuringSuspendedProofPolicyHasNoLookupOrCellCall]' started.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testConcurrentGetDuringSuspendedProofPolicyHasNoLookupOrCellCall]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testConfiguredBridgeDirectDispatchCannotBypassPhysicalAuth]' started.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testConfiguredBridgeDirectDispatchCannotBypassPhysicalAuth]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testKeyRevocationDuringCellOrSendAwaitStopsAffectedClientAndPreservesOtherClient]' started.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testKeyRevocationDuringCellOrSendAwaitStopsAffectedClientAndPreservesOtherClient]' passed (0.004 seconds).
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testLostWriteReplyDoesNotRetryMutationWhenClientReconnects]' started.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testLostWriteReplyDoesNotRetryMutationWhenClientReconnects]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testMultiplexOpenAndLaterCommandsAreBoundToPhysicalPrincipal]' started.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testMultiplexOpenAndLaterCommandsAreBoundToPhysicalPrincipal]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testRawSignAfterAuthenticationIsDeniedWithoutLocalPermit]' started.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testRawSignAfterAuthenticationIsDeniedWithoutLocalPermit]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testRealTwoEndpointHandshakeAndOwnerProofThenPrincipalSwap]' started.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testRealTwoEndpointHandshakeAndOwnerProofThenPrincipalSwap]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testRenewalReprovesIdentityAndLateOldCloseCannotRetireNewGeneration]' started.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testRenewalReprovesIdentityAndLateOldCloseCannotRetireNewGeneration]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testRetiredMultiplexGetSetAndSignDenialCannotReachReusedChannelOrCID]' started.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testRetiredMultiplexGetSetAndSignDenialCannotReachReusedChannelOrCID]' passed (0.004 seconds).
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testRevokeDuringAwaitedPolicyDoesNotCreateBridge]' started.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testRevokeDuringAwaitedPolicyDoesNotCreateBridge]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testSuspendedGetSetAndSignDenialStayOnOriginalPhysicalGenerationWithCIDCollision]' started.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testSuspendedGetSetAndSignDenialStayOnOriginalPhysicalGenerationWithCIDCollision]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testSuspendedOldReadCannotDeliverItsResponseOnReplacementTransport]' started.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testSuspendedOldReadCannotDeliverItsResponseOnReplacementTransport]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testSuspendedSignDenialCannotCrossActualDedicatedRenewal]' started.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testSuspendedSignDenialCannotCrossActualDedicatedRenewal]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testTransportLossFailsPendingGetAndDoesNotReplayIt]' started.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testTransportLossFailsPendingGetAndDoesNotReplayIt]' passed (0.009 seconds).
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testWireDescriptorVariantsCannotReachResolverOrCellAfterAuthenticatedPositiveControl]' started.
+Test Case '-[CellBaseTests.BridgeChannelTransportTests testWireDescriptorVariantsCannotReachResolverOrCellAfterAuthenticatedPositiveControl]' passed (0.005 seconds).
+Test Suite 'BridgeChannelTransportTests' passed at 2026-09-29 03:24:38.511.
+	 Executed 21 tests, with 0 failures (0 unexpected) in 0.314 (0.315) seconds
+Test Suite 'BridgeChannelWebSocketTests' started at 2026-09-29 03:24:38.511.
+Test Case '-[CellBaseTests.BridgeChannelWebSocketTests testCloseCancelsARealSocketStalledBeforeWebSocketUpgrade]' started.
+2026-09-29T03:24:38+0200 notice codes.vapor.application: [Vapor] Server started on http://127.0.0.1:65403
+2026-09-29T03:24:38+0200 info codes.vapor.application: request-id=20F16F8F-C012-4EF3-B9B8-35FD7F1C20A0 [Vapor] GET /stall
+Test Case '-[CellBaseTests.BridgeChannelWebSocketTests testCloseCancelsARealSocketStalledBeforeWebSocketUpgrade]' passed (0.004 seconds).
+Test Case '-[CellBaseTests.BridgeChannelWebSocketTests testVaporSocketRequiresProofThenPerformsProtectedReadWithNoServerSigner]' started.
+2026-09-29T03:24:38+0200 notice codes.vapor.application: [Vapor] Server started on http://127.0.0.1:65405
+2026-09-29T03:24:38+0200 info codes.vapor.application: request-id=4C545607-E673-4BE1-9823-EE0F7DC17122 [Vapor] GET /bridge
+2026-09-29T03:24:38+0200 info codes.vapor.application: request-id=1A99F905-F55B-45F7-B006-8E4BBF2075AD [Vapor] GET /bridge
+Test Case '-[CellBaseTests.BridgeChannelWebSocketTests testVaporSocketRequiresProofThenPerformsProtectedReadWithNoServerSigner]' passed (0.141 seconds).
+Test Suite 'BridgeChannelWebSocketTests' passed at 2026-09-29 03:24:38.656.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.145 (0.146) seconds
+Test Suite 'BridgeDescriptionConcurrencyTests' started at 2026-09-29 03:24:38.656.
+Test Case '-[CellBaseTests.BridgeDescriptionConcurrencyTests testOverlappingDescriptionResponsesAndAdvertisementsRetainCoherentSnapshots]' started.
+Test Case '-[CellBaseTests.BridgeDescriptionConcurrencyTests testOverlappingDescriptionResponsesAndAdvertisementsRetainCoherentSnapshots]' passed (0.070 seconds).
+Test Case '-[CellBaseTests.BridgeDescriptionConcurrencyTests testUnexpectedDescriptionPayloadDoesNotReplaceTheLastAcceptedSnapshot]' started.
+Test Case '-[CellBaseTests.BridgeDescriptionConcurrencyTests testUnexpectedDescriptionPayloadDoesNotReplaceTheLastAcceptedSnapshot]' passed (0.001 seconds).
+Test Suite 'BridgeDescriptionConcurrencyTests' passed at 2026-09-29 03:24:38.727.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.070 (0.070) seconds
+Test Suite 'BridgeDiagnosticPrivacyTests' started at 2026-09-29 03:24:38.727.
+Test Case '-[CellBaseTests.BridgeDiagnosticPrivacyTests testAgreementCommandUnknownCommandAndGetErrorDoNotLogPeerText]' started.
+Test Case '-[CellBaseTests.BridgeDiagnosticPrivacyTests testAgreementCommandUnknownCommandAndGetErrorDoNotLogPeerText]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeDiagnosticPrivacyTests testEveryPayloadMismatchAndUnknownResponseLogsMetadataWithoutDecryptedContent]' started.
+Test Case '-[CellBaseTests.BridgeDiagnosticPrivacyTests testEveryPayloadMismatchAndUnknownResponseLogsMetadataWithoutDecryptedContent]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeDiagnosticPrivacyTests testMalformedDescriptionBytesNeverEnterDiagnostics]' started.
+Test Case '-[CellBaseTests.BridgeDiagnosticPrivacyTests testMalformedDescriptionBytesNeverEnterDiagnostics]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeDiagnosticPrivacyTests testTransportErrorDescriptionsNeverEnterBaseDiagnostics]' started.
+Test Case '-[CellBaseTests.BridgeDiagnosticPrivacyTests testTransportErrorDescriptionsNeverEnterBaseDiagnostics]' passed (0.002 seconds).
+Test Suite 'BridgeDiagnosticPrivacyTests' passed at 2026-09-29 03:24:38.730.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.003 (0.003) seconds
+Test Suite 'BridgeFactoryLifetimeTests' started at 2026-09-29 03:24:38.730.
+Test Case '-[CellBaseTests.BridgeFactoryLifetimeTests testMuxLateFactoryRetiresResultWhenSessionCheckThrowsOrLogicalOpenIsCancelled]' started.
+Test Case '-[CellBaseTests.BridgeFactoryLifetimeTests testMuxLateFactoryRetiresResultWhenSessionCheckThrowsOrLogicalOpenIsCancelled]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeFactoryLifetimeTests testWSLateFactoryBoundBeforeOrAfterCloseRetiresSubscriptionExactlyOnce]' started.
+Test Case '-[CellBaseTests.BridgeFactoryLifetimeTests testWSLateFactoryBoundBeforeOrAfterCloseRetiresSubscriptionExactlyOnce]' passed (0.003 seconds).
+Test Suite 'BridgeFactoryLifetimeTests' passed at 2026-09-29 03:24:38.735.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.005 (0.005) seconds
+Test Suite 'BridgeIdentityBoundaryTests' started at 2026-09-29 03:24:38.735.
+Test Case '-[CellBaseTests.BridgeIdentityBoundaryTests testCopiedPublicOwnerCannotUseServerVaultForProtectedRead]' started.
+Test Case '-[CellBaseTests.BridgeIdentityBoundaryTests testCopiedPublicOwnerCannotUseServerVaultForProtectedRead]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeIdentityBoundaryTests testGuestCanCreateAndReadOwnSurfaceOverBridge]' started.
+Test Case '-[CellBaseTests.BridgeIdentityBoundaryTests testGuestCanCreateAndReadOwnSurfaceOverBridge]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeIdentityBoundaryTests testHouseCannotReadGuestDataOrUseCopiedGuestDescriptorOverBridge]' started.
+Test Case '-[CellBaseTests.BridgeIdentityBoundaryTests testHouseCannotReadGuestDataOrUseCopiedGuestDescriptorOverBridge]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeIdentityBoundaryTests testPairedBridgesCreateFreshGuestSurfaceOnlyWithinExplicitProofScopes]' started.
+Test Case '-[CellBaseTests.BridgeIdentityBoundaryTests testPairedBridgesCreateFreshGuestSurfaceOnlyWithinExplicitProofScopes]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.BridgeIdentityBoundaryTests testPeerThatControlsOwnerKeyCanStillReadThroughBridge]' started.
+Test Case '-[CellBaseTests.BridgeIdentityBoundaryTests testPeerThatControlsOwnerKeyCanStillReadThroughBridge]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeIdentityBoundaryTests testRevokingOneBridgeFeedPreservesTheOtherBridgeFeed]' started.
+Test Case '-[CellBaseTests.BridgeIdentityBoundaryTests testRevokingOneBridgeFeedPreservesTheOtherBridgeFeed]' passed (0.006 seconds).
+Test Case '-[CellBaseTests.BridgeIdentityBoundaryTests testSetResponseReflectsActualWriteSuccessAndFailure]' started.
+Test Case '-[CellBaseTests.BridgeIdentityBoundaryTests testSetResponseReflectsActualWriteSuccessAndFailure]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeIdentityBoundaryTests testTwoSerializedBridgeEndpointsReadWithClientProofThenCloseSigningAuthority]' started.
+Test Case '-[CellBaseTests.BridgeIdentityBoundaryTests testTwoSerializedBridgeEndpointsReadWithClientProofThenCloseSigningAuthority]' passed (0.001 seconds).
+Test Suite 'BridgeIdentityBoundaryTests' passed at 2026-09-29 03:24:38.752.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.017 (0.017) seconds
+Test Suite 'BridgeIdentityProofAuthorizationTests' started at 2026-09-29 03:24:38.752.
+Test Case '-[CellBaseTests.BridgeIdentityProofAuthorizationTests testActiveOperationRejectsWrongPrincipalDomainResourceActionAndAudience]' started.
+Test Case '-[CellBaseTests.BridgeIdentityProofAuthorizationTests testActiveOperationRejectsWrongPrincipalDomainResourceActionAndAudience]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeIdentityProofAuthorizationTests testDiscoveryCannotOverridePinnedScopeOrAuthorizeWithoutLocalOperation]' started.
+Test Case '-[CellBaseTests.BridgeIdentityProofAuthorizationTests testDiscoveryCannotOverridePinnedScopeOrAuthorizeWithoutLocalOperation]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeIdentityProofAuthorizationTests testProofAuthorityEndsOnResponseTimeoutOrTransportReset]' started.
+Test Case '-[CellBaseTests.BridgeIdentityProofAuthorizationTests testProofAuthorityEndsOnResponseTimeoutOrTransportReset]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeIdentityProofAuthorizationTests testRemoteDescriptorCannotCreateLocalProofAuthority]' started.
+Test Case '-[CellBaseTests.BridgeIdentityProofAuthorizationTests testRemoteDescriptorCannotCreateLocalProofAuthority]' passed (0.000 seconds).
+Test Suite 'BridgeIdentityProofAuthorizationTests' passed at 2026-09-29 03:24:38.753.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.001 (0.002) seconds
+Test Suite 'BridgeInboundPayloadValidatorTests' started at 2026-09-29 03:24:38.753.
+Test Case '-[CellBaseTests.BridgeInboundPayloadValidatorTests testAcceptsBoundedJSONAndIgnoresContainersInsideStrings]' started.
+Test Case '-[CellBaseTests.BridgeInboundPayloadValidatorTests testAcceptsBoundedJSONAndIgnoresContainersInsideStrings]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeInboundPayloadValidatorTests testRejectsMismatchedOrUnterminatedStructure]' started.
+Test Case '-[CellBaseTests.BridgeInboundPayloadValidatorTests testRejectsMismatchedOrUnterminatedStructure]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeInboundPayloadValidatorTests testRejectsPayloadAboveByteLimit]' started.
+Test Case '-[CellBaseTests.BridgeInboundPayloadValidatorTests testRejectsPayloadAboveByteLimit]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeInboundPayloadValidatorTests testRejectsPayloadAboveNestingLimit]' started.
+Test Case '-[CellBaseTests.BridgeInboundPayloadValidatorTests testRejectsPayloadAboveNestingLimit]' passed (0.000 seconds).
+Test Suite 'BridgeInboundPayloadValidatorTests' passed at 2026-09-29 03:24:38.754.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'BridgeMultiplexingTests' started at 2026-09-29 03:24:38.754.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testBridgeCommandV2MetadataRoundTripsWithoutChangingLegacyDefaults]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testBridgeCommandV2MetadataRoundTripsWithoutChangingLegacyDefaults]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testClientSessionBoundsIssuedChannelsAndReleasesReservationOnClose]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testClientSessionBoundsIssuedChannelsAndReleasesReservationOnClose]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testClientSessionRejectsResponseBeforeChannelIsOpened]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testClientSessionRejectsResponseBeforeChannelIsOpened]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testClientSessionReportsDetectedGapButStillDeliversFollowingFrame]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testClientSessionReportsDetectedGapButStillDeliversFollowingFrame]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testConnectionPoolEvictsLeastRecentlyUsedSessionAndClosesItAfterChannelRelease]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testConnectionPoolEvictsLeastRecentlyUsedSessionAndClosesItAfterChannelRelease]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testConnectionPoolRejectsUnboundSecurityKeyBeforeCreatingTransport]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testConnectionPoolRejectsUnboundSecurityKeyBeforeCreatingTransport]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testContinuityTrackerBoundsStreamsAndRejectsOversizedIdentifiers]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testContinuityTrackerBoundsStreamsAndRejectsOversizedIdentifiers]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testContinuityTrackerDetectsGapWithoutClaimingReplay]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testContinuityTrackerDetectsGapWithoutClaimingReplay]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testParallelResolverLookupsShareSuspendedAuthenticatedHandshakeAndPrincipal]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testParallelResolverLookupsShareSuspendedAuthenticatedHandshakeAndPrincipal]' passed (0.431 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testPoolDoesNotSharePhysicalSessionAcrossSecurityIdentities]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testPoolDoesNotSharePhysicalSessionAcrossSecurityIdentities]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testPoolResetForHostRetiresOnlyMatchingRemoteSessions]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testPoolResetForHostRetiresOnlyMatchingRemoteSessions]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testRepeatedChannelReuseBoundsOutboundStreamHistoryAndKeepsSiblingSequence]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testRepeatedChannelReuseBoundsOutboundStreamHistoryAndKeepsSiblingSequence]' passed (0.161 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testRepeatedStreamRemovalBoundsBackingHistoryAndPreservesSiblingWatermark]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testRepeatedStreamRemovalBoundsBackingHistoryAndPreservesSiblingWatermark]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testResolverMultiplexRouteReplacementKeepsNewGenerationSessionUsable]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testResolverMultiplexRouteReplacementKeepsNewGenerationSessionUsable]' passed (0.261 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testResolverMultiplexRouteUsesOneSessionURLForTwoRemoteCells]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testResolverMultiplexRouteUsesOneSessionURLForTwoRemoteCells]' passed (0.146 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionAddsPerStreamSequenceWatermarksToFlowFrames]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionAddsPerStreamSequenceWatermarksToFlowFrames]' passed (0.005 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionEnforcesChannelCapacityWithStableEvent]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionEnforcesChannelCapacityWithStableEvent]' passed (0.004 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionRejectsIdentityWithoutSigningKeyBeforeCallingFactory]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionRejectsIdentityWithoutSigningKeyBeforeCallingFactory]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionRejectsRemoteTargetAuthorityBeforeCallingFactory]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionRejectsRemoteTargetAuthorityBeforeCallingFactory]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionRemovesInsertedChannelWhenOpenedFrameCannotBeSent]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionRemovesInsertedChannelWhenOpenedFrameCannotBeSent]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testTwoRemoteBridgesShareOnePhysicalSessionAndKeepResponsesOnTheirChannels]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testTwoRemoteBridgesShareOnePhysicalSessionAndKeepResponsesOnTheirChannels]' passed (0.045 seconds).
+Test Suite 'BridgeMultiplexingTests' passed at 2026-09-29 03:24:39.820.
+	 Executed 21 tests, with 0 failures (0 unexpected) in 1.064 (1.066) seconds
+Test Suite 'BridgeMuxSendLifetimeTests' started at 2026-09-29 03:24:39.820.
+Test Case '-[CellBaseTests.BridgeMuxSendLifetimeTests testWSMuxHeldPhysicalSubmissionFencesReusedIDAndCIDWhileSiblingWorks]' started.
+Test Case '-[CellBaseTests.BridgeMuxSendLifetimeTests testWSMuxHeldPhysicalSubmissionFencesReusedIDAndCIDWhileSiblingWorks]' passed (0.007 seconds).
+Test Suite 'BridgeMuxSendLifetimeTests' passed at 2026-09-29 03:24:39.827.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.007 (0.008) seconds
+Test Suite 'BridgePeerRecordLayerTests' started at 2026-09-29 03:24:39.827.
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testCounterExhaustionClosesBeforeWrapInBothDirections]' started.
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testCounterExhaustionClosesBeforeWrapInBothDirections]' passed (0.005 seconds).
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testExactFrameBoundsAndFailureAreTerminal]' started.
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testExactFrameBoundsAndFailureAreTerminal]' passed (0.012 seconds).
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testRFC7748AndIndependentHKDFAndRecordVectors]' started.
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testRFC7748AndIndependentHKDFAndRecordVectors]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testRFC8439AEADKnownAnswer]' started.
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testRFC8439AEADKnownAnswer]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testSmallOrderPublicKeysAreRejected]' started.
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testSmallOrderPublicKeysAreRejected]' passed (0.001 seconds).
+Test Suite 'BridgePeerRecordLayerTests' passed at 2026-09-29 03:24:39.849.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.021 (0.021) seconds
+Test Suite 'BridgePeerV3Tests' started at 2026-09-29 03:24:39.849.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testActiveInitiatorCanReadResponderButUnrelatedRelayDHCannot]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testActiveInitiatorCanReadResponderButUnrelatedRelayDHCannot]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testAuthenticatedInnerFieldMutationsRequireMACSignatureAndFrozenContext]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testAuthenticatedInnerFieldMutationsRequireMACSignatureAndFrozenContext]' passed (0.073 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCanonicalEnvelopeAndPaddingRejectEveryAlternativeEncoding]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCanonicalEnvelopeAndPaddingRejectEveryAlternativeEncoding]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCloseAndDirectRevokeWinBeforePhysicalSendAdmission]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCloseAndDirectRevokeWinBeforePhysicalSendAdmission]' passed (0.091 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryHelloFieldAndLegacyProfileFailsBeforeDisclosure]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryHelloFieldAndLegacyProfileFailsBeforeDisclosure]' passed (0.017 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryOutOfOrderHandshakeMessageAndTamperedTagIsTerminal]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryOutOfOrderHandshakeMessageAndTamperedTagIsTerminal]' passed (0.025 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testExplicitDisclosurePolicyRejectsBeforeInitiatorSigning]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testExplicitDisclosurePolicyRejectsBeforeInitiatorSigning]' passed (0.224 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testHandshakeQuotasStayBoundedAndFinalFinishedWaitsForAuthenticatedProgress]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testHandshakeQuotasStayBoundedAndFinalFinishedWaitsForAuthenticatedProgress]' passed (0.016 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentDHLegsCannotSpliceProofOrFinishedEvenWithSameIdentities]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentDHLegsCannotSpliceProofOrFinishedEvenWithSameIdentities]' passed (0.206 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentFullHandshakeAndAllKeyPurposes]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentFullHandshakeAndAllKeyPurposes]' passed (0.023 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLateM1SendCompletionCannotUndoAuthenticatedProgress]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLateM1SendCompletionCannotUndoAuthenticatedProgress]' passed (0.005 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLiveMixedAlgorithmsFixedLengthsAndSameKeyReflection]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLiveMixedAlgorithmsFixedLengthsAndSameKeyReflection]' passed (0.393 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerLateFactoryTransportBindingRetiresSubscriptionAndDeinitializesForBothRoles]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerLateFactoryTransportBindingRetiresSubscriptionAndDeinitializesForBothRoles]' passed (0.252 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerMuxHeldPhysicalSubmissionFencesReusedIDAndCIDWhileSiblingWorks]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerMuxHeldPhysicalSubmissionFencesReusedIDAndCIDWhileSiblingWorks]' passed (0.071 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringEitherFactoryRetiresResultWithoutReady]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringEitherFactoryRetiresResultWithoutReady]' passed (0.082 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringVaultLookupOrSigningStopsDisclosure]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringVaultLookupOrSigningStopsDisclosure]' passed (0.145 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRegisteredRemoteRevocationAndSuspendedPolicyPreventLocalDisclosure]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRegisteredRemoteRevocationAndSuspendedPolicyPreventLocalDisclosure]' passed (0.092 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRetiredSignerCannotAffectFreshChannelWithSameIdentity]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRetiredSignerCannotAffectFreshChannelWithSameIdentity]' passed (0.016 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedFactoryIsRetiredOnceAndNeverPublishesReady]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedFactoryIsRetiredOnceAndNeverPublishesReady]' passed (0.104 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedVaultExistenceAndSignerCannotSurviveCloseRevokeOrExpiry]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedVaultExistenceAndSignerCannotSurviveCloseRevokeOrExpiry]' passed (1.176 seconds).
+Test Suite 'BridgePeerV3Tests' passed at 2026-09-29 03:24:42.867.
+	 Executed 20 tests, with 0 failures (0 unexpected) in 3.016 (3.018) seconds
+Test Suite 'BridgeResponseLifetimeTests' started at 2026-09-29 03:24:42.867.
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorDescriptionCannotReplaceRenewedMetadataOrScope]' started.
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorDescriptionCannotReplaceRenewedMetadataOrScope]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorFeedCannotPublishIntoRenewedStream]' started.
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorFeedCannotPublishIntoRenewedStream]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorGetCannotConsumeSameKeypathInRenewedBase]' started.
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorGetCannotConsumeSameKeypathInRenewedBase]' passed (0.004 seconds).
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testTwoConcurrentGetsOnSamePathKeepTheirOwnCommandAndImmediateResult]' started.
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testTwoConcurrentGetsOnSamePathKeepTheirOwnCommandAndImmediateResult]' passed (0.002 seconds).
+Test Suite 'BridgeResponseLifetimeTests' passed at 2026-09-29 03:24:42.877.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.009 (0.009) seconds
+Test Suite 'BridgeSigningLifetimeTests' started at 2026-09-29 03:24:42.877.
+Test Case '-[CellBaseTests.BridgeSigningLifetimeTests testOriginHeldExistenceOrReplayCannotSignExpiredChallengeWithLiveFeedPermit]' started.
+Test Case '-[CellBaseTests.BridgeSigningLifetimeTests testOriginHeldExistenceOrReplayCannotSignExpiredChallengeWithLiveFeedPermit]' passed (0.013 seconds).
+Test Case '-[CellBaseTests.BridgeSigningLifetimeTests testWSHeldExistenceChecksBothClocksAndCancellationBeforeAnySigning]' started.
+Test Case '-[CellBaseTests.BridgeSigningLifetimeTests testWSHeldExistenceChecksBothClocksAndCancellationBeforeAnySigning]' passed (0.003 seconds).
+Test Suite 'BridgeSigningLifetimeTests' passed at 2026-09-29 03:24:42.892.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.016 (0.016) seconds
+Test Suite 'BridgeTests' started at 2026-09-29 03:24:42.892.
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseAdmitRoutesConcurrentResponsesByCommandID]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseAdmitRoutesConcurrentResponsesByCommandID]' passed (0.195 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseAgreementRoutesConcurrentResponsesByCommandID]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseAgreementRoutesConcurrentResponsesByCommandID]' passed (0.147 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseAuditorTakesCommandsAndPurgesExpiredEntries]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseAuditorTakesCommandsAndPurgesExpiredEntries]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseConsumeAdmitSendsResponse]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseConsumeAdmitSendsResponse]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseDefersOutboundSendUntilReadySignalArrives]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseDefersOutboundSendUntilReadySignalArrives]' passed (0.070 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseDisconnectCommandsPreserveConnectionLabels]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseDisconnectCommandsPreserveConnectionLabels]' passed (0.107 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseGetFailsImmediatelyWhenTransportSendFails]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseGetFailsImmediatelyWhenTransportSendFails]' passed (0.004 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseReadySticksWhenSignalArrivesBeforeWaiter]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseReadySticksWhenSignalArrivesBeforeWaiter]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSendCommandIncrementsCid]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSendCommandIncrementsCid]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSharesOneRemoteFeedAcrossLocalSubscribers]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSharesOneRemoteFeedAcrossLocalSubscribers]' passed (0.098 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSignMessageRejectsEd25519SignatureLabeledAsSecp256k1]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSignMessageRejectsEd25519SignatureLabeledAsSecp256k1]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSignMessageRejectsForgedResponseWhenIdentityVaultAlwaysApproves]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSignMessageRejectsForgedResponseWhenIdentityVaultAlwaysApproves]' passed (0.104 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSignMessageRejectsMissingFingerprintChallengeBeforeSending]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSignMessageRejectsMissingFingerprintChallengeBeforeSending]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSignMessageRejectsRawPayloadBeforeSending]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSignMessageRejectsRawPayloadBeforeSending]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSignMessageRejectsUnverifiedSignatureResponse]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSignMessageRejectsUnverifiedSignatureResponse]' passed (0.126 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSignMessageRejectsWrongPurposeChallengeBeforeSending]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSignMessageRejectsWrongPurposeChallengeBeforeSending]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSignMessageRequiresReadyBeforeSending]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSignMessageRequiresReadyBeforeSending]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSignMessageRoutesResponsesByCommandID]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSignMessageRoutesResponsesByCommandID]' passed (0.073 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSignMessageTimeoutClearsPendingCommand]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeBaseSignMessageTimeoutClearsPendingCommand]' passed (0.316 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeCommandPayloadWireKeysStayStable]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeCommandPayloadWireKeysStayStable]' passed (0.008 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeCommandRoundTripStringPayload]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeCommandRoundTripStringPayload]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeCommandUnknownCommandDecodesAsNoneWithoutLosingRawCommand]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeCommandUnknownCommandDecodesAsNoneWithoutLosingRawCommand]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeTests testBridgeIdentityVaultAsyncSigningReturnsResponseSignature]' started.
+Test Case '-[CellBaseTests.BridgeTests testBridgeIdentityVaultAsyncSigningReturnsResponseSignature]' passed (0.211 seconds).
+Test Case '-[CellBaseTests.BridgeTests testCancelledWaiterPublishesSuccessfullyOpenedRemoteBridgeForReuse]' started.
+Test Case '-[CellBaseTests.BridgeTests testCancelledWaiterPublishesSuccessfullyOpenedRemoteBridgeForReuse]' passed (0.127 seconds).
+Test Case '-[CellBaseTests.BridgeTests testCellResolverAutomaticRemoteRoutesUseCleartextOnlyForLoopback]' started.
+Test Case '-[CellBaseTests.BridgeTests testCellResolverAutomaticRemoteRoutesUseCleartextOnlyForLoopback]' passed (0.171 seconds).
+Test Case '-[CellBaseTests.BridgeTests testCellResolverBuildsPublisherFirstBridgeheadURLWhenRouteRequestsIt]' started.
+Test Case '-[CellBaseTests.BridgeTests testCellResolverBuildsPublisherFirstBridgeheadURLWhenRouteRequestsIt]' passed (0.079 seconds).
+Test Case '-[CellBaseTests.BridgeTests testCellResolverDirectWebSocketBridgeRejectsNonCanonicalQueryBeforeTransport]' started.
+Test Case '-[CellBaseTests.BridgeTests testCellResolverDirectWebSocketBridgeRejectsNonCanonicalQueryBeforeTransport]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.BridgeTests testCellResolverDirectWebSocketBridgeSeparatesPrincipalsAndRejectsCopiedDescriptor]' started.
+Test Case '-[CellBaseTests.BridgeTests testCellResolverDirectWebSocketBridgeSeparatesPrincipalsAndRejectsCopiedDescriptor]' passed (0.134 seconds).
+Test Case '-[CellBaseTests.BridgeTests testCellResolverIdenticalRouteRegistrationKeepsCachedRemoteBridge]' started.
+Test Case '-[CellBaseTests.BridgeTests testCellResolverIdenticalRouteRegistrationKeepsCachedRemoteBridge]' passed (0.098 seconds).
+Test Case '-[CellBaseTests.BridgeTests testCellResolverPinnedRouteCapturesItsOwnGenerationAtomically]' started.
+Test Case '-[CellBaseTests.BridgeTests testCellResolverPinnedRouteCapturesItsOwnGenerationAtomically]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.BridgeTests testCellResolverPinnedRouteFailsInsteadOfRetryingThroughReplacement]' started.
+Test Case '-[CellBaseTests.BridgeTests testCellResolverPinnedRouteFailsInsteadOfRetryingThroughReplacement]' passed (0.022 seconds).
+Test Case '-[CellBaseTests.BridgeTests testCellResolverRemoteBridgeRejectsCopiedDescriptorMissingOrWrongVaultProof]' started.
+Test Case '-[CellBaseTests.BridgeTests testCellResolverRemoteBridgeRejectsCopiedDescriptorMissingOrWrongVaultProof]' passed (0.027 seconds).
+Test Case '-[CellBaseTests.BridgeTests testCellResolverRemoteBridgeSeparatesProofBearingPrincipalsWithSameUUID]' started.
+Test Case '-[CellBaseTests.BridgeTests testCellResolverRemoteBridgeSeparatesProofBearingPrincipalsWithSameUUID]' passed (0.100 seconds).
+Test Case '-[CellBaseTests.BridgeTests testCellResolverRemoteBridgeUsesOwnedPrincipalSnapshotAcrossCallerMutation]' started.
+Test Case '-[CellBaseTests.BridgeTests testCellResolverRemoteBridgeUsesOwnedPrincipalSnapshotAcrossCallerMutation]' passed (0.277 seconds).
+Test Case '-[CellBaseTests.BridgeTests testCellResolverRouteChurnDoesNotSwallowCallerCancellation]' started.
+Test Case '-[CellBaseTests.BridgeTests testCellResolverRouteChurnDoesNotSwallowCallerCancellation]' passed (0.016 seconds).
+Test Case '-[CellBaseTests.BridgeTests testCellResolverRouteReplacementInvalidatesCachedRemoteBridge]' started.
+Test Case '-[CellBaseTests.BridgeTests testCellResolverRouteReplacementInvalidatesCachedRemoteBridge]' passed (0.102 seconds).
+Test Case '-[CellBaseTests.BridgeTests testCellResolverRouteReplacementWhileSetupIsPendingCannotPublishStaleBridge]' started.
+Test Case '-[CellBaseTests.BridgeTests testCellResolverRouteReplacementWhileSetupIsPendingCannotPublishStaleBridge]' passed (0.176 seconds).
+Test Case '-[CellBaseTests.BridgeTests testCellResolverUnregisterRevokesCachedRemoteBridge]' started.
+Test Case '-[CellBaseTests.BridgeTests testCellResolverUnregisterRevokesCachedRemoteBridge]' passed (0.044 seconds).
+Test Case '-[CellBaseTests.BridgeTests testCellResolverUnregisterWhileSetupIsPendingCannotReturnOrPublishBridge]' started.
+Test Case '-[CellBaseTests.BridgeTests testCellResolverUnregisterWhileSetupIsPendingCannotReturnOrPublishBridge]' passed (0.062 seconds).
+Test Case '-[CellBaseTests.BridgeTests testInboundBridgeCanPinIdentityScopedPublisherLookupToRouteIdentity]' started.
+Test Case '-[CellBaseTests.BridgeTests testInboundBridgeCanPinIdentityScopedPublisherLookupToRouteIdentity]' passed (0.004 seconds).
+Test Case '-[CellBaseTests.BridgeTests testInboundBridgeResolvesIdentityScopedPublisherForCommandIdentity]' started.
+Test Case '-[CellBaseTests.BridgeTests testInboundBridgeResolvesIdentityScopedPublisherForCommandIdentity]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeTests testInboundBridgeSignCommandRejectsAnotherIdentityInLocalVault]' started.
+Test Case '-[CellBaseTests.BridgeTests testInboundBridgeSignCommandRejectsAnotherIdentityInLocalVault]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeTests testInboundBridgeSignCommandRejectsNonLocalIdentity]' started.
+Test Case '-[CellBaseTests.BridgeTests testInboundBridgeSignCommandRejectsNonLocalIdentity]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeTests testInboundBridgeSignCommandRejectsRawPayload]' started.
+Test Case '-[CellBaseTests.BridgeTests testInboundBridgeSignCommandRejectsRawPayload]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeTests testInboundBridgeSignCommandRejectsReplayedChallengeAndRecordsEvent]' started.
+Test Case '-[CellBaseTests.BridgeTests testInboundBridgeSignCommandRejectsReplayedChallengeAndRecordsEvent]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.BridgeTests testInboundBridgeSignCommandRejectsUnsolicitedLocalIdentityChallenge]' started.
+Test Case '-[CellBaseTests.BridgeTests testInboundBridgeSignCommandRejectsUnsolicitedLocalIdentityChallenge]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeTests testInboundBridgeSignCommandRejectsValidChallengeBeforeReady]' started.
+Test Case '-[CellBaseTests.BridgeTests testInboundBridgeSignCommandRejectsValidChallengeBeforeReady]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeTests testInboundBridgeSignCommandRespectsLocalQuarantineBeforeVaultSigning]' started.
+Test Case '-[CellBaseTests.BridgeTests testInboundBridgeSignCommandRespectsLocalQuarantineBeforeVaultSigning]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeTests testInboundBridgeSignCommandSignsKnownLocalIdentity]' started.
+Test Case '-[CellBaseTests.BridgeTests testInboundBridgeSignCommandSignsKnownLocalIdentity]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeTests testLegacyBridgeConfigInitializerDefaultsToOutboundWithoutDummyPublisher]' started.
+Test Case '-[CellBaseTests.BridgeTests testLegacyBridgeConfigInitializerDefaultsToOutboundWithoutDummyPublisher]' passed (0.000 seconds).
+Test Suite 'BridgeTests' passed at 2026-09-29 03:24:45.841.
+	 Executed 50 tests, with 0 failures (0 unexpected) in 2.940 (2.948) seconds
+Test Suite 'CellResolverProtocolLightweightBridgeTransportTests' started at 2026-09-29 03:24:45.841.
+Test Case '-[CellBaseTests.CellResolverProtocolLightweightBridgeTransportTests testRegisterDefaultWebSocketBridgeTransportsRegistersLightweightTransportForWSAndWSS]' started.
+Test Case '-[CellBaseTests.CellResolverProtocolLightweightBridgeTransportTests testRegisterDefaultWebSocketBridgeTransportsRegistersLightweightTransportForWSAndWSS]' passed (0.000 seconds).
+Test Suite 'CellResolverProtocolLightweightBridgeTransportTests' passed at 2026-09-29 03:24:45.841.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'LightweightBridgeTransportTests' started at 2026-09-29 03:24:45.841.
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testCopiedLocalKeyWithoutDelegateStillCannotObtainSigner]' started.
+2026-09-29 03:24:45.842 xctest[3628:29786764] IOPMScheduleUserActivityLevelNotification returned 0
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testCopiedLocalKeyWithoutDelegateStillCannotObtainSigner]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testCopiedRealLocalKeyOnCommandAndResponseNeverObtainsSigner]' started.
+2026-09-29 03:24:45.843 xctest[3628:29786825] IOPMScheduleUserActivityLevelNotification returned 0
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testCopiedRealLocalKeyOnCommandAndResponseNeverObtainsSigner]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testDescriptorNeverFallsBackToDefaultIdentityVault]' started.
+2026-09-29 03:24:45.845 xctest[3628:29786764] IOPMScheduleUserActivityLevelNotification returned 0
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testDescriptorNeverFallsBackToDefaultIdentityVault]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testIncomingCommandAndResponseAreRoutedToDelegate]' started.
+2026-09-29 03:24:45.845 xctest[3628:29786828] IOPMScheduleUserActivityLevelNotification returned 0
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testIncomingCommandAndResponseAreRoutedToDelegate]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testKeepAliveFailureReconnectsUsingFreshSocket]' started.
+2026-09-29 03:24:45.847 xctest[3628:29786825] IOPMScheduleUserActivityLevelNotification returned 0
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testKeepAliveFailureReconnectsUsingFreshSocket]' passed (0.234 seconds).
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testKnownLocalDescriptorKeepsBridgeVault]' started.
+2026-09-29 03:24:46.081 xctest[3628:29786828] IOPMScheduleUserActivityLevelNotification returned 0
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testKnownLocalDescriptorKeepsBridgeVault]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testLifecycleReactivationReconnectsAfterWakeFailure]' started.
+2026-09-29 03:24:46.083 xctest[3628:29786825] IOPMScheduleUserActivityLevelNotification returned 0
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testLifecycleReactivationReconnectsAfterWakeFailure]' passed (0.203 seconds).
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testMultiplexDecodedCommandAndResponseHaveProxyVaultBeforeBridgeBase]' started.
+2026-09-29 03:24:46.287 xctest[3628:29786764] IOPMScheduleUserActivityLevelNotification returned 0
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testMultiplexDecodedCommandAndResponseHaveProxyVaultBeforeBridgeBase]' passed (0.009 seconds).
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testOversizedInboundPayloadIsRejectedBeforeDecode]' started.
+2026-09-29 03:24:46.296 xctest[3628:29786828] IOPMScheduleUserActivityLevelNotification returned 0
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testOversizedInboundPayloadIsRejectedBeforeDecode]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testSameUUIDDifferentKeyDoesNotUseLocalVault]' started.
+2026-09-29 03:24:46.297 xctest[3628:29786764] IOPMScheduleUserActivityLevelNotification returned 0
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testSameUUIDDifferentKeyDoesNotUseLocalVault]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testSendDataUsesBinaryFramesByDefaultAndPerformsInitialPing]' started.
+2026-09-29 03:24:46.299 xctest[3628:29786765] IOPMScheduleUserActivityLevelNotification returned 0
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testSendDataUsesBinaryFramesByDefaultAndPerformsInitialPing]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testSendDataUsesTextFramesWhenConfigured]' started.
+2026-09-29 03:24:46.300 xctest[3628:29786764] IOPMScheduleUserActivityLevelNotification returned 0
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testSendDataUsesTextFramesWhenConfigured]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testVisitingIdentityUsesBridgeIdentityVaultWhenDelegateIsBridge]' started.
+2026-09-29 03:24:46.301 xctest[3628:29786827] IOPMScheduleUserActivityLevelNotification returned 0
+Test Case '-[CellBaseTests.LightweightBridgeTransportTests testVisitingIdentityUsesBridgeIdentityVaultWhenDelegateIsBridge]' passed (0.001 seconds).
+Test Suite 'LightweightBridgeTransportTests' passed at 2026-09-29 03:24:46.302.
+	 Executed 13 tests, with 0 failures (0 unexpected) in 0.459 (0.461) seconds
+Test Suite 'ScannerPeerAuthenticationTests' started at 2026-09-29 03:24:46.302.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testActualScannerSetupLobbyDescriptionAttachAndFeedForEitherInviter]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testActualScannerSetupLobbyDescriptionAttachAndFeedForEitherInviter]' passed (0.324 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testAEADOverheadIsIncludedInExistingSendQuota]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testAEADOverheadIsIncludedInExistingSendQuota]' passed (0.089 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testBothFactoriesWaitForSealedConfirmationAndEarlyDataIsRejected]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testBothFactoriesWaitForSealedConfirmationAndEarlyDataIsRejected]' passed (0.109 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testDiscoveryTokenSkipsPendingThenRevokedPeerWithoutBreakingHandshake]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testDiscoveryTokenSkipsPendingThenRevokedPeerWithoutBreakingHandshake]' passed (0.216 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testDiscoveryTokenUsesExistingSendByteQuota]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testDiscoveryTokenUsesExistingSendByteQuota]' passed (0.104 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testLateReceiveFailureAndDisconnectLeaveReconnectAndSiblingAlive]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testLateReceiveFailureAndDisconnectLeaveReconnectAndSiblingAlive]' passed (0.218 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testMissingEphemeralKeyAndOldProfileCannotDowngrade]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testMissingEphemeralKeyAndOldProfileCannotDowngrade]' passed (0.092 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testOldCiphertextDuringHandshakeAndRewrittenGenerationBothFailClosed]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testOldCiphertextDuringHandshakeAndRewrittenGenerationBothFailClosed]' passed (0.224 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testOldCommandsAndResponsesCannotCrossReconnectWithCollidingCID]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testOldCommandsAndResponsesCannotCrossReconnectWithCollidingCID]' passed (0.337 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testPeerGenerationWireFieldIsRequiredAndAuthFramesRemainUntagged]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testPeerGenerationWireFieldIsRequiredAndAuthFramesRemainUntagged]' passed (0.045 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testQueuedArrivalOrderAndConcurrentSendsPreserveCounters]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testQueuedArrivalOrderAndConcurrentSendsPreserveCounters]' passed (0.047 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testRelayCannotCorrelateIdentityFieldsAcrossFreshHandshakes]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testRelayCannotCorrelateIdentityFieldsAcrossFreshHandshakes]' passed (0.100 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testRelayForwardsRealHandshakeButSeesOnlyCiphertextInBothDirections]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testRelayForwardsRealHandshakeButSeesOnlyCiphertextInBothDirections]' passed (0.113 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testRelayTamperInsertionReplayReorderReflectionAndMalformedRecordsCloseWithoutDispatch]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testRelayTamperInsertionReplayReorderReflectionAndMalformedRecordsCloseWithoutDispatch]' passed (0.736 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testReplacingEitherEphemeralKeyInvalidatesIdentitySignature]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testReplacingEitherEphemeralKeyInvalidatesIdentitySignature]' passed (0.062 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerCopiedPublicKeyAlwaysGetsProxyIncludingWithoutDelegate]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerCopiedPublicKeyAlwaysGetsProxyIncludingWithoutDelegate]' passed (0.038 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerDisconnectRetainsFeedQuotaUntilNoncooperativeWorkReturns]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerDisconnectRetainsFeedQuotaUntilNoncooperativeWorkReturns]' passed (0.211 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerForgedProofAndReplayedProofCannotCreateBase]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerForgedProofAndReplayedProofCannotCreateBase]' passed (0.175 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerMutualProofPrecedesBaseLookupAndRegistration]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerMutualProofPrecedesBaseLookupAndRegistration]' passed (0.037 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerPeerProofDoesNotOverrideLobbyOwnerApproval]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerPeerProofDoesNotOverrideLobbyOwnerApproval]' passed (0.092 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerQuotaPlusOneDoesNotCreateTransportOrBase]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerQuotaPlusOneDoesNotCreateTransportOrBase]' passed (0.356 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerReconnectSamePeerIDRetiresOldTransportAndRejectsOldProof]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerReconnectSamePeerIDRetiresOldTransportAndRejectsOldProof]' passed (0.094 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerReconnectSamePeerIDsCompletesFreshMutualProof]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerReconnectSamePeerIDsCompletesFreshMutualProof]' passed (0.101 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerRejectsCommandBeforeProofAndReportsConsumerFailure]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerRejectsCommandBeforeProofAndReportsConsumerFailure]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerRevocationClosesOnlyAffectedPeerAndReclaimsQuota]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerRevocationClosesOnlyAffectedPeerAndReclaimsQuota]' passed (0.278 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerWrongPeerBindingAndRoleAreRejected]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerWrongPeerBindingAndRoleAreRejected]' passed (0.093 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testThirdPeerDiscoveryCollisionCannotStealAuthenticatedRouteOrGate]' started.
+2026-09-29 03:24:50.750 xctest[3628:29786765] foundPeer discovered
+2026-09-29 03:24:50.952 xctest[3628:29786765] lostPeer: <MCPeerID: 0x771e9dcdb0 DisplayName = test-b>
+2026-09-29 03:24:50.953 xctest[3628:29786765] foundPeer discovered
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testThirdPeerDiscoveryCollisionCannotStealAuthenticatedRouteOrGate]' passed (0.354 seconds).
+Test Suite 'ScannerPeerAuthenticationTests' passed at 2026-09-29 03:24:50.955.
+	 Executed 27 tests, with 0 failures (0 unexpected) in 4.648 (4.653) seconds
+Test Suite 'VaporBridgeTransportTests' started at 2026-09-29 03:24:50.955.
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testCloseCleanupUnregistersDelegateOnlyOnce]' started.
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testCloseCleanupUnregistersDelegateOnlyOnce]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testCloseFailureDiagnosticNeverLogsErrorDescription]' started.
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testCloseFailureDiagnosticNeverLogsErrorDescription]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testCopiedLocalDescriptorNeverReceivesLocalSigningVault]' started.
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testCopiedLocalDescriptorNeverReceivesLocalSigningVault]' passed (0.017 seconds).
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testFirstTimeAndReturningVisitorKeepBridgeVaultAndLookupMetadata]' started.
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testFirstTimeAndReturningVisitorKeepBridgeVaultAndLookupMetadata]' passed (0.006 seconds).
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testIdentitySnapshotPreservesWireIdentityFields]' started.
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testIdentitySnapshotPreservesWireIdentityFields]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testMissingBridgeDelegateNeverFallsBackToLocalVault]' started.
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testMissingBridgeDelegateNeverFallsBackToLocalVault]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testOversizedInboundPayloadIsRejectedBeforeDecode]' started.
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testOversizedInboundPayloadIsRejectedBeforeDecode]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testSendDataWithoutWebSocketCleansUpInTextMode]' started.
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testSendDataWithoutWebSocketCleansUpInTextMode]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testVaporIdentityVaultPersistsUnderCellBaseDocumentRoot]' started.
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testVaporIdentityVaultPersistsUnderCellBaseDocumentRoot]' passed (0.005 seconds).
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testVaporIdentityVaultReloadsWhenDocumentRootChanges]' started.
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testVaporIdentityVaultReloadsWhenDocumentRootChanges]' passed (0.011 seconds).
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testVaporIdentityVaultRestoresExactPersistedUUIDWithoutChangingSigningKey]' started.
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testVaporIdentityVaultRestoresExactPersistedUUIDWithoutChangingSigningKey]' passed (0.009 seconds).
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testVaporIdentityVaultUUIDRestoreRejectsMissingKeyMaterialWithoutRewritingVault]' started.
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testVaporIdentityVaultUUIDRestoreRejectsMissingKeyMaterialWithoutRewritingVault]' passed (0.007 seconds).
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testVaporIdentityVaultUUIDRestoreRejectsVaultEncryptedWithWrongMasterKey]' started.
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testVaporIdentityVaultUUIDRestoreRejectsVaultEncryptedWithWrongMasterKey]' passed (0.007 seconds).
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testVaporVaultIdentityValueForKeyPublishesStoredValueForRequester]' started.
+Test Case '-[CellBaseTests.VaporBridgeTransportTests testVaporVaultIdentityValueForKeyPublishesStoredValueForRequester]' passed (0.000 seconds).
+Test Suite 'VaporBridgeTransportTests' passed at 2026-09-29 03:24:51.023.
+	 Executed 14 tests, with 0 failures (0 unexpected) in 0.066 (0.068) seconds
+Test Suite 'CellBaseTests.xctest' passed at 2026-09-29 03:24:51.023.
+	 Executed 252 tests, with 1 test skipped and 0 failures (0 unexpected) in 13.833 (13.860) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 03:24:51.023.
+	 Executed 252 tests, with 1 test skipped and 0 failures (0 unexpected) in 13.833 (13.861) seconds
+CP53 isolated-process artifacts: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/cp53-process-7B2C41CC-B02E-4F5C-A86A-DEA69EE40FED
+Got no signed data!
+General CellBase.GeneralCell. Got owner identity but it failed to prove ownership!
+Got no signed data!
+General CellBase.GeneralCell. Got owner identity but it failed to prove ownership!
+Got no signed data!
+Inited radar service with peerId: <MCPeerID: 0x771e9dc1c0 DisplayName = HAVEN-firste1f>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc1a0 DisplayName = HAVEN-seconde1>
+LobbyCell init. Owner: BF25014A-6453-46E4-B47C-2640D08DA9BF
+********* Finished setting up bridge for second-E1FAFB9A-963C-4D30-8DEA-914B900ECB67
+********* Finished setting up bridge for first-E1FAFB9A-963C-4D30-8DEA-914B900ECB67
+Inited radar service with peerId: <MCPeerID: 0x771e9dc210 DisplayName = HAVEN-second77>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc1f0 DisplayName = HAVEN-first776>
+LobbyCell init. Owner: BF68907A-FBFE-4914-BD2A-D082FF55727E
+********* Finished setting up bridge for first-7767E9E1-2266-47CC-AA0D-C6110BF95061
+********* Finished setting up bridge for second-7767E9E1-2266-47CC-AA0D-C6110BF95061
+Inited radar service with peerId: <MCPeerID: 0x771e9dc0e0 DisplayName = HAVEN-first569>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc0c0 DisplayName = HAVEN-second56>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc160 DisplayName = HAVEN-first634>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc0b0 DisplayName = HAVEN-second63>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc190 DisplayName = HAVEN-firstdc1>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc180 DisplayName = HAVEN-seconddc>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc0f0 DisplayName = HAVEN-third0fb>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc250 DisplayName = HAVEN-first5e1>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc260 DisplayName = HAVEN-second5e>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc290 DisplayName = HAVEN-firstd93>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc2a0 DisplayName = HAVEN-secondd9>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc2b0 DisplayName = HAVEN-thirda5f>
+LobbyCell init. Owner: 22F6FF52-8ED6-492A-AF99-CDD339ABC395
+Inited radar service with peerId: <MCPeerID: 0x771e9dc2f0 DisplayName = HAVEN-first7af>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc300 DisplayName = HAVEN-second7a>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc330 DisplayName = HAVEN-first56c>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc340 DisplayName = HAVEN-second56>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc350 DisplayName = HAVEN-first42f>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc360 DisplayName = HAVEN-second42>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc390 DisplayName = HAVEN-firstd20>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc3a0 DisplayName = HAVEN-secondd2>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc3d0 DisplayName = HAVEN-firstdd8>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc3e0 DisplayName = HAVEN-seconddd>
+LobbyCell init. Owner: F5BF1CAD-54BF-4A49-926A-02F79885C33B
+Inited radar service with peerId: <MCPeerID: 0x771e9dc3f0 DisplayName = HAVEN-third62a>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc450 DisplayName = HAVEN-first906>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc460 DisplayName = HAVEN-second90>
+LobbyCell init. Owner: 9CB5DECD-9B59-4AFA-986D-D3AFF54020CE
+Inited radar service with peerId: <MCPeerID: 0x771e9dc470 DisplayName = HAVEN-third47d>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc4b0 DisplayName = HAVEN-firstb8e>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc4c0 DisplayName = HAVEN-secondb8>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc4f0 DisplayName = HAVEN-first5dd>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc500 DisplayName = HAVEN-second5d>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc530 DisplayName = HAVEN-first1db>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc540 DisplayName = HAVEN-second1d>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc580 DisplayName = HAVEN-first4ff>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc590 DisplayName = HAVEN-second4f>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc5c0 DisplayName = HAVEN-firstaea>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc5d0 DisplayName = HAVEN-secondae>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc5e0 DisplayName = HAVEN-firstf76>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc050 DisplayName = HAVEN-secondf7>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc610 DisplayName = HAVEN-first889>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc620 DisplayName = HAVEN-second88>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc650 DisplayName = HAVEN-firstc28>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc660 DisplayName = HAVEN-secondc2>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc690 DisplayName = HAVEN-firstace>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc6a0 DisplayName = HAVEN-secondac>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc6d0 DisplayName = HAVEN-first15d>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc6e0 DisplayName = HAVEN-second15>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc710 DisplayName = HAVEN-first2a1>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc720 DisplayName = HAVEN-second2a>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc750 DisplayName = HAVEN-first3d6>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc760 DisplayName = HAVEN-second3d>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc790 DisplayName = HAVEN-first081>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc7a0 DisplayName = HAVEN-second08>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc7d0 DisplayName = HAVEN-first8ec>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc7e0 DisplayName = HAVEN-second8e>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc810 DisplayName = HAVEN-first8db>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc820 DisplayName = HAVEN-second8d>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc850 DisplayName = HAVEN-first96e>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc860 DisplayName = HAVEN-second96>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc890 DisplayName = HAVEN-first00f>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc8a0 DisplayName = HAVEN-second00>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc8e0 DisplayName = HAVEN-first1d8>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc8f0 DisplayName = HAVEN-second1d>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc910 DisplayName = HAVEN-firstd2a>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc920 DisplayName = HAVEN-secondd2>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc960 DisplayName = HAVEN-first5b9>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc970 DisplayName = HAVEN-second5b>
+LobbyCell init. Owner: 987AFB01-24B4-4695-BE66-45125E6BD23E
+Inited radar service with peerId: <MCPeerID: 0x771e9dc990 DisplayName = HAVEN-firstb36>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc9a0 DisplayName = HAVEN-secondb3>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc9e0 DisplayName = HAVEN-firstf54>
+Inited radar service with peerId: <MCPeerID: 0x771e9dc9f0 DisplayName = HAVEN-secondf5>
+Inited radar service with peerId: <MCPeerID: 0x771e9dca20 DisplayName = HAVEN-first1a4>
+Inited radar service with peerId: <MCPeerID: 0x771e9dca30 DisplayName = HAVEN-second1a>
+Inited radar service with peerId: <MCPeerID: 0x771e9dca50 DisplayName = HAVEN-first4a1>
+Inited radar service with peerId: <MCPeerID: 0x771e9dca60 DisplayName = HAVEN-second4a>
+Inited radar service with peerId: <MCPeerID: 0x771e9dca90 DisplayName = HAVEN-first803>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcaa0 DisplayName = HAVEN-second80>
+LobbyCell init. Owner: ED267C93-BC0B-40C5-9FE3-C319F3361A6C
+********* Finished setting up bridge for second-803F10CC-5E9F-4462-8705-4EF2912276D6
+Inited radar service with peerId: <MCPeerID: 0x771e9dcad0 DisplayName = HAVEN-first84c>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcae0 DisplayName = HAVEN-second84>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcb20 DisplayName = HAVEN-first2c7>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcb30 DisplayName = HAVEN-second2c>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcb30 DisplayName = HAVEN-firstd76>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcb20 DisplayName = HAVEN-secondd7>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcb50 DisplayName = HAVEN-first157>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcb60 DisplayName = HAVEN-second15>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcb90 DisplayName = HAVEN-firstdb8>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcba0 DisplayName = HAVEN-seconddb>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcbd0 DisplayName = HAVEN-first031>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcbe0 DisplayName = HAVEN-second03>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcc10 DisplayName = HAVEN-first462>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcc20 DisplayName = HAVEN-second46>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcc60 DisplayName = HAVEN-firstbf7>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcc70 DisplayName = HAVEN-secondbf>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcc90 DisplayName = HAVEN-first8e5>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcca0 DisplayName = HAVEN-second8e>
+Inited radar service with peerId: <MCPeerID: 0x771e9dccd0 DisplayName = HAVEN-first194>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcce0 DisplayName = HAVEN-second19>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcd10 DisplayName = HAVEN-first845>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcd20 DisplayName = HAVEN-second84>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcd50 DisplayName = HAVEN-firsted2>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcd60 DisplayName = HAVEN-seconded>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcd90 DisplayName = HAVEN-first895>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcda0 DisplayName = HAVEN-second89>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcdd0 DisplayName = HAVEN-firstd06>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcde0 DisplayName = HAVEN-secondd0>
+Inited radar service with peerId: <MCPeerID: 0x771e9dcdf0 DisplayName = HAVEN-third9e1>
+Discovered devices2: Optional(["test-c"])

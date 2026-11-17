@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "haven.blind-facet-declaration.output.v0",
+  "type": "object",
+  "required": ["schema", "declaredBy", "declarations"],
+  "properties": {
+    "schema": { "const": "haven.blind-facet-declaration.output.v0" },
+    "declaredBy": { "type": "string", "description": "e.g. codex-local, model id if known" },
+    "declaredAt": { "type": "string" },
+    "declarations": {
+      "type": "object",
+      "description": "One entry per purposeRef. All 57 required.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["domain", "decisionEffect", "dataSubjects", "outputModality", "aiInvolvement", "confidence"],
+        "properties": {
+          "domain": {
+            "enum": ["none", "biometrics", "critical-infrastructure", "education", "employment", "essential-services", "law-enforcement", "migration-border", "justice-democracy"]
+          },
+          "decisionEffect": {
+            "enum": ["none", "informational", "influences-human-decision", "automated-decision-with-legal-or-similar-effect"]
+          },
+          "dataSubjects": {
+            "enum": ["none", "self-owner", "named-third-parties", "public", "vulnerable-groups"]
+          },
+          "outputModality": {
+            "enum": ["none", "structured-data", "ui-render", "natural-language-to-human", "synthetic-media"]
+          },
+          "aiInvolvement": {
+            "enum": ["none", "deterministic-code", "model-assisted", "model-generated"]
+          },
+          "flags": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "allocatesTasksToPersons": { "type": "boolean" },
+              "evaluatesPersonPerformance": { "type": "boolean" },
+              "infersPersonalCharacteristics": { "type": "boolean" },
+              "infersEmotion": { "type": "boolean" },
+              "deducesSensitiveAttribute": { "type": "boolean" },
+              "producesPersonScore": { "type": "boolean" },
+              "publishedToPublic": { "type": "boolean" },
+              "performsProfiling": { "type": "boolean" }
+            }
+          },
+          "confidence": { "enum": ["high", "medium", "low"] },
+          "note": { "type": "string", "description": "Only where a choice was genuinely close." }
+        }
+      }
+    }
+  }
+}

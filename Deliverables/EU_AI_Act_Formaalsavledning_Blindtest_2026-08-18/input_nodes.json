@@ -1,0 +1,855 @@
+{
+  "schema": "haven.blind-facet-declaration.input.v0",
+  "createdAt": "2026-08-18",
+  "note": "Node text only. Declare the five fields for each entry in output order.",
+  "nodes": [
+    {
+      "purposeRef": "purpose://root",
+      "parentRef": null,
+      "title": "Alle mennesker er like mye verdt",
+      "summary": "Top-level normative anchor for HAVEN purposes.",
+      "status": "active",
+      "goalOutcome": "HAVEN choices preserve equal worth, human agency, and explicit accountable purpose.",
+      "goalSuccessSignals": [
+        "New purposes can be traced to a child of purpose://root.",
+        "No accepted purpose requires hidden profiling, irreversible user lock-in, or unexplained ranking of people.",
+        "User-facing capabilities expose clear purpose, owner control, and reviewable consequences."
+      ],
+      "interests": [
+        "human-worth",
+        "agency",
+        "dignity",
+        "fairness",
+        "accountability"
+      ]
+    },
+    {
+      "purposeRef": "purpose://human-agency",
+      "parentRef": "purpose://root",
+      "title": "Human agency and understanding",
+      "summary": "Help people understand, choose, delegate, review, and reverse digital actions.",
+      "status": "draft",
+      "goalOutcome": "A person can understand what HAVEN is doing for them and can approve, pause, revoke, or revise meaningful actions.",
+      "goalSuccessSignals": [
+        "Sensitive actions have explicit confirmation or a documented grant.",
+        "User-facing summaries expose what will happen, what data is used, and what can be undone.",
+        "Human review queues aggregate similar decisions instead of forcing repetitive approvals."
+      ],
+      "interests": [
+        "agency",
+        "explainability",
+        "consent",
+        "delegation"
+      ]
+    },
+    {
+      "purposeRef": "purpose://contact.communication",
+      "parentRef": "purpose://human-agency",
+      "title": "Contact and communication",
+      "summary": "Help people initiate, continue, or refuse contact with explicit purpose and privacy boundaries.",
+      "status": "draft",
+      "goalOutcome": "A person can communicate or be introduced without exposing private contact data outside consent and grants.",
+      "goalSuccessSignals": [
+        "Contact action is represented as draft, request, follow-up, or denied private data.",
+        "Private fields such as phone and email are not revealed without consent.",
+        "Recipient intent and allowed purpose are visible before sending."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://contact.introduction",
+      "parentRef": "purpose://contact.communication",
+      "title": "Contact introduction",
+      "summary": "Introduce or connect people through a purpose-bound contact request.",
+      "status": "draft",
+      "goalOutcome": "A contact introduction is prepared or delivered without leaking private contact information.",
+      "goalSuccessSignals": [
+        "Introduction has requester, intended recipient, purpose, and message draft.",
+        "Send/deliver requires explicit user action or grant.",
+        "Private contact data remains hidden unless explicitly consented."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://contact.followup",
+      "parentRef": "purpose://contact.communication",
+      "title": "Contact follow-up",
+      "summary": "Continue an existing contact or meeting thread with explicit recipient and message context.",
+      "status": "draft",
+      "goalOutcome": "A follow-up message can be drafted for the correct recipient without auto-sending.",
+      "goalSuccessSignals": [
+        "Recipient is resolved or clarification is requested.",
+        "Message stays draft until explicit send action.",
+        "Previous context is cited when used."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://event.participation",
+      "parentRef": "purpose://human-agency",
+      "title": "Event participation",
+      "summary": "Help a person participate in an event by understanding agenda, people, privacy, and next useful actions.",
+      "status": "draft",
+      "goalOutcome": "A participant can decide what to attend, who to meet, and what to share without hidden pressure or data leakage.",
+      "goalSuccessSignals": [
+        "Agenda recommendations cite event context and time.",
+        "Meeting actions remain drafts until confirmed.",
+        "Privacy-sensitive requests deny private data or require consent."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://event.agenda.recommendation",
+      "parentRef": "purpose://event.participation",
+      "title": "Event agenda recommendation",
+      "summary": "Recommend or open an agenda item based on current time, interests, constraints, and available event context.",
+      "status": "draft",
+      "goalOutcome": "The user gets a relevant agenda recommendation or a clear missing-context response.",
+      "goalSuccessSignals": [
+        "Recommendation includes session identity or time when known.",
+        "Missing room/person/context is acknowledged instead of invented.",
+        "Open-session action uses an explicit action keypath or remains read-only."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://event.meeting.draft-request",
+      "parentRef": "purpose://event.participation",
+      "title": "Event meeting draft request",
+      "summary": "Draft an event meeting request or introduction while requiring explicit user action before sending.",
+      "status": "draft",
+      "goalOutcome": "A relevant meeting or coffee request is drafted for the right person and never silently sent.",
+      "goalSuccessSignals": [
+        "Person and meeting intent are extracted or clarification is requested.",
+        "Draft state is visible before send.",
+        "Private contact fields are not exposed."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://event.schedule.change-request",
+      "parentRef": "purpose://event.participation",
+      "title": "Event schedule change request",
+      "summary": "Propose a schedule change for an event item while requiring role checks and confirmation.",
+      "status": "draft",
+      "goalOutcome": "A schedule change is proposed or queued for approval without silently changing the event program.",
+      "goalSuccessSignals": [
+        "Target session or agenda item is identified or clarification is requested.",
+        "Role and confirmation requirements are visible.",
+        "No schedule mutation is committed without approval."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://event.privacy-preserving-networking",
+      "parentRef": "purpose://event.participation",
+      "title": "Privacy-preserving event networking",
+      "summary": "Help people meet others at an event while limiting profile visibility and private data exposure.",
+      "status": "draft",
+      "goalOutcome": "The user can network with consent controls and without exposing more profile data than intended.",
+      "goalSuccessSignals": [
+        "Privacy preference is explained or set as a draft action.",
+        "Aggregate-only or consented-only reports are distinguished from private data requests.",
+        "Private contact requests are denied or routed to consent workflow."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://digital-work",
+      "parentRef": "purpose://root",
+      "title": "Digital work",
+      "summary": "Purposes that help people or scaffolds coordinate, collect, share, inspect, and improve digital work.",
+      "status": "active",
+      "goalOutcome": "Digital work surfaces make useful work easier without hiding state, purpose, or access boundaries.",
+      "goalSuccessSignals": [
+        "A user can identify the current task or artifact state.",
+        "Actions map to real cell keypaths or documented missing capabilities.",
+        "Work outputs can be inspected, shared, or tested according to their purpose."
+      ],
+      "interests": [
+        "work",
+        "coordination",
+        "productivity"
+      ]
+    },
+    {
+      "purposeRef": "purpose://digital-work.coordinate",
+      "parentRef": "purpose://digital-work",
+      "title": "Coordinate work",
+      "summary": "Plan, coordinate, share, and track work across people, agents, or scaffolds.",
+      "status": "active",
+      "goalOutcome": "People and scaffolds can see who is doing what, what is blocked, and what needs a decision.",
+      "goalSuccessSignals": [
+        "Project/task state exposes open, blocked, done, and awaiting-review counts.",
+        "Sharing paths preserve recipient access boundaries.",
+        "Outstanding decisions can be queued for a human or delegated agent."
+      ],
+      "interests": [
+        "coordination",
+        "planning",
+        "sharing"
+      ]
+    },
+    {
+      "purposeRef": "purpose://project-work.overview-and-sharing",
+      "parentRef": "purpose://digital-work.coordinate",
+      "title": "Project work overview and sharing",
+      "summary": "Manage projects, tasks, sharing, and current outstanding work.",
+      "status": "active",
+      "goalOutcome": "A user can share desired project intent and see current status plus outstanding work.",
+      "goalSuccessSignals": [
+        "ProjectPortfolio.state can expose status, health, priority, milestones, and counts.",
+        "WorkItem.state can expose open, blocked, in-progress, done, comments, subtasks, and relations.",
+        "IdeaTaskWorkspace/IdeaTaskShare can prepare, deliver, and open a selected snapshot for a recipient."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://project-work.project-portfolio",
+      "parentRef": "purpose://project-work.overview-and-sharing",
+      "title": "Project portfolio",
+      "summary": "Track project status, health, priorities, milestones, releases, and capacity.",
+      "status": "active",
+      "goalOutcome": "Project status, health, priority, and milestone/release state can be read and counted.",
+      "goalSuccessSignals": [
+        "ProjectPortfolio.state exposes openCount, activeCount, blockedCount, health counts, roadmapTable, and milestoneTable."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://project-work.work-items",
+      "parentRef": "purpose://project-work.overview-and-sharing",
+      "title": "Work items",
+      "summary": "Track tasks, bugs, decisions, comments, subtasks, relations, and blockers.",
+      "status": "active",
+      "goalOutcome": "Open, blocked, in-progress, and done work can be tracked with relations and supporting evidence.",
+      "goalSuccessSignals": [
+        "WorkItem.state exposes total/open/blocked counts, board lanes, dependency risk, and selected item detail."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://project-work.share-selected-intent",
+      "parentRef": "purpose://project-work.overview-and-sharing",
+      "title": "Share selected project intent",
+      "summary": "Prepare, deliver, and open a selected project/work snapshot for a recipient.",
+      "status": "active",
+      "goalOutcome": "A selected idea/work snapshot can be prepared, delivered, and opened by an admitted recipient.",
+      "goalSuccessSignals": [
+        "IdeaTaskWorkspace.prepareShareInvite returns a preview.",
+        "IdeaTaskWorkspace.deliverShareInvite records delivery state.",
+        "IdeaTaskShare.acceptInvitationAccess opens accepted shared state for the recipient."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://project-work.current-status-and-outstanding",
+      "parentRef": "purpose://project-work.overview-and-sharing",
+      "title": "Current status and outstanding work",
+      "summary": "Show where a project stands now and what remains outstanding.",
+      "status": "active",
+      "goalOutcome": "The user can see current project position and outstanding work in one overview.",
+      "goalSuccessSignals": [
+        "ProjectPortfolio.state and WorkItem.state expose matching open/blocked/risk/upcoming counts and query rows.",
+        "The overview identifies waiting-on-human and waiting-on-cell states separately."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://digital-work.collect-structured-input",
+      "parentRef": "purpose://digital-work",
+      "title": "Collect structured input",
+      "summary": "Collect structured answers or evidence from people or systems.",
+      "status": "active",
+      "goalOutcome": "Structured input can be authored, delivered, collected, inspected, and exported with consent and evidence boundaries.",
+      "goalSuccessSignals": [
+        "Input schema is visible.",
+        "Submission state is explicit.",
+        "Responses can be read or exported according to grants."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://content.review-before-publish",
+      "parentRef": "purpose://digital-work",
+      "title": "Review content before publish",
+      "summary": "Prepare publication of notes, summaries, or public content with review, consent, and explicit confirmation.",
+      "status": "draft",
+      "goalOutcome": "Content can be reviewed and approved before any publish action happens.",
+      "goalSuccessSignals": [
+        "Target content and publication destination are identified or clarification is requested.",
+        "Privacy-sensitive or personal content is reviewed before publication.",
+        "No content is marked published without explicit confirmation."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://questionnaire.campaign.complete",
+      "parentRef": "purpose://digital-work.collect-structured-input",
+      "title": "Complete questionnaire campaign",
+      "summary": "Create, deliver, answer, inspect, and analyze a questionnaire campaign.",
+      "status": "active",
+      "goalOutcome": "A user can create, deliver, answer, inspect, and analyze a consent-gated questionnaire.",
+      "goalSuccessSignals": [
+        "Respondent form opens, saves draft, submits, and records consent state.",
+        "Admin authoring can configure questions, consent, pages, and lifecycle.",
+        "Responses can be collected, read, exported, and analyzed without leaking invitation payloads."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://questionnaire.respondent.form",
+      "parentRef": "purpose://questionnaire.campaign.complete",
+      "title": "Respondent questionnaire form",
+      "summary": "Expose consent, questions, draft save, submit, and withdrawal paths for a respondent.",
+      "status": "active",
+      "goalOutcome": "Respondent can answer and submit only after consent.",
+      "goalSuccessSignals": [
+        "Respondent open link returns the expected campaign context.",
+        "Draft save persists answers without marking final submission.",
+        "Submit records submitted state, consent state, and receipt ID."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://questionnaire.admin.authoring",
+      "parentRef": "purpose://questionnaire.campaign.complete",
+      "title": "Questionnaire admin authoring",
+      "summary": "Configure title, context, consent, questions, pages, and lifecycle.",
+      "status": "active",
+      "goalOutcome": "Admin can configure a campaign without editing code.",
+      "goalSuccessSignals": [
+        "Campaign settings setters update state.",
+        "Questions can be added, edited, ordered, and validated.",
+        "Admin can preview lifecycle and response policy before launch."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://questionnaire.delivery.consent",
+      "parentRef": "purpose://questionnaire.campaign.complete",
+      "title": "Questionnaire delivery and consent",
+      "summary": "Select recipients, send access-proof links, and preserve consent boundaries.",
+      "status": "active",
+      "goalOutcome": "Only selected reachable recipients receive access-proof invitations.",
+      "goalSuccessSignals": [
+        "Delivery preview reports ready and blocked recipients.",
+        "Invitation payload avoids leaking questionnaire content.",
+        "Consent text and withdrawal boundary are visible before submission."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://questionnaire.responses.collect",
+      "parentRef": "purpose://questionnaire.campaign.complete",
+      "title": "Collect questionnaire responses",
+      "summary": "Store draft and submitted answers with consent state and receipt IDs.",
+      "status": "active",
+      "goalOutcome": "Responses are persisted separately from invitation transport.",
+      "goalSuccessSignals": [
+        "Submitted answers appear only after respondent submit.",
+        "Draft answers remain distinguishable from submitted answers.",
+        "Consent and receipt evidence are queryable according to grants."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://questionnaire.responses.analyze",
+      "parentRef": "purpose://questionnaire.campaign.complete",
+      "title": "Analyze questionnaire responses",
+      "summary": "Inspect counts and export response data transparently.",
+      "status": "active",
+      "goalOutcome": "Admin can read, export, and analyze response data according to consent and grants.",
+      "goalSuccessSignals": [
+        "Response counts are visible.",
+        "Export JSON/CSV includes only permitted fields.",
+        "Analysis summaries cite the response set and filters used."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://gui.quality.functional-accessible",
+      "parentRef": "purpose://quality",
+      "title": "Functional accessible GUI",
+      "summary": "Ensure controls are labeled, focusable, visually stable, aesthetic, and wired to real actions.",
+      "status": "active",
+      "goalOutcome": "All visible controls work, text and fields do not overlap, and keyboard/focus behavior is usable.",
+      "goalSuccessSignals": [
+        "Buttons trigger real keypaths or explicit disabled states.",
+        "Text fields can receive input and persist or validate it.",
+        "Browser/Binding smoke passes without overlap in required viewports."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://skeleton.owner-entity-access",
+      "parentRef": "purpose://gui.quality.functional-accessible",
+      "title": "Owner entity access affordance",
+      "summary": "Ensure every production skeleton leaves the owner a visible route back to their own entity, Co-Pilot, or equivalent recovery interface.",
+      "status": "draft",
+      "goalOutcome": "A generated or user-authored skeleton cannot lock the owner out of their entity context.",
+      "goalSuccessSignals": [
+        "The production skeleton contains a visible Button, Reference, chat/composer, or equivalent interface affordance for owner entity / Co-Pilot access, or the host shell documents that it supplies one outside the portable skeleton.",
+        "The affordance binds to a real owner-scoped Cell/keypath or shell action and is not only decorative text.",
+        "Validation fails or warns before publication when the affordance is missing."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://quality",
+      "parentRef": "purpose://root",
+      "title": "Quality",
+      "summary": "Cross-cutting quality purposes that support user-facing and scaffold-facing work.",
+      "status": "active",
+      "goalOutcome": "Capabilities are reliable, understandable, useful, and maintainable.",
+      "goalSuccessSignals": [
+        "Contracts exist for key behavior.",
+        "Failures are observable and recoverable.",
+        "Quality gates are tied to the purpose they protect."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://governance",
+      "parentRef": "purpose://root",
+      "title": "Governance",
+      "summary": "Cross-cutting privacy, access, audit, preference, and owner-control purposes.",
+      "status": "active",
+      "goalOutcome": "Access and state changes are explicit, bounded, auditable, and owner-respecting.",
+      "goalSuccessSignals": [
+        "Sensitive reads and writes require visible grants or confirmations.",
+        "Preference and entity facts are owner-scoped and deletable.",
+        "Audit trails explain what changed and why."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://access.audit.privacy",
+      "parentRef": "purpose://governance",
+      "title": "Access, audit and privacy",
+      "summary": "Keep visibility grant-bound and mutations auditable.",
+      "status": "active",
+      "goalOutcome": "Reads, writes, shares, and exports follow explicit grants and leave reviewable evidence.",
+      "goalSuccessSignals": [
+        "Resolver denies missing grants.",
+        "Sensitive action plans identify risk level and confirmation needs.",
+        "Audit/feed entries explain successful mutations."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://questionnaire.access.audit",
+      "parentRef": "purpose://access.audit.privacy",
+      "title": "Questionnaire access audit",
+      "summary": "Keep questionnaire responses consent-gated and transport payloads minimal.",
+      "status": "active",
+      "goalOutcome": "Admin visibility follows consent and invitation transport does not leak questionnaire content.",
+      "goalSuccessSignals": [
+        "Privacy policy state is visible.",
+        "Access decisions are represented in audit/feed events.",
+        "Invitation payloads contain access proof rather than response content."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://preference.owner-controlled",
+      "parentRef": "purpose://governance",
+      "title": "Owner-controlled preferences",
+      "summary": "Keep reusable preference facts explicit, scoped, inspectable, and deletable.",
+      "status": "active",
+      "goalOutcome": "HAVEN can reuse owner-approved preference evidence without hidden profiling.",
+      "goalSuccessSignals": [
+        "Reusable preferences are stored as explicit evidence records.",
+        "Perspective may weight active context but does not silently mutate owner facts.",
+        "The owner can delete or revise stored preference records."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://validation",
+      "parentRef": "purpose://root",
+      "title": "Validation",
+      "summary": "Purposes that prove behavior through acceptance, contract, replay, GUI, and regression checks.",
+      "status": "active",
+      "goalOutcome": "HAVEN can tell whether a purpose has been achieved or is blocked.",
+      "goalSuccessSignals": [
+        "Each canonical purpose has at least one measurable Goal.",
+        "Goal evaluations return achieved, at_risk, blocked, missed, or unknown with evidence.",
+        "Regression tests protect deterministic purpose decomposition."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://test.acceptance",
+      "parentRef": "purpose://validation",
+      "title": "Acceptance tests",
+      "summary": "Prove that a purpose can be achieved and stays stable.",
+      "status": "active",
+      "goalOutcome": "A purpose has executable checks that demonstrate the user-facing or scaffold-facing outcome.",
+      "goalSuccessSignals": [
+        "Relevant unit/contract tests pass.",
+        "Fixtures cover positive, negative, and ambiguous prompts where applicable.",
+        "GUI smoke exists for user-facing surfaces."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://test.acceptance.purpose-decomposition",
+      "parentRef": "purpose://test.acceptance",
+      "title": "Purpose decomposition acceptance",
+      "summary": "Protect deterministic prompt decomposition and model-proposal boundaries.",
+      "status": "active",
+      "goalOutcome": "Equivalent prompts produce stable purpose coverage, and model proposals cannot override HAVEN validation.",
+      "goalSuccessSignals": [
+        "Known fixtures pass deterministic resolver checks.",
+        "Ambiguous prompts ask for clarification or candidate review.",
+        "Hallucinated capabilities are rejected or moved to missing."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://test.acceptance.hallucination-evaluation",
+      "parentRef": "purpose://test.acceptance",
+      "title": "Hallucination evaluation gate",
+      "summary": "Periodically test that chat, purpose decomposition, model-assisted proposals, and source-backed answers do not invent facts, refs, capabilities, or unsupported certainty.",
+      "status": "draft",
+      "goalOutcome": "HAVEN can periodically pass a hallucination evaluation suite and report regressions before hallucinated claims become accepted knowledge or user-facing behavior.",
+      "goalSuccessSignals": [
+        "Hallucinated purposeRefs, goalRefs, capability refs, keypaths, and source citations are rejected or reported as missing.",
+        "Unsupported factual claims are either grounded with checked sources, clearly marked as inference, or answered as unknown.",
+        "Known negative, adversarial, stale-source, and ambiguous fixtures do not become false canonical purposes.",
+        "When the target threshold has been met, later runs preserve the quality band instead of optimizing past it with regressions elsewhere."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://test.acceptance.questionnaire",
+      "parentRef": "purpose://test.acceptance",
+      "title": "Questionnaire acceptance tests",
+      "summary": "Protect questionnaire decomposition and campaign behavior.",
+      "status": "active",
+      "goalOutcome": "Questionnaire prompts produce stable purpose coverage and campaign contracts keep working.",
+      "goalSuccessSignals": [
+        "Questionnaire positive, negative, and ambiguous fixtures pass.",
+        "QuestionnaireCampaign admin/respondent/export tests pass.",
+        "GUI smoke covers admin and respondent surfaces."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://test.acceptance.project-work",
+      "parentRef": "purpose://test.acceptance",
+      "title": "Project work acceptance tests",
+      "summary": "Protect project/work decomposition and cell behavior.",
+      "status": "active",
+      "goalOutcome": "Project/work prompts produce stable purpose coverage and existing cells keep their contracts.",
+      "goalSuccessSignals": [
+        "Project/work positive, negative, and ambiguous fixtures pass.",
+        "ProjectPortfolioCellTests and WorkItemCellTests pass.",
+        "Share-flow and overview tests cover the requested user workflow."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://knowledge",
+      "parentRef": "purpose://root",
+      "title": "Knowledge and methodology",
+      "summary": "Purposes that provide source evidence, freshness, methods, and reusable knowledge for decisions.",
+      "status": "active",
+      "goalOutcome": "HAVEN decisions can cite current internal state, stable local knowledge, and checked external sources when needed.",
+      "goalSuccessSignals": [
+        "Source records include path or URL, checked date, status, and applies-to fields.",
+        "Stale or unfamiliar external claims require a fresh source check.",
+        "Machine-readable knowledge is versioned and traceable to documents or code."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://source.methodology.current",
+      "parentRef": "purpose://knowledge",
+      "title": "Current methodology sources",
+      "summary": "Use source evidence with checked dates and stale-source policy.",
+      "status": "active",
+      "goalOutcome": "Claims about outside practice, law, standards, or model/runtime behavior are based on source records that can be rechecked.",
+      "goalSuccessSignals": [
+        "External source records have URL, domain, checkedAt, and status.",
+        "Unstable facts trigger browsing or official-source checks.",
+        "Source evidence is attached to the purpose node it supports."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://knowledge.explain-policy",
+      "parentRef": "purpose://knowledge",
+      "title": "Explain policy or rules",
+      "summary": "Explain rules, policy, or consent boundaries in plain language without inventing authority.",
+      "status": "draft",
+      "goalOutcome": "The user receives a clear explanation of the relevant rule and what actions are allowed, blocked, or require consent.",
+      "goalSuccessSignals": [
+        "Explanation names the relevant policy or missing source.",
+        "Plain-language mode is supported without condescension.",
+        "The explanation distinguishes aggregate, consented, and private data."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://grounding",
+      "parentRef": "purpose://root",
+      "title": "Grounding",
+      "summary": "Purposes that map prompts to executable, verified, side-effect-aware action plans.",
+      "status": "active",
+      "goalOutcome": "A prompt can be decomposed into purpose nodes, achievable Goals, required capabilities, missing pieces, and safe action plans.",
+      "goalSuccessSignals": [
+        "grounding.decompose returns stable purpose coverage for equivalent inputs.",
+        "Unknown capabilities are reported as missing instead of hallucinated.",
+        "Side effects require explicit action plans and grants."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://grounding.local-model-assisted-decomposition",
+      "parentRef": "purpose://grounding",
+      "title": "Local model assisted decomposition",
+      "summary": "Use a local model as proposal engine while HAVEN keeps deterministic authority.",
+      "status": "active",
+      "goalOutcome": "A local model may suggest templates and hints without mutating final purpose trees or hidden profile state.",
+      "goalSuccessSignals": [
+        "modelPolicy.mode=proposal falls back deterministically when unavailable.",
+        "Model output can only select templates, propose hints, or expose rejected claims.",
+        "Final PurposeNode output is built by HAVEN templates and validators."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://purpose-taxonomy.capture-and-place",
+      "parentRef": "purpose://grounding",
+      "title": "Capture and place new purposes",
+      "summary": "Detect new purpose candidates, find their nearest ancestor, and queue review when automatic placement is uncertain or consent is required.",
+      "status": "candidate",
+      "goalOutcome": "New purpose candidates are captured, deduplicated, placed under the nearest known ancestor, and escalated only when needed.",
+      "goalSuccessSignals": [
+        "Candidate has a proposed parent, confidence, evidence, and missing capability list.",
+        "High-confidence safe placements are staged automatically without changing canonical taxonomy.",
+        "Consent-sensitive or low-confidence placements enter a human review accumulator."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://scaffold.operations",
+      "parentRef": "purpose://root",
+      "title": "Scaffold operations",
+      "summary": "Purposes for scaffolds to keep themselves connected, observable, recoverable, and aligned with HAVEN.",
+      "status": "candidate",
+      "goalOutcome": "A scaffold can detect whether operational purposes are achieved, at risk, or blocked.",
+      "goalSuccessSignals": [
+        "Health checks emit events when network or peer contact changes.",
+        "PerspectiveCell can react to operational state changes as contextual signals.",
+        "Recovery helpers are selected by purpose and capability, not hidden scripts."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://personal-context.semantic-state",
+      "parentRef": "purpose://human-agency",
+      "title": "Personal semantic context state",
+      "summary": "Represent owner-defined labels such as Home, Work, or lunch time without exposing raw location/time unless explicitly granted.",
+      "status": "candidate",
+      "goalOutcome": "Personal context labels become active, approaching, or ended based on owner-approved observations and tolerances.",
+      "goalSuccessSignals": [
+        "SemanticLocation label is evaluated from private location evidence with freshness and precision bounds.",
+        "SemanticTime label is evaluated in the owner's timezone with clear active windows.",
+        "Composite context Goals can combine labels without leaking raw observations."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://value-and-commons",
+      "parentRef": "purpose://root",
+      "title": "Value and commons",
+      "summary": "Purposes for returning value, protecting commons, and avoiding extractive platform dynamics.",
+      "status": "candidate",
+      "goalOutcome": "Value flows are transparent, bounded by policy, and do not undermine equal human worth or owner agency.",
+      "goalSuccessSignals": [
+        "Credits, payouts, grants, or value-return mechanisms have explicit policy and regulatory review.",
+        "Contribution evidence is inspectable and contestable.",
+        "No user is reduced to an opaque monetization score."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://prompt.unknown",
+      "parentRef": "purpose://root",
+      "title": "Unknown prompt purpose",
+      "summary": "Fallback when a prompt has no known canonical purpose yet.",
+      "status": "active",
+      "goalOutcome": "Unknown prompts are handled safely by reporting missing coverage, candidate purposes, and review needs.",
+      "goalSuccessSignals": [
+        "No false canonical purpose is asserted.",
+        "Candidate placement includes nearest known ancestor and confidence.",
+        "Human review is queued when needed."
+      ],
+      "interests": []
+    },
+    {
+      "purposeRef": "purpose://self-determination.data",
+      "parentRef": "purpose://root",
+      "title": "Data self-determination",
+      "summary": "The owner decides the purpose, extent, place, manner, recipients and duration of any use of their own and derived data, and can verify that the decision was honoured.",
+      "status": "candidate",
+      "goalOutcome": "Every use of a person's data runs under an agreement the person can read, change and withdraw, and leaves verifiable evidence.",
+      "goalSuccessSignals": [
+        "No use exists without an identifiable agreement stating purpose, extent, recipient and duration.",
+        "The owner can list every ongoing use of their data in one view.",
+        "Withdrawal stops further use at every recipient the agreement reached, and returns confirmation or discrepancy to the owner.",
+        "Control does not require trusting the operator: each compliance claim is checkable against evidence or shown as uncheckable."
+      ],
+      "interests": [
+        "self-determination",
+        "autonomy",
+        "revocability",
+        "accountability"
+      ]
+    },
+    {
+      "purposeRef": "purpose://self-determination.data.use-purpose",
+      "parentRef": "purpose://self-determination.data",
+      "title": "Purpose binding for data use",
+      "summary": "Data is used only for a declared purpose the owner accepted; a new purpose requires a new acceptance.",
+      "status": "candidate",
+      "goalOutcome": "Every use traces back to a declared purpose the owner accepted.",
+      "goalSuccessSignals": [
+        "Processing without a purpose reference is denied by the resolver.",
+        "Purpose extension triggers a new acceptance instead of silent reuse.",
+        "The declared purpose is stated so it can be refused without losing base functionality."
+      ],
+      "interests": [
+        "purpose-limitation",
+        "declared-purpose"
+      ]
+    },
+    {
+      "purposeRef": "purpose://self-determination.data.scope",
+      "parentRef": "purpose://self-determination.data",
+      "title": "Extent of data made available",
+      "summary": "The owner decides which fields, and at what precision, are made available, including the degree of identifiability.",
+      "status": "candidate",
+      "goalOutcome": "A recipient receives the smallest field set that solves the agreed task, at a precision the owner chose.",
+      "goalSuccessSignals": [
+        "Agreements name fields explicitly; a wildcard agreement cannot be entered into.",
+        "The owner can pick a coarser representation such as interval, region or pseudonym and still receive the service where feasible.",
+        "Linkage that raises identifiability beyond the agreed level is denied or surfaced."
+      ],
+      "interests": [
+        "minimisation",
+        "identifiability"
+      ]
+    },
+    {
+      "purposeRef": "purpose://self-determination.data.locality",
+      "parentRef": "purpose://self-determination.data",
+      "title": "Place and jurisdiction of data use",
+      "summary": "The owner decides where data is stored and processed, and how many copies exist.",
+      "status": "candidate",
+      "goalOutcome": "Every copy and processing site is known to the owner and inside the owner's chosen limit.",
+      "goalSuccessSignals": [
+        "The owner can see a complete list of known copies and processing sites.",
+        "Processing outside the chosen site or jurisdiction is blocked, not merely logged.",
+        "A conflict between the owner's locality choice and a service availability promise is shown to the owner as a choice, not hidden."
+      ],
+      "interests": [
+        "locality",
+        "jurisdiction",
+        "copies"
+      ]
+    },
+    {
+      "purposeRef": "purpose://self-determination.data.manner",
+      "parentRef": "purpose://self-determination.data",
+      "title": "Manner of processing and derived data",
+      "summary": "Whether data may be linked, profiled, used for model training or otherwise derived from, and who controls the derived result.",
+      "status": "candidate",
+      "goalOutcome": "Linkage, profiling, model training and other derivation happen only where the owner accepted that specific manner of processing, and derived data inherits the owner's control.",
+      "goalSuccessSignals": [
+        "The agreement separates read and display from linkage, profiling and training.",
+        "Derived artefacts such as profiles, embeddings and model contributions carry provenance and fall under the same withdrawal.",
+        "No hidden scoring or ranking of people can enter service without a declared manner of processing."
+      ],
+      "interests": [
+        "derived-data",
+        "model-training",
+        "linkage"
+      ]
+    },
+    {
+      "purposeRef": "purpose://self-determination.data.recipients",
+      "parentRef": "purpose://self-determination.data",
+      "title": "Recipients and delegation",
+      "summary": "Named recipients, onward delegation the owner can see, and default deny for everyone else. New dimension: the sketch had no recipient axis.",
+      "status": "candidate",
+      "goalOutcome": "Every party holding access is named in an agreement or derived from a delegation the owner can inspect and revoke.",
+      "goalSuccessSignals": [
+        "Default is deny; reach exists only as an explicit capability.",
+        "Onward delegation is visible to the owner with a chain back to the originating grant.",
+        "The owner can revoke one recipient without tearing down the rest of the agreement."
+      ],
+      "interests": [
+        "delegation",
+        "least-privilege",
+        "default-deny"
+      ]
+    },
+    {
+      "purposeRef": "purpose://self-determination.data.duration",
+      "parentRef": "purpose://self-determination.data",
+      "title": "Duration, withdrawal and deletion",
+      "summary": "How long use may last, and the right to change one's mind with downstream effect. New dimension: absent from the sketch.",
+      "status": "candidate",
+      "goalOutcome": "Control survives data leaving the owner: every use has an end date, and withdrawal propagates and leaves evidence.",
+      "goalSuccessSignals": [
+        "An agreement without a duration or renewal point cannot be entered into.",
+        "Withdrawal returns a receipt per recipient: stopped, or not confirmed with a stated reason.",
+        "Export and deletion of one's own data set are available without asking the operator for help."
+      ],
+      "interests": [
+        "revocability",
+        "retention",
+        "portability"
+      ]
+    },
+    {
+      "purposeRef": "purpose://self-determination.data.verifiability",
+      "parentRef": "purpose://self-determination.data",
+      "title": "Verifiability instead of trust",
+      "summary": "The owner can check that the rules were followed without having to trust the operator. Replaces the sketch's trust-in-organisation requirement.",
+      "status": "candidate",
+      "goalOutcome": "Every compliance claim is either checkable by the owner or explicitly marked as uncheckable.",
+      "goalSuccessSignals": [
+        "Sharing, export and purpose changes leave readable history the owner can retrieve.",
+        "The system visibly distinguishes verified from promised and from unknown.",
+        "The amount of trust the operator requires is documented and shrinks over time rather than growing."
+      ],
+      "interests": [
+        "verifiability",
+        "evidence"
+      ]
+    },
+    {
+      "purposeRef": "purpose://self-determination.data.exercisability",
+      "parentRef": "purpose://self-determination.data",
+      "title": "Control that can actually be exercised",
+      "summary": "Control that demands expertise, time or money distributes power unevenly. Raises the sketch's ease-of-use wish to a criterion.",
+      "status": "candidate",
+      "goalOutcome": "A person without expert knowledge can see, understand and change the use of their data within minutes, at no cost.",
+      "goalSuccessSignals": [
+        "The default setting is the protective one, not the disclosing one.",
+        "The number of decisions required for an ordinary purpose stays low enough that acceptance does not become routine clicking.",
+        "Refusing is as easy as accepting and does not remove base functionality."
+      ],
+      "interests": [
+        "exercisability",
+        "equal-opportunity",
+        "protective-default"
+      ]
+    }
+  ]
+}

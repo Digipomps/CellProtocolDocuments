@@ -1,0 +1,117 @@
+fetcher...
+Fskrevet /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/tmp7gqcjlav/inventory.json: 1 pakker, 1 i main, 0 utenfor, main=65788533
+  i main fanget av: squash-pr 1
+fetcher...
+Fskrevet /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/tmpojbv9fj4/inventory.json: 1 pakker, 1 i main, 0 utenfor, main=44513657
+  i main fanget av: git-cherry 1
+fetcher...
+.skrevet /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/tmp3ru4hvj5/inventory.json: 1 pakker, 1 i main, 0 utenfor, main=65788533
+  i main fanget av: squash-pr 1
+fetcher...
+Fskrevet /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/tmpqz8dnhe9/inventory.json: 1 pakker, 0 i main, 1 utenfor, main=44513657
+  i main fanget av: 
+fetcher...
+Fskrevet /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/tmpe167guna/inventory.json: 0 pakker, 0 i main, 0 utenfor, main=44513657
+  i main fanget av: 
+fetcher...
+ADVARSEL: gh pr list feilet, pr-feltet blir tomt: Command '('gh', 'pr', 'list', '-R', 'Digipomps/CellScaffold', '--state', 'all', '--limit', '400', '--json', 'number,headRefName,state,mergedAt')' returned non-zero exit status 128.
+Fskrevet /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/tmpchhru1tp/inventory.json: 1 pakker, 0 i main, 1 utenfor, main=44513657
+  i main fanget av: 
+fetcher...
+Fskrevet /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/tmpfnfqv8am/inventory.json: 1 pakker, 1 i main, 0 utenfor, main=44513657
+  i main fanget av: tre-punkts-diff 1
+fetcher...
+Fskrevet /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/tmpplvmd0p0/inventory.json: 1 pakker, 1 i main, 0 utenfor, main=f17b13ab
+  i main fanget av: git-cherry 1
+fetcher...
+Fskrevet /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/tmphwy4zw_v/inventory.json: 1 pakker, 1 i main, 0 utenfor, main=44513657
+  i main fanget av: squash-pr 1
+fetcher...
+.
+======================================================================
+FAIL: test_backdated_commit_after_merged_head_remains_unmerged (__main__.InventoryMeasurementTests.test_backdated_commit_after_merged_head_remains_unmerged)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/haven-prod-20260917/test_inventory_measurement.py", line 101, in test_backdated_commit_after_merged_head_remains_unmerged
+    self.assertEqual(self.measure()['packages'][0]['state'], 'UNMERGED')
+AssertionError: 'MERGED' != 'UNMERGED'
+- MERGED
++ UNMERGED
+? ++
+
+
+======================================================================
+FAIL: test_cherry_failure_preserves_previous_inventory (__main__.InventoryMeasurementTests.test_cherry_failure_preserves_previous_inventory)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/haven-prod-20260917/test_inventory_measurement.py", line 118, in test_cherry_failure_preserves_previous_inventory
+    with self.assertRaises(subprocess.CalledProcessError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: CalledProcessError not raised
+
+======================================================================
+FAIL: test_failed_atomic_replace_preserves_previous_inventory (__main__.InventoryMeasurementTests.test_failed_atomic_replace_preserves_previous_inventory)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/haven-prod-20260917/test_inventory_measurement.py", line 146, in test_failed_atomic_replace_preserves_previous_inventory
+    with self.assertRaises(OSError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: OSError not raised
+
+======================================================================
+FAIL: test_fetch_failure_preserves_previous_inventory (__main__.InventoryMeasurementTests.test_fetch_failure_preserves_previous_inventory)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/haven-prod-20260917/test_inventory_measurement.py", line 111, in test_fetch_failure_preserves_previous_inventory
+    with self.assertRaises(subprocess.CalledProcessError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: CalledProcessError not raised
+
+======================================================================
+FAIL: test_github_failure_preserves_previous_inventory (__main__.InventoryMeasurementTests.test_github_failure_preserves_previous_inventory)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/haven-prod-20260917/test_inventory_measurement.py", line 125, in test_github_failure_preserves_previous_inventory
+    with self.assertRaises(subprocess.CalledProcessError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: CalledProcessError not raised
+
+======================================================================
+FAIL: test_main_moving_during_measurement_preserves_previous_inventory (__main__.InventoryMeasurementTests.test_main_moving_during_measurement_preserves_previous_inventory)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/haven-prod-20260917/test_inventory_measurement.py", line 139, in test_main_moving_during_measurement_preserves_previous_inventory
+    with self.assertRaises(ValueError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_merge_only_resolution_is_not_hidden_by_empty_git_cherry (__main__.InventoryMeasurementTests.test_merge_only_resolution_is_not_hidden_by_empty_git_cherry)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/haven-prod-20260917/test_inventory_measurement.py", line 160, in test_merge_only_resolution_is_not_hidden_by_empty_git_cherry
+    self.assertEqual(self.measure()['packages'][0]['state'], 'UNMERGED')
+AssertionError: 'MERGED' != 'UNMERGED'
+- MERGED
++ UNMERGED
+? ++
+
+
+======================================================================
+FAIL: test_merged_pr_from_another_main_is_not_a_merge_receipt (__main__.InventoryMeasurementTests.test_merged_pr_from_another_main_is_not_a_merge_receipt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/haven-prod-20260917/test_inventory_measurement.py", line 107, in test_merged_pr_from_another_main_is_not_a_merge_receipt
+    self.assertEqual(self.measure()['packages'][0]['state'], 'UNMERGED')
+AssertionError: 'MERGED' != 'UNMERGED'
+- MERGED
++ UNMERGED
+? ++
+
+
+----------------------------------------------------------------------
+Ran 10 tests in 2.848s
+
+FAILED (failures=8)
+skrevet /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/tmp1udi8fb_/inventory.json: 1 pakker, 0 i main, 1 utenfor, main=44513657
+  i main fanget av: 

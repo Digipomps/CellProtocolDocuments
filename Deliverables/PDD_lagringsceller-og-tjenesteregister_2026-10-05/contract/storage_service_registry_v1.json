@@ -1,0 +1,14 @@
+{"cell":"cell:///StorageServiceRegistry","version":1,"status":"utkast-G2","scope":"scaffoldUnique","owner":"CELL_SCAFFOLD_OWNER_CONTEXT eller Scaffold","provisioning":{"policy":"requireExisting (owner.scaffold-bindingen)","eagerBootstrap":false,"note":"provisjoneres eksplisitt per vert i AP12"},"planned":true,
+ "keys":{
+  "entries":{"op":"get","grant":"r---","returns":"StorageServiceEntry[]"},
+  "entry":{"op":"set","grant":"r---","payload":["serviceID"],"returns":"StorageServiceEntry"},
+  "rank":{"op":"set","grant":"r---","payload":["locality","storedTB","egressTB","use"],"returns":["ranked[]{serviceID,monthlyCost,currency,isEstimate}","excluded[]{serviceID,reason}"]},
+  "proposeEntry":{"op":"set","grant":"rw--","payload":"StorageServiceEntry uten review","effect":"review.status = unreviewed"},
+  "approveEntry":{"op":"set","grant":"eier","payload":["serviceID","checkedAt"]},
+  "retireEntry":{"op":"set","grant":"eier","payload":["serviceID","reason"]}},
+ "entry":{"required":["serviceID","displayName","company","companyCountry","companyIsEuropean","regions","apiKind","pricing","limitations","purposes","sourceURL","pricedAt","review"],
+  "pricing":["currency","baseMonthly","includedStorageTB","storagePerTBMonth","includedEgressTB","egressPerTB","freeEgressMultipleOfStored","minimumStorageTB","minimumRetentionDays","egressMustNotExceedStored"],
+  "review":{"status":["approved","unreviewed","retired"],"proposedBy":"identitetsreferanse","checkedAt":"dato"},
+  "staleAfterDays":90},
+ "access":{"deliverable1":"lesing åpen for alle innloggede","planned":"individ og godkjent ideell gratis, selskap mikrobetaling (AP8, blokkert)"},
+ "negative":["andre enn eier kan ikke godkjenne","oppføring uten sourceURL eller pricedAt avvises","formålsmatch gir ingen rettighet"]}

@@ -1,0 +1,41 @@
+{
+  "name": "Agent Trust Package — etterprøving",
+  "_note": "«Etter»-flaten. Diff planlagt/observert over kvitteringer, per agent.",
+  "discovery": { "sourceCellEndpoint": "cell:///AgentTrustPackage", "sourceCellName": "AgentTrustPackage", "purpose": "purpose://candidate.tillitspakke-agentflaate.etterproving" },
+  "skeleton": { "VStack": { "spacing": 14, "modifiers": { "padding": 16 }, "elements": [
+    { "Section": { "header": { "Text": { "text": "Etterprøving" } }, "content": [
+      { "Text": { "keypath": "trustPackage.state.audit.statusLabel", "modifiers": { "fontStyle": "headline", "fontWeight": "bold" } } },
+      { "Text": { "keypath": "trustPackage.state.audit.summaryLabel" } },
+      { "Text": { "keypath": "trustPackage.state.audit.approvedDigestLabel", "modifiers": { "fontStyle": "caption", "styleClasses": ["tp-mono"] } } }
+    ] } },
+    { "Section": { "header": { "Text": { "text": "Avvik fra pakken" } }, "content": [
+      { "Text": { "keypath": "trustPackage.state.audit.violationsLabel", "modifiers": { "fontStyle": "caption" } } },
+      { "List": { "keypath": "trustPackage.state.audit.violations", "flowElementSkeleton": { "VStack": { "spacing": 3,
+        "modifiers": { "padding": 12, "cornerRadius": 12, "maxWidthInfinity": true, "hAlignment": "leading", "styleClasses": ["tp-violation-card"] },
+        "elements": [
+          { "Text": { "keypath": "kindLabel", "modifiers": { "fontStyle": "headline", "fontWeight": "bold" } } },
+          { "Text": { "keypath": "detailLabel" } },
+          { "Text": { "keypath": "whenAgentLabel", "modifiers": { "fontStyle": "caption" } } },
+          { "Text": { "keypath": "receiptLabel", "modifiers": { "fontStyle": "caption", "styleClasses": ["tp-mono"] } } },
+          { "Button": { "keypath": "trustPackage.open.receipt", "label": "Åpne kvittering", "payload": { "receiptID": "$id" } } }
+        ] } } } },
+      { "HStack": { "spacing": 8, "elements": [
+        { "Button": { "keypath": "trustPackage.fleet.stop", "label": "Stopp flåten" } },
+        { "Button": { "keypath": "trustPackage.open.package", "label": "Snevre inn og godkjenn på nytt" } }
+      ] } }
+    ] } },
+    { "Section": { "header": { "Text": { "text": "Siste kvitteringer" } }, "content": [
+      { "List": { "keypath": "trustPackage.state.audit.receipts", "flowElementSkeleton": { "VStack": { "spacing": 2,
+        "modifiers": { "padding": 10, "cornerRadius": 10, "maxWidthInfinity": true, "hAlignment": "leading", "styleClasses": ["tp-receipt-row"] },
+        "elements": [
+          { "Text": { "keypath": "lineLabel", "modifiers": { "fontWeight": "bold" } } },
+          { "Text": { "keypath": "resultLabel", "modifiers": { "fontStyle": "caption" } } },
+          { "Text": { "keypath": "signatureLabel", "modifiers": { "fontStyle": "caption" } } }
+        ] } } } }
+    ] } }
+  ] } },
+  "_verify_in_porthole": [
+    "Button i List-rad med payload $id.",
+    "To knapper i én HStack under en List — bekreft at begge når keypaths (reachableActionKeypaths)."
+  ]
+}

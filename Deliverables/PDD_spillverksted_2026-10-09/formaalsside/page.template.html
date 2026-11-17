@@ -1,0 +1,393 @@
+<title>Spillverksted – formålsplan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: arbeidstegning. Venstre: formålstreet som et kart man scroller i. Høyre: porten (godkjenning) som alltid er synlig. Popup for detaljer. */
+:root{
+  --bg:#eef1f6; --paper:#ffffff; --paper2:#f5f7fb; --ink:#141b2b; --muted:#56607a; --faint:#8b93a8;
+  --line:#d4d9e4; --line2:#b7bfd0; --accent:#2f4fd1; --accent-ink:#ffffff; --ok:#21794a; --warn:#9a6400; --bad:#b0362c;
+  --h0:#2f4fd1; --h1:#c0571e; --h2:#7b3fa6; --h3:#1d8270; --h4:#a2386a; --h5:#5a6b12; --h6:#2b6fa3; --h7:#8a5a1b;
+  --tint:.10;
+  --display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1320; --paper:#171c2c; --paper2:#1d2336; --ink:#e6e9f2; --muted:#a3abc2; --faint:#717a93;
+  --line:#2a3148; --line2:#3a4361; --accent:#8ea2ff; --accent-ink:#0f1320; --ok:#5fd394; --warn:#e8b04f; --bad:#f08a7f;
+  --h0:#8ea2ff; --h1:#f39a62; --h2:#c79af0; --h3:#5fd0bb; --h4:#f08bb8; --h5:#bfd060; --h6:#79b8ec; --h7:#e0b067;
+  --tint:.16; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1320; --paper:#171c2c; --paper2:#1d2336; --ink:#e6e9f2; --muted:#a3abc2; --faint:#717a93;
+  --line:#2a3148; --line2:#3a4361; --accent:#8ea2ff; --accent-ink:#0f1320; --ok:#5fd394; --warn:#e8b04f; --bad:#f08a7f;
+  --h0:#8ea2ff; --h1:#f39a62; --h2:#c79af0; --h3:#5fd0bb; --h4:#f08bb8; --h5:#bfd060; --h6:#79b8ec; --h7:#e0b067;
+  --tint:.16; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
+button,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1500px;margin:0 auto;padding-inline:16px;padding-block:18px 32px;display:grid;gap:16px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 20px}
+header .t{flex:1;min-width:0}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(1.6rem,4vw,2.4rem);line-height:1.05;margin:0;text-wrap:balance;letter-spacing:-.01em}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+.lede{margin:6px 0 0;color:var(--muted);max-width:70ch}
+.gatepill{display:inline-flex;align-items:center;gap:8px;border:1.5px solid var(--line2);border-radius:999px;padding:6px 12px;font-weight:600;font-size:13px;background:var(--paper)}
+.gatepill .d{width:9px;height:9px;border-radius:50%;background:var(--warn)}
+.gatepill.ok .d{background:var(--ok)} .gatepill.chg .d{background:var(--bad)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:none;padding:10px 12px;border-bottom:2.5px solid transparent;cursor:pointer;color:var(--muted);font-weight:500}
+.tabs button[aria-selected="true"]{color:var(--ink);border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;align-items:start}
+@media (max-width:980px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px}
+/* tree */
+.mapbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)}
+.mapbar .hint{color:var(--muted);font-size:13px;flex:1;min-width:180px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);background:var(--paper);border-radius:9px;padding:7px 12px;cursor:pointer;font-weight:500;font-size:14px}
+.btn:hover{background:var(--paper2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn:disabled{opacity:.5;cursor:default}
+.map{position:relative;overflow:auto;height:min(76vh,900px);background-image:radial-gradient(color-mix(in srgb,var(--line) 80%,transparent) 1px,transparent 1px);background-size:20px 20px;border-radius:0 0 14px 14px}
+.layer{position:relative;transform-origin:0 0}
+svg.links{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+.links path{fill:none;stroke-width:2}
+.node{position:absolute;display:flex;align-items:center;gap:8px;box-sizing:border-box;border:1.5px solid var(--hue);background:color-mix(in srgb,var(--hue) calc(var(--tint)*100%),var(--paper));border-radius:12px;padding:7px 10px;cursor:pointer;text-align:left;color:var(--ink)}
+.node:hover{box-shadow:0 0 0 3px color-mix(in srgb,var(--hue) 25%,transparent)}
+.node .c{font-family:var(--mono);font-size:11.5px;padding:2px 6px;border-radius:6px;background:var(--hue);color:var(--paper);flex:none}
+.node .n{flex:1;min-width:0;font-size:13.5px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.node .reuse{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);flex:none}
+.node.root{border-width:2px;background:var(--paper);font-family:var(--display);font-weight:600}
+.node.root .n{font-size:15px;-webkit-line-clamp:4}
+.node.anc{border-style:dashed;--hue:var(--line2);background:var(--paper2);color:var(--muted)}
+.node.cmt::after{content:"";position:absolute;top:-4px;right:-4px;width:10px;height:10px;border-radius:50%;background:var(--warn);border:2px solid var(--paper)}
+.tog{position:absolute;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--hue);background:var(--paper);display:grid;place-items:center;font-family:var(--mono);font-size:11px;padding:0;cursor:pointer;color:var(--ink)}
+/* gate */
+.gate{padding:16px;display:grid;gap:12px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+.gate h2{font-family:var(--display);font-weight:800;font-size:1.25rem;margin:0}
+.gate p{margin:0}
+.muted{color:var(--muted)} .small{font-size:13px}
+.next{background:var(--paper2);border-radius:10px;padding:10px 12px}
+.next ol{margin:6px 0 0;padding-left:20px;display:grid;gap:4px}
+label.f{display:grid;gap:6px;font-weight:600;font-size:13px}
+textarea{background:var(--paper2);border:1px solid var(--line2);border-radius:10px;padding:9px 10px;min-height:110px;resize:vertical;font-weight:400;line-height:1.45}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.msg{border-radius:10px;padding:9px 11px;font-size:14px;border:1px solid var(--line2)}
+.msg.ok{border-color:var(--ok)} .msg.warn{border-color:var(--warn)} .msg.bad{border-color:var(--bad)}
+.hist{display:grid;gap:8px;max-height:260px;overflow:auto}
+.hi{border-top:1px solid var(--line);padding-top:8px;font-size:13.5px}
+.hi b{font-weight:600}
+.hi .when{color:var(--faint);font-size:12px;font-variant-numeric:tabular-nums}
+/* dialog */
+dialog{border:none;border-radius:16px;padding:0;max-width:min(640px,calc(100vw - 32px));width:100%;background:var(--paper);color:var(--ink);box-shadow:0 24px 60px rgba(0,0,0,.28)}
+dialog::backdrop{background:rgba(10,14,25,.45)}
+.dh{display:flex;gap:10px;align-items:flex-start;padding:18px 18px 10px;border-bottom:1px solid var(--line)}
+.dh h3{font-family:var(--display);font-weight:800;font-size:1.25rem;line-height:1.2;margin:0;flex:1;text-wrap:balance}
+.db{padding:14px 18px 18px;display:grid;gap:14px;max-height:70vh;overflow:auto}
+.k{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
+.goal{border-left:4px solid var(--hue);background:color-mix(in srgb,var(--hue) calc(var(--tint)*100%),var(--paper2));border-radius:0 10px 10px 0;padding:10px 12px}
+.goal ul{margin:6px 0 0;padding-left:18px}
+.ref{font-family:var(--mono);font-size:12px;color:var(--muted);word-break:break-all}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.meta div{background:var(--paper2);border-radius:10px;padding:8px 10px}
+.kids{display:flex;flex-wrap:wrap;gap:6px}
+.kids button{border:1px solid var(--line2);background:var(--paper);border-radius:999px;padding:4px 10px;cursor:pointer;font-size:13px}
+.crumbs{font-size:13px;color:var(--muted)}
+.crumbs button{border:0;background:none;padding:0;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+/* analysis */
+.ana{padding:18px;display:grid;gap:20px}
+.ana>section,.grid>*{min-width:0}
+.ana li,.ana p,.hi{overflow-wrap:anywhere}
+.ana h2{font-family:var(--display);font-weight:800;font-size:1.3rem;margin:0 0 8px}
+.ana p,.ana li{max-width:72ch}
+.ana ol,.ana ul{margin:0;padding-left:20px;display:grid;gap:6px}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;font-size:14px;min-width:640px}
+th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-weight:600;background:var(--paper2)}
+td.win{font-weight:600}
+.loop{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.loop div{background:var(--paper2);border-radius:10px;padding:10px 12px}
+.loop b{display:block;font-family:var(--display);font-size:1.05rem}
+.loop .m{font-size:12px;color:var(--accent);font-weight:600;margin-top:4px}
+@media (prefers-reduced-motion:no-preference){.layer{transition:transform .2s ease}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="t">
+      <p class="eyebrow">Formålsplan · PDD_spillverksted_2026-10-09 · port G1</p>
+      <h1>Spillverksted for Sverre</h1>
+      <p class="lede">Arbeidsbenk der Sverre lærer programmering og AI-orkestrering ved å lage og publisere egne spill i HAVEN. Trykk på et formål for å se målet og hvordan det sjekkes.</p>
+    </div>
+    <span class="gatepill" id="gatepill"><span class="d"></span><span id="gatetext">G1 venter på deg</span></span>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-tree" aria-selected="true">Formålstre</button>
+    <button role="tab" id="tab-ana" aria-selected="false">Analyse</button>
+  </div>
+
+  <div class="grid">
+    <div>
+      <section class="panel" id="view-tree" aria-label="Formålstre">
+        <div class="mapbar">
+          <span class="hint" id="counts"></span>
+          <button class="btn" id="zout" aria-label="Zoom ut">−</button>
+          <button class="btn" id="zin" aria-label="Zoom inn">+</button>
+          <button class="btn" id="collapse">Skjul blad</button>
+        </div>
+        <div class="map" id="map"><div class="layer" id="layer"><svg class="links" id="links"></svg></div></div>
+      </section>
+      <section class="panel" id="view-ana" hidden aria-label="Analyse">
+        <div class="ana" id="ana"></div>
+      </section>
+    </div>
+
+    <aside class="panel gate" aria-label="Godkjenning">
+      <h2>Godkjenn formålene</h2>
+      <p class="muted small">Du godkjenner formålene og målene i treet (G1), ikke kode. Kommentarer følger med til Claude og blir en ny runde hvis du ber om endringer.</p>
+      <div class="next">
+        <b>Det skjer når du godkjenner (fase 1)</b>
+        <ol id="nextlist"></ol>
+      </div>
+      <label class="f" for="comment">Kommentarer
+        <textarea id="comment" placeholder="Skriv hva du vil ha endret, eller svar på spørsmålene under Analyse. Trykk på et formål og «Kommenter» for å henvise til det."></textarea>
+      </label>
+      <div class="row">
+        <button class="btn primary" id="approve">Godkjenn og start fase 1</button>
+        <button class="btn" id="changes">Be om endringer</button>
+      </div>
+      <div class="msg" id="gatemsg" hidden aria-live="polite"></div>
+      <div>
+        <div class="k">Beslutninger</div>
+        <div class="hist" id="hist"><p class="muted small">Ingen beslutninger ennå.</p></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<dialog id="dlg" aria-labelledby="dtitle"><div id="dcontent"></div></dialog>
+
+<script type="application/json" id="tree-data">/*TREE*/</script>
+<script>
+(() => {
+"use strict";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const T = JSON.parse($("tree-data").textContent);
+const SESSION = "session_01EpsSQYe1DthvA4E5RakX6R";
+const by = {}, kids = {};
+T.nodes.forEach((n) => { by[n.ref] = n; });
+T.nodes.forEach((n) => { if (n.parentRef) (kids[n.parentRef] = kids[n.parentRef] || []).push(n.ref); });
+const branches = kids[T.rootRef] || [];
+const hueOf = {};
+branches.forEach((b, i) => { const set = (r) => { hueOf[r] = i % 8; (kids[r] || []).forEach(set); }; set(b); });
+const hue = (r) => r === T.rootRef ? "var(--ink)" : `var(--h${hueOf[r]})`;
+const leaves = T.nodes.filter((n) => !kids[n.ref]);
+$("counts").textContent = `${branches.length} grener · ${leaves.length} bladformål · ${leaves.filter((n) => n.reused).length + T.nodes.filter((n)=>kids[n.ref]&&n.reused).length} gjenbruker Book 23`;
+
+const COMP = { allOf: "Alle barna må oppfylles (allOf)", sequence: "Barna oppfylles i rekkefølge (sequence)", anyOf: "Minst ett barn (anyOf)" };
+
+// ---------- tree layout ----------
+const W = { root: 270, branch: 250, leaf: 290 }, H = { root: 96, other: 52 }, COLX = [0, 300, 580], ROW = 62, ANC_W = 200;
+let collapsed = {}, k = 0;
+try { const s = JSON.parse(localStorage.getItem("spillverksted.view") || "{}"); collapsed = s.collapsed || {}; k = s.k || 0; } catch (e) {}
+const saveView = () => { try { localStorage.setItem("spillverksted.view", JSON.stringify({ collapsed, k })); } catch (e) {} };
+const commented = new Set();
+
+function render() {
+  const layer = $("layer"), svg = $("links");
+  layer.querySelectorAll(".node,.tog").forEach((e) => e.remove());
+  const pos = {}; let row = 0;
+  const x0 = ANC_W + 40;
+  branches.forEach((b) => {
+    const ch = collapsed[b] ? [] : (kids[b] || []);
+    if (!ch.length) { pos[b] = { x: x0 + COLX[1], y: row * ROW, w: W.branch, h: H.other }; row++; }
+    else {
+      ch.forEach((c) => { pos[c] = { x: x0 + COLX[2], y: row * ROW, w: W.leaf, h: H.other }; row++; });
+      const ys = ch.map((c) => pos[c].y);
+      pos[b] = { x: x0 + COLX[1], y: (Math.min(...ys) + Math.max(...ys)) / 2, w: W.branch, h: H.other };
+    }
+    row += 0.35;
+  });
+  const by0 = branches.map((b) => pos[b].y);
+  pos[T.rootRef] = { x: x0, y: Math.max(0, Math.min(...by0)), w: W.root - 30, h: H.root };
+  const paths = [];
+  const link = (a, b, color, dash) => {
+    const x1 = a.x + a.w, y1 = a.y + a.h / 2, x2 = b.x, y2 = b.y + b.h / 2, mx = (x1 + x2) / 2;
+    paths.push(`<path d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}" style="stroke:${color}"${dash ? ' stroke-dasharray="5 5"' : ""}/>`);
+  };
+  // ancestor: Book 23 anchor
+  const anc = { x: 0, y: pos[T.rootRef].y + (H.root - H.other) / 2, w: ANC_W, h: H.other };
+  const ae = document.createElement("button");
+  ae.className = "node anc"; Object.assign(ae.style, { left: anc.x + "px", top: anc.y + "px", width: anc.w + "px", minHeight: anc.h + "px" });
+  ae.innerHTML = `<span class="n">Book 23: Human agency and understanding</span>`;
+  ae.title = T.anchorRef; ae.onclick = () => openAnchor();
+  layer.appendChild(ae);
+  link(anc, pos[T.rootRef], "var(--line2)", true);
+  let maxX = 0, maxY = 0;
+  for (const ref in pos) {
+    const n = by[ref], p = pos[ref];
+    const el = document.createElement("button");
+    el.className = "node" + (ref === T.rootRef ? " root" : "") + (commented.has(n.code) ? " cmt" : "");
+    el.style.setProperty("--hue", hue(ref));
+    Object.assign(el.style, { left: p.x + "px", top: p.y + "px", width: p.w + "px", minHeight: p.h + "px" });
+    el.innerHTML = `<span class="c">${esc(n.code)}</span><span class="n">${esc(n.title)}</span>${n.reused ? '<span class="reuse">gjenbruk</span>' : ""}`;
+    el.setAttribute("aria-label", `${n.code}: ${n.title}. Vis detaljer`);
+    el.onclick = () => openNode(ref);
+    layer.appendChild(el);
+    maxX = Math.max(maxX, p.x + p.w); maxY = Math.max(maxY, p.y + p.h);
+    const ch = kids[ref] || [];
+    if (ref !== T.rootRef && ch.length) {
+      const t = document.createElement("button");
+      t.className = "tog"; t.style.setProperty("--hue", hue(ref));
+      Object.assign(t.style, { left: (p.x + p.w - 12) + "px", top: (p.y + p.h / 2 - 12) + "px" });
+      t.textContent = collapsed[ref] ? "+" + ch.length : "−";
+      t.setAttribute("aria-label", collapsed[ref] ? "Vis underformål" : "Skjul underformål");
+      t.onclick = (e) => { e.stopPropagation(); collapsed[ref] = !collapsed[ref]; saveView(); render(); };
+      layer.appendChild(t);
+    }
+    if (ch.length && (ref === T.rootRef || !collapsed[ref])) ch.forEach((c) => pos[c] && link(p, pos[c], hue(c)));
+  }
+  svg.innerHTML = paths.join("");
+  svg.setAttribute("width", maxX + 20); svg.setAttribute("height", maxY + 20);
+  layer.style.width = (maxX + 40) + "px"; layer.style.height = (maxY + 40) + "px";
+  if (!k) { const avail = $("map").clientWidth - 16; k = Math.max(0.55, Math.min(1, +(avail / (maxX + 40)).toFixed(2))); }
+  layer.style.transform = `scale(${k})`;
+  layer.style.marginBottom = ((maxY + 40) * (k - 1)) + "px";
+  layer.style.marginRight = ((maxX + 40) * (k - 1)) + "px";
+  $("collapse").textContent = branches.every((b) => collapsed[b]) ? "Vis alle" : "Skjul blad";
+}
+$("zin").onclick = () => { k = Math.min(1.6, +(k + 0.15).toFixed(2)); saveView(); render(); };
+$("zout").onclick = () => { k = Math.max(0.5, +(k - 0.15).toFixed(2)); saveView(); render(); };
+$("collapse").onclick = () => { const all = branches.every((b) => collapsed[b]); branches.forEach((b) => { collapsed[b] = !all; }); saveView(); render(); };
+
+// ---------- popup ----------
+const dlg = $("dlg");
+function chain(ref) { const out = []; let r = by[ref]?.parentRef; while (r) { out.unshift(by[r]); r = by[r].parentRef; } return out; }
+function openNode(ref) {
+  const n = by[ref], ch = (kids[ref] || []).map((r) => by[r]);
+  $("dcontent").innerHTML = `
+  <div class="dh" style="--hue:${hue(ref)}"><span class="node" style="position:static;padding:2px 0;border:0;background:none"><span class="c">${esc(n.code)}</span></span><h3 id="dtitle">${esc(n.title)}</h3><button class="btn" id="dclose" aria-label="Lukk">Lukk</button></div>
+  <div class="db" style="--hue:${hue(ref)}">
+    ${chain(ref).length ? `<div class="crumbs">${chain(ref).map((c) => `<button data-go="${esc(c.ref)}">${esc(c.code)} ${esc(c.title)}</button>`).join(" › ")}</div>` : `<div class="crumbs">Hører hjemme under Book 23: <span class="ref">${esc(T.anchorRef)}</span></div>`}
+    <div class="goal"><div class="k">Mål (Goal)</div><div>${esc(n.outcome)}</div>
+      ${(n.signals || []).length ? `<div class="k" style="margin-top:10px">Tegn på at målet er nådd</div><ul>${n.signals.map((s) => `<li>${esc(s)}</li>`).join("")}</ul>` : ""}</div>
+    <div><div class="k">Hvordan det sjekkes</div><div>${esc(n.verifier)}</div></div>
+    <div class="meta">
+      <div><div class="k">Fase</div>${esc(n.phase || "—")}</div>
+      <div><div class="k">Status</div>${esc(n.status)}</div>
+      <div><div class="k">Sammensetning</div>${ch.length ? esc(COMP[n.composition] || n.composition || "ikke satt") : "Bladformål"}</div>
+    </div>
+    ${n.reused ? `<div><div class="k">Gjenbruker fra Book 23</div><span class="ref">${esc(n.reused)}</span></div>` : ""}
+    ${n.why ? `<div><div class="k">Hvorfor</div><div>${esc(n.why)}</div></div>` : ""}
+    ${ch.length ? `<div><div class="k">Underformål</div><div class="kids">${ch.map((c) => `<button data-go="${esc(c.ref)}">${esc(c.code)} ${esc(c.title)}</button>`).join("")}</div></div>` : ""}
+    <div><div class="k">Ref</div><span class="ref">${esc(n.ref)}</span></div>
+    <div class="row"><button class="btn primary" id="dcomment">Kommenter ${esc(n.code)}</button></div>
+  </div>`;
+  $("dclose").onclick = () => dlg.close();
+  $("dcomment").onclick = () => { const c = $("comment"); c.value = (c.value.trim() ? c.value.trimEnd() + "\n" : "") + `[${n.code}] `; dlg.close(); c.focus(); c.setSelectionRange(c.value.length, c.value.length); commented.add(n.code); render(); };
+  $("dcontent").querySelectorAll("[data-go]").forEach((b) => b.onclick = () => openNode(b.dataset.go));
+  if (!dlg.open) dlg.showModal();
+}
+function openAnchor() {
+  $("dcontent").innerHTML = `<div class="dh"><h3 id="dtitle">Hvor treet hører hjemme</h3><button class="btn" id="dclose">Lukk</button></div>
+  <div class="db"><div><div class="k">Book 23</div><span class="ref">${esc(T.anchorRef)}</span></div><div>${esc(T.anchorNote)}</div>
+  <div class="muted small">Alle nye formål er kandidater. De blir en del av Book 23 først når du har godkjent dem som forslag.</div></div>`;
+  $("dclose").onclick = () => dlg.close();
+  dlg.showModal();
+}
+dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
+
+// ---------- tabs ----------
+function tab(name) {
+  $("tab-tree").setAttribute("aria-selected", name === "tree"); $("tab-ana").setAttribute("aria-selected", name === "ana");
+  $("view-tree").hidden = name !== "tree"; $("view-ana").hidden = name !== "ana";
+  try { localStorage.setItem("spillverksted.tab", name); } catch (e) {}
+}
+$("tab-tree").onclick = () => tab("tree"); $("tab-ana").onclick = () => tab("ana");
+
+// ---------- analysis ----------
+const A = T.analysis;
+$("nextlist").innerHTML = A.next.map((x) => `<li>${esc(x)}</li>`).join("");
+$("ana").innerHTML = `
+  <section><h2>Kort fortalt</h2><ul>${A.summary.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></section>
+  <section><h2>Arbeidsbenk-assistenten: løkken</h2><p class="muted">Samme løkke i alle arbeidsbenker. Modellen deltar bare der det står «modell».</p>
+    <div class="loop">${A.loop.map((s, i) => `<div><b>${i + 1}. ${esc(s[0])}</b>${esc(s[1])}${s[2] ? `<div class="m">${esc(s[2])}</div>` : ""}</div>`).join("")}</div>
+    <p style="margin-top:10px">En arbeidsbenk tar mønsteret i bruk med en profil: ${esc(A.profile)}</p></section>
+  <section><h2>Hva som finnes, og hva som mangler</h2>
+    <div class="tbl"><table><thead><tr><th>Behov</th><th>Finnes i HAVEN</th><th>Mangler</th></tr></thead><tbody>
+    ${A.gaps.map((g) => `<tr><td>${esc(g[0])}</td><td>${esc(g[1])}</td><td>${esc(g[2])}</td></tr>`).join("")}</tbody></table></div></section>
+  <section><h2>Spillmotor</h2><p>${esc(A.engineVerdict)}</p>
+    <div class="tbl"><table><thead><tr>${A.engine[0].map((h) => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>
+    ${A.engine.slice(1).map((r) => `<tr>${r.map((c, i) => `<td class="${i === 1 ? "win" : ""}">${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div></section>
+  <section><h2>Eget scaffold?</h2><p>${esc(A.scaffold)}</p></section>
+  <section><h2>Bibliotek eller RAG?</h2><p>${esc(A.library)}</p></section>
+  <section><h2>Spørsmål som kan endre treet</h2><ol>${A.questions.map((q) => `<li>${esc(q)}</li>`).join("")}</ol></section>
+  <section><h2>Dokumenter</h2><ul>${A.docs.map((d) => `<li>${esc(d)}</li>`).join("")}</ul></section>`;
+
+// ---------- gate: approval ----------
+let db = null, user = null, mcp = null, isOwner = false, sending = false;
+const msg = (cls, text) => { const m = $("gatemsg"); m.className = "msg " + cls; m.textContent = text; m.hidden = false; };
+function setPill(latest) {
+  const p = $("gatepill");
+  p.className = "gatepill" + (latest?.decision === "godkjent" ? " ok" : latest?.decision === "endringer" ? " chg" : "");
+  $("gatetext").textContent = latest?.decision === "godkjent" ? "G1 godkjent, fase 1 i gang" : latest?.decision === "endringer" ? "Endringer bedt om" : "G1 venter på deg";
+}
+function fmt(iso) { try { return new Date(iso).toLocaleString("nb-NO", { dateStyle: "medium", timeStyle: "short" }); } catch (e) { return iso; } }
+function renderHist(rows) {
+  setPill(rows[0]);
+  $("hist").innerHTML = rows.length ? rows.map((r) => `<div class="hi"><b>${r.decision === "godkjent" ? "Godkjent" : "Endringer bedt om"}</b> <span class="when">${esc(fmt(r.at))}</span>
+    ${r.comment ? `<div style="white-space:pre-wrap">${esc(r.comment)}</div>` : ""}
+    <div class="when">${r.notified === true ? "Sendt til Claude" : r.notified === false ? "Ikke sendt til Claude" : ""}</div></div>`).join("") : `<p class="muted small">Ingen beslutninger ennå.</p>`;
+}
+async function decide(decision) {
+  if (sending) return;
+  const comment = $("comment").value.trim();
+  if (decision === "endringer" && !comment) { msg("warn", "Skriv hva du vil ha endret, så vet Claude hva neste runde skal gjøre."); $("comment").focus(); return; }
+  if (!db) { msg("bad", "Beslutningen kan ikke lagres her. Åpne siden innlogget i Claude, eller skriv beslutningen i tråden."); return; }
+  if (!isOwner) { msg("bad", "Bare eieren av siden kan godkjenne."); return; }
+  sending = true; $("approve").disabled = $("changes").disabled = true;
+  msg("", "Lagrer beslutningen…");
+  const at = new Date().toISOString();
+  let ref;
+  try {
+    ref = await db.collection("gates").add({ gate: "G1", pdd: T.pdd, decision, comment, at, by: (await user?.id?.()) || null, notified: null });
+  } catch (e) {
+    msg("bad", "Beslutningen ble ikke lagret (" + (e.code || "ukjent feil") + "). Prøv igjen, eller skriv den i tråden.");
+    sending = false; $("approve").disabled = $("changes").disabled = false; return;
+  }
+  let notified = false, why = "";
+  if (mcp) {
+    const text = decision === "godkjent"
+      ? `Kjetil godkjente G1 for ${T.pdd} på formålssiden ${at}. Start fase 1.${comment ? "\n\nKommentar:\n" + comment : ""}`
+      : `Kjetil ba om endringer i G1 for ${T.pdd} på formålssiden ${at}. Lag en ny runde av treet.\n\nKommentar:\n${comment}`;
+    try { await mcp.callTool("Claude Code Remote", "send_message", { session_id: SESSION, message: text }, { cache: false }); notified = true; }
+    catch (e) { why = e.code === "not_granted" || e.code === "denied" ? "du ga ikke siden lov til å varsle Claude" : e.code === "server_not_connected" ? "Claude Code Remote er ikke koblet til" : (e.code || "ukjent feil"); }
+  } else why = "varsling er ikke tilgjengelig i denne visningen";
+  try { await ref.update({ notified }); } catch (e) {}
+  if (notified) msg("ok", decision === "godkjent" ? "Godkjent og sendt til Claude. Fase 1 starter i tråden «Små spill for Sverre»." : "Sendt til Claude. Neste runde av treet kommer i tråden.");
+  else msg("warn", `Beslutningen er lagret, men Claude ble ikke varslet: ${why}. Skriv «${decision === "godkjent" ? "godkjent" : "se kommentarene"}» i tråden, så leser Claude den herfra.`);
+  if (notified) $("comment").value = "";
+  sending = false; $("approve").disabled = $("changes").disabled = false;
+}
+$("approve").onclick = () => decide("godkjent");
+$("changes").onclick = () => decide("endringer");
+
+(async () => {
+  const c = window.claude;
+  if (!c?.use) { msg("warn", "Lagring og varsling er ikke tilgjengelig i denne visningen. Du kan lese planen og gi beslutningen i tråden."); return; }
+  const [d, u, m] = await Promise.all([c.use("db"), c.use("user"), c.use("mcp")]);
+  db = d; user = u; mcp = m;
+  try { isOwner = (await user?.isOwner?.()) ?? false; } catch (e) {}
+  if (!db) msg("warn", "Lagring er ikke tilgjengelig. Du kan gi beslutningen i tråden.");
+  else if (!isOwner) { $("approve").disabled = $("changes").disabled = true; msg("", "Bare Kjetil kan godkjenne. Du kan lese planen og se beslutningene."); }
+  if (db) db.collection("gates").orderBy("at", "desc").limit(20).onSnapshot((s) => renderHist(s.docs.map((x) => x.data() || {})), () => {});
+})();
+
+render();
+try { if (localStorage.getItem("spillverksted.tab") === "ana") tab("ana"); } catch (e) {}
+})();
+</script>

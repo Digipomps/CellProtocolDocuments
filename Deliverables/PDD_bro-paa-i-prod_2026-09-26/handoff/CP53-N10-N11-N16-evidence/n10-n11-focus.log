@@ -1,0 +1,422 @@
+warning: /Users/kjetil/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/kjetil/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: '_wt-bro-kanal-auth-20260927': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Provisioning 1 / 169]
+[Using on-disk description]
+[1 / 113] OrderedCollections
+[1 / 20] CellApple
+[2 / 7] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:168:31: warning: capture of 'service' with non-Sendable type 'ScannerService' in a '@Sendable' closure [#SendableClosureCaptures]
+166 |             service.duringInvitationAcceptance = { entered.fulfill(); _ = release.wait(timeout: .now() + 3) }
+167 |             DispatchQueue.global().async {
+168 |                 XCTAssertTrue(service.respondToInvitation(remoteUUID: "remote", accept: true)); accepted.fulfill()
+    |                               `- warning: capture of 'service' with non-Sendable type 'ScannerService' in a '@Sendable' closure [#SendableClosureCaptures]
+169 |             }
+170 |             await fulfillment(of: [entered], timeout: 2)
+
+CellApple.ScannerService:1:16: note: class 'ScannerService' does not conform to the 'Sendable' protocol
+ 1 | internal class ScannerService : NSObject, ObservableObject {
+   |                `- note: class 'ScannerService' does not conform to the 'Sendable' protocol
+ 2 |     @MainActor internal var advertisementExchange: CellApple.NearbyAdvertisementExchange?
+ 3 |     internal func readAdvertisement(remoteUUID: String) async -> CellApple.NearbyAdvertisement?
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:4:11: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellApple' [#AddPreconcurrencyImport]
+  2 | import Foundation
+  3 | import XCTest
+  4 | @testable import CellApple
+    |           `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellApple' [#AddPreconcurrencyImport]
+  5 | @testable import CellBase
+  6 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:173:42: warning: capture of 'service' with non-Sendable type 'ScannerService' in a '@Sendable' closure [#SendableClosureCaptures]
+171 |             DispatchQueue.global().async {
+172 |                 competing.fulfill()
+173 |                 if race == "collision" { service.browser(browser, foundPeer: c, withDiscoveryInfo: ["uuid": "remote"]) }
+    |                                          `- warning: capture of 'service' with non-Sendable type 'ScannerService' in a '@Sendable' closure [#SendableClosureCaptures]
+174 |                 else { service.stop() }
+175 |                 finished.fulfill()
+
+CellApple.ScannerService:1:16: note: class 'ScannerService' does not conform to the 'Sendable' protocol
+ 1 | internal class ScannerService : NSObject, ObservableObject {
+   |                `- note: class 'ScannerService' does not conform to the 'Sendable' protocol
+ 2 |     @MainActor internal var advertisementExchange: CellApple.NearbyAdvertisementExchange?
+ 3 |     internal func readAdvertisement(remoteUUID: String) async -> CellApple.NearbyAdvertisement?
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:173:58: warning: capture of 'browser' with non-Sendable type 'MCNearbyServiceBrowser' in a '@Sendable' closure [#SendableClosureCaptures]
+171 |             DispatchQueue.global().async {
+172 |                 competing.fulfill()
+173 |                 if race == "collision" { service.browser(browser, foundPeer: c, withDiscoveryInfo: ["uuid": "remote"]) }
+    |                                                          `- warning: capture of 'browser' with non-Sendable type 'MCNearbyServiceBrowser' in a '@Sendable' closure [#SendableClosureCaptures]
+174 |                 else { service.stop() }
+175 |                 finished.fulfill()
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/MultipeerConnectivity.framework/Headers/MCNearbyServiceBrowser.h:46:12: note: class 'MCNearbyServiceBrowser' does not conform to the 'Sendable' protocol
+44 | NS_ASSUME_NONNULL_BEGIN
+45 | API_DEPRECATED("Use Network Framework instead", macos(10.10, 27.0), ios(7.0, 27.0), tvos(10.0, 27.0))
+46 | @interface MCNearbyServiceBrowser : NSObject
+   |            `- note: class 'MCNearbyServiceBrowser' does not conform to the 'Sendable' protocol
+47 | - (instancetype)initWithPeer:(MCPeerID *)myPeerID serviceType:(NSString *)serviceType NS_DESIGNATED_INITIALIZER;
+48 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:1:1: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'MultipeerConnectivity' [#AddPreconcurrencyImport]
+  1 | import MultipeerConnectivity
+    | `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'MultipeerConnectivity' [#AddPreconcurrencyImport]
+  2 | import Foundation
+  3 | import XCTest
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:173:78: warning: capture of 'c' with non-Sendable type 'MCPeerID' in a '@Sendable' closure [#SendableClosureCaptures]
+171 |             DispatchQueue.global().async {
+172 |                 competing.fulfill()
+173 |                 if race == "collision" { service.browser(browser, foundPeer: c, withDiscoveryInfo: ["uuid": "remote"]) }
+    |                                                                              `- warning: capture of 'c' with non-Sendable type 'MCPeerID' in a '@Sendable' closure [#SendableClosureCaptures]
+174 |                 else { service.stop() }
+175 |                 finished.fulfill()
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/MultipeerConnectivity.framework/Headers/MCPeerID.h:32:12: note: class 'MCPeerID' does not conform to the 'Sendable' protocol
+30 | NS_ASSUME_NONNULL_BEGIN
+31 | API_DEPRECATED("Use Network Framework instead", macos(10.10, 27.0), ios(7.0, 27.0), tvos(10.0, 27.0))
+32 | @interface MCPeerID : NSObject <NSCopying, NSSecureCoding>
+   |            `- note: class 'MCPeerID' does not conform to the 'Sendable' protocol
+33 | - (instancetype)initWithDisplayName:(NSString *)myDisplayName NS_DESIGNATED_INITIALIZER;
+34 | 
+
+[#AddPreconcurrencyImport]: <https://docs.swift.org/compiler/documentation/diagnostics/add-preconcurrency-import>
+[#SendableClosureCaptures]: <https://docs.swift.org/compiler/documentation/diagnostics/sendable-closure-captures>
+[5 / 10] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:337:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+335 |         // concerns A's physical route, and preserves the receive sequence.
+336 |         _ = try pair.pb.gate.openPeerFrame(heldRequest.data)
+337 |         let pendingCommand = await bridge.auditor.loadBridgeCommandForCommandId(1)
+    |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+338 |         XCTAssertNotNil(pendingCommand)
+339 |         let forged = BridgeCommand(cmd: "response", payload: .string("from-c"), cid: 1,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:343:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+341 |         try await pc.gate.sendData(A.encode(forged))
+342 |         try await pair.deliverNext()
+343 |         let stillPending = await bridge.auditor.loadBridgeCommandForCommandId(1)
+    |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+344 |         XCTAssertNotNil(stillPending, "C's response must not consume B's pending cid")
+345 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:369:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+367 |             await pair.pb.bridge!.sendCommand(command: .description, identity: pair.b.owner, payload: nil)
+368 |             let oldCommand = try await pair.next(), captured = try pair.receiver(oldCommand)
+369 |             let firstCID = await pair.pb.bridge!.auditor.loadBridgeCommandForCommandId(1)
+    |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+370 |             XCTAssertEqual(firstCID?.cid, 1)
+371 |             try await pair.deliver(oldCommand)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:378:26: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+376 |             await fresh.1.bridge!.sendCommand(command: .description, identity: pair.b.owner, payload: nil)
+377 |             let newCommand = try await pair.next()
+378 |             let newCID = await fresh.1.bridge!.auditor.loadBridgeCommandForCommandId(1)
+    |                          `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+379 |             XCTAssertEqual(firstCID?.cid, newCID?.cid, "Actual Base cid reuse")
+380 |             // A callback already captured by an old transport cannot close the new one.
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:697:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+695 |                 XCTAssertNotEqual(oldKey, freshKey)
+696 |                 let request = BridgeCommand(cmd: "description", identity: pair.a.owner.publicIdentitySnapshot(), payload: nil, cid: 1)
+697 |                 let stored = await fresh.0.bridge!.auditor.storeBridgeCommand(request, for: 1)
+    |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+698 |                 XCTAssertTrue(stored)
+699 |                 // M knows the public new generation and the expected counter.
+
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+[9 / 12] CellBaseTests-product
+[11 / 15] CellBaseTests-product
+[13 / 15] CellBaseTests-product
+Build complete! (4,25 sek)
+Test Suite 'Selected tests' started at 2026-09-29 04:02:30.853.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-09-29 04:02:30.853.
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-09-29 04:02:30.853.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 04:02:30.853.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 04:02:30.909.
+Test Suite 'CellNearbyTests.xctest' started at 2026-09-29 04:02:30.909.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-09-29 04:02:30.909.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 04:02:30.909.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 04:02:30.967.
+Test Suite 'CellBaseTests.xctest' started at 2026-09-29 04:02:30.968.
+Test Suite 'ScannerPeerAuthenticationTests' started at 2026-09-29 04:02:30.968.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testActualScannerSetupLobbyDescriptionAttachAndFeedForEitherInviter]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testActualScannerSetupLobbyDescriptionAttachAndFeedForEitherInviter]' passed (0.464 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testAEADOverheadIsIncludedInExistingSendQuota]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testAEADOverheadIsIncludedInExistingSendQuota]' passed (0.081 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testBothFactoriesWaitForSealedConfirmationAndEarlyDataIsRejected]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testBothFactoriesWaitForSealedConfirmationAndEarlyDataIsRejected]' passed (0.100 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testDiscoveryTokenSkipsPendingThenRevokedPeerWithoutBreakingHandshake]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testDiscoveryTokenSkipsPendingThenRevokedPeerWithoutBreakingHandshake]' passed (0.152 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testDiscoveryTokenUsesExistingSendByteQuota]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testDiscoveryTokenUsesExistingSendByteQuota]' passed (0.107 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testLateReceiveFailureAndDisconnectLeaveReconnectAndSiblingAlive]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testLateReceiveFailureAndDisconnectLeaveReconnectAndSiblingAlive]' passed (0.315 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testMissingEphemeralKeyAndOldProfileCannotDowngrade]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testMissingEphemeralKeyAndOldProfileCannotDowngrade]' passed (0.035 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testOldCiphertextDuringHandshakeAndRewrittenGenerationBothFailClosed]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testOldCiphertextDuringHandshakeAndRewrittenGenerationBothFailClosed]' passed (0.261 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testOldCommandsAndResponsesCannotCrossReconnectWithCollidingCID]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testOldCommandsAndResponsesCannotCrossReconnectWithCollidingCID]' passed (0.446 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testPeerGenerationWireFieldIsRequiredAndAuthFramesRemainUntagged]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testPeerGenerationWireFieldIsRequiredAndAuthFramesRemainUntagged]' passed (0.049 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testQueuedArrivalOrderAndConcurrentSendsPreserveCounters]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testQueuedArrivalOrderAndConcurrentSendsPreserveCounters]' passed (0.040 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testRelayCannotCorrelateIdentityFieldsAcrossFreshHandshakes]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testRelayCannotCorrelateIdentityFieldsAcrossFreshHandshakes]' passed (0.180 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testRelayForwardsRealHandshakeButSeesOnlyCiphertextInBothDirections]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testRelayForwardsRealHandshakeButSeesOnlyCiphertextInBothDirections]' passed (0.099 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testRelayTamperInsertionReplayReorderReflectionAndMalformedRecordsCloseWithoutDispatch]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testRelayTamperInsertionReplayReorderReflectionAndMalformedRecordsCloseWithoutDispatch]' passed (0.794 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testReplacingEitherEphemeralKeyInvalidatesIdentitySignature]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testReplacingEitherEphemeralKeyInvalidatesIdentitySignature]' passed (0.124 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerCopiedPublicKeyAlwaysGetsProxyIncludingWithoutDelegate]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerCopiedPublicKeyAlwaysGetsProxyIncludingWithoutDelegate]' passed (0.039 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerDisconnectRetainsFeedQuotaUntilNoncooperativeWorkReturns]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerDisconnectRetainsFeedQuotaUntilNoncooperativeWorkReturns]' passed (0.142 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerForgedProofAndReplayedProofCannotCreateBase]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerForgedProofAndReplayedProofCannotCreateBase]' passed (0.304 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerMutualProofPrecedesBaseLookupAndRegistration]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerMutualProofPrecedesBaseLookupAndRegistration]' passed (0.060 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerPeerProofDoesNotOverrideLobbyOwnerApproval]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerPeerProofDoesNotOverrideLobbyOwnerApproval]' passed (0.101 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerQuotaPlusOneDoesNotCreateTransportOrBase]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerQuotaPlusOneDoesNotCreateTransportOrBase]' passed (0.470 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerReconnectSamePeerIDRetiresOldTransportAndRejectsOldProof]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerReconnectSamePeerIDRetiresOldTransportAndRejectsOldProof]' passed (0.113 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerReconnectSamePeerIDsCompletesFreshMutualProof]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerReconnectSamePeerIDsCompletesFreshMutualProof]' passed (0.083 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerRejectsCommandBeforeProofAndReportsConsumerFailure]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerRejectsCommandBeforeProofAndReportsConsumerFailure]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerRevocationClosesOnlyAffectedPeerAndReclaimsQuota]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerRevocationClosesOnlyAffectedPeerAndReclaimsQuota]' passed (0.232 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerWrongPeerBindingAndRoleAreRejected]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerWrongPeerBindingAndRoleAreRejected]' passed (0.192 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testThirdPeerDiscoveryCollisionCannotStealAuthenticatedRouteOrGate]' started.
+2026-09-29 04:02:36.125 xctest[10356:29847263] foundPeer discovered
+2026-09-29 04:02:36.333 xctest[10356:29847121] lostPeer: <MCPeerID: 0x7b369a8d90 DisplayName = test-b>
+2026-09-29 04:02:36.333 xctest[10356:29847121] foundPeer discovered
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testThirdPeerDiscoveryCollisionCannotStealAuthenticatedRouteOrGate]' passed (0.379 seconds).
+Test Suite 'ScannerPeerAuthenticationTests' passed at 2026-09-29 04:02:36.335.
+	 Executed 27 tests, with 0 failures (0 unexpected) in 5.362 (5.367) seconds
+Test Suite 'ScannerServiceInvitationTests' started at 2026-09-29 04:02:36.335.
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testAcceptanceTransitionExcludesDeterministicDiscoveryAndStopRace]' started.
+2026-09-29 04:02:36.336 xctest[10356:29847129] foundPeer discovered
+2026-09-29 04:02:36.336 xctest[10356:29847129] lostPeer: <MCPeerID: 0x7b369a8df0 DisplayName = B>
+2026-09-29 04:02:36.337 xctest[10356:29847121] foundPeer discovered
+2026-09-29 04:02:36.338 xctest[10356:29847121] foundPeer discovered
+2026-09-29 04:02:36.338 xctest[10356:29847121] lostPeer: <MCPeerID: 0x7b369a8e10 DisplayName = B>
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testAcceptanceTransitionExcludesDeterministicDiscoveryAndStopRace]' passed (0.328 seconds).
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testConcurrentInvitationsAreEachResolvedExactlyOnce]' started.
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testConcurrentInvitationsAreEachResolvedExactlyOnce]' passed (0.200 seconds).
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testCrossedInvitationsSelectOneSetupAndRequireExplicitAcceptance]' started.
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testCrossedInvitationsSelectOneSetupAndRequireExplicitAcceptance]' passed (0.388 seconds).
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testInvitationOwnsPeerSessionAndEndpointAcrossDiscoveryLossBeforeAndAfterAcceptance]' started.
+2026-09-29 04:02:37.253 xctest[10356:29847263] foundPeer discovered
+2026-09-29 04:02:37.254 xctest[10356:29847263] lostPeer: <MCPeerID: 0x7b369a8e10 DisplayName = B>
+2026-09-29 04:02:37.254 xctest[10356:29847263] foundPeer discovered
+2026-09-29 04:02:37.254 xctest[10356:29847263] foundPeer discovered
+2026-09-29 04:02:37.255 xctest[10356:29847263] foundPeer discovered
+2026-09-29 04:02:37.256 xctest[10356:29847263] foundPeer discovered
+2026-09-29 04:02:37.256 xctest[10356:29847263] lostPeer: <MCPeerID: 0x7b369a8e30 DisplayName = B>
+2026-09-29 04:02:37.257 xctest[10356:29847263] foundPeer discovered
+2026-09-29 04:02:37.257 xctest[10356:29847263] foundPeer discovered
+2026-09-29 04:02:37.258 xctest[10356:29847263] foundPeer discovered
+2026-09-29 04:02:37.258 xctest[10356:29847263] foundPeer discovered
+2026-09-29 04:02:37.259 xctest[10356:29847263] lostPeer: <MCPeerID: 0x7b369a8e50 DisplayName = B>
+2026-09-29 04:02:37.259 xctest[10356:29847263] foundPeer discovered
+2026-09-29 04:02:37.259 xctest[10356:29847263] foundPeer discovered
+2026-09-29 04:02:37.260 xctest[10356:29847263] foundPeer discovered
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testInvitationOwnsPeerSessionAndEndpointAcrossDiscoveryLossBeforeAndAfterAcceptance]' passed (0.009 seconds).
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testInvitationTimeoutRejects]' started.
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testInvitationTimeoutRejects]' passed (0.355 seconds).
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testKnownInvitationRequiresExplicitResponse]' started.
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testKnownInvitationRequiresExplicitResponse]' passed (0.200 seconds).
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testPendingAcceptedAndOutgoingExpiryAllowsNewValidInvitationWithoutOldSetup]' started.
+2026-09-29 04:02:37.817 xctest[10356:29847115] foundPeer discovered
+2026-09-29 04:02:37.818 xctest[10356:29847115] lostPeer: <MCPeerID: 0x7b369a8050 DisplayName = B>
+2026-09-29 04:02:37.818 xctest[10356:29847115] foundPeer discovered
+2026-09-29 04:02:37.968 xctest[10356:29847115] foundPeer discovered
+2026-09-29 04:02:37.968 xctest[10356:29847115] lostPeer: <MCPeerID: 0x7b369a8050 DisplayName = B>
+2026-09-29 04:02:37.969 xctest[10356:29847115] foundPeer discovered
+2026-09-29 04:02:38.143 xctest[10356:29847115] foundPeer discovered
+2026-09-29 04:02:38.144 xctest[10356:29847115] lostPeer: <MCPeerID: 0x7b369a8050 DisplayName = B>
+2026-09-29 04:02:38.144 xctest[10356:29847115] foundPeer discovered
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testPendingAcceptedAndOutgoingExpiryAllowsNewValidInvitationWithoutOldSetup]' passed (0.527 seconds).
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testStopRejectsPendingAndIsIdempotent]' started.
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testStopRejectsPendingAndIsIdempotent]' passed (0.198 seconds).
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testUnknownPeerIsRejectedImmediately]' started.
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testUnknownPeerIsRejectedImmediately]' passed (0.001 seconds).
+Test Suite 'ScannerServiceInvitationTests' passed at 2026-09-29 04:02:38.542.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 2.205 (2.207) seconds
+Test Suite 'CellBaseTests.xctest' passed at 2026-09-29 04:02:38.542.
+	 Executed 36 tests, with 0 failures (0 unexpected) in 7.567 (7.575) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 04:02:38.543.
+	 Executed 36 tests, with 0 failures (0 unexpected) in 7.567 (7.575) seconds
+Inited radar service with peerId: <MCPeerID: 0x7b369a8090 DisplayName = HAVEN-firstc80>
+Inited radar service with peerId: <MCPeerID: 0x7b369a80a0 DisplayName = HAVEN-secondc8>
+LobbyCell init. Owner: 916691A6-76BD-4A76-A9D0-F56C8E58530C
+********* Finished setting up bridge for second-C8024E89-557B-4797-86FD-7B8AD445073F
+********* Finished setting up bridge for first-C8024E89-557B-4797-86FD-7B8AD445073F
+Inited radar service with peerId: <MCPeerID: 0x7b369a80f0 DisplayName = HAVEN-seconde9>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8100 DisplayName = HAVEN-firste92>
+LobbyCell init. Owner: 2F74CBE4-17D8-4E17-ACD6-25163B0B057D
+********* Finished setting up bridge for first-E92BA97C-CAF9-4752-9B8E-6D0FAFFD7708
+********* Finished setting up bridge for second-E92BA97C-CAF9-4752-9B8E-6D0FAFFD7708
+Inited radar service with peerId: <MCPeerID: 0x7b369a8120 DisplayName = HAVEN-firstba5>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8140 DisplayName = HAVEN-secondba>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8170 DisplayName = HAVEN-first617>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8180 DisplayName = HAVEN-second61>
+Inited radar service with peerId: <MCPeerID: 0x7b369a81b0 DisplayName = HAVEN-first412>
+Inited radar service with peerId: <MCPeerID: 0x7b369a81c0 DisplayName = HAVEN-second41>
+Inited radar service with peerId: <MCPeerID: 0x7b369a81d0 DisplayName = HAVEN-thirdf89>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8210 DisplayName = HAVEN-first821>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8220 DisplayName = HAVEN-second82>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8250 DisplayName = HAVEN-firstd0a>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8260 DisplayName = HAVEN-secondd0>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8270 DisplayName = HAVEN-thirddc5>
+LobbyCell init. Owner: 72AD8F2A-F8FF-431D-ADA7-EA84AA1D0571
+Inited radar service with peerId: <MCPeerID: 0x7b369a82b0 DisplayName = HAVEN-firstb13>
+Inited radar service with peerId: <MCPeerID: 0x7b369a82c0 DisplayName = HAVEN-secondb1>
+Inited radar service with peerId: <MCPeerID: 0x7b369a82f0 DisplayName = HAVEN-first93d>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8300 DisplayName = HAVEN-second93>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8330 DisplayName = HAVEN-first5e8>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8340 DisplayName = HAVEN-second5e>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8370 DisplayName = HAVEN-first0be>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8380 DisplayName = HAVEN-second0b>
+Inited radar service with peerId: <MCPeerID: 0x7b369a83b0 DisplayName = HAVEN-first1f1>
+Inited radar service with peerId: <MCPeerID: 0x7b369a83c0 DisplayName = HAVEN-second1f>
+LobbyCell init. Owner: B0F46164-3336-4C3F-BA17-7A7C0A00F295
+Inited radar service with peerId: <MCPeerID: 0x7b369a83d0 DisplayName = HAVEN-third004>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8410 DisplayName = HAVEN-first940>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8420 DisplayName = HAVEN-second94>
+LobbyCell init. Owner: 4E9FD240-3495-4F83-B749-3D09C56AF69F
+Inited radar service with peerId: <MCPeerID: 0x7b369a8430 DisplayName = HAVEN-third3e4>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8470 DisplayName = HAVEN-first52a>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8480 DisplayName = HAVEN-second52>
+Inited radar service with peerId: <MCPeerID: 0x7b369a84b0 DisplayName = HAVEN-firstefd>
+Inited radar service with peerId: <MCPeerID: 0x7b369a84c0 DisplayName = HAVEN-secondef>
+Inited radar service with peerId: <MCPeerID: 0x7b369a84f0 DisplayName = HAVEN-firste96>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8500 DisplayName = HAVEN-seconde9>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8540 DisplayName = HAVEN-first89d>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8550 DisplayName = HAVEN-second89>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8580 DisplayName = HAVEN-first69b>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8590 DisplayName = HAVEN-second69>
+Inited radar service with peerId: <MCPeerID: 0x7b369a85b0 DisplayName = HAVEN-firstf75>
+Inited radar service with peerId: <MCPeerID: 0x7b369a85c0 DisplayName = HAVEN-secondf7>
+Inited radar service with peerId: <MCPeerID: 0x7b369a85f0 DisplayName = HAVEN-firstdc9>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8600 DisplayName = HAVEN-seconddc>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8630 DisplayName = HAVEN-first103>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8640 DisplayName = HAVEN-second10>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8670 DisplayName = HAVEN-firsta7f>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8680 DisplayName = HAVEN-seconda7>
+Inited radar service with peerId: <MCPeerID: 0x7b369a86b0 DisplayName = HAVEN-firstc82>
+Inited radar service with peerId: <MCPeerID: 0x7b369a86c0 DisplayName = HAVEN-secondc8>
+Inited radar service with peerId: <MCPeerID: 0x7b369a86f0 DisplayName = HAVEN-first882>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8700 DisplayName = HAVEN-second88>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8730 DisplayName = HAVEN-first626>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8740 DisplayName = HAVEN-second62>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8770 DisplayName = HAVEN-first408>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8780 DisplayName = HAVEN-second40>
+Inited radar service with peerId: <MCPeerID: 0x7b369a87b0 DisplayName = HAVEN-first2c5>
+Inited radar service with peerId: <MCPeerID: 0x7b369a87c0 DisplayName = HAVEN-second2c>
+Inited radar service with peerId: <MCPeerID: 0x7b369a87f0 DisplayName = HAVEN-firstc70>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8800 DisplayName = HAVEN-secondc7>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8830 DisplayName = HAVEN-firstefb>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8840 DisplayName = HAVEN-secondef>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8870 DisplayName = HAVEN-firstf48>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8880 DisplayName = HAVEN-secondf4>
+Inited radar service with peerId: <MCPeerID: 0x7b369a88c0 DisplayName = HAVEN-firste5c>
+Inited radar service with peerId: <MCPeerID: 0x7b369a88d0 DisplayName = HAVEN-seconde5>
+Inited radar service with peerId: <MCPeerID: 0x7b369a88f0 DisplayName = HAVEN-firsta8c>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8900 DisplayName = HAVEN-seconda8>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8940 DisplayName = HAVEN-first0d1>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8950 DisplayName = HAVEN-second0d>
+LobbyCell init. Owner: 0043D05C-108D-4FC6-9597-D8A9877BAA7A
+Inited radar service with peerId: <MCPeerID: 0x7b369a8970 DisplayName = HAVEN-firstf7a>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8980 DisplayName = HAVEN-secondf7>
+Inited radar service with peerId: <MCPeerID: 0x7b369a89c0 DisplayName = HAVEN-first8d9>
+Inited radar service with peerId: <MCPeerID: 0x7b369a89d0 DisplayName = HAVEN-second8d>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8a00 DisplayName = HAVEN-first65a>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8a10 DisplayName = HAVEN-second65>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8a30 DisplayName = HAVEN-first575>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8a40 DisplayName = HAVEN-second57>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8a70 DisplayName = HAVEN-first9dd>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8a80 DisplayName = HAVEN-second9d>
+LobbyCell init. Owner: 0AFD6C41-DBAD-4663-ADA0-9673AA093446
+********* Finished setting up bridge for second-9DDFC2F3-FD09-45A0-A1F3-506C10171171
+Inited radar service with peerId: <MCPeerID: 0x7b369a8aa0 DisplayName = HAVEN-first2d1>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8ac0 DisplayName = HAVEN-second2d>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8b00 DisplayName = HAVEN-first5a0>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8b10 DisplayName = HAVEN-second5a>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8b10 DisplayName = HAVEN-first4df>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8b00 DisplayName = HAVEN-second4d>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8b30 DisplayName = HAVEN-first462>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8b40 DisplayName = HAVEN-second46>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8b70 DisplayName = HAVEN-first30e>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8b80 DisplayName = HAVEN-second30>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8bb0 DisplayName = HAVEN-firstfb0>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8bc0 DisplayName = HAVEN-secondfb>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8bf0 DisplayName = HAVEN-first979>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8c00 DisplayName = HAVEN-second97>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8c40 DisplayName = HAVEN-firstd55>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8c50 DisplayName = HAVEN-secondd5>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8c70 DisplayName = HAVEN-first8ec>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8c80 DisplayName = HAVEN-second8e>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8cb0 DisplayName = HAVEN-first43d>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8cc0 DisplayName = HAVEN-second43>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8cf0 DisplayName = HAVEN-firstd8d>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8d00 DisplayName = HAVEN-secondd8>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8d30 DisplayName = HAVEN-first96d>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8d40 DisplayName = HAVEN-second96>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8d70 DisplayName = HAVEN-first11d>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8d80 DisplayName = HAVEN-second11>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8db0 DisplayName = HAVEN-first9c9>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8dc0 DisplayName = HAVEN-second9c>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8dd0 DisplayName = HAVEN-thirdb8d>
+Discovered devices2: Optional(["test-c"])
+Inited radar service with peerId: <MCPeerID: 0x7b369a8de0 DisplayName = HAVEN-local>
+Discovered devices: Optional(["B"])
+Discovered devices2: Optional([])
+Inited radar service with peerId: <MCPeerID: 0x7b369a8e00 DisplayName = HAVEN-local>
+Discovered devices: Optional(["B"])
+Discovered devices2: Optional([])
+Inited radar service with peerId: <MCPeerID: 0x7b369a8040 DisplayName = HAVEN-137e0969>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8040 DisplayName = HAVEN-a>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8050 DisplayName = HAVEN-b>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8e00 DisplayName = HAVEN-local>
+Discovered devices: Optional(["B"])
+Discovered devices2: Optional([])
+Discovered devices: Optional(["B"])
+Inited radar service with peerId: <MCPeerID: 0x7b369a8e20 DisplayName = HAVEN-local>
+Discovered devices: Optional(["B"])
+Discovered devices2: Optional([])
+Discovered devices: Optional(["B"])
+Inited radar service with peerId: <MCPeerID: 0x7b369a8e40 DisplayName = HAVEN-local>
+Discovered devices: Optional(["B"])
+Discovered devices2: Optional([])
+Discovered devices: Optional(["B"])
+Inited radar service with peerId: <MCPeerID: 0x7b369a8e60 DisplayName = HAVEN-fb91c374>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8040 DisplayName = HAVEN-fe177e9e>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8040 DisplayName = HAVEN-local>
+Discovered devices: Optional(["B"])
+Discovered devices2: Optional([])
+Discovered devices: Optional(["C"])
+Inited radar service with peerId: <MCPeerID: 0x7b369a8040 DisplayName = HAVEN-local>
+Discovered devices: Optional(["B"])
+Discovered devices2: Optional([])
+Discovered devices: Optional(["C"])
+Inited radar service with peerId: <MCPeerID: 0x7b369a8040 DisplayName = HAVEN-local>
+Discovered devices: Optional(["B"])
+Discovered devices2: Optional([])
+Discovered devices: Optional(["C"])
+Inited radar service with peerId: <MCPeerID: 0x7b369a8040 DisplayName = HAVEN-17efcce7>
+Inited radar service with peerId: <MCPeerID: 0x7b369a8040 DisplayName = HAVEN-0a8dc43a>

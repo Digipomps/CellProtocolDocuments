@@ -1,0 +1,1475 @@
+diff --git a/Sources/App/Cells/EntityScaffoldEnrollment/EntityScaffoldEnrollmentCell.swift b/Sources/App/Cells/EntityScaffoldEnrollment/EntityScaffoldEnrollmentCell.swift
+index 63f3955d..31887729 100644
+--- a/Sources/App/Cells/EntityScaffoldEnrollment/EntityScaffoldEnrollmentCell.swift
++++ b/Sources/App/Cells/EntityScaffoldEnrollment/EntityScaffoldEnrollmentCell.swift
+@@ -1,4 +1,4 @@
+-import CellBase
++@_spi(HAVENRuntime) import CellBase
+ import Foundation
+ 
+ #if canImport(Security)
+@@ -29,6 +29,7 @@ enum EntityScaffoldEnrollmentContract {
+         static let setHomePolicy = "entityHomePolicy.set"
+         static let entityDataGet = "entityData.get"
+         static let entityDataSet = "entityData.set"
++        static let validatePlacements = "entityHomePolicy.validatePlacements"
+     }
+ }
+ 
+@@ -126,40 +127,6 @@ struct EntityScaffoldLinkRecord: Codable, Equatable {
+     var revokedAt: String?
+ }
+ 
+-struct EntityHomePolicy: Codable, Equatable {
+-    var policyID: String
+-    var ownerIdentityUUID: String
+-    var homeScaffoldReference: String
+-    var preferredStorageScaffoldReference: String
+-    var availabilityTier: String
+-    var estimatedMonthlyCostNOK: Int?
+-    var maxMonthlyCostNOK: Int?
+-    var dataSensitivity: String
+-    var transportPolicy: String
+-    var backupPolicy: String
+-    var ownerPresenceRequiredForWrites: Bool
+-    var status: String
+-    var updatedAt: String
+-
+-    static func defaultPolicy(owner: Identity) -> EntityHomePolicy {
+-        EntityHomePolicy(
+-            policyID: "entity-home-policy:\(owner.uuid)",
+-            ownerIdentityUUID: owner.uuid,
+-            homeScaffoldReference: "cell:///EntityAnchor",
+-            preferredStorageScaffoldReference: "cell:///EntityAnchor",
+-            availabilityTier: "local",
+-            estimatedMonthlyCostNOK: nil,
+-            maxMonthlyCostNOK: nil,
+-            dataSensitivity: "owner-private",
+-            transportPolicy: "owner-approved-capability",
+-            backupPolicy: "identity-vault-bound",
+-            ownerPresenceRequiredForWrites: true,
+-            status: "active",
+-            updatedAt: EntityScaffoldEnrollmentClock.nowString()
+-        )
+-    }
+-}
+-
+ struct EntityScaffoldEnrollmentPending: Codable, Equatable {
+     var request: EntityScaffoldEnrollmentRequest
+     var requestHash: String
+@@ -256,6 +223,7 @@ final class EntityScaffoldEnrollmentCell: GeneralCell {
+         case usedApprovalJTIs
+         case lastValidationStatus
+         case homePolicy
++        case usedDataNonces
+     }
+ 
+     private let stateQueue = DispatchQueue(label: "haven.entity-scaffold-enrollment.state")
+@@ -266,6 +234,9 @@ final class EntityScaffoldEnrollmentCell: GeneralCell {
+     private var usedApprovalJTIs: Set<String>
+     private var lastValidationStatus: String?
+     private var homePolicy: EntityHomePolicy
++    private var usedDataNonces: [String: String] = [:]
++    private let operationGate = EntityScaffoldOperationGate()
++    private var emitOwnedFlow: ((FlowElement) -> Void)?
+ 
+     required init(owner: Identity) async {
+         self.enrollmentOwnerIdentity = owner
+@@ -291,6 +262,7 @@ final class EntityScaffoldEnrollmentCell: GeneralCell {
+         self.lastValidationStatus = try container.decodeIfPresent(String.self, forKey: .lastValidationStatus)
+         self.homePolicy = try container.decodeIfPresent(EntityHomePolicy.self, forKey: .homePolicy)
+             ?? EntityHomePolicy.defaultPolicy(owner: self.enrollmentOwnerIdentity)
++        self.usedDataNonces = try container.decodeIfPresent([String: String].self, forKey: .usedDataNonces) ?? [:]
+         try super.init(from: decoder)
+     }
+ 
+@@ -322,6 +294,7 @@ final class EntityScaffoldEnrollmentCell: GeneralCell {
+         try container.encode(snapshot.2, forKey: .usedApprovalJTIs)
+         try container.encodeIfPresent(snapshot.3, forKey: .lastValidationStatus)
+         try container.encode(snapshot.4, forKey: .homePolicy)
++        try container.encode(stateQueue.sync { usedDataNonces }, forKey: .usedDataNonces)
+     }
+ 
+     private func configure(with owner: Identity) async {
+@@ -330,6 +303,8 @@ final class EntityScaffoldEnrollmentCell: GeneralCell {
+     }
+ 
+     private func setupInterface() async {
++        emitOwnedFlow = await makeCellOwnedFlowEmitterForRuntimeBinding(requester: enrollmentOwnerIdentity)
++        await registerEntityDataContracts()
+         await registerGet(key: EntityScaffoldEnrollmentContract.Keys.state, owner: enrollmentOwnerIdentity) { [weak self] requester in
+             guard let self else { return .object([:]) }
+             guard await self.validateAccess("r---", at: EntityScaffoldEnrollmentContract.Keys.state, for: requester) else { return .string("denied") }
+@@ -375,13 +350,13 @@ final class EntityScaffoldEnrollmentCell: GeneralCell {
+         await registerSet(key: EntityScaffoldEnrollmentContract.Keys.complete, owner: enrollmentOwnerIdentity) { [weak self] requester, payload in
+             guard let self else { return .object(EntityScaffoldEnrollmentCell.errorValue(code: "cell-unavailable", message: "Enrollment cell is unavailable.")) }
+             guard await self.validateAccess("rw--", at: EntityScaffoldEnrollmentContract.Keys.complete, for: requester) else { return .string("denied") }
+-            return await self.handleComplete(requester: requester, payload: payload)
++            return await self.operationGate.run { await self.handleComplete(requester: requester, payload: payload) }
+         }
+ 
+         await registerSet(key: EntityScaffoldEnrollmentContract.Keys.revoke, owner: enrollmentOwnerIdentity) { [weak self] requester, payload in
+             guard let self else { return .object(EntityScaffoldEnrollmentCell.errorValue(code: "cell-unavailable", message: "Enrollment cell is unavailable.")) }
+             guard await self.validateAccess("rw--", at: EntityScaffoldEnrollmentContract.Keys.revoke, for: requester) else { return .string("denied") }
+-            return await self.handleRevoke(requester: requester, payload: payload)
++            return await self.operationGate.run { await self.handleRevoke(requester: requester, payload: payload) }
+         }
+ 
+         await registerSet(key: EntityScaffoldEnrollmentContract.Keys.validate, owner: enrollmentOwnerIdentity) { [weak self] requester, payload in
+@@ -393,17 +368,22 @@ final class EntityScaffoldEnrollmentCell: GeneralCell {
+         await registerSet(key: EntityScaffoldEnrollmentContract.Keys.setHomePolicy, owner: enrollmentOwnerIdentity) { [weak self] requester, payload in
+             guard let self else { return .object(EntityScaffoldEnrollmentCell.errorValue(code: "cell-unavailable", message: "Enrollment cell is unavailable.")) }
+             guard await self.validateAccess("rw--", at: EntityScaffoldEnrollmentContract.Keys.setHomePolicy, for: requester) else { return .string("denied") }
+-            return await self.handleSetHomePolicy(requester: requester, payload: payload)
++            return await self.operationGate.run { await self.handleSetHomePolicy(requester: requester, payload: payload) }
+         }
+ 
+         await registerSet(key: EntityScaffoldEnrollmentContract.Keys.entityDataGet, owner: enrollmentOwnerIdentity) { [weak self] requester, payload in
+             guard let self else { return .object(EntityScaffoldEnrollmentCell.errorValue(code: "cell-unavailable", message: "Enrollment cell is unavailable.")) }
+-            return await self.handleEntityDataGet(requester: requester, payload: payload)
++            return await self.operationGate.run { await self.handleEntityData(requester: requester, value: payload, operation: "read") }
+         }
+ 
+         await registerSet(key: EntityScaffoldEnrollmentContract.Keys.entityDataSet, owner: enrollmentOwnerIdentity) { [weak self] requester, payload in
+             guard let self else { return .object(EntityScaffoldEnrollmentCell.errorValue(code: "cell-unavailable", message: "Enrollment cell is unavailable.")) }
+-            return await self.handleEntityDataSet(requester: requester, payload: payload)
++            return await self.operationGate.run { await self.handleEntityData(requester: requester, value: payload, operation: "write") }
++        }
++
++        await registerSet(key: EntityScaffoldEnrollmentContract.Keys.validatePlacements, owner: enrollmentOwnerIdentity) { [weak self] requester, payload in
++            guard let self else { return .null }
++            return await self.operationGate.run { await self.handleValidatePlacements(requester: requester, payload: payload) }
+         }
+     }
+ 
+@@ -598,6 +578,9 @@ final class EntityScaffoldEnrollmentCell: GeneralCell {
+                 "link": EntityScaffoldEnrollmentValueCodec.value(for: link)
+             ])
+         }
++        do { try await persistEnrollmentState() } catch {
++            return .object(Self.errorValue(code: "enrollment-persistence-failed", message: "Revocation could not be retained."))
++        }
+         await emitLifecycle(key: EntityScaffoldEnrollmentContract.Keys.revoke, requester: requester, status: "revoked", requestID: linkID)
+         return result
+     }
+@@ -630,11 +613,16 @@ final class EntityScaffoldEnrollmentCell: GeneralCell {
+                 return .object(EntityScaffoldEnrollmentCell.errorValue(code: "secret-material-rejected", message: "Entity home policy must not contain private keys, tokens or vault secrets."))
+             }
+             let policy = try EntityScaffoldEnrollmentValueCodec.homePolicy(from: payload, owner: enrollmentOwnerIdentity)
++            let previousPolicy = stateQueue.sync { homePolicy }
+             let stored = stateQueue.sync { () -> EntityHomePolicy in
+                 homePolicy = policy
+                 lastValidationStatus = "home-policy-\(policy.status)"
+                 return homePolicy
+             }
++            do { try await persistEnrollmentState() } catch {
++                stateQueue.sync { homePolicy = previousPolicy }
++                throw error
++            }
+             await emitLifecycle(key: EntityScaffoldEnrollmentContract.Keys.setHomePolicy, requester: requester, status: stored.status, requestID: stored.policyID)
+             return .object([
+                 "status": .string(stored.status),
+@@ -647,58 +635,181 @@ final class EntityScaffoldEnrollmentCell: GeneralCell {
+         }
+     }
+ 
+-    private func handleEntityDataGet(requester: Identity, payload: ValueType) async -> ValueType {
++    private struct DataDenial: Error {
++        let code: String
++    }
++
++    private func handleEntityData(requester: Identity, value: ValueType, operation: String) async -> ValueType {
+         do {
+-            let object = EntityScaffoldEnrollmentValueCodec.object(from: payload)
+-            let authorization = await entityDataAuthorization(requester: requester, payload: object, operation: .read)
+-            guard authorization.allowed else {
+-                return .object(authorization.denialObject)
++            let request = try EntityScaffoldDataRequest.decode(value)
++            let payload = request.payload
++            guard payload.version == 1, payload.operation == operation,
++                  payload.ownerIdentityUUID == enrollmentOwnerIdentity.uuid,
++                  !payload.nonce.isEmpty, payload.nonce.count <= 128 else { throw DataDenial(code: "invalid-operation") }
++            guard let required = Self.requiredCapability(for: payload.keypath, operation: operation == "read" ? .read : .write),
++                  payload.capability == required,
++                  !Self.isForbiddenEntityDataKeypath(payload.keypath) else { throw DataDenial(code: "keypath-not-authorized") }
++            let now = Date()
++            guard let created = EntityScaffoldEnrollmentClock.date(from: payload.createdAt),
++                  let expires = EntityScaffoldEnrollmentClock.date(from: payload.expiresAt),
++                  created <= now.addingTimeInterval(30), created >= now.addingTimeInterval(-300),
++                  expires > now, expires > created, expires.timeIntervalSince(created) <= 300 else {
++                throw DataDenial(code: "operation-expired")
+             }
+-            let entityAnchor = try await ownerEntityAnchor(for: authorization.link, payload: object)
+-            let value = try await entityAnchor.get(keypath: authorization.keypath, requester: authorization.ownerRequester)
+-            await emitLifecycle(key: EntityScaffoldEnrollmentContract.Keys.entityDataGet, requester: requester, status: "read", requestID: authorization.auditID)
+-            return .object([
+-                "status": .string("allowed"),
+-                "operation": .string("read"),
+-                "keypath": .string(authorization.keypath),
+-                "capability": .string(authorization.capability),
+-                "linkID": authorization.link.map { .string($0.linkID) } ?? .null,
+-                "entityAnchorReference": .string(authorization.entityAnchorReference),
+-                "value": value
+-            ])
++            let (link, pending, policy) = stateQueue.sync {
++                let link = linksByID[payload.linkID]
++                return (link, link.flatMap { pendingByRequestID[$0.requestID] }, homePolicy)
++            }
++            guard let link else { throw DataDenial(code: "link-not-found") }
++            guard payload.enrollmentRequestID == link.requestID else { throw DataDenial(code: "stale-enrollment") }
++            guard link.status == "active" else { throw DataDenial(code: "link-\(link.status)") }
++            guard let approval = pending?.approval,
++                  let approvalExpiry = EntityScaffoldEnrollmentClock.date(from: approval.payload.expiresAt), approvalExpiry > now else {
++                throw DataDenial(code: "link-expired")
++            }
++            guard link.scaffoldIdentityUUID == requester.uuid,
++                  payload.scaffoldIdentityUUID == requester.uuid,
++                  payload.scaffoldIdentityDomain == link.scaffoldIdentityDomain,
++                  payload.scaffoldPublicKeyBase64URL == link.scaffoldPublicKeyBase64URL,
++                  Self.linkPublicKeyMatches(link, requester: requester),
++                  await verifyRequesterIdentityControl(requester) else { throw DataDenial(code: "scaffold-identity-mismatch") }
++            guard link.capabilities.contains(required) else { throw DataDenial(code: "missing-capability") }
++            guard payload.audience == link.audience, payload.purposeRef == EntityHomePolicy.dataPurpose else {
++                throw DataDenial(code: "purpose-or-audience-mismatch")
++            }
++            let signedData = try EntityScaffoldEnrollmentSigning.canonicalData(for: payload)
++            try EntityScaffoldEnrollmentSigning.verify(envelope: request.proof,
++                publicKeyBase64URL: link.scaffoldPublicKeyBase64URL, signedData: signedData,
++                expectedIdentityUUID: link.scaffoldIdentityUUID)
++            let owner = try await PaymentGateOwnerIdentitySupport.requireSigningIdentity(for: enrollmentOwnerIdentity)
++            let reference = try policy.canonicalReference(for: payload.keypath, owner: owner)
++            guard try Self.normalizedEntityAnchorEndpoint(link.entityAnchorReference, owner: owner) == reference,
++                  try Self.normalizedEntityAnchorEndpoint(payload.entityAnchorReference, owner: owner) == reference else {
++                throw DataDenial(code: "non-canonical-home")
++            }
++            guard let resolver = CellBase.defaultCellResolver,
++                  let anchor = try await resolver.cellAtEndpoint(endpoint: reference, requester: owner) as? Meddle else {
++                throw CellBaseError.noResolver
++            }
++            if operation == "read" {
++                let result = try await anchor.get(keypath: payload.keypath, requester: owner)
++                guard !Self.containsForbiddenSecretMaterial(result) else { throw DataDenial(code: "secret-material-rejected") }
++                return .object(["status": .string("allowed"), "operation": .string("read"),
++                    "keypath": .string(payload.keypath), "capability": .string(required), "linkID": .string(link.linkID),
++                    "entityAnchorReference": .string(reference), "policyRevision": .string(policy.revision ?? "legacy"), "value": result])
++            }
++            guard let writtenValue = payload.value, !Self.containsForbiddenSecretMaterial(writtenValue) else {
++                throw DataDenial(code: "secret-material-rejected")
++            }
++            guard let emitOwnedFlow else { throw DataDenial(code: "write-flow-unavailable") }
++            if policy.ownerPresenceRequiredForWrites {
++                guard let proof = request.ownerProof else { throw DataDenial(code: "owner-write-approval-required") }
++                try EntityScaffoldEnrollmentSigning.verify(envelope: proof,
++                    publicKeyBase64URL: try EntityScaffoldEnrollmentSigning.publicKeyBase64URL(for: owner),
++                    signedData: signedData, expectedIdentityUUID: owner.uuid)
++            }
++            let nonceKey = link.linkID + "|" + payload.nonce
++            try stateQueue.sync {
++                usedDataNonces = usedDataNonces.filter {
++                    (EntityScaffoldEnrollmentClock.date(from: $0.value) ?? .distantFuture) > now
++                }
++                guard usedDataNonces[nonceKey] == nil else { throw DataDenial(code: "operation-replayed") }
++                guard usedDataNonces.count < 10_000 else { throw DataDenial(code: "operation-capacity-exceeded") }
++                usedDataNonces[nonceKey] = payload.expiresAt
++            }
++            // Reserve before dispatch, including across restart. A failed/uncertain
++            // commit must be inspected with a fresh read, not replayed blindly.
++            try await persistEnrollmentState()
++            try await IdentityEntityPersistenceSupport.persistBatch(identity: owner,
++                mutations: [EntityBatchPersistMutation(keypath: payload.keypath, value: writtenValue)],
++                sourceUUID: uuid, schema: "entity-scaffold-enrollment.remote-write.v1", entityAnchorReference: reference,
++                requireExistingRoots: true)
++            var flow = FlowElement(title: "Entity remote write committed", content: .object([
++                "type": .string("entity-remote-write"), "operationID": .string(payload.nonce),
++                "linkID": .string(link.linkID), "keypath": .string(payload.keypath), "capability": .string(required),
++                "entityAnchorReference": .string(reference), "policyRevision": .string(policy.revision ?? "legacy")
++            ]), properties: FlowElement.Properties(type: .event, contentType: .object))
++            flow.topic = "entity.remoteWrite.committed"
++            flow.origin = uuid
++            emitOwnedFlow(flow)
++            return .object(["status": .string("allowed"), "operation": .string("write"),
++                "operationID": .string(payload.nonce), "keypath": .string(payload.keypath),
++                "capability": .string(required), "entityAnchorReference": .string(reference)])
++        } catch let error as DataDenial {
++            return .object(Self.errorValue(code: error.code, message: "Entity operation denied: \(error.code)."))
++        } catch let error as EntityScaffoldEnrollmentError {
++            return .object(Self.errorValue(error))
+         } catch {
+-            return .object(EntityScaffoldEnrollmentCell.errorValue(code: "entity-data-read-failed", message: String(describing: error)))
++            return .object(Self.errorValue(code: "entity-data-operation-failed", message: "The canonical home did not acknowledge this operation."))
+         }
+     }
+ 
+-    private func handleEntityDataSet(requester: Identity, payload: ValueType) async -> ValueType {
+-        do {
+-            let object = EntityScaffoldEnrollmentValueCodec.object(from: payload)
+-            let authorization = await entityDataAuthorization(requester: requester, payload: object, operation: .write)
+-            guard authorization.allowed else {
+-                return .object(authorization.denialObject)
++    private func persistEnrollmentState() async throws {
++        if persistancy == .persistant {
++            guard let resolver = CellBase.defaultCellResolver, try await resolver.persistCellSnapshot(self) else {
++                throw DataDenial(code: "enrollment-persistence-failed")
+             }
+-            guard let value = object["value"] else {
+-                return .object(EntityScaffoldEnrollmentCell.errorValue(code: "invalid-payload", message: "Missing value."))
++        }
++    }
++
++    private func handleValidatePlacements(requester: Identity, payload: ValueType) async -> ValueType {
++        do {
++            guard PaymentGateOwnerIdentitySupport.referencesMatch(enrollmentOwnerIdentity, requester),
++                  await verifyRequesterIdentityControl(requester), case .list(let observations) = payload else {
++                throw DataDenial(code: "owner-proof-required")
+             }
+-            guard !Self.containsForbiddenSecretMaterial(value) else {
+-                return .object(EntityScaffoldEnrollmentCell.errorValue(code: "secret-material-rejected", message: "Entity data writes through enrollment must not contain private keys, tokens or vault secrets."))
++            let policy = stateQueue.sync { homePolicy }
++            var seen = Set<String>()
++            for observation in observations {
++                let o = EntityScaffoldEnrollmentValueCodec.object(from: observation)
++                guard let family = EntityScaffoldEnrollmentValueCodec.string("family", in: o),
++                      let reference = EntityScaffoldEnrollmentValueCodec.string("scaffoldReference", in: o),
++                      let kind = EntityScaffoldEnrollmentValueCodec.string("kind", in: o),
++                      case .bool(let encrypted)? = o["encrypted"], case .bool(let values)? = o["containsEntityValues"],
++                      case .bool(let writable)? = o["writable"],
++                      seen.insert(family + "|" + reference).inserted else { throw DataDenial(code: "invalid-placement-inventory") }
++                try policy.validateObservedCopy(family: family, scaffoldReference: reference, kind: kind,
++                    encrypted: encrypted, containsEntityValues: values, writable: writable, owner: enrollmentOwnerIdentity)
+             }
+-            let entityAnchor = try await ownerEntityAnchor(for: authorization.link, payload: object)
+-            let writeResult = try await entityAnchor.set(keypath: authorization.keypath, value: value, requester: authorization.ownerRequester)
+-            await emitLifecycle(key: EntityScaffoldEnrollmentContract.Keys.entityDataSet, requester: requester, status: "written", requestID: authorization.auditID)
+-            return .object([
+-                "status": .string("allowed"),
+-                "operation": .string("write"),
+-                "keypath": .string(authorization.keypath),
+-                "capability": .string(authorization.capability),
+-                "linkID": authorization.link.map { .string($0.linkID) } ?? .null,
+-                "entityAnchorReference": .string(authorization.entityAnchorReference),
+-                "result": writeResult ?? .null
+-            ])
++            return .object(["status": .string("valid")])
+         } catch {
+-            return .object(EntityScaffoldEnrollmentCell.errorValue(code: "entity-data-write-failed", message: String(describing: error)))
+-        }
++            return .object(Self.errorValue(code: "placement-violation", message: "A declared copy violates the canonical-home policy."))
++        }
++    }
++
++    private func registerEntityDataContracts() async {
++        let string = ExploreContract.schema(type: "string")
++        let bool = ExploreContract.schema(type: "bool")
++        let envelope = EntityScaffoldDataRequest.exploreSchema
++        let result = EntityScaffoldDataRequest.resultSchema
++        for key in [EntityScaffoldEnrollmentContract.Keys.entityDataGet, EntityScaffoldEnrollmentContract.Keys.entityDataSet] {
++            await registerExploreContract(requester: enrollmentOwnerIdentity, key: key, method: .set,
++                input: envelope, returns: result, permissions: ["-w--"],
++                flowEffects: key == EntityScaffoldEnrollmentContract.Keys.entityDataSet
++                    ? [ExploreContract.flowEffect(trigger: .set, topic: "entity.remoteWrite.committed", contentType: "object", minimumCount: 0)] : [],
++                description: .string("Signed, active-link operation against the canonical entity home; one metadata-only FlowElement per committed write."))
++        }
++        let placement = ExploreContract.objectSchema(properties: ["family": string, "entityAnchorReference": string], requiredKeys: ["family", "entityAnchorReference"])
++        let copy = ExploreContract.objectSchema(properties: ["family": string, "scaffoldReference": string, "kind": string, "encrypted": bool], requiredKeys: ["family", "scaffoldReference", "kind", "encrypted"])
++        var policyFields: Object = [:]
++        for field in ["policyID", "ownerIdentityUUID", "homeScaffoldReference", "preferredStorageScaffoldReference", "availabilityTier", "dataSensitivity", "transportPolicy", "backupPolicy", "status", "updatedAt", "region", "hostingBoundary", "revision"] { policyFields[field] = string }
++        for field in ["estimatedMonthlyCostNOK", "maxMonthlyCostNOK"] { policyFields[field] = ExploreContract.oneOfSchema(options: [ExploreContract.schema(type: "integer"), ExploreContract.schema(type: "null")]) }
++        policyFields["ownerPresenceRequiredForWrites"] = bool
++        policyFields["placements"] = ExploreContract.listSchema(item: placement)
++        policyFields["localCopies"] = ExploreContract.listSchema(item: copy)
++        policyFields["allowedRegions"] = ExploreContract.listSchema(item: string)
++        policyFields["allowedHostingBoundaries"] = ExploreContract.listSchema(item: string)
++        let policySchema = ExploreContract.objectSchema(properties: policyFields)
++        await registerExploreContract(requester: enrollmentOwnerIdentity, key: EntityScaffoldEnrollmentContract.Keys.homePolicy,
++            method: .get, input: .null, returns: policySchema, permissions: ["r---"], description: .string("Owner's canonical homes and declared local-copy exceptions."))
++        await registerExploreContract(requester: enrollmentOwnerIdentity, key: EntityScaffoldEnrollmentContract.Keys.setHomePolicy,
++            method: .set, input: policySchema,
++            returns: ExploreContract.objectSchema(properties: ["status": string, "policy": policySchema, "error": ExploreContract.objectSchema(properties: ["code": string, "message": string])], requiredKeys: ["status"]),
++            permissions: ["-w--"], description: .string("Owner-approved replacement of placement policy. Invalid placement leaves the previous policy active."))
++        let observation = ExploreContract.objectSchema(properties: ["family": string, "scaffoldReference": string, "kind": string, "encrypted": bool, "containsEntityValues": bool, "writable": bool], requiredKeys: ["family", "scaffoldReference", "kind", "encrypted", "containsEntityValues", "writable"])
++        await registerExploreContract(requester: enrollmentOwnerIdentity, key: EntityScaffoldEnrollmentContract.Keys.validatePlacements,
++            method: .set, input: ExploreContract.listSchema(item: observation), returns: result,
++            permissions: ["-w--"], description: .string("Owner audits declared storage observations; rejects unauthorized duplicate entity data and writable caches."))
+     }
+ 
+     private func stateSnapshotValue() -> ValueType {
+@@ -738,142 +849,7 @@ final class EntityScaffoldEnrollmentCell: GeneralCell {
+         case write
+     }
+ 
+-    private struct EntityDataAuthorization {
+-        var allowed: Bool
+-        var keypath: String
+-        var capability: String
+-        var entityAnchorReference: String
+-        var ownerRequester: Identity
+-        var link: EntityScaffoldLinkRecord?
+-        var denialObject: Object
+-
+-        var auditID: String {
+-            link?.linkID ?? "owner:\(keypath)"
+-        }
+-    }
+-
+-    private func entityDataAuthorization(
+-        requester: Identity,
+-        payload: Object,
+-        operation: EntityDataOperation
+-    ) async -> EntityDataAuthorization {
+-        let keypath = (EntityScaffoldEnrollmentValueCodec.string("keypath", in: payload) ?? "")
+-            .trimmingCharacters(in: .whitespacesAndNewlines)
+-        guard !keypath.isEmpty else {
+-            return deniedEntityDataAuthorization(code: "invalid-payload", message: "Missing keypath.", keypath: keypath)
+-        }
+-        guard let capability = Self.requiredCapability(for: keypath, operation: operation) else {
+-            return deniedEntityDataAuthorization(code: "keypath-not-authorized", message: "The requested entity keypath is outside the enrollment access allowlist.", keypath: keypath)
+-        }
+-        guard !Self.isForbiddenEntityDataKeypath(keypath) else {
+-            return deniedEntityDataAuthorization(code: "sensitive-keypath-rejected", message: "The requested entity keypath may expose protected private data.", keypath: keypath, capability: capability)
+-        }
+-
+-        let ownerRequester = await PaymentGateOwnerIdentitySupport.signingIdentity(for: enrollmentOwnerIdentity)
+-        guard PaymentGateOwnerIdentitySupport.referencesMatch(enrollmentOwnerIdentity, ownerRequester),
+-              await PaymentGateOwnerIdentitySupport.canProve(ownerRequester) else {
+-            return deniedEntityDataAuthorization(code: "owner-proof-required", message: "The enrollment cell could not prove the entity owner identity.", keypath: keypath, capability: capability)
+-        }
+-
+-        let entityAnchorReference = EntityScaffoldEnrollmentValueCodec.string("entityAnchorReference", in: payload)
+-            ?? "cell:///EntityAnchor"
+-        if PaymentGateOwnerIdentitySupport.referencesMatch(enrollmentOwnerIdentity, requester) {
+-            return EntityDataAuthorization(
+-                allowed: true,
+-                keypath: keypath,
+-                capability: "owner.\(capability)",
+-                entityAnchorReference: entityAnchorReference,
+-                ownerRequester: ownerRequester,
+-                link: nil,
+-                denialObject: [:]
+-            )
+-        }
+-
+-        guard await PaymentGateOwnerIdentitySupport.canProve(requester) else {
+-            return deniedEntityDataAuthorization(code: "requester-proof-required", message: "The requesting scaffold identity could not prove control of its signing key.", keypath: keypath, capability: capability)
+-        }
+-        guard let linkID = EntityScaffoldEnrollmentValueCodec.string("linkID", in: payload), !linkID.isEmpty else {
+-            return deniedEntityDataAuthorization(code: "missing-link", message: "Entity data access requires an explicit active linkID.", keypath: keypath, capability: capability)
+-        }
+-        guard let link = stateQueue.sync(execute: { linksByID[linkID] }) else {
+-            return deniedEntityDataAuthorization(code: "link-not-found", message: "No scaffold enrollment link matches linkID.", keypath: keypath, capability: capability, linkID: linkID)
+-        }
+-        guard link.status == "active" else {
+-            return deniedEntityDataAuthorization(code: "link-\(link.status)", message: "The scaffold enrollment link is not active.", keypath: keypath, capability: capability, linkID: linkID)
+-        }
+-        guard link.scaffoldIdentityUUID == requester.uuid,
+-              Self.linkPublicKeyMatches(link, requester: requester) else {
+-            return deniedEntityDataAuthorization(code: "scaffold-identity-mismatch", message: "Requester identity does not match the active scaffold link.", keypath: keypath, capability: capability, linkID: linkID)
+-        }
+-        guard link.capabilities.contains(capability) else {
+-            return deniedEntityDataAuthorization(code: "missing-capability", message: "The active scaffold link does not grant \(capability).", keypath: keypath, capability: capability, linkID: linkID)
+-        }
+-
+-        return EntityDataAuthorization(
+-            allowed: true,
+-            keypath: keypath,
+-            capability: capability,
+-            entityAnchorReference: link.entityAnchorReference,
+-            ownerRequester: ownerRequester,
+-            link: link,
+-            denialObject: [:]
+-        )
+-    }
+-
+-    private func deniedEntityDataAuthorization(
+-        code: String,
+-        message: String,
+-        keypath: String,
+-        capability: String? = nil,
+-        linkID: String? = nil
+-    ) -> EntityDataAuthorization {
+-        var denial = EntityScaffoldEnrollmentCell.errorValue(code: code, message: message)
+-        if !keypath.isEmpty {
+-            denial["keypath"] = .string(keypath)
+-        }
+-        if let capability {
+-            denial["capability"] = .string(capability)
+-        }
+-        if let linkID {
+-            denial["linkID"] = .string(linkID)
+-        }
+-        return EntityDataAuthorization(
+-            allowed: false,
+-            keypath: keypath,
+-            capability: capability ?? "",
+-            entityAnchorReference: "",
+-            ownerRequester: enrollmentOwnerIdentity,
+-            link: nil,
+-            denialObject: denial
+-        )
+-    }
+-
+-    private func ownerEntityAnchor(for link: EntityScaffoldLinkRecord?, payload: Object) async throws -> Meddle {
+-        let reference = EntityScaffoldEnrollmentValueCodec.string("entityAnchorReference", in: payload)
+-            ?? link?.entityAnchorReference
+-            ?? "cell:///EntityAnchor"
+-        let endpoint = try Self.normalizedEntityAnchorEndpoint(reference, owner: enrollmentOwnerIdentity)
+-        if let link {
+-            let linkEndpoint = try Self.normalizedEntityAnchorEndpoint(link.entityAnchorReference, owner: enrollmentOwnerIdentity)
+-            guard endpoint == linkEndpoint else {
+-                throw EntityScaffoldEnrollmentError.invalidPayload("Payload entityAnchorReference does not match the active scaffold link.")
+-            }
+-        }
+-        guard let resolver = CellBase.defaultCellResolver else {
+-            throw CellBaseError.noResolver
+-        }
+-        let ownerRequester = await PaymentGateOwnerIdentitySupport.signingIdentity(for: enrollmentOwnerIdentity)
+-        guard PaymentGateOwnerIdentitySupport.referencesMatch(enrollmentOwnerIdentity, ownerRequester),
+-              await PaymentGateOwnerIdentitySupport.canProve(ownerRequester) else {
+-            throw EntityScaffoldEnrollmentError.invalidPayload("Unable to prove owner identity for EntityAnchor access.")
+-        }
+-        guard let entityAnchor = try await resolver.cellAtEndpoint(endpoint: endpoint, requester: ownerRequester) as? Meddle else {
+-            throw EntityScaffoldEnrollmentError.invalidPayload("EntityAnchor reference did not resolve to a Meddle cell.")
+-        }
+-        return entityAnchor
+-    }
+-
+-    fileprivate static func normalizedEntityAnchorEndpoint(_ reference: String, owner: Identity) throws -> String {
++    static func normalizedEntityAnchorEndpoint(_ reference: String, owner: Identity) throws -> String {
+         guard let url = URL(string: reference),
+               url.scheme?.lowercased() == "cell" else {
+             throw EntityScaffoldEnrollmentError.invalidPayload("entityAnchorReference must be a cell:// URL.")
+@@ -893,7 +869,7 @@ final class EntityScaffoldEnrollmentCell: GeneralCell {
+         guard components.count <= 2 else {
+             throw EntityScaffoldEnrollmentError.invalidPayload("entityAnchorReference contains unsupported path components.")
+         }
+-        guard url.query == nil else {
++        guard url.query == nil, url.fragment == nil, url.user == nil, url.password == nil else {
+             throw EntityScaffoldEnrollmentError.invalidPayload("entityAnchorReference query parameters are not allowed.")
+         }
+         guard let host = url.host, !host.isEmpty, host != "localhost" else {
+@@ -1013,8 +989,14 @@ final class EntityScaffoldEnrollmentCell: GeneralCell {
+             return false
+         case .list(let values):
+             return values.contains(where: containsForbiddenSecretMaterial)
+-        default:
++        case .string(let string):
++            return string.contains("PRIVATE KEY-----") || string.contains("BEGIN OPENSSH PRIVATE KEY")
++        case .null, .bool, .number, .integer, .float:
+             return false
++        default:
++            // No Identity, credential, opaque bytes or executable Cell values
++            // cross the entity-data proxy boundary.
++            return true
+         }
+     }
+ 
+@@ -1043,7 +1025,8 @@ final class EntityScaffoldEnrollmentCell: GeneralCell {
+                 .string(EntityScaffoldEnrollmentContract.Keys.validate),
+                 .string(EntityScaffoldEnrollmentContract.Keys.setHomePolicy),
+                 .string(EntityScaffoldEnrollmentContract.Keys.entityDataGet),
+-                .string(EntityScaffoldEnrollmentContract.Keys.entityDataSet)
++                .string(EntityScaffoldEnrollmentContract.Keys.entityDataSet),
++                .string(EntityScaffoldEnrollmentContract.Keys.validatePlacements)
+             ]),
+             "notes": .list([
+                 .string("Requests are signed by the new scaffold identity."),
+@@ -1499,62 +1482,10 @@ enum EntityScaffoldEnrollmentValueCodec {
+         ])
+     }
+ 
+-    static func value(for policy: EntityHomePolicy) -> ValueType {
+-        .object([
+-            "policyID": .string(policy.policyID),
+-            "ownerIdentityUUID": .string(policy.ownerIdentityUUID),
+-            "homeScaffoldReference": .string(policy.homeScaffoldReference),
+-            "preferredStorageScaffoldReference": .string(policy.preferredStorageScaffoldReference),
+-            "availabilityTier": .string(policy.availabilityTier),
+-            "estimatedMonthlyCostNOK": policy.estimatedMonthlyCostNOK.map(ValueType.integer) ?? .null,
+-            "maxMonthlyCostNOK": policy.maxMonthlyCostNOK.map(ValueType.integer) ?? .null,
+-            "dataSensitivity": .string(policy.dataSensitivity),
+-            "transportPolicy": .string(policy.transportPolicy),
+-            "backupPolicy": .string(policy.backupPolicy),
+-            "ownerPresenceRequiredForWrites": .bool(policy.ownerPresenceRequiredForWrites),
+-            "status": .string(policy.status),
+-            "updatedAt": .string(policy.updatedAt)
+-        ])
+-    }
++    static func value(for policy: EntityHomePolicy) -> ValueType { policy.value() }
+ 
+     static func homePolicy(from value: ValueType, owner: Identity) throws -> EntityHomePolicy {
+-        let object = object(from: value)
+-        let homeScaffoldReference = string("homeScaffoldReference", in: object) ?? "cell:///EntityAnchor"
+-        _ = try EntityScaffoldEnrollmentCell.normalizedEntityAnchorEndpoint(homeScaffoldReference, owner: owner)
+-        let preferredReference = string("preferredStorageScaffoldReference", in: object) ?? homeScaffoldReference
+-        _ = try EntityScaffoldEnrollmentCell.normalizedEntityAnchorEndpoint(preferredReference, owner: owner)
+-        let ownerIdentityUUID = string("ownerIdentityUUID", in: object) ?? owner.uuid
+-        guard ownerIdentityUUID == owner.uuid else {
+-            throw EntityScaffoldEnrollmentError.invalidPayload("Entity home policy ownerIdentityUUID does not match the enrollment owner.")
+-        }
+-        let estimatedCost = optionalInt("estimatedMonthlyCostNOK", in: object)
+-        let maxCost = optionalInt("maxMonthlyCostNOK", in: object)
+-        let ownerConfirmedCost = bool("ownerConfirmedCost", in: object)
+-        let requestedStatus = string("status", in: object) ?? "active"
+-        let status: String
+-        if let estimatedCost,
+-           let maxCost,
+-           estimatedCost > maxCost,
+-           ownerConfirmedCost == false {
+-            status = "requires_owner_confirmation"
+-        } else {
+-            status = requestedStatus
+-        }
+-        return EntityHomePolicy(
+-            policyID: string("policyID", in: object) ?? "entity-home-policy:\(owner.uuid)",
+-            ownerIdentityUUID: ownerIdentityUUID,
+-            homeScaffoldReference: homeScaffoldReference,
+-            preferredStorageScaffoldReference: preferredReference,
+-            availabilityTier: string("availabilityTier", in: object) ?? "local",
+-            estimatedMonthlyCostNOK: estimatedCost,
+-            maxMonthlyCostNOK: maxCost,
+-            dataSensitivity: string("dataSensitivity", in: object) ?? "owner-private",
+-            transportPolicy: string("transportPolicy", in: object) ?? "owner-approved-capability",
+-            backupPolicy: string("backupPolicy", in: object) ?? "identity-vault-bound",
+-            ownerPresenceRequiredForWrites: object["ownerPresenceRequiredForWrites"].map { boolValue($0) } ?? true,
+-            status: status,
+-            updatedAt: EntityScaffoldEnrollmentClock.nowString()
+-        )
++        try EntityHomePolicy.decode(value, owner: owner)
+     }
+ 
+     static func string(_ key: String, in object: Object) -> String? {
+diff --git a/Sources/App/Support/IdentityEntityPersistenceSupport.swift b/Sources/App/Support/IdentityEntityPersistenceSupport.swift
+index 6bc4b873..96017038 100644
+--- a/Sources/App/Support/IdentityEntityPersistenceSupport.swift
++++ b/Sources/App/Support/IdentityEntityPersistenceSupport.swift
+@@ -27,23 +27,34 @@ enum IdentityEntityPersistenceSupport {
+         identity: Identity,
+         mutations: [EntityBatchPersistMutation],
+         sourceUUID: String,
+-        schema: String
++        schema: String,
++        entityAnchorReference: String = "cell:///EntityAnchor",
++        requireExistingRoots: Bool = false
+     ) async throws {
+         guard let resolver = CellBase.defaultCellResolver else {
+             throw CellBaseError.noResolver
+         }
+         guard let entityAnchor = try await resolver.cellAtEndpoint(
+-            endpoint: "cell:///EntityAnchor",
++            endpoint: entityAnchorReference,
+             requester: identity
+-        ) as? EntityAnchorCell else {
++        ) as? (Emit & Absorb & Meddle) else {
+             throw CellBaseError.noTargetCell
+         }
+ 
+-        let preparedMutations = await mutationsIncludingMissingRoots(
+-            entityAnchor: entityAnchor,
+-            identity: identity,
+-            mutations: mutations
+-        )
++        let preparedMutations: [EntityBatchPersistMutation]
++        if requireExistingRoots {
++            // A scoped proxy must never broaden a nested write into replacement
++            // of a whole root, including after a failed remote read.
++            for mutation in mutations {
++                let root = String(mutation.keypath.prefix { $0 != "." && $0 != "[" })
++                if root != mutation.keypath { _ = try await entityAnchor.get(keypath: root, requester: identity) }
++            }
++            preparedMutations = mutations
++        } else {
++            preparedMutations = await mutationsIncludingMissingRoots(
++                entityAnchor: entityAnchor, identity: identity, mutations: mutations
++            )
++        }
+ 
+         let envelope = EntityBatchPersistEnvelope(schema: schema, mutations: preparedMutations)
+         let acknowledgementPublisher = try await entityAnchor.flow(requester: identity)
+@@ -108,7 +119,7 @@ enum IdentityEntityPersistenceSupport {
+     }
+ 
+     private static func mutationsIncludingMissingRoots(
+-        entityAnchor: EntityAnchorCell,
++        entityAnchor: Meddle,
+         identity: Identity,
+         mutations: [EntityBatchPersistMutation]
+     ) async -> [EntityBatchPersistMutation] {
+diff --git a/Tests/AppTests/EntityScaffoldEnrollmentCellTests.swift b/Tests/AppTests/EntityScaffoldEnrollmentCellTests.swift
+index 1f077422..9a270d3d 100644
+--- a/Tests/AppTests/EntityScaffoldEnrollmentCellTests.swift
++++ b/Tests/AppTests/EntityScaffoldEnrollmentCellTests.swift
+@@ -5,6 +5,11 @@
+ import CellBase
+ import CellVapor
+ import XCTest
++#if canImport(Combine)
++import Combine
++#else
++import OpenCombine
++#endif
+ 
+ final class EntityScaffoldEnrollmentCellTests: IsolatedCellTestCase {
+     func testSignedEnrollmentLifecycleCreatesActiveScaffoldLink() async throws {
+@@ -300,10 +305,7 @@ final class EntityScaffoldEnrollmentCellTests: IsolatedCellTestCase {
+ 
+         let read = try object(try await restored.set(
+             keypath: EntityScaffoldEnrollmentContract.Keys.entityDataGet,
+-            value: .object([
+-                "linkID": .string(linkID),
+-                "keypath": .string("entityRepresentation")
+-            ]),
++            value: dataRequest(cell, identities: identities, linkID: linkID, keypath: "entityRepresentation"),
+             requester: identities.scaffold
+         ))
+ 
+@@ -360,10 +362,7 @@ final class EntityScaffoldEnrollmentCellTests: IsolatedCellTestCase {
+ 
+         let missingCapability = try object(try await cell.set(
+             keypath: EntityScaffoldEnrollmentContract.Keys.entityDataGet,
+-            value: .object([
+-                "linkID": .string(linkID),
+-                "keypath": .string("relations.people")
+-            ]),
++            value: dataRequest(cell, identities: identities, linkID: linkID, keypath: "relations.people"),
+             requester: identities.scaffold
+         ))
+         XCTAssertEqual(string(missingCapability["status"]), "denied")
+@@ -378,10 +377,7 @@ final class EntityScaffoldEnrollmentCellTests: IsolatedCellTestCase {
+ 
+         let afterRevoke = try object(try await cell.set(
+             keypath: EntityScaffoldEnrollmentContract.Keys.entityDataGet,
+-            value: .object([
+-                "linkID": .string(linkID),
+-                "keypath": .string("entityRepresentation")
+-            ]),
++            value: dataRequest(cell, identities: identities, linkID: linkID, keypath: "entityRepresentation"),
+             requester: identities.scaffold
+         ))
+         XCTAssertEqual(string(afterRevoke["status"]), "denied")
+@@ -396,6 +392,9 @@ final class EntityScaffoldEnrollmentCellTests: IsolatedCellTestCase {
+         let identities = await makeEnrollmentIdentities("entity-chat-write")
+         let resolver = try await configureEntityAnchorResolver(identities)
+         _ = try await entityAnchor(resolver: resolver, requester: identities.owner)
++        try await IdentityEntityPersistenceSupport.persistBatch(identity: identities.owner,
++            mutations: [.init(keypath: "relations", value: .object(["chatInvites": .object(["pending": .list([])])]))],
++            sourceUUID: "entity-enrollment-tests", schema: "entity-enrollment-test-seed.v1")
+         let cell = await EntityScaffoldEnrollmentCell(owner: identities.owner)
+         let linkID = try await activateEnrollment(
+             cell: cell,
+@@ -405,15 +404,11 @@ final class EntityScaffoldEnrollmentCellTests: IsolatedCellTestCase {
+ 
+         let written = try object(try await cell.set(
+             keypath: EntityScaffoldEnrollmentContract.Keys.entityDataSet,
+-            value: .object([
+-                "linkID": .string(linkID),
+-                "keypath": .string("relations.chatInvites.pending[+]"),
+-                "value": .object([
++            value: dataRequest(cell, identities: identities, linkID: linkID, operation: "write", keypath: "relations.chatInvites.pending[+]", value: .object([
+                     "id": .string("invite-sim-nora"),
+                     "toRelationRef": .string("relations.people[id=person-sim-nora]"),
+                     "message": .string("Hei Nora, vil du teste chatflyten?")
+-                ])
+-            ]),
++                ])),
+             requester: identities.scaffold
+         ))
+         XCTAssertEqual(string(written["status"]), "allowed")
+@@ -427,42 +422,239 @@ final class EntityScaffoldEnrollmentCellTests: IsolatedCellTestCase {
+         XCTAssertEqual(string(invite["toRelationRef"]), "relations.people[id=person-sim-nora]")
+     }
+ 
+-    func testHomePolicyRequiresOwnerConfirmationWhenHostedCostExceedsCap() async throws {
+-        let previousDebugAccess = CellBase.debugValidateAccessForEverything
+-        CellBase.debugValidateAccessForEverything = false
+-        defer { CellBase.debugValidateAccessForEverything = previousDebugAccess }
++    func testOwnerReadsOneCanonicalRepresentationFromTwoEnrolledScaffoldsThroughResolver() async throws {
++        let a = await makeEnrollmentIdentities("two-scaffolds-a")
++        let bIdentity = await makeEnrollmentIdentities("two-scaffolds-b")
++        let b = EnrollmentIdentities(vault: bIdentity.vault, owner: a.owner, scaffold: bIdentity.scaffold)
++        let resolver = try await configureEntityAnchorResolver(a)
++        try await registerResolveIfNeeded(resolver, name: "EntityScaffoldEnrollment", type: EntityScaffoldEnrollmentCell.self)
++        try await resolver.addCellResolve(name: EntityScaffoldDataAccessCell.cellName, cellScope: .scaffoldUnique,
++            persistency: .ephemeral, identityDomain: "private", type: EntityScaffoldDataAccessCell.self)
++        let resolved = try await resolver.cellAtEndpoint(endpoint: "cell:///EntityScaffoldEnrollment", requester: a.owner)
++        let cell = try XCTUnwrap(resolved as? EntityScaffoldEnrollmentCell)
++        try await seedRepresentation(a.owner, name: "One home")
++        let linkA = try await activateEnrollment(cell: cell, identities: a, capabilities: ["entity.representation.read", "entity.representation.write"])
++        let linkB = try await activateEnrollment(cell: cell, identities: b, capabilities: ["entity.representation.read"])
++        for (identities, linkID) in [(a, linkA), (b, linkB)] {
++            let proxy = EntityScaffoldEntityAnchorProxy(accessReference: "cell:///EntityScaffoldDataAccess", ownerIdentityUUID: a.owner.uuid,
++                link: try await linkRecord(cell, linkID: linkID, owner: a.owner), requester: identities.scaffold)
++            let request = try await proxy.request(operation: "read", keypath: "entityRepresentation", capability: "entity.representation.read")
++            let result = try object(try await proxy.perform(request))
++            XCTAssertEqual(string(result["status"]), "allowed")
++            XCTAssertEqual(string(try object(result["value"])["name"]), "One home")
++            XCTAssertEqual(string(result["entityAnchorReference"]), "cell:///EntityAnchor")
++        }
++        let payload = try await dataRequest(cell, identities: a, linkID: linkA, operation: "write", keypath: "entityRepresentation.name", value: .string("Changed at home"))
++        let result = try object(try await cell.set(keypath: EntityScaffoldEnrollmentContract.Keys.entityDataSet, value: payload, requester: a.scaffold))
++        XCTAssertEqual(string(result["status"]), "allowed")
++        let readB = try object(try await cell.set(keypath: EntityScaffoldEnrollmentContract.Keys.entityDataGet,
++            value: dataRequest(cell, identities: b, linkID: linkB, keypath: "entityRepresentation"), requester: b.scaffold))
++        XCTAssertEqual(string(try object(readB["value"])["name"]), "Changed at home")
++    }
+ 
+-        let identities = await makeEnrollmentIdentities("home-policy")
+-        let cell = await EntityScaffoldEnrollmentCell(owner: identities.owner)
++    func testStaleCacheRendersButCannotAuthorizeWriteEvenAfterRevocation() async throws {
++        let ids = await makeEnrollmentIdentities("stale-cache")
++        let resolver = try await configureEntityAnchorResolver(ids)
++        try await seedRepresentation(ids.owner, name: "Current home value")
++        let anchor = try await entityAnchor(resolver: resolver, requester: ids.owner)
++        let cell = await EntityScaffoldEnrollmentCell(owner: ids.owner)
++        let link = try await activateEnrollment(cell: cell, identities: ids, capabilities: ["entity.representation.read", "entity.representation.write"])
++        let cache = EntityScaffoldCachedRead(value: .object(["name": .string("Old cached value")]),
++            sourceHomeReference: "cell:///EntityAnchor", revision: "old-revision", expiresAt: .distantPast)
++        let rendered = try object(cache.render())
++        XCTAssertEqual(rendered["stale"], .bool(true))
++        XCTAssertEqual(rendered["mayAuthorizeWrite"], .bool(false))
++        XCTAssertEqual(string(try object(rendered["value"])["name"]), "Old cached value")
++        let freshSignedWrite = try await dataRequest(cell, identities: ids, linkID: link,
++            operation: "write", keypath: "entityRepresentation.name", value: .string("Unauthorized"))
++        var cachedAuthorityAttempt = try object(freshSignedWrite)
++        cachedAuthorityAttempt["cacheRevision"] = .string(cache.revision)
++        let cacheDenied = try object(try await cell.set(keypath: EntityScaffoldEnrollmentContract.Keys.entityDataSet,
++            value: .object(cachedAuthorityAttempt), requester: ids.scaffold))
++        XCTAssertEqual(string(cacheDenied["status"]), "denied")
++        _ = try await cell.set(keypath: EntityScaffoldEnrollmentContract.Keys.revoke, value: .object(["linkID": .string(link)]), requester: ids.owner)
++        let revoked = try object(try await cell.set(keypath: EntityScaffoldEnrollmentContract.Keys.entityDataSet,
++            value: freshSignedWrite, requester: ids.scaffold))
++        XCTAssertEqual(errorCode(revoked), "link-revoked")
++        let homeValue = try await anchor.get(keypath: "entityRepresentation.name", requester: ids.owner)
++        XCTAssertEqual(homeValue, .string("Current home value"))
++        XCTAssertEqual(try object(cache.render())["stale"], .bool(true))
++    }
+ 
+-        let updated = try object(try await cell.set(
+-            keypath: EntityScaffoldEnrollmentContract.Keys.setHomePolicy,
+-            value: .object([
+-                "homeScaffoldReference": .string("cell:///EntityAnchor/\(identities.owner.uuid)"),
+-                "preferredStorageScaffoldReference": .string("cell:///EntityAnchor/\(identities.owner.uuid)"),
+-                "availabilityTier": .string("hosted-staging"),
+-                "estimatedMonthlyCostNOK": .integer(450),
+-                "maxMonthlyCostNOK": .integer(100),
+-                "dataSensitivity": .string("owner-private"),
+-                "transportPolicy": .string("owner-approved-capability"),
+-                "backupPolicy": .string("identity-vault-bound")
+-            ]),
+-            requester: identities.owner
+-        ))
+-        XCTAssertEqual(string(updated["status"]), "requires_owner_confirmation")
+-        let storedPolicy = try object(updated["policy"])
+-        XCTAssertEqual(string(storedPolicy["status"]), "requires_owner_confirmation")
++    func testEachAcknowledgedRemoteWriteEmitsOneMetadataFlowAndReplayCannotWrite() async throws {
++        let ids = await makeEnrollmentIdentities("write-flow")
++        let resolver = try await configureEntityAnchorResolver(ids)
++        try await seedRepresentation(ids.owner, name: "Before")
++        let cell = await EntityScaffoldEnrollmentCell(owner: ids.owner)
++        let link = try await activateEnrollment(cell: cell, identities: ids, capabilities: ["entity.representation.write"])
++        let observed = expectation(description: "one committed remote write")
++        observed.assertForOverFulfill = true
++        var flows: [FlowElement] = []
++        let publisher = try await cell.flow(requester: ids.owner)
++        let subscription = publisher.sink(receiveCompletion: { _ in }, receiveValue: { flow in
++            guard flow.topic == "entity.remoteWrite.committed" else { return }
++            flows.append(flow)
++            observed.fulfill()
++        })
++        defer { subscription.cancel() }
++        let request = try await dataRequest(cell, identities: ids, linkID: link, operation: "write", keypath: "entityRepresentation.name", value: .string("After"))
++        let written = try object(try await cell.set(keypath: EntityScaffoldEnrollmentContract.Keys.entityDataSet, value: request, requester: ids.scaffold))
++        XCTAssertEqual(string(written["status"]), "allowed")
++        await fulfillment(of: [observed], timeout: 3)
++        XCTAssertEqual(flows.count, 1)
++        let receipt = try object(try XCTUnwrap(flows.first).content)
++        XCTAssertEqual(string(receipt["keypath"]), "entityRepresentation.name")
++        XCTAssertNil(receipt["value"])
++        let restored = try JSONDecoder().decode(EntityScaffoldEnrollmentCell.self, from: JSONEncoder().encode(cell))
++        let replay = try object(try await restored.set(keypath: EntityScaffoldEnrollmentContract.Keys.entityDataSet, value: request, requester: ids.scaffold))
++        XCTAssertEqual(errorCode(replay), "operation-replayed")
++        let anchor = try await entityAnchor(resolver: resolver, requester: ids.owner)
++        let homeValue = try await anchor.get(keypath: "entityRepresentation.name", requester: ids.owner)
++        XCTAssertEqual(homeValue, .string("After"))
++    }
+ 
+-        let restored = try JSONDecoder().decode(
+-            EntityScaffoldEnrollmentCell.self,
+-            from: JSONEncoder().encode(cell)
+-        )
+-        let policyAfterRestart = try object(try await restored.get(
+-            keypath: EntityScaffoldEnrollmentContract.Keys.homePolicy,
+-            requester: identities.owner
+-        ))
+-        XCTAssertEqual(string(policyAfterRestart["status"]), "requires_owner_confirmation")
+-        XCTAssertEqual(string(policyAfterRestart["availabilityTier"]), "hosted-staging")
++    func testHostedPlacementOnlyWithinOwnerCostAndPrivacyPolicy() async throws {
++        let ids = await makeEnrollmentIdentities("hosted-policy")
++        let cell = await EntityScaffoldEnrollmentCell(owner: ids.owner)
++        let good: Object = ["homeScaffoldReference": .string("cell://home.example/EntityAnchor"),
++            "availabilityTier": .string("hosted-production"), "estimatedMonthlyCostNOK": .integer(90),
++            "maxMonthlyCostNOK": .integer(100), "region": .string("NO"), "allowedRegions": .list([.string("NO")]),
++            "hostingBoundary": .string("owner-private-cloud"), "allowedHostingBoundaries": .list([.string("owner-private-cloud")]),
++            "transportPolicy": .string("tls-remote-bridge")]
++        for (field, invalid) in [("estimatedMonthlyCostNOK", ValueType.integer(101)), ("estimatedMonthlyCostNOK", .null),
++                                 ("region", .string("outside-policy")), ("hostingBoundary", .string("public-shared")),
++                                 ("transportPolicy", .string("unencrypted"))] {
++            var candidate = good; candidate[field] = invalid
++            let result = try object(try await cell.set(keypath: EntityScaffoldEnrollmentContract.Keys.setHomePolicy, value: .object(candidate), requester: ids.owner))
++            XCTAssertEqual(string(result["status"]), "denied", field)
++            let active = try object(try await cell.get(keypath: EntityScaffoldEnrollmentContract.Keys.homePolicy, requester: ids.owner))
++            XCTAssertEqual(string(active["homeScaffoldReference"]), "cell:///EntityAnchor")
++        }
++        let accepted = try object(try await cell.set(keypath: EntityScaffoldEnrollmentContract.Keys.setHomePolicy, value: .object(good), requester: ids.owner))
++        XCTAssertEqual(string(accepted["status"]), "active")
++        let restored = try JSONDecoder().decode(EntityScaffoldEnrollmentCell.self, from: JSONEncoder().encode(cell))
++        let policy = try object(try await restored.get(keypath: EntityScaffoldEnrollmentContract.Keys.homePolicy, requester: ids.owner))
++        XCTAssertEqual(string(policy["homeScaffoldReference"]), "cell://home.example/EntityAnchor")
++    }
++
++    func testOneHomeAndNamedReadOnlyEncryptedCopyExceptions() async throws {
++        let ids = await makeEnrollmentIdentities("copy-policy")
++        var policy = EntityHomePolicy.defaultPolicy(owner: ids.owner)
++        policy.localCopies = [.init(family: "entityRepresentation", scaffoldReference: "scaffold:staging", kind: .cache, encrypted: true),
++                              .init(family: "entityRepresentation", scaffoldReference: "scaffold:backup", kind: .backup, encrypted: true)]
++        for (reference, kind) in [("scaffold:staging", "cache"), ("scaffold:backup", "backup")] {
++            XCTAssertNoThrow(try policy.validateObservedCopy(family: "entityRepresentation", scaffoldReference: reference,
++                kind: kind, encrypted: true, containsEntityValues: true, writable: false, owner: ids.owner))
++            XCTAssertThrowsError(try policy.validateObservedCopy(family: "entityRepresentation", scaffoldReference: reference,
++                kind: kind, encrypted: true, containsEntityValues: true, writable: true, owner: ids.owner))
++        }
++        XCTAssertThrowsError(try policy.validateObservedCopy(family: "entityRepresentation", scaffoldReference: "cell://other.example/EntityAnchor",
++            kind: "canonical", encrypted: true, containsEntityValues: true, writable: true, owner: ids.owner))
++        XCTAssertThrowsError(try policy.validateObservedCopy(family: "entityRepresentation", scaffoldReference: "scaffold:undeclared",
++            kind: "cache", encrypted: true, containsEntityValues: true, writable: false, owner: ids.owner))
++        policy.placements = policy.effectivePlacements + [.init(family: "entityRepresentation", entityAnchorReference: "cell://duplicate.example/EntityAnchor")]
++        XCTAssertThrowsError(try policy.validate(owner: ids.owner))
++    }
++
++    func testSignedRequestScopeTamperingOwnerPresenceAndSecretsFailClosed() async throws {
++        let ids = await makeEnrollmentIdentities("signed-data-boundary")
++        let resolver = try await configureEntityAnchorResolver(ids)
++        try await seedRepresentation(ids.owner, name: "Unchanged")
++        let cell = await EntityScaffoldEnrollmentCell(owner: ids.owner)
++        let linkID = try await activateEnrollment(cell: cell, identities: ids, capabilities: ["entity.representation.read", "entity.representation.write"])
++        let proxy = EntityScaffoldEntityAnchorProxy(accessReference: "cell:///EntityScaffoldDataAccess", ownerIdentityUUID: ids.owner.uuid,
++            link: try await linkRecord(cell, linkID: linkID, owner: ids.owner), requester: ids.scaffold)
++        let original = try await proxy.request(operation: "write", keypath: "entityRepresentation.name", capability: "entity.representation.write", value: .string("Attempt"), ownerApprover: ids.owner)
++        var tampered = original; tampered.payload.value = .string("Tampered")
++        var audience = original; audience.payload.audience = "wrong-audience"
++        var purpose = original; purpose.payload.purposeRef = "purpose://unapproved"
++        var target = original; target.payload.entityAnchorReference = "cell://other.example/EntityAnchor"
++        var expired = original; expired.payload.expiresAt = "2000-01-01T00:00:00Z"
++        var noOwner = original; noOwner.ownerProof = nil
++        for request in [tampered, audience, purpose, target, expired, noOwner] {
++            let denied = try object(try await cell.set(keypath: EntityScaffoldEnrollmentContract.Keys.entityDataSet, value: request.value(), requester: ids.scaffold))
++            XCTAssertEqual(string(denied["status"]), "denied")
++        }
++        let secret = try await dataRequest(cell, identities: ids, linkID: linkID, operation: "write", keypath: "entityRepresentation",
++            value: .object(["privateKey": .string("synthetic-secret")]))
++        let denied = try object(try await cell.set(keypath: EntityScaffoldEnrollmentContract.Keys.entityDataSet, value: secret, requester: ids.scaffold))
++        XCTAssertEqual(errorCode(denied), "secret-material-rejected")
++        let anchor = try await entityAnchor(resolver: resolver, requester: ids.owner)
++        let homeValue = try await anchor.get(keypath: "entityRepresentation.name", requester: ids.owner)
++        XCTAssertEqual(homeValue, .string("Unchanged"))
++    }
++
++    func testNonEnrolledScaffoldIsDeniedByResolverIngress() async throws {
++        let ids = await makeEnrollmentIdentities("not-enrolled")
++        let resolver = try await configureEntityAnchorResolver(ids)
++        try await registerResolveIfNeeded(resolver, name: "EntityScaffoldEnrollment", type: EntityScaffoldEnrollmentCell.self)
++        try await resolver.addCellResolve(name: EntityScaffoldDataAccessCell.cellName, cellScope: .scaffoldUnique,
++            persistency: .ephemeral, identityDomain: "private", type: EntityScaffoldDataAccessCell.self)
++        let resolved = try await resolver.cellAtEndpoint(endpoint: "cell:///EntityScaffoldEnrollment", requester: ids.owner)
++        let cell = try XCTUnwrap(resolved as? EntityScaffoldEnrollmentCell)
++        let linkID = try await activateEnrollment(cell: cell, identities: ids, capabilities: ["entity.representation.read"])
++        let foreign = await makeEnrollmentIdentities("non-enrolled-foreign")
++        let proxy = EntityScaffoldEntityAnchorProxy(accessReference: "cell:///EntityScaffoldDataAccess", ownerIdentityUUID: ids.owner.uuid,
++            link: try await linkRecord(cell, linkID: linkID, owner: ids.owner), requester: foreign.scaffold)
++        let read = try await proxy.request(operation: "read", keypath: "entityRepresentation", capability: "entity.representation.read")
++        let denied = try object(try await proxy.perform(read))
++        XCTAssertEqual(string(denied["status"]), "denied")
++        XCTAssertNil(denied["value"])
++    }
++
++    func testRevokedScaffoldIsDeniedForReadAndWrite() async throws {
++        let ids = await makeEnrollmentIdentities("revoked-operations")
++        _ = try await configureEntityAnchorResolver(ids)
++        try await seedRepresentation(ids.owner, name: "Before revocation")
++        let cell = await EntityScaffoldEnrollmentCell(owner: ids.owner)
++        let linkID = try await activateEnrollment(cell: cell, identities: ids, capabilities: ["entity.representation.read", "entity.representation.write"])
++        _ = try await cell.set(keypath: EntityScaffoldEnrollmentContract.Keys.revoke,
++            value: .object(["linkID": .string(linkID)]), requester: ids.owner)
++        for operation in ["read", "write"] {
++            let request = try await dataRequest(cell, identities: ids, linkID: linkID, operation: operation,
++                keypath: "entityRepresentation", value: operation == "write" ? .object(["name": .string("Denied")]) : nil)
++            let result = try object(try await cell.set(keypath: operation == "read" ? EntityScaffoldEnrollmentContract.Keys.entityDataGet : EntityScaffoldEnrollmentContract.Keys.entityDataSet,
++                value: request, requester: ids.scaffold))
++            XCTAssertEqual(errorCode(result), "link-revoked")
++        }
++    }
++
++    func testCapabilityOutsideApprovedSubsetIsDeniedForWrite() async throws {
++        let ids = await makeEnrollmentIdentities("read-only-grant")
++        let resolver = try await configureEntityAnchorResolver(ids)
++        try await seedRepresentation(ids.owner, name: "Read only")
++        let cell = await EntityScaffoldEnrollmentCell(owner: ids.owner)
++        let linkID = try await activateEnrollment(cell: cell, identities: ids, capabilities: ["entity.representation.read"])
++        let write = try await dataRequest(cell, identities: ids, linkID: linkID, operation: "write", keypath: "entityRepresentation.name", value: .string("Escalation"))
++        let denied = try object(try await cell.set(keypath: EntityScaffoldEnrollmentContract.Keys.entityDataSet, value: write, requester: ids.scaffold))
++        XCTAssertEqual(errorCode(denied), "missing-capability")
++        let anchor = try await entityAnchor(resolver: resolver, requester: ids.owner)
++        let homeValue = try await anchor.get(keypath: "entityRepresentation.name", requester: ids.owner)
++        XCTAssertEqual(homeValue, .string("Read only"))
++    }
++
++    private func seedRepresentation(_ owner: Identity, name: String) async throws {
++        try await IdentityEntityPersistenceSupport.persistBatch(identity: owner,
++            mutations: [.init(keypath: "entityRepresentation", value: .object(["name": .string(name)]))],
++            sourceUUID: "entity-enrollment-tests", schema: "entity-enrollment-test-seed.v1")
++    }
++
++    private func linkRecord(_ cell: EntityScaffoldEnrollmentCell, linkID: String, owner: Identity) async throws -> EntityScaffoldLinkRecord {
++        let records = try await cell.get(keypath: EntityScaffoldEnrollmentContract.Keys.linkedScaffolds, requester: owner)
++        let links = try JSONDecoder().decode([EntityScaffoldLinkRecord].self, from: JSONEncoder().encode(records))
++        return try XCTUnwrap(links.first { $0.linkID == linkID })
++    }
++
++    private func dataRequest(_ cell: EntityScaffoldEnrollmentCell, identities: EnrollmentIdentities,
++                             linkID: String, operation: String = "read", keypath: String, value: ValueType? = nil) async throws -> ValueType {
++        let link = try await linkRecord(cell, linkID: linkID, owner: identities.owner)
++        let proxy = EntityScaffoldEntityAnchorProxy(accessReference: "cell:///EntityScaffoldDataAccess", ownerIdentityUUID: identities.owner.uuid, link: link, requester: identities.scaffold)
++        let capability: String
++        if keypath.hasPrefix("entityRepresentation") { capability = operation == "read" ? "entity.representation.read" : "entity.representation.write" }
++        else if keypath.hasPrefix("relations.chatInvites") { capability = operation == "read" ? "entity.chatInvites.read" : "entity.chatInvites.write" }
++        else { capability = operation == "read" ? "entity.relations.read" : "entity.relations.write.ownerApproved" }
++        return try await proxy.request(operation: operation, keypath: keypath, capability: capability, value: value,
++            ownerApprover: operation == "write" ? identities.owner : nil).value()
+     }
+ 
+     private func makeEnrollmentIdentities(_ suffix: String) async -> EnrollmentIdentities {
+@@ -579,6 +771,7 @@ final class EntityScaffoldEnrollmentCellTests: IsolatedCellTestCase {
+         expiresAt: Date? = nil
+     ) async throws -> EntityScaffoldEnrollmentRequest {
+         let now = Date()
++        let binding = await scaffold.identityVault?.identityDomainBinding(for: scaffold)
+         let payload = EntityScaffoldEnrollmentRequestPayload(
+             version: 1,
+             requestID: "req-\(UUID().uuidString)",
+@@ -587,7 +780,7 @@ final class EntityScaffoldEnrollmentCellTests: IsolatedCellTestCase {
+             scaffoldIdentityUUID: scaffold.uuid,
+             scaffoldDisplayName: scaffold.displayName,
+             scaffoldPublicKeyBase64URL: try EntityScaffoldEnrollmentSigning.publicKeyBase64URL(for: scaffold),
+-            scaffoldIdentityDomain: "safari-extension-tests",
++            scaffoldIdentityDomain: binding?.domain ?? "safari-extension-tests",
+             scaffoldKind: "safari-extension",
+             requestedCapabilities: capabilities,
+             audience: audience,
+diff --git a/Sources/App/Cells/EntityScaffoldEnrollment/EntityHomePolicy.swift b/Sources/App/Cells/EntityScaffoldEnrollment/EntityHomePolicy.swift
+new file mode 100644
+--- /dev/null
++++ b/Sources/App/Cells/EntityScaffoldEnrollment/EntityHomePolicy.swift
+@@ -0,0 +1,188 @@
++import CellBase
++import Foundation
++
++/// Owner-local placement authority, persisted with EntityScaffoldEnrollment.
++/// A routing reference identifies a location; it never supplies authority.
++struct EntityHomePolicy: Codable, Equatable {
++    static let families = ["entityRepresentation", "relations", "agreements", "purposes", "chronicle"]
++    static let dataPurpose = "purpose://entity.owner-access"
++
++    struct Placement: Codable, Equatable {
++        var family: String
++        var entityAnchorReference: String
++    }
++
++    struct LocalCopy: Codable, Equatable {
++        enum Kind: String, Codable { case cache, backup, index, uiState }
++        var family: String
++        var scaffoldReference: String
++        var kind: Kind
++        var encrypted: Bool
++    }
++
++    var policyID: String
++    var ownerIdentityUUID: String
++    var homeScaffoldReference: String
++    var preferredStorageScaffoldReference: String
++    var availabilityTier: String
++    var estimatedMonthlyCostNOK: Int?
++    var maxMonthlyCostNOK: Int?
++    var dataSensitivity: String
++    var transportPolicy: String
++    var backupPolicy: String
++    var ownerPresenceRequiredForWrites: Bool
++    var status: String
++    var updatedAt: String
++    // Optional on disk so old enrollment snapshots remain readable. Old policy
++    // has one home for all families and grants no local-copy exceptions.
++    var placements: [Placement]?
++    var localCopies: [LocalCopy]?
++    var region: String?
++    var hostingBoundary: String?
++    var allowedRegions: [String]?
++    var allowedHostingBoundaries: [String]?
++    var revision: String?
++
++    var effectivePlacements: [Placement] {
++        placements ?? Self.families.map { Placement(family: $0, entityAnchorReference: homeScaffoldReference) }
++    }
++
++    static func defaultPolicy(owner: Identity) -> EntityHomePolicy {
++        EntityHomePolicy(
++            policyID: "entity-home-policy:\(owner.uuid)", ownerIdentityUUID: owner.uuid,
++            homeScaffoldReference: "cell:///EntityAnchor", preferredStorageScaffoldReference: "cell:///EntityAnchor",
++            availabilityTier: "local", estimatedMonthlyCostNOK: nil, maxMonthlyCostNOK: nil,
++            dataSensitivity: "owner-private", transportPolicy: "owner-approved-capability",
++            backupPolicy: "identity-vault-bound", ownerPresenceRequiredForWrites: true,
++            status: "active", updatedAt: EntityScaffoldEnrollmentClock.nowString()
++        )
++    }
++
++    func canonicalReference(for keypath: String, owner: Identity) throws -> String {
++        try validate(owner: owner)
++        guard status == "active" else {
++            throw EntityScaffoldEnrollmentError.invalidPayload("Home placement requires owner confirmation.")
++        }
++        guard let placement = effectivePlacements.first(where: {
++            keypath == $0.family || keypath.hasPrefix($0.family + ".") || keypath.hasPrefix($0.family + "[")
++        }) else {
++            throw EntityScaffoldEnrollmentError.invalidPayload("No canonical home for this entity family.")
++        }
++        return try EntityScaffoldEnrollmentCell.normalizedEntityAnchorEndpoint(placement.entityAnchorReference, owner: owner)
++    }
++
++    func validate(owner: Identity) throws {
++        guard ownerIdentityUUID == owner.uuid else { throw EntityScaffoldEnrollmentError.issuerMismatch }
++        guard ["synthetic", "public", "private", "owner-private", "sensitive"].contains(dataSensitivity) else {
++            throw EntityScaffoldEnrollmentError.invalidPayload("Unknown data sensitivity requires owner policy review.")
++        }
++        let homes = effectivePlacements
++        guard homes.count == Self.families.count, Set(homes.map(\.family)) == Set(Self.families) else {
++            throw EntityScaffoldEnrollmentError.invalidPayload("Each entity family must have exactly one canonical home.")
++        }
++        let home = try EntityScaffoldEnrollmentCell.normalizedEntityAnchorEndpoint(homeScaffoldReference, owner: owner)
++        let preferred = try EntityScaffoldEnrollmentCell.normalizedEntityAnchorEndpoint(preferredStorageScaffoldReference, owner: owner)
++        guard home == preferred else {
++            throw EntityScaffoldEnrollmentError.invalidPayload("A preferred store cannot be a second canonical home; use an explicit family placement or backup exception.")
++        }
++        let endpoints = try homes.map { try EntityScaffoldEnrollmentCell.normalizedEntityAnchorEndpoint($0.entityAnchorReference, owner: owner) }
++        let hosted = endpoints.contains { $0 != "cell:///EntityAnchor" } || availabilityTier.hasPrefix("hosted") || availabilityTier == "private-cloud" || availabilityTier == "swarm"
++        if hosted {
++            guard let cost = estimatedMonthlyCostNOK, let cap = maxMonthlyCostNOK,
++                  cost >= 0, cap >= 0, cost <= cap,
++                  let region, allowedRegions?.contains(region) == true,
++                  let hostingBoundary, allowedHostingBoundaries?.contains(hostingBoundary) == true,
++                  transportPolicy == "tls-remote-bridge" || transportPolicy == "vpn-lan" else {
++                throw EntityScaffoldEnrollmentError.invalidPayload("Hosted placement is outside the owner's cost, region, hosting or transport policy.")
++            }
++        }
++        var copies = Set<String>()
++        for copy in localCopies ?? [] {
++            guard Self.families.contains(copy.family), !copy.scaffoldReference.isEmpty,
++                  copies.insert(copy.family + "|" + copy.scaffoldReference).inserted else {
++                throw EntityScaffoldEnrollmentError.invalidPayload("Invalid or duplicate local-copy exception.")
++            }
++            if copy.kind == .cache || copy.kind == .backup {
++                guard copy.encrypted else {
++                    throw EntityScaffoldEnrollmentError.invalidPayload("Cache and backup exceptions require encryption.")
++                }
++            }
++        }
++    }
++
++    /// Audits known storage declarations. It does not scan another machine's
++    /// disk, nor pretend that a recipient cannot copy previously disclosed data.
++    func validateObservedCopy(family: String, scaffoldReference: String, kind: String,
++                              encrypted: Bool, containsEntityValues: Bool, writable: Bool,
++                              owner: Identity) throws {
++        let home = try canonicalReference(for: family, owner: owner)
++        if kind == "canonical" {
++            guard try EntityScaffoldEnrollmentCell.normalizedEntityAnchorEndpoint(scaffoldReference, owner: owner) == home else {
++                throw EntityScaffoldEnrollmentError.invalidPayload("Duplicate canonical entity data detected.")
++            }
++            return
++        }
++        guard !writable, let role = LocalCopy.Kind(rawValue: kind),
++              let exception = localCopies?.first(where: {
++                  $0.family == family && $0.scaffoldReference == scaffoldReference && $0.kind == role
++              }) else {
++            throw EntityScaffoldEnrollmentError.invalidPayload("Undeclared or writable second copy of entity data.")
++        }
++        switch exception.kind {
++        case .cache, .backup:
++            guard encrypted && exception.encrypted else {
++                throw EntityScaffoldEnrollmentError.invalidPayload("Unencrypted entity copy.")
++            }
++        case .index, .uiState:
++            guard !containsEntityValues else {
++                throw EntityScaffoldEnrollmentError.invalidPayload("Entity values require a named cache or backup exception.")
++            }
++        }
++    }
++
++    static func decode(_ value: ValueType, owner: Identity) throws -> EntityHomePolicy {
++        let object = EntityScaffoldEnrollmentValueCodec.object(from: value)
++        func string(_ name: String, _ fallback: String) -> String {
++            EntityScaffoldEnrollmentValueCodec.string(name, in: object) ?? fallback
++        }
++        func strings(_ name: String) -> [String]? {
++            guard case .list(let values)? = object[name] else { return nil }
++            return values.compactMap { if case .string(let s) = $0 { return s }; return nil }
++        }
++        func integer(_ name: String) -> Int? {
++            switch object[name] { case .integer(let n)?, .number(let n)?: return n; default: return nil }
++        }
++        var policy = defaultPolicy(owner: owner)
++        policy.homeScaffoldReference = string("homeScaffoldReference", policy.homeScaffoldReference)
++        policy.preferredStorageScaffoldReference = string("preferredStorageScaffoldReference", policy.homeScaffoldReference)
++        policy.ownerIdentityUUID = string("ownerIdentityUUID", owner.uuid)
++        policy.availabilityTier = string("availabilityTier", "local")
++        policy.estimatedMonthlyCostNOK = integer("estimatedMonthlyCostNOK")
++        policy.maxMonthlyCostNOK = integer("maxMonthlyCostNOK")
++        policy.dataSensitivity = string("dataSensitivity", "owner-private")
++        policy.transportPolicy = string("transportPolicy", "owner-approved-capability")
++        policy.backupPolicy = string("backupPolicy", "identity-vault-bound")
++        if case .bool(let presence)? = object["ownerPresenceRequiredForWrites"] { policy.ownerPresenceRequiredForWrites = presence }
++        policy.region = EntityScaffoldEnrollmentValueCodec.string("region", in: object)
++        policy.hostingBoundary = EntityScaffoldEnrollmentValueCodec.string("hostingBoundary", in: object)
++        policy.allowedRegions = strings("allowedRegions")
++        policy.allowedHostingBoundaries = strings("allowedHostingBoundaries")
++        policy.revision = UUID().uuidString
++        if let placements = object["placements"] {
++            policy.placements = try JSONDecoder().decode([Placement].self, from: JSONEncoder().encode(placements))
++        }
++        if let copies = object["localCopies"] {
++            policy.localCopies = try JSONDecoder().decode([LocalCopy].self, from: JSONEncoder().encode(copies))
++        }
++        try policy.validate(owner: owner)
++        return policy
++    }
++
++    func value() -> ValueType {
++        // Both types use the same ordinary JSON object/array/scalar encoding.
++        var snapshot = self
++        snapshot.placements = effectivePlacements
++        snapshot.localCopies = localCopies ?? []
++        return (try? JSONDecoder().decode(ValueType.self, from: JSONEncoder().encode(snapshot))) ?? .null
++    }
++}
+diff --git a/Sources/App/Cells/EntityScaffoldEnrollment/EntityScaffoldDataAccessCell.swift b/Sources/App/Cells/EntityScaffoldEnrollment/EntityScaffoldDataAccessCell.swift
+new file mode 100644
+--- /dev/null
++++ b/Sources/App/Cells/EntityScaffoldEnrollment/EntityScaffoldDataAccessCell.swift
+@@ -0,0 +1,62 @@
++import CellBase
++import Foundation
++
++/// Scaffold-scoped ingress for identities that do not own the home enrollment
++/// Cell. It forwards the original requester, never the owner's authority.
++/// The owner UUID is only a routing hint into this scaffold's existing vault.
++final class EntityScaffoldDataAccessCell: GeneralCell {
++    static let cellName = "EntityScaffoldDataAccess"
++    static let operation = "entityData.perform"
++
++    required init(owner: Identity) async {
++        await super.init(owner: owner)
++        try? await ensureRuntimeReady()
++    }
++
++    required init(from decoder: Decoder) throws { try super.init(from: decoder) }
++
++    override func installCellRuntimeBindingsForAccess() async throws {
++        await registerSet(key: Self.operation, owner: storedOwnerIdentity,
++            input: EntityScaffoldDataRequest.exploreSchema,
++            returns: EntityScaffoldDataRequest.resultSchema,
++            permissions: ["-w--"], description: .string("Forwards a signed enrolled-scaffold operation to its owner's canonical enrollment authority.")) { [weak self] requester, payload in
++                guard let self else { return .null }
++                return await self.perform(payload, requester: requester)
++            }
++    }
++
++    override func validateCellSpecificAccess(_ requestedAccess: String, at keypath: String, for identity: Identity) async -> Bool {
++        // This only admits a proof-bearing caller to the ingress. It grants no
++        // entity read/write authority; the target Cell checks the signed link,
++        // scope, home policy, expiry and nonce for every operation.
++        requestedAccess == "-w--" && keypath == Self.operation
++            ? await verifyRequesterIdentityControl(identity) : false
++    }
++
++    private func perform(_ value: ValueType, requester: Identity) async -> ValueType {
++        do {
++            let request = try EntityScaffoldDataRequest.decode(value)
++            guard request.payload.scaffoldIdentityUUID == requester.uuid,
++                  await verifyRequesterIdentityControl(requester),
++                  let vault = CellBase.defaultIdentityVault,
++                  let owner = await vault.identity(forUUID: request.payload.ownerIdentityUUID),
++                  await vault.identityExistInVault(owner),
++                  let resolver = CellBase.defaultCellResolver,
++                  let enrollment = try await resolver.cellAtEndpoint(
++                    endpoint: EntityScaffoldEnrollmentContract.endpoint, requester: owner
++                  ) as? EntityScaffoldEnrollmentCell else { return Self.denied }
++            let key: String
++            switch request.payload.operation {
++            case "read": key = EntityScaffoldEnrollmentContract.Keys.entityDataGet
++            case "write": key = EntityScaffoldEnrollmentContract.Keys.entityDataSet
++            default: return Self.denied
++            }
++            return try await enrollment.set(keypath: key, value: value, requester: requester) ?? Self.denied
++        } catch { return Self.denied }
++    }
++
++    private static var denied: ValueType {
++        .object(["status": .string("denied"), "error": .object([
++            "code": .string("entity-access-denied"), "message": .string("No current enrolled entity authority accepted this operation.")])])
++    }
++}
+diff --git a/Sources/App/Cells/EntityScaffoldEnrollment/EntityScaffoldDataRequest.swift b/Sources/App/Cells/EntityScaffoldEnrollment/EntityScaffoldDataRequest.swift
+new file mode 100644
+--- /dev/null
++++ b/Sources/App/Cells/EntityScaffoldEnrollment/EntityScaffoldDataRequest.swift
+@@ -0,0 +1,134 @@
++import CellBase
++import Foundation
++
++struct EntityScaffoldDataRequest: Codable {
++    struct Payload: Codable {
++        var version = 1
++        var operation: String
++        var linkID: String
++        var enrollmentRequestID: String
++        var ownerIdentityUUID: String
++        var scaffoldIdentityUUID: String
++        var scaffoldIdentityDomain: String
++        var scaffoldPublicKeyBase64URL: String
++        var entityAnchorReference: String
++        var keypath: String
++        var capability: String
++        var purposeRef: String
++        var audience: String
++        var nonce: String
++        var createdAt: String
++        var expiresAt: String
++        var value: ValueType?
++    }
++    var payload: Payload
++    var proof: EntityScaffoldSignatureEnvelope
++    var ownerProof: EntityScaffoldSignatureEnvelope?
++
++    func value() throws -> ValueType {
++        try JSONDecoder().decode(ValueType.self, from: JSONEncoder().encode(self))
++    }
++
++    static func decode(_ value: ValueType) throws -> Self {
++        guard case .object(let object) = value,
++              Set(object.keys).isSubset(of: ["payload", "proof", "ownerProof"]),
++              case .object(let payload)? = object["payload"],
++              Set(payload.keys).isSubset(of: ["version", "operation", "linkID", "enrollmentRequestID", "ownerIdentityUUID", "scaffoldIdentityUUID",
++                "scaffoldIdentityDomain", "scaffoldPublicKeyBase64URL", "entityAnchorReference", "keypath",
++                "capability", "purposeRef", "audience", "nonce", "createdAt", "expiresAt", "value"]) else {
++            throw EntityScaffoldEnrollmentError.invalidPayload("Only a signed entity operation is accepted; cached grants and cache revisions are not authority.")
++        }
++        return try JSONDecoder().decode(Self.self, from: JSONEncoder().encode(value))
++    }
++}
++
++/// Client-side proxy to the canonical home's scaffold-scoped access ingress.
++/// The signed active enrollment is the bounded entity-data grant.
++/// This type holds no owner signing material and creates no local EntityAnchor.
++struct EntityScaffoldEntityAnchorProxy {
++    var accessReference: String
++    var ownerIdentityUUID: String
++    var link: EntityScaffoldLinkRecord
++    var requester: Identity
++
++    func request(operation: String, keypath: String, capability: String, value: ValueType? = nil,
++                 ownerApprover: Identity? = nil) async throws -> EntityScaffoldDataRequest {
++        let now = Date()
++        let payload = EntityScaffoldDataRequest.Payload(
++            operation: operation, linkID: link.linkID, enrollmentRequestID: link.requestID, ownerIdentityUUID: ownerIdentityUUID, scaffoldIdentityUUID: requester.uuid,
++            scaffoldIdentityDomain: link.scaffoldIdentityDomain,
++            scaffoldPublicKeyBase64URL: try EntityScaffoldEnrollmentSigning.publicKeyBase64URL(for: requester),
++            entityAnchorReference: link.entityAnchorReference, keypath: keypath, capability: capability,
++            purposeRef: EntityHomePolicy.dataPurpose, audience: link.audience,
++            nonce: UUID().uuidString, createdAt: EntityScaffoldEnrollmentClock.string(from: now),
++            expiresAt: EntityScaffoldEnrollmentClock.string(from: now.addingTimeInterval(120)), value: value
++        )
++        var request = EntityScaffoldDataRequest(payload: payload,
++            proof: try await EntityScaffoldEnrollmentSigning.signatureEnvelope(payload: payload, signer: requester))
++        if let ownerApprover {
++            request.ownerProof = try await EntityScaffoldEnrollmentSigning.signatureEnvelope(payload: payload, signer: ownerApprover)
++        }
++        return request
++    }
++
++    func perform(_ request: EntityScaffoldDataRequest) async throws -> ValueType {
++        guard let resolver = CellBase.defaultCellResolver,
++              let cell = try await resolver.cellAtEndpoint(endpoint: accessReference, requester: requester) as? Meddle else {
++            throw CellBaseError.noResolver
++        }
++        return try await cell.set(keypath: EntityScaffoldDataAccessCell.operation, value: request.value(), requester: requester) ?? .null
++    }
++}
++
++/// Decrypted, volatile display snapshot, not a persistence or grant artifact.
++/// A durable copy requires an encrypted cache exception in EntityHomePolicy.
++struct EntityScaffoldCachedRead {
++    let value: ValueType
++    let sourceHomeReference: String
++    let revision: String
++    let expiresAt: Date
++
++    func render(now: Date = Date()) -> ValueType {
++        .object(["value": value, "sourceHomeReference": .string(sourceHomeReference),
++                 "revision": .string(revision), "stale": .bool(expiresAt <= now),
++                 "mayAuthorizeWrite": .bool(false)])
++    }
++}
++
++actor EntityScaffoldOperationGate {
++    private var held = false
++    private var waiters: [CheckedContinuation<Void, Never>] = []
++    func run<T>(_ action: () async -> T) async -> T {
++        if held { await withCheckedContinuation { waiters.append($0) } } else { held = true }
++        let result = await action()
++        if waiters.isEmpty { held = false } else { waiters.removeFirst().resume() }
++        return result
++    }
++}
++
++extension EntityScaffoldDataRequest {
++    static var exploreSchema: ValueType {
++        let string = ExploreContract.schema(type: "string")
++        let storedValue = ExploreContract.oneOfSchema(options: ["object", "list", "string", "integer", "float", "bool", "null"].map { ExploreContract.schema(type: $0) })
++        let signature = ExploreContract.objectSchema(properties: ["type": string, "algorithm": string,
++            "byIdentityUUID": string, "signatureBase64URL": string],
++            requiredKeys: ["type", "algorithm", "byIdentityUUID", "signatureBase64URL"])
++        var fields: Object = [:]
++        let requiredFields = ["operation", "linkID", "enrollmentRequestID", "ownerIdentityUUID", "scaffoldIdentityUUID", "scaffoldIdentityDomain", "scaffoldPublicKeyBase64URL",
++            "entityAnchorReference", "keypath", "capability", "purposeRef", "audience", "nonce", "createdAt", "expiresAt"]
++        for key in requiredFields { fields[key] = string }
++        fields["version"] = ExploreContract.schema(type: "integer")
++        fields["value"] = storedValue
++        return ExploreContract.objectSchema(properties: [
++            "payload": ExploreContract.objectSchema(properties: fields, requiredKeys: ["version"] + requiredFields),
++            "proof": signature, "ownerProof": signature], requiredKeys: ["payload", "proof"])
++    }
++    static var resultSchema: ValueType {
++        let string = ExploreContract.schema(type: "string")
++        let storedValue = ExploreContract.oneOfSchema(options: ["object", "list", "string", "integer", "float", "bool", "null"].map { ExploreContract.schema(type: $0) })
++        return ExploreContract.objectSchema(properties: ["status": string, "operation": string,
++            "operationID": string, "keypath": string, "capability": string, "entityAnchorReference": string,
++            "policyRevision": string, "linkID": string, "value": storedValue,
++            "error": ExploreContract.objectSchema(properties: ["code": string, "message": string], requiredKeys: ["code", "message"])], requiredKeys: ["status"])
++    }
++}
+diff --git a/Sources/App/configure.swift b/Sources/App/configure.swift
+--- a/Sources/App/configure.swift
++++ b/Sources/App/configure.swift
+@@ -1113,6 +1113,7 @@
+                 try await addCellResolveIfNeeded(name: "Porthole", cellScope: .identityUnique, persistency: .persistant, type: OrchestratorCell.self)
+                 try await addCellResolveIfNeeded(name: "EntityAnchor", cellScope: .identityUnique, persistency: .persistant, type: EntityAnchorCell.self)
+                 try await addCellResolveIfNeeded(name: EntityScaffoldEnrollmentContract.cellName, cellScope: .identityUnique, persistency: .persistant, type: EntityScaffoldEnrollmentCell.self)
++                try await addCellResolveIfNeeded(name: EntityScaffoldDataAccessCell.cellName, cellScope: .scaffoldUnique, type: EntityScaffoldDataAccessCell.self)
+                 try await addCellResolveIfNeeded(name: SwarmIdentityAdmissionContract.cellName, cellScope: .identityUnique, persistency: .persistant, type: SwarmIdentityAdmissionCell.self)
+                 try await addCellResolveIfNeeded(name: "Perspective", cellScope: .identityUnique, persistency: .persistant, type: PerspectiveCell.self)
+                 try await addCellResolveIfNeeded(name: SpatialArtifactContract.cellName, cellScope: .identityUnique, persistency: .persistant, type: SpatialArtifactCell.self)

@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="nb"><head><meta charset="utf-8">
+<title>Statistikk — mockup</title>
+<link rel="stylesheet" href="file:///Users/kjetil/Build/Digipomps/HAVEN/CellScaffold/Public/css/butterpop-studio.css">
+<style>
+  body { background: var(--paper); }
+  .mockframe { width: 1180px; margin: 0 auto 60px; padding: 28px 0 40px; }
+  /* Fem faner i stedet for fire — krever endring i .segmented */
+  .segmented.is-five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+
+  .stat-notice {
+    display: flex; gap: 12px; align-items: flex-start;
+    border: 1px solid var(--ink); border-left-width: 6px;
+    border-radius: var(--radius); background: var(--white);
+    padding: 14px 16px; margin: 0 0 22px;
+  }
+  .stat-notice strong { font-weight: 850; }
+  .stat-notice p { margin: 4px 0 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
+  .stat-notice-mark { font-weight: 900; font-size: 18px; line-height: 1.2; }
+
+  .stat-table { width: 100%; border-collapse: collapse; }
+  .stat-table th, .stat-table td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); }
+  .stat-table thead th { border-bottom: 1px solid var(--ink); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  .stat-group { font-size: 11px; font-weight: 850; letter-spacing: .04em; text-transform: uppercase; }
+  .stat-group-caption { display: block; margin-top: 3px; font-size: 11px; font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--muted); }
+  .stat-sep { border-left: 1px solid var(--line); }
+  .stat-num { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 800; font-size: 15px; }
+  .stat-sub { display: block; color: var(--muted); font-size: 12px; font-weight: 500; font-family: Inter, system-ui, sans-serif; }
+  .stat-title { font-weight: 850; }
+  .stat-title span { display: block; color: var(--muted); font-size: 12px; font-weight: 500; }
+
+  .legend { display: flex; gap: 18px; align-items: center; margin: 0 0 14px; font-size: 13px; }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  .swatch-levert { background: #2aaeb7; }
+  .swatch-lyttet { background: #ff634f; }
+
+  .bars { display: grid; gap: 10px; }
+  .barrow { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 12px; align-items: center; }
+  .barlabel { font-size: 12px; color: var(--muted); font-family: ui-monospace, Menlo, monospace; }
+  .bartrack { display: grid; gap: 2px; }
+  .bar { display: grid; grid-template-columns: minmax(0, 1fr) 48px; align-items: center; gap: 8px; }
+  .barwrap { min-width: 0; }
+  .barfill { display: block; height: 13px; border-radius: 0 4px 4px 0; }
+  .barval { font-size: 11px; font-weight: 800; color: var(--ink);
+    font-family: ui-monospace, Menlo, monospace; white-space: nowrap; text-align: right; }
+  .bar-levert { background: #2aaeb7; }
+  .bar-lyttet { background: #ff634f; }
+  .axis-note { margin-top: 14px; color: var(--muted); font-size: 12px; }
+  .panel-toolbar h3 { margin: 0; }
+</style></head>
+<body>
+
+<!-- ============ TILSTAND: FYLT ============ -->
+<div class="mockframe" id="state-fylt">
+  <div class="segmented is-five" role="tablist" aria-label="Studioområder">
+    <button class="segment" role="tab" aria-selected="false">Mikser</button>
+    <button class="segment" role="tab" aria-selected="false">Publiser</button>
+    <button class="segment is-active" role="tab" aria-selected="true">Statistikk</button>
+    <button class="segment" role="tab" aria-selected="false">Medlemmer</button>
+    <button class="segment" role="tab" aria-selected="false">Brukskvote</button>
+  </div>
+
+  <div class="panel-toolbar" style="margin-bottom:18px">
+    <div><h3>Bruk av publiserte låter</h3>
+      <p class="subtle" style="margin:6px 0 0">Siste 30 dager</p></div>
+  </div>
+
+  <div class="stat-notice">
+    <span class="stat-notice-mark">◐</span>
+    <div>
+      <strong>124 av 471 avspillinger er talt.</strong>
+      <p>347 lyttere har ikke samtykket til å bli registrert, og finnes ikke i tallene under.
+         Tallene viser altså et utsnitt, ikke totalen — og utsnittet er ikke tilfeldig.</p>
+    </div>
+  </div>
+
+  <table class="stat-table">
+    <thead>
+      <tr>
+        <th rowspan="2" style="vertical-align:bottom">Låt</th>
+        <th colspan="2" class="stat-group stat-sep">Levert
+          <span class="stat-group-caption">Byte serveren sendte. Sier ikke at noen hørte.</span></th>
+        <th colspan="2" class="stat-group stat-sep">Lyttet
+          <span class="stat-group-caption">Spilleren meldte fra. Sier ikke at noen fulgte med.</span></th>
+        <th class="stat-group stat-sep">Nedlastet
+          <span class="stat-group-caption">Filen er hentet.</span></th>
+      </tr>
+      <tr>
+        <th class="stat-sep" style="font-weight:500;text-transform:none">Økter</th>
+        <th style="font-weight:500;text-transform:none">Median dekning</th>
+        <th class="stat-sep" style="font-weight:500;text-transform:none">Økter</th>
+        <th style="font-weight:500;text-transform:none">Nådde slutten</th>
+        <th class="stat-sep" style="font-weight:500;text-transform:none">Ganger</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="stat-title">So much fun<span>Publisert 28.08</span></td>
+        <td class="stat-sep"><span class="stat-num">68</span></td>
+        <td><span class="stat-num">100 %</span><span class="stat-sub">hele fila hentet</span></td>
+        <td class="stat-sep"><span class="stat-num">61</span></td>
+        <td><span class="stat-num">22</span><span class="stat-sub">36 % av øktene</span></td>
+        <td class="stat-sep"><span class="stat-num">9</span></td>
+      </tr>
+      <tr>
+        <td class="stat-title">Langsomt nordover<span>Publisert 21.08</span></td>
+        <td class="stat-sep"><span class="stat-num">41</span></td>
+        <td><span class="stat-num">100 %</span><span class="stat-sub">hele fila hentet</span></td>
+        <td class="stat-sep"><span class="stat-num">38</span></td>
+        <td><span class="stat-num">30</span><span class="stat-sub">79 % av øktene</span></td>
+        <td class="stat-sep"><span class="stat-num">14</span></td>
+      </tr>
+      <tr>
+        <td class="stat-title">Vinterlys<span>Publisert 09.08</span></td>
+        <td class="stat-sep"><span class="stat-num">15</span></td>
+        <td><span class="stat-num">62 %</span><span class="stat-sub">avbrutt overføring</span></td>
+        <td class="stat-sep"><span class="stat-num">12</span></td>
+        <td><span class="stat-num">2</span><span class="stat-sub">17 % av øktene</span></td>
+        <td class="stat-sep"><span class="stat-num">0</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="axis-note">«Levert» og «lyttet» slås aldri sammen til ett tall. Når de spriker,
+     er det spriket som er informasjonen.</p>
+</div>
+
+<!-- ============ TILSTAND: TOM ============ -->
+<div class="mockframe" id="state-tom">
+  <div class="segmented is-five" role="tablist">
+    <button class="segment" role="tab">Mikser</button>
+    <button class="segment" role="tab">Publiser</button>
+    <button class="segment is-active" role="tab" aria-selected="true">Statistikk</button>
+    <button class="segment" role="tab">Medlemmer</button>
+    <button class="segment" role="tab">Brukskvote</button>
+  </div>
+  <div class="panel-toolbar" style="margin-bottom:18px">
+    <div><h3>Bruk av publiserte låter</h3>
+      <p class="subtle" style="margin:6px 0 0">Siste 30 dager</p></div>
+  </div>
+  <p class="empty-state">Ingen avspillinger er talt ennå. Tallene begynner å komme når
+     en lytter har samtykket til å bli registrert.</p>
+</div>
+
+<!-- ============ TILSTAND: BLINDFLEKK DOMINERER ============ -->
+<div class="mockframe" id="state-blindflekk">
+  <div class="segmented is-five" role="tablist">
+    <button class="segment" role="tab">Mikser</button>
+    <button class="segment" role="tab">Publiser</button>
+    <button class="segment is-active" role="tab" aria-selected="true">Statistikk</button>
+    <button class="segment" role="tab">Medlemmer</button>
+    <button class="segment" role="tab">Brukskvote</button>
+  </div>
+  <div class="panel-toolbar" style="margin-bottom:18px">
+    <div><h3>Bruk av publiserte låter</h3>
+      <p class="subtle" style="margin:6px 0 0">Siste 30 dager</p></div>
+  </div>
+  <div class="stat-notice" style="border-left-color: var(--coral)">
+    <span class="stat-notice-mark" style="color: var(--coral)">◔</span>
+    <div>
+      <strong>3 av 208 avspillinger er talt.</strong>
+      <p>205 lyttere har ikke samtykket. Med så få talte økter sier tallene under
+         nesten ingenting om hvordan låtene faktisk blir brukt — de beskriver tre
+         lyttere, ikke publikum.</p>
+    </div>
+  </div>
+  <table class="stat-table">
+    <thead>
+      <tr>
+        <th rowspan="2" style="vertical-align:bottom">Låt</th>
+        <th colspan="2" class="stat-group stat-sep">Levert
+          <span class="stat-group-caption">Byte serveren sendte.</span></th>
+        <th colspan="2" class="stat-group stat-sep">Lyttet
+          <span class="stat-group-caption">Spilleren meldte fra.</span></th>
+        <th class="stat-group stat-sep">Nedlastet</th>
+      </tr>
+      <tr>
+        <th class="stat-sep" style="font-weight:500;text-transform:none">Økter</th>
+        <th style="font-weight:500;text-transform:none">Median dekning</th>
+        <th class="stat-sep" style="font-weight:500;text-transform:none">Økter</th>
+        <th style="font-weight:500;text-transform:none">Nådde slutten</th>
+        <th class="stat-sep" style="font-weight:500;text-transform:none">Ganger</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="stat-title">So much fun<span>Publisert 28.08</span></td>
+        <td class="stat-sep"><span class="stat-num">2</span></td>
+        <td><span class="stat-num">100 %</span></td>
+        <td class="stat-sep"><span class="stat-num">2</span></td>
+        <td><span class="stat-num">1</span></td>
+        <td class="stat-sep"><span class="stat-num">0</span></td>
+      </tr>
+      <tr>
+        <td class="stat-title">Langsomt nordover<span>Publisert 21.08</span></td>
+        <td class="stat-sep"><span class="stat-num">1</span></td>
+        <td><span class="stat-num">44 %</span></td>
+        <td class="stat-sep"><span class="stat-num">1</span></td>
+        <td><span class="stat-num">0</span></td>
+        <td class="stat-sep"><span class="stat-num">0</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ============ TILSTAND: DETALJ FOR ÉN LÅT ============ -->
+<div class="mockframe" id="state-detalj">
+  <div class="panel-toolbar" style="margin-bottom:6px">
+    <div><h3>So much fun — hvor langt kommer de?</h3>
+      <p class="subtle" style="margin:6px 0 0">61 talte økter · 3 min 42 s</p></div>
+    <button class="button button-dark" type="button">Tilbake til oversikten</button>
+  </div>
+
+  <p class="axis-note" style="margin:14px 0 16px">
+    Andel av øktene som fortsatt var i gang ved hvert punkt i låta. To mål, aldri
+    slått sammen: det ene er byte serveren sendte, det andre er det spilleren meldte
+    at ble spilt av.
+  </p>
+
+  <div class="legend">
+    <span><i class="swatch-levert"></i>Levert — byte sendt</span>
+    <span><i class="swatch-lyttet"></i>Lyttet — spilleren meldte fra</span>
+  </div>
+
+  <div class="bars">
+    <div class="barrow"><span class="barlabel">0:00</span><div class="bartrack">
+      <div class="bar"><div class="barwrap"><i class="barfill bar-levert" style="width:100%"></i></div><span class="barval">100 %</span></div>
+      <div class="bar"><div class="barwrap"><i class="barfill bar-lyttet" style="width:100%"></i></div><span class="barval">100 %</span></div>
+    </div></div>
+    <div class="barrow"><span class="barlabel">0:22</span><div class="bartrack">
+      <div class="bar"><div class="barwrap"><i class="barfill bar-levert" style="width:100%"></i></div><span class="barval">100 %</span></div>
+      <div class="bar"><div class="barwrap"><i class="barfill bar-lyttet" style="width:84%"></i></div><span class="barval">84 %</span></div>
+    </div></div>
+    <div class="barrow"><span class="barlabel">0:44</span><div class="bartrack">
+      <div class="bar"><div class="barwrap"><i class="barfill bar-levert" style="width:100%"></i></div><span class="barval">100 %</span></div>
+      <div class="bar"><div class="barwrap"><i class="barfill bar-lyttet" style="width:61%"></i></div><span class="barval">61 %</span></div>
+    </div></div>
+    <div class="barrow"><span class="barlabel">1:06</span><div class="bartrack">
+      <div class="bar"><div class="barwrap"><i class="barfill bar-levert" style="width:100%"></i></div><span class="barval">100 %</span></div>
+      <div class="bar"><div class="barwrap"><i class="barfill bar-lyttet" style="width:56%"></i></div><span class="barval">56 %</span></div>
+    </div></div>
+    <div class="barrow"><span class="barlabel">1:29</span><div class="bartrack">
+      <div class="bar"><div class="barwrap"><i class="barfill bar-levert" style="width:98%"></i></div><span class="barval">98 %</span></div>
+      <div class="bar"><div class="barwrap"><i class="barfill bar-lyttet" style="width:52%"></i></div><span class="barval">52 %</span></div>
+    </div></div>
+    <div class="barrow"><span class="barlabel">1:51</span><div class="bartrack">
+      <div class="bar"><div class="barwrap"><i class="barfill bar-levert" style="width:98%"></i></div><span class="barval">98 %</span></div>
+      <div class="bar"><div class="barwrap"><i class="barfill bar-lyttet" style="width:49%"></i></div><span class="barval">49 %</span></div>
+    </div></div>
+    <div class="barrow"><span class="barlabel">2:13</span><div class="bartrack">
+      <div class="bar"><div class="barwrap"><i class="barfill bar-levert" style="width:97%"></i></div><span class="barval">97 %</span></div>
+      <div class="bar"><div class="barwrap"><i class="barfill bar-lyttet" style="width:46%"></i></div><span class="barval">46 %</span></div>
+    </div></div>
+    <div class="barrow"><span class="barlabel">2:35</span><div class="bartrack">
+      <div class="bar"><div class="barwrap"><i class="barfill bar-levert" style="width:97%"></i></div><span class="barval">97 %</span></div>
+      <div class="bar"><div class="barwrap"><i class="barfill bar-lyttet" style="width:43%"></i></div><span class="barval">43 %</span></div>
+    </div></div>
+    <div class="barrow"><span class="barlabel">2:58</span><div class="bartrack">
+      <div class="bar"><div class="barwrap"><i class="barfill bar-levert" style="width:97%"></i></div><span class="barval">97 %</span></div>
+      <div class="bar"><div class="barwrap"><i class="barfill bar-lyttet" style="width:39%"></i></div><span class="barval">39 %</span></div>
+    </div></div>
+    <div class="barrow"><span class="barlabel">3:42</span><div class="bartrack">
+      <div class="bar"><div class="barwrap"><i class="barfill bar-levert" style="width:97%"></i></div><span class="barval">97 %</span></div>
+      <div class="bar"><div class="barwrap"><i class="barfill bar-lyttet" style="width:36%"></i></div><span class="barval">36 %</span></div>
+    </div></div>
+  </div>
+
+  <p class="axis-note">
+    De turkise stolpene er nesten like lange hele veien fordi nettleseren henter hele
+    fila med én gang. Det er derfor «levert» ikke kan brukes som mål på lytting — og
+    derfor begge står her. Frafallet mellom 0:22 og 0:44 er det eneste tallet som sier
+    noe om selve låta.
+  </p>
+</div>
+
+</body></html>

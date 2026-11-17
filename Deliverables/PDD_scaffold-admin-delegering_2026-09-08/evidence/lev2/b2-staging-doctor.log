@@ -1,0 +1,46 @@
+
+   konfig       deploy-konfigurasjon                                                       OK       /etc/haven/deploy-staging.conf
+   konfig       paakrevde felt                                                             OK       CONTAINER, IMAGE_REPOSITORY, HEALTH_URL, PROVISION_CONFIG, EVIDENCE_ROOT
+   container    finnes                                                                     OK       cellscaffold-app-1 (running)
+   container    kjoerende image                                                            OK       cellscaffold-staging-local:sha-f262a8ebc3f2b9916288603f3b5aaf2142dd5579
+   container    APP_BUILD_REVISION                                                         OK       f262a8ebc3f2b9916288603f3b5aaf2142dd5579
+   container    kommandolinje                                                              OK       serve --env production --hostname 0.0.0.0 --port 8081
+   mounts       antall                                                                     OK       7
+   mounts       /app/CellsContainer                                                        OK       /mnt/disk1/app/CellsContainer.staging-f76de5a
+   mounts       /etc/haven/cellscaffold-runtime-secrets/runtime-identity-manifest.v2.json  OK       /etc/haven/cellscaffold-runtime-identity-manifest-f76de5a/runtime-identity-manifest.v2.json
+   mounts       /run/cellscaffold-key-continuity                                           OK       /var/lib/haven/cellscaffold-key-continuity-f76de5a
+   mounts       /run/secrets/admin-bridge-client-credential.json                           OK       /etc/haven/cellscaffold-runtime-secrets-f76de5a/admin-bridge-client-credential.json
+   mounts       /run/secrets/alertmanager-notification-relay-token                         OK       /etc/haven/cellscaffold-runtime-secrets-f76de5a/admin-alert-relay-token
+   mounts       /run/secrets/apns-auth-key.p8                                              OK       /etc/haven/cellscaffold-runtime-secrets-f76de5a/apns-auth-key.p8
+   mounts       /run/secrets/cell-vault-master-key                                         OK       /etc/haven/cellscaffold-runtime-secrets-f76de5a/cell-vault-master-key
+   seremoni     konfigurasjon                                                              OK       /etc/haven/manifest-provision-staging.conf (0o644 0:0)
+   vault        utledet fra container                                                      OK       /app/CellsContainer/IdentityVaults -> /mnt/disk1/app/CellsContainer.staging-f76de5a/IdentityVaults
+ ! sti-binding  vault                                                                      ADVARSEL /mnt/disk1/app/CellsContainer.staging-f76de5a/IdentityVaults er bundet til en release - maa utledes, ikke skrives ned
+ ! sti-binding  manifest                                                                   ADVARSEL /etc/haven/cellscaffold-runtime-identity-manifest-f76de5a/runtime-identity-manifest.v2.json er bundet til en release - maa utledes, ikke skrives ned
+   vault        katalog                                                                    OK       /mnt/disk1/app/CellsContainer.staging-f76de5a/IdentityVaults (0o700 995:995)
+   vault        innhold                                                                    OK       63 filer
+   seremoni     vault-masternoekkel                                                        OK       /etc/haven/cellscaffold-runtime-secrets-f76de5a/cell-vault-master-key (0o400 995:995)
+   manifest     katalog                                                                    OK       /etc/haven/cellscaffold-runtime-identity-manifest-f76de5a (0o700 995:995)
+   manifest     fil                                                                        OK       /etc/haven/cellscaffold-runtime-identity-manifest-f76de5a/runtime-identity-manifest.v2.json (0o400 995:995)
+   manifest     signert for                                                                OK       f262a8ebc3f2b9916288603f3b5aaf2142dd5579
+   manifest     bindinger                                                                  OK       28 — continuation
+   manifest     mot kjoerende container                                                    OK       samme revisjon
+   manifest     miljoenavn                                                                 OK       VAPOR_ENV=staging
+   eier         kontekst                                                                   OK       Scaffold
+   kontinuitet  modus                                                                      OK       continuation mot installert forgjenger
+   konfig       containernavn stemmer                                                      OK       cellscaffold-app-1
+   juks         CELL_SCAFFOLD_STAGING_MANIFEST_BYPASS                                      OK       ikke satt
+   bevis        katalog                                                                    OK       /mnt/disk1/app/haven-staging-evidence/deploy (0o700 0:0)
+   laas         katalog                                                                    OK       /run/lock/haven (0o711 0:0)
+   som uid 995  vault lesbar                                                               OK       /mnt/disk1/app/CellsContainer.staging-f76de5a/IdentityVaults
+ ! som uid 995  vault-masternoekkel lesbar                                                 ADVARSEL /etc/haven/cellscaffold-runtime-secrets-f76de5a/cell-vault-master-key - 995 naar ikke fram; seremonien kopierer den inn selv
+   seremoni     arbeidskatalog kan exec                                                    OK       /var/lib/haven-cellscaffold-provision
+   seremoni     writer-forutsetninger                                                      OK       katalog- og filkontrollene passerer som uid 995
+   verktoey     unshare                                                                    OK       /usr/bin/unshare
+   verktoey     setpriv                                                                    OK       /usr/bin/setpriv
+   verktoey     jq                                                                         OK       /usr/bin/jq
+   verktoey     curl                                                                       OK       /usr/bin/curl
+   verktoey     flock                                                                      OK       /usr/bin/flock
+   helse        svarer                                                                     OK       http://127.0.0.1:8081 serverer f262a8ebc3f2b9916288603f3b5aaf2142dd5579
+
+0 feil, 3 advarsler — alle referanser peker riktig.

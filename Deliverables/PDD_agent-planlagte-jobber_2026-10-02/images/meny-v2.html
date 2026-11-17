@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<title>HAVEN Agent — planlagte jobber i menylinjen (skisse v2)</title>
+<style>
+  :root { --bar: #e9e6e1; --menu: rgba(246,246,246,0.97); --line: #d6d6d6; --ink: #1d1d1f; --dim: #8e8e93; --sel: #2f6fe0; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: linear-gradient(160deg, #c9b79c 0%, #8d7a66 55%, #5d5148 100%); font-family: "Helvetica Neue", "Liberation Sans", "Arimo", "DejaVu Sans", Arial, sans-serif; font-size: 13px; color: var(--ink); }
+  .stage { width: 1180px; height: 100vh; position: relative; overflow: hidden; }
+  .bar { position: absolute; left: 0; right: 0; top: 0; height: 26px; background: var(--bar); display: flex; align-items: center; justify-content: flex-end; padding: 0 14px; gap: 16px; font-size: 13px; }
+  .bar .clock { color: #222; }
+  .bar .icon { display: flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 5px; background: rgba(0,0,0,0.12); }
+  .dot { width: 11px; height: 11px; border-radius: 50%; background: #1d1d1f; display: inline-block; }
+  .bang { width: 13px; height: 13px; border-radius: 50%; background: #1d1d1f; color: #e9e6e1; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+  .menu { position: absolute; background: var(--menu); border-radius: 7px; border: 1px solid rgba(0,0,0,0.18); box-shadow: 0 12px 34px rgba(0,0,0,0.33); padding: 5px; }
+  .item { height: 23px; display: flex; align-items: center; justify-content: space-between; padding: 0 9px; border-radius: 4px; white-space: nowrap; gap: 26px; }
+  .item.text { color: var(--dim); }
+  .item.sel { background: var(--sel); color: #fff; }
+  .item .key, .item .arrow { color: var(--dim); font-size: 12px; }
+  .item.sel .arrow { color: #fff; }
+  .sep { height: 1px; background: var(--line); margin: 5px 9px; }
+  .tag { position: absolute; left: 22px; top: 44px; color: #fff; font-size: 15px; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.4); max-width: 330px; line-height: 1.35; }
+  .sub { position: absolute; left: 22px; color: #fff; font-size: 12.5px; opacity: 0.95; max-width: 330px; line-height: 1.5; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+  .sub b { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage"></div>
+<script>
+const state = new URLSearchParams(location.search).get("state") || "post";
+const stage = document.getElementById("stage");
+function el(html) { const t = document.createElement("template"); t.innerHTML = html.trim(); return t.content.firstChild; }
+function item(label, opts = {}) {
+  const cls = ["item"]; if (opts.text) cls.push("text"); if (opts.sel) cls.push("sel");
+  const right = opts.arrow ? '<span class="arrow">›</span>' : (opts.key ? `<span class="key">${opts.key}</span>` : "");
+  return `<div class="${cls.join(" ")}"><span>${label}</span>${right}</div>`;
+}
+const sep = '<div class="sep"></div>';
+function menu(x, y, rows) { return `<div class="menu" style="left:${x}px;top:${y}px">${rows.join("")}</div>`; }
+function bar(icon, clock) { return `<div class="bar"><span class="icon">${icon}</span><span class="clock">${clock}</span></div>`; }
+const OK = '<span class="dot"></span>';
+function bang(n) { return `<span class="bang">!</span><span>${n}</span>`; }
+const tail = [
+  item("Åpne adminflate…", {key: "⌘A"}),
+  item("Oppdater nå", {key: "⌘R"}),
+  item("Varsler: på", {text: true}),
+  item("Varselinnstillinger…"),
+  sep,
+  item("Avslutt", {key: "⌘Q"}),
+];
+
+if (state === "post") {
+  stage.append(el('<div class="tag">Trinn 1: ulest post blir en sak</div>'));
+  stage.append(el('<div class="sub" style="top:96px">Slik viser menyen du har i dag saken. Ingen ny menyapp trengs.<br><br><b>Betyr:</b> det ligger ulest post som Losen ikke har lest. Saken forsvinner når posten er kvittert.<br><br>«Åpne» åpner adminvinduet, der det står hvor mange meldinger og fra når.</div>'));
+  stage.append(el(bar(bang(1), "fre. 2. okt. 14:31")));
+  stage.append(el(menu(470, 30, [
+    item("1 venter på deg", {text: true}),
+    sep,
+    item("Post fra Vegar venter på svar", {arrow: true, sel: true}),
+    sep,
+    ...tail,
+  ])));
+  stage.append(el(menu(742, 62, [
+    item("Vegar · correspondence · kjetil-vegar-d", {text: true}),
+    item("Åpne"),
+    item("Ignorer i dag"),
+  ])));
+} else if (state === "godkjenn") {
+  stage.append(el('<div class="tag">Trinn 4: Losen ber om en jobb, og du godkjenner</div>'));
+  stage.append(el('<div class="sub" style="top:118px">Jobben går ikke før du har trykket «Godkjenn». Endres den etterpå, kommer saken tilbake.<br><br>«Åpne» viser hele jobben: hva som kjøres, når, og når den slutter.<br><br>Også dette vises av menyen du har i dag.</div>'));
+  stage.append(el(bar(bang(1), "man. 12. okt. 10:04")));
+  stage.append(el(menu(400, 30, [
+    item("1 venter på deg", {text: true}),
+    sep,
+    item("Losen ber om en planlagt jobb: Regresjon HavenAgentD", {arrow: true, sel: true}),
+    sep,
+    ...tail,
+  ])));
+  stage.append(el(menu(790, 62, [
+    item("Losen · job · hverdager kl. 02:00, til 11. nov.", {text: true}),
+    item("Godkjenn"),
+    item("Avvis"),
+    item("Åpne"),
+  ])));
+} else if (state === "ro") {
+  stage.append(el('<div class="tag">Trinn 5: «Planlagte jobber» når alt går</div>'));
+  stage.append(el('<div class="sub" style="top:96px">Ny linje i menyen. Hver jobb viser når den går, og hvordan det gikk sist.<br><br>«Sett på pause» stopper jobben til du starter den igjen. «Stopp» avslutter den for godt.</div>'));
+  stage.append(el(bar(OK, "tir. 13. okt. 13:42")));
+  stage.append(el(menu(368, 30, [
+    item("Ingenting venter", {text: true}),
+    item("Alle 5 leste kilder er tomme. Sist lest 2026-10-13T11:42:07Z.", {text: true}),
+    sep,
+    item("Ingenting venter — 5 av 6 kilder lest", {text: true}),
+    sep,
+    item("Planlagte jobber", {arrow: true, sel: true}),
+    sep,
+    ...tail,
+  ])));
+  stage.append(el(menu(808, 120, [
+    item("3 jobber · neste kl. 14:00", {text: true}),
+    sep,
+    item("Korrespondansesjekk — hvert 30. minutt", {arrow: true, sel: true}),
+    item("Fristvarsel — hver dag kl. 09:00", {arrow: true}),
+    item("Regresjon HavenAgentD — hverdager kl. 02:00", {arrow: true}),
+    sep,
+    item("Sett alle på pause"),
+  ])));
+  stage.append(el(menu(808, 302, [
+    item("Sist kl. 13:30 · ferdig uten feil", {text: true}),
+    item("Neste kl. 14:00", {text: true}),
+    item("Fast program · godkjent i policyen", {text: true}),
+    sep,
+    item("Sett på pause"),
+    item("Stopp"),
+  ])));
+  stage.append(el('<div class="sub" style="top:440px">Den nederste menyen er undermenyen til «Korrespondansesjekk». Den står egentlig til høyre for linjen, og er flyttet ned for å få plass i bildet.</div>'));
+} else if (state === "feil") {
+  stage.append(el('<div class="tag">Trinn 5: en jobb feilet, og en ble passert</div>'));
+  stage.append(el('<div class="sub" style="top:118px">Én sak per jobb, ikke én per gang.<br><br>«Kvitter» fjerner saken. Feiler jobben igjen, kommer en ny.<br><br>«Stopp jobben» avslutter den.</div>'));
+  stage.append(el(bar(bang(2), "ons. 14. okt. 09:12")));
+  stage.append(el(menu(420, 30, [
+    item("2 venter på deg", {text: true}),
+    sep,
+    item("Planlagt jobb feilet: Fristvarsel", {arrow: true, sel: true}),
+    item("Planlagt jobb ble passert: Regresjon HavenAgentD", {arrow: true}),
+    sep,
+    item("Planlagte jobber", {arrow: true}),
+    sep,
+    ...tail,
+  ])));
+  stage.append(el(menu(790, 62, [
+    item("job · kl. 09:00 · programmet ga status 1", {text: true}),
+    item("Kvitter"),
+    item("Stopp jobben"),
+    item("Åpne"),
+  ])));
+  stage.append(el(menu(420, 330, [
+    item("3 jobber · neste kl. 09:30", {text: true}),
+    sep,
+    item("Korrespondansesjekk — sist kl. 09:00 · ferdig uten feil", {arrow: true}),
+    item("Fristvarsel — sist kl. 09:00 · feilet", {arrow: true, sel: true}),
+    item("Regresjon HavenAgentD — passert 2 ganger, kjørt kl. 07:42", {arrow: true}),
+    sep,
+    item("Sett alle på pause"),
+  ])));
+  stage.append(el('<div class="sub" style="top:440px">Den nederste menyen er undermenyen til «Planlagte jobber», flyttet ned for å få plass i bildet.</div>'));
+} else {
+  stage.append(el('<div class="tag">Trinn 5: planleggeren går ikke</div>'));
+  stage.append(el('<div class="sub" style="top:96px">Står planleggeren, sier menyen det. Uten denne saken ville menyen sagt «Ingenting venter», og det ville ikke vært sant.</div>'));
+  stage.append(el(bar(bang(1), "tor. 15. okt. 08:03")));
+  stage.append(el(menu(440, 30, [
+    item("1 venter på deg", {text: true}),
+    sep,
+    item("Planleggeren går ikke", {arrow: true, sel: true}),
+    sep,
+    item("Planlagte jobber", {arrow: true}),
+    sep,
+    ...tail,
+  ])));
+  stage.append(el(menu(668, 62, [
+    item("job · siste livstegn onsdag kl. 23:51", {text: true}),
+    item("Åpne"),
+    item("Ignorer i dag"),
+  ])));
+  stage.append(el(menu(440, 300, [
+    item("3 jobber · ingen går før planleggeren er i gang", {text: true}),
+    sep,
+    item("Korrespondansesjekk — sist onsdag kl. 23:30", {arrow: true}),
+    item("Fristvarsel — sist onsdag kl. 09:00", {arrow: true}),
+    item("Regresjon HavenAgentD — sist onsdag kl. 02:00", {arrow: true}),
+  ])));
+  stage.append(el('<div class="sub" style="top:440px">Den nederste menyen er undermenyen til «Planlagte jobber», flyttet ned for å få plass i bildet.</div>'));
+}
+</script>
+</body>
+</html>

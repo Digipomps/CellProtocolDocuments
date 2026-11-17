@@ -1,0 +1,288 @@
+--- a/Tests/AppTests/AssistantCorrespondenceCellTests.swift
++++ b/Tests/AppTests/AssistantCorrespondenceCellTests.swift
+@@ -1422,9 +1422,16 @@
+ 
+   func testActiveGrantReceivesOwnSendFromSenderWithoutFeedWriteAccess() async throws {
+     try await withRecipientFeedFixture { fixture in
++      let delivered = expectation(description: "Recipient receives its send event")
++      delivered.expectedFulfillmentCount = 1
+       let recorder = AssistantCorrespondenceFlowRecorder()
+       let publisher = try await fixture.cell.flow(requester: fixture.recipient)
+-      let subscription = publisher.sink(receiveCompletion: { _ in }, receiveValue: recorder.append)
++      let subscription = publisher.sink(
++        receiveCompletion: { completion in XCTFail("Unexpected feed completion: \(completion)") },
++        receiveValue: { event in
++          recorder.append(event)
++          delivered.fulfill()
++        })
+       defer { subscription.cancel() }
+ 
+       let feedWrite = await fixture.cell.validateAccess("-w--", at: "feed", for: fixture.sender)
+@@ -1446,6 +1453,7 @@
+           content: "test-only-secret-body", clientMessageID: "own-send"), fixture: fixture,
+         requester: fixture.sender)
+       XCTAssertEqual(result["status"]?.string, "sent")
++      await fulfillment(of: [delivered], timeout: 2)
+       let event = try XCTUnwrap(recorder.snapshot().first)
+       XCTAssertEqual(recorder.snapshot().count, 1)
+       XCTAssertEqual(event.title, "haven.assistant.correspondence.message.send")
+@@ -1464,9 +1472,16 @@
+ 
+   func testRecipientFeedExcludesOtherRecipientsSendAndAck() async throws {
+     try await withRecipientFeedFixture { fixture in
++      let delivered = expectation(description: "Recipient receives its send and ack in order")
++      delivered.expectedFulfillmentCount = 2
+       let recorder = AssistantCorrespondenceFlowRecorder()
+       let publisher = try await fixture.cell.flow(requester: fixture.recipient)
+-      let subscription = publisher.sink(receiveCompletion: { _ in }, receiveValue: recorder.append)
++      let subscription = publisher.sink(
++        receiveCompletion: { completion in XCTFail("Unexpected feed completion: \(completion)") },
++        receiveValue: { event in
++          recorder.append(event)
++          delivered.fulfill()
++        })
+       defer { subscription.cancel() }
+ 
+       let otherSend = try await submitFeedOperation(
+@@ -1494,6 +1509,7 @@
+         "message.ack", signer: fixture.recipient, arguments: arguments(messageID: ownID),
+         fixture: fixture)
+       XCTAssertEqual(ownAck["status"]?.string, "acknowledged")
++      await fulfillment(of: [delivered], timeout: 2)
+       XCTAssertEqual(
+         recorder.snapshot().map(\.title),
+         [
+@@ -1512,9 +1528,16 @@
+ 
+   func testInboxListAndMessageReadNeverReachRecipientFeed() async throws {
+     try await withRecipientFeedFixture { fixture in
++      let barrier = recipientFeedBarrierEvent()
++      let drained = expectation(description: "Recipient processes all events before the barrier")
+       let recorder = AssistantCorrespondenceFlowRecorder()
+       let publisher = try await fixture.cell.flow(requester: fixture.recipient)
+-      let subscription = publisher.sink(receiveCompletion: { _ in }, receiveValue: recorder.append)
++      let subscription = publisher.sink(
++        receiveCompletion: { completion in XCTFail("Unexpected feed completion: \(completion)") },
++        receiveValue: { event in
++          if event.id == barrier.id { drained.fulfill() }
++          else { recorder.append(event) }
++        })
+       defer { subscription.cancel() }
+       let sent = try await submitFeedOperation(
+         "message.send", signer: fixture.sender,
+@@ -1529,6 +1552,9 @@
+         "message.read", signer: fixture.recipient, arguments: arguments(messageID: messageID),
+         fixture: fixture)
+       XCTAssertEqual(objectValue(read["message"])?["content"]?.string, "test-only-secret-body")
++      // This same subscriber must pass the queued events before receiving the marker.
++      try await emitOwnerFeedEvent(barrier, fixture: fixture)
++      await fulfillment(of: [drained], timeout: 2)
+       XCTAssertEqual(
+         recorder.snapshot().map(\.title), ["haven.assistant.correspondence.message.send"])
+     }
+@@ -1536,19 +1562,28 @@
+ 
+   func testOwnerKeepsAllOperationEventsAndNoFeedEventContainsMessageContent() async throws {
+     try await withRecipientFeedFixture { fixture in
++      let ownerDelivered = expectation(description: "Owner receives send, list, read and ack")
++      ownerDelivered.expectedFulfillmentCount = 4
++      let recipientDelivered = expectation(description: "Recipient receives send and ack")
++      recipientDelivered.expectedFulfillmentCount = 2
+       let ownerRecorder = AssistantCorrespondenceFlowRecorder()
+       let recipientRecorder = AssistantCorrespondenceFlowRecorder()
+       let ownerPublisher = try await fixture.cell.flow(requester: fixture.owner)
+       let recipientPublisher = try await fixture.cell.flow(requester: fixture.recipient)
+       let ownerSubscription = ownerPublisher.sink(
+-        receiveCompletion: { _ in },
++        receiveCompletion: { completion in XCTFail("Unexpected owner feed completion: \(completion)") },
+         receiveValue: { event in
+           if event.topic == AssistantCorrespondenceContracts.flowTopic {
+             ownerRecorder.append(event)
++            ownerDelivered.fulfill()
+           }
+         })
+       let recipientSubscription = recipientPublisher.sink(
+-        receiveCompletion: { _ in }, receiveValue: recipientRecorder.append)
++        receiveCompletion: { completion in XCTFail("Unexpected recipient feed completion: \(completion)") },
++        receiveValue: { event in
++          recipientRecorder.append(event)
++          recipientDelivered.fulfill()
++        })
+       defer {
+         ownerSubscription.cancel()
+         recipientSubscription.cancel()
+@@ -1567,6 +1602,7 @@
+       _ = try await submitFeedOperation(
+         "message.ack", signer: fixture.recipient, arguments: arguments(messageID: messageID),
+         fixture: fixture)
++      await fulfillment(of: [ownerDelivered, recipientDelivered], timeout: 2)
+       XCTAssertEqual(
+         ownerRecorder.snapshot().map(\.title),
+         [
+@@ -1588,37 +1624,61 @@
+   }
+ 
+   func testExpiredOrRevokedGrantDeniesNewFeedAndStopsExistingSubscription() async throws {
++    // Revocation terminates a subscription. Expiry needs its own live subscription.
++    for revoke in [true, false] {
++      try await withRecipientFeedFixture { fixture in
++        let delivered = expectation(description: "Active feed delivers before authority changes")
++        let denied = expectation(description: "Existing feed terminates with StreamState.denied")
++        let recorder = AssistantCorrespondenceFlowRecorder()
++        let publisher = try await fixture.cell.flow(requester: fixture.recipient)
++        let subscription = publisher.sink(
++          receiveCompletion: { completion in
++            switch completion {
++            case .failure(StreamState.denied): denied.fulfill()
++            default: XCTFail("Expected StreamState.denied, got \(completion)")
++            }
++          },
++          receiveValue: { event in
++            recorder.append(event)
++            delivered.fulfill()
++          })
++        defer { subscription.cancel() }
++        let sent = try await submitFeedOperation(
++          "message.send", signer: fixture.sender,
++          arguments: arguments(
++            recipient: "feed-recipient", subject: "Before authority changes",
++            content: "test-only-secret-body", clientMessageID: "expiry-send"), fixture: fixture)
++        XCTAssertEqual(sent["status"]?.string, "sent")
++        await fulfillment(of: [delivered], timeout: 2)
++        let event = try XCTUnwrap(recorder.snapshot().first)
++        XCTAssertEqual(recorder.snapshot().count, 1)
++        if revoke {
++          setenv("HAVEN_ASSISTANT_CORRESPONDENCE_REVOKED_PRINCIPALS", "feed-recipient", 1)
++        } else {
++          fixture.clock.advance(by: 3601)
++        }
++        await assertFeedDenied(fixture.cell, requester: fixture.recipient)
++        try await emitOwnerFeedEvent(event, fixture: fixture)
++        await fulfillment(of: [denied], timeout: 2)
++        XCTAssertEqual(
++          recorder.snapshot().count, 1,
++          revoke ? "A live revoked feed must stop emitting" : "A live expired feed must stop emitting")
++      }
++    }
++  }
++
++  func testRecipientFeedExcludesAdministrativeTopicAndMalformedEvents() async throws {
+     try await withRecipientFeedFixture { fixture in
++      let barrier = recipientFeedBarrierEvent()
++      let drained = expectation(description: "Recipient processes all events before the barrier")
+       let recorder = AssistantCorrespondenceFlowRecorder()
+       let publisher = try await fixture.cell.flow(requester: fixture.recipient)
+-      let subscription = publisher.sink(receiveCompletion: { _ in }, receiveValue: recorder.append)
+-      defer { subscription.cancel() }
+-      let sent = try await submitFeedOperation(
+-        "message.send", signer: fixture.sender,
+-        arguments: arguments(
+-          recipient: "feed-recipient", subject: "Before expiry",
+-          content: "test-only-secret-body", clientMessageID: "expiry-send"), fixture: fixture)
+-      XCTAssertEqual(sent["status"]?.string, "sent")
+-      let event = try XCTUnwrap(recorder.snapshot().first)
+-      XCTAssertEqual(recorder.snapshot().count, 1)
+-      let revocationKey = "HAVEN_ASSISTANT_CORRESPONDENCE_REVOKED_PRINCIPALS"
+-      setenv(revocationKey, "feed-recipient", 1)
+-      await assertFeedDenied(fixture.cell, requester: fixture.recipient)
+-      try await emitOwnerFeedEvent(event, fixture: fixture)
+-      XCTAssertEqual(recorder.snapshot().count, 1, "A live revoked feed must stop emitting")
+-      unsetenv(revocationKey)
+-      fixture.clock.advance(by: 3601)
+-      await assertFeedDenied(fixture.cell, requester: fixture.recipient)
+-      try await emitOwnerFeedEvent(event, fixture: fixture)
+-      XCTAssertEqual(recorder.snapshot().count, 1, "A live expired feed must stop emitting")
+-    }
+-  }
+-
+-  func testRecipientFeedExcludesAdministrativeTopicAndMalformedEvents() async throws {
+-    try await withRecipientFeedFixture { fixture in
+-      let recorder = AssistantCorrespondenceFlowRecorder()
+-      let publisher = try await fixture.cell.flow(requester: fixture.recipient)
+-      let subscription = publisher.sink(receiveCompletion: { _ in }, receiveValue: recorder.append)
++      let subscription = publisher.sink(
++        receiveCompletion: { completion in XCTFail("Unexpected feed completion: \(completion)") },
++        receiveValue: { event in
++          if event.id == barrier.id { drained.fulfill() }
++          else { recorder.append(event) }
++        })
+       defer { subscription.cancel() }
+       var event = FlowElement(
+         title: "haven.assistant.correspondence.message.send",
+@@ -1642,6 +1702,9 @@
+       try await emitOwnerFeedEvent(event, fixture: fixture)
+       event.content = .string("malformed event")
+       try await emitOwnerFeedEvent(event, fixture: fixture)
++      // This same subscriber must pass the queued events before receiving the marker.
++      try await emitOwnerFeedEvent(barrier, fixture: fixture)
++      await fulfillment(of: [drained], timeout: 2)
+       XCTAssertTrue(recorder.snapshot().isEmpty)
+     }
+   }
+@@ -1653,9 +1716,16 @@
+       await decoded.ensurePortholeRuntimeBindings(requester: fixture.owner)
+       var restored = fixture
+       restored.cell = decoded
++      let delivered = expectation(description: "Recipient receives a send after runtime rebinding")
++      delivered.expectedFulfillmentCount = 1
+       let recorder = AssistantCorrespondenceFlowRecorder()
+       let publisher = try await decoded.flow(requester: fixture.recipient)
+-      let subscription = publisher.sink(receiveCompletion: { _ in }, receiveValue: recorder.append)
++      let subscription = publisher.sink(
++        receiveCompletion: { completion in XCTFail("Unexpected feed completion: \(completion)") },
++        receiveValue: { event in
++          recorder.append(event)
++          delivered.fulfill()
++        })
+       defer { subscription.cancel() }
+       let sent = try await submitFeedOperation(
+         "message.send", signer: fixture.sender,
+@@ -1664,6 +1734,7 @@
+           content: "test-only-secret-body", clientMessageID: "decoded-send"), fixture: restored,
+         requester: fixture.sender)
+       XCTAssertEqual(sent["status"]?.string, "sent")
++      await fulfillment(of: [delivered], timeout: 2)
+       XCTAssertEqual(
+         recorder.snapshot().map(\.title), ["haven.assistant.correspondence.message.send"])
+     }
+@@ -1811,21 +1882,37 @@
+     }
+   }
+ 
++  private func recipientFeedBarrierEvent() -> FlowElement {
++    var event = FlowElement(
++      title: "haven.assistant.correspondence.message.send",
++      content: .object([
++        "operation": .string("message.send"),
++        "message": .object(["recipientID": .string("feed-recipient")]),
++      ]), properties: FlowElement.Properties(type: .event, contentType: .object))
++    event.topic = AssistantCorrespondenceContracts.flowTopic
++    return event
++  }
++
+   private func emitOwnerFeedEvent(_ event: FlowElement, fixture: RecipientFeedFixture) async throws
+   {
+     let emitter = await fixture.cell.makeCellOwnedFlowEmitterForRuntimeBinding(
+       requester: fixture.owner)
+     let emit = try XCTUnwrap(emitter)
++    let delivered = expectation(description: "Owner receives injected event \(event.id)")
+     let recorder = AssistantCorrespondenceFlowRecorder()
+     let publisher = try await fixture.cell.flow(requester: fixture.owner)
+     let subscription = publisher.sink(
+-      receiveCompletion: { _ in },
++      receiveCompletion: { completion in XCTFail("Unexpected owner feed completion: \(completion)") },
+       receiveValue: { candidate in
+-        if candidate.id == event.id { recorder.append(candidate) }
++        if candidate.id == event.id {
++          recorder.append(candidate)
++          delivered.fulfill()
++        }
+       })
+     defer { subscription.cancel() }
+-    // Synchronous cell-owned emission finishes every subscriber callback before assertions.
++    // Cell-owned emission is synchronous at the source; authorized delivery is asynchronous.
+     emit(event)
++    await fulfillment(of: [delivered], timeout: 2)
+     XCTAssertEqual(recorder.snapshot().count, 1, "Owner must still see the event")
+   }
+ 

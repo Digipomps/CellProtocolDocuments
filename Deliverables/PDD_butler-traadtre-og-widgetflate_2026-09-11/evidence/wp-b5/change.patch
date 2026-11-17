@@ -1,0 +1,1611 @@
+diff --git a/Public/css/themes/Co-Pilot Chat.css b/Public/css/themes/Co-Pilot Chat.css
+new file mode 100644
+index 00000000..a902175d
+--- /dev/null
++++ b/Public/css/themes/Co-Pilot Chat.css	
+@@ -0,0 +1,44 @@
++/* Co-Pilot Chat (Butler) — lys arbeidsflate etter mockupen (WP-B5, PDD
++   butler-traadtre-og-widgetflate, referanse images/web-fylt-v1.png).
++   Lastes av Porthole bare for denne konfigurasjonen (syncConfigurationTheme).
++   Farger, størrelser og avstander i flaten kommer fra skjelettets modifikatorer, så web
++   og app tolker dem likt (WP-B4). Her står bare vertsrammen: lyst lerret i stedet for
++   product-view sitt mørke tema, og web-spesifikke klasser (radklasser, fanelinje). */
++
++.canvas.product-view.view-mode { background: #f4f7fa; border-color: #d5e0eb; box-shadow: none; }
++.canvas.product-view .skeleton-host { padding: 16px; }
++.canvas.product-view .skeleton-host > .style-role-butler-workbench { max-width: none; margin: 0; height: 100%; box-sizing: border-box; flex-wrap: nowrap; }
++
++/* product-view sitt mørke tema nullstilles til Porthole sin lyse grunnstil. */
++.canvas.product-view .skeleton-section { border: 0; border-radius: 0; background: transparent; color: #17212b; box-shadow: none; }
++.canvas.product-view .skeleton-section-header { border-bottom-color: #d5e0eb; }
++.canvas.product-view .skeleton-text { color: #17212b; }
++.canvas.product-view .skeleton-vstack { gap: 10px; }
++.canvas.product-view .skeleton-hstack { flex-wrap: nowrap; }
++.canvas.product-view .skeleton-button,
++.canvas.product-view .skeleton-list-row-action { border: 1px solid #d5e0eb; border-radius: 6px; background: #ffffff; color: #17212b; box-shadow: none; font-size: 13px; padding: 5px 10px; }
++.canvas.product-view .skeleton-divider { border-top-color: #e3eaf1; margin: 0; }
++
++/* Fanene Samtale/Aktivt/Mer som liten velger i chat-panelet. */
++.canvas.product-view .style-role-butler-chat-tabs { display: flex; flex-direction: column; gap: 0; min-height: 0; }
++.canvas.product-view .style-role-butler-chat-tabs > .skeleton-tabs-list { margin: 8px 16px 0; padding: 2px; gap: 2px; border: 1px solid #d5e0eb; border-radius: 7px; background: #f1f5f9; align-self: flex-start; }
++.canvas.product-view .style-role-butler-chat-tabs .skeleton-tabs-tab { color: #556273; padding: 3px 11px; font-weight: 600; font-size: 12px; border-radius: 5px; transform: none; }
++.canvas.product-view .style-role-butler-chat-tabs .skeleton-tabs-tab:hover { background: #ffffff; color: #17212b; border-color: transparent; transform: none; }
++.canvas.product-view .style-role-butler-chat-tabs .skeleton-tabs-tab[aria-selected="true"] { background: #ffffff; color: #17212b; border-color: #d5e0eb; box-shadow: none; }
++.canvas.product-view .style-role-butler-chat-tabs > .skeleton-tabs-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: auto; }
++.canvas.product-view .style-role-butler-chat-tabs .style-role-chat-conversation,
++.canvas.product-view .style-role-butler-chat-tabs .style-role-chat-conversation > .skeleton-section-content { flex: 1; min-height: 0; display: flex; flex-direction: column; }
++
++/* Meldinger som rader med avatar, ikke bobler (porthole-webo.css gir chatradene bobler). */
++.canvas.product-view .style-role-chat-prompt-log .skeleton-list-row-main,
++.canvas.product-view .style-role-chat-prompt-log .chat-prompt-row-user .skeleton-list-row-main,
++.canvas.product-view .style-role-chat-prompt-log .chat-prompt-row-assistant .skeleton-list-row-main { background: transparent; border: 0; border-left: 0; box-shadow: none; margin: 0; padding: 0; max-width: none; }
++.canvas.product-view .style-role-chat-prompt-log .chat-prompt-row-assistant .skeleton-text:first-child,
++.canvas.product-view .style-role-chat-prompt-log .chat-prompt-row-user .skeleton-text:first-child { font-size: inherit; opacity: 1; }
++.canvas.product-view .style-role-chat-prompt-log .style-role-assistant-response-actions { margin-top: 6px; }
++
++/* Skrivefeltet: én linje, systemskrift, uten «>». Boksen er TextArea-modifikatorene. */
++.canvas.product-view .style-role-chat-composer.skeleton-textarea-wrapper::before { content: none; }
++.canvas.product-view .style-role-chat-composer.skeleton-textarea { padding: 0; min-height: 20px; line-height: 1.45; font-family: inherit; resize: none; color: #17212b; outline: none; }
++.canvas.product-view .style-role-chat-composer.skeleton-textarea::placeholder { color: #8391a1; opacity: 1; }
++.canvas.product-view .style-role-chat-composer-dock { background: #ffffff; position: static; }
+diff --git a/Sources/App/Cells/PersonalCopilot/PersonalCopilotCells+HelperTree.swift b/Sources/App/Cells/PersonalCopilot/PersonalCopilotCells+HelperTree.swift
+index e53bc345..6285ef4f 100644
+--- a/Sources/App/Cells/PersonalCopilot/PersonalCopilotCells+HelperTree.swift
++++ b/Sources/App/Cells/PersonalCopilot/PersonalCopilotCells+HelperTree.swift
+@@ -63,7 +63,8 @@ extension PersonalCopilotHelperTree {
+         let string = ExploreContract.schema(type: "string")
+         let integer = ExploreContract.schema(type: "integer")
+         let bool = ExploreContract.schema(type: "bool")
+-        let chip = ExploreContract.objectSchema(properties: ["id": string, "label": string, "branchKind": string], requiredKeys: ["id", "label", "branchKind"])
++        let chip = ExploreContract.objectSchema(properties: ["id": string, "label": string, "branchKind": string, "toneColor": string],
++                                                requiredKeys: ["id", "label", "branchKind", "toneColor"])
+         let chips = ExploreContract.listSchema(item: chip)
+         var row: Object = [:]
+         for key in ["id", "title", "kind", "countText", "rowState", "tone", "kindSummary", "disclosureGlyph"] { row[key] = string }
+@@ -94,7 +95,11 @@ extension PersonalCopilotHelperTree {
+         schemas.append(("state.ui.helperTree", ExploreContract.objectSchema(properties: tree, requiredKeys: tree.keys.sorted())))
+         schemas.append(("state.ui.chatPanelRows", ExploreContract.listSchema(item: ExploreContract.objectSchema(properties: panel, requiredKeys: panel.keys.sorted()))))
+         // Existing prompt log fields are preserved; describe the added provenance contract.
+-        let message = ExploreContract.objectSchema(properties: ["id": string, "nodeID": string, "branchChips": chips], requiredKeys: ["id", "nodeID", "branchChips"])
++        // WP-B5: avatar, klokkeslett og radtypen branchStart («gren startet · …»).
++        let message = ExploreContract.objectSchema(properties: [
++            "id": string, "nodeID": string, "branchChips": chips, "kind": string, "label": string,
++            "initials": string, "timeLabel": string, "avatarColor": string, "dismissActionLabel": string
++        ], requiredKeys: ["id", "nodeID", "branchChips"])
+         schemas.append(("state.ui.promptMessages", ExploreContract.listSchema(item: message)))
+         return schemas
+     }
+diff --git a/Sources/App/Cells/PersonalCopilot/PersonalCopilotChatPresentation.swift b/Sources/App/Cells/PersonalCopilot/PersonalCopilotChatPresentation.swift
+new file mode 100644
+index 00000000..4475f557
+--- /dev/null
++++ b/Sources/App/Cells/PersonalCopilot/PersonalCopilotChatPresentation.swift
+@@ -0,0 +1,53 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++
++import Foundation
++import CellBase
++
++/// WP-B5: det meldingsraden i Butler-arbeidsflaten viser i tillegg til teksten —
++/// initialer og farge i avataren, klokkeslett, og «Avvis» bare der det finnes et åpent
++/// forslag å avvise. Rene funksjoner, så projeksjonen kan testes uten cellen.
++enum PersonalCopilotChatPresentation {
++    static let userAvatarColor = "#0f4c81"
++    static let assistantAvatarColor = "#0f8a61"
++    static let displayTimeZone = TimeZone(identifier: "Europe/Oslo") ?? .current
++
++    /// «Kjetil Hustveit» → «KH», «Butler» → «B», «Du» → «D». Tomt navn gir tom streng.
++    static func initials(_ name: String) -> String {
++        let words = name.split(whereSeparator: { $0.isWhitespace || $0 == "-" }).filter { $0.first?.isLetter == true }
++        return String(words.prefix(2).compactMap(\.first)).uppercased()
++    }
++
++    /// ISO 8601-tidspunktet som «HH:mm» i norsk tid; tomt når tidspunktet ikke kan leses.
++    static func timeLabel(_ isoTimestamp: String) -> String {
++        guard let date = parse(isoTimestamp) else { return "" }
++        var calendar = Calendar(identifier: .gregorian)
++        calendar.timeZone = displayTimeZone
++        let parts = calendar.dateComponents([.hour, .minute], from: date)
++        guard let hour = parts.hour, let minute = parts.minute else { return "" }
++        return String(format: "%02d:%02d", hour, minute)
++    }
++
++    /// «Avvis» avviser det aktive forslaget (tom payload). Knappen hører derfor bare hjemme på
++    /// raden som viser dette forslaget; alle andre rader får ingen `dismissActionLabel`.
++    static func markingOpenSuggestion(_ ui: Object, rowID: String?) -> Object {
++        guard case let .list(rows)? = ui["promptMessages"] else { return ui }
++        var result = ui
++        result["promptMessages"] = .list(rows.map { value in
++            guard case var .object(row) = value else { return value }
++            if let rowID, row["id"]?.string == rowID {
++                row["dismissActionLabel"] = .string("Avvis")
++            } else {
++                row.removeValue(forKey: "dismissActionLabel")
++            }
++            return .object(row)
++        })
++        return result
++    }
++
++    private static func parse(_ raw: String) -> Date? {
++        let fractional = ISO8601DateFormatter()
++        fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
++        return fractional.date(from: raw) ?? ISO8601DateFormatter().date(from: raw)
++    }
++}
+diff --git a/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore+HelperTree.swift b/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore+HelperTree.swift
+index 1c8c4b2c..36503373 100644
+--- a/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore+HelperTree.swift
++++ b/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore+HelperTree.swift
+@@ -148,6 +148,21 @@ struct PersonalCopilotHelperTree: Codable, Equatable {
+         return result
+     }
+ 
++    /// Farge på grenprikken i chips (samme som treets tone branchA).
++    static let branchToneColor = "#0f8a61"
++
++    static func branchStartRow(_ node: PersonalCopilotHelperNode) -> Object {
++        [
++            "id": .string("branch-start-\(node.id)"),
++            "kind": .string("branchStart"),
++            "role": .string("separator"),
++            "nodeID": .string(node.id),
++            "label": .string("gren startet · \(node.title)"),
++            "rowStyleClasses": .list([.string("chat-prompt-row"), .string("chat-prompt-row-separator")]),
++            "branchChips": .list([])
++        ]
++    }
++
+     /// One source of truth for the log, row counts, scope controls and chat header.
+     func project(into source: Object) -> Object {
+         var ui = source
+@@ -174,16 +189,25 @@ struct PersonalCopilotHelperTree: Codable, Equatable {
+             return byID[id] == nil ? Self.rootID : id
+         }
+         func chip(_ node: PersonalCopilotHelperNode) -> ValueType {
+-            .object(["id": .string(node.id), "label": .string(node.title), "branchKind": .string("a")])
++            .object(["id": .string(node.id), "label": .string(node.title), "branchKind": .string("a"),
++                     "toneColor": .string(Self.branchToneColor)])
+         }
+         var seen = Set<String>()
++        var startedBranches = Set<String>()
+         var messages: [ValueType] = []
++        var messageCount = 0
+         for var message in chronological where inScope.contains(nodeID(message)) {
+             if let id = message["id"]?.string, !seen.insert(id).inserted { continue }
+             let origin = byID[nodeID(message)]!
++            // WP-B5: der en gren begynner i en overordnet nodes logg, en skillelinje
++            // «gren startet · …» (radtype branchStart; telles ikke som melding).
++            if origin.id != Self.rootID, origin.id != selected.id, startedBranches.insert(origin.id).inserted {
++                messages.append(.object(Self.branchStartRow(origin)))
++            }
+             message["nodeID"] = .string(origin.id)
+             message["branchChips"] = .list(origin.id == Self.rootID ? [] : [chip(origin)])
+             messages.append(.object(message))
++            messageCount += 1
+         }
+         // Row count = unique retained messages in this node's subtree, regardless of folding/mode.
+         var messageIDsByNode: [String: Set<String>] = [:]
+@@ -223,7 +247,7 @@ struct PersonalCopilotHelperTree: Codable, Equatable {
+         let branches = nodes.filter { $0.id != Self.rootID && inScope.contains($0.id) }
+         let modeLabel = scope.mode == .subtree ? "Undertre" : "Bare denne"
+         let branchLabel = "\(branches.count) \(branches.count == 1 ? "gren" : "grener")"
+-        let messageLabel = "\(messages.count) \(messages.count == 1 ? "melding" : "meldinger")"
++        let messageLabel = "\(messageCount) \(messageCount == 1 ? "melding" : "meldinger")"
+         // Conversations are root + direct children; deeper helper branches do not inflate this count.
+         let conversationCount = 1 + nodes.filter { $0.parentID == Self.rootID }.count
+         var tree: Object = [:]
+@@ -238,7 +262,7 @@ struct PersonalCopilotHelperTree: Codable, Equatable {
+         var panel: Object = [:]
+         panel["mode"] = .string("expanded")
+         panel["title"] = .string(selected.title)
+-        panel["count"] = .integer(messages.count)
++        panel["count"] = .integer(messageCount)
+         panel["countLabel"] = .string("\(messageLabel) · \(branchLabel) i skop")
+         panel["scopeDescription"] = .string(scope.mode == .subtree ? "\(selected.title) og alle underhjelpere" : "Bare \(selected.title)")
+         panel["scopeChips"] = .list(branches.map(chip))
+@@ -255,7 +279,7 @@ struct PersonalCopilotHelperTree: Codable, Equatable {
+         ui["helperTree"] = .object(tree)
+         ui["chatPanelRows"] = .list([.object(panel)])
+         ui["promptMessages"] = .list(messages)
+-        ui["promptMessageCount"] = .integer(messages.count)
++        ui["promptMessageCount"] = .integer(messageCount)
+         return ui
+     }
+ }
+diff --git a/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift b/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift
+index 061306b7..b90a11b6 100644
+--- a/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift
++++ b/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore.swift
+@@ -1321,7 +1321,13 @@ private struct PersonalCopilotChatPromptLogEntry: Codable, Equatable {
+         var object: Object = [
+             "id": .string(id),
+             "role": .string(role),
+-            "speaker": .string(speaker),
++            "speaker": .string(displaySpeaker),
++            // WP-B5: avatar og klokkeslett i meldingsraden.
++            "initials": .string(PersonalCopilotChatPresentation.initials(displaySpeaker)),
++            "timeLabel": .string(PersonalCopilotChatPresentation.timeLabel(createdAt)),
++            "avatarColor": .string(role == "assistant"
++                ? PersonalCopilotChatPresentation.assistantAvatarColor
++                : PersonalCopilotChatPresentation.userAvatarColor),
+             "body": .string(body),
+             "status": .string(status),
+             "statusText": .string(statusText),
+@@ -1332,7 +1338,6 @@ private struct PersonalCopilotChatPromptLogEntry: Codable, Equatable {
+             "rowStyleClasses": .list(rowStyleClasses.map(ValueType.string)),
+             "helperActionLabel": .string(helperActionLabel),
+             "surfaceActionLabel": .string(surfaceActionLabel),
+-            "dismissActionLabel": .string("Avvis"),
+             "actionHint": .string(actionHint)
+         ]
+         if let laneLabel {
+@@ -1356,6 +1361,11 @@ private struct PersonalCopilotChatPromptLogEntry: Codable, Equatable {
+         return object
+     }
+ 
++    /// Assistenten heter Butler i flaten; eldre rader ble lagret som «Co-pilot».
++    private var displaySpeaker: String {
++        role == "assistant" && speaker == "Co-pilot" ? "Butler" : speaker
++    }
++
+     private var helperActionLabel: String {
+         switch kind {
+         case PersonalCopilotChatAssistantIntentKind.invitePerson.rawValue:
+@@ -10375,6 +10385,13 @@ actor PersonalCopilotCloudStore {
+             widgetCanvasFeedbackByScopeID[chatUIScopeID(requesterUUID: requesterUUID, threadID: uiThreadID)],
+             to: ui.objectValue()
+         )
++        // WP-B5: «Avvis» bare på raden som viser et forslag som fortsatt er åpent.
++        var openSuggestionRowID: String?
++        if let suggestion = state.chatAssistantSuggestionsByRequester[requesterUUID],
++           suggestion.status != .accepted, suggestion.status != .dismissed {
++            openSuggestionRowID = "assistant-\(suggestion.id)"
++        }
++        object = PersonalCopilotChatPresentation.markingOpenSuggestion(object, rowID: openSuggestionRowID)
+         object["automaticEscalation"] = .object(chatAutomaticEscalationObject(requesterUUID: requesterUUID, threadID: uiThreadID))
+         let acceptedCount = thread.map(acceptedParticipantCount(in:)) ?? 1
+         let otherHumanCount = max(0, acceptedCount - 1)
+diff --git a/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory+HelperTree.swift b/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory+HelperTree.swift
+index 16103734..8fd40daa 100644
+--- a/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory+HelperTree.swift
++++ b/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory+HelperTree.swift
+@@ -30,44 +30,16 @@ extension PersonalCopilotConfigurationFactory {
+         return .VStack(rail)
+     }
+ 
+-    static func withHelperTree(_ conversation: SkeletonElement) -> SkeletonElement {
+-        var railModifiers = SkeletonModifiers()
+-        railModifiers.width = 288
+-        railModifiers.maxWidthInfinity = true
+-        railModifiers.styleRole = "butler-helper-tree-rail"
+-        // panelRows supplies zero/one row. A root visibility condition has no
+-        // value in SkeletonView and would hide the rail even after opening it.
+-        var panel = SkeletonList(topic: nil, keypath: "chatHub.state.ui.helperTree.panelRows",
+-                                 flowElementSkeleton: SkeletonVStack(elements: [try! helperTreeCandidate()], spacing: 0))
+-        panel.modifiers = railModifiers
+-        var chatModifiers = SkeletonModifiers()
+-        chatModifiers.maxWidthInfinity = true
+-        chatModifiers.styleRole = "butler-helper-tree-chat"
+-        let chat = SkeletonElement.VStack(SkeletonVStack(elements: [conversation], spacing: 0, modifiers: chatModifiers))
+-        var layoutModifiers = SkeletonModifiers()
+-        layoutModifiers.maxWidthInfinity = true
+-        layoutModifiers.styleRole = "butler-helper-tree-layout"
+-        return .HStack(SkeletonHStack(elements: [.List(panel), chat], spacing: 12, modifiers: layoutModifiers))
+-    }
+-
+-    static func helperTreeChatHeader() -> SkeletonElement {
+-        .List(SkeletonList(topic: nil, keypath: "chatHub.state.ui.chatPanelRows", flowElementSkeleton: SkeletonVStack(elements: [
+-            .Button(SkeletonButton(keypath: "chatHub.ui.helperTree.open", label: "Tråder", payload: .object([:]))),
+-            .Text(SkeletonText(keypath: "title")),
+-            .Text(SkeletonText(keypath: "countLabel")),
+-            .Text(SkeletonText(keypath: "scopeDescription")),
+-            .Text(SkeletonText(keypath: "composerTargetLabel"))
+-        ], spacing: 4)))
+-    }
+-
+-    static func helperTreeBranchChips() -> SkeletonElement {
+-        var list = SkeletonList(topic: nil, keypath: "branchChips", flowElementSkeleton: SkeletonVStack(elements: [
+-            .Text(SkeletonText(keypath: "label"))
+-        ], spacing: 0))
+-        var modifiers = SkeletonModifiers()
+-        modifiers.visibility = SkeletonVisibilityRule(when: SkeletonCondition(scope: .item, keypath: "nodeID", notEquals: .string(PersonalCopilotHelperTree.rootID)))
+-        list.modifiers = modifiers
+-        return .List(list)
++    /// WP-B5: skopvelgeren (Undertre | Bare denne) fra referansekandidaten, til chat-hodet
++    /// i arbeidsflaten. «Tråder»-knappen og «Lukk tre» i kandidaten hører til appbredden
++    /// (skjult tre krever `hidden` i SkeletonLayoutVariant; formatrunden med vei B).
++    static func helperTreeScopeControls() throws -> SkeletonElement {
++        let decoded = try JSONDecoder().decode(SkeletonElement.self, from: Data(helperTreeCandidateJSON.utf8))
++        guard case let .VStack(candidate) = decoded, case let .HStack(controls)? = candidate.elements.first,
++              controls.elements.count == 2 else {
++            preconditionFailure("Invalid bundled helper tree candidate")
++        }
++        return controls.elements[1]
+     }
+ 
+     /// WP-B1: hjelpertreet som Tree. Én radmal; dybde og tilstand kommer fra
+@@ -86,8 +58,9 @@ extension PersonalCopilotConfigurationFactory {
+ {"VStack":{"elements":[],"spacing":0,"modifiers":{"width":7,"height":7,"cornerRadius":3.5,"background":"#ef7c2d","visibility":{"when":{"scope":"item","keypath":"tone","equals":"declined"}}}}},
+ {"Text":{"keypath":"title","modifiers":{"fontSize":14,"fontWeight":"400","foregroundColor":"#17212b","lineLimit":1,"maxWidthInfinity":true,"visibility":{"when":{"scope":"item","keypath":"rowState","notEquals":"selected"}}}}},
+ {"Text":{"keypath":"title","modifiers":{"fontSize":14,"fontWeight":"600","foregroundColor":"#17212b","lineLimit":1,"maxWidthInfinity":true,"visibility":{"when":{"scope":"item","keypath":"rowState","equals":"selected"}}}}},
+-{"Text":{"keypath":"kindSummary","modifiers":{"fontSize":11,"fontWeight":"400","foregroundColor":"#556273","padding":0,"height":15,"borderWidth":1,"borderColor":"#d5e0eb","cornerRadius":4,"visibility":{"when":{"scope":"item","keypath":"kindSummary","notEquals":""}}}}},
+-{"Text":{"keypath":"countText","modifiers":{"fontSize":12,"fontWeight":"400","foregroundColor":"#556273"}}}
++{"Spacer":{}},
++{"Text":{"keypath":"kindSummary","modifiers":{"fontSize":10.5,"fontWeight":"400","foregroundColor":"#556273","paddingInsets":{"top":0,"leading":5,"bottom":0,"trailing":5},"borderWidth":1,"borderColor":"#d5e0eb","cornerRadius":4,"visibility":{"when":{"scope":"item","keypath":"kindSummary","notEquals":""}}}}},
++{"Text":{"keypath":"countText","modifiers":{"fontSize":12,"fontWeight":"400","foregroundColor":"#556273","minWidth":16}}}
+ ],"spacing":7,"modifiers":{"maxWidthInfinity":true}}}],"spacing":0}},
+ "disclosureModifiers":{"fontSize":10,"foregroundColor":"#556273","width":14},
+ "rowModifiers":{"padding":5,"cornerRadius":7,"background":"#ffffff","backgroundKeypath":"rowBackground","maxWidthInfinity":true,"interactionStyles":{"hover":{"background":"#f3f8fc"}}},
+diff --git a/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory+WidgetCanvas.swift b/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory+WidgetCanvas.swift
+index 31c84710..912b263f 100644
+--- a/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory+WidgetCanvas.swift
++++ b/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory+WidgetCanvas.swift
+@@ -10,31 +10,38 @@ extension PersonalCopilotConfigurationFactory {
+         cardModifiers.dragPayloadKeypath = "sourceDescriptor"
+         cardModifiers.dragPreviewRole = "widget-card"
+         cardModifiers.accessibilityDragLabel = "Dra kortet til Flaten rundt"
++        // WP-B5: kortet i loggen i full bredde, tittelen som overskrift, «Fest» som lenkeknapp.
++        cardModifiers.padding = nil
++        cardModifiers.paddingInsets = SkeletonInsets(top: 10, leading: 14, bottom: 10, trailing: 14)
++        cardModifiers.maxWidthInfinity = true
++        cardModifiers.borderColor = ButlerWorkbenchStyle.line
++        cardModifiers.cornerRadius = 8
++        var pin = SkeletonButton(keypath: "chatHub.widgets.pinFromDrop", label: "Fest", payloadKeypath: "pinPayload")
++        pin.modifiers = butlerQuietButtonModifiers(color: ButlerWorkbenchStyle.accent, size: 12.5)
++        var headerModifiers = SkeletonModifiers()
++        headerModifiers.maxWidthInfinity = true
+         let header = SkeletonElement.HStack(SkeletonHStack(elements: [
+-            .Text(SkeletonText(text: "⠿")), widgetText("title"), .Spacer(SkeletonSpacer()),
+-            .Button(SkeletonButton(keypath: "chatHub.widgets.pinFromDrop", label: "Fest", payloadKeypath: "pinPayload"))
+-        ], spacing: 8))
+-        return widgetList("componentCards", elements: [header, widgetText("summary")], rowModifiers: cardModifiers)
+-    }
+-
+-    static func widgetCanvasWorkbench(conversation: SkeletonElement, componentPanel: SkeletonElement) -> SkeletonElement {
+-        var modifiers = SkeletonModifiers()
+-        modifiers.styleRole = "chat-workbench-layout"
+-        modifiers.styleClasses = ["chat-workbench-layout"]
+-        // Keep the existing active helper accessible beside the log, in its left column.
+-        return .Grid(SkeletonGrid(
+-            columns: [.adaptive(min: 420)], spacing: 12,
+-            elements: [.VStack(SkeletonVStack(elements: [conversation, componentPanel], spacing: 12)), widgetCanvas()],
+-            modifiers: modifiers
+-        ))
++            widgetText(nil, text: "⠿", size: 12, color: ButlerWorkbenchStyle.faint),
++            widgetText("title", size: 13, weight: "600", color: ButlerWorkbenchStyle.ink),
++            .Spacer(SkeletonSpacer()), .Button(pin)
++        ], spacing: 8, modifiers: headerModifiers))
++        var list = SkeletonList(topic: nil, keypath: "componentCards",
++                                flowElementSkeleton: SkeletonVStack(elements: [header, widgetText("summary")], spacing: 8, modifiers: cardModifiers))
++        var listModifiers = SkeletonModifiers()
++        listModifiers.rowDecoration = SkeletonRowDecoration.none
++        listModifiers.itemSpacing = 6
++        list.modifiers = listModifiers
++        return .List(list)
+     }
+ 
+     /// WP-K1 flate.candidate, using only existing elements/modifiers. No full layout or live data yet.
+     static func widgetCanvas() -> SkeletonElement {
++        var headerModifiers = widgetBox(padding: 11)
++        headerModifiers.maxWidthInfinity = true
+         let header = SkeletonElement.HStack(SkeletonHStack(elements: [
+             widgetText(nil, text: "Flaten rundt", size: 13, weight: "600"),
+             .Spacer(SkeletonSpacer()), widgetText("chatHub.state.ui.widgetCanvas.summary", size: 12)
+-        ], spacing: 8, modifiers: widgetBox(padding: 11)))
++        ], spacing: 8, modifiers: headerModifiers))
+         let dropSlots = widgetList("chatHub.state.ui.widgetCanvas.dropSlots", elements: [widgetText("label")],
+                                    rowModifiers: widgetDropModifiers(relative: true))
+         let widgets = widgetList("chatHub.state.ui.pinnedComponentSurfaces", elements: widgetCardElements(),
+@@ -44,16 +51,22 @@ extension PersonalCopilotConfigurationFactory {
+             widgetText(nil, text: "Dra et kort ut av chatten, eller trykk Fest på kortet.")
+         ], rowModifiers: widgetBox(padding: 16, card: true))
+         var scroll = SkeletonScrollView(elements: [dropSlots, widgets, hints])
+-        scroll.modifiers = widgetBox(padding: 12)
++        var scrollModifiers = SkeletonModifiers()
++        scrollModifiers.paddingInsets = SkeletonInsets(top: 10, leading: 12, bottom: 10, trailing: 12)
++        scroll.modifiers = scrollModifiers
+         let content = SkeletonElement.ScrollView(scroll)
+         var modifiers = widgetDropModifiers(relative: false)
+         modifiers.background = "#ffffff"
+         modifiers.borderColor = "#d5e0eb"
+         modifiers.borderWidth = 1
+-        modifiers.cornerRadius = 10
++        modifiers.cornerRadius = 8
+         modifiers.maxWidthInfinity = true
+-        modifiers.height = 640
++        // WP-B5: fyller arbeidsflatens høyre kolonne i stedet for fast høyde 640.
++        modifiers.flexGrow = 1
++        modifiers.minHeight = 0
+         modifiers.styleRole = "butler-widget-canvas"
++        // Grunnen til en avvist slipp vises som før uten synlighetsvilkår: et vilkår på
++        // rotdata kan ikke oppfylles i appen (SkeletonReachabilityAudit: unreachableAtRootScope).
+         return .VStack(SkeletonVStack(elements: [
+             header, .Divider(SkeletonDivider()),
+             widgetText("chatHub.state.ui.widgetCanvas.dropDeniedReason", size: 12), content
+@@ -61,20 +74,40 @@ extension PersonalCopilotConfigurationFactory {
+     }
+ 
+     private static func widgetCardElements() -> [SkeletonElement] {
++        var toggle = SkeletonButton(keypath: "chatHub.widgets.toggleFullSurface", label: "⤢",
++                                    labelKeypath: "fullSurfaceActionLabel", payloadKeypath: "widgetActionPayload")
++        toggle.modifiers = widgetIconButtonModifiers()
++        var unpin = SkeletonButton(keypath: "chatHub.widgets.unpin", label: "✕", payloadKeypath: "widgetActionPayload")
++        unpin.modifiers = widgetIconButtonModifiers()
++        var headerModifiers = SkeletonModifiers()
++        headerModifiers.maxWidthInfinity = true
+         let header = SkeletonElement.HStack(SkeletonHStack(elements: [
+-            widgetText("title", weight: "600"), .Spacer(SkeletonSpacer()),
+-            .Button(SkeletonButton(keypath: "chatHub.widgets.toggleFullSurface", label: "⤢",
+-                                   labelKeypath: "fullSurfaceActionLabel", payloadKeypath: "widgetActionPayload")),
+-            .Button(SkeletonButton(keypath: "chatHub.widgets.unpin", label: "✕", payloadKeypath: "widgetActionPayload"))
+-        ], spacing: 6))
++            widgetText("title", size: 13, weight: "700", color: ButlerWorkbenchStyle.ink), .Spacer(SkeletonSpacer()),
++            .Button(toggle), .Button(unpin)
++        ], spacing: 6, modifiers: headerModifiers))
+         let separator = widgetList("separatorAfter", elements: [.Divider(SkeletonDivider())])
++        // Status som farget prikk + tekst (statusColor/statusText fra kilden, vei B).
++        var dot = SkeletonText(text: "●")
++        var dotModifiers = SkeletonModifiers()
++        dotModifiers.fontSize = 9
++        dotModifiers.foregroundColor = "#556273"
++        dotModifiers.foregroundColorKeypath = "statusColor"
++        dot.modifiers = dotModifiers
++        let status = SkeletonElement.HStack(SkeletonHStack(elements: [
++            .Text(dot), widgetText("statusText", size: 11.5, color: ButlerWorkbenchStyle.ink)
++        ], spacing: 4))
+         let program = widgetList("programRows", elements: [
+             .Grid(SkeletonGrid(columns: [.flexible(min: 0), .fixed(74), .fixed(66)], spacing: 8,
+-                               elements: [widgetText("title"), widgetText("room"), widgetText("statusLabel", size: 11)])),
++                               elements: [widgetText("title", color: ButlerWorkbenchStyle.ink), widgetText("room"), status])),
+             separator
+         ])
++        var statModifiers = SkeletonModifiers()
++        statModifiers.maxWidthInfinity = true
+         let stats = widgetList("statRows", elements: [
+-            .HStack(SkeletonHStack(elements: [widgetText("label"), .Spacer(SkeletonSpacer()), widgetText("value", weight: "700")], spacing: 8)),
++            .HStack(SkeletonHStack(elements: [
++                widgetText("label", color: ButlerWorkbenchStyle.ink), .Spacer(SkeletonSpacer()),
++                widgetText("value", weight: "700", color: ButlerWorkbenchStyle.ink)
++            ], spacing: 8, modifiers: statModifiers)),
+             separator
+         ])
+         return [header, widgetText("summary"), .Divider(SkeletonDivider()), program, stats,
+@@ -82,6 +115,12 @@ extension PersonalCopilotConfigurationFactory {
+                 widgetList("errorFooters", elements: [widgetText("text", size: 11.5, color: "#9a4a12")])]
+     }
+ 
++    private static func widgetIconButtonModifiers() -> SkeletonModifiers {
++        var modifiers = butlerQuietButtonModifiers(size: 13)
++        modifiers.paddingInsets = SkeletonInsets(top: 1, leading: 5, bottom: 1, trailing: 5)
++        return modifiers
++    }
++
+     private static func widgetDropModifiers(relative: Bool) -> SkeletonModifiers {
+         var modifiers = SkeletonModifiers()
+         let prefix = relative ? "" : "chatHub.state.ui.widgetCanvas."
+diff --git a/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory+Workbench.swift b/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory+Workbench.swift
+new file mode 100644
+index 00000000..87ba5b9b
+--- /dev/null
++++ b/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory+Workbench.swift
+@@ -0,0 +1,361 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++
++import Foundation
++import CellBase
++
++/// WP-B5: Butler-arbeidsflaten etter mockupen (PDD butler-traadtre-og-widgetflate,
++/// `images/web-fylt-v1.png`): Tråder | chat | Flaten rundt i full høyde, én hodelinje med
++/// tellere og skopvelger, meldinger som avatar + navn + tid + tekst, ett skrivefelt med
++/// «skriver til». Farger, størrelser og avstander er skjelettmodifikatorer, så web og app
++/// tolker dem likt; web-temaet (`Public/css/themes/Co-Pilot Chat.css`) setter bare
++/// vertsrammen. Verifisert visuelt som kandidat v6 før porting (STATUS 2026-09-19).
++extension PersonalCopilotConfigurationFactory {
++    enum ButlerWorkbenchStyle {
++        static let ink = "#17212b"
++        static let muted = "#556273"
++        static let faint = "#8391a1"
++        static let line = "#d5e0eb"
++        static let soft = "#f7fafc"
++        static let accent = "#0f4c81"
++        /// Samme farger som prikkene i treet (tone branchA/branchB/declined).
++        static let toneColors: [String: String] = ["branchA": "#0f8a61", "branchB": "#7a4fbf", "declined": "#ef7c2d"]
++        /// Fra denne bredden står panelene side om side; under den stables de (appbredde 780 i
++        /// referansebildene). Grunnoppsettet er det stablede, så en vert som ikke oppgir bredde
++        /// (ukjent plass matcher ingen terskel) får en flate som også virker på liten skjerm.
++        static let sideBySideMinWidth: Double = 1100
++    }
++
++    // MARK: - Arbeidsflaten
++
++    /// Rotelementet: tre paneler i full høyde side om side når det er plass, ellers stablet.
++    /// Chat-panelet eier fanene Samtale/Aktivt/Mer (en liten velger i chat-hodet, Kjetils valg
++    /// 2026-09-19).
++    static func butlerWorkbench(tabs: SkeletonTabs, componentPanel: SkeletonElement) -> SkeletonElement {
++        var chatTabs = tabs
++        var tabModifiers = chatTabs.modifiers ?? SkeletonModifiers()
++        tabModifiers.styleRole = "butler-chat-tabs"
++        tabModifiers.styleClasses = ["butler-chat-tabs"]
++        tabModifiers.controlStyle = .plain
++        tabModifiers.flexGrow = 1
++        tabModifiers.minHeight = 0
++        chatTabs.modifiers = tabModifiers
++
++        let chatPanel = butlerPanel(role: "butler-chat-panel", elements: [butlerChatHeader(), .Tabs(chatTabs)]) {
++            $0.flexGrow = 1
++        }
++
++        var columnModifiers = SkeletonModifiers()
++        columnModifiers.styleRole = "butler-canvas-column"
++        columnModifiers.styleClasses = ["butler-canvas-column"]
++        columnModifiers.width = 370
++        columnModifiers.minHeight = 0
++        columnModifiers.maxHeightInfinity = true
++        let canvasColumn = SkeletonElement.VStack(SkeletonVStack(
++            elements: [componentPanel, widgetCanvas()], spacing: 12, modifiers: columnModifiers
++        ))
++
++        var rootModifiers = SkeletonModifiers()
++        rootModifiers.styleRole = "butler-workbench"
++        rootModifiers.styleClasses = ["butler-workbench"]
++        rootModifiers.maxWidthInfinity = true
++        rootModifiers.maxHeightInfinity = true
++        rootModifiers.minHeight = 0
++        rootModifiers.layoutVariants = [SkeletonLayoutVariant(
++            minAvailableWidth: ButlerWorkbenchStyle.sideBySideMinWidth, axis: .horizontal, spacing: 16
++        )]
++        return .VStack(SkeletonVStack(elements: [butlerTreePanel(), chatPanel, canvasColumn], spacing: 12, modifiers: rootModifiers))
++    }
++
++    /// Tråder-panelet: hode med antall samtaler, treet i egen rulleflate, skop nederst.
++    /// Treet er alltid synlig i webbredde; «Tråder»-knappen og lukking hører til appbredden
++    /// (skjult tre krever `hidden` i SkeletonLayoutVariant, formatrunden med vei B).
++    static func butlerTreePanel() -> SkeletonElement {
++        let header = butlerHStack([
++            butlerText("Tråder", size: 13, weight: "600"),
++            .Spacer(SkeletonSpacer()),
++            butlerText(keypath: "chatHub.state.ui.helperTree.conversationSummary", size: 12, color: ButlerWorkbenchStyle.muted)
++        ]) {
++            $0.paddingInsets = butlerInsets(13, 14, bottom: 11)
++            $0.maxWidthInfinity = true
++        }
++        // Treet bærer selv tilgjengelighetsnavnet «Tråder» (helperTreeRowsJSON).
++        let tree = (try? helperTreeRows()) ?? .Text(SkeletonText(text: ""))
++        var scroll = SkeletonScrollView(axis: "vertical", elements: [tree])
++        var scrollModifiers = SkeletonModifiers()
++        scrollModifiers.flexGrow = 1
++        scrollModifiers.minHeight = 0
++        scrollModifiers.paddingInsets = butlerInsets(8, 8)
++        scroll.modifiers = scrollModifiers
++        let footer = butlerHStack([
++            butlerText("Skop", size: 12, color: ButlerWorkbenchStyle.muted),
++            butlerText(keypath: "chatHub.state.ui.helperTree.scopeSummary", size: 11, color: ButlerWorkbenchStyle.muted) {
++                $0.borderWidth = 1
++                $0.borderColor = ButlerWorkbenchStyle.line
++                $0.cornerRadius = 20
++                $0.paddingInsets = butlerInsets(2, 8)
++            },
++            .Spacer(SkeletonSpacer())
++        ]) {
++            $0.paddingInsets = butlerInsets(10, 14)
++            $0.maxWidthInfinity = true
++        }
++        return butlerPanel(role: "butler-tree-panel", elements: [
++            header, .Divider(SkeletonDivider()), .ScrollView(scroll), .Divider(SkeletonDivider()), footer
++        ]) {
++            $0.width = 290
++        }
++    }
++
++    /// Chat-hodet: tittel, tellere og skopvelger på én linje; skopbeskrivelse og grenchips under.
++    static func butlerChatHeader() -> SkeletonElement {
++        var titleLine: SkeletonElementList = [
++            butlerText(keypath: "title", size: 14, weight: "700"),
++            .Spacer(SkeletonSpacer()),
++            butlerText(keypath: "countLabel", size: 12, color: ButlerWorkbenchStyle.muted)
++        ]
++        if let controls = try? helperTreeScopeControls() {
++            titleLine.append(controls)
++        }
++        var chips = SkeletonList(topic: nil, keypath: "scopeChips", flowElementSkeleton: SkeletonVStack(elements: [butlerPill()], spacing: 0))
++        chips.selectionMode = SkeletonListSelectionMode.none
++        chips.modifiers = butlerModifiers {
++            $0.wrap = true
++            $0.rowDecoration = SkeletonRowDecoration.none
++            $0.itemSpacing = 6
++        }
++        let row = SkeletonVStack(elements: [
++            butlerHStack(titleLine, spacing: 12) {
++                $0.paddingInsets = butlerInsets(10, 16, bottom: 9)
++                $0.maxWidthInfinity = true
++            },
++            .Divider(SkeletonDivider()),
++            butlerHStack([
++                butlerText(keypath: "scopeDescription", size: 12, color: ButlerWorkbenchStyle.muted),
++                .List(chips)
++            ], spacing: 10) {
++                $0.paddingInsets = butlerInsets(7, 16)
++                $0.background = ButlerWorkbenchStyle.soft
++            },
++            .Divider(SkeletonDivider())
++        ], spacing: 0)
++        var list = SkeletonList(topic: nil, keypath: "chatHub.state.ui.chatPanelRows", flowElementSkeleton: row)
++        list.selectionMode = SkeletonListSelectionMode.none
++        list.modifiers = butlerModifiers {
++            $0.rowDecoration = SkeletonRowDecoration.none
++            $0.itemSpacing = 0
++        }
++        return .List(list)
++    }
++
++    // MARK: - Meldingsraden
++
++    /// Én rad i loggen: avatar + navn + tid + grenchip, tekst, status, svarhandlinger og kort.
++    /// Radtypen `branchStart` (cellen legger den inn der en gren begynner i skopets logg)
++    /// vises som en skillelinje «gren startet · …».
++    static func butlerMessageRow(actions: SkeletonElement, cards: SkeletonElement) -> SkeletonVStack {
++        let initials = butlerText(keypath: "initials", size: 10.5, weight: "700", color: "#ffffff") {
++            $0.styleRole = "butler-avatar-initials"
++        }
++        let disc = butlerVStack([initials]) {
++            $0.width = 28
++            $0.height = 28
++            $0.cornerRadius = 14
++            $0.background = ButlerWorkbenchStyle.accent
++            $0.backgroundKeypath = "avatarColor"
++            $0.hAlignment = "center"
++            $0.vAlignment = "center"
++        }
++        // Ytre kolonne holder avataren øverst i raden.
++        let avatar = butlerVStack([disc]) {
++            $0.width = 28
++            $0.vAlignment = "top"
++        }
++        let heading = butlerHStack([
++            butlerText(keypath: "speaker", size: 13.5, weight: "700"),
++            butlerText(keypath: "timeLabel", size: 11.5, color: ButlerWorkbenchStyle.faint),
++            butlerBranchChips()
++        ])
++        let body = butlerText(keypath: "body", size: 14) { $0.lineHeightMultiple = 1.45 }
++        let status = butlerText(keypath: "statusText", size: 12, color: ButlerWorkbenchStyle.muted)
++        let content = butlerVStack([heading, body, status, actions, cards], spacing: 3) { $0.flexGrow = 1 }
++        let message = butlerHStack([avatar, content], spacing: 10) {
++            $0.vAlignment = "top"
++            $0.visibility = SkeletonVisibilityRule(when: SkeletonCondition(scope: .item, keypath: "kind", notEquals: .string("branchStart")))
++        }
++        // To egne linjeelementer (hvert element har sin egen id).
++        func rule() -> SkeletonElement {
++            butlerVStack([]) {
++                $0.height = 1
++                $0.background = ButlerWorkbenchStyle.line
++                $0.flexGrow = 1
++            }
++        }
++        let branchStart = butlerHStack([rule(), butlerText(keypath: "label", size: 12, color: ButlerWorkbenchStyle.muted), rule()], spacing: 10) {
++            $0.maxWidthInfinity = true
++            $0.paddingInsets = butlerInsets(4, 0)
++            $0.visibility = SkeletonVisibilityRule(when: SkeletonCondition(scope: .item, keypath: "kind", equals: .string("branchStart")))
++        }
++        return SkeletonVStack(elements: [branchStart, message], spacing: 0, modifiers: butlerModifiers {
++            $0.paddingInsets = butlerInsets(7, 0)
++        })
++    }
++
++    /// Grenchip ved navnet; bare for meldinger fra en gren (ikke roten).
++    static func butlerBranchChips() -> SkeletonElement {
++        var list = SkeletonList(topic: nil, keypath: "branchChips", flowElementSkeleton: SkeletonVStack(
++            elements: [butlerPill(insets: butlerInsets(1, 7))], spacing: 0
++        ))
++        list.selectionMode = SkeletonListSelectionMode.none
++        list.modifiers = butlerModifiers {
++            $0.visibility = SkeletonVisibilityRule(when: SkeletonCondition(scope: .item, keypath: "nodeID", notEquals: .string(PersonalCopilotHelperTree.rootID)))
++            $0.rowDecoration = SkeletonRowDecoration.none
++            $0.wrap = true
++            $0.itemSpacing = 6
++        }
++        return .List(list)
++    }
++
++    // MARK: - Skrivefeltet
++
++    /// Skrivefelt og Send på én linje.
++    static func butlerComposerRow(composer: SkeletonTextArea, send: SkeletonElement) -> SkeletonElement {
++        butlerHStack([.TextArea(composer), send]) { $0.maxWidthInfinity = true }
++    }
++
++    /// Hjelpelinja under skrivefeltet: hva feltet kan, hvem det skriver til, rydd utkast.
++    static func butlerComposerFooter(clear: SkeletonElement) -> SkeletonElement {
++        let row = SkeletonVStack(elements: [
++            butlerHStack([
++                butlerText("Alt widgetene kan gjøre, kan du be om her.", size: 12, color: ButlerWorkbenchStyle.muted),
++                butlerText(keypath: "composerTargetLabel", size: 11, color: ButlerWorkbenchStyle.muted) {
++                    $0.borderWidth = 1
++                    $0.borderColor = ButlerWorkbenchStyle.line
++                    $0.cornerRadius = 20
++                    $0.paddingInsets = butlerInsets(2, 8)
++                },
++                .Spacer(SkeletonSpacer()),
++                clear
++            ]) { $0.maxWidthInfinity = true }
++        ], spacing: 0)
++        var list = SkeletonList(topic: nil, keypath: "chatHub.state.ui.chatPanelRows", flowElementSkeleton: row)
++        list.selectionMode = SkeletonListSelectionMode.none
++        list.modifiers = butlerModifiers { $0.rowDecoration = SkeletonRowDecoration.none }
++        return .List(list)
++    }
++
++    /// Skrivefeltets boks: én linje, systemskrift, lys ramme. Modifikatorene legges én gang
++    /// rundt feltet både på web og i appen (WP-B4).
++    static func butlerComposerModifiers() -> SkeletonModifiers {
++        butlerModifiers {
++            $0.background = "#FFFFFF"
++            $0.foregroundColor = "#111827"
++            $0.borderColor = ButlerWorkbenchStyle.line
++            $0.borderWidth = 1
++            $0.cornerRadius = 6
++            $0.paddingInsets = butlerInsets(9, 12)
++            $0.minHeight = 40
++            $0.flexGrow = 1
++            $0.fontSize = 14
++            $0.fontFamilies = ["-apple-system", "Segoe UI", "Helvetica Neue", "Arial"]
++            $0.styleRole = "chat-composer"
++        }
++    }
++
++    static func butlerSendButtonModifiers() -> SkeletonModifiers {
++        butlerModifiers {
++            $0.background = ButlerWorkbenchStyle.accent
++            $0.foregroundColor = "#FFFFFF"
++            $0.cornerRadius = 6
++            $0.borderWidth = 0
++            $0.paddingInsets = butlerInsets(9, 14)
++        }
++    }
++
++    static func butlerQuietButtonModifiers(color: String = ButlerWorkbenchStyle.muted, size: Double = 12) -> SkeletonModifiers {
++        butlerModifiers {
++            $0.background = "#FFFFFF"
++            $0.foregroundColor = color
++            $0.borderWidth = 0
++            $0.fontSize = size
++            $0.paddingInsets = butlerInsets(2, 6)
++        }
++    }
++
++    // MARK: - Byggeklosser
++
++    static func butlerPanel(role: String, elements: SkeletonElementList, configure: (inout SkeletonModifiers) -> Void) -> SkeletonElement {
++        var modifiers = butlerModifiers {
++            $0.styleRole = role
++            $0.styleClasses = [role]
++            $0.background = "#ffffff"
++            $0.borderWidth = 1
++            $0.borderColor = ButlerWorkbenchStyle.line
++            $0.cornerRadius = 8
++            $0.contentClip = true
++            $0.minHeight = 0
++            $0.maxHeightInfinity = true
++        }
++        configure(&modifiers)
++        return .VStack(SkeletonVStack(elements: elements, spacing: 0, modifiers: modifiers))
++    }
++
++    /// Farget prikk for grenen (toneColor fra cellen); skjult når feltet mangler.
++    static func butlerToneDot() -> SkeletonElement {
++        butlerVStack([]) {
++            $0.width = 6
++            $0.height = 6
++            $0.cornerRadius = 3
++            $0.background = ButlerWorkbenchStyle.line
++            $0.backgroundKeypath = "toneColor"
++            $0.visibility = SkeletonVisibilityRule(when: SkeletonCondition(scope: .item, keypath: "toneColor", exists: true))
++        }
++    }
++
++    static func butlerPill(size: Double = 11, insets: SkeletonInsets? = nil) -> SkeletonElement {
++        butlerHStack([butlerToneDot(), butlerText(keypath: "label", size: size, color: ButlerWorkbenchStyle.muted)], spacing: 5) {
++            $0.borderWidth = 1
++            $0.borderColor = ButlerWorkbenchStyle.line
++            $0.cornerRadius = 20
++            $0.paddingInsets = insets ?? butlerInsets(2, 8)
++            $0.background = "#ffffff"
++        }
++    }
++
++    static func butlerText(
++        _ text: String? = nil,
++        keypath: String? = nil,
++        size: Double = 13,
++        weight: String = "400",
++        color: String = ButlerWorkbenchStyle.ink,
++        configure: (inout SkeletonModifiers) -> Void = { _ in }
++    ) -> SkeletonElement {
++        var value = keypath.map { SkeletonText(keypath: $0) } ?? SkeletonText(text: text ?? "")
++        var modifiers = butlerModifiers {
++            $0.fontSize = size
++            $0.fontWeight = weight
++            $0.foregroundColor = color
++        }
++        configure(&modifiers)
++        value.modifiers = modifiers
++        return .Text(value)
++    }
++
++    static func butlerHStack(_ elements: SkeletonElementList, spacing: Double = 8, configure: (inout SkeletonModifiers) -> Void = { _ in }) -> SkeletonElement {
++        .HStack(SkeletonHStack(elements: elements, spacing: spacing, modifiers: butlerModifiers(configure)))
++    }
++
++    static func butlerVStack(_ elements: SkeletonElementList, spacing: Double = 0, configure: (inout SkeletonModifiers) -> Void = { _ in }) -> SkeletonElement {
++        .VStack(SkeletonVStack(elements: elements, spacing: spacing, modifiers: butlerModifiers(configure)))
++    }
++
++    static func butlerModifiers(_ configure: (inout SkeletonModifiers) -> Void) -> SkeletonModifiers {
++        var modifiers = SkeletonModifiers()
++        configure(&modifiers)
++        return modifiers
++    }
++
++    static func butlerInsets(_ vertical: Double, _ horizontal: Double, bottom: Double? = nil, trailing: Double? = nil) -> SkeletonInsets {
++        SkeletonInsets(top: vertical, leading: horizontal, bottom: bottom ?? vertical, trailing: trailing ?? horizontal)
++    }
++}
+diff --git a/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory.swift b/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory.swift
+index 44948441..d60f0cdd 100644
+--- a/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory.swift
++++ b/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory.swift
+@@ -1293,19 +1293,13 @@ enum PersonalCopilotConfigurationFactory {
+     }
+ 
+     private static func chatHubSkeleton() -> SkeletonElement {
+-        // Build the large conversation body before decoding the helper rail.
++        // Build the large conversation body before assembling the workbench.
+         // Keeping both on one debug stack exceeded Swift worker stack bounds.
+-        guard case var .Tabs(tabs) = chatHubSkeletonBody() else {
+-            preconditionFailure("Chat workbench must expose its declared tabs")
+-        }
+-        if let index = tabs.panels.firstIndex(where: { $0.id == "samtale" }),
+-           let conversation = tabs.panels[index].content.first {
+-            tabs.panels[index].content = [withHelperTree(conversation)]
+-        }
+-        return .Tabs(tabs)
++        let body = chatHubSkeletonBody()
++        return butlerWorkbench(tabs: body.tabs, componentPanel: body.componentPanel)
+     }
+ 
+-    private static func chatHubSkeletonBody() -> SkeletonElement {
++    private static func chatHubSkeletonBody() -> (tabs: SkeletonTabs, componentPanel: SkeletonElement) {
+         var candidateRow = row([
+             keyText("displayName"),
+             keyText("headline"),
+@@ -1407,18 +1401,16 @@ enum PersonalCopilotConfigurationFactory {
+         var promptLog = SkeletonList(
+             topic: nil,
+             keypath: "chatHub.state.ui.promptMessages",
+-            flowElementSkeleton: row([
+-                keyText("speaker"),
+-                keyText("body"),
+-                keyText("statusText"),
+-                helperTreeBranchChips(),
+-                assistantResponseActions(),
+-                widgetSourceCards(modifiers: componentSurfaceCardModifiers())
+-            ])
++            flowElementSkeleton: butlerMessageRow(
++                actions: assistantResponseActions(),
++                cards: widgetSourceCards(modifiers: componentSurfaceCardModifiers())
++            )
+         )
+         var promptLogModifiers = SkeletonModifiers()
+         promptLogModifiers.styleRole = "chat-prompt-log"
+         promptLogModifiers.styleClasses = ["chat-prompt-log"]
++        promptLogModifiers.rowDecoration = SkeletonRowDecoration.none
++        promptLogModifiers.itemSpacing = 4
+         promptLog.modifiers = promptLogModifiers
+ 
+         var clarificationOptionRow = row([
+@@ -1631,23 +1623,6 @@ enum PersonalCopilotConfigurationFactory {
+             ])
+         )
+ 
+-        var pinnedComponentChipRow = row([
+-            hstack([
+-                keyText("title"),
+-                button("chatHub.ui.dismissComponentSurface", "×", payload: .object([:]), style: .secondary)
+-            ])
+-        ])
+-        pinnedComponentChipRow.modifiers = pinnedComponentChipModifiers()
+-        var pinnedComponentSurfaces = SkeletonList(
+-            topic: nil,
+-            keypath: "chatHub.state.ui.pinnedComponentSurfaces",
+-            flowElementSkeleton: pinnedComponentChipRow
+-        )
+-        pinnedComponentSurfaces.activationActionKeypath = "chatHub.ui.restoreComponentSurface"
+-        pinnedComponentSurfaces.selectionValueKeypath = "id"
+-        pinnedComponentSurfaces.selectionPayloadMode = .itemID
+-        pinnedComponentSurfaces.modifiers = pinnedComponentChipListModifiers()
+-
+         var advancedComponentSurfaceRow = row([
+                 keyText("title"),
+                 keyText("summary"),
+@@ -1721,12 +1696,12 @@ enum PersonalCopilotConfigurationFactory {
+         let composer = SkeletonTextArea(
+             sourceKeypath: "chatHub.state.composer.body",
+             targetKeypath: "chatHub.setComposer",
+-            placeholder: "F.eks. \"start Arendalsuka-onboarding\", \"vis meg programmet\", \"inviter Anna\" eller \"vi trenger avstemning\"",
+-            minLines: 3,
++            placeholder: "Skriv til Butler …",
++            minLines: 1,
+             maxLines: 8,
+             submitOnEnter: true,
+             editorMode: .plain,
+-            modifiers: composerModifiers()
++            modifiers: butlerComposerModifiers()
+         )
+ 
+         // Startforslag: repertoaret som ett klikk. Vises bare i en tom samtale,
+@@ -1764,49 +1739,60 @@ enum PersonalCopilotConfigurationFactory {
+         ], spacing: 4)
+         promptHelpLine.modifiers = promptHelpLineModifiers()
+ 
+-        let composerDock = stack(
+-            [
+-                text("Hva vil du få gjort?"),
++        // WP-B5: ett skrivefelt med Send, og under det hvem feltet skriver til. Festede
++        // widgets vises på Flaten rundt, ikke også som liste over skrivefeltet.
++        var sendButton = SkeletonButton(keypath: "chatHub.prompt.submit", label: "Send", payload: .object([:]))
++        sendButton.modifiers = butlerSendButtonModifiers()
++        var clearButton = SkeletonButton(keypath: "chatHub.clearComposer", label: "Rydd utkast", payload: .object([:]))
++        clearButton.modifiers = butlerQuietButtonModifiers()
++        var composerDockModifiers = SkeletonModifiers()
++        composerDockModifiers.styleRole = "chat-composer-dock"
++        composerDockModifiers.styleClasses = ["chat-composer-dock"]
++        composerDockModifiers.paddingInsets = butlerInsets(10, 16, bottom: 12)
++        composerDockModifiers.borderEdges = [.top]
++        composerDockModifiers.borderWidth = 1
++        composerDockModifiers.borderColor = ButlerWorkbenchStyle.line
++        let composerDock = SkeletonElement.VStack(SkeletonVStack(
++            elements: [
+                 .VStack(starterCard),
+                 .VStack(promptHelpLine),
+                 .List(activeToolChips),
+-                .List(pinnedComponentSurfaces),
+                 .List(minimizedComponentSurfaces),
+-                .TextArea(composer),
+-                hstack([
+-                    button("chatHub.prompt.submit", "Send", payload: .object([:]), style: .primary),
+-                    button("chatHub.clearComposer", "Rydd utkast", payload: .object([:]), style: .secondary)
+-                ])
++                butlerComposerRow(composer: composer, send: .Button(sendButton)),
++                butlerComposerFooter(clear: .Button(clearButton))
+             ],
+-            role: "chat-composer-dock"
+-        )
++            spacing: 10,
++            modifiers: composerDockModifiers
++        ))
+ 
+         // Kortene hoerer hjemme INNE i rulleomraadet, ikke som soesken av det.
+         // Som soesken ble de egne rader i seksjonens rutenett, og fire synlige
+         // kort spiste hele hoeyden: loggraden ble 0 px og det nederste kortet
+         // havnet utenfor rammen uten noe aa rulle i. Inne i rullefeltet foelger
+         // de samtalen, og det nyeste ligger nederst der leseren ser det.
+-        let promptScroll = scrollView(
+-            [
+-                helperTreeChatHeader(),
+-                .List(promptLog),
+-                .VStack(clarificationCard),
+-                .VStack(routeExplanationCard),
+-                automaticEscalationControls,
+-                automaticEscalationConsent,
+-                .VStack(askThisTimeCard)
+-            ],
+-            role: "chat-prompt-scroll"
+-        )
+-
+-        let conversation = section(
+-            "Butler Chat",
+-            [
+-                promptScroll,
+-                composerDock
+-            ],
+-            modifiers: chatConversationModifiers()
+-        )
++        var promptScroll = SkeletonScrollView(axis: "vertical", elements: [
++            .List(promptLog),
++            .VStack(clarificationCard),
++            .VStack(routeExplanationCard),
++            automaticEscalationControls,
++            automaticEscalationConsent,
++            .VStack(askThisTimeCard)
++        ])
++        var promptScrollModifiers = SkeletonModifiers()
++        promptScrollModifiers.styleRole = "chat-prompt-scroll"
++        promptScrollModifiers.styleClasses = ["chat-prompt-scroll"]
++        promptScrollModifiers.flexGrow = 1
++        promptScrollModifiers.minHeight = 0
++        promptScrollModifiers.paddingInsets = butlerInsets(12, 16)
++        promptScroll.modifiers = promptScrollModifiers
++
++        // WP-B5: ingen egen seksjonstittel; chat-hodet over fanene viser skopets tittel og tellere.
++        var conversationSection = SkeletonSection(content: [.ScrollView(promptScroll), composerDock])
++        var conversationModifiers = chatConversationModifiers()
++        conversationModifiers.flexGrow = 1
++        conversationModifiers.minHeight = 0
++        conversationSection.modifiers = conversationModifiers
++        let conversation = SkeletonElement.Section(conversationSection)
+ 
+         let active = stack([
+             hstack([
+@@ -2850,20 +2836,21 @@ enum PersonalCopilotConfigurationFactory {
+             modifiers: activeComponentPanelModifiers()
+         )
+ 
+-        let conversationWorkbench = widgetCanvasWorkbench(conversation: conversation, componentPanel: componentPanel)
+-
+-        return .Tabs(SkeletonTabs(
++        // WP-B5: Aktiv hjelper og Flaten rundt står i arbeidsflatens høyre kolonne,
++        // ikke inne i Samtale-fanen (butlerWorkbench).
++        let tabs = SkeletonTabs(
+             tabsKeypath: "chatHub.state.ui.tabs",
+             activeTabStateKeypath: "chatHub.state.ui.activeTab",
+             selectionActionKeypath: "chatHub.ui.setActiveTab",
+             idKeypath: "id",
+             labelKeypath: "title",
+             panels: [
+-                SkeletonTabPanel(id: "samtale", content: [conversationWorkbench]),
++                SkeletonTabPanel(id: "samtale", content: [conversation]),
+                 SkeletonTabPanel(id: "aktivt", content: [active]),
+                 SkeletonTabPanel(id: "mer", content: [more])
+             ]
+-        ))
++        )
++        return (tabs, componentPanel)
+     }
+ 
+     private static func personalAssistantProfileSkeleton() -> SkeletonElement {
+@@ -3566,13 +3553,39 @@ enum PersonalCopilotConfigurationFactory {
+         var modifiers = SkeletonModifiers()
+         modifiers.styleRole = "assistant-response-actions"
+         modifiers.styleClasses = ["assistant-response-actions"]
++        // WP-B5: synligheten kommer fra radens egne data, ikke fra web-CSS (nth-child +
++        // radklasse), så app og web viser de samme knappene. En rad uten handlinger tar
++        // ingen plass.
++        func hasRowClass(_ name: String) -> SkeletonCondition {
++            SkeletonCondition(scope: .item, keypath: "rowStyleClasses", contains: .string(name))
++        }
++        let hasDismiss = SkeletonCondition(scope: .item, keypath: "dismissActionLabel", exists: true)
++        modifiers.visibility = SkeletonVisibilityRule(when: SkeletonCondition(anyOf: [
++            SkeletonCondition(scope: .item, keypath: "laneLabel", exists: true),
++            hasDismiss,
++            hasRowClass("chat-prompt-can-open-helper"),
++            hasRowClass("chat-prompt-can-load-surface")
++        ]))
++        var openHelper = SkeletonButton(keypath: "chatHub.ui.openSuggestedHelper", label: "Åpne hjelper", payload: .object([:]),
++                                        labelKeypath: "helperActionLabel", payloadKeypath: "helperActionPayload")
++        var openHelperModifiers = primaryButtonModifiers()
++        openHelperModifiers.visibility = SkeletonVisibilityRule(when: hasRowClass("chat-prompt-can-open-helper"))
++        openHelper.modifiers = openHelperModifiers
++        var loadSurface = SkeletonButton(keypath: "chatHub.ui.openMatchedResourceLibrary", label: "Last inn flate",
++                                         payload: .object(["autoOpen": .bool(true)]),
++                                         labelKeypath: "surfaceActionLabel", payloadKeypath: "surfaceActionPayload")
++        var loadSurfaceModifiers = secondaryButtonModifiers()
++        loadSurfaceModifiers.visibility = SkeletonVisibilityRule(when: hasRowClass("chat-prompt-can-load-surface"))
++        loadSurface.modifiers = loadSurfaceModifiers
++        // «Avvis» avviser det aktive forslaget (tom payload); cellen setter
++        // dismissActionLabel bare på raden som viser det (PersonalCopilotChatPresentation).
++        var dismiss = SkeletonButton(keypath: "chatHub.assistant.dismissSuggestion", label: "Avvis", payload: .object([:]),
++                                     labelKeypath: "dismissActionLabel")
++        var dismissModifiers = secondaryButtonModifiers()
++        dismissModifiers.visibility = SkeletonVisibilityRule(when: hasDismiss)
++        dismiss.modifiers = dismissModifiers
+         return .HStack(SkeletonHStack(
+-            elements: [
+-                laneChipButton(),
+-                button("chatHub.ui.openSuggestedHelper", "Åpne hjelper", payload: .object([:]), style: .primary, labelKeypath: "helperActionLabel", payloadKeypath: "helperActionPayload"),
+-                button("chatHub.ui.openMatchedResourceLibrary", "Last inn flate", payload: .object(["autoOpen": .bool(true)]), style: .secondary, labelKeypath: "surfaceActionLabel", payloadKeypath: "surfaceActionPayload"),
+-                button("chatHub.assistant.dismissSuggestion", "Avvis", payload: .object([:]), style: .secondary, labelKeypath: "dismissActionLabel")
+-            ],
++            elements: [laneChipButton(), .Button(openHelper), .Button(loadSurface), .Button(dismiss)],
+             spacing: 8,
+             modifiers: modifiers
+         ))
+@@ -4122,18 +4135,6 @@ enum PersonalCopilotConfigurationFactory {
+         return modifiers
+     }
+ 
+-    private static func composerModifiers() -> SkeletonModifiers {
+-        var modifiers = SkeletonModifiers()
+-        modifiers.background = "#FFFFFF"
+-        modifiers.foregroundColor = "#111827"
+-        modifiers.borderColor = "#CBD5E1"
+-        modifiers.borderWidth = 1
+-        modifiers.cornerRadius = 8
+-        modifiers.padding = 10
+-        modifiers.styleRole = "chat-composer"
+-        return modifiers
+-    }
+-
+     private static func activeToolChipListModifiers() -> SkeletonModifiers {
+         var modifiers = SkeletonModifiers()
+         modifiers.styleRole = "chat-active-tool-chips"
+diff --git a/Sources/App/Support/ButlerBuiltInConfigurationUpgrade.swift b/Sources/App/Support/ButlerBuiltInConfigurationUpgrade.swift
+index f00ed180..7f09e277 100644
+--- a/Sources/App/Support/ButlerBuiltInConfigurationUpgrade.swift
++++ b/Sources/App/Support/ButlerBuiltInConfigurationUpgrade.swift
+@@ -14,7 +14,10 @@ enum ButlerBuiltInConfigurationUpgrade {
+     // WP-B1: factory output just before the helper tree became a Tree element
+     // (CellScaffold f851df49 with CellProtocol d810720f). See ButlerBuiltIn-pretree.md.
+     static let preTreeSkeletonDigest = "1af1ca3a94310791f7f63eb384639c2b4065fb1f3efc8fb9a9b6695bd71b0bdb"
+-    static let formerSkeletonDigests: Set<String> = [previousSkeletonDigest, preTreeSkeletonDigest]
++    // WP-B5: factory output just before the Butler workbench (tree | chat | canvas).
++    // See ButlerBuiltIn-prewb.md.
++    static let preWorkbenchSkeletonDigest = "8cadf2b642cf3294620e79725278df6e9f066d086a50e4b5567e303b05c3a9b8"
++    static let formerSkeletonDigests: Set<String> = [previousSkeletonDigest, preTreeSkeletonDigest, preWorkbenchSkeletonDigest]
+ 
+     static func upgraded(
+         _ configuration: CellConfiguration,
+diff --git a/Tests/AppTests/ButlerBuiltInConfigurationUpgradeTests.swift b/Tests/AppTests/ButlerBuiltInConfigurationUpgradeTests.swift
+index d72669a3..555c4cd7 100644
+--- a/Tests/AppTests/ButlerBuiltInConfigurationUpgradeTests.swift
++++ b/Tests/AppTests/ButlerBuiltInConfigurationUpgradeTests.swift
+@@ -41,6 +41,22 @@ final class ButlerBuiltInConfigurationUpgradeTests: IsolatedCellTestCase {
+         XCTAssertNil(ButlerBuiltInConfigurationUpgrade.upgraded(upgraded, using: published))
+     }
+ 
++    func testPreWorkbenchFactoryUpgradesToWorkbenchAndIsIdempotent() throws {
++        let url = try XCTUnwrap(Bundle.module.url(
++            forResource: "ButlerBuiltIn-prewb", withExtension: "json", subdirectory: "Fixtures"
++        ))
++        var old = try JSONDecoder().decode(CellConfiguration.self, from: Data(contentsOf: url))
++        old.uuid = "preserved-workspace-id"
++        XCTAssertEqual(ButlerBuiltInConfigurationUpgrade.fingerprint(try XCTUnwrap(old.skeleton)),
++                       ButlerBuiltInConfigurationUpgrade.preWorkbenchSkeletonDigest)
++        let published = try current()
++        let upgraded = try XCTUnwrap(ButlerBuiltInConfigurationUpgrade.upgraded(old, using: published))
++        XCTAssertEqual(upgraded.uuid, old.uuid)
++        XCTAssertEqual(try bytes(upgraded.cellReferences), try bytes(old.cellReferences))
++        XCTAssertTrue(String(decoding: try bytes(upgraded.skeleton), as: UTF8.self).contains("butler-workbench"))
++        XCTAssertNil(ButlerBuiltInConfigurationUpgrade.upgraded(upgraded, using: published))
++    }
++
+     func testExactFormerFactoryUpgradesOnlySkeletonAndIsIdempotent() throws {
+         var old = try legacy()
+         old.uuid = "preserved-workspace-id"
+@@ -53,7 +69,7 @@ final class ButlerBuiltInConfigurationUpgradeTests: IsolatedCellTestCase {
+         XCTAssertEqual(try bytes(upgraded.discovery), try bytes(old.discovery))
+         XCTAssertEqual(try bytes(upgraded.cellReferences), try bytes(old.cellReferences))
+         XCTAssertEqual(try bytes(upgraded.localization), try bytes(old.localization))
+-        XCTAssertTrue(String(decoding: try bytes(upgraded.skeleton), as: UTF8.self).contains("chatHub.ui.helperTree.open"))
++        XCTAssertTrue(String(decoding: try bytes(upgraded.skeleton), as: UTF8.self).contains("butler-workbench"))
+         XCTAssertNil(ButlerBuiltInConfigurationUpgrade.upgraded(upgraded, using: published))
+     }
+ 
+@@ -107,10 +123,10 @@ final class ButlerBuiltInConfigurationUpgradeTests: IsolatedCellTestCase {
+                   case let .cellConfiguration(rendered)? = envelope["configuration"] else {
+                 throw XCTUnwrapFailure.missingConfiguration
+             }
+-            XCTAssertTrue(String(decoding: try bytes(rendered.skeleton), as: UTF8.self).contains("chatHub.ui.helperTree.open"))
++            XCTAssertTrue(String(decoding: try bytes(rendered.skeleton), as: UTF8.self).contains("butler-workbench"))
+             let stored = try XCTUnwrap(ordinary.getCellConfiguration())
+             XCTAssertEqual(stored.uuid, old.uuid)
+-            XCTAssertTrue(String(decoding: try bytes(stored.skeleton), as: UTF8.self).contains("chatHub.ui.helperTree.open"))
++            XCTAssertTrue(String(decoding: try bytes(stored.skeleton), as: UTF8.self).contains("butler-workbench"))
+ 
+             // Recreate the old active configuration and use the ordinary
+             // catalogue action; matching the active UUID must not keep it stale.
+@@ -122,10 +138,10 @@ final class ButlerBuiltInConfigurationUpgradeTests: IsolatedCellTestCase {
+                 ])]), controlCell: ordinary, requester: owner
+             )
+             XCTAssertEqual(loaded.uuid, old.uuid)
+-            XCTAssertTrue(String(decoding: try bytes(loaded.skeleton), as: UTF8.self).contains("chatHub.ui.helperTree.open"))
++            XCTAssertTrue(String(decoding: try bytes(loaded.skeleton), as: UTF8.self).contains("butler-workbench"))
+             let encodedControl = try bytes(ordinary)
+             let reloaded = try JSONDecoder().decode(OrchestratorCell.self, from: encodedControl)
+-            XCTAssertTrue(String(decoding: try bytes(reloaded.getCellConfiguration()?.skeleton), as: UTF8.self).contains("chatHub.ui.helperTree.open"))
++            XCTAssertTrue(String(decoding: try bytes(reloaded.getCellConfiguration()?.skeleton), as: UTF8.self).contains("butler-workbench"))
+ 
+             var customized = old
+             customized.skeleton = .Text(SkeletonText(text: "Preserved user layout"))
+@@ -167,7 +183,7 @@ final class ButlerBuiltInConfigurationUpgradeTests: IsolatedCellTestCase {
+                 _ = try await PortholeWebSessionSupport.bootstrapValue(
+                     controlCell: compatible, requester: owner, sessionId: "provisioned-compatible-butler"
+                 )
+-                XCTAssertTrue(String(decoding: try bytes(compatible.getCellConfiguration()?.skeleton), as: UTF8.self).contains("chatHub.ui.helperTree.open"))
++                XCTAssertTrue(String(decoding: try bytes(compatible.getCellConfiguration()?.skeleton), as: UTF8.self).contains("butler-workbench"))
+             }
+             let finalMappings = await resolver.identityNamedCells(requester: owner)
+             XCTAssertEqual(finalMappings[owner.uuid]?[PersonalChatHubAccountCompatibility.referenceName], compatibleHub.uuid)
+diff --git a/Tests/AppTests/PersonalCopilotHelperTreeReachabilityTests.swift b/Tests/AppTests/PersonalCopilotHelperTreeReachabilityTests.swift
+index a84af7d0..7455a523 100644
+--- a/Tests/AppTests/PersonalCopilotHelperTreeReachabilityTests.swift
++++ b/Tests/AppTests/PersonalCopilotHelperTreeReachabilityTests.swift
+@@ -6,71 +6,86 @@ import XCTest
+ import CellBase
+ import Foundation
+ 
++/// WP-B5: Butler-arbeidsflaten (Tråder | chat | Flaten rundt) og hjelpertreets handlinger.
+ final class PersonalCopilotHelperTreeReachabilityTests: XCTestCase {
+-    func testRailHasBoundedRowsAndSharesTheConversationRow() throws {
+-        let wrapped = PersonalCopilotConfigurationFactory.withHelperTree(.Text(SkeletonText(text: "Conversation")))
+-        let decoded = try JSONDecoder().decode(SkeletonElement.self, from: JSONEncoder().encode(wrapped))
+-        guard case let .HStack(layout) = decoded, layout.elements.count == 2,
+-              case let .List(panel) = layout.elements[0],
+-              case let .VStack(chat) = layout.elements[1],
+-              case let .VStack(rail) = try PersonalCopilotConfigurationFactory.helperTreeCandidate(),
+-              case let .ScrollView(rows) = rail.elements[2],
+-              case let .Tree(visibleRows)? = rows.elements.first else {
+-            return XCTFail("Expected a rail beside the conversation with a bounded row scroller")
++    private func chatSkeleton() throws -> SkeletonElement {
++        let configuration = try XCTUnwrap(PersonalCopilotConfigurationFactory.catalogConfigurations().first { $0.name == "Co-Pilot Chat" })
++        let decoded = try JSONDecoder().decode(CellConfiguration.self, from: JSONEncoder().encode(configuration))
++        return try XCTUnwrap(decoded.skeleton)
++    }
++
++    func testWorkbenchHasTreeChatAndCanvasPanelsSideBySideFromWideWidth() throws {
++        guard case let .VStack(root) = try chatSkeleton(), root.elements.count == 3,
++              case let .VStack(treePanel) = root.elements[0],
++              case let .VStack(chatPanel) = root.elements[1],
++              case let .VStack(canvasColumn) = root.elements[2] else {
++            return XCTFail("Expected tree | chat | canvas as the root of Butler Chat")
++        }
++        XCTAssertEqual(root.modifiers?.styleRole, "butler-workbench")
++        XCTAssertEqual(root.modifiers?.maxHeightInfinity, true)
++        // Stablet er grunnoppsettet (virker også når verten ikke oppgir bredde); side om side fra 1100.
++        let variant = try XCTUnwrap(root.modifiers?.layoutVariants?.first)
++        XCTAssertEqual(variant.minAvailableWidth, 1100)
++        XCTAssertEqual(variant.axis, .horizontal)
++
++        XCTAssertEqual(treePanel.modifiers?.styleRole, "butler-tree-panel")
++        XCTAssertEqual(treePanel.modifiers?.width, 290)
++        XCTAssertEqual(treePanel.modifiers?.maxHeightInfinity, true)
++        guard let scroll = treePanel.elements.first(where: { if case .ScrollView = $0 { return true } else { return false } }),
++              case let .ScrollView(rows) = scroll, case let .Tree(tree)? = rows.elements.first else {
++            return XCTFail("The tree panel must hold the Tree in its own scroll area")
++        }
++        XCTAssertEqual(rows.modifiers?.flexGrow, 1)
++        XCTAssertEqual(tree.keypath, "chatHub.state.ui.helperTree.visibleRows")
++        XCTAssertEqual(tree.selectionActionKeypath, "chatHub.ui.helperTree.selectNode")
++        XCTAssertEqual(tree.expansionActionKeypath, "chatHub.ui.helperTree.setExpanded")
++        XCTAssertEqual(tree.selectedIDStateKeypath, "chatHub.state.ui.helperTree.scope.nodeID")
++        XCTAssertEqual(tree.levelKeypath, "level")
++
++        XCTAssertEqual(chatPanel.modifiers?.styleRole, "butler-chat-panel")
++        XCTAssertEqual(chatPanel.modifiers?.flexGrow, 1)
++        guard chatPanel.elements.count == 2, case let .List(header) = chatPanel.elements[0],
++              case let .Tabs(tabs) = chatPanel.elements[1] else {
++            return XCTFail("The chat panel is the header row list followed by the Samtale/Aktivt/Mer tabs")
+         }
+-        XCTAssertEqual(layout.modifiers?.styleRole, "butler-helper-tree-layout")
+-        XCTAssertEqual(layout.spacing, 12)
+-        XCTAssertEqual(panel.keypath, "chatHub.state.ui.helperTree.panelRows")
+-        XCTAssertEqual(panel.modifiers?.width, 288)
+-        XCTAssertNil(panel.modifiers?.visibility, "panelRows must gate the rail; root visibility cannot resolve Cell state")
+-        XCTAssertEqual(panel.elements.count, 0, "The factory leaves row data to the Cell")
+-        XCTAssertEqual(chat.modifiers?.maxWidthInfinity, true)
+-        XCTAssertEqual(chat.elements.count, 1)
+-        XCTAssertNil(rail.modifiers?.height, "The reference mockup's 1170 px frame must not reach the live chat")
+-        XCTAssertEqual(rows.axis, "vertical")
+-        XCTAssertEqual(rows.modifiers?.height, 216)
+-        XCTAssertEqual(visibleRows.keypath, "chatHub.state.ui.helperTree.visibleRows")
+-        XCTAssertEqual(visibleRows.selectionActionKeypath, "chatHub.ui.helperTree.selectNode")
+-        XCTAssertEqual(visibleRows.expansionActionKeypath, "chatHub.ui.helperTree.setExpanded")
+-        XCTAssertEqual(visibleRows.selectedIDStateKeypath, "chatHub.state.ui.helperTree.scope.nodeID")
+-        XCTAssertEqual(visibleRows.levelKeypath, "level")
+-        XCTAssertTrue(HelperTreeSkeletonReachabilityAudit.reachableActionKeypaths(.VStack(rail)).contains("chatHub.ui.helperTree.setScopeMode"))
++        XCTAssertEqual(header.keypath, "chatHub.state.ui.chatPanelRows")
++        XCTAssertEqual(tabs.modifiers?.styleRole, "butler-chat-tabs")
++        XCTAssertEqual(tabs.panels.map(\.id), ["samtale", "aktivt", "mer"])
++
++        XCTAssertEqual(canvasColumn.modifiers?.styleRole, "butler-canvas-column")
++        XCTAssertEqual(canvasColumn.modifiers?.width, 370)
++        guard case let .VStack(canvas)? = canvasColumn.elements.last else {
++            return XCTFail("The canvas column ends with Flaten rundt")
++        }
++        XCTAssertEqual(canvas.modifiers?.styleRole, "butler-widget-canvas")
++        XCTAssertNil(canvas.modifiers?.height, "Flaten rundt fills the column instead of a fixed 640 px")
++        XCTAssertEqual(canvas.modifiers?.flexGrow, 1)
+     }
+ 
+     func testFinalChatConfigurationExposesTreeAcceptanceActions() throws {
+-        let configuration = try XCTUnwrap(PersonalCopilotConfigurationFactory.catalogConfigurations().first { $0.name == "Co-Pilot Chat" })
+-        let decoded = try JSONDecoder().decode(CellConfiguration.self, from: JSONEncoder().encode(configuration))
+-        let skeleton = try XCTUnwrap(decoded.skeleton)
+-        var tree = PersonalCopilotHelperTree.migrating(helperRows: [
+-            ["id": .string("docs-rag"), "title": .string("Kilder")]
+-        ])
+-        XCTAssertFalse(tree.isOpen)
+-        XCTAssertNil(tree.apply(action: "open", payload: .object([:])))
+-        let openUI = tree.project(into: [:])
+-        guard case let .object(openTree)? = openUI["helperTree"],
+-              case let .list(panelRows)? = openTree["panelRows"],
+-              case let .object(panelRow)? = panelRows.first else {
+-            return XCTFail("Opening must supply a panel row")
+-        }
+-        XCTAssertEqual(panelRows.count, 1)
+-        XCTAssertEqual(panelRow.count, 0)
+-        // The audit has no runtime-state input: it always traverses List row
+-        // templates with hasRowData=true, even when factory elements are empty.
+-        // Thus it checks the open [{}] case above without changing the factory
+-        // default or injecting root data that SkeletonView never receives.
+-        // PDD skjelett/tre.handlinger.md, including the added close control.
+-        let expected: Set<String> = ["selectNode", "setExpanded", "setScopeMode", "open", "close"].reduce(into: []) {
++        let skeleton = try chatSkeleton()
++        // Web width: the tree is always visible, so selection, expansion and scope are the ways in.
++        // «Tråder»/«Lukk tre» (open/close) belong to the compact app-width drawer
++        // (skjelett/tre.handlinger.md) and return with `hidden` in SkeletonLayoutVariant.
++        let expected: Set<String> = ["selectNode", "setExpanded", "setScopeMode"].reduce(into: []) {
+             $0.insert("chatHub.ui.helperTree.\($1)")
+         }
+-        // WP-B1: the test-support copy predates Tree; CellBase's own audit
+-        // walks Tree rows and their selection/expansion actions (T-F2).
+         // Unqualified on purpose: CellBase also declares `struct CellBase`, so
+         // `CellBase.SkeletonReachabilityAudit` would name the struct, not the module.
+         let reachable = SkeletonReachabilityAudit.reachableActionKeypaths(skeleton)
+         XCTAssertTrue(expected.isSubset(of: reachable), "Missing actions: \(expected.subtracting(reachable).sorted())")
+         let lost = SkeletonReachabilityAudit.audit(skeleton).flatMap(\.lostActionKeypaths)
+-        XCTAssertTrue(Set(lost).intersection(expected).isEmpty)
+-        let candidateLost = SkeletonReachabilityAudit.audit(try PersonalCopilotConfigurationFactory.helperTreeCandidate()).flatMap(\.lostActionKeypaths)
+-        XCTAssertTrue(Set(candidateLost).intersection(expected).isEmpty, "Lost: \(candidateLost)")
++        XCTAssertTrue(Set(lost).intersection(expected).isEmpty, "Lost: \(lost)")
++        for action in ["chatHub.prompt.submit", "chatHub.clearComposer", "chatHub.widgets.pinFromDrop",
++                       "chatHub.widgets.unpin", "chatHub.widgets.toggleFullSurface", "chatHub.ui.setActiveTab",
++                       "chatHub.ui.restoreComponentSurface", "chatHub.assistant.dismissSuggestion"] {
++            XCTAssertTrue(reachable.contains(action), "Unreachable: \(action)")
++        }
++        // The Cell keeps its open/close actions for the app-width drawer.
++        var tree = PersonalCopilotHelperTree.migrating(helperRows: [["id": .string("docs-rag"), "title": .string("Kilder")]])
++        XCTAssertNil(tree.apply(action: "open", payload: .object([:])))
++        XCTAssertNil(tree.apply(action: "close", payload: .object([:])))
++        let scopeControls = try PersonalCopilotConfigurationFactory.helperTreeScopeControls()
++        XCTAssertTrue(SkeletonReachabilityAudit.reachableActionKeypaths(scopeControls).contains("chatHub.ui.helperTree.setScopeMode"))
+     }
+ }
+diff --git a/Tests/AppTests/PersonalCopilotHelperTreeTests.swift b/Tests/AppTests/PersonalCopilotHelperTreeTests.swift
+index 299a1ebb..f26c7672 100644
+--- a/Tests/AppTests/PersonalCopilotHelperTreeTests.swift
++++ b/Tests/AppTests/PersonalCopilotHelperTreeTests.swift
+@@ -192,7 +192,10 @@ final class PersonalCopilotHelperTreeTests: IsolatedCellTestCase {
+         XCTAssertEqual(initial["promptMessageCount"], .integer(4))
+         let subtree = try ui(await store.applyChatHelperTreeAction(requester: owner, action: "selectNode", payload: .object(["nodeID": .string("helper-docs-rag")])))
+         XCTAssertEqual(subtree["promptMessageCount"], .integer(2))
+-        XCTAssertEqual(try objects(subtree["promptMessages"]).compactMap { $0["id"]?.string }, ["legacy-1", "legacy-2"])
++        // WP-B5: «gren startet · …» står der grenen begynner i skopets logg; den er ikke en melding.
++        let subtreeRows = try objects(subtree["promptMessages"])
++        XCTAssertEqual(subtreeRows.filter { $0["kind"] != .string("branchStart") }.compactMap { $0["id"]?.string }, ["legacy-1", "legacy-2"])
++        XCTAssertEqual(subtreeRows.filter { $0["kind"] == .string("branchStart") }.compactMap { $0["id"]?.string }, ["branch-start-sources-child"])
+         let panel = try XCTUnwrap(objects(subtree["chatPanelRows"]).first)
+         XCTAssertEqual(panel["title"], .string("Kilder"))
+         XCTAssertEqual(panel["count"], .integer(2))
+@@ -203,7 +206,7 @@ final class PersonalCopilotHelperTreeTests: IsolatedCellTestCase {
+         let branchChips = try objects(childMessage["branchChips"])
+         XCTAssertEqual(branchChips.count, 1)
+         let branchChip = try XCTUnwrap(branchChips.first)
+-        XCTAssertEqual(Set(branchChip.keys), Set(["id", "label", "branchKind"]))
++        XCTAssertEqual(Set(branchChip.keys), Set(["id", "label", "branchKind", "toneColor"]))
+         XCTAssertEqual(branchChip["id"], .string("sources-child"))
+         XCTAssertEqual(branchChip["label"], .string("Underkilder"))
+         XCTAssertEqual(branchChip["branchKind"], .string("a"))
+@@ -287,7 +290,7 @@ final class PersonalCopilotHelperTreeTests: IsolatedCellTestCase {
+         let second: ValueType = .object(["id": .string("second"), "nodeID": .string(parent), "createdAt": .string("2026-09-11T10:00:00.500Z")])
+         let tied: ValueType = .object(["id": .string("tied"), "nodeID": .string(parent), "createdAt": .string("2026-09-11T10:00:00.500Z")])
+         let projected = tree.project(into: ["promptMessages": .list([second, first, second, tied])])
+-        XCTAssertEqual(try objects(projected["promptMessages"]).compactMap { $0["id"]?.string }, ["first", "second", "tied"])
++        XCTAssertEqual(try objects(projected["promptMessages"]).filter { $0["kind"] != .string("branchStart") }.compactMap { $0["id"]?.string }, ["first", "second", "tied"])
+         XCTAssertEqual(projected["promptMessageCount"], .integer(3))
+         let rows = try objects(object(projected["helperTree"])["visibleRows"])
+         XCTAssertEqual(rows.count, 6)
+diff --git a/Tests/AppTests/PersonalCopilotV1Tests.swift b/Tests/AppTests/PersonalCopilotV1Tests.swift
+index d72d8d98..fb1480a0 100644
+--- a/Tests/AppTests/PersonalCopilotV1Tests.swift
++++ b/Tests/AppTests/PersonalCopilotV1Tests.swift
+@@ -260,7 +260,9 @@ final class PersonalCopilotV1Tests: IsolatedCellTestCase {
+         XCTAssertTrue(inviteChatJSON.contains("chat-active-tool-chips"))
+         XCTAssertTrue(inviteChatJSON.contains("chatHub.state.ui.hasActiveHelperSurface"))
+         XCTAssertTrue(inviteChatJSON.contains("chatHub.state.ui.pinnedComponentSurfaces"))
+-        XCTAssertTrue(inviteChatJSON.contains("pinned-component-dock"))
++        // WP-B5: festede widgets står på Flaten rundt, ikke som dokk over skrivefeltet.
++        XCTAssertFalse(inviteChatJSON.contains("pinned-component-dock"))
++        XCTAssertTrue(inviteChatJSON.contains("butler-widget-canvas"))
+         XCTAssertTrue(inviteChatJSON.contains("snap-grid"))
+         XCTAssertTrue(inviteChatJSON.contains("component-panel-scroll"))
+         XCTAssertTrue(inviteChatJSON.contains("chatHub.state.assistant.clarification.options"))
+@@ -315,14 +317,16 @@ final class PersonalCopilotV1Tests: IsolatedCellTestCase {
+         XCTAssertTrue(inviteChatJSON.contains("chatHub.state.ui.absorbedChats"))
+         XCTAssertTrue(inviteChatJSON.contains("Til samtale"))
+         let samtalePanelJSON = try jsonString(try XCTUnwrap(tabPanel(in: topTabs, id: "samtale")))
+-        XCTAssertTrue(samtalePanelJSON.contains("Butler Chat"))
++        XCTAssertTrue(samtalePanelJSON.contains("Skriv til Butler"))
+         XCTAssertFalse(samtalePanelJSON.contains("Co-Pilot Chat"))
+-        XCTAssertTrue(samtalePanelJSON.contains("Hva vil du få gjort"))
++        XCTAssertFalse(samtalePanelJSON.contains("Hva vil du få gjort"))
+         XCTAssertTrue(samtalePanelJSON.contains(#""ScrollView""#))
+         XCTAssertTrue(samtalePanelJSON.contains("chat-prompt-scroll"))
+         XCTAssertTrue(samtalePanelJSON.contains("chat-composer-dock"))
+         XCTAssertTrue(samtalePanelJSON.contains("chatHub.state.ui.activeToolChips"))
+-        XCTAssertTrue(samtalePanelJSON.contains("chatHub.state.ui.pinnedComponentSurfaces"))
++        // WP-B5: festede widgets står på Flaten rundt i arbeidsflaten, ikke i Samtale-fanen.
++        XCTAssertFalse(samtalePanelJSON.contains("chatHub.state.ui.pinnedComponentSurfaces"))
++        XCTAssertTrue(inviteChatJSON.contains("chatHub.state.ui.pinnedComponentSurfaces"))
+         XCTAssertTrue(samtalePanelJSON.contains("chatHub.state.ui.minimizedComponentSurfaces"))
+         XCTAssertTrue(samtalePanelJSON.contains("chat-clarification-card"))
+         XCTAssertTrue(samtalePanelJSON.contains("chat-lane-chip"))
+@@ -337,7 +341,7 @@ final class PersonalCopilotV1Tests: IsolatedCellTestCase {
+         XCTAssertTrue(samtalePanelJSON.contains("chatHub.assistant.explainRoute"))
+         XCTAssertTrue(samtalePanelJSON.contains("chatHub.assistant.reinterpretDraft"))
+         XCTAssertTrue(samtalePanelJSON.contains("chatHub.assistant.answerClarification"))
+-        XCTAssertTrue(samtalePanelJSON.contains("component-panel-scroll"))
++        XCTAssertTrue(inviteChatJSON.contains("component-panel-scroll"))
+         XCTAssertFalse(samtalePanelJSON.contains("Privat prompt-samtale"))
+         XCTAssertFalse(samtalePanelJSON.localizedCaseInsensitiveContains("andre mennesker blir ikke med"))
+         XCTAssertFalse(samtalePanelJSON.contains("Co-piloten leser bare utkastet ditt"))
+@@ -351,7 +355,7 @@ final class PersonalCopilotV1Tests: IsolatedCellTestCase {
+         XCTAssertTrue(samtalePanelJSON.contains("laneLabel"))
+         XCTAssertTrue(samtalePanelJSON.contains("laneDetailPayload"))
+         XCTAssertTrue(samtalePanelJSON.contains("Avvis"))
+-        XCTAssertTrue(samtalePanelJSON.contains("Aktiv hjelper"))
++        XCTAssertTrue(inviteChatJSON.contains("Aktiv hjelper"))
+         XCTAssertFalse(samtalePanelJSON.contains("Rydd historikk"))
+         XCTAssertFalse(samtalePanelJSON.contains("Rydd komponenter"))
+         XCTAssertFalse(samtalePanelJSON.contains("Rydd hjelpere"))
+diff --git a/Tests/AppTests/PersonalCopilotWorkbenchTests.swift b/Tests/AppTests/PersonalCopilotWorkbenchTests.swift
+new file mode 100644
+index 00000000..5a6bcf9e
+--- /dev/null
++++ b/Tests/AppTests/PersonalCopilotWorkbenchTests.swift
+@@ -0,0 +1,87 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++
++@testable import App
++import XCTest
++import CellBase
++import Foundation
++
++/// WP-B5: det meldingsraden og chat-hodet i Butler-arbeidsflaten trenger fra cellen.
++final class PersonalCopilotWorkbenchTests: XCTestCase {
++    func testInitialsAndTimeLabel() {
++        XCTAssertEqual(PersonalCopilotChatPresentation.initials("Kjetil Hustveit"), "KH")
++        XCTAssertEqual(PersonalCopilotChatPresentation.initials("Butler"), "B")
++        XCTAssertEqual(PersonalCopilotChatPresentation.initials("Du"), "D")
++        XCTAssertEqual(PersonalCopilotChatPresentation.initials("  "), "")
++        // 07:12Z er 09:12 i Oslo om sommeren.
++        XCTAssertEqual(PersonalCopilotChatPresentation.timeLabel("2026-09-19T07:12:00Z"), "09:12")
++        XCTAssertEqual(PersonalCopilotChatPresentation.timeLabel("2026-09-19T07:12:00.250Z"), "09:12")
++        XCTAssertEqual(PersonalCopilotChatPresentation.timeLabel("ikke en dato"), "")
++    }
++
++    func testDismissLabelOnlyOnTheOpenSuggestionRow() {
++        let ui: Object = ["promptMessages": .list([
++            .object(["id": .string("assistant-old"), "dismissActionLabel": .string("Avvis")]),
++            .object(["id": .string("prompt-1")]),
++            .object(["id": .string("assistant-open")])
++        ])]
++        func labels(_ object: Object) -> [String?] {
++            guard case let .list(rows)? = object["promptMessages"] else { return [] }
++            return rows.map { value -> String? in
++                guard case let .object(row) = value else { return nil }
++                return row["dismissActionLabel"]?.string
++            }
++        }
++        XCTAssertEqual(labels(PersonalCopilotChatPresentation.markingOpenSuggestion(ui, rowID: "assistant-open")), [nil, nil, "Avvis"])
++        XCTAssertEqual(labels(PersonalCopilotChatPresentation.markingOpenSuggestion(ui, rowID: nil)), [nil, nil, nil])
++    }
++
++    func testScopedLogMarksWhereABranchStartsAndCountsOnlyMessages() throws {
++        var tree = PersonalCopilotHelperTree.migrating(helperRows: [["id": .string("invite"), "title": .string("Inviter")]])
++        func message(_ id: String, _ node: String, _ minute: Int) -> ValueType {
++            .object(["id": .string(id), "role": .string("user"), "nodeID": .string(node),
++                     "createdAt": .string(String(format: "2026-09-19T07:%02d:00Z", minute))])
++        }
++        let source: Object = ["promptMessages": .list([
++            message("m1", PersonalCopilotHelperTree.rootID, 10),
++            message("m2", "helper-invite", 20),
++            message("m3", "helper-invite", 21),
++            message("m4", PersonalCopilotHelperTree.rootID, 26)
++        ])]
++        func rows(_ ui: Object) -> [Object] {
++            guard case let .list(values)? = ui["promptMessages"] else { return [] }
++            return values.compactMap { if case let .object(row) = $0 { return row } else { return nil } }
++        }
++
++        let atRoot = tree.project(into: source)
++        XCTAssertEqual(rows(atRoot).map { $0["id"]?.string ?? "" }, ["m1", "branch-start-helper-invite", "m2", "m3", "m4"])
++        let separator = rows(atRoot)[1]
++        XCTAssertEqual(separator["kind"], .string("branchStart"))
++        XCTAssertEqual(separator["label"], .string("gren startet · Inviter"))
++        XCTAssertEqual(atRoot["promptMessageCount"], .integer(4), "The separator is not a message")
++        guard case let .list(panels)? = atRoot["chatPanelRows"], case let .object(panel)? = panels.first else {
++            return XCTFail("Expected chat panel row")
++        }
++        XCTAssertEqual(panel["count"], .integer(4))
++        XCTAssertEqual(panel["countLabel"], .string("4 meldinger · 1 gren i skop"))
++        guard case let .list(chips)? = rows(atRoot)[2]["branchChips"], case let .object(chip)? = chips.first else {
++            return XCTFail("A branch message carries its chip")
++        }
++        XCTAssertEqual(chip["toneColor"], .string(PersonalCopilotHelperTree.branchToneColor))
++
++        // Inside the branch itself there is nothing to mark.
++        XCTAssertNil(tree.apply(action: "selectNode", payload: .object(["nodeID": .string("helper-invite")])))
++        XCTAssertEqual(rows(tree.project(into: source)).map { $0["id"]?.string ?? "" }, ["m2", "m3"])
++    }
++
++    func testMessageRowTemplateIsTheWorkbenchRow() throws {
++        let configuration = try XCTUnwrap(PersonalCopilotConfigurationFactory.catalogConfigurations().first { $0.name == "Co-Pilot Chat" })
++        let json = String(decoding: try JSONEncoder().encode(configuration), as: UTF8.self)
++        for marker in ["butler-avatar-initials", "\"avatarColor\"", "\"timeLabel\"", "\"branchStart\"", "Skriv til Butler",
++                       "chat-prompt-can-open-helper", "chat-prompt-can-load-surface", "\"toneColor\""] {
++            XCTAssertTrue(json.contains(marker), "Missing \(marker)")
++        }
++        XCTAssertFalse(json.contains("Hva vil du få gjort?"))
++        XCTAssertFalse(json.contains("\"height\":640"))
++    }
++}
+diff --git a/Tests/AppTests/PortholeConfigurationLoadingTests.swift b/Tests/AppTests/PortholeConfigurationLoadingTests.swift
+index a145205d..fcfa8ddf 100644
+--- a/Tests/AppTests/PortholeConfigurationLoadingTests.swift
++++ b/Tests/AppTests/PortholeConfigurationLoadingTests.swift
+@@ -1508,12 +1508,19 @@ final class PortholeConfigurationLoadingTests: IsolatedCellTestCase {
+                 bootstrapConfiguration.cellReferences?.first(where: { $0.label == "chatHub" })?.endpoint,
+                 PersonalChatHubContract.endpoint
+             )
+-            guard case let .Tabs(tabs)? = bootstrapConfiguration.skeleton else {
+-                XCTFail("Expected default chat workbench to be the rendered skeleton")
++            var chatTabIDs: [String]?
++            if case let .VStack(workbench)? = bootstrapConfiguration.skeleton,
++               workbench.modifiers?.styleRole == "butler-workbench" {
++                for case let .VStack(panel) in workbench.elements {
++                    for case let .Tabs(tabs) in panel.elements { chatTabIDs = tabs.panels.map(\.id) }
++                }
++            }
++            guard let chatTabIDs else {
++                XCTFail("Expected the Butler workbench, with the chat tabs in its chat panel, as the default skeleton")
+                 try await app.asyncShutdown()
+                 return
+             }
+-            XCTAssertEqual(tabs.panels.map(\.id), ["samtale", "aktivt", "mer"])
++            XCTAssertEqual(chatTabIDs, ["samtale", "aktivt", "mer"])
+             XCTAssertNotNil(asObject(stateObject["chatHub"]))
+ 
+             let action = try await PortholeWebSessionSupport.executeAction(
+@@ -1602,8 +1609,9 @@ final class PortholeConfigurationLoadingTests: IsolatedCellTestCase {
+             )
+             guard case let .object(placeholderBootstrapObject) = placeholderBootstrap,
+                   case let .cellConfiguration(placeholderConfiguration)? = placeholderBootstrapObject["configuration"],
+-                  case .Tabs? = placeholderConfiguration.skeleton else {
+-                XCTFail("Expected built-in Hello HAVEN placeholder to render the chat workbench")
++                  case let .VStack(placeholderWorkbench)? = placeholderConfiguration.skeleton,
++                  placeholderWorkbench.modifiers?.styleRole == "butler-workbench" else {
++                XCTFail("Expected built-in Hello HAVEN placeholder to render the Butler workbench")
+                 try await app.asyncShutdown()
+                 return
+             }
+diff --git a/playwright/butler-helper-tree-purpose.spec.js b/playwright/butler-helper-tree-purpose.spec.js
+index 622bc7ac..d2d11472 100644
+--- a/playwright/butler-helper-tree-purpose.spec.js
++++ b/playwright/butler-helper-tree-purpose.spec.js
+@@ -36,8 +36,9 @@ test("helper tree: selecting a node scopes the log and counters (A2)", async ({
+   await postPortholeAction(page, "chatHub.ui.clearPromptHistory", {});
+   await openButlerChat(page);
+ 
+-  const promptRows = page.locator(".style-role-chat-prompt-log .skeleton-list-row");
+-  const composer = page.locator('textarea[placeholder*="F.eks."], textarea.skeleton-textarea').first();
++  // WP-B5: «gren startet · …» is a separator row in the log, not a message.
++  const promptRows = page.locator(".style-role-chat-prompt-log .skeleton-list-row:not(.chat-prompt-row-separator)");
++  const composer = page.locator('textarea[placeholder*="Skriv til Butler"], textarea[placeholder*="F.eks."], textarea.skeleton-textarea').first();
+   await expect(composer).toBeVisible({ timeout: 45_000 });
+   await composer.fill("hva kan du hjelpe meg med?");
+   await page.getByRole("button", { name: /^(Finn forslag|Send)$/ }).first().click();
+@@ -53,7 +54,10 @@ test("helper tree: selecting a node scopes the log and counters (A2)", async ({
+   expect(measurement.rootClarificationCards).toBeGreaterThan(0);
+   expect(measurement.rootHelpLines).toBeGreaterThan(0);
+ 
+-  await clickAndWaitForPortholeAction(page, page.getByRole("button", { name: "Tråder" }).first());
++  // WP-B5: at web width the tree is always visible in the workbench; the «Tråder» button
++  // belongs to the compact app-width drawer.
++  const openTree = page.getByRole("button", { name: "Tråder" });
++  if (await openTree.count()) await clickAndWaitForPortholeAction(page, openTree.first());
+   const tree = page.getByRole("tree", { name: "Tråder" });
+   await expect(tree).toBeVisible({ timeout: 30_000 });
+   const root = tree.locator('[role="treeitem"][data-node-id="butler"]');

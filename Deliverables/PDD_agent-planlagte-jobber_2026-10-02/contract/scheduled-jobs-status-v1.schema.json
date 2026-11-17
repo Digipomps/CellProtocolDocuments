@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digipomps.org/haven/contracts/scheduled-jobs-status-v1.schema.json",
+  "title": "HAVEN scheduled jobs status v1",
+  "description": "Svaret fra GET /scheduled-jobs på kontrollbroen, og innholdet i MCP-verktøyet agent.schedule.list. Samme regel som innboksen for saker: en tom liste betyr ikke ro. worker.state sier om planleggeren går, og readable sier om tilstanden kunne leses.",
+  "type": "object",
+  "required": [
+    "schema",
+    "generatedAt",
+    "readable",
+    "worker",
+    "items"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "haven.scheduled-jobs-status.v1"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "readable": {
+      "type": "boolean"
+    },
+    "unreadableReason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 200
+    },
+    "worker": {
+      "type": "object",
+      "required": [
+        "state"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "enum": [
+            "running",
+            "stopped",
+            "unknown"
+          ]
+        },
+        "heartbeatAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      }
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "maxRequestedJobs": {
+          "const": 10
+        },
+        "minSecondsBetweenRuns": {
+          "const": 900
+        },
+        "maxDaysUntilEnd": {
+          "const": 90
+        },
+        "defaultDaysUntilEnd": {
+          "const": 30
+        },
+        "maxLocalTaskTimeoutSeconds": {
+          "const": 900
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "origin",
+          "status",
+          "when"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60,
+            "description": "For en jobb: tittelen fra bestillingen. For en fast hendelse: title i config.json, ellers id-en."
+          },
+          "origin": {
+            "enum": [
+              "config",
+              "requested"
+            ],
+            "description": "config: fast hendelse i config.json. requested: bestilt gjennom MCP eller CLI."
+          },
+          "status": {
+            "enum": [
+              "awaiting-approval",
+              "active",
+              "paused",
+              "stopped",
+              "ended",
+              "rejected",
+              "invalid"
+            ],
+            "description": "For en fast hendelse brukes active, paused, stopped (stoppet med schedule-stop) og invalid."
+          },
+          "when": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "description": "Tidsplanen i klartekst, laget av agenten."
+          },
+          "action": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Hva som kjøres, i klartekst, laget av agenten."
+          },
+          "endsAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "nextFireAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "last": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "at",
+              "outcome"
+            ],
+            "properties": {
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "outcome": {
+                "enum": [
+                  "ok",
+                  "failed",
+                  "timeout",
+                  "interrupted",
+                  "output-limit",
+                  "refused",
+                  "no-result",
+                  "withdrawn"
+                ]
+              },
+              "summary": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 300
+              }
+            }
+          },
+          "missedCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "needsAttention": {
+            "type": "boolean"
+          },
+          "canPause": {
+            "type": "boolean"
+          },
+          "canResume": {
+            "type": "boolean"
+          },
+          "canStop": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

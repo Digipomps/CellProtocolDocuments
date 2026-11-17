@@ -1,0 +1,45 @@
+{
+  "schema": "haven.palazzo.bordbestilling.noekkelstier.v1",
+  "cell": "PalazzoBooking",
+  "source_commit": "7eb404f1f8e3baf16e93f8a1b1447ed1c6f3b508",
+  "note": "En liste, ikke en kontrakt med validator. Holdt mot kildefilene med sjekk_noekkelstier.py.",
+  "keypaths": [
+    {"keypath": "booking.state", "constant": "state", "kind": "get", "access": "r---", "who": "staff", "route": "GET /api/booking/state"},
+    {"keypath": "booking.plan", "constant": "plan", "kind": "get", "access": "r---", "who": "staff", "route": "GET /api/booking/plan"},
+    {"keypath": "booking.plan.set", "constant": "planSet", "kind": "set", "access": "-w--", "who": "owner", "route": "POST /api/booking/plan"},
+    {"keypath": "booking.area.set", "constant": "areaSet", "kind": "set", "access": "-w--", "who": "staff", "route": "POST /api/booking/area"},
+    {"keypath": "booking.availability", "constant": "availability", "kind": "set", "access": "-w--", "who": "guest", "route": "POST /api/booking/availability"},
+    {"keypath": "booking.request", "constant": "request", "kind": "set", "access": "-w--", "who": "guest", "route": "POST /api/booking/request"},
+    {"keypath": "booking.create", "constant": "create", "kind": "set", "access": "-w--", "who": "staff", "route": "POST /api/booking/create"},
+    {"keypath": "booking.walkin", "constant": "walkIn", "kind": "set", "access": "-w--", "who": "staff", "route": "POST /api/booking/walkin"},
+    {"keypath": "booking.change", "constant": "change", "kind": "set", "access": "-w--", "who": "guest", "route": "POST /api/booking/change"},
+    {"keypath": "booking.cancel", "constant": "cancel", "kind": "set", "access": "-w--", "who": "guest", "route": "POST /api/booking/cancel"},
+    {"keypath": "booking.mark", "constant": "mark", "kind": "set", "access": "-w--", "who": "staff", "route": "POST /api/booking/mark"},
+    {"keypath": "booking.promote", "constant": "promote", "kind": "set", "access": "-w--", "who": "staff", "route": "POST /api/booking/promote"},
+    {"keypath": "booking.lookup", "constant": "lookup", "kind": "set", "access": "-w--", "who": "staff", "route": "POST /api/booking/lookup"},
+    {"keypath": "booking.overview", "constant": "overview", "kind": "set", "access": "-w--", "who": "staff", "route": "POST /api/booking/overview"},
+    {"keypath": "booking.mine", "constant": "mine", "kind": "get", "access": "r---", "who": "guest", "route": "GET /api/booking/mine"},
+    {"keypath": "insight.bookings.upcoming", "constant": "upcoming", "kind": "get", "access": "r---", "who": "contract", "route": "GET /api/booking/upcoming"}
+  ],
+  "who": {
+    "guest": "Enhver som beviser kontroll over identiteten sin. Reglene avgjør hvem som eier en bestilling.",
+    "staff": "Huset, og ansatte som står på husets liste.",
+    "owner": "Bare huset.",
+    "contract": "Huset; andre bare med avtale og husets samtykke."
+  },
+  "channels": {
+    "guest": "nett",
+    "house": ["telefon", "e-post", "oppmøte", "intern", "annet"],
+    "walk_in": "walk-in"
+  },
+  "refused_409": [
+    "plan_not_configured", "in_the_past", "too_far_ahead", "closed_that_day", "not_a_bookable_time",
+    "party_too_large", "start_is_full", "no_table", "unknown_booking", "past_deadline", "not_changeable",
+    "table_taken", "table_too_small", "too_many_open_bookings"
+  ],
+  "error_400_from_rules": [
+    "invalid_date", "invalid_time", "invalid_party_size", "unknown_table", "invalid_state",
+    "duplicate_reference", "invalid_channel"
+  ],
+  "error_400_from_cell": ["invalid_payload", "invalid_plan", "unknown_area"]
+}

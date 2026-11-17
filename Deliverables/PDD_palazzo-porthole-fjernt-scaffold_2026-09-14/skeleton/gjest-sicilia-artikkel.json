@@ -1,0 +1,15 @@
+{ "name": "Palazzo artikkel", "_note": "guest.article.configuration — egen konfigurasjon per åpnet artikkel (skeleton har ikke expand). Knappene skriver entity.article.react; kommentaren via TextArea submitActionKeypath.",
+  "skeleton": { "ScrollView": { "axis": "vertical", "elements": [ { "VStack": { "spacing": 12, "modifiers": { "padding": 18, "maxWidthInfinity": true, "hAlignment": "leading" }, "elements": [
+    { "Text": { "keypath": "article.region", "modifiers": { "fontStyle": "caption" } } },
+    { "Text": { "keypath": "article.title", "modifiers": { "fontStyle": "title2", "fontWeight": "bold" } } },
+    { "Text": { "keypath": "article.body", "modifiers": { "fontStyle": "body" } } },
+    { "Text": { "keypath": "article.originLabel", "modifiers": { "fontStyle": "caption" } } },
+    { "Divider": {} },
+    { "Text": { "text": "Hva gjør du med dette?", "modifiers": { "fontStyle": "headline" } } },
+    { "HStack": { "spacing": 8, "elements": [
+      { "Button": { "keypath": "entity.article.react", "label": "Vil smake", "payload": { "articleID": "$id", "reaction": "wantToTaste" }, "icon": "fork.knife" } },
+      { "Button": { "keypath": "entity.article.react", "label": "Interessant", "payload": { "articleID": "$id", "reaction": "interesting" }, "icon": "bookmark" } },
+      { "Button": { "keypath": "entity.article.react", "label": "Ikke for meg", "payload": { "articleID": "$id", "reaction": "notForMe" }, "icon": "hand.raised" } } ] } },
+    { "TextArea": { "placeholder": "Vil du legge til noe med egne ord? (blir liggende hos deg)", "minLines": 2, "maxLines": 4, "submitOnEnter": true, "submitActionKeypath": "entity.article.react", "editorMode": "plain" } },
+    { "Text": { "text": "Bare det du trykker eller skriver lagres — aldri at du leste.", "modifiers": { "fontStyle": "caption" } } } ] } } ] } },
+  "_verify_in_porthole": ["$id settes av fabrikken ved bygging (som matchID).", "TextArea submitActionKeypath med ekstra payload (articleID, reaction: comment) — fabrikken må kunne binde payload; ellers egen keypath entity.article.comment.<id>."] }

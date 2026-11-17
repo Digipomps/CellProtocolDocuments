@@ -1,0 +1,59 @@
+# Formål i Kallimachos — velg ett, eller none
+
+- purpose://access.audit.privacy — Access, audit and privacy: Keep visibility grant-bound and mutations auditable.
+- purpose://contact.communication — Contact and communication: Help people initiate, continue, or refuse contact with explicit purpose and privacy boundaries.
+- purpose://contact.followup — Contact follow-up: Continue an existing contact or meeting thread with explicit recipient and message context.
+- purpose://contact.introduction — Contact introduction: Introduce or connect people through a purpose-bound contact request.
+- purpose://content.review-before-publish — Review content before publish: Prepare publication of notes, summaries, or public content with review, consent, and explicit confirmation.
+- purpose://digital-work — Digital work: Purposes that help people or scaffolds coordinate, collect, share, inspect, and improve digital work.
+- purpose://digital-work.collect-structured-input — Collect structured input: Collect structured answers or evidence from people or systems.
+- purpose://digital-work.coordinate — Coordinate work: Plan, coordinate, share, and track work across people, agents, or scaffolds.
+- purpose://event.agenda.recommendation — Event agenda recommendation: Recommend or open an agenda item based on current time, interests, constraints, and available event context.
+- purpose://event.meeting.draft-request — Event meeting draft request: Draft an event meeting request or introduction while requiring explicit user action before sending.
+- purpose://event.participation — Event participation: Help a person participate in an event by understanding agenda, people, privacy, and next useful actions.
+- purpose://event.privacy-preserving-networking — Privacy-preserving event networking: Help people meet others at an event while limiting profile visibility and private data exposure.
+- purpose://event.schedule.change-request — Event schedule change request: Propose a schedule change for an event item while requiring role checks and confirmation.
+- purpose://governance — Governance: Cross-cutting privacy, access, audit, preference, and owner-control purposes.
+- purpose://grounding — Grounding: Purposes that map prompts to executable, verified, side-effect-aware action plans.
+- purpose://grounding.local-model-assisted-decomposition — Local model assisted decomposition: Use a local model as proposal engine while HAVEN keeps deterministic authority.
+- purpose://gui.quality.functional-accessible — Functional accessible GUI: Ensure controls are labeled, focusable, visually stable, aesthetic, and wired to real actions.
+- purpose://human-agency — Human agency and understanding: Help people understand, choose, delegate, review, and reverse digital actions.
+- purpose://knowledge — Knowledge and methodology: Purposes that provide source evidence, freshness, methods, and reusable knowledge for decisions.
+- purpose://knowledge.explain-policy — Explain policy or rules: Explain rules, policy, or consent boundaries in plain language without inventing authority.
+- purpose://personal-context.semantic-state — Personal semantic context state: Represent owner-defined labels such as Home, Work, or lunch time without exposing raw location/time unless explicitly granted.
+- purpose://preference.owner-controlled — Owner-controlled preferences: Keep reusable preference facts explicit, scoped, inspectable, and deletable.
+- purpose://project-work.current-status-and-outstanding — Current status and outstanding work: Show where a project stands now and what remains outstanding.
+- purpose://project-work.overview-and-sharing — Project work overview and sharing: Manage projects, tasks, sharing, and current outstanding work.
+- purpose://project-work.project-portfolio — Project portfolio: Track project status, health, priorities, milestones, releases, and capacity.
+- purpose://project-work.share-selected-intent — Share selected project intent: Prepare, deliver, and open a selected project/work snapshot for a recipient.
+- purpose://project-work.work-items — Work items: Track tasks, bugs, decisions, comments, subtasks, relations, and blockers.
+- purpose://prompt.unknown — Unknown prompt purpose: Fallback when a prompt has no known canonical purpose yet.
+- purpose://purpose-taxonomy.capture-and-place — Capture and place new purposes: Detect new purpose candidates, find their nearest ancestor, and queue review when automatic placement is uncertain or consent is required.
+- purpose://quality — Quality: Cross-cutting quality purposes that support user-facing and scaffold-facing work.
+- purpose://questionnaire.access.audit — Questionnaire access audit: Keep questionnaire responses consent-gated and transport payloads minimal.
+- purpose://questionnaire.admin.authoring — Questionnaire admin authoring: Configure title, context, consent, questions, pages, and lifecycle.
+- purpose://questionnaire.campaign.complete — Complete questionnaire campaign: Create, deliver, answer, inspect, and analyze a questionnaire campaign.
+- purpose://questionnaire.delivery.consent — Questionnaire delivery and consent: Select recipients, send access-proof links, and preserve consent boundaries.
+- purpose://questionnaire.respondent.form — Respondent questionnaire form: Expose consent, questions, draft save, submit, and withdrawal paths for a respondent.
+- purpose://questionnaire.responses.analyze — Analyze questionnaire responses: Inspect counts and export response data transparently.
+- purpose://questionnaire.responses.collect — Collect questionnaire responses: Store draft and submitted answers with consent state and receipt IDs.
+- purpose://root — Alle mennesker er like mye verdt: Top-level normative anchor for HAVEN purposes.
+- purpose://scaffold.operations — Scaffold operations: Purposes for scaffolds to keep themselves connected, observable, recoverable, and aligned with HAVEN.
+- purpose://self-determination.data — Data self-determination: The owner decides the purpose, extent, place, manner, recipients and duration of any use of their own and derived data, and can verify that the decision was honoured.
+- purpose://self-determination.data.duration — Duration, withdrawal and deletion: How long use may last, and the right to change one's mind with downstream effect. New dimension: absent from the sketch.
+- purpose://self-determination.data.exercisability — Control that can actually be exercised: Control that demands expertise, time or money distributes power unevenly. Raises the sketch's ease-of-use wish to a criterion.
+- purpose://self-determination.data.locality — Place and jurisdiction of data use: The owner decides where data is stored and processed, and how many copies exist.
+- purpose://self-determination.data.manner — Manner of processing and derived data: Whether data may be linked, profiled, used for model training or otherwise derived from, and who controls the derived result.
+- purpose://self-determination.data.recipients — Recipients and delegation: Named recipients, onward delegation the owner can see, and default deny for everyone else. New dimension: the sketch had no recipient axis.
+- purpose://self-determination.data.scope — Extent of data made available: The owner decides which fields, and at what precision, are made available, including the degree of identifiability.
+- purpose://self-determination.data.use-purpose — Purpose binding for data use: Data is used only for a declared purpose the owner accepted; a new purpose requires a new acceptance.
+- purpose://self-determination.data.verifiability — Verifiability instead of trust: The owner can check that the rules were followed without having to trust the operator. Replaces the sketch's trust-in-organisation requirement.
+- purpose://skeleton.owner-entity-access — Owner entity access affordance: Ensure every production skeleton leaves the owner a visible route back to their own entity, Co-Pilot, or equivalent recovery interface.
+- purpose://source.methodology.current — Current methodology sources: Use source evidence with checked dates and stale-source policy.
+- purpose://test.acceptance — Acceptance tests: Prove that a purpose can be achieved and stays stable.
+- purpose://test.acceptance.hallucination-evaluation — Hallucination evaluation gate: Periodically test that chat, purpose decomposition, model-assisted proposals, and source-backed answers do not invent facts, refs, capabilities, or unsupported certainty.
+- purpose://test.acceptance.project-work — Project work acceptance tests: Protect project/work decomposition and cell behavior.
+- purpose://test.acceptance.purpose-decomposition — Purpose decomposition acceptance: Protect deterministic prompt decomposition and model-proposal boundaries.
+- purpose://test.acceptance.questionnaire — Questionnaire acceptance tests: Protect questionnaire decomposition and campaign behavior.
+- purpose://validation — Validation: Purposes that prove behavior through acceptance, contract, replay, GUI, and regression checks.
+- purpose://value-and-commons — Value and commons: Purposes for returning value, protecting commons, and avoiding extractive platform dynamics.

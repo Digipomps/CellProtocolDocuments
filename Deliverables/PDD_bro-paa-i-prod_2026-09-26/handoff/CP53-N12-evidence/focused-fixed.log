@@ -1,0 +1,190 @@
+warning: /Users/kjetil/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/kjetil/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: '_wt-bro-kanal-auth-20260927': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Provisioning 1 / 169]
+[Using on-disk description]
+[1 / 191] InternalCollectionsUtilities
+[1 / 22] Random
+[2 / 11] CellApple
+[6 / 15] CellApple
+[8 / 17] CellApple
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:255:9: warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+253 | struct SkeletonBorderShape: Shape {
+254 |     let radius: CGFloat
+255 |     let edges: [SkeletonEdge]?
+    |         `- warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+256 |     let rtl: Bool
+257 |     func path(in rect: CGRect) -> Path {
+
+CellBase.SkeletonEdge:1:13: note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+1 | public enum SkeletonEdge : String, Codable {
+  |             `- note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+2 |     case top
+3 |     case leading
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:5:1: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  3 | 
+  4 | import SwiftUI
+  5 | import CellBase
+    | `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  6 | #if os(macOS)
+  7 | import AppKit
+
+[#AddPreconcurrencyImport]: <https://docs.swift.org/compiler/documentation/diagnostics/add-preconcurrency-import>
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/EntityRadar/EntityScannerCell.swift:200:25: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 198 |             guard let self, self.isAdvertisementOwner(requester),
+ 199 |                   await self.validateAccess("r---", at: "advertisement", for: requester) else { return .string("denied") }
+ 200 |             let value = await self.advertisementExchange.currentPublication
+     |                         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 201 |             return value.flatMap { self.valueType(from: $0) } ?? .null
+ 202 |         })
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/EntityRadar/EntityScannerCell.swift:209:17: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 207 |             try ad.validate()
+ 208 |             if self.connectService == nil { try await self.startConnectService(requester: requester) }
+ 209 |             try await self.advertisementExchange.publish(ad)
+     |                 `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 210 |             self.pushScannerEvent(topic: "scanner.advertisement.changed", title: "Nearby Sharing Changed",
+ 211 |                 payload: ["active": .bool(true)], requesterOverride: requester)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/EntityRadar/EntityScannerCell.swift:217:17: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 215 |             guard let self, self.isAdvertisementOwner(requester),
+ 216 |                   await self.validateAccess("-w--", at: "withdrawAdvertisement", for: requester) else { return .string("denied") }
+ 217 |             try await self.advertisementExchange.publish(nil)
+     |                 `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 218 |             self.pushScannerEvent(topic: "scanner.advertisement.changed", title: "Nearby Sharing Changed",
+ 219 |                 payload: ["active": .bool(false)], requesterOverride: requester)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/EntityRadar/EntityScannerCell.swift:538:9: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 536 | 
+ 537 |     func stopConnectService(requester: Identity) async {
+ 538 |         await advertisementExchange.stop()
+     |         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 539 |         let service = connectService
+ 540 |         connectService = nil
+
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+[12 / 21] CellApple
+[16 / 21] CellApple-product
+[16 / 21] CellBaseTests-product
+[21 / 28] CellBaseTests-product
+[22 / 28] CellBaseTests-product
+[23 / 28] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:500:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 498 |         // concerns A's physical route, and preserves the receive sequence.
+ 499 |         _ = try pair.pb.gate.openPeerFrame(heldRequest.data)
+ 500 |         let pendingCommand = await bridge.auditor.loadBridgeCommandForCommandId(1)
+     |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 501 |         XCTAssertNotNil(pendingCommand)
+ 502 |         let forged = BridgeCommand(cmd: "response", payload: .string("from-c"), cid: 1,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:506:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 504 |         try await pc.gate.sendData(A.encode(forged))
+ 505 |         try await pair.deliverNext()
+ 506 |         let stillPending = await bridge.auditor.loadBridgeCommandForCommandId(1)
+     |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 507 |         XCTAssertNotNil(stillPending, "C's response must not consume B's pending cid")
+ 508 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:532:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 530 |             await pair.pb.bridge!.sendCommand(command: .description, identity: pair.b.owner, payload: nil)
+ 531 |             let oldCommand = try await pair.next(), captured = try pair.receiver(oldCommand)
+ 532 |             let firstCID = await pair.pb.bridge!.auditor.loadBridgeCommandForCommandId(1)
+     |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 533 |             XCTAssertEqual(firstCID?.cid, 1)
+ 534 |             try await pair.deliver(oldCommand)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:541:26: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 539 |             await fresh.1.bridge!.sendCommand(command: .description, identity: pair.b.owner, payload: nil)
+ 540 |             let newCommand = try await pair.next()
+ 541 |             let newCID = await fresh.1.bridge!.auditor.loadBridgeCommandForCommandId(1)
+     |                          `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 542 |             XCTAssertEqual(firstCID?.cid, newCID?.cid, "Actual Base cid reuse")
+ 543 |             // A callback already captured by an old transport cannot close the new one.
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:865:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 863 |                 XCTAssertNotEqual(oldKey, freshKey)
+ 864 |                 let request = BridgeCommand(cmd: "description", identity: pair.a.owner.publicIdentitySnapshot(), payload: nil, cid: 1)
+ 865 |                 let stored = await fresh.0.bridge!.auditor.storeBridgeCommand(request, for: 1)
+     |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 866 |                 XCTAssertTrue(stored)
+ 867 |                 // M knows the public new generation and the expected counter.
+
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+[25 / 28] CellBaseTests-product
+[27 / 31] CellBaseTests-product
+[29 / 31] CellBaseTests-product
+Build complete! (5,78 sek)
+Test Suite 'Selected tests' started at 2026-09-29 07:27:48.376.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-09-29 07:27:48.376.
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-09-29 07:27:48.376.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 07:27:48.376.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 07:27:48.431.
+Test Suite 'CellNearbyTests.xctest' started at 2026-09-29 07:27:48.431.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-09-29 07:27:48.431.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 07:27:48.431.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' started at 2026-09-29 07:27:48.489.
+Test Suite 'CellBaseTests.xctest' started at 2026-09-29 07:27:48.489.
+Test Suite 'ScannerNearbyInteractionTests' started at 2026-09-29 07:27:48.489.
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testCloseRevokeDisconnectAndStopInvalidateAndDiscardQueuedAndLateCallbacks]' started.
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:1022: error: -[CellBaseTests.ScannerNearbyInteractionTests testCloseRevokeDisconnectAndStopInvalidateAndDiscardQueuedAndLateCallbacks] : XCTAssertEqual failed: threw error "invalidProof"
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/Cells/Bridging/BridgeChannelTransport.swift:291: error: -[CellBaseTests.ScannerNearbyInteractionTests testCloseRevokeDisconnectAndStopInvalidateAndDiscardQueuedAndLateCallbacks] : failed: caught error: "CancellationError()"
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testCloseRevokeDisconnectAndStopInvalidateAndDiscardQueuedAndLateCallbacks]' failed (2.505 seconds).
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testConcurrentPeersKeepTokensSessionsAndResultsOnTheirAuthenticatedPeer]' started.
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:1022: error: -[CellBaseTests.ScannerNearbyInteractionTests testConcurrentPeersKeepTokensSessionsAndResultsOnTheirAuthenticatedPeer] : XCTAssertEqual failed: threw error "invalidProof"
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/Cells/Bridging/BridgeChannelTransport.swift:291: error: -[CellBaseTests.ScannerNearbyInteractionTests testConcurrentPeersKeepTokensSessionsAndResultsOnTheirAuthenticatedPeer] : failed: caught error: "CancellationError()"
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testConcurrentPeersKeepTokensSessionsAndResultsOnTheirAuthenticatedPeer]' failed (0.211 seconds).
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testPrincipalSetupTargetAndVersionRejectBeforeCreatingOrRunningNI]' started.
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:1022: error: -[CellBaseTests.ScannerNearbyInteractionTests testPrincipalSetupTargetAndVersionRejectBeforeCreatingOrRunningNI] : XCTAssertEqual failed: threw error "invalidProof"
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/Cells/Bridging/BridgeChannelTransport.swift:291: error: -[CellBaseTests.ScannerNearbyInteractionTests testPrincipalSetupTargetAndVersionRejectBeforeCreatingOrRunningNI] : failed: caught error: "CancellationError()"
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testPrincipalSetupTargetAndVersionRejectBeforeCreatingOrRunningNI]' failed (0.202 seconds).
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testReconnectRejectsOldTokenContextAndCallbacksWithoutTouchingNewSession]' started.
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:1022: error: -[CellBaseTests.ScannerNearbyInteractionTests testReconnectRejectsOldTokenContextAndCallbacksWithoutTouchingNewSession] : XCTAssertEqual failed: threw error "invalidProof"
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/Cells/Bridging/BridgeChannelTransport.swift:291: error: -[CellBaseTests.ScannerNearbyInteractionTests testReconnectRejectsOldTokenContextAndCallbacksWithoutTouchingNewSession] : failed: caught error: "CancellationError()"
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testReconnectRejectsOldTokenContextAndCallbacksWithoutTouchingNewSession]' failed (0.088 seconds).
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testSuspensionTimeoutAndInvalidationNeverCreateReplacementSessionOrReuseOldCallback]' started.
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:1022: error: -[CellBaseTests.ScannerNearbyInteractionTests testSuspensionTimeoutAndInvalidationNeverCreateReplacementSessionOrReuseOldCallback] : XCTAssertEqual failed: threw error "invalidProof"
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellBase/Cells/Bridging/BridgeChannelTransport.swift:291: error: -[CellBaseTests.ScannerNearbyInteractionTests testSuspensionTimeoutAndInvalidationNeverCreateReplacementSessionOrReuseOldCallback] : failed: caught error: "CancellationError()"
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testSuspensionTimeoutAndInvalidationNeverCreateReplacementSessionOrReuseOldCallback]' failed (0.052 seconds).
+Test Suite 'ScannerNearbyInteractionTests' failed at 2026-09-29 07:27:51.549.
+	 Executed 5 tests, with 10 failures (10 unexpected) in 3.059 (3.059) seconds
+Test Suite 'ScannerPeerAuthenticationTests' started at 2026-09-29 07:27:51.549.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testDiscoveryTokenSkipsPendingThenRevokedPeerWithoutBreakingHandshake]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testDiscoveryTokenSkipsPendingThenRevokedPeerWithoutBreakingHandshake]' passed (0.137 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testDiscoveryTokenUsesExistingSendByteQuota]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testDiscoveryTokenUsesExistingSendByteQuota]' passed (0.107 seconds).
+Test Suite 'ScannerPeerAuthenticationTests' passed at 2026-09-29 07:27:51.793.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.244 (0.245) seconds
+Test Suite 'CellBaseTests.xctest' failed at 2026-09-29 07:27:51.794.
+	 Executed 7 tests, with 10 failures (10 unexpected) in 3.303 (3.305) seconds
+Test Suite 'Selected tests' failed at 2026-09-29 07:27:51.794.
+	 Executed 7 tests, with 10 failures (10 unexpected) in 3.303 (3.305) seconds
+Inited radar service with peerId: <MCPeerID: 0x103fd5280 DisplayName = HAVEN-first30a>
+Inited radar service with peerId: <MCPeerID: 0x103fdb970 DisplayName = HAVEN-second30>
+Inited radar service with peerId: <MCPeerID: 0x103fd45f0 DisplayName = HAVEN-third686>
+Inited radar service with peerId: <MCPeerID: 0x75d0b2c060 DisplayName = HAVEN-first9c7>
+Inited radar service with peerId: <MCPeerID: 0x75d0b2c070 DisplayName = HAVEN-second9c>
+Inited radar service with peerId: <MCPeerID: 0x75d0b2c080 DisplayName = HAVEN-third991>
+Inited radar service with peerId: <MCPeerID: 0x75d0b2c0c0 DisplayName = HAVEN-firstdb2>
+Inited radar service with peerId: <MCPeerID: 0x75d0b2c0d0 DisplayName = HAVEN-seconddb>
+Inited radar service with peerId: <MCPeerID: 0x75d0b2c0e0 DisplayName = HAVEN-thirdb46>
+Inited radar service with peerId: <MCPeerID: 0x75d0b2c120 DisplayName = HAVEN-firstfd8>
+Inited radar service with peerId: <MCPeerID: 0x75d0b2c130 DisplayName = HAVEN-secondfd>
+Inited radar service with peerId: <MCPeerID: 0x75d0b2c160 DisplayName = HAVEN-firste2e>
+Inited radar service with peerId: <MCPeerID: 0x75d0b2c170 DisplayName = HAVEN-seconde2>
+Inited radar service with peerId: <MCPeerID: 0x75d0b2c1a0 DisplayName = HAVEN-first683>
+Inited radar service with peerId: <MCPeerID: 0x75d0b2c1b0 DisplayName = HAVEN-second68>
+Inited radar service with peerId: <MCPeerID: 0x75d0b2c1c0 DisplayName = HAVEN-third8dc>
+Inited radar service with peerId: <MCPeerID: 0x75d0b2c200 DisplayName = HAVEN-firstb45>
+Inited radar service with peerId: <MCPeerID: 0x75d0b2c210 DisplayName = HAVEN-secondb4>
+Note: Some test targets reported failures:
+  - CellBaseTests (XCTest)

@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digipomps.org/haven/contracts/scheduled-job-runtime-v1.schema.json",
+  "title": "HAVEN scheduled job runtime v1 (kjøretilstand)",
+  "description": "State/ScheduledJobs/<id>.runtime.json. Skrives bare av arbeideren. lastOccurrence og currentRun skrives før en kjøring starter, slik at samme tidspunkt aldri kjøres to ganger.",
+  "type": "object",
+  "required": [
+    "schema",
+    "id",
+    "specDigest",
+    "runCount",
+    "missedCount",
+    "updatedAt"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "haven.scheduled-job-runtime.v1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+    },
+    "specDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "countingFrom": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Tidspunktet jobben først ble godkjent. Ingenting før dette regnes som passert."
+    },
+    "lastOccurrence": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "nextFireAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "runCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "missedCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "missedSince": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "currentRun": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "required": [
+        "occurrence",
+        "startedAt"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "occurrence": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "pid": {
+          "type": "integer"
+        }
+      }
+    },
+    "pendingSpool": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "required": [
+        "occurrence",
+        "file",
+        "queuedAt"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "occurrence": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "file": {
+          "type": "string",
+          "maxLength": 140
+        },
+        "queuedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "lastRun": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "required": [
+        "occurrence",
+        "startedAt",
+        "outcome"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "occurrence": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "finishedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "outcome": {
+          "enum": [
+            "ok",
+            "failed",
+            "timeout",
+            "interrupted",
+            "output-limit",
+            "refused",
+            "no-result",
+            "withdrawn"
+          ],
+          "description": "no-result: køen ga ikke noe resultat innen fristen. withdrawn: køfila ble trukket tilbake før køen tok den, fordi jobben ble satt på pause, stoppet, gikk ut eller mistet godkjenningen."
+        },
+        "exitCode": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "summary": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 2000
+        },
+        "log": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 300
+        }
+      }
+    },
+    "attention": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "required": [
+        "kind",
+        "occurrence",
+        "since"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "failed",
+            "missed",
+            "invalid"
+          ]
+        },
+        "occurrence": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "since": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 200
+        }
+      }
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "Palazzo Gjest",
+  "_note": "Feiltilstand: signalet utløp før gjesten svarte. Samme List som treffkortet; raden har state=expired og cellen setter stateLabel. Knappene byttes til én: «Fjern».",
+  "skeleton": { "Section": {
+    "header": { "Text": { "text": "Palazzo husker" } },
+    "content": [
+      { "List": { "keypath": "entity.match.pending", "flowElementSkeleton": { "VStack": {
+        "spacing": 6,
+        "modifiers": { "padding": 14, "cornerRadius": 12, "maxWidthInfinity": true, "hAlignment": "leading", "styleClasses": ["pz-match-card", "pz-match-expired"] },
+        "elements": [
+          { "Text": { "keypath": "signalTitle", "modifiers": { "fontStyle": "headline", "fontWeight": "bold" } } },
+          { "Text": { "keypath": "explanation", "modifiers": { "fontStyle": "body" } } },
+          { "Text": { "keypath": "stateLabel", "modifiers": { "fontStyle": "caption" } } },
+          { "Button": { "keypath": "entity.match.dismiss", "label": "Fjern", "payload": { "matchID": "$id" }, "icon": "xmark" } }
+        ]
+      } } } }
+    ]
+  } },
+  "_verify_in_porthole": [ "Én rad-skeleton per tilstand krever betinget visning i rad — ikke støttet i dag. Cellen leverer i stedet to lister: entity.match.pending og entity.match.expired, hver med egen List. Bildet viser expired-listen." ]
+}

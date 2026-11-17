@@ -1,0 +1,429 @@
+diff --git a/Documentation/ExternalAgreementAdmissionProbe.md b/Documentation/ExternalAgreementAdmissionProbe.md
+new file mode 100644
+index 0000000..1d66e24
+--- /dev/null
++++ b/Documentation/ExternalAgreementAdmissionProbe.md
+@@ -0,0 +1,38 @@
++# External Agreement admission — local probe
++
++This document describes the isolated a36 probe on base `68069b6`. It is not a release or deployment claim.
++
++At the base revision, `Contract.SigningPayload` covers issuer, subject, domain,
++Agreement and times, but not the Cell UUID. The probe adds optional
++`targetCellUUID` to both the wire Contract and signed payload. Nil retains the
++legacy payload and semantics. `acceptExternallySignedAgreement` requires an
++exact Cell binding; unbound legacy contracts are rejected on this new path.
++Existing local admission and its `.ownerApprovalRequired` policy are retained.
++Cell-bound authorization is also checked on later access.
++
++The import freezes the presented Contract through JSON before suspending,
++verifies the issuer/subject/domain/signature/time, proves the presenting
++subject, compares grants, duration, policy binding and conditions with the
++current template, evaluates conditions and installs only public descriptors.
++The fixture keeps owner, host and subject in separate ephemeral vaults. The
++host cannot sign as the owner. The owner sends JSON bytes; the subject presents
++the decoded Contract directly to the Cell API. This is a single-process local
++probe, not a tested two-machine transport or deployed correspondence Cell.
++
++`BridgeIdentityVault.signMessageForIdentity` is an existing challenge-signing
++proxy. `BridgeBase.consumeCommand` requires a matching local operation lease
++from `BridgeIdentityProofAuthorization` before its local vault signs. A public
++subject descriptor by itself cannot prove key control. This probe adds no
++bridge command for importing a Contract; remote import remains untested.
++
++Same-identity owner reads and separately admitted subject reads both require
++key control. `GeneralCell` does not select a different authentication mode for
++admission and ordinary access. Apple vault paths may use user-presence-protected
++Keychain keys and reuse an authentication context. A fresh Touch ID/password
++prompt on each admission, and no prompt on agent read/send, are not established
++by this probe.
++
++Evidence from the HAVEN root: `HAVEN-Deploy/_handoff/KORR-UT/bolk1/` and
++`CellProtocolDocuments/Deliverables/PDD_kryptert-korrespondanse-med-vedlegg-ut_2026-10-06/handoff/BOLK-1-RAPPORT.md`.
++The document is retained in the local probe commit and its exported patch;
++no main-branch implementation is claimed.
+diff --git a/Sources/CellBase/Agreement/Contract.swift b/Sources/CellBase/Agreement/Contract.swift
+index 5404e50..5f0a8b1 100644
+--- a/Sources/CellBase/Agreement/Contract.swift
++++ b/Sources/CellBase/Agreement/Contract.swift
+@@ -19,6 +19,7 @@ public struct Contract: Codable {
+     /// that signature to one subject and one domain. It is not a bilateral or
+     /// multi-party signature format.
+     public static let issuerOnlySubjectBoundSemantics = "issuer_only_subject_bound_v1"
++    public static let issuerOnlySubjectCellBoundSemantics = "issuer_only_subject_cell_bound_v2"
+     public static let maximumDuration: TimeInterval = 60 * 60 * 24 * 365
+     public static let allowedClockSkew: TimeInterval = 300
+     public var uuid: String
+@@ -29,11 +30,13 @@ public struct Contract: Codable {
+     public var issuedAt: TimeInterval
+     public var expiresAt: TimeInterval
+     public var signature: Data?
++    /// Required by external admission. Nil retains the existing local-contract wire format.
++    public var targetCellUUID: String? = nil
+ 
+     /// Human- and machine-readable semantics for the existing wire format.
+     /// This is derived rather than encoded, preserving wire compatibility.
+     public var signingSemantics: String {
+-        Self.issuerOnlySubjectBoundSemantics
++        targetCellUUID == nil ? Self.issuerOnlySubjectBoundSemantics : Self.issuerOnlySubjectCellBoundSemantics
+     }
+ 
+     var authorizationDeduplicationKey: String {
+@@ -69,6 +72,7 @@ public struct Contract: Codable {
+         case issuedAt
+         case expiresAt
+         case signature
++        case targetCellUUID
+     }
+ 
+     private struct SigningPayload: Codable {
+@@ -81,6 +85,7 @@ public struct Contract: Codable {
+         var domain: String
+         var issuedAt: TimeInterval
+         var expiresAt: TimeInterval
++        var targetCellUUID: String?
+     }
+ 
+     public static func signed(
+@@ -88,7 +93,8 @@ public struct Contract: Codable {
+         issuer: Identity,
+         subject: Identity,
+         domain: String,
+-        issuedAt: Date = Date()
++        issuedAt: Date = Date(),
++        targetCellUUID: String? = nil
+     ) async throws -> Contract {
+         let agreementSnapshot = try snapshot(agreement)
+         var contract = Contract(
+@@ -99,7 +105,8 @@ public struct Contract: Codable {
+             domain: domain,
+             issuedAt: issuedAt.timeIntervalSince1970,
+             expiresAt: issuedAt.addingTimeInterval(TimeInterval(agreementSnapshot.duration)).timeIntervalSince1970,
+-            signature: nil
++            signature: nil,
++            targetCellUUID: targetCellUUID
+         )
+         guard let signature = try await issuer.sign(data: contract.signingData()) else {
+             throw ContractError.signingFailed
+@@ -221,7 +228,8 @@ public struct Contract: Codable {
+             subjectSigningKeyFingerprint: subject.signingPublicKeyFingerprint,
+             domain: domain,
+             issuedAt: issuedAt,
+-            expiresAt: expiresAt
++            expiresAt: expiresAt,
++            targetCellUUID: targetCellUUID
+         )
+         return try Self.canonicalEncoder().encode(payload)
+     }
+diff --git a/Sources/CellBase/Cells/GeneralCell/GeneralCell.swift b/Sources/CellBase/Cells/GeneralCell/GeneralCell.swift
+index 923b36c..b4ba43c 100644
+--- a/Sources/CellBase/Cells/GeneralCell/GeneralCell.swift
++++ b/Sources/CellBase/Cells/GeneralCell/GeneralCell.swift
+@@ -1450,6 +1450,60 @@ open class GeneralCell: CellProtocol, OwnerInstantiable, Codable, CellAuthorizat
+         }
+     }
+ 
++    /// Installs an owner-signed, cell-bound Contract presented by its proven subject.
++    /// The host needs only the owner's public identity. No owner signing proxy is used.
++    public func acceptExternallySignedAgreement(
++        _ presented: Contract,
++        for identity: Identity
++    ) async -> AgreementState {
++        // Freeze all mutable Agreement/Identity references before any suspension.
++        guard !CellBase.debugValidateAccessForEverything,
++              let bytes = try? JSONEncoder().encode(presented),
++              let contract = try? JSONDecoder().decode(Contract.self, from: bytes) else {
++            return .rejected
++        }
++        do {
++            try await ensureRuntimeReady()
++        } catch {
++            return .rejected
++        }
++        guard contract.targetCellUUID == uuid,
++              await contract.verifyAuthorizationBinding(
++                expectedIssuer: owner,
++                expectedSubject: identity,
++                expectedDomain: identityDomain,
++                now: authorizationClock()
++              ),
++              await checkIdentityOrigin(identity, against: contract.subject) else {
++            return .rejected
++        }
++        // Reuse the exact local-admission template check without rewriting signed bytes.
++        guard let request = try? contract.agreement.publicDescriptorSnapshot() else {
++            return .rejected
++        }
++        request.state = .template
++        guard agreementDerivedFromTemplate(request: request, subject: identity) != nil else {
++            return .rejected
++        }
++        let conditionsResolved = await Self.$isEvaluatingAuthorizationConditions.withValue(true) {
++            await allConditionsResolved(
++                contract.agreement.conditions,
++                context: ConnectContext(source: nil, target: self, identity: identity)
++            )
++        }
++        guard conditionsResolved,
++              contract.temporalStatus(now: authorizationClock()) == .active else {
++            return .rejected
++        }
++        let authorization = await auditor.installAuthorization(
++            contract: contract,
++            member: contract.subject.publicIdentitySnapshot(),
++            restoring: persistedAuthorizationSnapshot()
++        )
++        applyPersistedAuthorizationSnapshot(authorization)
++        return .signed
++    }
++
+     private func admissionPolicyAllows(
+         _ agreement: Agreement,
+         ownerAuthorized: Bool
+@@ -2200,6 +2254,9 @@ open class GeneralCell: CellProtocol, OwnerInstantiable, Codable, CellAuthorizat
+         }
+         var relevantContracts = [Contract]()
+         for currentContract in await authorizationContracts() {
++            guard currentContract.targetCellUUID == nil || currentContract.targetCellUUID == uuid else {
++                continue
++            }
+             guard await currentContract.verifyAuthorizationBinding(
+                 expectedIssuer: owner,
+                 expectedSubject: identity,
+diff --git a/Tests/CellBaseTests/ExternalAgreementAdmissionTests.swift b/Tests/CellBaseTests/ExternalAgreementAdmissionTests.swift
+new file mode 100644
+index 0000000..a955c85
+--- /dev/null
++++ b/Tests/CellBaseTests/ExternalAgreementAdmissionTests.swift
+@@ -0,0 +1,231 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++import XCTest
++@_spi(HAVENRuntime) @testable import CellBase
++
++final class ExternalAgreementAdmissionTests: XCTestCase {
++    private var previousVault: IdentityVaultProtocol?
++    private let now = Date(timeIntervalSince1970: 1_800_000_000)
++    override func setUp() {
++        super.setUp()
++        XCTAssertFalse(CellBase.debugValidateAccessForEverything, "Probe requires real authorization")
++        previousVault = CellBase.defaultIdentityVault
++        CellBase.defaultIdentityVault = EphemeralIdentityVault()
++    }
++    override func tearDown() {
++        CellBase.defaultIdentityVault = previousVault
++        super.tearDown()
++    }
++    // Uses the existing trusted runtime-binding scope only to install handlers;
++    // access and membership still use the production authorization path.
++    private final class ProbeCell: GeneralCell {
++        required init(owner: Identity) async {
++            await super.init(owner: owner)
++            name = "probe-name"
++        }
++        required init(from decoder: Decoder) throws { try super.init(from: decoder) }
++        override func installCellRuntimeBindingsForAccess() async throws {
++            await addInterceptForGet(requester: storedOwnerIdentity, key: "name") { _, _ in
++                .string(self.name)
++            }
++            await addInterceptForSet(requester: storedOwnerIdentity, key: "name") { _, value, _ in
++                if case .string(let value) = value { self.name = value }
++                return .string(self.name)
++            }
++        }
++    }
++    private struct Fixture {
++        let a: EphemeralIdentityVault
++        let b: EphemeralIdentityVault
++        let sVault: EphemeralIdentityVault
++        let owner: Identity
++        let subject: Identity
++        let cell: GeneralCell
++    }
++    private func identity(_ vault: EphemeralIdentityVault, _ label: String) async -> Identity {
++        var identity = Identity(UUID().uuidString, displayName: label, identityVault: vault)
++        await vault.addIdentity(identity: &identity, for: "private")
++        return identity
++    }
++    private func fixture() async -> Fixture {
++        let a = EphemeralIdentityVault(), b = EphemeralIdentityVault(), s = EphemeralIdentityVault()
++        let owner = await identity(a, "test-owner")
++        let subject = await identity(s, "test-subject")
++        CellBase.defaultIdentityVault = b
++        let cell = await ProbeCell(owner: owner.publicIdentitySnapshot())
++        cell.authorizationClock = { self.now }
++        cell.agreementTemplate.conditions = []
++        cell.agreementTemplate.grants = [Grant(keypath: "name", permission: "r---")]
++        cell.agreementTemplate.duration = 3600
++        return Fixture(a: a, b: b, sVault: s, owner: owner, subject: subject, cell: cell)
++    }
++    private func signed(_ f: Fixture, issuer: Identity? = nil, resource: String? = nil,
++                        duration: Int = 600, issuedAt: Date? = nil, path: String = "name", domain: String? = nil) async throws -> Contract {
++        let agreement = Agreement(owner: f.owner.publicIdentitySnapshot())
++        agreement.state = .signed
++        agreement.signatories = [f.owner.publicIdentitySnapshot(), f.subject.publicIdentitySnapshot()]
++        agreement.conditions = []
++        agreement.grants = [Grant(keypath: path, permission: "r---")]
++        agreement.duration = duration
++        let contract = try await Contract.signed(agreement: agreement, issuer: issuer ?? f.owner,
++            subject: f.subject.publicIdentitySnapshot(), domain: domain ?? f.cell.identityDomain,
++            issuedAt: issuedAt ?? now, targetCellUUID: resource ?? f.cell.uuid)
++        let wire = try JSONDecoder().decode(Contract.self, from: JSONEncoder().encode(contract))
++        let validSignature = await wire.verifyCryptographicSignature()
++        XCTAssertTrue(validSignature, "Negative tests must start with authentic signed bytes")
++        return wire
++    }
++    private struct Snapshot: Decodable {
++        let contracts: [Contract]
++        let members: [Identity]
++    }
++    private func snapshot(_ cell: GeneralCell) throws -> Snapshot {
++        try JSONDecoder().decode(Snapshot.self, from: JSONEncoder().encode(cell))
++    }
++    private func denied(_ contract: Contract, _ f: Fixture, presenter: Identity? = nil) async throws {
++        let state = await f.cell.acceptExternallySignedAgreement(contract, for: presenter ?? f.subject)
++        XCTAssertEqual(state, .rejected)
++        let snapshot = try snapshot(f.cell)
++        XCTAssertEqual(snapshot.contracts.count, 0)
++        XCTAssertEqual(snapshot.members.count, 0)
++    }
++    func testExternalOwnerSignatureAdmitsSubjectWithoutOwnerKeyInHostAndRejectsWrite() async throws {
++        let f = await fixture()
++        XCTAssertNil(f.cell.owner.identityVault)
++        let ownerInB = await f.b.identity(forUUID: f.owner.uuid)
++        XCTAssertNil(ownerInB)
++        do { _ = try await f.b.signMessageForIdentity(messageData: Data("probe".utf8), identity: f.owner); XCTFail("B signed as owner") } catch {}
++        let contract = try await signed(f)
++        XCTAssertNil(contract.issuer.identityVault)
++        XCTAssertNil(contract.subject.identityVault)
++        let result = await f.cell.acceptExternallySignedAgreement(contract, for: f.subject)
++        XCTAssertEqual(result, .signed)
++        let read = try await f.cell.get(keypath: "name", requester: f.subject)
++        XCTAssertEqual(read, .string("probe-name"))
++        do { _ = try await f.cell.set(keypath: "name", value: .string("forbidden"), requester: f.subject); XCTFail("Write admitted") } catch {}
++        XCTAssertEqual(f.cell.name, "probe-name")
++        let snapshot = try snapshot(f.cell)
++        XCTAssertEqual(snapshot.members.count, 1)
++        XCTAssertEqual(snapshot.contracts.count, 1)
++        XCTAssertNil(snapshot.members.first?.identityVault)
++    }
++    func testRejectsSignatureFromOtherKeyWithOwnerUUID() async throws {
++        let f = await fixture()
++        let vault = EphemeralIdentityVault()
++        var impostor = Identity(f.owner.uuid, displayName: "test-impostor", identityVault: vault)
++        await vault.addIdentity(identity: &impostor, for: "private")
++        try await denied(try await signed(f, issuer: impostor), f)
++    }
++    func testRejectsOwnerSignatureForOtherCellWithSameTemplateAndDomain() async throws {
++        let f = await fixture()
++        let other = await GeneralCell(owner: f.owner.publicIdentitySnapshot())
++        other.identityDomain = f.cell.identityDomain
++        other.agreementTemplate = f.cell.agreementTemplate
++        try await denied(try await signed(f, resource: other.uuid), f)
++    }
++    func testRejectsExpiredSignature() async throws {
++        let f = await fixture()
++        try await denied(try await signed(f, issuedAt: now.addingTimeInterval(-1200)), f)
++    }
++    func testRejectsNotYetValidSignature() async throws {
++        let f = await fixture()
++        try await denied(try await signed(f, issuedAt: now.addingTimeInterval(601)), f)
++    }
++    func testRejectsSubjectWithoutPrivateKeyProof() async throws {
++        let f = await fixture()
++        try await denied(try await signed(f), f, presenter: f.subject.publicIdentitySnapshot())
++    }
++    func testRejectsGrantOutsideTemplate() async throws {
++        let f = await fixture()
++        try await denied(try await signed(f, path: "members"), f)
++    }
++    func testRejectsDurationBeyondTemplate() async throws {
++        let f = await fixture()
++        try await denied(try await signed(f, duration: 3601), f)
++    }
++    func testRejectsThirdIdentityPresentingSubjectsContractAndReading() async throws {
++        let f = await fixture()
++        let third = await identity(EphemeralIdentityVault(), "test-third")
++        let contract = try await signed(f)
++        try await denied(contract, f, presenter: third)
++        let admitted = await f.cell.acceptExternallySignedAgreement(contract, for: f.subject)
++        XCTAssertEqual(admitted, .signed)
++        do { _ = try await f.cell.get(keypath: "name", requester: third); XCTFail("Third identity read") } catch {}
++    }
++    func testRepeatedPresentationDoesNotGrowMembersOrContracts() async throws {
++        let f = await fixture()
++        let contract = try await signed(f)
++        for _ in 0..<2 {
++            let result = await f.cell.acceptExternallySignedAgreement(contract, for: f.subject)
++            XCTAssertEqual(result, .signed)
++        }
++        let snapshot = try snapshot(f.cell)
++        XCTAssertEqual(snapshot.members.count, 1)
++        XCTAssertEqual(snapshot.contracts.count, 1)
++    }
++    func testRejectsHostAddAgreementWithoutOwnerPrivateKey() async throws {
++        let f = await fixture()
++        let request = try f.cell.agreementTemplate.publicDescriptorSnapshot()
++        let result = await f.cell.addAgreement(request, for: f.subject, authorizedBy: f.cell.owner)
++        XCTAssertEqual(result, .rejected)
++        let snapshot = try snapshot(f.cell)
++        XCTAssertTrue(snapshot.contracts.isEmpty)
++    }
++    func testOwnerSameIdentityRequiresKeyProofForOrdinaryRead() async throws {
++        let f = await fixture()
++        _ = try await f.cell.get(keypath: "name", requester: f.owner)
++        do { _ = try await f.cell.get(keypath: "name", requester: f.owner.publicIdentitySnapshot()); XCTFail("Owner without proof read") } catch {}
++    }
++    func testOwnerAndSeparateAgentIdentityBothRequireTheirOwnKeyProof() async throws {
++        let f = await fixture()
++        let result = await f.cell.acceptExternallySignedAgreement(try await signed(f), for: f.subject)
++        XCTAssertEqual(result, .signed)
++        _ = try await f.cell.get(keypath: "name", requester: f.subject)
++        do { _ = try await f.cell.get(keypath: "name", requester: f.subject.publicIdentitySnapshot()); XCTFail("Agent without proof read") } catch {}
++        _ = try await f.cell.get(keypath: "name", requester: f.owner)
++    }
++    func testRejectsChangedCellBindingAfterWireRoundTrip() async throws {
++        let f = await fixture()
++        let contract = try await signed(f)
++        var json = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(contract)) as? [String: Any])
++        json["targetCellUUID"] = "test-other-cell"
++        let modified = try JSONDecoder().decode(Contract.self, from: JSONSerialization.data(withJSONObject: json))
++        let valid = await modified.verifyCryptographicSignature()
++        XCTAssertFalse(valid)
++    }
++    func testRejectsUnboundLegacyContractWhileKeepingItsSignatureValid() async throws {
++        let f = await fixture()
++        let agreement = Agreement(owner: f.owner.publicIdentitySnapshot())
++        agreement.state = .signed
++        agreement.conditions = []
++        agreement.signatories = [f.owner.publicIdentitySnapshot(), f.subject.publicIdentitySnapshot()]
++        agreement.grants = f.cell.agreementTemplate.grants
++        agreement.duration = 600
++        let legacy = try await Contract.signed(agreement: agreement, issuer: f.owner,
++            subject: f.subject.publicIdentitySnapshot(), domain: f.cell.identityDomain, issuedAt: now)
++        let wire = try JSONDecoder().decode(Contract.self, from: JSONEncoder().encode(legacy))
++        XCTAssertNil(wire.targetCellUUID)
++        XCTAssertEqual(wire.signingSemantics, Contract.issuerOnlySubjectBoundSemantics)
++        let valid = await wire.verifyCryptographicSignature()
++        XCTAssertTrue(valid)
++        try await denied(wire, f)
++    }
++    func testRejectsOwnerSignatureForWrongDomain() async throws {
++        let f = await fixture()
++        try await denied(try await signed(f, domain: "other-domain"), f)
++    }
++    func testRejectsConditionsDifferentFromCurrentTemplate() async throws {
++        let f = await fixture()
++        let contract = try await signed(f)
++        f.cell.agreementTemplate.conditions = [GrantCondition(requestedGrant: "identity.displayName", requestedPermission: "r---")]
++        try await denied(contract, f)
++    }
++    func testPublicRemoteSubjectWithoutSigningProxyCannotProveControl() async throws {
++        let f = await fixture()
++        let proved = await f.cell.verifyRequesterIdentityControl(f.subject.publicIdentitySnapshot())
++        XCTAssertFalse(proved)
++        let localProof = await f.cell.verifyRequesterIdentityControl(f.subject)
++        XCTAssertTrue(localProof)
++    }
++}
++

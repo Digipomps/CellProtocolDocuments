@@ -1,0 +1,60 @@
+{
+  "head": "a4a2c01bd111ac6fc9b5de0bc6fe4effebfe2463",
+  "commands": [
+    {
+      "name": "final-build",
+      "command": [
+        "swift",
+        "build",
+        "--disable-sandbox",
+        "--disable-automatic-resolution",
+        "--cache-path",
+        "/private/tmp/bro-swift-cache",
+        "--jobs",
+        "4"
+      ],
+      "exit": 0,
+      "seconds": 8.529737292,
+      "last_executed": null,
+      "log": "final-build.log"
+    },
+    {
+      "name": "final-test",
+      "command": [
+        "swift",
+        "test",
+        "--disable-sandbox",
+        "--disable-automatic-resolution",
+        "--cache-path",
+        "/private/tmp/bro-swift-cache",
+        "--jobs",
+        "4"
+      ],
+      "exit": 1,
+      "seconds": 60.406077374999995,
+      "last_executed": "Executed 1475 tests, with 12 tests skipped and 3 failures (3 unexpected) in 57.113 (57.212) seconds",
+      "log": "final-test.log"
+    },
+    {
+      "name": "final-tsan",
+      "command": [
+        "swift",
+        "test",
+        "--disable-sandbox",
+        "--disable-automatic-resolution",
+        "--cache-path",
+        "/private/tmp/bro-swift-cache",
+        "--jobs",
+        "4",
+        "--sanitize",
+        "thread",
+        "--filter",
+        "PublisherAsyncLifetimeTests|BridgeDescriptionConcurrencyTests|EntityScannerConsumerSecurityTests|ScannerNearbyInteractionTests|ScannerPeerAuthenticationTests|ScannerServiceInvitationTests|ScannerAdmissionTests|BridgePeerV3Tests|BridgePeerRecordLayerTests|BridgePeerFlowControlTests|BridgeMultiplexingTests|BridgeMuxSendLifetimeTests|BridgeResponseLifetimeTests|BridgeFactoryLifetimeTests|BridgeSigningLifetimeTests"
+      ],
+      "exit": 0,
+      "seconds": 80.443434208,
+      "last_executed": "Executed 135 tests, with 0 failures (0 unexpected) in 38.395 (38.423) seconds",
+      "log": "final-tsan.log"
+    }
+  ]
+}

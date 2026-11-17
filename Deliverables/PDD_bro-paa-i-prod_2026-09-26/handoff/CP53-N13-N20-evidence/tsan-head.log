@@ -1,0 +1,283 @@
+warning: /Users/kjetil/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/kjetil/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: '_wt-bro-kanal-auth-20260927': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Provisioning 1 / 169]
+[Using on-disk description]
+[1 / 173] BitCollections
+[1 / 1122] ConsoleKit
+[9 / 1761] CryptoSwift
+[89 / 846] Logging
+[108 / 843] Logging
+[141 / 838] CellBaseTests-product
+[199 / 834] CAsyncHTTPClient
+[226 / 837] BigInt
+[257 / 840] OrderedCollections
+[269 / 838] HashTreeCollections
+[300 / 834] RoutingKit-product
+[318 / 837] KeyPathResolver
+[354 / 834] HavenPerspectiveSchemas
+[377 / 831] ConsoleKitTerminal
+[401 / 829] Logging
+[444 / 827] ConsoleKit
+[453 / 828] Atomics
+[476 / 826] DequeModule
+[496 / 824] TaxonomyResolver-product
+[500 / 827] CellNearbyTests-product
+[525 / 823] NIOEmbedded
+[545 / 824] NIOCore
+[547 / 824] CellNearbyTests-product
+[566 / 825] _NIOFileSystem
+[594 / 825] NIOWebSocket
+[617 / 828] NIOWebSocket
+[629 / 826] MultipartKit
+[654 / 824] NIOExtras
+[665 / 824] NIOPosix
+[688 / 820] ConsoleKit
+[702 / 820] NIOSOCKS
+[714 / 819] NIOFoundationCompat-product
+[720 / 819] AsyncHTTPClient
+[728 / 819] CellBase
+[737 / 819] CellApple
+[738 / 819] Vapor
+[755 / 817] haven-commons-product
+[756 / 817] PurposeInterestBenchmarkSupport
+[761 / 819] PurposeInterestBenchmarkSupport
+[770 / 818] CellVapor-product
+[771 / 817] CellVapor
+[774 / 817] CellRuntimeBenchmarks-product
+[779 / 817] CellVapor-product
+[779 / 817] CellRuntimeBenchmarks-product
+[780 / 817] CellRuntimeBenchmarks-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/EntityRadar/EntityScannerCell.swift:200:25: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 198 |             guard let self, self.isAdvertisementOwner(requester),
+ 199 |                   await self.validateAccess("r---", at: "advertisement", for: requester) else { return .string("denied") }
+ 200 |             let value = await self.advertisementExchange.currentPublication
+     |                         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 201 |             return value.flatMap { self.valueType(from: $0) } ?? .null
+ 202 |         })
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/EntityRadar/EntityScannerCell.swift:209:17: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 207 |             try ad.validate()
+ 208 |             if self.connectService == nil { try await self.startConnectService(requester: requester) }
+ 209 |             try await self.advertisementExchange.publish(ad)
+     |                 `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 210 |             self.pushScannerEvent(topic: "scanner.advertisement.changed", title: "Nearby Sharing Changed",
+ 211 |                 payload: ["active": .bool(true)], requesterOverride: requester)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/EntityRadar/EntityScannerCell.swift:217:17: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 215 |             guard let self, self.isAdvertisementOwner(requester),
+ 216 |                   await self.validateAccess("-w--", at: "withdrawAdvertisement", for: requester) else { return .string("denied") }
+ 217 |             try await self.advertisementExchange.publish(nil)
+     |                 `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 218 |             self.pushScannerEvent(topic: "scanner.advertisement.changed", title: "Nearby Sharing Changed",
+ 219 |                 payload: ["active": .bool(false)], requesterOverride: requester)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/EntityRadar/EntityScannerCell.swift:538:9: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 536 | 
+ 537 |     func stopConnectService(requester: Identity) async {
+ 538 |         await advertisementExchange.stop()
+     |         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 539 |         let service = connectService
+ 540 |         connectService = nil
+
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+[781 / 817] CellApple
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:255:9: warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+253 | struct SkeletonBorderShape: Shape {
+254 |     let radius: CGFloat
+255 |     let edges: [SkeletonEdge]?
+    |         `- warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+256 |     let rtl: Bool
+257 |     func path(in rect: CGRect) -> Path {
+
+CellBase.SkeletonEdge:1:13: note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+1 | public enum SkeletonEdge : String, Codable {
+  |             `- note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+2 |     case top
+3 |     case leading
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:5:1: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  3 | 
+  4 | import SwiftUI
+  5 | import CellBase
+    | `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  6 | #if os(macOS)
+  7 | import AppKit
+
+[#AddPreconcurrencyImport]: <https://docs.swift.org/compiler/documentation/diagnostics/add-preconcurrency-import>
+[788 / 814] CellApple
+[801 / 812] CellBaseTests-product
+[805 / 816] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:500:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 498 |         // concerns A's physical route, and preserves the receive sequence.
+ 499 |         _ = try pair.pb.gate.openPeerFrame(heldRequest.data)
+ 500 |         let pendingCommand = await bridge.auditor.loadBridgeCommandForCommandId(1)
+     |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 501 |         XCTAssertNotNil(pendingCommand)
+ 502 |         let forged = BridgeCommand(cmd: "response", payload: .string("from-c"), cid: 1,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:506:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 504 |         try await pc.gate.sendData(A.encode(forged))
+ 505 |         try await pair.deliverNext()
+ 506 |         let stillPending = await bridge.auditor.loadBridgeCommandForCommandId(1)
+     |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 507 |         XCTAssertNotNil(stillPending, "C's response must not consume B's pending cid")
+ 508 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:532:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 530 |             await pair.pb.bridge!.sendCommand(command: .description, identity: pair.b.owner, payload: nil)
+ 531 |             let oldCommand = try await pair.next(), captured = try pair.receiver(oldCommand)
+ 532 |             let firstCID = await pair.pb.bridge!.auditor.loadBridgeCommandForCommandId(1)
+     |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 533 |             XCTAssertEqual(firstCID?.cid, 1)
+ 534 |             try await pair.deliver(oldCommand)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:541:26: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 539 |             await fresh.1.bridge!.sendCommand(command: .description, identity: pair.b.owner, payload: nil)
+ 540 |             let newCommand = try await pair.next()
+ 541 |             let newCID = await fresh.1.bridge!.auditor.loadBridgeCommandForCommandId(1)
+     |                          `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 542 |             XCTAssertEqual(firstCID?.cid, newCID?.cid, "Actual Base cid reuse")
+ 543 |             // A callback already captured by an old transport cannot close the new one.
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:860:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 858 |                 XCTAssertNotEqual(oldKey, freshKey)
+ 859 |                 let request = BridgeCommand(cmd: "description", identity: pair.a.owner.publicIdentitySnapshot(), payload: nil, cid: 1)
+ 860 |                 let stored = await fresh.0.bridge!.auditor.storeBridgeCommand(request, for: 1)
+     |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 861 |                 XCTAssertTrue(stored)
+ 862 |                 // M knows the public new generation and the expected counter.
+
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+[810 / 816] CellBaseTests-product
+[812 / 816] CellBaseTests-product
+[813 / 816] CellBaseTests-product
+[814 / 816] CellBaseTests-product
+Build complete! (12,26 sek)
+Test Suite 'Selected tests' started at 2026-09-29 06:55:20.358.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-09-29 06:55:20.359.
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-09-29 06:55:20.359.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 06:55:20.359.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 06:55:22.717.
+Test Suite 'CellNearbyTests.xctest' started at 2026-09-29 06:55:22.718.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-09-29 06:55:22.718.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 06:55:22.718.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 06:55:25.129.
+Test Suite 'CellBaseTests.xctest' started at 2026-09-29 06:55:25.130.
+Test Suite 'BridgeDescriptionConcurrencyTests' started at 2026-09-29 06:55:25.130.
+Test Case '-[CellBaseTests.BridgeDescriptionConcurrencyTests testOverlappingDescriptionResponsesAndAdvertisementsRetainCoherentSnapshots]' started.
+Test Case '-[CellBaseTests.BridgeDescriptionConcurrencyTests testOverlappingDescriptionResponsesAndAdvertisementsRetainCoherentSnapshots]' passed (0.144 seconds).
+Test Case '-[CellBaseTests.BridgeDescriptionConcurrencyTests testUnexpectedDescriptionPayloadDoesNotReplaceTheLastAcceptedSnapshot]' started.
+Test Case '-[CellBaseTests.BridgeDescriptionConcurrencyTests testUnexpectedDescriptionPayloadDoesNotReplaceTheLastAcceptedSnapshot]' passed (0.002 seconds).
+Test Suite 'BridgeDescriptionConcurrencyTests' passed at 2026-09-29 06:55:25.275.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.146 (0.146) seconds
+Test Suite 'EntityScannerConsumerSecurityTests' started at 2026-09-29 06:55:25.276.
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testConcurrentAcceptancesConsumePendingExactlyOnce]' started.
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testConcurrentAcceptancesConsumePendingExactlyOnce]' passed (0.125 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testEverySignedAcceptanceBindingRejectsBeforeStateOrStorageAndRealEncounterPersists]' started.
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testEverySignedAcceptanceBindingRejectsBeforeStateOrStorageAndRealEncounterPersists]' passed (0.304 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testGlobalCountAndByteBudgetsWithManyAuthenticatedPeersAndContactIDs]' started.
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testGlobalCountAndByteBudgetsWithManyAuthenticatedPeersAndContactIDs]' passed (2.665 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testPendingExpiryDuringVerificationAndFutureSignedAcceptanceCannotPersist]' started.
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testPendingExpiryDuringVerificationAndFutureSignedAcceptanceCannotPersist]' passed (0.134 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testPendingRequestFloodInvalidProofsTTLAndRetirementStayBoundedWithHealthyPeer]' started.
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testPendingRequestFloodInvalidProofsTTLAndRetirementStayBoundedWithHealthyPeer]' passed (0.577 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testRealConsumerRetainsLeaseAcrossEveryAwaitAndDropsRetiredGeneration]' started.
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testRealConsumerRetainsLeaseAcrossEveryAwaitAndDropsRetiredGeneration]' passed (1.673 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testRealRequestAndUserAcceptanceStoreBothSidesAndRejectSameUUIDOtherKey]' started.
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testRealRequestAndUserAcceptanceStoreBothSidesAndRejectSameUUIDOtherKey]' passed (0.085 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testSameSigningIdentityOnTwoSessionsPersistsTheResponderRole]' started.
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testSameSigningIdentityOnTwoSessionsPersistsTheResponderRole]' passed (0.055 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testSubscriberMayRevokeAfterCommitWithoutDeadlockOrLaterPublication]' started.
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testSubscriberMayRevokeAfterCommitWithoutDeadlockOrLaterPublication]' passed (0.118 seconds).
+Test Suite 'EntityScannerConsumerSecurityTests' passed at 2026-09-29 06:55:31.012.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 5.736 (5.737) seconds
+Test Suite 'CellBaseTests.xctest' passed at 2026-09-29 06:55:31.012.
+	 Executed 11 tests, with 0 failures (0 unexpected) in 5.881 (5.883) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 06:55:31.012.
+	 Executed 11 tests, with 0 failures (0 unexpected) in 5.881 (5.884) seconds
+Inited radar service with peerId: <MCPeerID: 0x111703860 DisplayName = HAVEN-firstc0a>
+Inited radar service with peerId: <MCPeerID: 0x1117037c0 DisplayName = HAVEN-secondc0>
+Initing Entity Anchor (Apple) cell for owner: 1831AC5A-1DBB-45C9-B595-E45F4A015846
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x1117050a0 DisplayName = HAVEN-first28a>
+Inited radar service with peerId: <MCPeerID: 0x111705060 DisplayName = HAVEN-second28>
+Initing Entity Anchor (Apple) cell for owner: 2246BA5A-3F69-4A25-9C5B-BE7948AA62F6
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x111704090 DisplayName = HAVEN-thirdfc1>
+Inited radar service with peerId: <MCPeerID: 0x111703db0 DisplayName = HAVEN-firsted5>
+Inited radar service with peerId: <MCPeerID: 0x111703d60 DisplayName = HAVEN-seconded>
+Initing Entity Anchor (Apple) cell for owner: 537FEE1E-BDEA-4D73-8A70-755C065E5C42
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x1117048c0 DisplayName = HAVEN-third877>
+Inited radar service with peerId: <MCPeerID: 0x111704c60 DisplayName = HAVEN-thirddef>
+Inited radar service with peerId: <MCPeerID: 0x111704bd0 DisplayName = HAVEN-third893>
+Inited radar service with peerId: <MCPeerID: 0x111704b70 DisplayName = HAVEN-third1bc>
+Inited radar service with peerId: <MCPeerID: 0x1117047b0 DisplayName = HAVEN-thirda49>
+Inited radar service with peerId: <MCPeerID: 0x111704b00 DisplayName = HAVEN-thirdb7b>
+Inited radar service with peerId: <MCPeerID: 0x111703cd0 DisplayName = HAVEN-third261>
+Inited radar service with peerId: <MCPeerID: 0x111703ca0 DisplayName = HAVEN-third252>
+Inited radar service with peerId: <MCPeerID: 0x111703360 DisplayName = HAVEN-firste2b>
+Inited radar service with peerId: <MCPeerID: 0x111703320 DisplayName = HAVEN-seconde2>
+Initing Entity Anchor (Apple) cell for owner: 5889527F-E2F6-4F5A-8C47-9DC7D71C4FE5
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x1117031f0 DisplayName = HAVEN-first0b2>
+Inited radar service with peerId: <MCPeerID: 0x111703150 DisplayName = HAVEN-second0b>
+Initing Entity Anchor (Apple) cell for owner: 64CEB920-D2C7-4088-9D1E-A9E9EAD9D545
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x111704530 DisplayName = HAVEN-thirdb26>
+Inited radar service with peerId: <MCPeerID: 0x111702d20 DisplayName = HAVEN-firstbaf>
+Inited radar service with peerId: <MCPeerID: 0x111702ce0 DisplayName = HAVEN-secondba>
+Initing Entity Anchor (Apple) cell for owner: ABA440D6-84D3-46A5-911E-19645EC284C0
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x111705f10 DisplayName = HAVEN-first6bc>
+Inited radar service with peerId: <MCPeerID: 0x111705ed0 DisplayName = HAVEN-second6b>
+Initing Entity Anchor (Apple) cell for owner: C70AD889-A247-421F-833A-ED386C35DD03
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x111704490 DisplayName = HAVEN-first527>
+Inited radar service with peerId: <MCPeerID: 0x111704450 DisplayName = HAVEN-second52>
+Initing Entity Anchor (Apple) cell for owner: FF2D6502-B20E-45E2-84FA-8C9A7F7D9141
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x111702c50 DisplayName = HAVEN-first715>
+Inited radar service with peerId: <MCPeerID: 0x111702c00 DisplayName = HAVEN-second71>
+Initing Entity Anchor (Apple) cell for owner: F4008A14-C556-4C7C-8BA9-93C313581434
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x111704a60 DisplayName = HAVEN-first8a2>
+Inited radar service with peerId: <MCPeerID: 0x111704a20 DisplayName = HAVEN-second8a>
+Initing Entity Anchor (Apple) cell for owner: B2B6E1A4-0552-4ED7-840A-FB25D0360E27
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x111703040 DisplayName = HAVEN-first7e7>
+Inited radar service with peerId: <MCPeerID: 0x111703000 DisplayName = HAVEN-second7e>
+Initing Entity Anchor (Apple) cell for owner: 61A49639-11D6-4754-A649-C54FBB9C16DC
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x111702ed0 DisplayName = HAVEN-first62d>
+Inited radar service with peerId: <MCPeerID: 0x111702e90 DisplayName = HAVEN-second62>
+Initing Entity Anchor (Apple) cell for owner: 5B5346A7-CFC1-406D-A371-BF4EC734F013
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x111704470 DisplayName = HAVEN-firstb7c>
+Inited radar service with peerId: <MCPeerID: 0x111705ee0 DisplayName = HAVEN-secondb7>
+Initing Entity Anchor (Apple) cell for owner: 76296B4C-B8CF-4582-8142-FD789290035E
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x111704300 DisplayName = HAVEN-firstddf>
+Inited radar service with peerId: <MCPeerID: 0x1117042c0 DisplayName = HAVEN-seconddd>
+Initing Entity Anchor (Apple) cell for owner: 9907AEDB-0E69-449F-B9C1-4DD4988FA71C
+*********** Finished setup keys in Entity Anchor ***********
+Initing Entity Anchor (Apple) cell for owner: 4E75E6E2-93E9-458A-BF33-4B0EF7F6B69D
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x111704400 DisplayName = HAVEN-first77c>
+Inited radar service with peerId: <MCPeerID: 0x111706e10 DisplayName = HAVEN-second77>
+Initing Entity Anchor (Apple) cell for owner: BA17D295-EB36-4BFE-83D5-0C1DDE18386D
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x111706e90 DisplayName = HAVEN-firstb6d>
+Inited radar service with peerId: <MCPeerID: 0x111706ed0 DisplayName = HAVEN-secondb6>
+Initing Entity Anchor (Apple) cell for owner: 10DD7F93-7C6B-4696-A63A-56119703ED0F
+*********** Finished setup keys in Entity Anchor ***********

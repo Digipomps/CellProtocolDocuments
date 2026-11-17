@@ -1,0 +1,255 @@
+diff -ruN work_v4/Sources/CellApple/Cells/EntityAnchorCell.swift work/Sources/CellApple/Cells/EntityAnchorCell.swift
+--- work_v4/Sources/CellApple/Cells/EntityAnchorCell.swift	2026-09-26 00:30:49.050167665 +0000
++++ work/Sources/CellApple/Cells/EntityAnchorCell.swift	2026-09-26 00:30:49.075654009 +0000
+@@ -77,6 +77,7 @@
+         self.agreementTemplate.ensureGrant("rw--", for: "entityRepresentation")
+         self.agreementTemplate.ensureGrant("r--s", for: "dataInventory")
+         self.agreementTemplate.ensureGrant("rw--", for: "chronicle")
++        self.agreementTemplate.ensureGrant("r---", for: "trace")
+         self.agreementTemplate.ensureGrant("rw--", for: "identityLinks")
+         self.agreementTemplate.ensureGrant("r---", for: "entityAuthority")
+         self.agreementTemplate.ensureGrant("r---", for: "entityContactSchema")
+@@ -131,6 +132,20 @@
+             throw KeypathStorageErrors.denied
+         })
+ 
++        await addInterceptForGet(requester: owner, key: "trace", getValueIntercept: {
++            keypath, requester in
++            if await self.validateAccess("r---", at: "trace", for: requester) {
++                do {
++                    return try self.storage.get(keypath: keypath)
++                } catch {
++                    if keypath == EntityChangeTrace.rootKeypath { return .list([]) }
++                    throw error
++                }
++            } else {
++                throw KeypathStorageErrors.denied
++            }
++        })
++
+         await addInterceptForGet(requester: owner, key: "agreements", getValueIntercept: {
+             keypath, requester in
+             if await self.validateAccess("r---", at: "agreements", for: requester) {
+@@ -490,6 +505,7 @@
+         await registerExploreContract(requester: requester, key: "proofs", method: .get, input: .null, returns: storedValue, permissions: [], required: false, description: .string("Reads owner-only proof data."))
+         await registerExploreContract(requester: requester, key: "relations", method: .set, input: storedValue, returns: .null, permissions: ["-w--"], required: false, description: .string("Stores owner entity relation data."))
+         await registerExploreContract(requester: requester, key: "relations", method: .get, input: .null, returns: storedValue, permissions: ["r---"], required: false, description: .string("Reads owner entity relation data."))
++        await registerExploreContract(requester: requester, key: "trace", method: .get, input: .null, returns: ExploreContract.schema(type: "array"), permissions: ["r---"], required: false, description: .string("Reads the owner entity change trace: one entry per accepted batchPersist or direct write — signer, keypaths, purpose, model, receipt."))
+         await registerExploreContract(requester: requester, key: "chronicle", method: .get, input: .null, returns: storedValue, permissions: ["r---"], required: false, description: .string("Reads the owner entity chronicle."))
+         await registerExploreContract(requester: requester, key: "entityAuthority", method: .get, input: .null, returns: ExploreContract.schema(type: "object"), permissions: ["r---"], required: false, description: .string("Reads the signed Entity authority epoch, revision, head hash, and declared durability boundary."))
+         await registerExploreContract(requester: requester, key: "entityContactSchema", method: .get, input: .null, returns: EntityValidatedContactRecordV1.schemaExploreReturn(), permissions: ["r---"], required: true, description: .string("Reads the value-free, fail-closed schema for owner-signed validated contact persistence."))
+diff -ruN work_v4/Sources/CellBase/PersistingCells/EntityChangeTrace.swift work/Sources/CellBase/PersistingCells/EntityChangeTrace.swift
+--- work_v4/Sources/CellBase/PersistingCells/EntityChangeTrace.swift	2026-09-26 00:30:49.049042844 +0000
++++ work/Sources/CellBase/PersistingCells/EntityChangeTrace.swift	2026-09-26 00:31:08.427077546 +0000
+@@ -7,12 +7,18 @@
+ // purpose://candidate.entitetsdata.no-write-without-owner-proof
+ //
+ // Every accepted change to entity data leaves exactly one entry in the
+-// entity's own chronicle: who signed, which keypaths changed, which purpose
++// entity's own trace: who signed, which keypaths changed, which purpose
+ // the change served, and which model proposed it when one did. One batch,
+ // one entry — not one per field. The entry is written in the same snapshot
+ // as the change, so there is no state where the change exists and the
+ // trace does not.
+ //
++// The trace lives at its own root keypath, `trace`, next to `chronicle` —
++// not inside it. The chronicle list is a wire-level contract that hosts
++// compare entry for entry (EntityRelationHostParityTests); the trace is the
++// anchor's own record of what it accepted, and must never change what a
++// batch wrote.
++//
+ // The same file holds the one purpose rule the anchor enforces itself:
+ // `purpose://prompt.unknown` fails closed. A change that cannot say what it
+ // is for is not persisted (lesson.purpose-never-grants-rights).
+@@ -41,7 +47,8 @@
+ public enum EntityChangeTrace {
+     public static let unknownPurposeRef = "purpose://prompt.unknown"
+     public static let entryIDPrefix = "trace-"
+-    public static let chronicleAppendKeypath = "chronicle[+]"
++    public static let rootKeypath = "trace"
++    public static let appendKeypath = "trace[+]"
+ 
+     public enum Kind: String, Codable, Sendable {
+         case batchPersist = "entity.batchPersist"
+@@ -79,7 +86,7 @@
+         }
+     }
+ 
+-    /// One chronicle entry for one accepted batch.
++    /// One trace entry for one accepted batch.
+     public static func entry(
+         for envelope: EntityBatchPersistEnvelope,
+         signedBy requester: Identity,
+@@ -113,7 +120,7 @@
+         return .object(object)
+     }
+ 
+-    /// One chronicle entry for one direct keypath write by a proven owner.
++    /// One trace entry for one direct keypath write by a proven owner.
+     public static func entry(
+         keypath: String,
+         signedBy requester: Identity,
+@@ -132,17 +139,16 @@
+         ])
+     }
+ 
+-    /// Appends the entry to the entity's chronicle list. `chronicle[+]` turns
+-    /// the empty stub object into a list on first use, which is how the
+-    /// relation chronicle already treats it.
++    /// Appends the entry to the entity's trace list. `trace[+]` creates the
++    /// list on first use.
+     public static func append(_ entry: ValueType, to entity: inout Entity) throws {
+-        try entity.set(keypath: chronicleAppendKeypath, setValue: entry)
++        try entity.set(keypath: appendKeypath, setValue: entry)
+     }
+ 
+-    /// The trace entries in a chronicle value, oldest first. Tolerates the
+-    /// pre-trace stub object and relation events living in the same list.
+-    public static func entries(in chronicle: ValueType?) -> [Object] {
+-        guard case let .list(items)? = chronicle else { return [] }
++    /// The trace entries in a trace value, oldest first. Tolerates an absent
++    /// or empty root.
++    public static func entries(in trace: ValueType?) -> [Object] {
++        guard case let .list(items)? = trace else { return [] }
+         return items.compactMap { item -> Object? in
+             guard case let .object(object) = item,
+                   case let .string(id)? = object["id"],
+diff -ruN work_v4/Sources/CellVapor/Cells/EntityAnchorCell.swift work/Sources/CellVapor/Cells/EntityAnchorCell.swift
+--- work_v4/Sources/CellVapor/Cells/EntityAnchorCell.swift	2026-09-26 00:30:49.049472457 +0000
++++ work/Sources/CellVapor/Cells/EntityAnchorCell.swift	2026-09-26 00:30:49.074677858 +0000
+@@ -77,6 +77,7 @@
+         self.agreementTemplate.ensureGrant("rw--", for: "entityRepresentation")
+         self.agreementTemplate.ensureGrant("r--s", for: "dataInventory")
+         self.agreementTemplate.ensureGrant("rw--", for: "chronicle")
++        self.agreementTemplate.ensureGrant("r---", for: "trace")
+         self.agreementTemplate.ensureGrant("rw--", for: "identityLinks")
+         self.agreementTemplate.ensureGrant("r---", for: "entityAuthority")
+         self.agreementTemplate.ensureGrant("r---", for: "entityContactSchema")
+@@ -176,6 +177,20 @@
+             throw KeypathStorageErrors.denied
+         })
+ 
++        await addInterceptForGet(requester: owner, key: "trace", getValueIntercept: {
++            keypath, requester in
++            if await self.validateAccess("r---", at: "trace", for: requester) {
++                do {
++                    return try self.storage.get(keypath: keypath)
++                } catch {
++                    if keypath == EntityChangeTrace.rootKeypath { return .list([]) }
++                    throw error
++                }
++            } else {
++                throw KeypathStorageErrors.denied
++            }
++        })
++
+         await addInterceptForGet(requester: owner, key: "agreements", getValueIntercept: {
+             keypath, requester in
+             if await self.validateAccess("r---", at: "agreements", for: requester) {
+@@ -462,6 +477,7 @@
+         await registerExploreContract(requester: requester, key: "proofs", method: .get, input: .null, returns: storedValue, permissions: ["r---"], required: false, description: .string("Reads proof data under the configured Agreement policy."))
+         await registerExploreContract(requester: requester, key: "relations", method: .set, input: storedValue, returns: .null, permissions: ["-w--"], required: false, description: .string("Stores owner entity relation data."))
+         await registerExploreContract(requester: requester, key: "relations", method: .get, input: .null, returns: storedValue, permissions: ["r---"], required: false, description: .string("Reads owner entity relation data."))
++        await registerExploreContract(requester: requester, key: "trace", method: .get, input: .null, returns: ExploreContract.schema(type: "array"), permissions: ["r---"], required: false, description: .string("Reads the owner entity change trace: one entry per accepted batchPersist or direct write — signer, keypaths, purpose, model, receipt."))
+         await registerExploreContract(requester: requester, key: "chronicle", method: .get, input: .null, returns: storedValue, permissions: ["r---"], required: false, description: .string("Reads the owner entity chronicle."))
+         await registerExploreContract(requester: requester, key: "entityAuthority", method: .get, input: .null, returns: ExploreContract.schema(type: "object"), permissions: ["r---"], required: false, description: .string("Reads the signed Entity authority epoch, revision, head hash, and declared durability boundary."))
+         await registerExploreContract(requester: requester, key: "entityContactSchema", method: .get, input: .null, returns: EntityValidatedContactRecordV1.schemaExploreReturn(), permissions: ["r---"], required: true, description: .string("Reads the value-free, fail-closed schema for owner-signed validated contact persistence."))
+diff -ruN work_v4/Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift work/Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift
+--- work_v4/Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift	2026-09-26 00:30:49.050666968 +0000
++++ work/Tests/CellBaseTests/EntityAnchorAccessBoundaryTests.swift	2026-09-26 00:31:08.422130809 +0000
+@@ -100,7 +100,7 @@
+ 
+             let b = await SimulatedEntity.make("B")
+             let claimant = SimulatedEntity.keylessClaimant(of: owner)
+-            for keypath in ["person", "relations", "proofs", "agreements", "identityLinks", "chronicle"] {
++            for keypath in ["person", "relations", "proofs", "agreements", "identityLinks", "chronicle", "trace"] {
+                 // The owner reads. (identityLinks and chronicle are the ones the spec names first.)
+                 do {
+                     _ = try await anchor.get(keypath: keypath, requester: owner)
+@@ -157,7 +157,7 @@
+             _ = try await anchor.set(keypath: "person.nickname", value: .string("Ada"), requester: a.owner)
+ 
+             // Read: every entity keypath.
+-            for keypath in ["person", "relations", "proofs", "agreements", "identityLinks", "identityLinks.state", "chronicle", "entityAuthority", "dataInventory"] {
++            for keypath in ["person", "relations", "proofs", "agreements", "identityLinks", "identityLinks.state", "chronicle", "trace", "entityAuthority", "dataInventory"] {
+                 await XCTAssertThrowsAsync(try await anchor.get(keypath: keypath, requester: admin), "\(tag) read \(keypath)")
+             }
+             // Write.
+@@ -262,7 +262,7 @@
+             XCTAssertEqual(response["errorCode"], .string("request_signature_invalid"), tag)
+             let absent7 = await read(anchor, "person.headline", as: a.owner)
+             XCTAssertNil(absent7, "\(tag) forged write landed")
+-            let chronicle8 = try await anchor.get(keypath: "chronicle", requester: a.owner)
++            let chronicle8 = try await anchor.get(keypath: EntityChangeTrace.rootKeypath, requester: a.owner)
+             XCTAssertTrue(EntityChangeTrace.entries(in: chronicle8).isEmpty, "\(tag) a refused change left a trace")
+         }
+     }
+@@ -277,7 +277,7 @@
+                 requester: a.owner, purposeRef: EntityChangeTrace.unknownPurposeRef)
+             let response = try await harness.send(envelope)
+             XCTAssertEqual(response["status"], .string("failed"), "\(tag) \(response)")
+-            XCTAssertTrue((try? response["error"]?.stringValue())??.contains("prompt.unknown") == true, "\(tag) \(response)")
++            XCTAssertTrue((try? response["error"]?.stringValue())??.contains("unknownPurpose") == true, "\(tag) \(response)")
+             let absent9 = await read(anchor, "person.headline", as: a.owner)
+             XCTAssertNil(absent9, tag)
+ 
+@@ -309,7 +309,7 @@
+             XCTAssertEqual(response["status"], .string("persisted"), "\(tag) \(response)")
+             let got11 = try await anchor.get(keypath: "person.headline", requester: a.owner)
+             XCTAssertEqual(got11, .string("direct"), tag)
+-            let entries = EntityChangeTrace.entries(in: try await anchor.get(keypath: "chronicle", requester: a.owner))
++            let entries = EntityChangeTrace.entries(in: try await anchor.get(keypath: EntityChangeTrace.rootKeypath, requester: a.owner))
+             XCTAssertEqual(entries.count, 1, "\(tag) direct owner write should leave exactly one trace entry")
+             XCTAssertEqual(entries.first?["kind"], .string(EntityChangeTrace.Kind.keypathSet.rawValue), tag)
+             XCTAssertEqual(entries.first?["signedBy"], .string(a.owner.uuid), tag)
+@@ -332,13 +332,14 @@
+             XCTAssertEqual(firstResponse["status"], .string("authority_committed"), "\(tag) \(firstResponse)")
+             let firstReceipt = try EntityAuthorityCommitReceipt(value: try XCTUnwrap(firstResponse["commitReceipt"]))
+ 
+-            var entries = EntityChangeTrace.entries(in: try await anchor.get(keypath: "chronicle", requester: a.owner))
++            var entries = EntityChangeTrace.entries(in: try await anchor.get(keypath: EntityChangeTrace.rootKeypath, requester: a.owner))
+             XCTAssertEqual(entries.count, 1, "\(tag) one batch, one entry — not one per field")
+             let entry = try XCTUnwrap(entries.first)
+             XCTAssertEqual(entry["kind"], .string(EntityChangeTrace.Kind.batchPersist.rawValue), tag)
+             XCTAssertEqual(entry["signedBy"], .string(a.owner.uuid), tag)
+             XCTAssertEqual(entry["signingKeyFingerprint"], .string(a.owner.signingPublicKeyFingerprint ?? "?"), tag)
+-            XCTAssertEqual(entry["keypaths"], .list([.string("person.headline"), .string("person.nickname")]), tag)
++            // ValueType == is not reliable on composite values (lesson.valuetype-equality-false-for-objects); compare strings.
++            XCTAssertEqual(Self.strings(entry["keypaths"]), ["person.headline", "person.nickname"], tag)
+             XCTAssertEqual(entry["purposeRef"], .string("purpose://access.audit.privacy"), tag)
+             XCTAssertEqual(entry["modelRef"], .string("model://local/apple-intelligence"), tag)
+             guard case let .object(receipt)? = entry["receipt"] else { return XCTFail("\(tag) trace has no receipt") }
+@@ -353,25 +354,30 @@
+                 requester: a.owner, purposeRef: "purpose://access.audit.privacy")
+             let sent12 = try await harness.send(second)
+             XCTAssertEqual(sent12["status"], .string("authority_committed"), tag)
+-            entries = EntityChangeTrace.entries(in: try await anchor.get(keypath: "chronicle", requester: a.owner))
++            entries = EntityChangeTrace.entries(in: try await anchor.get(keypath: EntityChangeTrace.rootKeypath, requester: a.owner))
+             XCTAssertEqual(entries.count, 2, tag)
+             XCTAssertEqual(entries.last?["modelRef"], .null, "\(tag) no model, no model ref")
+ 
+             // The same batch again is the same change: idempotent, and no third entry.
+             let replay = try await harness.send(second)
+             XCTAssertEqual(replay["idempotentReplay"], .bool(true), "\(tag) \(replay)")
+-            entries = EntityChangeTrace.entries(in: try await anchor.get(keypath: "chronicle", requester: a.owner))
++            entries = EntityChangeTrace.entries(in: try await anchor.get(keypath: EntityChangeTrace.rootKeypath, requester: a.owner))
+             XCTAssertEqual(entries.count, 2, "\(tag) a replayed batch must not add a trace entry")
+ 
+             // The trace survives a restart from disk.
+             let restarted = try scaffold.restart(anchor)
+-            let restartedEntries = EntityChangeTrace.entries(in: try await restarted.get(keypath: "chronicle", requester: a.owner))
++            let restartedEntries = EntityChangeTrace.entries(in: try await restarted.get(keypath: EntityChangeTrace.rootKeypath, requester: a.owner))
+             XCTAssertEqual(restartedEntries.map { $0["id"] }, entries.map { $0["id"] }, "\(tag) trace after restart")
+         }
+     }
+ 
+     // MARK: - Helpers
+ 
++    private static func strings(_ value: ValueType?) -> [String] {
++        guard case let .list(items)? = value else { return [] }
++        return items.compactMap { if case let .string(s) = $0 { return s } else { return nil } }
++    }
++
+     /// A value, or nil when the keypath is absent or refused. For "nothing changed".
+     private func read(_ anchor: GeneralCell, _ keypath: String, as requester: Identity) async -> ValueType? {
+         guard let value = try? await anchor.get(keypath: keypath, requester: requester), value != .null else { return nil }

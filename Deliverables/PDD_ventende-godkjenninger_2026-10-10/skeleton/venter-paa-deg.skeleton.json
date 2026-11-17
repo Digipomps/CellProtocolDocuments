@@ -1,0 +1,375 @@
+{
+ "Section": {
+  "header": {
+   "Text": {
+    "text": "Oversikt",
+    "modifiers": {
+     "fontStyle": "title2",
+     "fontWeight": "bold"
+    }
+   }
+  },
+  "modifiers": {
+   "styleRole": "workbench-overview",
+   "styleClasses": [
+    "haven-workbench-overview"
+   ]
+  },
+  "content": [
+   {
+    "Text": {
+     "keypath": "workItems.state.overview.mirrorFreshness",
+     "modifiers": {
+      "fontStyle": "caption",
+      "foregroundColor": "#6E6E73"
+     }
+    }
+   },
+   {
+    "Text": {
+     "keypath": "workItems.state.overview.mirrorWarningText",
+     "modifiers": {
+      "fontStyle": "caption",
+      "foregroundColor": "#C0392B"
+     }
+    }
+   },
+   {
+    "Section": {
+     "header": {
+      "HStack": {
+       "spacing": 8,
+       "elements": [
+        {
+         "Text": {
+          "text": "Venter på deg",
+          "modifiers": {
+           "fontStyle": "title3",
+           "fontWeight": "semibold"
+          }
+         }
+        },
+        {
+         "Text": {
+          "keypath": "workItems.state.overview.needsYouCount",
+          "modifiers": {
+           "fontStyle": "title3",
+           "foregroundColor": "#6E6E73"
+          }
+         }
+        }
+       ]
+      }
+     },
+     "content": [
+      {
+       "Text": {
+        "keypath": "workItems.state.overview.needsYouEmptyText",
+        "modifiers": {
+         "foregroundColor": "#6E6E73"
+        }
+       }
+      },
+      {
+       "List": {
+        "keypath": "workItems.state.overview.needsYou",
+        "flowElementSkeleton": {
+         "VStack": {
+          "spacing": 6,
+          "elements": [
+           {
+            "HStack": {
+             "spacing": 8,
+             "elements": [
+              {
+               "Text": {
+                "keypath": "sourceLabel",
+                "modifiers": {
+                 "fontStyle": "caption",
+                 "foregroundColor": "#6E6E73"
+                }
+               }
+              },
+              {
+               "Text": {
+                "keypath": "ageText",
+                "modifiers": {
+                 "fontStyle": "caption",
+                 "foregroundColor": "#6E6E73"
+                }
+               }
+              },
+              {
+               "Text": {
+                "keypath": "deadlineText",
+                "modifiers": {
+                 "fontStyle": "caption",
+                 "fontWeight": "semibold",
+                 "foregroundColor": "#C0392B",
+                 "visibility": {
+                  "when": {
+                   "scope": "item",
+                   "keypath": "hasDeadline",
+                   "equals": true
+                  }
+                 }
+                }
+               }
+              }
+             ]
+            }
+           },
+           {
+            "Text": {
+             "keypath": "title",
+             "modifiers": {
+              "fontStyle": "headline"
+             }
+            }
+           },
+           {
+            "Text": {
+             "keypath": "summary",
+             "modifiers": {
+              "fontStyle": "callout"
+             }
+            }
+           },
+           {
+            "HStack": {
+             "spacing": 8,
+             "elements": [
+              {
+               "Text": {
+                "text": "Hvor:",
+                "modifiers": {
+                 "fontStyle": "caption",
+                 "fontWeight": "semibold"
+                }
+               }
+              },
+              {
+               "Text": {
+                "keypath": "whereText",
+                "modifiers": {
+                 "fontStyle": "caption",
+                 "fontDesign": "monospaced",
+                 "textSelection": true
+                }
+               }
+              }
+             ]
+            }
+           },
+           {
+            "HStack": {
+             "spacing": 8,
+             "elements": [
+              {
+               "Text": {
+                "text": "Ja utløser:",
+                "modifiers": {
+                 "fontStyle": "caption",
+                 "fontWeight": "semibold"
+                }
+               }
+              },
+              {
+               "Text": {
+                "keypath": "nextAction",
+                "modifiers": {
+                 "fontStyle": "caption"
+                }
+               }
+              }
+             ]
+            }
+           },
+           {
+            "HStack": {
+             "spacing": 8,
+             "elements": [
+              {
+               "Button": {
+                "keypath": "workItems.setStatus",
+                "label": "Ja",
+                "payloadKeypath": "yesPayload",
+                "labelKeypath": "yesLabel",
+                "modifiers": {
+                 "controlStyle": "borderedProminent",
+                 "visibility": {
+                  "when": {
+                   "scope": "item",
+                   "keypath": "hasYes",
+                   "equals": true
+                  }
+                 }
+                }
+               }
+              },
+              {
+               "Button": {
+                "keypath": "workItems.setStatus",
+                "label": "Nei",
+                "payloadKeypath": "noPayload",
+                "labelKeypath": "noLabel",
+                "modifiers": {
+                 "controlStyle": "bordered",
+                 "visibility": {
+                  "when": {
+                   "scope": "item",
+                   "keypath": "hasNo",
+                   "equals": true
+                  }
+                 }
+                }
+               }
+              },
+              {
+               "Button": {
+                "keypath": "workItems.setStatus",
+                "label": "Merk som løst",
+                "payloadKeypath": "resolvedPayload",
+                "modifiers": {
+                 "controlStyle": "bordered",
+                 "visibility": {
+                  "when": {
+                   "scope": "item",
+                   "keypath": "hasYes",
+                   "equals": false
+                  }
+                 }
+                }
+               }
+              },
+              {
+               "Button": {
+                "keypath": "workItems.overview.ask",
+                "label": "Spør",
+                "payloadKeypath": "askPayload",
+                "modifiers": {
+                 "controlStyle": "bordered"
+                }
+               }
+              },
+              {
+               "Button": {
+                "keypath": "",
+                "label": "Åpne",
+                "urlKeypath": "whereURL",
+                "modifiers": {
+                 "controlStyle": "bordered",
+                 "visibility": {
+                  "when": {
+                   "scope": "item",
+                   "keypath": "hasURL",
+                   "equals": true
+                  }
+                 }
+                }
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        }
+       }
+      },
+      {
+       "Text": {
+        "keypath": "workItems.state.overview.oldestNeedsYouText",
+        "modifiers": {
+         "fontStyle": "caption",
+         "foregroundColor": "#6E6E73"
+        }
+       }
+      }
+     ]
+    }
+   },
+   {
+    "Section": {
+     "header": {
+      "HStack": {
+       "spacing": 8,
+       "elements": [
+        {
+         "Text": {
+          "text": "Kjører nå",
+          "modifiers": {
+           "fontStyle": "title3",
+           "fontWeight": "semibold"
+          }
+         }
+        },
+        {
+         "Text": {
+          "keypath": "workItems.state.overview.runningCount",
+          "modifiers": {
+           "fontStyle": "title3",
+           "foregroundColor": "#6E6E73"
+          }
+         }
+        }
+       ]
+      }
+     },
+     "content": [
+      {
+       "Text": {
+        "keypath": "workItems.state.overview.runningEmptyText",
+        "modifiers": {
+         "foregroundColor": "#6E6E73"
+        }
+       }
+      },
+      {
+       "List": {
+        "keypath": "workItems.state.overview.running",
+        "flowElementSkeleton": {
+         "VStack": {
+          "spacing": 4,
+          "elements": [
+           {
+            "HStack": {
+             "spacing": 8,
+             "elements": [
+              {
+               "Text": {
+                "keypath": "sourceLabel",
+                "modifiers": {
+                 "fontStyle": "caption",
+                 "foregroundColor": "#6E6E73"
+                }
+               }
+              },
+              {
+               "Text": {
+                "keypath": "title"
+               }
+              }
+             ]
+            }
+           },
+           {
+            "Text": {
+             "keypath": "detail",
+             "modifiers": {
+              "fontStyle": "caption",
+              "foregroundColor": "#6E6E73"
+             }
+            }
+           }
+          ]
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,15 @@
+--- BridgeBase
++++ BridgeBase-mutant
+@@ -1861,11 +1861,7 @@
+         }
+         await afterResponseLookup?(lookedUp)
+         try connectionStateLock.withLock {
+-            guard channelSession === channelSessionValue else { throw BridgeChannelAuthentication.Failure.staleGeneration }
+-            try channelSession.checkInbound(command)
+-            // Re-read the registered operation under the lifecycle lock. A copy
+-            // returned before retirement/timeout conveys no publication rights.
+-            guard let commandRequest = auditor.loadBridgeCommandForCommandId(command.cid) else { return }
++            let commandRequest = lookedUp // MUTATION: trust the pre-suspension copy
+             let retainCommandForStream = commandRequest.command == .feed
+             if !retainCommandForStream { auditor.removeBridgeCommand(for: command.cid) }
+             if !retainCommandForStream { identityProofAuthorization.complete(command.cid) }

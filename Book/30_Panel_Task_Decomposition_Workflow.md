@@ -191,12 +191,18 @@ satisfied, the task is done and the handoff records the decision.
 
 ## 4. Current Limitations
 
-- This is a prompt/skill workflow contract. No runtime object orchestrates
-  it; agents apply the JSON contracts manually and a human owns decisions.
-- Goal and claim evaluation is computed by whoever holds the adjudicator
-  role, following Chapter 29 and Chapter 09 semantics by hand or with local
-  scripts. The Swift implementations in CellProtocol are the normative
-  semantics but are not yet exposed as a Cell or CLI for panel use.
+- This is a prompt/skill workflow contract. This chapter does not establish
+  a complete runtime orchestrator; agents can apply the JSON contracts
+  manually and a human owns decisions.
+- The adjudicator applies Chapter 29 and Chapter 09 semantics; the Swift
+  implementations remain normative. Source-checked 2026-10-02: goal evaluation
+  is exposed by [GoalEvaluationCell](../../CellProtocol/Sources/CellBase/Cells/Purpose/GoalEvaluationCell.swift)
+  (`goal.definition`, observations and evaluation/state operations).
+  [ClaimComposition](../../CellProtocol/Sources/CellBase/PurposeAndInterest/ClaimComposition.swift)
+  provides claim-composition evaluation in the library. This bounded check
+  did not verify a complete panel orchestrator, a dedicated claim-evaluation
+  Cell/CLI, or the deployed adviser journey. Reusable evaluation primitives
+  are not evidence that the complete panel workflow is productized.
 - Artifacts live as fenced JSON in notes and deliverables. RAG indexing,
   Perspective persistence, and signing are future work.
 - The workflow does not replace `haven-claim-review` for public-facing

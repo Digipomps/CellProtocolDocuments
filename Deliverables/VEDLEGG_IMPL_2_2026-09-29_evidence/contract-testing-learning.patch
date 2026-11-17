@@ -1,0 +1,27 @@
+--- a/.claude/skills/cellprotocol-contract-testing/SKILL.md
++++ b/.claude/skills/cellprotocol-contract-testing/SKILL.md
+@@ -86,6 +86,24 @@
+ fixture pass. Use isolated identities and assert both successful owner access
+ and rejection of a copied public descriptor.
+ 
++## Restricted macOS test hosts
++
++A writable Swift module cache and network access do not establish Keychain
++access. In the attachment implementation baseline on 2026-09-29, the unchanged
++CellProtocol revision `81601a6` built successfully through
++`Scripts/haven-swiftpm.sh`, but `AppleIdentityVaultKeyStorageTests` failed with
++`EPERM` while generating a CDSA key and with status `-25291` while obtaining a
++scoped secret. Other Keychain tests explicitly skipped unavailable storage.
++See `CellProtocolDocuments/Deliverables/VEDLEGG_IMPL_2_2026-09-29.md` and its
++baseline logs for the actual environment and result.
++
++Keep build success, full-suite status and focused crypto results separate.
++`--disable-sandbox` affects SwiftPM's sandbox, not the enclosing agent sandbox
++or macOS security services. Do not silently skip these failures or weaken vault
++checks to claim a green suite. Under an owner instruction to stop on red, record
++the failing tests and command exit code, stop implementation, and identify the
++test-host requirement without claiming that a different host has been verified.
++
+ ## Completion Checklist
+ 
+ - The invariant is named in test names or comments.

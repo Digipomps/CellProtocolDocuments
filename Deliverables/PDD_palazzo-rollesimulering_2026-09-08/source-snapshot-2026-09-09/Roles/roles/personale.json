@@ -1,0 +1,89 @@
+{
+  "role": "personale",
+  "principal": "staff:{staff_id}",
+  "note": "Kelneren. Briefen henter alltid ferskt gjennom gjestens insight.*-keypaths med kelnerens egen identitet, og lagrer ingenting om gjesten. Kalibreringsparet er belagt i PalazzoSurfaceTests: testBriefWithStandingConsentShowsWhatWasShared:262 og testBriefWithoutConsentSaysNotSharedAndStartsTheAsk:208 — men de kjører in-process uten gateway-token, så paret må etableres på nytt på produksjonsveien i hver kjøring.",
+  "purposes": [
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.personale.brief-with-consent",
+      "title": "Kelneren ser gjestens allergener når gjesten har delt dem",
+      "calibration": "positive",
+      "action": {
+        "method": "POST",
+        "path": "/api/staff/brief",
+        "json": {
+          "value": {
+            "guestCell": "{consenting_guest_cell}"
+          }
+        }
+      },
+      "expect": {
+        "access": "allowed",
+        "state": {
+          "path": "value.shared#",
+          "op": "gte",
+          "value": 5
+        }
+      },
+      "why": "Kalibrering: de fem briefKeypaths skal komme tilbake som delt. Er de det ikke, er det samtykkeveien eller aktøren som er i stykker — og da leses ikke resten."
+    },
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.personale.brief-without-consent",
+      "title": "Kelneren ser IKKE gjestens allergener uten samtykke",
+      "calibration": "null",
+      "action": {
+        "method": "POST",
+        "path": "/api/staff/brief",
+        "json": {
+          "value": {
+            "guestCell": "{guest_cell}"
+          }
+        }
+      },
+      "expect": {
+        "access": "allowed",
+        "state": {
+          "path": "value.shared#",
+          "op": "gte",
+          "value": 1
+        }
+      },
+      "stop_is": "riktig",
+      "why": "Riktig stopp: uten samtykke svarer briefen «ikke delt» for alle fem. Merk at dette ikke er et HTTP-avslag — formålet er ikke nådd, og det er forskjellen som betyr noe."
+    },
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.personale.own-surface",
+      "title": "Kelneren får sin egen flate",
+      "action": {
+        "method": "GET",
+        "path": "/api/staff/state"
+      },
+      "expect": {
+        "access": "allowed",
+        "state": {
+          "path": "value",
+          "op": "ne",
+          "value": null
+        }
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.personale.guest-entity-direct",
+      "title": "Kelneren leser gjestens entitet utenom briefen",
+      "action": {
+        "method": "POST",
+        "path": "/api/cell/get",
+        "json": {
+          "value": {
+            "cell": "{guest_cell}",
+            "keypath": "entity.records"
+          }
+        }
+      },
+      "expect": {
+        "access": "denied"
+      },
+      "stop_is": "riktig",
+      "why": "Riktig stopp: briefen er den eneste veien, og den går gjennom kontrakten. Kommer denne gjennom, er grensen omgått."
+    }
+  ]
+}

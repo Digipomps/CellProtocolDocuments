@@ -1,0 +1,351 @@
+diff --git a/Sources/CellApple/Cells/Porthole/Utility Views/CellComponentSurfaceView.swift b/Sources/CellApple/Cells/Porthole/Utility Views/CellComponentSurfaceView.swift
+index 1f4d629..e0a5a5d 100644
+--- a/Sources/CellApple/Cells/Porthole/Utility Views/CellComponentSurfaceView.swift	
++++ b/Sources/CellApple/Cells/Porthole/Utility Views/CellComponentSurfaceView.swift	
+@@ -43,6 +43,14 @@ struct CellComponentSurfaceView: View {
+     @State private var instance: SkeletonComponentInstance?
+     @State private var failure: String?
+ 
++    /// WP-F: fast instans-ID, eller ID lest fra data (radens item først) via instanceIDKeypath.
++    private var resolvedInstanceID: String? {
++        if let id = surface.instanceID { return id }
++        if case .string(let id)? = data.resolve(surface.instanceIDKeypath), !id.isEmpty { return id }
++        return nil
++    }
++    private var instanceKey: String { resolvedInstanceID ?? "" }
++
+     var body: some View {
+         VStack(alignment: .leading, spacing: 0) {
+             if let instance, failure == nil {
+@@ -50,8 +58,8 @@ struct CellComponentSurfaceView: View {
+                     renderData: data.row(instance.mount.item))
+                     .environment(\.skeletonComponentLocalState, localState)
+                     .environment(\.skeletonNativeActionScope, instance.actionScope)
+-                    .environment(\.skeletonComponentAncestors, ancestors + [surface.instanceID])
+-                    .environment(\.skeletonNativeElementID, "component:" + surface.instanceID)
++                    .environment(\.skeletonComponentAncestors, ancestors + [instanceKey])
++                    .environment(\.skeletonNativeElementID, "component:" + instanceKey)
+                 if actionHandler == nil {
+                     Text("ComponentSurface: source actions require a host adapter (mount metadata).")
+                         .font(.caption).foregroundStyle(.secondary)
+@@ -60,9 +68,14 @@ struct CellComponentSurfaceView: View {
+                 Text(failure ?? "ComponentSurface: unresolved mount").font(.caption).foregroundStyle(.secondary)
+             }
+         }
+-        .accessibilityIdentifier("skeleton.component.\(surface.instanceID)")
+-        .task(id: surface.instanceID + ":" + surface.sourceKeypath + ":" + data.signature) {
+-            guard !ancestors.contains(surface.instanceID), ancestors.count < 64,
++        .accessibilityIdentifier("skeleton.component.\(instanceKey)")
++        .task(id: instanceKey + ":" + surface.sourceKeypath + ":" + data.signature) {
++            guard resolvedInstanceID != nil else {
++                failure = "ComponentSurface: unresolved instanceID"
++                instance = nil
++                return
++            }
++            guard !ancestors.contains(instanceKey), ancestors.count < 64,
+                   let value = data.resolve(surface.sourceKeypath) else {
+                 failure = "ComponentSurface: unresolved or recursive mount"
+                 instance = nil
+@@ -70,8 +83,8 @@ struct CellComponentSurfaceView: View {
+             }
+             do {
+                 let mount = try SkeletonComponentInstance.decode(value)
+-                if instance?.instanceID == surface.instanceID { instance?.update(mount) }
+-                else { instance = .init(instanceID: surface.instanceID, mount: mount) }
++                if instance?.instanceID == instanceKey { instance?.update(mount) }
++                else { instance = .init(instanceID: instanceKey, mount: mount) }
+                 failure = nil
+             } catch {
+                 instance = nil; failure = "ComponentSurface: invalid mount — \(error.localizedDescription)"
+diff --git a/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeRuntime.swift b/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeRuntime.swift
+index cceec55..f2994c9 100644
+--- a/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeRuntime.swift	
++++ b/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeRuntime.swift	
+@@ -269,6 +269,7 @@ enum SkeletonNativeLayout {
+             result.fontSize = v.fontSize ?? result.fontSize
+             result.borderColor = v.borderColor ?? result.borderColor
+             result.foregroundColor = v.foregroundColor ?? result.foregroundColor
++            result.width = v.width ?? result.width
+         }
+         if case .string(let value)? = data.resolve(result.backgroundKeypath) { result.background = value }
+         if variant?.foregroundColor == nil, case .string(let value)? = data.resolve(result.foregroundColorKeypath) { result.foregroundColor = value }
+@@ -392,7 +393,7 @@ extension SkeletonElement {
+     }
+     func nativeIdentity(fallback: String) -> String {
+         switch self {
+-        case .ComponentSurface(let surface): return "component:" + surface.instanceID
++        case .ComponentSurface(let surface): return "component:" + (surface.instanceID ?? "{" + (surface.instanceIDKeypath ?? "") + "}")
+         case .TextField(let field): return "field:" + (field.targetKeypath ?? field.sourceKeypath ?? fallback)
+         case .TextArea(let field): return "area:" + (field.targetKeypath ?? field.sourceKeypath ?? fallback)
+         case .Tree(let tree): return "tree:" + tree.keypath
+diff --git a/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift b/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift
+index 3fb6ccd..a610257 100644
+--- a/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift	
++++ b/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift	
+@@ -307,6 +307,18 @@ struct SkeletonLinearLayout: Layout {
+         let occupied = sizes.reduce(CGFloat(0)) { $0 + (axis == .horizontal ? $1.width : $1.height) } + spacing * CGFloat(max(0, subviews.count - 1))
+         let available = (axis == .horizontal ? proposal.width : proposal.height) ?? occupied
+         let total = subviews.reduce(0.0) { $0 + $1[SkeletonFlexGrowKey.self] }
++        // WP-F: som SwiftUI-stakken krymper barna når ideell bredde ikke får plass, så tekst
++        // brytes i stedet for å gå ut over kanten. Hvert barn krymper mot sin minste bredde,
++        // i forhold til hvor mye det kan krympe; faste rammer krymper ikke.
++        if axis == .horizontal, let width = proposal.width, occupied > width {
++            let minimum = subviews.map { $0.sizeThatFits(ProposedViewSize(width: 0, height: proposal.height)).width }
++            let slack = sizes.indices.map { max(0, sizes[$0].width - minimum[$0]) }
++            let totalSlack = slack.reduce(0, +)
++            if totalSlack > 0 {
++                let shortfall = min(occupied - width, totalSlack)
++                for i in sizes.indices { sizes[i].width -= shortfall * slack[i] / totalSlack }
++            }
++        }
+         if total > 0, available > occupied {
+             for i in sizes.indices {
+                 let extra = (available - occupied) * subviews[i][SkeletonFlexGrowKey.self] / total
+diff --git a/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonView.swift b/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonView.swift
+index 531a767..6383ff6 100644
+--- a/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonView.swift	
++++ b/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonView.swift	
+@@ -765,6 +765,8 @@ public struct SkeletonView: View {
+         }
+         let (modifiers, variant) = SkeletonNativeLayout.effective(element.nativeModifiers, layout: layoutContext, data: dataContext)
+         let element = element.withNativeModifiers(modifiers)
++        // WP-F: en layoutvariant kan skjule elementet (som `display: none` på web).
++        if variant?.hidden == true { return AnyView(EmptyView()) }
+         let userInfoValue = dataContext.item ?? self.userInfoValue
+         switch element {
+         case .Text(let text):
+@@ -788,10 +790,14 @@ public struct SkeletonView: View {
+         case .Image(let image):
+             return renderSkeletonImage(image)
+         case .Spacer(let spacer):
++            // WP-F: som i SwiftUI-stakken tar en Spacer uten bredde ledig plass. Vekst settes i
++            // modifikatorene, fordi stilmodifikatorens egen layoutverdi ligger innerst og vinner.
++            var spacerModifiers = spacer.modifiers ?? SkeletonModifiers()
++            if spacerModifiers.flexGrow == nil && spacer.width == nil { spacerModifiers.flexGrow = 1 }
+             return AnyView(
+                 Spacer()
+                     .frame(width: spacer.width.map { CGFloat($0) })
+-                    .applySkeletonModifiers(spacer.modifiers, userInfoValue: userInfoValue)
++                    .applySkeletonModifiers(spacerModifiers, userInfoValue: userInfoValue)
+             )
+         case .HStack(let h):
+             let axis: Axis = variant?.axis == .vertical ? .vertical : .horizontal
+diff --git a/Sources/CellBase/Skeleton/SkeletonDescription.swift b/Sources/CellBase/Skeleton/SkeletonDescription.swift
+index c38726f..39524f9 100644
+--- a/Sources/CellBase/Skeleton/SkeletonDescription.swift
++++ b/Sources/CellBase/Skeleton/SkeletonDescription.swift
+@@ -799,6 +799,10 @@ public struct SkeletonLayoutVariant: Codable {
+     public var fontSize: Double?
+     public var borderColor: String?
+     public var foregroundColor: String?
++    /// WP-F: skjuler elementet mens varianten gjelder (for eksempel treet i appbredde).
++    public var hidden: Bool?
++    /// WP-F: fast bredde mens varianten gjelder; overstyrer elementets `width`.
++    public var width: Double?
+ 
+     public init(
+         when: SkeletonCondition? = nil,
+@@ -816,7 +820,9 @@ public struct SkeletonLayoutVariant: Codable {
+         flexGrow: Double? = nil,
+         fontSize: Double? = nil,
+         borderColor: String? = nil,
+-        foregroundColor: String? = nil
++        foregroundColor: String? = nil,
++        hidden: Bool? = nil,
++        width: Double? = nil
+     ) {
+         self.when = when
+         self.minAvailableWidth = minAvailableWidth
+@@ -834,10 +840,12 @@ public struct SkeletonLayoutVariant: Codable {
+         self.fontSize = fontSize
+         self.borderColor = borderColor
+         self.foregroundColor = foregroundColor
++        self.hidden = hidden
++        self.width = width
+     }
+ 
+     private enum CodingKeys: String, CodingKey, CaseIterable {
+-        case when, minAvailableWidth, maxAvailableWidth, minAvailableHeight, maxAvailableHeight, requiresCapability, axis, columns, spacing, paddingInsets, minHeight, maxHeight, flexGrow, fontSize, borderColor, foregroundColor
++        case when, minAvailableWidth, maxAvailableWidth, minAvailableHeight, maxAvailableHeight, requiresCapability, axis, columns, spacing, paddingInsets, minHeight, maxHeight, flexGrow, fontSize, borderColor, foregroundColor, hidden, width
+     }
+ 
+     public init(from decoder: Decoder) throws {
+@@ -865,6 +873,8 @@ public struct SkeletonLayoutVariant: Codable {
+         self.fontSize = try container.skeletonValue(Double.self, forKey: .fontSize)
+         self.borderColor = try container.skeletonValue(String.self, forKey: .borderColor)
+         self.foregroundColor = try container.skeletonValue(String.self, forKey: .foregroundColor)
++        self.hidden = try container.skeletonValue(Bool.self, forKey: .hidden)
++        self.width = try container.skeletonValue(Double.self, forKey: .width)
+         try validate()
+     }
+ 
+@@ -878,6 +888,7 @@ public struct SkeletonLayoutVariant: Codable {
+         try skeletonNumber(maxHeight, field: "maxHeight", minimum: 0)
+         try skeletonNumber(flexGrow, field: "flexGrow", minimum: 0)
+         try skeletonNumber(fontSize, field: "fontSize", positive: true)
++        try skeletonNumber(width, field: "width", minimum: 0)
+         try skeletonRange(minAvailableWidth, maxAvailableWidth, field: "availableWidth")
+         try skeletonRange(minAvailableHeight, maxAvailableHeight, field: "availableHeight")
+         try skeletonRange(minHeight, maxHeight, field: "height")
+@@ -921,6 +932,8 @@ public struct SkeletonLayoutVariant: Codable {
+         try container.encodeIfPresent(fontSize, forKey: .fontSize)
+         try container.encodeIfPresent(borderColor, forKey: .borderColor)
+         try container.encodeIfPresent(foregroundColor, forKey: .foregroundColor)
++        try container.encodeIfPresent(hidden, forKey: .hidden)
++        try container.encodeIfPresent(width, forKey: .width)
+     }
+ 
+     private static func validateCondition(_ condition: SkeletonCondition) throws {
+@@ -2502,7 +2515,12 @@ public struct SkeletonTree: Codable, Identifiable {
+ public struct SkeletonComponentSurface: Codable, Identifiable {
+     public var id = UUID() // transient Swift identity; never a source/node/instance identifier
+     public var sourceKeypath: String
+-    public var instanceID: String
++    /// Fast instans-ID for én flate.
++    public var instanceID: String?
++    /// WP-F (vei B): instans-ID lest fra data (radens item først, så roten), slik at hver rad i
++    /// en List får sin egen flate og tilstand. Nøyaktig én av `instanceID` og
++    /// `instanceIDKeypath` er satt.
++    public var instanceIDKeypath: String?
+     public var variant: SkeletonComponentVariant
+     public var modifiers: SkeletonModifiers?
+ 
+@@ -2518,8 +2536,29 @@ public struct SkeletonComponentSurface: Codable, Identifiable {
+         self.modifiers = modifiers
+     }
+ 
++    public init(
++        sourceKeypath: String,
++        instanceIDKeypath: String,
++        variant: SkeletonComponentVariant,
++        modifiers: SkeletonModifiers? = nil
++    ) {
++        self.sourceKeypath = sourceKeypath
++        self.instanceIDKeypath = instanceIDKeypath
++        self.variant = variant
++        self.modifiers = modifiers
++    }
++
+     private enum CodingKeys: String, CodingKey, CaseIterable {
+-        case sourceKeypath, instanceID, variant, modifiers
++        case sourceKeypath, instanceID, instanceIDKeypath, variant, modifiers
++    }
++
++    private static func validateInstance(_ id: String?, _ keypath: String?) throws {
++        switch (id, keypath) {
++        case let (id?, nil): try skeletonNonempty(id, field: "instanceID")
++        case let (nil, keypath?): try skeletonNonempty(keypath, field: "instanceIDKeypath")
++        case (nil, nil): throw SkeletonFormatError(field: "instanceID", reason: "instanceID or instanceIDKeypath is required")
++        default: throw SkeletonFormatError(field: "instanceIDKeypath", reason: "use either instanceID or instanceIDKeypath, not both")
++        }
+     }
+ 
+     public init(from decoder: Decoder) throws {
+@@ -2531,22 +2570,24 @@ public struct SkeletonComponentSurface: Codable, Identifiable {
+         try skeletonKnownKeys(payloadDecoder, allowed: CodingKeys.allCases.map(\.rawValue))
+         let container = try payloadDecoder.container(keyedBy: CodingKeys.self)
+         self.sourceKeypath = try container.skeletonRequired(String.self, forKey: .sourceKeypath)
+-        self.instanceID = try container.skeletonRequired(String.self, forKey: .instanceID)
++        self.instanceID = try container.skeletonValue(String.self, forKey: .instanceID)
++        self.instanceIDKeypath = try container.skeletonValue(String.self, forKey: .instanceIDKeypath)
+         self.variant = try container.skeletonRequired(SkeletonComponentVariant.self, forKey: .variant)
+         self.modifiers = try container.skeletonValue(SkeletonModifiers.self, forKey: .modifiers)
+         try skeletonNonempty(sourceKeypath, field: "sourceKeypath")
+-        try skeletonNonempty(instanceID, field: "instanceID")
++        try Self.validateInstance(instanceID, instanceIDKeypath)
+     }
+ 
+     private enum ElementKey: CodingKey { case ComponentSurface }
+ 
+     public func encode(to encoder: Encoder) throws {
+         try skeletonNonempty(sourceKeypath, field: "sourceKeypath")
+-        try skeletonNonempty(instanceID, field: "instanceID")
++        try Self.validateInstance(instanceID, instanceIDKeypath)
+         var wrapper = encoder.container(keyedBy: ElementKey.self)
+         var container = wrapper.nestedContainer(keyedBy: CodingKeys.self, forKey: .ComponentSurface)
+         try container.encode(sourceKeypath, forKey: .sourceKeypath)
+-        try container.encode(instanceID, forKey: .instanceID)
++        try container.encodeIfPresent(instanceID, forKey: .instanceID)
++        try container.encodeIfPresent(instanceIDKeypath, forKey: .instanceIDKeypath)
+         try container.encode(variant, forKey: .variant)
+         try container.encodeIfPresent(modifiers, forKey: .modifiers)
+     }
+diff --git a/Sources/CellBase/Skeleton/SkeletonReachabilityAudit.swift b/Sources/CellBase/Skeleton/SkeletonReachabilityAudit.swift
+index 097c6ca..83f0b9f 100644
+--- a/Sources/CellBase/Skeleton/SkeletonReachabilityAudit.swift
++++ b/Sources/CellBase/Skeleton/SkeletonReachabilityAudit.swift
+@@ -203,13 +203,15 @@ public enum SkeletonReachabilityAudit {
+                                           context: .row, definitions: definitions))
+                 node.children = [row]
+             case .ComponentSurface(let surface):
+-                guard instanceIDs.insert(surface.instanceID).inserted else {
+-                    node.findings.append(finding(.duplicateComponentInstanceID, "Duplicate instanceID: \(surface.instanceID)."))
++                // An instanceIDKeypath is resolved per row when rendered; only fixed IDs can collide here.
++                let instanceLabel = surface.instanceID ?? "{\(surface.instanceIDKeypath ?? "")}"
++                if let fixedID = surface.instanceID, !instanceIDs.insert(fixedID).inserted {
++                    node.findings.append(finding(.duplicateComponentInstanceID, "Duplicate instanceID: \(fixedID)."))
+                     return node
+                 }
+                 guard let resolved = resolveComponent?(surface), nonempty(resolved.componentID), nonempty(resolved.revision) else {
+                     node.findings.append(finding(.unresolvedComponentDefinition,
+-                        "No resolved definition/revision for instance \(surface.instanceID), source \(surface.sourceKeypath)."))
++                        "No resolved definition/revision for instance \(instanceLabel), source \(surface.sourceKeypath)."))
+                     return node
+                 }
+                 let identity = DefinitionID(componentID: resolved.componentID, revision: resolved.revision)
+@@ -219,7 +221,7 @@ public enum SkeletonReachabilityAudit {
+                     return node
+                 }
+                 node.children = [build(resolved.skeleton,
+-                    path: here + "[\(surface.instanceID):\(resolved.componentID)@\(resolved.revision)]",
++                    path: here + "[\(instanceLabel):\(resolved.componentID)@\(resolved.revision)]",
+                     context: resolved.dataContext ?? context, definitions: definitions.union([identity]))]
+             default:
+                 for (index, child) in children(of: element).enumerated() {
+diff --git a/Tests/CellBaseTests/SkeletonReachabilityAuditTests.swift b/Tests/CellBaseTests/SkeletonReachabilityAuditTests.swift
+index 1262f32..97a7635 100644
+--- a/Tests/CellBaseTests/SkeletonReachabilityAuditTests.swift
++++ b/Tests/CellBaseTests/SkeletonReachabilityAuditTests.swift
+@@ -257,8 +257,8 @@ extension SkeletonReachabilityAuditTests {
+         var seen: [String] = []
+         let findings = SkeletonReachabilityAudit.audit(fixture.skeleton, context: .init(root: true),
+                                                       requiredActionKeypaths: ["actions.refresh"]) { surface in
+-            seen.append(surface.instanceID)
+-            return fixture.initialRoot.mounts[surface.instanceID].map {
++            seen.append(surface.instanceID ?? "")
++            return fixture.initialRoot.mounts[surface.instanceID ?? ""].map {
+                 SkeletonResolvedComponent(mount: $0, hostContext: .init(root: true))
+             }
+         }
+@@ -278,9 +278,9 @@ extension SkeletonReachabilityAuditTests {
+         let surface = SkeletonElement.VStack(.init(elements: [wpR1Mount("a"), wpR1Mount("b")]))
+         var seen: [String] = []
+         let actions = SkeletonReachabilityAudit.reachableActionKeypaths(surface) { mount in
+-            seen.append(mount.instanceID)
++            seen.append(mount.instanceID ?? "")
+             return SkeletonResolvedComponent(componentID: "program", revision: "r1",
+-                skeleton: .Button(.init(keypath: "refresh.\(mount.instanceID)", label: "Refresh")))
++                skeleton: .Button(.init(keypath: "refresh.\(mount.instanceID ?? "")", label: "Refresh")))
+         }
+         XCTAssertEqual(seen, ["a", "b"])
+         XCTAssertEqual(actions, ["refresh.a", "refresh.b"])
+diff --git a/Tests/CellBaseTests/SkeletonTests.swift b/Tests/CellBaseTests/SkeletonTests.swift
+index 36ae754..98a82e5 100644
+--- a/Tests/CellBaseTests/SkeletonTests.swift
++++ b/Tests/CellBaseTests/SkeletonTests.swift
+@@ -1733,10 +1733,11 @@ extension SkeletonTests {
+         var ids: [String] = []
+         for element in surface.elements {
+             guard case .ComponentSurface(let mountSurface) = element else { return XCTFail("Missing surface") }
+-            ids.append(mountSurface.instanceID)
+-            XCTAssertEqual(mountSurface.sourceKeypath, "mounts.\(mountSurface.instanceID)")
+-            let mount = try XCTUnwrap(fixture.initialRoot.mounts[mountSurface.instanceID])
+-            let expected = try XCTUnwrap(fixture.expected.initial[mountSurface.instanceID])
++            let instanceID = try XCTUnwrap(mountSurface.instanceID)
++            ids.append(instanceID)
++            XCTAssertEqual(mountSurface.sourceKeypath, "mounts.\(instanceID)")
++            let mount = try XCTUnwrap(fixture.initialRoot.mounts[instanceID])
++            let expected = try XCTUnwrap(fixture.expected.initial[instanceID])
+             XCTAssertEqual(try wpR1Encoded(mount.item), try wpR1Encoded(["title": expected.title]))
+             XCTAssertEqual(expected.subtitle, fixture.initialRoot.subtitle)
+             XCTAssertNotEqual(expected.title, fixture.initialRoot.title)

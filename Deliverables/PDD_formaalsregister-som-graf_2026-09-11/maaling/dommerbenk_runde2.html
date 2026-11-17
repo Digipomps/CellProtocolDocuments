@@ -1,0 +1,343 @@
+<title>Dommerbenken</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#EFF3EF; --surface:#FFFFFF; --surface-sunk:#E4EAE4;
+  --ink:#12241F; --ink-soft:#3C4F49; --muted:#66786F; --rule:#CBD6CD;
+  --accent:#1C6E5A; --accent-soft:#D6E8E0;
+  --wait:#A85418; --wait-soft:#F3E2D3;
+  --no:#7A5E8C; --no-soft:#EAE0F0;
+  --done:#2E7D5B;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0D1614; --surface:#14201D; --surface-sunk:#101A18;
+    --ink:#E4EDE8; --ink-soft:#B4C4BD; --muted:#839890; --rule:#273732;
+    --accent:#5CB99B; --accent-soft:#1B332B;
+    --wait:#D9903F; --wait-soft:#332415;
+    --no:#B69BC7; --no-soft:#251E2B;
+    --done:#5CB99B;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0D1614; --surface:#14201D; --surface-sunk:#101A18;
+  --ink:#E4EDE8; --ink-soft:#B4C4BD; --muted:#839890; --rule:#273732;
+  --accent:#5CB99B; --accent-soft:#1B332B;
+  --wait:#D9903F; --wait-soft:#332415;
+  --no:#B69BC7; --no-soft:#251E2B;
+  --done:#5CB99B;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);margin:0;
+  font-family:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;font-size:16px;line-height:1.6;
+  padding-inline:20px}
+.wrap{max-width:880px;margin:0 auto;padding-block:44px 96px}
+h1,h2,h3{font-family:"Newsreader",Georgia,serif;font-weight:600;margin:0;text-wrap:balance}
+h1{font-size:clamp(1.9rem,4.4vw,2.7rem);line-height:1.1}
+h2{font-size:1.45rem;line-height:1.25}
+p{margin:0 0 1em}
+code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.86em}
+.eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.72rem;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 .5em}
+.lede{font-family:"Newsreader",Georgia,serif;font-size:1.15rem;line-height:1.5;
+  color:var(--ink-soft);max-width:60ch;margin-top:.6em}
+
+.criterion{border-left:3px solid var(--accent);background:var(--surface);
+  padding:18px 22px;margin:28px 0 0;border-radius:0 3px 3px 0}
+.criterion p{margin:0;font-size:1rem}
+.criterion b{color:var(--accent)}
+.criterion .small{color:var(--muted);font-size:.9rem;margin-top:.5em;display:block}
+.criterion .why{color:var(--ink-soft);font-size:.9rem;margin-top:.7em;display:block;border-top:1px solid var(--rule);padding-top:.6em}
+
+.progress{display:flex;align-items:center;gap:14px;margin-top:26px;flex-wrap:wrap}
+.bar{flex:1 1 260px;height:8px;background:var(--surface-sunk);border-radius:99px;overflow:hidden;min-width:180px}
+.bar i{display:block;height:100%;background:var(--accent);width:0%;transition:width .25s ease}
+.pct{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.82rem;color:var(--muted);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.savestate{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.75rem;color:var(--muted)}
+.savestate.ok{color:var(--done)}
+.savestate.warn{color:var(--wait)}
+
+hr.rule{border:0;border-top:1px solid var(--rule);margin-block:40px}
+
+.nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--surface);border:1px solid var(--rule);color:var(--ink);
+  padding:8px 15px;border-radius:3px;font-size:.9rem}
+.btn:hover{border-color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn:disabled:hover{border-color:var(--rule)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.counter{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.82rem;color:var(--muted);
+  font-variant-numeric:tabular-nums}
+.dots{display:flex;gap:5px;flex-wrap:wrap;margin-left:auto}
+.dot{width:11px;height:11px;border-radius:2px;border:1px solid var(--rule);background:var(--surface);padding:0}
+.dot[data-state="part"]{background:var(--wait-soft);border-color:var(--wait)}
+.dot[data-state="full"]{background:var(--accent);border-color:var(--accent)}
+.dot[aria-current="true"]{outline:2px solid var(--ink);outline-offset:2px}
+
+.task{background:var(--surface);border:1px solid var(--rule);border-radius:3px;
+  padding:clamp(20px,4vw,32px)}
+.task h2{margin-bottom:.2em;font-size:1.3rem;word-break:break-word}
+.meta{color:var(--muted);font-size:.88rem;margin:0 0 4px}
+.meta code{color:var(--ink-soft)}
+.persp{background:var(--surface-sunk);border-radius:3px;padding:14px 16px;margin:18px 0 0;
+  font-size:.92rem;color:var(--ink-soft)}
+.persp b{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.7rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.4em}
+.hint{font-size:.88rem;color:var(--muted);margin:14px 0 0}
+
+.lessons{list-style:none;padding:0;margin:20px 0 0}
+.lesson{border-top:1px solid var(--rule);padding-block:18px;display:grid;
+  grid-template-columns:1fr 172px;gap:12px 22px;align-items:start}
+.lesson:first-child{border-top:0}
+.lesson[data-v="ja"]{background:linear-gradient(90deg,var(--accent-soft),transparent 60%);margin-inline:-12px;padding-inline:12px;border-radius:3px}
+.lesson[data-v="?"]{background:linear-gradient(90deg,var(--wait-soft),transparent 60%);margin-inline:-12px;padding-inline:12px;border-radius:3px}
+.l-ref{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.8rem;color:var(--accent);
+  word-break:break-word;margin:0 0 .35em}
+.l-text{margin:0;font-size:.95rem;color:var(--ink-soft)}
+.l-sym{margin:.5em 0 0;font-size:.88rem;color:var(--muted)}
+.l-sym b{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.68rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);font-weight:600}
+.choices{display:flex;gap:6px;flex-wrap:wrap}
+.choice{border:1px solid var(--rule);background:var(--surface);color:var(--ink-soft);
+  padding:6px 12px;border-radius:3px;font-size:.84rem;white-space:nowrap}
+.choice:hover{border-color:var(--ink-soft)}
+.choice[aria-pressed="true"][data-v="ja"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.choice[aria-pressed="true"][data-v="?"]{background:var(--wait-soft);border-color:var(--wait);color:var(--wait)}
+.grunn{grid-column:1 / -1;margin-top:-4px}
+.grunn label{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.7rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--accent);display:block;margin-bottom:.4em}
+.grunn label.mangler{color:var(--wait)}
+.grunn input{width:100%;background:var(--surface-sunk);border:1px solid var(--rule);
+  border-radius:3px;color:var(--ink);padding:9px 12px;font:inherit;font-size:.93rem}
+.grunn input.mangler{border-color:var(--wait)}
+
+.note{margin-top:24px}
+.note label{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.7rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.5em}
+textarea{width:100%;min-height:74px;background:var(--surface-sunk);border:1px solid var(--rule);
+  border-radius:3px;color:var(--ink);padding:11px 13px;font:inherit;font-size:.93rem;resize:vertical}
+textarea:focus-visible,input:focus-visible,.choice:focus-visible,.btn:focus-visible,.dot:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px}
+
+.ferdig{margin-top:26px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.ferdig .btn{padding:11px 18px}
+.ferdig .status{font-size:.9rem;color:var(--muted)}
+.ferdig .status.warn{color:var(--wait)}
+.done-card{background:var(--accent-soft);border:1px solid var(--accent);border-radius:3px;
+  padding:22px 24px;margin-top:26px}
+.done-card p{margin:0;color:var(--ink)}
+.done-card .btn{margin-top:10px}
+
+footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--rule);
+  color:var(--muted);font-size:.85rem}
+footer p{margin:0 0 .5em}
+
+@media (max-width:680px){
+  .lesson{grid-template-columns:1fr}
+  .dots{margin-left:0;width:100%}
+}
+</style>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Fasit for formålsoppslag · WP12 · runde 2</p>
+    <h1>Dommerbenken</h1>
+    <p class="lede">Fem oppgaver, 75 lærdommer. Denne gangen er «nei» standard: du trenger bare å peke ut de få som faktisk ville endret noe — og si hva.</p>
+
+    <div class="criterion">
+      <p><b>Kriteriet:</b> ville forebyggingen endret et konkret valg, en test eller en avgrensning i <em>denne</em> oppgaven?</p>
+      <span class="small">Et <b>ja</b> krever at du skriver hva som ville blitt annerledes — ett ledd holder: «testen X», «avgrensningen Y», «valget Z». Klarer du ikke å navngi det, er svaret nei. Generelt gode råd er nei. «Riktig, men den endret ingenting her» er nei. Forvent 0–3 ja per oppgave.</span>
+      <span class="why">Hvorfor på nytt: i runde 1 ble alle 197 «ja». Da får begge oppslagsmotorene full score, og fasiten kan ikke skille dem. Radene står nå i tilfeldig rekkefølge, så plasseringen sier ingenting om hvilken motor som rangerte dem høyt.</span>
+    </div>
+
+    <div class="progress">
+      <div class="bar"><i id="bar"></i></div>
+      <span class="pct" id="pct">0 av 5 oppgaver ferdig</span>
+      <span class="savestate" id="save">laster …</span>
+    </div>
+  </header>
+
+  <hr class="rule">
+
+  <nav class="nav">
+    <button class="btn" id="prev" type="button">← Forrige</button>
+    <span class="counter" id="counter">1 / 5</span>
+    <button class="btn primary" id="next" type="button">Neste →</button>
+    <div class="dots" id="dots"></div>
+  </nav>
+
+  <main class="task" id="task" aria-live="polite"></main>
+
+  <footer>
+    <p>Svarene lagres automatisk mens du klikker, og Claude leser dem herfra — du skal ikke sende noe. Runde 1 (197 svar) er bevart uendret.</p>
+    <p>Kilde: <code>maaling/korpus_44.json</code>, snapshot <code>1437e34b…6f00f</code>. De fem oppgavene er de der de to motorene er mest uenige om topp-10 (overlapp 4–6 av 10); radene er unionen, i fast tilfeldig rekkefølge.</p>
+  </footer>
+
+</div>
+
+<script id="data" type="application/json">[{"navn": "PDD_arbeidsko-ai-utforere_2026-09-07", "perspektiv": "Én arbeidskø, tre utførere, ingen postbud; Ett jobbformat = HAVEN-Deploy-task; Dispatcher på Mac-en.", "skop": "simulated-scope://deploy", "spec": "CellProtocolDocuments/Deliverables/PDD_arbeidsko-ai-utforere_2026-09-07/FORMAALSSPEC.md", "k6": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "k1": [1, 2, 3, 6, 11, 12, 13, 14, 15, 16], "union": [{"n": 6, "ref": "lesson.queue-job-file-before-prompt", "symptom": "Køjobben `formaalskomposisjon-fullfor-commit-20260910-1020` ble avvist med «mangler promptfil» 13 sekunder etter at `.job` ble skrevet; promptfilen kom to sekunder etter avvisningen og ligger foreldreløs i `_losen-queue/inbox/`, der runneren aldri ser den igjen.", "forebygging": "Skriv `<id>.prompt.md` først og `<id>.job` sist, helst som `mv` fra en tmp-fil i samme mappe — `.job` er registreringssignalet, slik `job.json` er det i HavenAgentD::Docs/AgentJobs.md. Kan bli derivedTest: runneren eller `hd validate` rapporterer enhver `inbox/*.prompt.md` uten tilhørende `.job`, eldre enn to minutter, som foreldreløs."}, {"n": 15, "ref": "lesson.worktree-created-from-vm-has-unusable-gitdir", "symptom": "WP1 ble blocked etter ett minutt: `fatal: not a git repository: /sessions/<sesjon>/mnt/CellScaffold/.git/worktrees/_wt-sad-20260909`, exit 128. Branch og HEAD kunne ikke bekreftes.", "forebygging": "Opprett worktrees fra macOS (Codex), ikke fra VM-en. Er det allerede gjort fra VM-en: skriv om begge pekerfilene til macOS-stien og verifiser `branch --show-current` + `rev-parse HEAD` **fra macOS** før noen jobb legges i køen. En jobb skal aldri være første stedet en sti blir prøvd."}, {"n": 3, "ref": "lesson.codex-workspace-write-cannot-build-cellscaffold", "symptom": "WP0-baselinen i køen ble blocked: `sandbox-exec: sandbox_apply: Operation not permitted`. Testkommandoen brukte 1 604 sekunder uten at én eneste test startet.", "forebygging": "Lange bygg og testkjøringer legges ikke som `workspace-write`-køjobb. De kjøres som detached skript startet via Codex med `danger-full-access` og python Popen(start_new_session=True), med logg i en montert mappe som Cowork kan polle — samme mønster som produserte den notariserte HavenAgentD-pakken 2026-09-08. Køjobber brukes til analyse, kontrakter, dokumentasjon og korte kommandoer."}, {"n": 1, "ref": "lesson.paste-command-instead-of-queue", "symptom": "Kjetil fikk et innlimingsskript for å starte Codex; flagget --full-auto finnes ikke på `codex exec`, og kjøringen feilet ved første linje.", "forebygging": "Før enhver Codex-kjøring fra Cowork: `ls HAVEN/_losen-queue/inbox running; tail logs/runner.log`, legg jobben som <id>.job + <id>.prompt.md. Aldri gi Kjetil kommandoer å lime inn. Gyldige `codex exec`-flagg: --sandbox, --skip-git-repo-check, -C."}, {"n": 2, "ref": "lesson.codex-sandbox-cannot-reach-docker", "symptom": "S10 (docker compose build/up) endte i `permission denied … docker.sock` i Codex-sandkassen; deploy-slicen ble blocked.", "forebygging": "Deploy-/image-steg planlegges aldri som Codex-slice; de registreres som HAVEN-Deploy-post med eier Kjetil (eller en dispatcher-adapter med eksplisitt docker-rettighet når arbeidskø-PDD-en er levert). Se HD-0012."}, {"n": 8, "ref": "lesson.baseline-measured-another-pdds-branch", "symptom": "WP0 målte `pdd/tillitspakke-agentflaate` med 181 skitne oppføringer, ikke et rent utgangspunkt for sin egen PDD. En regresjonsbaseline derfra sier ingenting om hva denne PDD-en endrer.", "forebygging": "WP0 måler en ren eksport av den revisjonen arbeidet skal gå ut fra (`git archive <rev> | tar -x -C <scratch>`), ikke det delte arbeidstreet. Er arbeidstreet opptatt av en annen PDD, er det en planopplysning som hører i STATUS, ikke noe implementeringen skal jobbe rundt."}, {"n": 10, "ref": "lesson.a-red-baseline-is-a-question-not-an-answer", "symptom": "En rød baseline ble behandlet som en opplysning om prosjektet, og arbeidet gikk videre med et tiltak som gjorde den grønn. Tiltaket skjulte årsaken i stedet for å fjerne den.", "forebygging": "Svar på tre spørsmål før du gjør noe med en rød baseline: er utsjekket mitt likt origin? er CI grønn på origin/main? hvilken commit gjorde den rød, og hvem eier den? Først når svaret er «prosjektet er faktisk rødt» er det riktig å jobbe rundt det — og da som en egen, navngitt sak, ikke som en stille lokal omgåelse."}, {"n": 16, "ref": "lesson.entityanchor-keypaths-are-registered", "symptom": "WP2-testen skrev en sentinel til `profile` på abonnentens EntityAnchor og fikk `notFound` ved gjenlesing. Skrivingen ga ingen feil.", "forebygging": "Skriv aldri testdata til en oppdiktet keypath på en celle. Finn en keypath cellen faktisk registrerer, helst en annen test som allerede bruker den. At et `set` går gjennom er ikke bevis på at keypathen finnes."}, {"n": 12, "ref": "lesson.codex-mcp-60s", "symptom": "Codex-MCP-kall kuttes etter ~60 s; registerlesning og Swift-bygg sprengte taket.", "forebygging": "Bygg/test/lange jobber går via terminal codex exec eller filbasert overlevering, aldri via Codex-MCP."}, {"n": 14, "ref": "lesson.zsh-no-inline-comments", "symptom": "Begge kommandolinjene feilet med 'ukjent argument: #' og ingenting kjørte.", "forebygging": "Aldri forklaring på samme linje som en kommando; skript har '\"#\"*) break ;;' i argumentparseren."}, {"n": 4, "ref": "lesson.a-new-red-test-needs-a-repeated-baseline", "symptom": "Første fulle kjøring med nye endringer viste to røde i stedet for baselinens én, og den nye lå i en fil jeg hadde endret. Det så ut som en regresjon jeg hadde innført.", "forebygging": "Når en ny rød dukker opp: kjør basen på nytt, i et eget rent worktree, **flere ganger** (tre holder som regel), før du enten tar på deg feilen eller avfeier den. Skriv resultatet av gjentakelsen i TESTRESULT — «2 av 3 på ren base» er et svar, «den er nok flaky» er ikke. Det koster ti minutter og avgjør om du bruker natten på å jage din egen feil eller andres."}, {"n": 9, "ref": "lesson.syntax-check-reported-as-delivered", "symptom": "WP1 ble rapportert som «kode og 7 tester levert, syntakssjekken bestod». Et faktisk bygg ga 50 kompileringsfeil, og testene feilet 4 av 7 da de først kunne kjøre.", "forebygging": "En implementeringsslice er ikke levert før et detached bygg med `danger-full-access` er kjørt mot arbeidstreet og både bygg og de nye testene er grønne. Legg byggejobben klar FØR slicen kjøres, og skriv i prompten at slicen skal rapportere «skrevet, ikke verifisert» — ikke «levert»."}, {"n": 11, "ref": "lesson.stop-rule-too-wide-stops-the-job", "symptom": "En commit-jobb til Codex stoppet før første `git add` fordi stoppregelen sa «finner du `.git/index.lock` eller annen låsefil: stopp». Et rekursivt søk fant 25 filer som heter `locked` under andre arbeidstrær — normale `git worktree lock`-markører som ikke blokkerer noe. Jobben gjorde ingenting, og hele runden gikk tapt.", "forebygging": "Skriv stoppregler som navn og sti, ikke som kategori: «stopp hvis `index.lock`, `HEAD.lock` eller `*.lock` finnes under `<denne stien>`». Navngi eksplisitt det som ser ut som en treffer men ikke er det, og si at det skal ignoreres. Legg alltid til «stopp hvis kommandoen faktisk avvises med denne feilen» — en filsøk-treffliste er ikke et bevis på blokkering. Samme gjelder alle vide vendinger i en prompt: «eller lignende», «eller annet», «eventuelle andre»."}, {"n": 7, "ref": "lesson.swift-test-exit-code-lies-in-havenagentd", "symptom": "`swift test` i HavenAgentD avslutter med 1 selv når samtlige 212 tester passerer. Et skript som leser `$?` melder rødt på et helt grønt tre.", "forebygging": "Les resultatet fra linjen `Test run with N tests in M suites passed/failed`, ikke fra exitkoden, i alle skript og køjobber for dette repoet. Og fjern det tomme XCTest-målet, eller bygg det for riktig arkitektur, før noen setter opp CI her — ellers vil CI være rød uansett hva som gjøres."}, {"n": 13, "ref": "lesson.pkill-pattern-killed-the-queue-job", "symptom": "En commit-jobb i Losen-køen døde med EXIT=143 tolv sekunder etter start. Ingen feilmelding, ingen commit. Årsaken var min egen opprydding i et annet skript: `pkill -f \"<appnavn>\"`.", "forebygging": "Bruk aldri `pkill -f <mønster>` på en maskin der andre prosesser kan ha teksten i argv. Stopp en prosess ved PID du selv startet, eller ved `pgrep -x <prosessnavn>` kombinert med en sjekk av `ps -o comm=` mot den nøyaktige kjørbare stien. Dette gjelder særlig når en jobbkø kjører prompter som argument: alt du skriver i en prompt står på en kommandolinje et sted."}, {"n": 5, "ref": "lesson.pin-must-be-on-their-main", "symptom": "En revisjonspin i Package.swift pekte på en CellProtocol-revisjon som ikke lå på CellProtocol sin main. Koden bygde bare på den ene maskinen som hadde revisjonen liggende lokalt.", "forebygging": "Å pinne er riktig — det er det som gjør bygget reproduserbart. Kravet er at revisjonen er en forfar av avhengighetens egen main. Da er «bygg fra andres main» og «reproduserbart bygg» samme krav. HavenAgentD::Scripts/assert_dependencies_are_on_their_main.sh håndhever det, og CI kjører den. Lander du en klient før cellen den bruker er på den andres main, har du laget et repo som bare bygger hos deg."}], "rekkefolge": [6, 15, 3, 1, 2, 8, 10, 16, 12, 14, 4, 9, 11, 7, 13, 5]}, {"navn": "PDD_innholdsvern-lyd-20260909_2026-09-10", "perspektiv": "Åndsverket forlater ikke huset som fil; Klartekst forlater aldri serveren; Nøkkelen går samme vei som lyden.", "skop": "simulated-scope://musikk", "spec": "CellProtocolDocuments/Deliverables/PDD_innholdsvern-lyd-20260909_2026-09-10/FORMAALSSPEC.md", "k6": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "k1": [1, 10, 11, 12, 5, 3, 13, 14, 15, 16], "union": [{"n": 1, "ref": "lesson.ciphertext-field-held-plaintext-hash", "symptom": "Losen fortalte Kjetil at lyd allerede var kryptert i lagring. Det var feil: filene i prod begynner med ID3 og er vanlig MP3. To ting forte dit. (1) Krypteringskoden som ble lest tilhorer MusicIngestCell paa /mvp/ingest/local, mens Butterpop publiserer gjennom MusicAssetStoreCell.storeLocalAsset, som skriver bytene slik de kommer. (2) storeLocalAsset setter ciphertextSHA256 = plaintextSHA256 = sha256(data), saa manifestet ser kryptert ut selv naar encryptionPolicy er none.", "forebygging": "En paastand om at noe er kryptert, signert eller verifisert skal bekreftes paa artefaktet - les bytene, ikke feltet. Et felt som heter ciphertext* skal ikke settes naar encryptionPolicy er none; enten utelates det, eller navnet sier hva det er. Kan bli derivedTest: manifest med encryptionPolicy none har ingen ciphertext-verdi."}, {"n": 3, "ref": "lesson.entityanchor-keypaths-are-registered", "symptom": "WP2-testen skrev en sentinel til `profile` på abonnentens EntityAnchor og fikk `notFound` ved gjenlesing. Skrivingen ga ingen feil.", "forebygging": "Skriv aldri testdata til en oppdiktet keypath på en celle. Finn en keypath cellen faktisk registrerer, helst en annen test som allerede bruker den. At et `set` går gjennom er ikke bevis på at keypathen finnes."}, {"n": 9, "ref": "lesson.unresolvable-condition-is-invisible", "symptom": "Relasjoner-flaten viste tittel og ingen vei inn: ingen filopplasting, ingen knapper. Alle tester gronne.", "forebygging": "SkeletonReachabilityAudit kjores over hver flate; test.skeleton.no-unreachable-elements feiler med elementene som aldri kan sees og handlingene som gaar tapt med dem. Betingelser hoerer hjemme inne i List/Grid/Reference-rader, der radens verdi sendes videre; ellers skal cellen avgjore og innhold bindes."}, {"n": 5, "ref": "lesson.empty-list-must-not-look-like-calm", "symptom": "En flate som samler «hva venter på meg» ser roligere ut jo mindre den får lest. En kilde som svarer 403, et token som er feil, en agent som ikke svarer — alle tre gir en tom liste, og en tom liste ser ut som at ingenting venter.", "forebygging": "Modeller fravær eksplisitt: én rad per kjent kilde, alltid med, med tilstand `read` / `unreadable` / `not-configured`, og en påkrevd grunn når den ikke er lest. Skill erklært fravær (vi vet at den ikke er koblet til) fra ukjent fravær (vi fikk ikke spurt) — bare det første får se rolig ut. Ha én boolsk verdi i visningsmodellen (`claimsAllClear`) som er sann på nøyaktig ett sted, og en test som går over **alle** feilutfall og krever at den er falsk og at listen ikke er tom. Gi hvert feilutfall sin egen overskrift: «det virker ikke» hjelper ingen, «token avvist» og «ingen kontakt» krever hver sin handling."}, {"n": 8, "ref": "lesson.test-the-representation-not-the-issuance-flow", "symptom": "Alle fire WP4-rolletestene feilet i oppsettet, ikke i det de skulle teste: `deniedNoGrant` på `requestEntry` mot `cell:///AdminEntry`. Testen fikk aldri gitt identiteten rollen.", "forebygging": "Skille to spørsmål: «hvordan får noen rollen» og «hva gir rollen». Tester du det andre, installer rollen på husets etablerte måte og test virkningen. Let alltid etter en eksisterende `*TestSupport`-hjelper før du bygger oppsettet selv — `grep -rn \"TestSupport\" CellScaffold::Tests` — og se hvilke argumenter de andre testene gir den."}, {"n": 10, "ref": "lesson.cellbase-internal-members-look-public", "symptom": "WP2 stoppet på `'fullPermissionString' is inaccessible due to 'internal' protection level`. Medlemmet finnes og brukes i CellBase selv, så det så ut som et gyldig API.", "forebygging": "Sjekk tilgangsnivå og faktisk returverdi før du bruker et CellBase-medlem fra App: `grep -n \"var <navn>\" CellProtocol::Sources/CellBase/...`. Et medlem som brukes internt i CellBase er ikke automatisk en del av API-et, og navnelikhet betyr ikke verdilikhet."}, {"n": 11, "ref": "lesson.branch-is-empty-after-eight-work-packages", "symptom": "Åtte arbeidspakker rapportert utført og verifisert, ACCEPT.md skrevet — men `git branch -v` viste at `pdd/scaffold-admin-delegering` fortsatt pekte på samme commit som `main` (`e1f3e22f`). All koden lå ucommittet i et worktree som bare finnes på én maskin. Ett tapt worktree = 2 750 linjer kode og test borte, med full dokumentasjon på at arbeidet var «levert».", "forebygging": "Skill «filene finnes» fra «branchen har dem». Sjekk `git rev-parse <branch>` mot `git rev-parse <base>` som del av hver verifikasjon som påstår at noe ligger på en branch; er de like, er branchen tom. Legg en commit-pakke inn i planen etter første grønne bygg, ikke etter siste arbeidspakke. Når worktreet bare kan leses fra macOS, kjør sjekken der — ikke hopp over den fordi verktøyet svarer feil."}, {"n": 16, "ref": "lesson.bridge-inferred-architecture-from-one-use", "symptom": "En kodeassistent sluttet fra én observert bruksmåte av bridge til en egenskap ved arkitekturen og konkluderte feil.", "forebygging": "Erklær hver kapabilitet oppgaven bygger på som eget formål med kilde og Avgrensning (pkg.std.cell-combination)."}, {"n": 15, "ref": "lesson.cellbase-decodingerror-shadows-swift", "symptom": "WP1s nye celle ga 50 kompileringsfeil: `type 'DecodingError' has no member 'dataCorruptedError'` og `cannot infer contextual base in reference to member 'registry'`, alle fra én linje.", "forebygging": "I App-modulen: skriv `Swift.DecodingError` når du vil ha standardbibliotekets. Gjelder generelt for typenavn CellBase også definerer — sjekk med `grep -rn \"enum <Navn>\" CellProtocol::Sources/CellBase` før du antar at et kjent Foundation-navn er Foundations."}, {"n": 13, "ref": "lesson.valuetype-equality-false-for-objects", "symptom": "Fire av sju WP1-tester feilet på `XCTAssertEqual` mellom to `ValueType.object` som hadde identisk innhold. Feilmeldingen viste samme nøkler og verdier på begge sider, i ulik rekkefølge.", "forebygging": "Aldri assert på hele sammensatte `ValueType`-verdier. Sammenlign kanonisk JSON (`JSONEncoder` med `.sortedKeys`) eller pakk ut og sammenlign felt for felt. Skalarer (`.string`, `.integer`, `.bool`, `.null`) sammenlignes trygt. Merk: dette er et funn i CellBase, ikke bare en testregel — App-kildene destrukturerer riktignok før sammenligning, men en fremtidig `==` på hele verdier vil stille behandle like verdier som ulike. Ikke revidert utover App-kildene."}, {"n": 14, "ref": "lesson.planned-documented-as-implemented", "symptom": "Book/05_Flows_Lifecycle.md beskrev sekvensnummer, signatur og replay som ikke finnes i structen.", "forebygging": "Docs-diff i samme endring, med 'Last verified against code'-dato; planlagt oppførsel merkes eksplisitt."}, {"n": 6, "ref": "lesson.tested-a-different-path-than-production", "symptom": "Rot-probene leste relations.state.* gjennom porthole.get og var gronne, mens rendereren aldri fikk de samme dataene.", "forebygging": "Naar en test skal si noe om hva brukeren ser, maa den bruke produksjonens egen kodevei - helst produksjonens egen funksjon med produksjonens egne inndata (SkeletonReachabilityAudit kaller condition.evaluate(root: nil, ...) nettopp derfor)."}, {"n": 4, "ref": "lesson.purpose-never-grants-rights", "symptom": "Risiko for at formålsmatch tolkes som tilgang.", "forebygging": "Et formål kan innsnevre en rettighet, aldri opprette, utvide eller arve en; exact match; purpose://prompt.unknown feiler lukket."}, {"n": 12, "ref": "lesson.swift-test-exit-code-lies-in-havenagentd", "symptom": "`swift test` i HavenAgentD avslutter med 1 selv når samtlige 212 tester passerer. Et skript som leser `$?` melder rødt på et helt grønt tre.", "forebygging": "Les resultatet fra linjen `Test run with N tests in M suites passed/failed`, ikke fra exitkoden, i alle skript og køjobber for dette repoet. Og fjern det tomme XCTest-målet, eller bygg det for riktig arkitektur, før noen setter opp CI her — ellers vil CI være rød uansett hva som gjøres."}, {"n": 7, "ref": "lesson.pkill-pattern-killed-the-queue-job", "symptom": "En commit-jobb i Losen-køen døde med EXIT=143 tolv sekunder etter start. Ingen feilmelding, ingen commit. Årsaken var min egen opprydding i et annet skript: `pkill -f \"<appnavn>\"`.", "forebygging": "Bruk aldri `pkill -f <mønster>` på en maskin der andre prosesser kan ha teksten i argv. Stopp en prosess ved PID du selv startet, eller ved `pgrep -x <prosessnavn>` kombinert med en sjekk av `ps -o comm=` mot den nøyaktige kjørbare stien. Dette gjelder særlig når en jobbkø kjører prompter som argument: alt du skriver i en prompt står på en kommandolinje et sted."}, {"n": 2, "ref": "lesson.cellscaffold-two-holes", "symptom": "CellScaffold har tomme booking-/concierge-stubber og autorisasjon som kaster nøkkelstien og bare sjekker eierskap.", "forebygging": "Ikke porter celler fra CellScaffold til PalazzoScaffold uten å lukke begge hullene; test.cell.auth-negative og test.cell.stub-scan må være grønne."}], "rekkefolge": [1, 3, 9, 5, 8, 10, 11, 16, 15, 13, 14, 6, 4, 12, 7, 2]}, {"navn": "PDD_formaalsregister-som-graf_2026-09-11", "perspektiv": "Formålsregisteret er én graf signalmatching kan kjøre på; Én taksonomi, én sannhet; De 39 avvikende nodene er avgjort, ikke slettet.", "skop": "simulated-scope://kunnskap", "spec": "CellProtocolDocuments/Deliverables/PDD_formaalsregister-som-graf_2026-09-11/FORMAALSSPEC.md", "k6": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "k1": [4, 2, 10, 1, 11, 12, 13, 5, 14, 15], "union": [{"n": 1, "ref": "lesson.decomposition-is-classification", "symptom": "Modeller som genererte purpose://-refs fritt hallusinerte referanser.", "forebygging": "Dekomponering velger fra Book 23 + pakker først; nye noder merkes 'candidate' og navngis av Claude, aldri implisitt av en modell."}, {"n": 7, "ref": "lesson.entityanchor-keypaths-are-registered", "symptom": "WP2-testen skrev en sentinel til `profile` på abonnentens EntityAnchor og fikk `notFound` ved gjenlesing. Skrivingen ga ingen feil.", "forebygging": "Skriv aldri testdata til en oppdiktet keypath på en celle. Finn en keypath cellen faktisk registrerer, helst en annen test som allerede bruker den. At et `set` går gjennom er ikke bevis på at keypathen finnes."}, {"n": 11, "ref": "lesson.cellbase-internal-members-look-public", "symptom": "WP2 stoppet på `'fullPermissionString' is inaccessible due to 'internal' protection level`. Medlemmet finnes og brukes i CellBase selv, så det så ut som et gyldig API.", "forebygging": "Sjekk tilgangsnivå og faktisk returverdi før du bruker et CellBase-medlem fra App: `grep -n \"var <navn>\" CellProtocol::Sources/CellBase/...`. Et medlem som brukes internt i CellBase er ikke automatisk en del av API-et, og navnelikhet betyr ikke verdilikhet."}, {"n": 15, "ref": "lesson.a-new-red-test-needs-a-repeated-baseline", "symptom": "Første fulle kjøring med nye endringer viste to røde i stedet for baselinens én, og den nye lå i en fil jeg hadde endret. Det så ut som en regresjon jeg hadde innført.", "forebygging": "Når en ny rød dukker opp: kjør basen på nytt, i et eget rent worktree, **flere ganger** (tre holder som regel), før du enten tar på deg feilen eller avfeier den. Skriv resultatet av gjentakelsen i TESTRESULT — «2 av 3 på ren base» er et svar, «den er nok flaky» er ikke. Det koster ti minutter og avgjør om du bruker natten på å jage din egen feil eller andres."}, {"n": 3, "ref": "lesson.bridge-inferred-architecture-from-one-use", "symptom": "En kodeassistent sluttet fra én observert bruksmåte av bridge til en egenskap ved arkitekturen og konkluderte feil.", "forebygging": "Erklær hver kapabilitet oppgaven bygger på som eget formål med kilde og Avgrensning (pkg.std.cell-combination)."}, {"n": 4, "ref": "lesson.cellbase-decodingerror-shadows-swift", "symptom": "WP1s nye celle ga 50 kompileringsfeil: `type 'DecodingError' has no member 'dataCorruptedError'` og `cannot infer contextual base in reference to member 'registry'`, alle fra én linje.", "forebygging": "I App-modulen: skriv `Swift.DecodingError` når du vil ha standardbibliotekets. Gjelder generelt for typenavn CellBase også definerer — sjekk med `grep -rn \"enum <Navn>\" CellProtocol::Sources/CellBase` før du antar at et kjent Foundation-navn er Foundations."}, {"n": 14, "ref": "lesson.tested-a-different-path-than-production", "symptom": "Rot-probene leste relations.state.* gjennom porthole.get og var gronne, mens rendereren aldri fikk de samme dataene.", "forebygging": "Naar en test skal si noe om hva brukeren ser, maa den bruke produksjonens egen kodevei - helst produksjonens egen funksjon med produksjonens egne inndata (SkeletonReachabilityAudit kaller condition.evaluate(root: nil, ...) nettopp derfor)."}, {"n": 9, "ref": "lesson.planned-documented-as-implemented", "symptom": "Book/05_Flows_Lifecycle.md beskrev sekvensnummer, signatur og replay som ikke finnes i structen.", "forebygging": "Docs-diff i samme endring, med 'Last verified against code'-dato; planlagt oppførsel merkes eksplisitt."}, {"n": 2, "ref": "lesson.local-main-is-not-main", "symptom": "WP0-baselinen var rød og ble meldt som «main bygger ikke». Det var feil. Den commiten baselinen ble målt mot, `ba14895`, lå bare på den LOKALE main-grenen og var aldri pushet; den avhang av CellBase-kode som heller ikke var pushet. origin/main lå fire commits lenger fram, pinnet CellProtocol til en revisjon som ER på CellProtocol sin main, og hadde grønn CI hele tiden. Et helt døgns arbeid ble bygget oppå den lokale commiten.", "forebygging": "Før du måler en baseline eller sier at main er rød: `git fetch origin main` og sammenlign. Er lokal main foran origin/main, er de commitene ikke main for andre — bygg aldri videre på dem. Se på CI for origin/main før du konkluderer. `swift package edit` skal aldri være på når noe måles eller meldes verifisert. Og den eneste sjekken som virkelig avgjør: klon fra GitHub til en tom katalog og bygg der. HavenAgentD::Scripts/preflight_before_landing.sh stiller alle fire spørsmålene."}, {"n": 13, "ref": "lesson.valuetype-equality-false-for-objects", "symptom": "Fire av sju WP1-tester feilet på `XCTAssertEqual` mellom to `ValueType.object` som hadde identisk innhold. Feilmeldingen viste samme nøkler og verdier på begge sider, i ulik rekkefølge.", "forebygging": "Aldri assert på hele sammensatte `ValueType`-verdier. Sammenlign kanonisk JSON (`JSONEncoder` med `.sortedKeys`) eller pakk ut og sammenlign felt for felt. Skalarer (`.string`, `.integer`, `.bool`, `.null`) sammenlignes trygt. Merk: dette er et funn i CellBase, ikke bare en testregel — App-kildene destrukturerer riktignok før sammenligning, men en fremtidig `==` på hele verdier vil stille behandle like verdier som ulike. Ikke revidert utover App-kildene."}, {"n": 5, "ref": "lesson.purpose-never-grants-rights", "symptom": "Risiko for at formålsmatch tolkes som tilgang.", "forebygging": "Et formål kan innsnevre en rettighet, aldri opprette, utvide eller arve en; exact match; purpose://prompt.unknown feiler lukket."}, {"n": 10, "ref": "lesson.pin-must-be-on-their-main", "symptom": "En revisjonspin i Package.swift pekte på en CellProtocol-revisjon som ikke lå på CellProtocol sin main. Koden bygde bare på den ene maskinen som hadde revisjonen liggende lokalt.", "forebygging": "Å pinne er riktig — det er det som gjør bygget reproduserbart. Kravet er at revisjonen er en forfar av avhengighetens egen main. Da er «bygg fra andres main» og «reproduserbart bygg» samme krav. HavenAgentD::Scripts/assert_dependencies_are_on_their_main.sh håndhever det, og CI kjører den. Lander du en klient før cellen den bruker er på den andres main, har du laget et repo som bare bygger hos deg."}, {"n": 8, "ref": "lesson.ciphertext-field-held-plaintext-hash", "symptom": "Losen fortalte Kjetil at lyd allerede var kryptert i lagring. Det var feil: filene i prod begynner med ID3 og er vanlig MP3. To ting forte dit. (1) Krypteringskoden som ble lest tilhorer MusicIngestCell paa /mvp/ingest/local, mens Butterpop publiserer gjennom MusicAssetStoreCell.storeLocalAsset, som skriver bytene slik de kommer. (2) storeLocalAsset setter ciphertextSHA256 = plaintextSHA256 = sha256(data), saa manifestet ser kryptert ut selv naar encryptionPolicy er none.", "forebygging": "En paastand om at noe er kryptert, signert eller verifisert skal bekreftes paa artefaktet - les bytene, ikke feltet. Et felt som heter ciphertext* skal ikke settes naar encryptionPolicy er none; enten utelates det, eller navnet sier hva det er. Kan bli derivedTest: manifest med encryptionPolicy none har ingen ciphertext-verdi."}, {"n": 6, "ref": "lesson.free-text-is-not-a-declaration", "symptom": "Leksikalsk avledning fra fri formålstekst ga F1 0,060; strukturerte erklæringer ga 0,686 og 0,909 med ruting til menneske.", "forebygging": "Formålsnoder skal ha strukturerte felt (goal, verifier, avgrensning, surfaces) — ikke bare summary; usikre noder rutes til Kjetil med confidence."}, {"n": 12, "ref": "lesson.codex-workspace-write-cannot-build-cellscaffold", "symptom": "WP0-baselinen i køen ble blocked: `sandbox-exec: sandbox_apply: Operation not permitted`. Testkommandoen brukte 1 604 sekunder uten at én eneste test startet.", "forebygging": "Lange bygg og testkjøringer legges ikke som `workspace-write`-køjobb. De kjøres som detached skript startet via Codex med `danger-full-access` og python Popen(start_new_session=True), med logg i en montert mappe som Cowork kan polle — samme mønster som produserte den notariserte HavenAgentD-pakken 2026-09-08. Køjobber brukes til analyse, kontrakter, dokumentasjon og korte kommandoer."}], "rekkefolge": [1, 7, 11, 15, 3, 4, 14, 9, 2, 13, 5, 10, 8, 6, 12]}, {"navn": "PDD_haven-visionos_2026-09-10", "perspektiv": "HAVEN i rommet; Flere Portholes samtidig; Porthole er instansierbar.", "skop": "simulated-scope://gui", "spec": "CellProtocolDocuments/Deliverables/PDD_haven-visionos_2026-09-10/FORMAALSSPEC.md", "k6": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "k1": [8, 1, 11, 5, 12, 4, 6, 13, 14, 3], "union": [{"n": 1, "ref": "lesson.scaffold-without-porthole-host-has-no-preview", "symptom": "G1-GUI måtte bruke mockups rendret fra skeleton-JSON; ekte Porthole-preview var umulig.", "forebygging": "For scaffolds uten Porthole-vert: (1) images/README.md må si eksplisitt at bildene er mockups og hva skeleton ikke kan rendre, (2) paritet (test.gui.parity) planlegges som egen slice med kjørende scaffold + Binding/Porthole via bridge, ikke som del av implementeringsjobben."}, {"n": 3, "ref": "lesson.findability-is-not-usability", "symptom": "Flatene ble kalt validert fordi de bestod en beskrivelsesaudit; de var samtidig ubrukelige.", "forebygging": "En formaalssjekk maa navngi handlingene eieren skal kunne utfore, og testes mot SkeletonReachabilityAudit.reachableActionKeypaths - ikke mot hvor godt formaalet er formulert."}, {"n": 4, "ref": "lesson.tested-a-different-path-than-production", "symptom": "Rot-probene leste relations.state.* gjennom porthole.get og var gronne, mens rendereren aldri fikk de samme dataene.", "forebygging": "Naar en test skal si noe om hva brukeren ser, maa den bruke produksjonens egen kodevei - helst produksjonens egen funksjon med produksjonens egne inndata (SkeletonReachabilityAudit kaller condition.evaluate(root: nil, ...) nettopp derfor)."}, {"n": 8, "ref": "lesson.cellbase-decodingerror-shadows-swift", "symptom": "WP1s nye celle ga 50 kompileringsfeil: `type 'DecodingError' has no member 'dataCorruptedError'` og `cannot infer contextual base in reference to member 'registry'`, alle fra én linje.", "forebygging": "I App-modulen: skriv `Swift.DecodingError` når du vil ha standardbibliotekets. Gjelder generelt for typenavn CellBase også definerer — sjekk med `grep -rn \"enum <Navn>\" CellProtocol::Sources/CellBase` før du antar at et kjent Foundation-navn er Foundations."}, {"n": 13, "ref": "lesson.syntax-check-reported-as-delivered", "symptom": "WP1 ble rapportert som «kode og 7 tester levert, syntakssjekken bestod». Et faktisk bygg ga 50 kompileringsfeil, og testene feilet 4 av 7 da de først kunne kjøre.", "forebygging": "En implementeringsslice er ikke levert før et detached bygg med `danger-full-access` er kjørt mot arbeidstreet og både bygg og de nye testene er grønne. Legg byggejobben klar FØR slicen kjøres, og skriv i prompten at slicen skal rapportere «skrevet, ikke verifisert» — ikke «levert»."}, {"n": 11, "ref": "lesson.cellbase-internal-members-look-public", "symptom": "WP2 stoppet på `'fullPermissionString' is inaccessible due to 'internal' protection level`. Medlemmet finnes og brukes i CellBase selv, så det så ut som et gyldig API.", "forebygging": "Sjekk tilgangsnivå og faktisk returverdi før du bruker et CellBase-medlem fra App: `grep -n \"var <navn>\" CellProtocol::Sources/CellBase/...`. Et medlem som brukes internt i CellBase er ikke automatisk en del av API-et, og navnelikhet betyr ikke verdilikhet."}, {"n": 7, "ref": "lesson.new-cell-must-declare-its-provisioning-mode", "symptom": "To nye celler i CellScaffold ga tre nye regresjoner: `OrchestratorPersistenceTests testRequireExistingModeRejectsFreshStorageWithoutCreatingBootstrapCells` (opprettet en celle i require-existing-modus mot fersk lagring) og to `TopUpCheckoutTests` som teller celler i provision-only-modus (5 mot forventet 4).", "forebygging": "Enhver ny persistert celle i CellScaffold må eksplisitt svare på tre spørsmål før den registreres: (1) skal den opprettes i require-existing mot fersk lagring? Nei, med mindre den er kanonisk bootstrap. (2) Er den en av de kanoniske eager-bootstrap-cellene som provision-only skal lage? Nesten alltid nei — TopUpCheckoutTests teller dem eksplisitt. (3) Er den en Porthole-publisert flate? Bare da hører den i `reconcilePortholePublishedCellResolves`. Scaffold-intern tilstand registreres i egen funksjon, gated på policy OG provisionOnly, med gjenkjenning av eksisterende mapping."}, {"n": 10, "ref": "lesson.empty-list-must-not-look-like-calm", "symptom": "En flate som samler «hva venter på meg» ser roligere ut jo mindre den får lest. En kilde som svarer 403, et token som er feil, en agent som ikke svarer — alle tre gir en tom liste, og en tom liste ser ut som at ingenting venter.", "forebygging": "Modeller fravær eksplisitt: én rad per kjent kilde, alltid med, med tilstand `read` / `unreadable` / `not-configured`, og en påkrevd grunn når den ikke er lest. Skill erklært fravær (vi vet at den ikke er koblet til) fra ukjent fravær (vi fikk ikke spurt) — bare det første får se rolig ut. Ha én boolsk verdi i visningsmodellen (`claimsAllClear`) som er sann på nøyaktig ett sted, og en test som går over **alle** feilutfall og krever at den er falsk og at listen ikke er tom. Gi hvert feilutfall sin egen overskrift: «det virker ikke» hjelper ingen, «token avvist» og «ingen kontakt» krever hver sin handling."}, {"n": 5, "ref": "lesson.unresolvable-condition-is-invisible", "symptom": "Relasjoner-flaten viste tittel og ingen vei inn: ingen filopplasting, ingen knapper. Alle tester gronne.", "forebygging": "SkeletonReachabilityAudit kjores over hver flate; test.skeleton.no-unreachable-elements feiler med elementene som aldri kan sees og handlingene som gaar tapt med dem. Betingelser hoerer hjemme inne i List/Grid/Reference-rader, der radens verdi sendes videre; ellers skal cellen avgjore og innhold bindes."}, {"n": 14, "ref": "lesson.local-main-is-not-main", "symptom": "WP0-baselinen var rød og ble meldt som «main bygger ikke». Det var feil. Den commiten baselinen ble målt mot, `ba14895`, lå bare på den LOKALE main-grenen og var aldri pushet; den avhang av CellBase-kode som heller ikke var pushet. origin/main lå fire commits lenger fram, pinnet CellProtocol til en revisjon som ER på CellProtocol sin main, og hadde grønn CI hele tiden. Et helt døgns arbeid ble bygget oppå den lokale commiten.", "forebygging": "Før du måler en baseline eller sier at main er rød: `git fetch origin main` og sammenlign. Er lokal main foran origin/main, er de commitene ikke main for andre — bygg aldri videre på dem. Se på CI for origin/main før du konkluderer. `swift package edit` skal aldri være på når noe måles eller meldes verifisert. Og den eneste sjekken som virkelig avgjør: klon fra GitHub til en tom katalog og bygg der. HavenAgentD::Scripts/preflight_before_landing.sh stiller alle fire spørsmålene."}, {"n": 12, "ref": "lesson.valuetype-equality-false-for-objects", "symptom": "Fire av sju WP1-tester feilet på `XCTAssertEqual` mellom to `ValueType.object` som hadde identisk innhold. Feilmeldingen viste samme nøkler og verdier på begge sider, i ulik rekkefølge.", "forebygging": "Aldri assert på hele sammensatte `ValueType`-verdier. Sammenlign kanonisk JSON (`JSONEncoder` med `.sortedKeys`) eller pakk ut og sammenlign felt for felt. Skalarer (`.string`, `.integer`, `.bool`, `.null`) sammenlignes trygt. Merk: dette er et funn i CellBase, ikke bare en testregel — App-kildene destrukturerer riktignok før sammenligning, men en fremtidig `==` på hele verdier vil stille behandle like verdier som ulike. Ikke revidert utover App-kildene."}, {"n": 2, "ref": "lesson.text-ux-is-not-design", "symptom": "Kjetil forventet en helt annen flate enn den som ble vist; den tekstlige UX-beskrivelsen var godkjent, bildet var det ikke.", "forebygging": "Rendret bilde (Porthole-preview eller mockup) godkjennes før implementering; bildet er akseptansereferanse."}, {"n": 9, "ref": "lesson.surface-load-alias-miss", "symptom": "Flatelasting tok 46 541 ms (klientens 45 s-timeout) ved bom, 5 000 ms ved treff; målingen 10.08 målte en mislykket lasting.", "forebygging": "Mål lastetid tre ganger og sjekk logg for navnebom før en flate erklæres ferdig; aliaser må løses server-side eller ikke brukes."}, {"n": 6, "ref": "lesson.parity-was-correctness-not-decoration", "symptom": "Parity-audit mellom Porthole og Binding viste at problemet ikke var manglende dekorasjon, men produktkorrekthet (feil oppførsel).", "forebygging": "Akseptanse sammenligner både bilde og oppførsel (knapper trigger keypaths, felt tar input) — begge i ACCEPT.md."}], "rekkefolge": [1, 3, 4, 8, 13, 11, 7, 10, 5, 14, 12, 2, 9, 6]}, {"navn": "PDD_palazzo-gjestebestilling_2026-09-03", "perspektiv": "ukjent; ukjent.", "skop": "simulated-scope://palazzo", "spec": "CellProtocolDocuments/Deliverables/PDD_palazzo-gjestebestilling_2026-09-03/FORMAALSSPEC.md", "k6": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "k1": [1, 2, 5, 3, 10, 11, 12, 6, 13, 14], "union": [{"n": 2, "ref": "lesson.empty-list-must-not-look-like-calm", "symptom": "En flate som samler «hva venter på meg» ser roligere ut jo mindre den får lest. En kilde som svarer 403, et token som er feil, en agent som ikke svarer — alle tre gir en tom liste, og en tom liste ser ut som at ingenting venter.", "forebygging": "Modeller fravær eksplisitt: én rad per kjent kilde, alltid med, med tilstand `read` / `unreadable` / `not-configured`, og en påkrevd grunn når den ikke er lest. Skill erklært fravær (vi vet at den ikke er koblet til) fra ukjent fravær (vi fikk ikke spurt) — bare det første får se rolig ut. Ha én boolsk verdi i visningsmodellen (`claimsAllClear`) som er sann på nøyaktig ett sted, og en test som går over **alle** feilutfall og krever at den er falsk og at listen ikke er tom. Gi hvert feilutfall sin egen overskrift: «det virker ikke» hjelper ingen, «token avvist» og «ingen kontakt» krever hver sin handling."}, {"n": 9, "ref": "lesson.a-red-baseline-is-a-question-not-an-answer", "symptom": "En rød baseline ble behandlet som en opplysning om prosjektet, og arbeidet gikk videre med et tiltak som gjorde den grønn. Tiltaket skjulte årsaken i stedet for å fjerne den.", "forebygging": "Svar på tre spørsmål før du gjør noe med en rød baseline: er utsjekket mitt likt origin? er CI grønn på origin/main? hvilken commit gjorde den rød, og hvem eier den? Først når svaret er «prosjektet er faktisk rødt» er det riktig å jobbe rundt det — og da som en egen, navngitt sak, ikke som en stille lokal omgåelse."}, {"n": 10, "ref": "lesson.syntax-check-reported-as-delivered", "symptom": "WP1 ble rapportert som «kode og 7 tester levert, syntakssjekken bestod». Et faktisk bygg ga 50 kompileringsfeil, og testene feilet 4 av 7 da de først kunne kjøre.", "forebygging": "En implementeringsslice er ikke levert før et detached bygg med `danger-full-access` er kjørt mot arbeidstreet og både bygg og de nye testene er grønne. Legg byggejobben klar FØR slicen kjøres, og skriv i prompten at slicen skal rapportere «skrevet, ikke verifisert» — ikke «levert»."}, {"n": 6, "ref": "lesson.purpose-never-grants-rights", "symptom": "Risiko for at formålsmatch tolkes som tilgang.", "forebygging": "Et formål kan innsnevre en rettighet, aldri opprette, utvide eller arve en; exact match; purpose://prompt.unknown feiler lukket."}, {"n": 5, "ref": "lesson.scaffold-without-porthole-host-has-no-preview", "symptom": "G1-GUI måtte bruke mockups rendret fra skeleton-JSON; ekte Porthole-preview var umulig.", "forebygging": "For scaffolds uten Porthole-vert: (1) images/README.md må si eksplisitt at bildene er mockups og hva skeleton ikke kan rendre, (2) paritet (test.gui.parity) planlegges som egen slice med kjørende scaffold + Binding/Porthole via bridge, ikke som del av implementeringsjobben."}, {"n": 11, "ref": "lesson.findability-is-not-usability", "symptom": "Flatene ble kalt validert fordi de bestod en beskrivelsesaudit; de var samtidig ubrukelige.", "forebygging": "En formaalssjekk maa navngi handlingene eieren skal kunne utfore, og testes mot SkeletonReachabilityAudit.reachableActionKeypaths - ikke mot hvor godt formaalet er formulert."}, {"n": 8, "ref": "lesson.baseline-measured-another-pdds-branch", "symptom": "WP0 målte `pdd/tillitspakke-agentflaate` med 181 skitne oppføringer, ikke et rent utgangspunkt for sin egen PDD. En regresjonsbaseline derfra sier ingenting om hva denne PDD-en endrer.", "forebygging": "WP0 måler en ren eksport av den revisjonen arbeidet skal gå ut fra (`git archive <rev> | tar -x -C <scratch>`), ikke det delte arbeidstreet. Er arbeidstreet opptatt av en annen PDD, er det en planopplysning som hører i STATUS, ikke noe implementeringen skal jobbe rundt."}, {"n": 3, "ref": "lesson.unresolvable-condition-is-invisible", "symptom": "Relasjoner-flaten viste tittel og ingen vei inn: ingen filopplasting, ingen knapper. Alle tester gronne.", "forebygging": "SkeletonReachabilityAudit kjores over hver flate; test.skeleton.no-unreachable-elements feiler med elementene som aldri kan sees og handlingene som gaar tapt med dem. Betingelser hoerer hjemme inne i List/Grid/Reference-rader, der radens verdi sendes videre; ellers skal cellen avgjore og innhold bindes."}, {"n": 4, "ref": "lesson.decomposition-is-classification", "symptom": "Modeller som genererte purpose://-refs fritt hallusinerte referanser.", "forebygging": "Dekomponering velger fra Book 23 + pakker først; nye noder merkes 'candidate' og navngis av Claude, aldri implisitt av en modell."}, {"n": 14, "ref": "lesson.corr-approval-surfaces-timed-out", "symptom": "Corr-godkjenningen (Vegar) er utestet fordi flater/godkjenninger timet ut før testing rakk å skje.", "forebygging": "FORMAALSSPEC.md §2 lister avhengigheter som egne formål med verifier; pkg.std.everything-works og gui.surface-loads-in-time må være grønne før den egentlige testen kjøres."}, {"n": 12, "ref": "lesson.text-ux-is-not-design", "symptom": "Kjetil forventet en helt annen flate enn den som ble vist; den tekstlige UX-beskrivelsen var godkjent, bildet var det ikke.", "forebygging": "Rendret bilde (Porthole-preview eller mockup) godkjennes før implementering; bildet er akseptansereferanse."}, {"n": 7, "ref": "lesson.test-the-representation-not-the-issuance-flow", "symptom": "Alle fire WP4-rolletestene feilet i oppsettet, ikke i det de skulle teste: `deniedNoGrant` på `requestEntry` mot `cell:///AdminEntry`. Testen fikk aldri gitt identiteten rollen.", "forebygging": "Skille to spørsmål: «hvordan får noen rollen» og «hva gir rollen». Tester du det andre, installer rollen på husets etablerte måte og test virkningen. Let alltid etter en eksisterende `*TestSupport`-hjelper før du bygger oppsettet selv — `grep -rn \"TestSupport\" CellScaffold::Tests` — og se hvilke argumenter de andre testene gir den."}, {"n": 1, "ref": "lesson.bridge-inferred-architecture-from-one-use", "symptom": "En kodeassistent sluttet fra én observert bruksmåte av bridge til en egenskap ved arkitekturen og konkluderte feil.", "forebygging": "Erklær hver kapabilitet oppgaven bygger på som eget formål med kilde og Avgrensning (pkg.std.cell-combination)."}, {"n": 13, "ref": "lesson.free-text-is-not-a-declaration", "symptom": "Leksikalsk avledning fra fri formålstekst ga F1 0,060; strukturerte erklæringer ga 0,686 og 0,909 med ruting til menneske.", "forebygging": "Formålsnoder skal ha strukturerte felt (goal, verifier, avgrensning, surfaces) — ikke bare summary; usikre noder rutes til Kjetil med confidence."}], "rekkefolge": [2, 9, 10, 6, 5, 11, 8, 3, 4, 14, 12, 7, 1, 13]}]</script>
+<script>
+(function(){
+  "use strict";
+  var TASKS = JSON.parse(document.getElementById("data").textContent);
+  var answers = {};          // slug -> {svar:{n:"ja"|"?"}, grunn:{n:text}, ferdig:bool, notat:"", sek:n}
+  var db = null, i = 0, started = Date.now();
+
+  function slug(s){ return s.replace(/[^A-Za-z0-9_.\-]/g, "_").slice(0,120); }
+  function get(t){ var s = slug(t.navn); return answers[s] || (answers[s] = {svar:{}, grunn:{}, ferdig:false, notat:"", sek:0}); }
+  function missing(a){   // ja-rows without a reason
+    return Object.keys(a.svar).filter(function(n){ return a.svar[n] === "ja" && !(a.grunn[n] || "").trim(); });
+  }
+  function state(t){
+    var a = get(t);
+    if (a.ferdig) return "full";
+    return Object.keys(a.svar).length ? "part" : "none";
+  }
+  function doneCount(){ return TASKS.filter(function(t){ return get(t).ferdig; }).length; }
+  function jaCount(){ return TASKS.reduce(function(n,t){ var a = get(t); return n + Object.keys(a.svar).filter(function(k){ return a.svar[k] === "ja"; }).length; }, 0); }
+
+  var $ = function(id){ return document.getElementById(id); };
+  function setSave(txt, cls){ var el = $("save"); el.textContent = txt; el.className = "savestate" + (cls ? " " + cls : ""); }
+  function renderProgress(){
+    var n = doneCount();
+    $("bar").style.width = (n/TASKS.length*100).toFixed(1) + "%";
+    $("pct").textContent = n + " av " + TASKS.length + " oppgaver ferdig · " + jaCount() + " ja";
+  }
+  function renderDots(){
+    var d = $("dots"); d.innerHTML = "";
+    TASKS.forEach(function(t, k){
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "dot"; b.dataset.state = state(t);
+      b.setAttribute("aria-current", k === i ? "true" : "false");
+      b.setAttribute("aria-label", "Oppgave " + (k+1) + ": " + t.navn);
+      b.title = t.navn;
+      b.addEventListener("click", function(){ go(k); });
+      d.appendChild(b);
+    });
+  }
+  function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+  function render(){
+    var t = TASKS[i], s = slug(t.navn), a = get(t);
+    started = Date.now();
+    var h = '';
+    h += '<p class="meta">Oppgave ' + (i+1) + ' av ' + TASKS.length + ' · ' + t.union.length + ' lærdommer</p>';
+    h += '<h2>' + esc(t.navn) + '</h2>';
+    h += '<p class="meta"><code>' + esc(t.spec) + '</code></p>';
+    if (t.perspektiv) h += '<div class="persp"><b>Slik så oppgaven ut den gangen</b>' + esc(t.perspektiv) + '</div>';
+    h += '<p class="hint">Alt du ikke rører, teller som nei. Trykk «Ville endret noe» bare der du kan skrive hva.</p>';
+    h += '<ul class="lessons">';
+    t.union.forEach(function(u){
+      var v = a.svar[u.n] || "";
+      var g = a.grunn[u.n] || "";
+      h += '<li class="lesson" data-n="' + u.n + '" data-v="' + v + '">';
+      h +=   '<div>';
+      h +=     '<p class="l-ref">' + esc(u.ref) + '</p>';
+      h +=     '<p class="l-text">' + esc(u.forebygging) + '</p>';
+      if (u.symptom) h += '<p class="l-sym"><b>Det som skjedde:</b> ' + esc(u.symptom) + '</p>';
+      h +=   '</div>';
+      h +=   '<div class="choices">';
+      [["ja","Ville endret noe"],["?","Usikker"]].forEach(function(p){
+        h += '<button type="button" class="choice" data-v="' + p[0] + '" data-n="' + u.n + '" aria-pressed="' + (v === p[0]) + '">' + p[1] + '</button>';
+      });
+      h +=   '</div>';
+      if (v === "ja") {
+        var mangler = !g.trim();
+        h += '<div class="grunn"><label class="' + (mangler ? "mangler" : "") + '" for="g-' + u.n + '">' + (mangler ? "Hva ville blitt annerledes? (må fylles ut)" : "Ville endret:") + '</label>';
+        h += '<input id="g-' + u.n + '" data-n="' + u.n + '" class="' + (mangler ? "mangler" : "") + '" type="text" maxlength="240" placeholder="f.eks. testen for … / avgrensningen … / valget om …" value="' + esc(g) + '"></div>';
+      }
+      h += '</li>';
+    });
+    h += '</ul>';
+    h += '<div class="note"><label for="notat-' + i + '">Noe du vil legge til (valgfritt)</label>';
+    h += '<textarea id="notat-' + i + '" placeholder="F.eks. at den riktige lærdommen mangler helt, eller at to sier det samme.">' + esc(a.notat) + '</textarea></div>';
+
+    var miss = missing(a);
+    if (a.ferdig) {
+      h += '<div class="done-card"><p>Ferdig vurdert: ' + Object.keys(a.svar).filter(function(k){return a.svar[k]==="ja";}).length + ' ja, ' + Object.keys(a.svar).filter(function(k){return a.svar[k]==="?";}).length + ' usikker, resten nei. ' + (i + 1 < TASKS.length ? 'Gå videre til neste oppgave.' : 'Det var den siste — takk.') + '</p><button type="button" class="btn" id="reopen">Åpne igjen</button></div>';
+    } else {
+      h += '<div class="ferdig"><button type="button" class="btn primary" id="ferdig"' + (miss.length ? ' disabled' : '') + '>Ferdig — resten er nei</button>';
+      h += '<span class="status' + (miss.length ? ' warn' : '') + '">' + (miss.length ? miss.length + ' ja mangler begrunnelse' : 'Låser oppgaven; du kan åpne den igjen.') + '</span></div>';
+    }
+
+    $("task").innerHTML = h;
+    $("counter").textContent = (i+1) + " / " + TASKS.length;
+    $("prev").disabled = i === 0;
+    $("next").disabled = i === TASKS.length - 1;
+
+    Array.prototype.forEach.call($("task").querySelectorAll(".choice"), function(btn){
+      btn.addEventListener("click", function(){
+        var n = btn.dataset.n, val = btn.dataset.v;
+        if (a.svar[n] === val) { delete a.svar[n]; if (val === "ja") delete a.grunn[n]; } else { a.svar[n] = val; if (val !== "ja") delete a.grunn[n]; }
+        a.ferdig = false;
+        a.sek = (a.sek || 0) + Math.round((Date.now() - started)/1000); started = Date.now();
+        save(s, a, t); render(); renderProgress(); renderDots();
+        if (val === "ja" && a.svar[n] === "ja") { var inp = $("g-" + n); if (inp) inp.focus(); }
+      });
+    });
+    Array.prototype.forEach.call($("task").querySelectorAll(".grunn input"), function(inp){
+      inp.addEventListener("input", function(){
+        a.grunn[inp.dataset.n] = inp.value;
+        var lbl = inp.previousElementSibling, ok = !!inp.value.trim();
+        inp.className = ok ? "" : "mangler"; if (lbl) { lbl.className = ok ? "" : "mangler"; lbl.textContent = ok ? "Ville endret:" : "Hva ville blitt annerledes? (må fylles ut)"; }
+        var m = missing(a), fb = $("ferdig"), st = $("task").querySelector(".ferdig .status");
+        if (fb) { fb.disabled = m.length > 0; }
+        if (st) { st.className = "status" + (m.length ? " warn" : ""); st.textContent = m.length ? m.length + " ja mangler begrunnelse" : "Låser oppgaven; du kan åpne den igjen."; }
+        save(s, a, t);
+      });
+    });
+    var ta = $("task").querySelector("textarea");
+    if (ta) ta.addEventListener("change", function(){ a.notat = ta.value; save(s, a, t); });
+    var fb = $("ferdig");
+    if (fb) fb.addEventListener("click", function(){
+      if (missing(a).length) return;
+      a.ferdig = true; a.sek = (a.sek || 0) + Math.round((Date.now() - started)/1000); started = Date.now();
+      save(s, a, t); render(); renderProgress(); renderDots(); window.scrollTo({top:0, behavior:"smooth"});
+    });
+    var ro = $("reopen");
+    if (ro) ro.addEventListener("click", function(){ a.ferdig = false; save(s, a, t); render(); renderProgress(); renderDots(); });
+  }
+
+  var pending = {};
+  function save(s, a, t){
+    if (!db) { setSave("ikke lagret — ingen forbindelse", "warn"); return; }
+    clearTimeout(pending[s]);
+    pending[s] = setTimeout(function(){
+      db.doc("dommer2/" + s).set({
+        oppgave: t.navn, runde: 2,
+        svar: a.svar, grunn: a.grunn, ferdig: !!a.ferdig,
+        notat: a.notat || "", sekunder: a.sek || 0,
+        rekkefolge: t.rekkefolge || [],
+        oppdatert: new Date().toISOString()
+      }).then(function(){ setSave("lagret", "ok"); })
+        .catch(function(e){ setSave("kunne ikke lagre (" + (e && e.code ? e.code : "feil") + ")", "warn"); });
+    }, 350);
+  }
+
+  function go(k){ i = Math.max(0, Math.min(TASKS.length - 1, k)); render(); renderDots(); window.scrollTo({top:0, behavior:"smooth"}); }
+  $("prev").addEventListener("click", function(){ go(i-1); });
+  $("next").addEventListener("click", function(){ go(i+1); });
+
+  render(); renderProgress(); renderDots();
+
+  if (window.claude && window.claude.use) {
+    window.claude.use("db").then(function(d){
+      if (!d) { setSave("lagring utilgjengelig i denne visningen", "warn"); return; }
+      db = d;
+      return d.collection("dommer2").get().then(function(q){
+        q.docs.forEach(function(doc){
+          var v = doc.data() || {};
+          answers[doc.id] = {svar: v.svar || {}, grunn: v.grunn || {}, ferdig: !!v.ferdig, notat: v.notat || "", sek: v.sekunder || 0};
+        });
+        setSave(doneCount() || jaCount() ? "lagret" : "klar", doneCount() || jaCount() ? "ok" : "");
+        render(); renderProgress(); renderDots();
+      });
+    }).catch(function(){ setSave("lagring utilgjengelig", "warn"); });
+  } else {
+    setSave("lagring utilgjengelig", "warn");
+  }
+})();
+</script>

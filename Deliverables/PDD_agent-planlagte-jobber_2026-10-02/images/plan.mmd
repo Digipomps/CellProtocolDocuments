@@ -1,0 +1,31 @@
+flowchart LR
+  classDef kjetil fill:#fde2e2,stroke:#c0392b,stroke-width:2px,color:#7b1f17;
+  classDef trinn fill:#eef3fb,stroke:#3b6fb5,color:#16324f;
+  classDef ser fill:#eef7ee,stroke:#3c8a4a,color:#1d4424;
+
+  A{{"Du: godkjenner bildene<br/>(G1-GUI)"}}:::kjetil --> B{{"Du: godkjenner planen<br/>(G2)"}}:::kjetil
+  B --> T0
+
+  subgraph S0["Trinn 0 · Måling"]
+    direction TB
+    T0["Prøveskript kjøres<br/>fra launchd"]:::trinn --> R0["Du ser: måleresultater"]:::ser
+  end
+  subgraph S1["Trinn 1 · Køen som launchd-jobb"]
+    direction TB
+    T1["Arbeideren flyttes ut av<br/>Losens mapper og får kontroller"]:::trinn --> R1["Du ser: Losens jobber kjører<br/>uten Terminal-vindu"]:::ser
+  end
+  subgraph S2["Trinn 2 · Cron i planleggeren"]
+    direction TB
+    T2["Cron, passerte tidspunkt,<br/>MCP-verktøy, faste skript"]:::trinn --> R2["Du ser: Losen oppretter en jobb,<br/>og den kjører til avtalt tid"]:::ser
+  end
+  subgraph S3["Trinn 3 · Menylinjen"]
+    direction TB
+    T3["Planlagte jobber,<br/>Stopp køen, saker ved feil"]:::trinn --> R3["Du ser: menyen<br/>som i bildene"]:::ser
+  end
+  subgraph S4["Trinn 4 · Første faste jobber"]
+    direction TB
+    T4["Korrespondansesjekk<br/>og fristvarsel"]:::trinn --> R4["Du ser: en sak når noe er ulest<br/>eller en frist nærmer seg"]:::ser
+  end
+
+  S0 --> S1 --> S2 --> S3 --> S4
+  S4 --> C{{"Du: godkjenner resultatet<br/>(G3)"}}:::kjetil

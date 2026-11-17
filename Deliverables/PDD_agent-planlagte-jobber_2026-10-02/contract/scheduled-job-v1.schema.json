@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digipomps.org/haven/contracts/scheduled-job-v1.schema.json",
+  "title": "HAVEN scheduled job v1 (bestilling)",
+  "description": "En planlagt jobb en assistent eller operatøren har bedt om. Ligger i State/ScheduledJobs/<id>.spec.json. Fila endres aldri etter at den er skrevet: en endring er en ny bestilling med samme id, og den må godkjennes på nytt. Sjekksummen av filas bytes (specDigest) er det godkjenningen binder seg til. Jobben bærer bare en henvisning til det som skal kjøres, aldri argumenter eller tekst som kjøres.",
+  "type": "object",
+  "required": [
+    "schema",
+    "id",
+    "title",
+    "schedule",
+    "endsAt",
+    "action",
+    "timeoutSeconds",
+    "requestedVia",
+    "createdAt"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "haven.scheduled-job.v1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "description": "Kan ikke være lik id-en til en hendelse i config.json."
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40,
+      "description": "Vises i menylinjen. Aldri noe som likner en hemmelighet."
+    },
+    "schedule": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "cron",
+            "timeZone"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "cron"
+            },
+            "cron": {
+              "type": "string",
+              "minLength": 9,
+              "maxLength": 120
+            },
+            "timeZone": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "everySeconds"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "interval"
+            },
+            "everySeconds": {
+              "type": "integer",
+              "minimum": 900,
+              "maximum": 2678400
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "at"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "once"
+            },
+            "at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        }
+      ]
+    },
+    "notBefore": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Valgfri. Ingen kjøring før dette."
+    },
+    "endsAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Påkrevd. Høyst 90 døgn etter createdAt. Etter dette kjøres jobben ikke, og en bestilling som ikke er godkjent, utløper. For once er standarden ett døgn etter at."
+    },
+    "action": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "id"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "localTask"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "description": "Id-en til et fast program i automationPolicy.localTasks."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "templateDigest"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "spoolJob"
+            },
+            "templateDigest": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "description": "Sjekksummen av jobbmalen. Malen ligger i <id>.<de tolv første tegnene>.spool.json. Arbeideren kontrollerer sjekksummen før malen legges i køen."
+            }
+          }
+        }
+      ]
+    },
+    "timeoutSeconds": {
+      "type": "integer",
+      "minimum": 10,
+      "maximum": 43200,
+      "description": "For localTask: tidsgrense for programmet, høyst 900. For spoolJob: hvor lenge arbeideren venter på resultatfila før jobben regnes som feilet."
+    },
+    "requestedVia": {
+      "enum": [
+        "mcp",
+        "cli"
+      ]
+    },
+    "requestedBy": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40,
+      "description": "Navnet MCP-klienten oppga i initialize (clientInfo.name), oversatt til «Claude», «Codex» eller «En assistent». For cli: «operatøren». Agenten setter feltet; den som ber, kan ikke velge det."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

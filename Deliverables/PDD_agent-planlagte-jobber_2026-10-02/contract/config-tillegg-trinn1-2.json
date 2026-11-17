@@ -1,0 +1,81 @@
+{
+  "beskrivelse": "Det som legges til i ~/Library/Application Support/HAVENAgent/config.json i trinn 1 og 2. Ingenting annet i fila endres. Installasjonsskriptet viser forskjellen og sjekksummen til programmet før noe skrives. firstFireAt settes til installasjonstidspunktet, slik at begge kjører straks planleggeren er startet på nytt.",
+  "automationPolicy.localTasks": [
+    {
+      "id": "korrespondanse-sjekk",
+      "description": "Lister innboksen for to korrespondanseprofiler og skriver én markør per avsender med ulest post. Leser ikke innhold, kvitterer ikke og sender ingenting.",
+      "executablePath": "/usr/bin/python3",
+      "arguments": [
+        "/Users/kjetil/Library/Application Support/HAVENAgent/bin/korrespondanse_vakt.py",
+        "sjekk",
+        "--profil",
+        "kjetil-vegar-d",
+        "--profil",
+        "kjetil-d",
+        "--navn",
+        "vegar-local-agent=Vegar",
+        "--navn",
+        "victoria-lille-robot=Victoria",
+        "--navn",
+        "pilot-simulation-d=pilotsimuleringen",
+        "--klient",
+        "/Users/kjetil/Library/Application Support/HAVEN/AssistantCorrespondence/bin/haven-correspondence-mcp",
+        "--klientrot",
+        "/Users/kjetil/Library/Application Support/HAVEN/AssistantCorrespondence",
+        "--markorer",
+        "/Users/kjetil/Library/Application Support/HAVENAgent/Inbox/CorrespondenceWaiting",
+        "--tilstand",
+        "/Users/kjetil/Library/Application Support/HAVENAgent/State/ScheduledTasks"
+      ],
+      "requiresUserSession": true
+    },
+    {
+      "id": "korrespondanse-frist",
+      "description": "Leser når tilgangsbeviset i to korrespondanseprofiler går ut, og skriver en markør når det er under åtte døgn igjen. Bruker ikke nettet.",
+      "executablePath": "/usr/bin/python3",
+      "arguments": [
+        "/Users/kjetil/Library/Application Support/HAVENAgent/bin/korrespondanse_vakt.py",
+        "frist",
+        "--profil",
+        "kjetil-vegar-d",
+        "--profil",
+        "kjetil-d",
+        "--klientrot",
+        "/Users/kjetil/Library/Application Support/HAVEN/AssistantCorrespondence",
+        "--dager",
+        "7",
+        "--markorer",
+        "/Users/kjetil/Library/Application Support/HAVENAgent/Inbox/CorrespondenceWaiting",
+        "--tilstand",
+        "/Users/kjetil/Library/Application Support/HAVENAgent/State/ScheduledTasks"
+      ],
+      "requiresUserSession": false
+    }
+  ],
+  "scheduledEvents": [
+    {
+      "id": "korrespondanse-sjekk",
+      "firstFireAt": "<installasjonstidspunktet, UTC>",
+      "repeatMode": "untilStopped",
+      "intervalSeconds": 1800,
+      "action": {
+        "kind": "localTask",
+        "id": "korrespondanse-sjekk",
+        "arguments": {}
+      }
+    },
+    {
+      "id": "korrespondanse-frist",
+      "firstFireAt": "<installasjonstidspunktet, UTC>",
+      "repeatMode": "untilStopped",
+      "intervalSeconds": 86400,
+      "action": {
+        "kind": "localTask",
+        "id": "korrespondanse-frist",
+        "arguments": {}
+      }
+    }
+  ],
+  "rekkefolge": "korrespondanse-sjekk står før korrespondanse-frist. Planleggeren kjører forfalte hendelser i den rekkefølgen, så sjekken har skrevet ferskt stempel før fristvarselet ser etter det.",
+  "fra-trinn-3": "korrespondanse-frist får i tillegg feltene cron «0 9 * * *» og timeZone «Europe/Oslo». Begge hendelsene får title: «Korrespondansesjekk» og «Fristvarsel». En agent uten cron ser bort fra feltene og kjører videre på intervallet."
+}

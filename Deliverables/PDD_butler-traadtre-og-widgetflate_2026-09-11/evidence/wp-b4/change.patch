@@ -1,0 +1,195 @@
+diff --git a/Public/css/porthole-webo.css b/Public/css/porthole-webo.css
+index 7d86d494..c07c127b 100644
+--- a/Public/css/porthole-webo.css
++++ b/Public/css/porthole-webo.css
+@@ -2378,6 +2378,31 @@ body.panel-resizing * {
+   align-items: center;
+ }
+ 
++/* WP-B4 paritet med CellApple: en stakk har alltid full bredde i en kolonne
++   (.frame(maxWidth: .infinity)); maxWidthInfinity fyller bredden i en kolonne og
++   maxHeightInfinity høyden i en rad. Fast bredde/høyde på elementet vinner fortsatt. */
++[data-axis="column"] > .skeleton-hstack,
++[data-axis="column"] > .skeleton-vstack,
++[data-axis="column"] > [data-fill-width="true"],
++.skeleton-scroll-view:not(.scroll-axis-horizontal) > .skeleton-hstack,
++.skeleton-scroll-view:not(.scroll-axis-horizontal) > .skeleton-vstack,
++.skeleton-scroll-view:not(.scroll-axis-horizontal) > [data-fill-width="true"],
++[data-axis="row"] > [data-fill-height="true"] {
++  align-self: stretch;
++}
++
++/* WP-B4 paritet: TextArea med egen boks i skjelettet — feltet inni har ingen egen ramme. */
++.skeleton-textarea-boxed > .skeleton-textarea {
++  border: 0 !important;
++  border-radius: 0 !important;
++  background: transparent !important;
++  box-shadow: none !important;
++}
++
++.skeleton-textarea-boxed:focus-within {
++  box-shadow: 0 0 0 2px rgba(127, 214, 208, 0.28);
++}
++
+ .skeleton-vstack[hidden],
+ .skeleton-hstack[hidden],
+ .skeleton-grid[hidden],
+@@ -4802,27 +4827,28 @@ body.skeleton-presentation-scroll-locked {
+   color: #475569;
+ }
+ 
++/* WP-B4 paritet: skjelettets egne farger (foregroundColor) vinner; disse gjelder der skjelettet ikke gir farge. */
+ .canvas.product-view .style-role-chat-prompt-log .skeleton-list-row-main {
+   background: rgba(255, 255, 255, 0.94);
+-  color: #172033 !important;
++  color: #172033;
+ }
+ 
+ .canvas.product-view .style-role-chat-prompt-log .skeleton-list-row-main .skeleton-text {
+-  color: #172033 !important;
++  color: #172033;
+ }
+ 
+ .canvas.product-view .style-role-chat-prompt-log .chat-prompt-row-user .skeleton-list-row-main {
+   background: rgba(255, 255, 255, 0.94);
+-  color: #172033 !important;
++  color: #172033;
+   border-color: rgba(148, 163, 184, 0.34);
+ }
+ 
+ .canvas.product-view .style-role-chat-prompt-log .chat-prompt-row-user .skeleton-list-row-main .skeleton-text {
+-  color: #172033 !important;
++  color: #172033;
+ }
+ 
+ .canvas.product-view .style-role-chat-prompt-log .chat-prompt-row-user .skeleton-list-row-main .skeleton-text:first-child {
+-  color: #475569 !important;
++  color: #475569;
+ }
+ 
+ .canvas.conference-view .skeleton-host {
+diff --git a/Public/js/skeleton-runtime.js b/Public/js/skeleton-runtime.js
+index c19f838f..288afaa5 100644
+--- a/Public/js/skeleton-runtime.js
++++ b/Public/js/skeleton-runtime.js
+@@ -1142,6 +1142,7 @@
+   function renderStack(raw, state, context, key, path, orientation) {
+     const container = document.createElement("div");
+     container.className = orientation === "hstack" ? "skeleton-hstack" : "skeleton-vstack";
++    container.dataset.axis = orientation === "hstack" ? "row" : "column"; // WP-B4 paritet
+     applySkeletonIdentity(container, key, path);
+     const stackSpec = decodeStackSpec(raw);
+     applyElementModifiers(container, stackSpec.modifiers, state, path, context);
+@@ -1437,6 +1438,24 @@
+     return wrapper;
+   }
+ 
++  const TEXT_AREA_FIELD_MODIFIERS = ["styleRole", "styleClasses", "fontSize", "fontWeight", "fontFamilies",
++    "foregroundColor", "foregroundColorKeypath", "lineHeightMultiple", "letterSpacing", "numericVariant",
++    "multilineTextAlignment", "lineLimit", "textDecoration", "localization"];
++
++  function textAreaFieldModifiers(modifiers) {
++    if (!modifiers || typeof modifiers !== "object") return modifiers;
++    return Object.fromEntries(TEXT_AREA_FIELD_MODIFIERS
++      .filter((name) => Object.prototype.hasOwnProperty.call(modifiers, name))
++      .map((name) => [name, modifiers[name]]));
++  }
++
++  function textAreaDeclaresBox(modifiers) {
++    if (!modifiers || typeof modifiers !== "object") return false;
++    return (Number.isFinite(modifiers.borderWidth) && modifiers.borderWidth > 0)
++      || Boolean(modifiers.background) || Boolean(modifiers.backgroundKeypath)
++      || Number.isFinite(modifiers.padding) || Boolean(modifiers.paddingInsets);
++  }
++
+   function renderTextArea(raw, state, context, key, path) {
+     const spec = raw && typeof raw === "object" ? raw : {};
+     const editorMode = typeof spec.editorMode === "string" ? spec.editorMode.trim() : "";
+@@ -1462,7 +1481,10 @@
+     if (typeof spec.maxLines === "number" && spec.maxLines > 0) {
+       field.style.maxHeight = `${Math.max(spec.maxLines, field.rows) * 1.5}em`;
+     }
+-    applyElementModifiers(field, spec.modifiers, state, path, context);
++    // WP-B4 paritet: boksen (ramme, bakgrunn, polstring, størrelse) står på omslaget én gang, som
++    // i CellApple; selve feltet får bare typografi og rolle.
++    applyElementModifiers(field, textAreaFieldModifiers(spec.modifiers), state, path, context);
++    if (textAreaDeclaresBox(spec.modifiers)) wrapper.classList.add("skeleton-textarea-boxed");
+     if (spec.modifiers && spec.modifiers.styleRole === "admin-form-field") {
+       field.setAttribute("aria-label", spec.modifiers?.accessibilityLabel || field.placeholder || "Adminnotater");
+     }
+@@ -2076,6 +2098,12 @@
+     if (width !== null) {
+       spacer.style.width = `${width}px`;
+       spacer.style.minWidth = `${width}px`;
++      spacer.style.flex = "0 0 auto";
++    } else {
++      // WP-B4 paritet: som SwiftUI Spacer tar en Spacer uten bredde ledig plass langs stakkens akse.
++      spacer.style.flex = "1 1 0px";
++      spacer.style.minWidth = "0px";
++      spacer.style.minHeight = "0px";
+     }
+     return spacer;
+   }
+@@ -5069,6 +5097,7 @@
+         if (["HStack", "VStack"].includes(record.type)) {
+           const direction = variant.axis ? (variant.axis === "horizontal" ? "row" : "column") : (record.type === "HStack" ? "row" : "column");
+           applyStackAlignmentModifiers(node, modifiers, direction);
++          node.dataset.axis = direction; // WP-B4 paritet
+         }
+         if (variant.columns && record.type === "Grid") node.style.gridTemplateColumns = gridTemplateColumns(variant.columns);
+         if (Number.isFinite(variant.spacing)) node.style.gap = `${variant.spacing}px`;
+@@ -5087,7 +5116,13 @@
+         });
+         if (modifiers.hAlignmentKeypath) {
+           const alignment = resolveKeypath(modifiers.hAlignmentKeypath, record.state.rootData, context) || modifiers.hAlignment;
+-          node.style.alignSelf = { leading: "flex-start", center: "center", trailing: "flex-end" }[alignment] || "";
++          if (["HStack", "VStack"].includes(record.type)) {
++            // WP-B4 paritet: stakkens justering gjelder innholdet (se applyElementModifiers).
++            const direction = variant.axis ? (variant.axis === "horizontal" ? "row" : "column") : (record.type === "HStack" ? "row" : "column");
++            applyStackAlignmentModifiers(node, { ...modifiers, hAlignment: alignment }, direction);
++          } else {
++            node.style.alignSelf = { leading: "flex-start", center: "center", trailing: "flex-end" }[alignment] || "";
++          }
+         }
+         const padding = effective.padding || 0;
+         const insets = effective.paddingInsets || {};
+@@ -5163,6 +5198,11 @@
+     });
+   }
+ 
++  function isSkeletonStack(element) {
++    return element instanceof HTMLElement
++      && (element.classList.contains("skeleton-hstack") || element.classList.contains("skeleton-vstack"));
++  }
++
+   function applyStackAlignmentModifiers(element, modifiers, direction) {
+     if (!(element instanceof HTMLElement) || !modifiers || typeof modifiers !== "object") {
+       return;
+@@ -5227,9 +5267,11 @@
+     }
+     if (modifiers.maxWidthInfinity === true) {
+       element.style.maxWidth = "100%";
++      element.dataset.fillWidth = "true"; // WP-B4 paritet: fyller bredden i en kolonne (porthole-webo.css)
+     }
+     if (modifiers.maxHeightInfinity === true) {
+       element.style.maxHeight = "100%";
++      element.dataset.fillHeight = "true"; // WP-B4 paritet: fyller høyden i en rad (porthole-webo.css)
+     }
+     if (modifiers.wrap === true) {
+       // Containers here are already display:flex (skeleton-hstack, skeleton-list,
+@@ -5266,7 +5308,14 @@
+       return null;
+     };
+     const alignSelf = alignSelfFrom(resolvedHAlignment) || alignSelfFrom(resolvedVAlignment);
+-    if (alignSelf) {
++    // WP-B4 paritet: en HStack/VStack har alltid full bredde (CellApple .frame(maxWidth: .infinity));
++    // dens egen hAlignment/vAlignment plasserer innholdet, ikke stakken selv.
++    if (isSkeletonStack(element)) {
++      if (modifiers.hAlignmentKeypath && resolvedHAlignment) {
++        applyStackAlignmentModifiers(element, { ...modifiers, hAlignment: resolvedHAlignment },
++          element.classList.contains("skeleton-hstack") ? "row" : "column");
++      }
++    } else if (alignSelf) {
+       element.style.alignSelf = alignSelf;
+     }
+     const resolvedBackground = (modifiers.backgroundKeypath

@@ -1,0 +1,51 @@
+{
+  "contract": "invite_v1",
+  "lastVerifiedAgainstCode": "2026-09-23",
+  "sources": {
+    "CellProtocol": "a785dc7 Sources/CellBase/Invitation/HavenInviteTicket.swift, HavenInvitePublication.swift, Sources/CellBase/Cells/Chat/ChatInvitationProofUtility.swift",
+    "Binding": "8ce634f6 Cells/InvitationCell.swift",
+    "CellScaffold": "77a922bc Sources/App/Controllers/VaporInviteLanding.swift"
+  },
+  "cells": {
+    "BindingInvitationCell": {
+      "existing": ["invite.configure", "invite.settings", "invite.prepare", "invite.publish", "invite.markSent", "invite.openPreparedMessage", "invite.refreshStatus", "invite.pullContactRequests", "invite.acceptContactRequest", "invite.recordDeclined", "invite.recordJoined", "invite.revoke", "invite.verify", "invite.clearOutbox", "invite.boundaryStatement", "invite.state", "invite.inbox", "invite.outbox", "invite.revoked", "invite.lastResult"],
+      "planned": {
+        "invite.prepare#identityDomain": "WP1 — billettens issuer er domenets identitet",
+        "invite.prepare#tombstoneCheck": "WP5 — nekter ny billett til endepunkt med gravstein",
+        "invite.state#lifecycleForSender": "WP5 — published|answered|expired|revoked; aldri opened, aldri declined/never"
+      }
+    },
+    "VaporInviteLanding": {
+      "existing": ["POST /api/invite/publish", "POST /api/invite/revoke", "POST /api/invite/status", "POST /api/invite/requests", "GET /invite/:token", "POST /invite/:token/reply"],
+      "planned": {
+        "GET /invite/:token#basis": "WP4 — viser basis-feltene fra billetten",
+        "POST /invite/:token/reply#decision": "WP5 — yes | notNow | never (never = HavenInviteTombstone)",
+        "POST /invite/:token/claim": "WP3 — krav om retting/sletting uten konto",
+        "GET /invite/:token/help": "WP9 — hjelp; ingen send/accept/decline",
+        "POST /invite/:token/reply#directEntity": "WP8 — ja uten app oppretter forseglet EntityAnchor for nykommeren"
+      }
+    },
+    "ChatCell": {
+      "existing": ["generateInvitationArtifacts", "acceptInvitationArtifact", "inspectInvitationArtifact", "invitationArtifacts.list", "clearInvites"],
+      "planned": {}
+    },
+    "EntityAnchorCell": {
+      "existing": ["identityLinks.genesis (branch pdd/entitetsdata-egen-kontroll ebb0b7f, ikke pushet)"],
+      "planned": {"entity.moveHome": "WP12"}
+    }
+  },
+  "types": {
+    "HavenInviteTicket": {"existing": true, "fields": ["version", "ticketID", "issuer", "issuerDisplayName", "issuerContactEndpoint", "issuerEntityRef", "audienceToken", "audienceKind", "humanCode", "greetingName", "note", "createdAt", "expiresAt", "nonce", "capabilities", "proof"], "planned": {"basis": "WP4 — feltene mottaker ser: [{key, value, origin}]", "identityDomain": "WP1"}},
+    "HavenInviteLifecycle": {"existing": ["published", "opened", "accepted", "declined", "expired", "revoked"], "planned": {"senderView": "WP5 — projeksjon: published|answered|expired|revoked"}},
+    "HavenInviteTombstone": {"existing": false, "planned": "WP5 — {version, audienceToken, endpointDigest, issuedAt, proof}; signert av mottakerens svar-nøkkel; overlever reimport"},
+    "ContactRecord": {"existing": false, "planned": "WP3 — {basis:{name,endpoint,origin:{file,date,column},status:'unconfirmed'|'confirmed'}, privateNotes:string?}"},
+    "RegisterKey": {"existing": false, "planned": "WP15 — derive(endpoint, registerID) → ulik per register"}
+  },
+  "invariants": [
+    {"id": "R.private-notes-never-leave", "rule": "no outgoing artifact (ticket, publication, contactRequest, landing HTML) contains any byte of ContactRecord.privateNotes"},
+    {"id": "E.sender-sees-answered-only", "rule": "senderView never distinguishes notNow from never, and never exposes opened"},
+    {"id": "O.expired-is-dead", "rule": "isExpired(ticket) ⇒ landing 410, reply 410, acceptContactRequest refused, chat acceptance refused"},
+    {"id": "A1.no-membership-oracle", "rule": "no endpoint answers whether an endpoint belongs to a member"},
+    {"id": "N.direct-reply-anchor-is-theirs", "rule": "EntityAnchor created by a landing reply is sealed to the replier's key; sender and scaffold admin are refused r/w/actions"}
+  ]
+}

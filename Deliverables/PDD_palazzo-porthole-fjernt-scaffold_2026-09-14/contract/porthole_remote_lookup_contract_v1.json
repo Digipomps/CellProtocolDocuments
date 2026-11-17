@@ -1,0 +1,37 @@
+{
+  "name": "porthole.remote-configuration-lookup",
+  "version": 1,
+  "lastVerifiedAgainstCode": "2026-09-14",
+  "purposeRefs": [
+    "purpose://candidate.palazzo-porthole-fjernt-scaffold.remote-lookup",
+    "purpose://candidate.palazzo-porthole-fjernt-scaffold.trust-boundary",
+    "purpose://candidate.palazzo-porthole-fjernt-scaffold.reference-rewrite",
+    "purpose://candidate.palazzo-porthole-fjernt-scaffold.published-allowlist"
+  ],
+  "action": "POST /browserhead/porthole/action addConfiguration",
+  "payload": {
+    "configurationLookup": {
+      "name": "string (påkrevd)",
+      "sourceCellEndpoint": "cell:///<Cell> | cell://<host>:<port>/<Cell>",
+      "keypath": "string — PÅKREVD når sourceCellEndpoint har host:port; ignoreres for lokale"
+    }
+  },
+  "rules": [
+    "Lokalt endepunkt (cell:///…): uendret oppslag i Portholes egen katalog.",
+    "Fjernt endepunkt: host:port må være godkjent av RemoteBridgeheadAccess (HAVEN_BRIDGEHEAD_HOSTS + token); ellers 400 uten resolver-kall.",
+    "Fjernt endepunkt uten keypath: 400 med grunn 'keypath required for remote source'.",
+    "Hentet konfigurasjon skrives om: discovery.sourceCellEndpoint og alle cellReferences[].endpoint fra cell:///X til cell://host:port/X.",
+    "isPortholePublishedConfiguration er sann for omskrevet konfig når host:port er godkjent; lokal allowlist uendret."
+  ],
+  "fixtures": {
+    "positive": [
+      {"configurationLookup": {"name": "Palazzo Gjest", "sourceCellEndpoint": "cell://127.0.0.1:18083/PalazzoGuestShell", "keypath": "guest.configuration"}, "expect": {"status": 200, "activeConfigurationName": "Palazzo Gjest", "rewrittenEndpoints": ["cell://127.0.0.1:18083/PalazzoGuestShell", "cell://127.0.0.1:18083/PalazzoEntity"]}},
+      {"configurationLookup": {"name": "Palazzo Innhold", "sourceCellEndpoint": "cell://127.0.0.1:18083/PalazzoContent", "keypath": "content.configuration"}, "expect": {"status": 200}}
+    ],
+    "negative": [
+      {"configurationLookup": {"name": "Palazzo Gjest", "sourceCellEndpoint": "cell://evil.example:18083/PalazzoGuestShell", "keypath": "guest.configuration"}, "expect": {"status": 400, "resolverCalls": 0}},
+      {"configurationLookup": {"name": "Palazzo Gjest", "sourceCellEndpoint": "cell://127.0.0.1:18083/PalazzoGuestShell"}, "expect": {"status": 400, "reasonContains": "keypath"}},
+      {"configurationLookup": {"name": "Finnes ikke", "sourceCellEndpoint": "cell:///PalazzoGuestShell"}, "expect": {"status": 400, "reason": "Configuration is not available in this Porthole yet."}}
+    ]
+  }
+}

@@ -1,0 +1,48 @@
+Utdrag av jobbloggen job-236-korr-vent-og-sett-ut.log (Kjetils Mac, 30.09.2026, lokal tid CEST = UTC+2).
+Linjer med hemmeligheter er filtrert bort. Resten er uendret.
+
+[21:02:44] venter på image-bygg 36754212064
+[22:23:03] bygg: completed success
+[22:23:03] prefetch --check
+GHCR_CHECK_OK environment=staging commit=415ea3d278dc85be5547c137d917aa343dadb38a image=ghcr.io/digipomps/cellscaffold-web:sha-415ea3d278dc85be5547c137d917aa343dadb38a
+[22:23:08] prefetch
+Status: Downloaded newer image for ghcr.io/digipomps/cellscaffold-web:sha-415ea3d278dc85be5547c137d917aa343dadb38a
+GHCR_PREFETCH_OK environment=staging commit=415ea3d278dc85be5547c137d917aa343dadb38a source=ghcr.io/digipomps/cellscaffold-web:sha-415ea3d278dc85be5547c137d917aa343dadb38a destination=cellscaffold-staging-local:sha-415ea3d278dc85be5547c137d917aa343dadb38a
+[22:23:43] doctor
+   helse        svarer                                                                     OK       http://127.0.0.1:8081 serverer feec23725321320ab00f0e7f7bf728b775869ec7
+0 feil, 3 advarsler — alle referanser peker riktig.
+[22:23:44] preflight
+2026-09-30T20:23:45Z PREFLIGHT miljoe=staging commit=415ea3d278dc85be5547c137d917aa343dadb38a txn=20260930T202345Z-staging-415ea3d2
+2026-09-30T20:23:47Z PREFLIGHT_GREEN prev=feec23725321320ab00f0e7f7bf728b775869ec7 image=sha256:abacb1ed43a66537c32174dd8fe8d3ed187dc7e0d6c8b2d11272599631d0d33c
+2026-09-30T20:23:47Z   celler=/mnt/disk1/app/CellsContainer.staging-f76de5a
+2026-09-30T20:23:47Z   manifest=/etc/haven/cellscaffold-runtime-identity-manifest-f76de5a/runtime-identity-manifest.v2.json
+2026-09-30T20:23:47Z PREFLIGHT_ONLY — ingenting endret
+[22:23:47] deploy   (kommando: sudo -n /usr/bin/systemctl start haven-deploy@staging-415ea3d2…)
+Sep 30 20:24:24 haven-deploy[1732644]:   "environment": "staging",
+Sep 30 20:24:24 haven-deploy[1732644]:   "transactionID": "20260930T202347Z-staging-415ea3d2",
+Sep 30 20:24:24 haven-deploy[1732644]:   "commit": "415ea3d278dc85be5547c137d917aa343dadb38a",
+Sep 30 20:24:24 haven-deploy[1732644]:   "previousCommit": "feec23725321320ab00f0e7f7bf728b775869ec7",
+Sep 30 20:24:24 haven-deploy[1732644]:   "rollbackContainer": "cellscaffold-app-1-rollback-20260930T202347Z-staging-415ea3d2",
+Sep 30 20:24:24 haven-deploy[1732644]:   "dataRoot": "/mnt/disk1/app/CellsContainer.staging-f76de5a",
+Sep 30 20:24:24 haven-deploy[1732644]:   "manifestBackup": "/mnt/disk1/app/haven-staging-evidence/manifest-provision/20260930T202400Z-415ea3d2/manifest.before.json",
+Sep 30 20:24:24 haven-deploy[1732644]:   "ceremony": { "vaultFilesAdded": [], "bindingsGained": [] },
+Sep 30 20:24:24 haven-deploy[1732644]:   "readinessGate": "http200_status_ready",
+Sep 30 20:24:24 haven-deploy[1732644]:   "targetedFingerprint": { "before": "cells_count=1332 …", "firstStart": "cells_count=1332 …", "afterRestart": "cells_count=1332 …" },
+Sep 30 20:24:24 haven-deploy[1732644]:   "completedAt": "2026-09-30T20:24:24Z"
+Sep 30 20:24:24 haven-deploy[1732644]: 2026-09-30T20:24:24Z COMMITTED_VERIFIED
+Sep 30 20:24:24 haven-deploy[1732644]: 2026-09-30T20:24:24Z FERDIG — bevis i /mnt/disk1/app/haven-staging-evidence/deploy/20260930T202347Z-staging-415ea3d2
+[22:24:26] staging kjører: 415ea3d278dc85be5547c137d917aa343dadb38a
+[22:24:27] invitasjoner: kopier og bytt   (kommando: INVITES_FILE=/home/ops/invites-20260930-kjetil.env /home/ops/cutover-invites-20260908.sh 415ea3d2… 415ea3d2…)
+2026-09-30T20:24:28Z INVITES_BASE64 erstattet fra /home/ops/invites-20260930-kjetil.env (ovrige 94 miljolinjer uendret)
+2026-09-30T20:24:51Z COMMITTED_VERIFIED
+[22:29:49] oppsett på Macen
+== kjetil-vegar-d
+{'profile': 'kjetil-vegar-d', 'principalID': 'kjetil-vegar-codex-d', 'status': 'pending_approval', …}
+== kjetil-d
+{'profile': 'kjetil-d', 'principalID': 'kjetil-codex-d', 'status': 'pending_approval', …}
+[22:29:50] ferdig: venter på Kjetils godkjenning på https://staging.haven.digipomps.org/admin/funding
+
+Målt 02.10.2026 11:36Z (job-249): https://staging.haven.digipomps.org/health/build gir app_revision 415ea3d278dc85be5547c137d917aa343dadb38a.
+Målt 02.10.2026 11:36Z (job-249): `hd coord status` gir «HD-0141  codex  89.167.90.101  3d00h  cellscaffold-app-1,nginx».
+Målt 02.10.2026 11:36Z (job-249): PR 277 er OPEN, MERGEABLE, sjekken «Focused control-plane gates» IN_PROGRESS siden 11:02Z. Image-bygg 36998313078 for 06f32050 er in_progress siden 10:57Z.
+Målt 02.10.2026 11:38Z (job-250): origin/main er fdcfe7a5; taggen 2026.9.4 peker på fdcfe7a5; ingen tagg inneholder 415ea3d2 eller 06f32050; korrespondansekildene er uendret på main siden feec2372.

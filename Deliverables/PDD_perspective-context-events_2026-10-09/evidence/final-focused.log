@@ -1,0 +1,151 @@
+[haven-swiftpm] running swift test with cache 78c2e52a5799
+warning: 'cellprotocol': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Provisioning 1 / 169]
+[Using on-disk description]
+[1 / 2] swift-nio-ssl_NIOSSL
+[1 / 142] NIOHTTP2
+[1 / 320] _NumericsShims
+[1 / 149] CCryptoBoringSSL
+[2 / 7] CellBaseTests-product
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/PerspectiveContextTests.swift:137:89: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+135 |         let config = ContextConfiguration(sources: [.init(sourceID: "place", endpoint: "cell:///place")], rules: [.init(id: "home", definition: definition, label: "home", purposeWeights: [purpose.reference: 0])])
+136 |         let response = try await cell.set(keypath: "perspective.context.configure", value: ContextCodec.encode(config), requester: owner)
+137 |         guard case let .object(object) = response else { return XCTFail("bad response \(response)") }
+    |                                                                                         |- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+    |                                                                                         |- note: use a default value parameter to avoid this warning
+    |                                                                                         |- note: provide a default value to avoid this warning
+    |                                                                                         `- note: use 'String(describing:)' to silence this warning
+138 |         guard case let .string(status)? = object["status"] else { return XCTFail("missing status \(response)") }
+139 |         XCTAssertEqual(status, "ok", "\(response)")
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/PerspectiveContextTests.swift:138:100: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+136 |         let response = try await cell.set(keypath: "perspective.context.configure", value: ContextCodec.encode(config), requester: owner)
+137 |         guard case let .object(object) = response else { return XCTFail("bad response \(response)") }
+138 |         guard case let .string(status)? = object["status"] else { return XCTFail("missing status \(response)") }
+    |                                                                                                    |- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+    |                                                                                                    |- note: use a default value parameter to avoid this warning
+    |                                                                                                    |- note: provide a default value to avoid this warning
+    |                                                                                                    `- note: use 'String(describing:)' to silence this warning
+139 |         XCTAssertEqual(status, "ok", "\(response)")
+140 |         let changed = expectation(description: "home context")
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/PerspectiveContextTests.swift:139:41: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+137 |         guard case let .object(object) = response else { return XCTFail("bad response \(response)") }
+138 |         guard case let .string(status)? = object["status"] else { return XCTFail("missing status \(response)") }
+139 |         XCTAssertEqual(status, "ok", "\(response)")
+    |                                         |- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+    |                                         |- note: use a default value parameter to avoid this warning
+    |                                         |- note: provide a default value to avoid this warning
+    |                                         `- note: use 'String(describing:)' to silence this warning
+140 |         let changed = expectation(description: "home context")
+141 |         let departed = expectation(description: "departure context")
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/PerspectiveContextTests.swift:238:108: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+236 |         do {
+237 |             let response = try await perspective.set(keypath: "perspective.context.configure", value: ContextCodec.encode(ContextConfiguration()), requester: outsider)
+238 |             guard case .string("denied") = response else { return XCTFail("Unprivileged config accepted: \(response)") }
+    |                                                                                                            |- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+    |                                                                                                            |- note: use a default value parameter to avoid this warning
+    |                                                                                                            |- note: provide a default value to avoid this warning
+    |                                                                                                            `- note: use 'String(describing:)' to silence this warning
+239 |         } catch { /* Existing runtime may reject before the registered handler. */ }
+240 |         let value = try await perspective.get(keypath: "perspective.context.configuration", requester: owner)
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/PerspectiveContextTests.swift:275:13: warning: variable 'state' was never mutated; consider changing to 'let' constant [#VariableNeverMutated]
+273 |     }
+274 |     func testMalformedControlCannotClaimActiveRulesWithoutValidity() throws {
+275 |         var state = PerspectiveContextState(configuration: config())
+    |             `- warning: variable 'state' was never mutated; consider changing to 'let' constant [#VariableNeverMutated]
+276 |         let valid = state.decision(now: now)
+277 |         XCTAssertNoThrow(try valid.validate())
+
+[#VariableNeverMutated]: <https://docs.swift.org/compiler/documentation/diagnostics/variable-never-mutated>
+[4 / 9] CellBaseTests-product
+[10 / 14] CellBaseTests-product
+[12 / 14] CellBaseTests-product
+Build complete! (5,52 sek)
+Test Suite 'Selected tests' started at 2026-10-12 11:53:35.985.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-10-12 11:53:35.986.
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-10-12 11:53:35.986.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-12 11:53:35.986.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-12 11:53:36.055.
+Test Suite 'CellNearbyTests.xctest' started at 2026-10-12 11:53:36.056.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-10-12 11:53:36.056.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-12 11:53:36.056.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-12 11:53:36.127.
+Test Suite 'CellBaseTests.xctest' started at 2026-10-12 11:53:36.127.
+Test Suite 'PerspectiveContextFlowTests' started at 2026-10-12 11:53:36.127.
+Test Case '-[CellBaseTests.PerspectiveContextFlowTests testRealSubscriptionChangesEffectivePurposesAndDepartureRestoresBaseline]' started.
+Test Case '-[CellBaseTests.PerspectiveContextFlowTests testRealSubscriptionChangesEffectivePurposesAndDepartureRestoresBaseline]' passed (0.014 seconds).
+Test Suite 'PerspectiveContextFlowTests' passed at 2026-10-12 11:53:36.142.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.014 (0.015) seconds
+Test Suite 'PerspectiveContextIntegrationTests' started at 2026-10-12 11:53:36.142.
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testConfigurationRejectsNonOwnerWithoutDebugBypass]' started.
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testConfigurationRejectsNonOwnerWithoutDebugBypass]' passed (0.006 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testDurableContextReadAfterFreshCellDecodeAndDetachPersists]' started.
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testDurableContextReadAfterFreshCellDecodeAndDetachPersists]' passed (0.008 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testFreshDecodeAndOrdinaryFlowReconnectConfirmActiveState]' started.
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testFreshDecodeAndOrdinaryFlowReconnectConfirmActiveState]' passed (0.007 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testResolverLoadedPortholeInputFiltersContentAndConsumesControlEvents]' started.
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testResolverLoadedPortholeInputFiltersContentAndConsumesControlEvents]' passed (1.027 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testSameFilterConfigurationPreservesActiveRestrictions]' started.
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testSameFilterConfigurationPreservesActiveRestrictions]' passed (0.209 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testStorageFailureDoesNotAcknowledgeOrApplyNewConfiguration]' started.
+Test Case '-[CellBaseTests.PerspectiveContextIntegrationTests testStorageFailureDoesNotAcknowledgeOrApplyNewConfiguration]' passed (0.012 seconds).
+Test Suite 'PerspectiveContextIntegrationTests' passed at 2026-10-12 11:53:37.411.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 1.269 (1.269) seconds
+Test Suite 'PerspectiveContextTests' started at 2026-10-12 11:53:37.411.
+Test Case '-[CellBaseTests.PerspectiveContextTests testDepartureDuplicateDelayedAndConflictingEvents]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testDepartureDuplicateDelayedAndConflictingEvents]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testExpiryAdvancesRevisionOnceAndExpiredSnapshotCannotConfirm]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testExpiryAdvancesRevisionOnceAndExpiredSnapshotCannotConfirm]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testExpiryAndRestartRequireFreshSnapshotEvenAtSameRevision]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testExpiryAndRestartRequireFreshSnapshotEvenAtSameRevision]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testFiltersIntersectWithinBaseAndUseBaseWhenUnknownOrExpired]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testFiltersIntersectWithinBaseAndUseBaseWhenUnknownOrExpired]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testGoldenObservationFixturesRoundTripAndRejectInvalidExamples]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testGoldenObservationFixturesRoundTripAndRejectInvalidExamples]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testJobParentMeetingDigitalGroupAndNewsLabelsAreIndependentRules]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testJobParentMeetingDigitalGroupAndNewsLabelsAreIndependentRules]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testMalformedConfigurationAndEventsAreRejected]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testMalformedConfigurationAndEventsAreRejected]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testMalformedControlCannotClaimActiveRulesWithoutValidity]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testMalformedControlCannotClaimActiveRulesWithoutValidity]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testMorningNeedsTimeAndHomeOrFamilyAndKnownEmptySources]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testMorningNeedsTimeAndHomeOrFamilyAndKnownEmptySources]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testPrioritySupportsLowerWeightsAndDeactivationAndStableTies]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testPrioritySupportsLowerWeightsAndDeactivationAndStableTies]' passed (0.000 seconds).
+Test Suite 'PerspectiveContextTests' passed at 2026-10-12 11:53:37.418.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.006 (0.007) seconds
+Test Suite 'CellBaseTests.xctest' passed at 2026-10-12 11:53:37.418.
+	 Executed 17 tests, with 0 failures (0 unexpected) in 1.290 (1.291) seconds
+Test Suite 'Selected tests' passed at 2026-10-12 11:53:37.418.
+	 Executed 17 tests, with 0 failures (0 unexpected) in 1.290 (1.291) seconds
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-77298/CellsContainer/BEACA334-2D45-4E80-A79A-06119B78BD50/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-77298/CellsContainer/BEACA334-2D45-4E80-A79A-06119B78BD50/Perspective.json, NSUnderlyingError=0x751c89a6a0 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-77298/CellsContainer/F7A1BD82-8C8E-4C6D-9B02-3C4FEE425C07/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-77298/CellsContainer/F7A1BD82-8C8E-4C6D-9B02-3C4FEE425C07/Perspective.json, NSUnderlyingError=0x751cb14660 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-77298/CellsContainer/260B94C7-D581-4386-A93C-BB4436F56925/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-77298/CellsContainer/260B94C7-D581-4386-A93C-BB4436F56925/Perspective.json, NSUnderlyingError=0x751cb10330 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-77298/CellsContainer/260B94C7-D581-4386-A93C-BB4436F56925/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-77298/CellsContainer/260B94C7-D581-4386-A93C-BB4436F56925/Perspective.json, NSUnderlyingError=0x751cb10c60 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-77298/CellsContainer/CE6CEF92-F7BA-4615-9EE9-15D82288C8FE/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-77298/CellsContainer/CE6CEF92-F7BA-4615-9EE9-15D82288C8FE/Perspective.json, NSUnderlyingError=0x751cb14600 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-77298/CellsContainer/CE6CEF92-F7BA-4615-9EE9-15D82288C8FE/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-77298/CellsContainer/CE6CEF92-F7BA-4615-9EE9-15D82288C8FE/Perspective.json, NSUnderlyingError=0x751cb14f90 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-77298/CellsContainer/6F297D46-F459-428B-B84A-81FFA4A6D9EF/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-77298/CellsContainer/6F297D46-F459-428B-B84A-81FFA4A6D9EF/Perspective.json, NSUnderlyingError=0x751cb14420 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-77298/CellsContainer/70864A9E-CD5A-4330-8921-32D502EC563A/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-77298/CellsContainer/70864A9E-CD5A-4330-8921-32D502EC563A/Perspective.json, NSUnderlyingError=0x751cb14e70 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-77298/CellsContainer/33960F55-B05B-4B22-A5A2-38933DD4214D/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-77298/CellsContainer/33960F55-B05B-4B22-A5A2-38933DD4214D/Perspective.json, NSUnderlyingError=0x751cb10210 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}

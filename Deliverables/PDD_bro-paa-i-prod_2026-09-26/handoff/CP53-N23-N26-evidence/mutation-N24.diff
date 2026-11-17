@@ -1,0 +1,11 @@
+--- BridgeMultiplexing
++++ BridgeMultiplexing-mutant
+@@ -1013,7 +1013,7 @@
+         let reservation = stateLock.withLock { () -> ChannelReservation in
+             guard closed == false else { return .closed }
+             guard channels[channelID] == nil, pendingChannelIDs.contains(channelID) == false,
+-                  previousSends == 0 else {
++                  true else { // MUTATION: allow reuse while an old send is pending
+                 return .conflict
+             }
+             let retainedIDs = Set(channels.keys).union(pendingChannelIDs).union(sendingChannelIDs.keys).subtracting([channelID])

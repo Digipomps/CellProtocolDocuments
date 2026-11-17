@@ -1,0 +1,1077 @@
+diff --git a/Public/js/skeleton-runtime.js b/Public/js/skeleton-runtime.js
+index c43a7a4d..fbcc823b 100644
+--- a/Public/js/skeleton-runtime.js
++++ b/Public/js/skeleton-runtime.js
+@@ -14,6 +14,8 @@
+     "TextArea",
+     "Button",
+     "List",
++    "Tree",
++    "ComponentSurface",
+     "Divider",
+     "Object",
+     "Section",
+@@ -249,6 +251,7 @@
+     }
+ 
+     const state = {
++      fontFallback: getComputedStyle(targetRootElement).fontFamily || "system-ui, sans-serif",
+       rootElement: renderRootElement,
+       onAction: typeof options.onAction === "function" ? options.onAction : async () => {},
+       onNavigate: typeof options.onNavigate === "function" ? options.onNavigate : null,
+@@ -265,6 +268,11 @@
+         typeof options.resolveButtonPayload === "function" ? options.resolveButtonPayload : null,
+       formatText: typeof options.formatText === "function" ? options.formatText : null,
+       rootData: {},
++      rendererOptions: options,
++      layoutContext: options.layoutContext || {},
++      treeBindings: [],
++      componentBindings: new Map(),
++      dragContext: options.dragContext || { transfer: null, source: null, listeners: new Set() },
+       localization: global.HavenLocalization?.createRuntime({
+         configuration: options.localization || null,
+         catalogs: options.localizationCatalogs || [],
+@@ -292,14 +300,30 @@
+       presentationKeydownHandlerInstalled: false,
+       activePresentationBindings: [],
+       presentationScrollLocked: false,
+-      activeDragTransfer: null,
+       isMounted: !deferMount,
+     };
+ 
+     const rootSkeleton = extractRootSkeleton(options.skeleton);
+-    const rootNode = renderElement(rootSkeleton, state, null, "root", "root");
++    const rootNode = renderElement(rootSkeleton, state, options.itemContext || null, "root", "root");
+ 
+     state.rootElement.replaceChildren(rootNode);
++    state.refreshDragStyles = () => refreshDragStyles(state);
++    state.dragContext.listeners.add(state.refreshDragStyles);
++    state.beginExternalDrag = (event) => {
++      if (!state.rootElement.contains(event.target)) return;
++      setHostDrag(state, parseDragTransfer(event) || { dragRole: "", dragPayload: null }, event.target);
++    };
++    state.cancelDrag = (event) => {
++      if (event.type !== "keydown" || event.key === "Escape") setHostDrag(state, null, null);
++    };
++    // One transient drag context per host, shared by mounted definitions.
++    if (!options.dragContext) {
++      document.addEventListener("dragstart", state.beginExternalDrag);
++      document.addEventListener("dragend", state.cancelDrag);
++      document.addEventListener("drop", state.cancelDrag);
++      document.addEventListener("keydown", state.cancelDrag);
++    }
++    updateLayoutContext(state);
+     state.presentationKeydownHandler = (event) => handlePresentationKeydown(state, event);
+     if (state.isMounted) {
+       document.addEventListener("keydown", state.presentationKeydownHandler, true);
+@@ -314,6 +338,16 @@
+         flushDynamicBindings(state);
+         updateLocalizationBindings(state);
+       },
++      setLayoutContext(context) {
++        state.layoutContext = context || {};
++        updateLayoutContext(state);
++      },
++      captureState() {
++        return captureRendererState(state);
++      },
++      restoreState(snapshot) {
++        restoreRendererState(state, snapshot);
++      },
+       setLocalization(context, configuration, catalogs = []) {
+         if (!state.localization) return false;
+         const signature = JSON.stringify(context);
+@@ -350,6 +384,16 @@
+         updatePresentationBindings(state);
+       },
+       destroy({ preserveDOM = false } = {}) {
++        state.componentBindings.forEach((binding) => binding.renderer?.destroy());
++        state.componentBindings.clear();
++        state.dragContext.listeners.delete(state.refreshDragStyles);
++        if (!options.dragContext) {
++          setHostDrag(state, null, null);
++          document.removeEventListener("dragstart", state.beginExternalDrag);
++          document.removeEventListener("dragend", state.cancelDrag);
++          document.removeEventListener("drop", state.cancelDrag);
++          document.removeEventListener("keydown", state.cancelDrag);
++        }
+         state.localization?.clear();
+         state.localizationBindings = [];
+         if (state.presentationKeydownHandler && state.presentationKeydownHandlerInstalled) {
+@@ -499,6 +543,28 @@
+       return `Invalid skeleton at ${path}: expected an object payload.`;
+     }
+ 
++    if (type === "Tree") {
++      const error = validateRequiredStrings(payload, ["keypath", "idKeypath", "parentIDKeypath",
++        "levelKeypath", "leadingInsetKeypath", "hasChildrenKeypath", "expandedKeypath",
++        "selectedIDStateKeypath", "selectionActionKeypath", "expansionActionKeypath"], path);
++      if (error) return error;
++      if (!isPlainObject(payload.rowSkeleton) || !payload.rowSkeleton.VStack) {
++        return `Invalid skeleton at ${path}.rowSkeleton: expected a wrapped VStack.`;
++      }
++      return validateElement(payload.rowSkeleton, depth + 1, `${path}.rowSkeleton`);
++    }
++    if (type === "ComponentSurface") {
++      // WP-F format: nøyaktig én av instanceID og instanceIDKeypath.
++      const hasID = typeof payload.instanceID === "string" && payload.instanceID.trim() !== "";
++      const hasKeypath = typeof payload.instanceIDKeypath === "string" && payload.instanceIDKeypath.trim() !== "";
++      if (hasID === hasKeypath) {
++        return `Invalid skeleton at ${path}: expected exactly one of instanceID and instanceIDKeypath.`;
++      }
++      return validateRequiredStrings(payload, ["sourceKeypath"], path)
++        || (!["inline", "pinned"].includes(payload.variant)
++          ? `Invalid skeleton at ${path}.variant: expected inline or pinned.` : null);
++    }
++
+     if (type === "ScrollView") {
+       if (!Array.isArray(payload.elements)) {
+         return `Invalid skeleton at ${path}.elements: expected an array.`;
+@@ -732,6 +798,13 @@
+   }
+ 
+   function renderElement(element, state, context, key, path) {
++    const node = renderElementNode(element, state, context, key, path);
++    const spec = Array.isArray(element.value) ? {} : (element.value || {});
++    node.skeletonLayout = { type: element.type, spec, state, context, base: null };
++    return node;
++  }
++
++  function renderElementNode(element, state, context, key, path) {
+     switch (element.type) {
+       case "VStack":
+         return renderStack(element.value, state, context, key, path, "vstack");
+@@ -749,6 +822,10 @@
+         return renderTextArea(element.value, state, context, key, path);
+       case "Button":
+         return renderButton(element.value, state, context, key, path);
++      case "Tree":
++        return renderTree(element.value, state, context, key, path);
++      case "ComponentSurface":
++        return renderComponentSurface(element.value, state, context, key, path);
+       case "List":
+         return renderList(element.value, state, context, key, path);
+       case "Divider":
+@@ -758,9 +835,9 @@
+       case "ScrollView":
+         return renderScrollView(element.value, state, context, key, path);
+       case "Spacer":
+-        return renderSpacer(element.value, path);
++        return renderSpacer(element.value, state, context, path);
+       case "Image":
+-        return renderImage(element.value, key, path);
++        return renderImage(element.value, state, context, key, path);
+       case "Reference":
+         return renderReference(element.value, state, context, key, path);
+       case "ZStack":
+@@ -799,9 +876,291 @@
+     }
+   }
+ 
++  // WP-R2: Tree consumes the cell's ordered visible list; it never traverses or
++  // filters data. Navigation changes focus only, selection/expansion await data.
++  function replaceItemContext(context, item) {
++    Object.keys(context).forEach((key) => delete context[key]);
++    if (item && typeof item === "object") {
++      Object.entries(item).forEach(([key, value]) => Object.defineProperty(context, key, { value, configurable: true, enumerable: true, writable: true }));
++    }
++  }
++
++  function renderTree(spec, state, context, key, path) {
++    const container = document.createElement("div");
++    container.className = "skeleton-tree";
++    container.setAttribute("role", "tree");
++    applySkeletonIdentity(container, key, path);
++    applyElementModifiers(container, spec.modifiers, state, path, context);
++    const binding = { container, spec, context, key, path, rows: new Map(), items: [], focusedID: null };
++    state.treeBindings.push(binding);
++    return container;
++  }
++
++  function treeFocus(binding, id, moveDOMFocus = true) {
++    if (!binding.rows.has(id)) return;
++    binding.focusedID = id;
++    binding.rows.forEach((entry, rowID) => { entry.row.tabIndex = rowID === id ? 0 : -1; });
++    if (moveDOMFocus) {
++      const row = binding.rows.get(id).row;
++      row.focus({ preventScroll: true });
++      row.scrollIntoView({ block: "nearest", inline: "nearest" });
++    }
++  }
++
++  function treeAction(binding, state, id, expanded) {
++    const payload = expanded === undefined ? { nodeID: id } : { nodeID: id, expanded };
++    const keypath = expanded === undefined ? binding.spec.selectionActionKeypath : binding.spec.expansionActionKeypath;
++    return dispatchAction(state, keypath, payload, { trigger: expanded === undefined ? "tree-selection" : "tree-expansion" })
++      .catch((error) => { console.warn("Skeleton tree action failed", error); });
++  }
++
++  function makeTreeRow(binding, state, id) {
++    const { spec } = binding;
++    const row = document.createElement("div");
++    row.className = "skeleton-tree-row";
++    row.dataset.nodeId = id;
++    row.setAttribute("role", "treeitem");
++    row.tabIndex = -1;
++    const context = {};
++    const item = binding.items.find((value) => getByPath(value, spec.idKeypath) === id);
++    replaceItemContext(context, item);
++    applyElementModifiers(row, spec.rowModifiers, state, null, context);
++    const disclosure = document.createElement("button");
++    disclosure.type = "button";
++    disclosure.className = "skeleton-tree-disclosure";
++    disclosure.tabIndex = -1;
++    // The row owns the accessible label/expanded state and the single tab stop.
++    disclosure.setAttribute("aria-hidden", "true");
++    applyElementModifiers(disclosure, spec.disclosureModifiers, state, null, context);
++    disclosure.addEventListener("mousedown", (event) => event.preventDefault());
++    disclosure.addEventListener("click", (event) => {
++      event.stopPropagation();
++      treeFocus(binding, id);
++      void treeAction(binding, state, id, getByPath(context, spec.expandedKeypath) !== true);
++    });
++    row.appendChild(disclosure);
++    const content = renderElement(decodeElement(spec.rowSkeleton), state, context, `${binding.key}.node.${id}`, null);
++    row.appendChild(content);
++    content.querySelectorAll("button, a, input, textarea, select, [tabindex]").forEach((node) => { node.tabIndex = -1; });
++    row.addEventListener("focus", () => treeFocus(binding, id, false));
++    row.addEventListener("click", (event) => {
++      if (isInteractiveTarget(event.target)) return;
++      treeFocus(binding, id);
++      void treeAction(binding, state, id);
++    });
++    row.addEventListener("keydown", (event) => {
++      if (event.target !== row || event.altKey || event.metaKey || event.ctrlKey) return;
++      const ids = binding.items.map((item) => getByPath(item, spec.idKeypath));
++      const index = ids.indexOf(id);
++      let nextID;
++      switch (event.key) {
++        case "ArrowDown": nextID = ids[Math.min(index + 1, ids.length - 1)]; break;
++        case "ArrowUp": nextID = ids[Math.max(index - 1, 0)]; break;
++        case "Home": nextID = ids[0]; break;
++        case "End": nextID = ids[ids.length - 1]; break;
++        case "ArrowRight":
++          if (getByPath(context, spec.hasChildrenKeypath) === true) {
++            if (getByPath(context, spec.expandedKeypath) !== true) void treeAction(binding, state, id, true);
++            else nextID = ids.find((childID) => getByPath(binding.rows.get(childID)?.context, spec.parentIDKeypath) === id);
++          }
++          break;
++        case "ArrowLeft":
++          if (getByPath(context, spec.hasChildrenKeypath) === true && getByPath(context, spec.expandedKeypath) === true) {
++            void treeAction(binding, state, id, false);
++          } else nextID = getByPath(context, spec.parentIDKeypath);
++          break;
++        case "Enter": case " ": void treeAction(binding, state, id); break;
++        default: return; // In particular, Tab enters once and leaves normally.
++      }
++      event.preventDefault();
++      if (nextID != null) treeFocus(binding, nextID);
++    });
++    return { row, disclosure, context };
++  }
++
++  function updateTreeBindings(state) {
++    state.treeBindings.forEach((binding) => {
++      const { spec, container } = binding;
++      const resolved = resolveKeypath(spec.keypath, state.rootData, binding.context);
++      const items = Array.isArray(resolved) ? resolved : [];
++      const ids = items.map((item) => getByPath(item, spec.idKeypath));
++      if (ids.some((id) => typeof id !== "string" || !id) || new Set(ids).size !== ids.length) {
++        container.dataset.skeletonError = "Tree requires unique string node IDs";
++        return;
++      }
++      delete container.dataset.skeletonError;
++      const hadFocus = container.contains(document.activeElement);
++      let focusID = binding.focusedID;
++      const visited = new Set();
++      while (focusID && !ids.includes(focusID) && !visited.has(focusID)) {
++        visited.add(focusID);
++        focusID = getByPath(binding.rows.get(focusID)?.context, spec.parentIDKeypath);
++      }
++      const selectedID = resolveKeypath(spec.selectedIDStateKeypath, state.rootData, binding.context);
++      if (!ids.includes(focusID)) focusID = ids.includes(selectedID) ? selectedID : ids[0];
++      binding.items = items;
++      items.forEach((item, index) => {
++        const id = ids[index];
++        let entry = binding.rows.get(id);
++        if (!entry) {
++          entry = makeTreeRow(binding, state, id);
++          binding.rows.set(id, entry);
++        }
++        replaceItemContext(entry.context, item);
++        const { row, disclosure } = entry;
++        row.setAttribute("aria-level", String(getByPath(item, spec.levelKeypath)));
++        row.setAttribute("aria-selected", String(id === selectedID));
++        row.style.paddingInlineStart = `${getByPath(item, spec.leadingInsetKeypath) || 0}px`;
++        const hasChildren = getByPath(item, spec.hasChildrenKeypath) === true;
++        const expanded = getByPath(item, spec.expandedKeypath) === true;
++        if (hasChildren) row.setAttribute("aria-expanded", String(expanded));
++        else row.removeAttribute("aria-expanded");
++        disclosure.style.visibility = hasChildren ? "visible" : "hidden";
++        disclosure.disabled = !hasChildren;
++        disclosure.textContent = expanded ? "▾" : "▸";
++        if (container.children[index] !== row) container.insertBefore(row, container.children[index] || null);
++      });
++      binding.rows.forEach((entry, id) => {
++        if (ids.includes(id)) return;
++        pruneDescendantBindings(state, entry.row, binding);
++        entry.row.remove();
++        binding.rows.delete(id);
++      });
++      container.tabIndex = items.length ? -1 : 0;
++      treeFocus(binding, focusID, hadFocus && document.activeElement !== binding.rows.get(focusID)?.row);
++      if (hadFocus && !items.length) container.focus();
++    });
++  }
++
++  function renderComponentSurface(spec, state, context, key, path) {
++    // WP-F format: fast instanceID, eller ID lest fra radens data (instanceIDKeypath).
++    const resolvedID = typeof spec.instanceID === "string" && spec.instanceID
++      ? spec.instanceID
++      : resolveKeypath(spec.instanceIDKeypath, state.rootData, context);
++    const instanceID = typeof resolvedID === "string" || typeof resolvedID === "number" ? String(resolvedID) : "";
++    if (!instanceID) {
++      const failure = document.createElement("div");
++      failure.className = "skeleton-component-surface-error";
++      failure.textContent = "ComponentSurface: unresolved instanceID";
++      applySkeletonIdentity(failure, key, path);
++      return failure;
++    }
++    // The cache is keyed solely by instanceID, including when a List reorders.
++    let binding = state.componentBindings.get(instanceID);
++    if (!binding) {
++      const container = document.createElement("div");
++      container.className = "skeleton-component-surface";
++      container.dataset.instanceId = instanceID;
++      binding = { container, itemContext: {}, renderer: null, definition: null };
++      state.componentBindings.set(instanceID, binding);
++      applyElementModifiers(container, spec.modifiers, state, path, context);
++    }
++    Object.assign(binding, { spec, context, key, path });
++    binding.container.dataset.componentVariant = spec.variant || "inline";
++    applySkeletonIdentity(binding.container, `component.${instanceID}`, path);
++    return binding.container;
++  }
++
++  function componentActionMetadata(mount, instanceID, meta) {
++    return { ...meta, sourceCellEndpoint: mount.sourceCellEndpoint,
++      mount: { instanceID, componentID: mount.componentID, revision: mount.revision } };
++  }
++
++  function updateComponentBindings(state) {
++    state.componentBindings.forEach((binding, instanceID) => {
++      if (!state.rootElement.contains(binding.container)) {
++        binding.renderer?.destroy();
++        state.componentBindings.delete(instanceID);
++        return;
++      }
++      const mount = resolveKeypath(binding.spec.sourceKeypath, state.rootData, binding.context);
++      const ancestors = state.rendererOptions.componentAncestors || [];
++      const valid = !ancestors.includes(instanceID) && ancestors.length < 64 && mount && ["componentID", "revision", "sourceCellEndpoint"].every((key) => typeof mount[key] === "string" && mount[key].trim())
++        && validateSkeleton(mount.skeleton).valid;
++      if (!valid) {
++        binding.renderer?.destroy();
++        binding.renderer = null;
++        binding.definition = null;
++        binding.container.textContent = "ComponentSurface: unresolved or invalid mount";
++        binding.container.dataset.skeletonError = "invalid-component-mount";
++        return;
++      }
++      delete binding.container.dataset.skeletonError;
++      binding.mount = mount;
++      replaceItemContext(binding.itemContext, mount.item);
++      const definition = JSON.stringify([mount.componentID, mount.revision]);
++      if (definition !== binding.definition) {
++        const snapshot = binding.renderer?.captureState();
++        binding.renderer?.destroy();
++        binding.definition = definition;
++        binding.container.dataset.componentId = mount.componentID;
++        binding.container.dataset.componentRevision = mount.revision;
++        binding.renderer = createRenderer({
++          rootElement: binding.container, skeleton: mount.skeleton, itemContext: binding.itemContext,
++          dragContext: state.dragContext, layoutContext: state.layoutContext,
++          componentAncestors: [...ancestors, instanceID],
++          localization: state.rendererOptions.localization,
++          localizationContext: state.rendererOptions.localizationContext,
++          onAction: (keypath, payload, meta) => state.onAction(keypath, payload, componentActionMetadata(binding.mount, instanceID, meta)),
++        });
++        binding.renderer.update(state.rootData);
++        if (snapshot) binding.renderer.restoreState(snapshot);
++      } else {
++        binding.renderer.update(state.rootData);
++      }
++    });
++  }
++
++  function captureRendererState(state) {
++    const fields = state.fieldBindings.map((binding) => ({
++      target: binding.targetKeypath, source: binding.sourceKeypath,
++      value: readRememberedFieldValue(state, binding),
++      focused: bindingHasFocus(binding), start: binding.element.selectionStart, end: binding.element.selectionEnd,
++    }));
++    const scroll = Array.from(state.rootElement.querySelectorAll("[data-skeleton-key]")).map((node) => ({
++      key: node.dataset.skeletonKey, top: node.scrollTop, left: node.scrollLeft,
++      focused: node === document.activeElement,
++    }));
++    const trees = state.treeBindings.map((binding) => ({ keypath: binding.spec.keypath, focusedID: binding.focusedID,
++      focused: binding.container.contains(document.activeElement) }));
++    const focusedButton = state.buttonBindings.find((binding) => binding.button === document.activeElement);
++    return { fields, scroll, trees, focusedAction: focusedButton ? resolveButtonSpec(focusedButton.spec, focusedButton.context).keypath : null };
++  }
++
++  function restoreRendererState(state, snapshot) {
++    snapshot.trees.forEach((saved) => {
++      const binding = state.treeBindings.find((entry) => entry.spec.keypath === saved.keypath);
++      if (binding) treeFocus(binding, saved.focusedID, saved.focused);
++    });
++    snapshot.fields.forEach((field) => {
++      const binding = state.fieldBindings.find((entry) => entry.targetKeypath === field.target && entry.sourceKeypath === field.source);
++      if (!binding) return;
++      if (field.value !== null) {
++        rememberLocalFieldValue(state, binding, field.value);
++        writeFieldBindingValue(binding, field.value, false);
++      }
++      if (field.focused) {
++        focusFieldBinding(binding);
++        if (typeof field.start === "number" && binding.element.setSelectionRange) binding.element.setSelectionRange(field.start, field.end);
++      }
++    });
++    snapshot.scroll.forEach((saved) => {
++      const node = Array.from(state.rootElement.querySelectorAll("[data-skeleton-key]")).find((entry) => entry.dataset.skeletonKey === saved.key);
++      if (!node) return;
++      node.scrollTop = saved.top;
++      node.scrollLeft = saved.left;
++      if (saved.focused && !snapshot.focusedAction) node.focus({ preventScroll: true });
++    });
++    if (snapshot.focusedAction) {
++      const button = state.buttonBindings.find((binding) => resolveButtonSpec(binding.spec, binding.context).keypath === snapshot.focusedAction);
++      button?.button.focus({ preventScroll: true });
++    }
++  }
++
+   function renderStack(raw, state, context, key, path, orientation) {
+     const container = document.createElement("div");
+     container.className = orientation === "hstack" ? "skeleton-hstack" : "skeleton-vstack";
++    container.dataset.axis = orientation === "hstack" ? "row" : "column"; // WP-B4 paritet
+     applySkeletonIdentity(container, key, path);
+     const stackSpec = decodeStackSpec(raw);
+     applyElementModifiers(container, stackSpec.modifiers, state, path, context);
+@@ -1054,7 +1413,7 @@
+     const wrapper = document.createElement("div");
+     wrapper.className = "skeleton-textfield-wrapper";
+     applySkeletonIdentity(wrapper, key, path);
+-    applyElementModifiers(wrapper, spec.modifiers);
++    applyElementModifiers(wrapper, spec.modifiers, state, path, context);
+ 
+     const field = document.createElement("input");
+     field.type = "text";
+@@ -1063,11 +1422,11 @@
+     bindLocalizedText(state, field, spec.modifiers?.localization?.placeholder, context,
+       () => spec.placeholder || "", (text) => {
+         field.placeholder = text;
+-        if (spec.modifiers?.styleRole === "admin-form-field") field.setAttribute("aria-label", text || "Adminfelt");
++        if (spec.modifiers?.styleRole === "admin-form-field") field.setAttribute("aria-label", spec.modifiers?.accessibilityLabel || text || "Adminfelt");
+       });
+     applyElementModifiers(field, spec.modifiers, state, path, context);
+     if (spec.modifiers && spec.modifiers.styleRole === "admin-form-field") {
+-      field.setAttribute("aria-label", field.placeholder || "Adminfelt");
++      field.setAttribute("aria-label", spec.modifiers?.accessibilityLabel || field.placeholder || "Adminfelt");
+     }
+ 
+     const sourceKeypath = typeof spec.sourceKeypath === "string" ? spec.sourceKeypath : null;
+@@ -1097,6 +1456,24 @@
+     return wrapper;
+   }
+ 
++  const TEXT_AREA_FIELD_MODIFIERS = ["styleRole", "styleClasses", "fontSize", "fontWeight", "fontFamilies",
++    "foregroundColor", "foregroundColorKeypath", "lineHeightMultiple", "letterSpacing", "numericVariant",
++    "multilineTextAlignment", "lineLimit", "textDecoration", "localization"];
++
++  function textAreaFieldModifiers(modifiers) {
++    if (!modifiers || typeof modifiers !== "object") return modifiers;
++    return Object.fromEntries(TEXT_AREA_FIELD_MODIFIERS
++      .filter((name) => Object.prototype.hasOwnProperty.call(modifiers, name))
++      .map((name) => [name, modifiers[name]]));
++  }
++
++  function textAreaDeclaresBox(modifiers) {
++    if (!modifiers || typeof modifiers !== "object") return false;
++    return (Number.isFinite(modifiers.borderWidth) && modifiers.borderWidth > 0)
++      || Boolean(modifiers.background) || Boolean(modifiers.backgroundKeypath)
++      || Number.isFinite(modifiers.padding) || Boolean(modifiers.paddingInsets);
++  }
++
+   function renderTextArea(raw, state, context, key, path) {
+     const spec = raw && typeof raw === "object" ? raw : {};
+     const editorMode = typeof spec.editorMode === "string" ? spec.editorMode.trim() : "";
+@@ -1116,15 +1493,18 @@
+     bindLocalizedText(state, field, spec.modifiers?.localization?.placeholder, context,
+       () => spec.placeholder || "", (text) => {
+         field.placeholder = text;
+-        if (spec.modifiers?.styleRole === "admin-form-field") field.setAttribute("aria-label", text || "Adminfelt");
++        if (spec.modifiers?.styleRole === "admin-form-field") field.setAttribute("aria-label", spec.modifiers?.accessibilityLabel || text || "Adminfelt");
+       });
+     field.rows = typeof spec.minLines === "number" && spec.minLines > 0 ? spec.minLines : 4;
+     if (typeof spec.maxLines === "number" && spec.maxLines > 0) {
+       field.style.maxHeight = `${Math.max(spec.maxLines, field.rows) * 1.5}em`;
+     }
+-    applyElementModifiers(field, spec.modifiers, state, path, context);
++    // WP-B4 paritet: boksen (ramme, bakgrunn, polstring, størrelse) står på omslaget én gang, som
++    // i CellApple; selve feltet får bare typografi og rolle.
++    applyElementModifiers(field, textAreaFieldModifiers(spec.modifiers), state, path, context);
++    if (textAreaDeclaresBox(spec.modifiers)) wrapper.classList.add("skeleton-textarea-boxed");
+     if (spec.modifiers && spec.modifiers.styleRole === "admin-form-field") {
+-      field.setAttribute("aria-label", field.placeholder || "Adminnotater");
++      field.setAttribute("aria-label", spec.modifiers?.accessibilityLabel || field.placeholder || "Adminnotater");
+     }
+ 
+     const sourceKeypath = typeof spec.sourceKeypath === "string" ? spec.sourceKeypath : null;
+@@ -1430,7 +1810,7 @@
+       link.href = navigationURL.href;
+       const labelElement = appendSkeletonButtonContent(link, resolved.label, iconElement);
+       bindLocalizedText(state, link, spec.modifiers?.localization?.label, context,
+-        () => resolveButtonSpec(spec, context).label, (text) => { labelElement.textContent = text; link.setAttribute("aria-label", text); });
++        () => resolveButtonSpec(spec, context).label, (text) => { labelElement.textContent = text; link.setAttribute("aria-label", spec.modifiers?.accessibilityLabel || text); });
+       applySkeletonIdentity(link, key, path);
+       applyElementModifiers(link, spec.modifiers, state, path, context);
+       if (state.onNavigate) {
+@@ -1476,7 +1856,7 @@
+       () => resolveButtonSpec(spec, context).label, (text) => {
+         setButtonLabelText(binding, binding.pendingRequestCount > 0 ? pendingButtonLabel(text)
+           : button.classList.contains("is-acknowledged") ? acknowledgedButtonLabel(text) : text);
+-        button.setAttribute("aria-label", text);
++        button.setAttribute("aria-label", spec.modifiers?.accessibilityLabel || text);
+       });
+ 
+     button.addEventListener("click", () => {
+@@ -1613,6 +1993,7 @@
+     const keypath = typeof spec.keypath === "string" ? spec.keypath : null;
+     const listBinding = {
+       kind: "list",
++      modifiers: spec.modifiers || {},
+       container: wrapper,
+       keypath,
+       context,
+@@ -1722,24 +2103,30 @@
+     return scroller;
+   }
+ 
+-  function renderSpacer(raw, path) {
++  function renderSpacer(raw, state, context, path) {
+     const spacer = document.createElement("div");
+     spacer.className = "skeleton-spacer";
+     if (typeof path === "string" && path.length > 0) {
+       spacer.dataset.skeletonPath = path;
+     }
+     if (raw && typeof raw === "object") {
+-      applyElementModifiers(spacer, raw.modifiers);
++      applyElementModifiers(spacer, raw.modifiers, state, path, context);
+     }
+     const width = raw && typeof raw === "object" && typeof raw.width === "number" ? raw.width : null;
+     if (width !== null) {
+       spacer.style.width = `${width}px`;
+       spacer.style.minWidth = `${width}px`;
++      spacer.style.flex = "0 0 auto";
++    } else {
++      // WP-B4 paritet: som SwiftUI Spacer tar en Spacer uten bredde ledig plass langs stakkens akse.
++      spacer.style.flex = "1 1 0px";
++      spacer.style.minWidth = "0px";
++      spacer.style.minHeight = "0px";
+     }
+     return spacer;
+   }
+ 
+-  function renderImage(raw, key, path) {
++  function renderImage(raw, state, context, key, path) {
+     const spec = raw && typeof raw === "object" ? raw : {};
+     const wrapper = document.createElement("div");
+     wrapper.className = "skeleton-image-wrapper";
+@@ -1758,7 +2145,7 @@
+       if (icon) {
+         icon.removeAttribute("aria-hidden");
+         icon.setAttribute("role", "img");
+-        icon.setAttribute("aria-label", spec.name.trim());
++        icon.setAttribute("aria-label", spec.modifiers?.accessibilityLabel || spec.name.trim());
+         if (spec.padding && Number.isFinite(spec.padding)) {
+           wrapper.style.padding = `${spec.padding}px`;
+         }
+@@ -1770,7 +2157,7 @@
+     const image = document.createElement("img");
+     image.className = "skeleton-image";
+     image.loading = "lazy";
+-    image.alt = typeof spec.name === "string" ? spec.name : "skeleton-image";
++    image.alt = spec.modifiers?.accessibilityLabel || (typeof spec.name === "string" ? spec.name : "skeleton-image");
+ 
+     const source = resolveImageSource(spec);
+     if (source) {
+@@ -1928,6 +2315,7 @@
+ 
+     const input = document.createElement("input");
+     input.type = "checkbox";
++    if (spec.modifiers?.accessibilityLabel) input.setAttribute("aria-label", spec.modifiers.accessibilityLabel);
+ 
+     const label = document.createElement("span");
+     label.textContent = typeof spec.label === "string" ? spec.label : "Toggle";
+@@ -4604,6 +4992,243 @@
+     }
+   }
+ 
++  function portableFontWeight(value) {
++    const weights = { ultralight: "100", thin: "200", light: "300", regular: "400", normal: "400",
++      medium: "500", semibold: "600", bold: "700", heavy: "800", black: "900" };
++    const name = String(value).trim().toLowerCase();
++    return weights[name] || (/^[1-9]00$/.test(name) ? name : "400");
++  }
++
++  function applyInsets(element, insets, padding = 0) {
++    const names = { top: "paddingTop", leading: "paddingInlineStart", bottom: "paddingBottom", trailing: "paddingInlineEnd" };
++    Object.entries(names).forEach(([edge, property]) => { element.style[property] = `${insets[edge] ?? padding}px`; });
++  }
++
++  function applyPortableModifiers(element, modifiers, state) {
++    if (modifiers.paddingInsets) applyInsets(element, modifiers.paddingInsets, modifiers.padding || 0);
++    if (modifiers.fontFamilies?.length) {
++      const fallback = state?.fontFallback || "system-ui, sans-serif";
++      element.style.fontFamily = `${modifiers.fontFamilies.map((font) => JSON.stringify(font)).join(", ")}, ${fallback}`;
++    }
++    if (Number.isFinite(modifiers.lineHeightMultiple)) element.style.lineHeight = String(modifiers.lineHeightMultiple);
++    if (Number.isFinite(modifiers.letterSpacing)) element.style.letterSpacing = `${modifiers.letterSpacing}px`;
++    if (["proportional", "tabular"].includes(modifiers.numericVariant)) element.style.fontVariantNumeric = `${modifiers.numericVariant}-nums`;
++    ["minHeight", "maxHeight", "minWidth"].forEach((name) => {
++      if (Number.isFinite(modifiers[name])) element.style[name] = `${modifiers[name]}px`;
++    });
++    if (Number.isFinite(modifiers.flexGrow)) element.style.flexGrow = String(modifiers.flexGrow);
++    if (Number.isFinite(modifiers.itemSpacing) && element.classList.contains("skeleton-list")) element.style.gap = `${modifiers.itemSpacing}px`;
++    if (modifiers.controlStyle === "plain") element.classList.add("skeleton-control-plain");
++    if (typeof modifiers.accessibilityLabel === "string") element.setAttribute("aria-label", modifiers.accessibilityLabel);
++    if (modifiers.borderStyle) element.style.borderStyle = modifiers.borderStyle;
++    if (Array.isArray(modifiers.borderEdges)) {
++      const sides = { top: "Top", leading: "InlineStart", bottom: "Bottom", trailing: "InlineEnd" };
++      Object.entries(sides).forEach(([edge, side]) => {
++        element.style[`border${side}Width`] = `${modifiers.borderEdges.includes(edge) ? (modifiers.borderWidth ?? 0) : 0}px`;
++      });
++    }
++    if (modifiers.contentClip === true) element.style.overflow = "hidden";
++    if (modifiers.textDecoration) element.style.textDecoration = modifiers.textDecoration;
++    if (Number.isFinite(modifiers.textRotationDegrees)) element.style.rotate = `${modifiers.textRotationDegrees}deg`;
++    if (modifiers.leadingMarker) {
++      const marker = modifiers.leadingMarker;
++      element.classList.add("skeleton-leading-marker");
++      Object.entries({ width: marker.width, top: marker.insetTop, bottom: marker.insetBottom,
++        offset: marker.offset, radius: marker.cornerRadius }).forEach(([name, value]) => {
++        element.style.setProperty(`--marker-${name}`, `${value}px`);
++      });
++      element.style.setProperty("--marker-color", marker.color);
++    }
++  }
++
++  const VARIANT_STYLE_PROPERTIES = ["flexDirection", "gridTemplateColumns", "gap", "paddingTop", "paddingInlineStart",
++    "paddingBottom", "paddingInlineEnd", "minHeight", "maxHeight", "flexGrow", "fontSize", "borderColor", "color", "alignItems", "justifyContent", "width"];
++  const VARIANT_OVERRIDES = ["axis", "columns", "spacing", "paddingInsets", "minHeight", "maxHeight", "flexGrow", "fontSize", "borderColor", "foregroundColor", "width"];
++
++  function layoutVariantMatches(variant, available, state, context) {
++    if (variant.when && !evaluateVisibilityCondition(variant.when, state, context)) return false;
++    for (const dimension of ["Width", "Height"]) {
++      const value = available[`available${dimension}`];
++      for (const bound of ["min", "max"]) {
++        const threshold = variant[`${bound}Available${dimension}`];
++        if (threshold != null && (!Number.isFinite(value) || (bound === "min" ? value < threshold : value > threshold))) return false;
++      }
++    }
++    return (variant.requiresCapability || []).every((capability) => (available.capabilities || []).includes(capability));
++  }
++
++  function narrowDimension(inherited, declared) {
++    if (!Number.isFinite(declared)) return inherited;
++    return Number.isFinite(inherited) ? Math.min(inherited, declared) : declared;
++  }
++
++  function declaredGridWidths(columns, width, spacing, count) {
++    if (!columns?.length) return [];
++    const adaptive = columns.find((column) => column.type === "adaptive");
++    if (adaptive) {
++      if (!Number.isFinite(width)) return [];
++      const minimum = adaptive.min ?? 120;
++      const tracks = Math.max(1, Math.min(count || 1, Math.floor((width + spacing) / (minimum + spacing))));
++      return Array(tracks).fill(Math.min(adaptive.max ?? Infinity, Math.max(0, (width - spacing * (tracks - 1)) / tracks)));
++    }
++    const sizes = columns.map((column) => column.type === "fixed" ? column.value : column.min || 0);
++    if (!Number.isFinite(width)) return columns.map((column) => column.type === "fixed" ? column.value : undefined);
++    let remaining = Math.max(0, width - spacing * (columns.length - 1) - sizes.reduce((sum, value) => sum + value, 0));
++    let flexible = columns.map((column, index) => column.type === "flexible" ? index : -1).filter((index) => index >= 0);
++    while (remaining > 0.01 && flexible.length) {
++      const share = remaining / flexible.length;
++      flexible.forEach((index) => {
++        const addition = Math.min(share, (columns[index].max ?? Infinity) - sizes[index]);
++        sizes[index] += Math.max(0, addition);
++        remaining -= Math.max(0, addition);
++      });
++      flexible = flexible.filter((index) => sizes[index] < (columns[index].max ?? Infinity));
++    }
++    return sizes;
++  }
++
++  function updateLayoutContext(state) {
++    const visit = (node, inherited) => {
++      if (!(node instanceof HTMLElement)) return;
++      const interaction = node.skeletonInteraction;
++      if (interaction) Object.assign(node.style, interaction.base);
++      const record = node.skeletonLayout;
++      let available = { ...inherited };
++      let columns = null;
++      let spacing = 0;
++      if (record) {
++        const { spec, context } = record;
++        const modifiers = spec.modifiers || {};
++        available.availableWidth = narrowDimension(available.availableWidth, modifiers.width);
++        available.availableHeight = narrowDimension(available.availableHeight, modifiers.height);
++        const variants = modifiers.layoutVariants || [];
++        const index = variants.findIndex((variant) => layoutVariantMatches(variant, available, record.state, context));
++        const variant = index < 0 ? {} : variants[index];
++        if (variants.length) {
++          if (!record.base) record.base = Object.fromEntries(VARIANT_STYLE_PROPERTIES.map((name) => [name, node.style[name]]));
++          Object.entries(record.base).forEach(([name, value]) => { node.style[name] = value; });
++          node.dataset.layoutVariant = String(index);
++        }
++        const effective = { ...modifiers };
++        VARIANT_OVERRIDES.forEach((name) => { if (variant[name] != null) effective[name] = variant[name]; });
++        if (variant.axis && ["HStack", "VStack"].includes(record.type)) node.style.flexDirection = variant.axis === "horizontal" ? "row" : "column";
++        if (["HStack", "VStack"].includes(record.type)) {
++          const direction = variant.axis ? (variant.axis === "horizontal" ? "row" : "column") : (record.type === "HStack" ? "row" : "column");
++          applyStackAlignmentModifiers(node, modifiers, direction);
++          node.dataset.axis = direction; // WP-B4 paritet
++        }
++        if (variant.columns && record.type === "Grid") node.style.gridTemplateColumns = gridTemplateColumns(variant.columns);
++        if (Number.isFinite(variant.spacing)) node.style.gap = `${variant.spacing}px`;
++        if (variant.paddingInsets) applyInsets(node, variant.paddingInsets, modifiers.padding || 0);
++        ["minHeight", "maxHeight", "fontSize"].forEach((name) => {
++          if (Number.isFinite(variant[name])) node.style[name] = `${variant[name]}px`;
++        });
++        if (Number.isFinite(variant.flexGrow)) node.style.flexGrow = String(variant.flexGrow);
++        if (variant.borderColor) node.style.borderColor = variant.borderColor;
++        if (variant.foregroundColor) node.style.color = variant.foregroundColor;
++        // WP-F format: fast bredde eller skjult mens varianten gjelder; elementet og tilstanden beholdes.
++        if (Number.isFinite(variant.width)) {
++          node.style.width = `${variant.width}px`;
++          available.availableWidth = narrowDimension(available.availableWidth, variant.width);
++        }
++        // dataset, ikke toggleAttribute: samme attributter, og node-kontrakttestens DOM kjenner dataset.
++        if (variant.hidden === true) node.dataset.layoutHidden = "true"; else delete node.dataset.layoutHidden;
++        if (Number.isFinite(variant.width) || typeof modifiers.width === "number") node.dataset.fixedWidth = "true"; else delete node.dataset.fixedWidth;
++        // Bound colors are live in a mounted item as in a List row.
++        [["backgroundKeypath", "background"], ["foregroundColorKeypath", "color"]].forEach(([key, property]) => {
++          if (modifiers[key] && !(property === "color" && variant.foregroundColor)) {
++            node.style[property] = resolveKeypath(modifiers[key], record.state.rootData, context) || modifiers[property === "color" ? "foregroundColor" : "background"] || "";
++          }
++        });
++        if (modifiers.hAlignmentKeypath) {
++          const alignment = resolveKeypath(modifiers.hAlignmentKeypath, record.state.rootData, context) || modifiers.hAlignment;
++          if (["HStack", "VStack"].includes(record.type)) {
++            // WP-B4 paritet: stakkens justering gjelder innholdet (se applyElementModifiers).
++            const direction = variant.axis ? (variant.axis === "horizontal" ? "row" : "column") : (record.type === "HStack" ? "row" : "column");
++            applyStackAlignmentModifiers(node, { ...modifiers, hAlignment: alignment }, direction);
++          } else {
++            node.style.alignSelf = { leading: "flex-start", center: "center", trailing: "flex-end" }[alignment] || "";
++          }
++        }
++        const padding = effective.padding || 0;
++        const insets = effective.paddingInsets || {};
++        if (Number.isFinite(available.availableWidth)) available.availableWidth = Math.max(0, available.availableWidth - (insets.leading ?? padding) - (insets.trailing ?? padding));
++        if (Number.isFinite(available.availableHeight)) available.availableHeight = Math.max(0, narrowDimension(available.availableHeight, effective.maxHeight) - (insets.top ?? padding) - (insets.bottom ?? padding));
++        if (record.type === "Grid") {
++          columns = variant.columns || spec.columns;
++          spacing = variant.spacing ?? spec.spacing ?? 10;
++        }
++      }
++      if (interaction) {
++        ["background", "color", "opacity"].forEach((property) => { interaction.base[property] = node.style[property]; });
++        applyInteractionState(node, state);
++      }
++      const children = Array.from(node.children);
++      const widths = declaredGridWidths(columns, available.availableWidth, spacing, children.length);
++      children.forEach((child, index) => visit(child, widths.length
++        ? { ...available, availableWidth: widths[index % widths.length] }
++        : available));
++    };
++    // The host supplies these numbers. Never infer viewport classes or measure
++    // individual elements: undeclared containers pass the same context on.
++    Array.from(state.rootElement.children).forEach((child) => visit(child, state.layoutContext));
++  }
++
++  function registerInteractionStyles(element, modifiers, state) {
++    if (!state || !modifiers.interactionStyles) return;
++    const record = { styles: modifiers.interactionStyles, base: {}, hovered: false, focused: false };
++    ["background", "color", "opacity"].forEach((property) => { record.base[property] = element.style[property]; });
++    element.skeletonInteraction = record;
++    const refresh = () => applyInteractionState(element, state);
++    element.addEventListener("mouseenter", () => { record.hovered = true; refresh(); });
++    element.addEventListener("mouseleave", () => { record.hovered = false; refresh(); });
++    element.addEventListener("focusin", () => { record.focused = element.matches(":focus-visible"); refresh(); });
++    element.addEventListener("focusout", () => { record.focused = false; refresh(); });
++  }
++
++  function applyInteractionState(element, state) {
++    const record = element.skeletonInteraction;
++    if (!record) return;
++    const { styles } = record;
++    const combined = { ...record.base };
++    const apply = (style) => {
++      if (!style) return;
++      if (style.background != null) combined.background = style.background;
++      if (style.foregroundColor != null) combined.color = style.foregroundColor;
++      if (style.opacity != null) combined.opacity = String(style.opacity);
++    };
++    if (record.hovered) apply(styles.hover);
++    if (record.focused) apply(styles.focusVisible);
++    if (state.dragContext.transfer) apply(styles.dragActive);
++    if (state.dragContext.source === element) apply(styles.dragSource);
++    Object.assign(element.style, combined);
++  }
++
++  function setHostDrag(state, transfer, source) {
++    const previous = state.dragContext.source;
++    if (previous !== source) previous?.classList.remove("drag-active");
++    Object.assign(state.dragContext, { transfer, source });
++    state.dragContext.listeners.forEach((refresh) => refresh());
++  }
++
++  function refreshDragStyles(state) {
++    const nodes = [state.rootElement, ...state.rootElement.querySelectorAll("*")];
++    nodes.forEach((element) => {
++      applyInteractionState(element, state);
++      const drop = element.skeletonDrop;
++      if (drop) {
++        const accepting = dragRoleAccepted(state.dragContext.transfer, drop.acceptedDragRoles);
++        element.classList.toggle("drop-accepting", accepting);
++        if (!state.dragContext.transfer) updateDropTargetState(element, drop.modifiers, state, drop.context, "idle");
++      }
++    });
++  }
++
++  function isSkeletonStack(element) {
++    return element instanceof HTMLElement
++      && (element.classList.contains("skeleton-hstack") || element.classList.contains("skeleton-vstack"));
++  }
++
+   function applyStackAlignmentModifiers(element, modifiers, direction) {
+     if (!(element instanceof HTMLElement) || !modifiers || typeof modifiers !== "object") {
+       return;
+@@ -4611,7 +5236,7 @@
+     const h = typeof modifiers.hAlignment === "string" ? modifiers.hAlignment.trim() : "";
+     const v = typeof modifiers.vAlignment === "string" ? modifiers.vAlignment.trim() : "";
+     const cross = { leading: "flex-start", center: "center", trailing: "flex-end",
+-                    top: "flex-start", bottom: "flex-end" };
++                    top: "flex-start", bottom: "flex-end", firstTextBaseline: "first baseline" };
+     if (direction === "column") {
+       if (cross[h]) { element.style.alignItems = cross[h]; }
+       if (cross[v]) { element.style.justifyContent = cross[v]; }
+@@ -4626,6 +5251,7 @@
+       return;
+     }
+ 
++    element.skeletonLayout = { type: null, spec: { modifiers }, state, context, base: null };
+     const styleRole = typeof modifiers.styleRole === "string" ? modifiers.styleRole.trim() : "";
+     if (styleRole) {
+       element.dataset.styleRole = styleRole;
+@@ -4661,15 +5287,18 @@
+     }
+     if (typeof modifiers.width === "number") {
+       element.style.width = `${modifiers.width}px`;
++      element.dataset.fixedWidth = "true"; // WP-F paritet: fast bredde krymper ikke i en rad (porthole-webo.css)
+     }
+     if (typeof modifiers.height === "number") {
+       element.style.height = `${modifiers.height}px`;
+     }
+     if (modifiers.maxWidthInfinity === true) {
+       element.style.maxWidth = "100%";
++      element.dataset.fillWidth = "true"; // WP-B4 paritet: fyller bredden i en kolonne (porthole-webo.css)
+     }
+     if (modifiers.maxHeightInfinity === true) {
+       element.style.maxHeight = "100%";
++      element.dataset.fillHeight = "true"; // WP-B4 paritet: fyller høyden i en rad (porthole-webo.css)
+     }
+     if (modifiers.wrap === true) {
+       // Containers here are already display:flex (skeleton-hstack, skeleton-list,
+@@ -4706,7 +5335,14 @@
+       return null;
+     };
+     const alignSelf = alignSelfFrom(resolvedHAlignment) || alignSelfFrom(resolvedVAlignment);
+-    if (alignSelf) {
++    // WP-B4 paritet: en HStack/VStack har alltid full bredde (CellApple .frame(maxWidth: .infinity));
++    // dens egen hAlignment/vAlignment plasserer innholdet, ikke stakken selv.
++    if (isSkeletonStack(element)) {
++      if (modifiers.hAlignmentKeypath && resolvedHAlignment) {
++        applyStackAlignmentModifiers(element, { ...modifiers, hAlignment: resolvedHAlignment },
++          element.classList.contains("skeleton-hstack") ? "row" : "column");
++      }
++    } else if (alignSelf) {
+       element.style.alignSelf = alignSelf;
+     }
+     const resolvedBackground = (modifiers.backgroundKeypath
+@@ -4729,7 +5365,7 @@
+       element.style.fontSize = `${modifiers.fontSize}px`;
+     }
+     if (typeof modifiers.fontWeight === "string" && modifiers.fontWeight) {
+-      element.style.fontWeight = modifiers.fontWeight;
++      element.style.fontWeight = portableFontWeight(modifiers.fontWeight);
+     }
+     if (typeof modifiers.opacity === "number") {
+       element.style.opacity = String(modifiers.opacity);
+@@ -4755,7 +5391,7 @@
+       element.style.overflow = "hidden";
+     }
+ 
+-    if (typeof modifiers.borderWidth === "number" && modifiers.borderWidth > 0) {
++    if (typeof modifiers.borderWidth === "number" && modifiers.borderWidth >= 0) {
+       element.style.borderStyle = "solid";
+       element.style.borderWidth = `${modifiers.borderWidth}px`;
+       if (typeof modifiers.borderColor === "string" && modifiers.borderColor) {
+@@ -4763,13 +5399,15 @@
+       }
+     }
+ 
+-    if (typeof modifiers.shadowRadius === "number" && modifiers.shadowRadius > 0) {
++    if (Number.isFinite(modifiers.shadowRadius) || Number.isFinite(modifiers.shadowSpread)) {
+       const shadowX = typeof modifiers.shadowX === "number" ? modifiers.shadowX : 0;
+       const shadowY = typeof modifiers.shadowY === "number" ? modifiers.shadowY : 0;
+       const shadowColor = typeof modifiers.shadowColor === "string" ? modifiers.shadowColor : "rgba(0,0,0,0.2)";
+-      element.style.boxShadow = `${shadowX}px ${shadowY}px ${modifiers.shadowRadius}px ${shadowColor}`;
++      element.style.boxShadow = `${shadowX}px ${shadowY}px ${modifiers.shadowRadius || 0}px ${modifiers.shadowSpread || 0}px ${shadowColor}`;
+     }
+ 
++    applyPortableModifiers(element, modifiers, state);
++    registerInteractionStyles(element, modifiers, state);
+     applyDragAndDropModifiers(element, modifiers, state, path, context);
+   }
+ 
+@@ -5435,13 +6073,14 @@
+           dragRole: draggableRole,
+           dragPayload: dragPayload === undefined ? null : dragPayload,
+         };
+-        state.activeDragTransfer = transfer;
++        event.stopPropagation();
++        setHostDrag(state, transfer, element);
+         event.dataTransfer.setData("application/x-cellprotocol-drag", JSON.stringify(transfer));
+         event.dataTransfer.setData("text/plain", dragPreviewText(element));
+         event.dataTransfer.effectAllowed = "all";
+         const previewRole = typeof modifiers.dragPreviewRole === "string" ? modifiers.dragPreviewRole.trim() : "";
+-        if (previewRole) {
+-          const ghost = buildDragGhost(element, previewRole);
++        if (previewRole || element.classList.contains("skeleton-component-surface")) {
++          const ghost = buildDragGhost(element, previewRole || "component-card");
+           document.body.appendChild(ghost);
+           event.dataTransfer.setDragImage(ghost, 20, 20);
+           window.setTimeout(() => ghost.remove(), 0);
+@@ -5451,7 +6090,7 @@
+ 
+       element.addEventListener("dragend", () => {
+         element.classList.remove("drag-active");
+-        state.activeDragTransfer = null;
++        setHostDrag(state, null, null);
+       });
+     }
+ 
+@@ -5463,6 +6102,7 @@
+     const acceptedDragRoles = Array.isArray(modifiers.acceptedDragRoles)
+       ? modifiers.acceptedDragRoles.filter((entry) => typeof entry === "string" && entry.trim()).map((entry) => entry.trim())
+       : [];
++    element.skeletonDrop = { modifiers, context, acceptedDragRoles };
+     element.dataset.dropTargetRole = dropTargetRole;
+     element.classList.add("drop-target", `drop-target-${sanitizeClassName(dropTargetRole)}`);
+     if (typeof modifiers.accessibilityDropLabel === "string" && modifiers.accessibilityDropLabel.trim()) {
+@@ -5471,7 +6111,7 @@
+     }
+ 
+     element.addEventListener("dragover", (event) => {
+-      const transfer = parseDragTransfer(event) || state.activeDragTransfer;
++      const transfer = parseDragTransfer(event) || state.dragContext.transfer;
+       if (!dragRoleAccepted(transfer, acceptedDragRoles)) {
+         return;
+       }
+@@ -5489,7 +6129,7 @@
+     });
+ 
+     element.addEventListener("drop", (event) => {
+-      const transfer = parseDragTransfer(event) || state.activeDragTransfer;
++      const transfer = parseDragTransfer(event) || state.dragContext.transfer;
+       if (!dragRoleAccepted(transfer, acceptedDragRoles)) {
+         return;
+       }
+@@ -5497,6 +6137,7 @@
+       event.stopPropagation();
+       updateDropTargetState(element, modifiers, state, context, "idle");
+ 
++      setHostDrag(state, null, null);
+       const dropActionKeypath = typeof modifiers.dropActionKeypath === "string" ? modifiers.dropActionKeypath.trim() : "";
+       if (!dropActionKeypath) {
+         return;
+@@ -5588,7 +6229,17 @@
+     ghost.style.top = "-9999px";
+     ghost.style.left = "-9999px";
+     ghost.style.pointerEvents = "none";
+-    ghost.textContent = dragPreviewText(sourceElement) || "Flytt";
++    const component = sourceElement.matches(".skeleton-component-surface") ? sourceElement : sourceElement.querySelector(".skeleton-component-surface");
++    if (component) {
++      const preview = component.cloneNode(true);
++      preview.querySelectorAll("[id]").forEach((node) => node.removeAttribute("id"));
++      preview.querySelectorAll("button, input, textarea, select, a").forEach((node) => { node.tabIndex = -1; });
++      preview.style.opacity = "1";
++      ghost.setAttribute("aria-hidden", "true");
++      ghost.inert = true;
++      ghost.appendChild(preview);
++      ghost.style.width = `${Math.min(320, sourceElement.getBoundingClientRect().width || 240)}px`;
++    } else ghost.textContent = dragPreviewText(sourceElement) || "Flytt";
+     return ghost;
+   }
+ 
+@@ -6024,6 +6675,7 @@
+   }
+ 
+   function flushDynamicBindings(state) {
++    updateTreeBindings(state);
+     updateVisibilityBindings(state);
+     updateTextBindings(state);
+     updateFieldBindings(state);
+@@ -6069,6 +6721,21 @@
+     updateNavigationBarBindings(state);
+     updateVisibilityBindings(state);
+     updatePresentationBindings(state);
++    updateTreeBindings(state);
++    updateComponentBindings(state);
++    state.buttonBindings.forEach((binding) => {
++      if (binding.pendingRequestCount > 0 || binding.button.classList.contains("is-acknowledged")) return;
++      const label = resolvedButtonLabel(binding);
++      setButtonLabelText(binding, label);
++      if (binding.spec.modifiers?.accessibilityLabel) binding.button.setAttribute("aria-label", binding.spec.modifiers.accessibilityLabel);
++    });
++    updateTextBindings(state);
++    updateFieldBindings(state);
++    updateToggleBindings(state);
++    updatePickerBindings(state);
++    updateVisibilityBindings(state);
++    updateLayoutContext(state);
++    refreshDragStyles(state);
+   }
+ 
+   function updateTabBindings(state) {
+@@ -6646,6 +7313,12 @@
+   function renderCollectionRow(binding, state, item, index) {
+     const row = document.createElement("article");
+     row.className = "skeleton-list-row";
++    const rowModifiers = binding.modifiers || {};
++    if (rowModifiers.rowDecoration === "none") {
++      row.classList.add("skeleton-row-plain");
++      Object.assign(row.style, { border: "0", borderRadius: "0", boxShadow: "none", background: "transparent" });
++    }
++    if (rowModifiers.rowInsets) applyInsets(row, rowModifiers.rowInsets, 0);
+     row.dataset.index = String(index);
+     const rowMeta = Array.isArray(binding.rowMeta) && binding.rowMeta[index] ? binding.rowMeta[index] : null;
+     if (rowMeta) {
+@@ -7130,6 +7803,7 @@
+   }
+ 
+   function pruneDescendantBindings(state, container, protectedBinding) {
++    state.treeBindings = state.treeBindings.filter((entry) => entry === protectedBinding || !isBindingContainerInsideContainer(entry.container, container));
+     state.localizationBindings = state.localizationBindings.filter((entry) => !isBindingElementInsideContainer(entry.element, container));
+     state.textBindings = state.textBindings.filter((entry) => !isBindingElementInsideContainer(entry.element, container));
+     state.fieldBindings = state.fieldBindings.filter((entry) => !isBindingElementInsideContainer(entry.element, container));

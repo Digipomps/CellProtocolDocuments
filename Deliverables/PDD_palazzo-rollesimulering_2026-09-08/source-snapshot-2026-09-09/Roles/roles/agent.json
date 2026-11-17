@@ -1,0 +1,87 @@
+{
+  "role": "agent",
+  "principal": "guest:{agent_id}",
+  "note": "Bridgehead-identiteten (Losen/agent). Grants-listen den kjøres med skal være nøyaktig den tillitspakken erklærer — se PDD_tillitspakke-agentflaate_2026-09-08. Da er kjøringen samtidig en etterprøving av at pakken ble overholdt: hvert keypath innenfor pakken skal være allowed, hvert utenfor denied.",
+  "purposes": [
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.agent.scaffold-info",
+      "title": "Agenten leser hva scaffoldet tilbyr",
+      "calibration": "positive",
+      "action": {
+        "method": "GET",
+        "path": "/api/scaffold/info"
+      },
+      "expect": {
+        "access": "allowed",
+        "state": {
+          "path": "value",
+          "op": "ne",
+          "value": null
+        }
+      },
+      "why": "Kalibrering: dette er offentlig for enhver principal. Stopper den her, er det aktøren.",
+      "null_principal_may_reach": true
+    },
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.agent.outside-package",
+      "title": "Agenten leser et keypath tillitspakken ikke erklærer",
+      "calibration": "null",
+      "action": {
+        "method": "POST",
+        "path": "/api/cell/get",
+        "json": {
+          "value": {
+            "cell": "{guest_cell}",
+            "keypath": "entity.records"
+          }
+        }
+      },
+      "expect": {
+        "access": "denied"
+      },
+      "why": "Riktig stopp: utenfor pakken. Kommer den gjennom, ble tillitspakken ikke overholdt, og det er et funn i tillitspakke-oppgaven."
+    },
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.agent.inside-package-own-behalf",
+      "title": "Agenten leser det pakken erklærer, på egne vegne",
+      "action": {
+        "method": "GET",
+        "path": "/api/content"
+      },
+      "expect": {
+        "access": "allowed",
+        "state": {
+          "path": "value",
+          "op": "ne",
+          "value": null
+        }
+      },
+      "stop_is": "feil",
+      "why": "Erklært i pakken. Stopper den, er enten pakken eller publiseringen feil.",
+      "null_principal_may_reach": true,
+      "null_exempt_why": "publisert innhold er offentlig; at en principal uten grants nar det er riktig, ikke lekkasje"
+    },
+    {
+      "purposeRef": "purpose://candidate.palazzo-rollesimulering.agent.on-behalf-of-user",
+      "title": "Agenten handler på brukerens vegne der brukeren har gitt tilgang",
+      "action": {
+        "method": "GET",
+        "path": "/api/access/state"
+      },
+      "expect": {
+        "access": "allowed",
+        "state": {
+          "path": "value",
+          "op": "ne",
+          "value": null
+        }
+      },
+      "null_principal_may_reach": true
+    }
+  ],
+  "generated_from": {
+    "status": "handwritten",
+    "why": "Det finnes ingen tillitspakke for en flåte som kjører mot Palazzo ennå. Fixturen i tillitspakke-PDD-en er WebFetch-flåten i CellProtocol, og å generere agentrollen fra den ville gitt formål mot celler Palazzo ikke har. Disse fire er derfor skrevet for hånd og skal ERSTATTES.",
+    "replace_with": "python3 Tests/Roles/roles_from_trust_package.py <pakke.json> --reach <reach.json> --out Tests/Roles/roles/agent.json (stier relative til repoet PalazzoScaffold)"
+  }
+}

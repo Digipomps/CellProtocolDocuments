@@ -1,0 +1,14 @@
+== lsof -i :9192
+COMMAND     PID   USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+Google     1429 kjetil   44u  IPv4 0xad08d021bab65f77      0t0  TCP 127.0.0.1:62652->127.0.0.1:9192 (ESTABLISHED)
+Run       13470 kjetil   19u  IPv4 0xe98e349b95738874      0t0  TCP 127.0.0.1:9192 (LISTEN)
+Run       13470 kjetil   20u  IPv4 0x864957700e4d7420      0t0  TCP 127.0.0.1:9192->127.0.0.1:62652 (ESTABLISHED)
+== ps Run
+13470     1 Ss         05:01 /Users/kjetil/Build/Digipomps/HAVEN/CellScaffold/_wt-skjellettelementer-web-20260919/.build/out/Products/Debug/Run serve --env testing --hostname 127.0.0.1 --port 9192
+== pidfil 13470
+pid lever
+== http
+127.0.0.1 /login FEIL URLError <urlopen error [Errno 61] Connection refused>
+127.0.0.1 /browserhead/webo?co FEIL URLError <urlopen error [Errno 61] Connection refused>
+localhost /login 200 text/html; charset=utf-8 20157 b'<!doctype html>\n<html lang="en" class="h-full bg-white">\n  <head>\n    <meta char'
+localhost /browserhead/webo?co 200 text/html; charset=utf-8 20163 b'<!doctype html>\n<html lang="en" class="h-full bg-white">\n  <head>\n    <meta char'

@@ -1,0 +1,1072 @@
+Build capacity: 71.3 GiB free (7%); reserving 10 GiB leaves 61.3 GiB (6%).
+warning: /Users/kjetil/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/kjetil/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: '_wt-bro-kanal-auth-20260927': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Constructing description]
+[Pre-planning 1 / 3614]
+[Planning 1358 / 3614]
+[Planning deferred tasks]
+[Constructing 2552 / 8678]
+[Starting]
+[1 / 1018] NIOExtras
+[1 / 1253] Algorithms
+[43 / 1197] _NIODataStructures
+[63 / 843] ServiceContextModule
+[111 / 839] CoreMetrics
+[149 / 836] COpenCombineHelpers
+[204 / 833] swift-nio_NIOPosix
+[220 / 836] BigInt
+[254 / 841] _NIOBase64
+[274 / 839] _RopeModule
+[302 / 834] DequeModule
+[319 / 832] swift-nio__NIOFileSystem
+[353 / 835] OpenCombineFoundation
+[373 / 832] TaxonomyResolver-product
+[398 / 832] HavenPerspectiveSchemas
+[411 / 833] CombineHelpers
+[436 / 831] Collections
+[454 / 828] SystemPackage
+[481 / 829] CryptoExtras
+[487 / 830] CNIOBoringSSLShims
+[514 / 828] Metrics-product
+[529 / 827] Tracing
+[545 / 829] _NIOFileSystem
+[572 / 825] NIOHTTP1
+[582 / 827] NIOFileSystem
+[602 / 824] NIOTLS-product
+[606 / 825] HavenCommonsTests-product
+[626 / 828] NIOSSL
+[643 / 825] _NIOFileSystem-product
+[663 / 824] Collections
+[677 / 824] Random
+[685 / 825] KeyPathResolver-product
+[692 / 823] NIOHTTP2
+[712 / 820] NIOWebSocket
+[719 / 820] NIOHTTPCompression-product
+[721 / 820] AsyncHTTPClient
+[729 / 820] CellBase
+[738 / 820] CellApple
+[740 / 820] Vapor
+[755 / 818] haven-commons-product
+[757 / 818] Vapor-product
+[760 / 820] CellVapor
+[771 / 818] CellRuntimeBenchmarks-product
+[772 / 818] CellVapor
+[775 / 818] CellVapor-product
+[778 / 818] haven-commons-product
+[779 / 818] CellVapor-product
+[780 / 818] CellRuntimeBenchmarks-product
+[781 / 818] CellRuntimeBenchmarks-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/EntityRadar/EntityScannerCell.swift:190:25: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 188 |             guard let self, self.isAdvertisementOwner(requester),
+ 189 |                   await self.validateAccess("r---", at: "advertisement", for: requester) else { return .string("denied") }
+ 190 |             let value = await self.advertisementExchange.currentPublication
+     |                         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 191 |             return value.flatMap { self.valueType(from: $0) } ?? .null
+ 192 |         })
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/EntityRadar/EntityScannerCell.swift:199:17: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 197 |             try ad.validate()
+ 198 |             if self.connectService == nil { try await self.startConnectService(requester: requester) }
+ 199 |             try await self.advertisementExchange.publish(ad)
+     |                 `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 200 |             self.pushScannerEvent(topic: "scanner.advertisement.changed", title: "Nearby Sharing Changed",
+ 201 |                 payload: ["active": .bool(true)], requesterOverride: requester)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/EntityRadar/EntityScannerCell.swift:207:17: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 205 |             guard let self, self.isAdvertisementOwner(requester),
+ 206 |                   await self.validateAccess("-w--", at: "withdrawAdvertisement", for: requester) else { return .string("denied") }
+ 207 |             try await self.advertisementExchange.publish(nil)
+     |                 `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 208 |             self.pushScannerEvent(topic: "scanner.advertisement.changed", title: "Nearby Sharing Changed",
+ 209 |                 payload: ["active": .bool(false)], requesterOverride: requester)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/EntityRadar/EntityScannerCell.swift:528:9: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 526 | 
+ 527 |     func stopConnectService(requester: Identity) async {
+ 528 |         await advertisementExchange.stop()
+     |         `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 529 |         let service = connectService
+ 530 |         connectService = nil
+
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+[782 / 818] CellApple
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:255:9: warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+253 | struct SkeletonBorderShape: Shape {
+254 |     let radius: CGFloat
+255 |     let edges: [SkeletonEdge]?
+    |         `- warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+256 |     let rtl: Bool
+257 |     func path(in rect: CGRect) -> Path {
+
+CellBase.SkeletonEdge:1:13: note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+1 | public enum SkeletonEdge : String, Codable {
+  |             `- note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+2 |     case top
+3 |     case leading
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:5:1: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  3 | 
+  4 | import SwiftUI
+  5 | import CellBase
+    | `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  6 | #if os(macOS)
+  7 | import AppKit
+
+[#AddPreconcurrencyImport]: <https://docs.swift.org/compiler/documentation/diagnostics/add-preconcurrency-import>
+[789 / 817] CellApple
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift:341:56: warning: '20.0' is not a valid version number for watchOS
+339 |         try await registerEntityScannerResolve(on: resolver)
+340 | 
+341 |         if #available(macOS 26.0, iOS 27.0, tvOS 27.0, watchOS 20.0, *) {
+    |                                                        `- warning: '20.0' is not a valid version number for watchOS
+342 |             try await registerResolve(
+343 |                 on: resolver,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift:385:36: warning: conformance of 'CellType' to protocol 'Emit' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+383 |         do {
+384 |             if let persistency {
+385 |                 try await resolver.addCellResolve(
+    |                                    `- warning: conformance of 'CellType' to protocol 'Emit' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+386 |                     name: name,
+387 |                     cellScope: cellScope,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift:385:36: warning: conformance of 'CellType' to protocol 'OwnerInstantiable' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+383 |         do {
+384 |             if let persistency {
+385 |                 try await resolver.addCellResolve(
+    |                                    `- warning: conformance of 'CellType' to protocol 'OwnerInstantiable' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+386 |                     name: name,
+387 |                     cellScope: cellScope,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift:393:36: warning: conformance of 'CellType' to protocol 'Emit' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+391 |                 )
+392 |             } else {
+393 |                 try await resolver.addCellResolve(
+    |                                    `- warning: conformance of 'CellType' to protocol 'Emit' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+394 |                     name: name,
+395 |                     cellScope: cellScope,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift:393:36: warning: conformance of 'CellType' to protocol 'OwnerInstantiable' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+391 |                 )
+392 |             } else {
+393 |                 try await resolver.addCellResolve(
+    |                                    `- warning: conformance of 'CellType' to protocol 'OwnerInstantiable' may be isolated and cannot be passed to @concurrent context [#IsolatedConformances]
+394 |                     name: name,
+395 |                     cellScope: cellScope,
+
+[#IsolatedConformances]: <https://docs.swift.org/compiler/documentation/diagnostics/isolated-conformances>
+[791 / 817] CellApple
+[804 / 815] CellApple-product
+[804 / 815] CellBaseTests-product
+[809 / 824] CellBaseTests-product
+[810 / 824] CellBaseTests-product
+[811 / 824] CellBaseTests-product
+[812 / 824] CellBaseTests-product
+[813 / 824] CellBaseTests-product
+[818 / 824] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:18:14: warning: concurrently-executed local function 'data' must be marked as '@Sendable'; this is an error in the Swift 6 language mode
+  16 |     private func checkFullVector(_ name: String) async throws {
+  17 |         let v = try Self.vectors(name)
+  18 |         func data(_ name: String) -> Data { v[name]! }
+     |              `- warning: concurrently-executed local function 'data' must be marked as '@Sendable'; this is an error in the Swift 6 language mode
+  19 |         let endpoint = try A.decode(P.Endpoint.self, from: data("endpoint"))
+  20 |         let ih = try A.decode(P.Hello.self, from: data("hello0")), rh = try A.decode(P.Hello.self, from: data("hello1"))
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:250:54: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 248 |         i = try BridgeChannelTransport(underlying: it, peerEndpoint: endpoint, role: .initiator, owner: io,
+ 249 |             limits: limits, source: UUID().uuidString, disclosurePolicy: policy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 250 |             recheckPolicy: recheck, wallClock: clock.date, monotonic: clock.uptime) { [id] gate, session in
+     |                                                      `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 251 |                 if let factory, factoryRole == .initiator { return try await factory(gate, session) }
+ 252 |                 id.created(); gate.setDelegate(id)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:250:77: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 248 |         i = try BridgeChannelTransport(underlying: it, peerEndpoint: endpoint, role: .initiator, owner: io,
+ 249 |             limits: limits, source: UUID().uuidString, disclosurePolicy: policy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 250 |             recheckPolicy: recheck, wallClock: clock.date, monotonic: clock.uptime) { [id] gate, session in
+     |                                                                             `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 251 |                 if let factory, factoryRole == .initiator { return try await factory(gate, session) }
+ 252 |                 id.created(); gate.setDelegate(id)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:258:63: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 256 |         r = try BridgeChannelTransport(underlying: rt, peerEndpoint: endpoint, role: .responder, owner: ro,
+ 257 |             limits: limits, source: UUID().uuidString, disclosurePolicy: responderPolicy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 258 |             recheckPolicy: responderRecheck, wallClock: clock.date, monotonic: clock.uptime) { [rd] gate, session in
+     |                                                               `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 259 |                 if let factory, factoryRole == .responder { return try await factory(gate, session) }
+ 260 |                 rd.created(); gate.setDelegate(rd)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:258:86: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 256 |         r = try BridgeChannelTransport(underlying: rt, peerEndpoint: endpoint, role: .responder, owner: ro,
+ 257 |             limits: limits, source: UUID().uuidString, disclosurePolicy: responderPolicy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 258 |             recheckPolicy: responderRecheck, wallClock: clock.date, monotonic: clock.uptime) { [rd] gate, session in
+     |                                                                                      `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 259 |                 if let factory, factoryRole == .responder { return try await factory(gate, session) }
+ 260 |                 rd.created(); gate.setDelegate(rd)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:828:35: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 826 |         operation = try P.Operation(owner: owner, endpoint: gate.session.peerEndpoint!, role: role,
+ 827 |             generation: UUID().uuidString, policy: .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 828 |             wallClock: pair.clock.date, monotonic: pair.clock.uptime, ephemeral: privateKey)
+     |                                   `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 829 |     }
+ 830 |     func advance(to step: Int) async throws {
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:828:63: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 826 |         operation = try P.Operation(owner: owner, endpoint: gate.session.peerEndpoint!, role: role,
+ 827 |             generation: UUID().uuidString, policy: .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 828 |             wallClock: pair.clock.date, monotonic: pair.clock.uptime, ephemeral: privateKey)
+     |                                                               `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 829 |     }
+ 830 |     func advance(to step: Int) async throws {
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:969:88: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 967 | extension BridgePeerV3Tests {
+ 968 |     func testValidAEADInnerMutationsCloseRealGateReleaseQuotaAndPreserveHealthySibling() async throws {
+ 969 |         let quotaClock = V3Clock(), limits = BridgeChannelLimits(monotonic: quotaClock.uptime)
+     |                                                                                        `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 970 |         let sibling = try V3GatePair(limits: limits), healthy = try await sibling.start()
+ 971 |         for step in 1...5 { try await sibling.step(step) }; try await healthy.value
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:1015:78: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+1013 | extension BridgePeerV3Tests {
+1014 |     func testWrongHandshakeStateAndMalformedRecordsRetireOnlyOffendingGate() async throws {
+1015 |         let clock = V3Clock(), limits = BridgeChannelLimits(monotonic: clock.uptime)
+     |                                                                              `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+1016 |         let sibling = try V3GatePair(limits: limits), healthy = try await sibling.start()
+1017 |         for step in 1...5 { try await sibling.step(step) }; try await healthy.value
+[820 / 824] CellBaseTests-product
+[821 / 824] CellBaseTests-product
+[822 / 824] CellBaseTests-product
+Build complete! (16,89 sek)
+Test Suite 'Selected tests' started at 2026-09-29 08:41:17.745.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-09-29 08:41:17.746.
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-09-29 08:41:17.746.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 08:41:17.746.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 08:41:20.227.
+Test Suite 'CellNearbyTests.xctest' started at 2026-09-29 08:41:20.228.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-09-29 08:41:20.228.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 08:41:20.228.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 08:41:22.639.
+Test Suite 'CellBaseTests.xctest' started at 2026-09-29 08:41:22.640.
+Test Suite 'BridgeDescriptionConcurrencyTests' started at 2026-09-29 08:41:22.640.
+Test Case '-[CellBaseTests.BridgeDescriptionConcurrencyTests testOverlappingDescriptionResponsesAndAdvertisementsRetainCoherentSnapshots]' started.
+Test Case '-[CellBaseTests.BridgeDescriptionConcurrencyTests testOverlappingDescriptionResponsesAndAdvertisementsRetainCoherentSnapshots]' passed (0.144 seconds).
+Test Case '-[CellBaseTests.BridgeDescriptionConcurrencyTests testUnexpectedDescriptionPayloadDoesNotReplaceTheLastAcceptedSnapshot]' started.
+Test Case '-[CellBaseTests.BridgeDescriptionConcurrencyTests testUnexpectedDescriptionPayloadDoesNotReplaceTheLastAcceptedSnapshot]' passed (0.002 seconds).
+Test Suite 'BridgeDescriptionConcurrencyTests' passed at 2026-09-29 08:41:22.786.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.146 (0.146) seconds
+Test Suite 'BridgeFactoryLifetimeTests' started at 2026-09-29 08:41:22.787.
+Test Case '-[CellBaseTests.BridgeFactoryLifetimeTests testMuxLateFactoryRetiresResultWhenSessionCheckThrowsOrLogicalOpenIsCancelled]' started.
+Test Case '-[CellBaseTests.BridgeFactoryLifetimeTests testMuxLateFactoryRetiresResultWhenSessionCheckThrowsOrLogicalOpenIsCancelled]' passed (0.006 seconds).
+Test Case '-[CellBaseTests.BridgeFactoryLifetimeTests testWSLateFactoryBoundBeforeOrAfterCloseRetiresSubscriptionExactlyOnce]' started.
+Test Case '-[CellBaseTests.BridgeFactoryLifetimeTests testWSLateFactoryBoundBeforeOrAfterCloseRetiresSubscriptionExactlyOnce]' passed (0.016 seconds).
+Test Suite 'BridgeFactoryLifetimeTests' passed at 2026-09-29 08:41:22.809.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.022 (0.022) seconds
+Test Suite 'BridgeMultiplexingTests' started at 2026-09-29 08:41:22.809.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testBridgeCommandV2MetadataRoundTripsWithoutChangingLegacyDefaults]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testBridgeCommandV2MetadataRoundTripsWithoutChangingLegacyDefaults]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testClientSessionBoundsIssuedChannelsAndReleasesReservationOnClose]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testClientSessionBoundsIssuedChannelsAndReleasesReservationOnClose]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testClientSessionRejectsResponseBeforeChannelIsOpened]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testClientSessionRejectsResponseBeforeChannelIsOpened]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testClientSessionReportsDetectedGapButStillDeliversFollowingFrame]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testClientSessionReportsDetectedGapButStillDeliversFollowingFrame]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testConnectionPoolEvictsLeastRecentlyUsedSessionAndClosesItAfterChannelRelease]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testConnectionPoolEvictsLeastRecentlyUsedSessionAndClosesItAfterChannelRelease]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testConnectionPoolRejectsUnboundSecurityKeyBeforeCreatingTransport]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testConnectionPoolRejectsUnboundSecurityKeyBeforeCreatingTransport]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testContinuityTrackerBoundsStreamsAndRejectsOversizedIdentifiers]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testContinuityTrackerBoundsStreamsAndRejectsOversizedIdentifiers]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testContinuityTrackerDetectsGapWithoutClaimingReplay]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testContinuityTrackerDetectsGapWithoutClaimingReplay]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testParallelResolverLookupsShareSuspendedAuthenticatedHandshakeAndPrincipal]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testParallelResolverLookupsShareSuspendedAuthenticatedHandshakeAndPrincipal]' passed (0.438 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testPoolDoesNotSharePhysicalSessionAcrossSecurityIdentities]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testPoolDoesNotSharePhysicalSessionAcrossSecurityIdentities]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testPoolResetForHostRetiresOnlyMatchingRemoteSessions]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testPoolResetForHostRetiresOnlyMatchingRemoteSessions]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testRepeatedChannelReuseBoundsOutboundStreamHistoryAndKeepsSiblingSequence]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testRepeatedChannelReuseBoundsOutboundStreamHistoryAndKeepsSiblingSequence]' passed (0.561 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testRepeatedStreamRemovalBoundsBackingHistoryAndPreservesSiblingWatermark]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testRepeatedStreamRemovalBoundsBackingHistoryAndPreservesSiblingWatermark]' passed (0.006 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testResolverMultiplexRouteReplacementKeepsNewGenerationSessionUsable]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testResolverMultiplexRouteReplacementKeepsNewGenerationSessionUsable]' passed (0.174 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testResolverMultiplexRouteUsesOneSessionURLForTwoRemoteCells]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testResolverMultiplexRouteUsesOneSessionURLForTwoRemoteCells]' passed (0.122 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionAddsPerStreamSequenceWatermarksToFlowFrames]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionAddsPerStreamSequenceWatermarksToFlowFrames]' passed (0.009 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionEnforcesChannelCapacityWithStableEvent]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionEnforcesChannelCapacityWithStableEvent]' passed (0.007 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionRejectsIdentityWithoutSigningKeyBeforeCallingFactory]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionRejectsIdentityWithoutSigningKeyBeforeCallingFactory]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionRejectsRemoteTargetAuthorityBeforeCallingFactory]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionRejectsRemoteTargetAuthorityBeforeCallingFactory]' passed (0.004 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionRemovesInsertedChannelWhenOpenedFrameCannotBeSent]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testServerSessionRemovesInsertedChannelWhenOpenedFrameCannotBeSent]' passed (0.006 seconds).
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testTwoRemoteBridgesShareOnePhysicalSessionAndKeepResponsesOnTheirChannels]' started.
+Test Case '-[CellBaseTests.BridgeMultiplexingTests testTwoRemoteBridgesShareOnePhysicalSessionAndKeepResponsesOnTheirChannels]' passed (0.022 seconds).
+Test Suite 'BridgeMultiplexingTests' passed at 2026-09-29 08:41:24.170.
+	 Executed 21 tests, with 0 failures (0 unexpected) in 1.358 (1.361) seconds
+Test Suite 'BridgeMuxSendLifetimeTests' started at 2026-09-29 08:41:24.170.
+Test Case '-[CellBaseTests.BridgeMuxSendLifetimeTests testWSMuxHeldPhysicalSubmissionFencesReusedIDAndCIDWhileSiblingWorks]' started.
+Test Case '-[CellBaseTests.BridgeMuxSendLifetimeTests testWSMuxHeldPhysicalSubmissionFencesReusedIDAndCIDWhileSiblingWorks]' passed (0.010 seconds).
+Test Suite 'BridgeMuxSendLifetimeTests' passed at 2026-09-29 08:41:24.180.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.010 (0.010) seconds
+Test Suite 'BridgePeerFlowControlTests' started at 2026-09-29 08:41:24.180.
+Test Case '-[CellBaseTests.BridgePeerFlowControlTests testFullDataWindowStillReceiptsAndNoAckLoopWithSustainedTraffic]' started.
+Test Case '-[CellBaseTests.BridgePeerFlowControlTests testFullDataWindowStillReceiptsAndNoAckLoopWithSustainedTraffic]' passed (0.258 seconds).
+Test Case '-[CellBaseTests.BridgePeerFlowControlTests testLargeFramesAndControlFloodAreBoundedWithoutQuotaReleaseAtEnqueue]' started.
+Test Case '-[CellBaseTests.BridgePeerFlowControlTests testLargeFramesAndControlFloodAreBoundedWithoutQuotaReleaseAtEnqueue]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.BridgePeerFlowControlTests testMissingReceiverRetainsEveryByteAndBoundsSequentialFeed]' started.
+Test Case '-[CellBaseTests.BridgePeerFlowControlTests testMissingReceiverRetainsEveryByteAndBoundsSequentialFeed]' passed (0.126 seconds).
+Test Case '-[CellBaseTests.BridgePeerFlowControlTests testReceiptProvesUnpredictableTokenAndCannotReleaseOtherGenerationOrDuplicate]' started.
+Test Case '-[CellBaseTests.BridgePeerFlowControlTests testReceiptProvesUnpredictableTokenAndCannotReleaseOtherGenerationOrDuplicate]' passed (0.000 seconds).
+Test Suite 'BridgePeerFlowControlTests' passed at 2026-09-29 08:41:24.569.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.388 (0.389) seconds
+Test Suite 'BridgePeerRecordLayerTests' started at 2026-09-29 08:41:24.569.
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testCounterExhaustionClosesBeforeWrapInBothDirections]' started.
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testCounterExhaustionClosesBeforeWrapInBothDirections]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testExactFrameBoundsAndFailureAreTerminal]' started.
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testExactFrameBoundsAndFailureAreTerminal]' passed (0.004 seconds).
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testRFC7748AndIndependentHKDFAndRecordVectors]' started.
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testRFC7748AndIndependentHKDFAndRecordVectors]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testRFC8439AEADKnownAnswer]' started.
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testRFC8439AEADKnownAnswer]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testSmallOrderPublicKeysAreRejected]' started.
+Test Case '-[CellBaseTests.BridgePeerRecordLayerTests testSmallOrderPublicKeysAreRejected]' passed (0.000 seconds).
+Test Suite 'BridgePeerRecordLayerTests' passed at 2026-09-29 08:41:24.576.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.007 (0.007) seconds
+Test Suite 'BridgePeerV3Tests' started at 2026-09-29 08:41:24.576.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testActiveInitiatorCanReadResponderButUnrelatedRelayDHCannot]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testActiveInitiatorCanReadResponderButUnrelatedRelayDHCannot]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testAuthenticatedInnerFieldMutationsRequireMACSignatureAndFrozenContext]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testAuthenticatedInnerFieldMutationsRequireMACSignatureAndFrozenContext]' passed (0.119 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCanonicalEnvelopeAndPaddingRejectEveryAlternativeEncoding]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCanonicalEnvelopeAndPaddingRejectEveryAlternativeEncoding]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCloseAndDirectRevokeWinBeforePhysicalSendAdmission]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testCloseAndDirectRevokeWinBeforePhysicalSendAdmission]' passed (0.071 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryHelloFieldAndLegacyProfileFailsBeforeDisclosure]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryHelloFieldAndLegacyProfileFailsBeforeDisclosure]' passed (0.029 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryOutOfOrderHandshakeMessageAndTamperedTagIsTerminal]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testEveryOutOfOrderHandshakeMessageAndTamperedTagIsTerminal]' passed (0.053 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testExplicitDisclosurePolicyRejectsBeforeInitiatorSigning]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testExplicitDisclosurePolicyRejectsBeforeInitiatorSigning]' passed (0.254 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testFinalFinishedReservationSurvivesHeldPhysicalClose]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testFinalFinishedReservationSurvivesHeldPhysicalClose]' passed (0.064 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testHandshakeQuotasStayBoundedAndFinalFinishedWaitsForAuthenticatedProgress]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testHandshakeQuotasStayBoundedAndFinalFinishedWaitsForAuthenticatedProgress]' passed (0.033 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentDHLegsCannotSpliceProofOrFinishedEvenWithSameIdentities]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentDHLegsCannotSpliceProofOrFinishedEvenWithSameIdentities]' passed (0.214 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentFullHandshakeAndAllKeyPurposes]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testIndependentFullHandshakeAndAllKeyPurposes]' passed (0.040 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLateM1SendCompletionCannotUndoAuthenticatedProgress]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLateM1SendCompletionCannotUndoAuthenticatedProgress]' passed (0.008 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLiveMixedAlgorithmsFixedLengthsAndSameKeyReflection]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testLiveMixedAlgorithmsFixedLengthsAndSameKeyReflection]' passed (0.340 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerLateFactoryTransportBindingRetiresSubscriptionAndDeinitializesForBothRoles]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerLateFactoryTransportBindingRetiresSubscriptionAndDeinitializesForBothRoles]' passed (0.250 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerMuxHeldPhysicalSubmissionFencesReusedIDAndCIDWhileSiblingWorks]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPeerMuxHeldPhysicalSubmissionFencesReusedIDAndCIDWhileSiblingWorks]' passed (0.106 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringEitherFactoryRetiresResultWithoutReady]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringEitherFactoryRetiresResultWithoutReady]' passed (0.074 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringVaultLookupOrSigningStopsDisclosure]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testPolicyChangeDuringVaultLookupOrSigningStopsDisclosure]' passed (0.059 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRegisteredRemoteRevocationAndSuspendedPolicyPreventLocalDisclosure]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRegisteredRemoteRevocationAndSuspendedPolicyPreventLocalDisclosure]' passed (0.065 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRetiredSignerCannotAffectFreshChannelWithSameIdentity]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testRetiredSignerCannotAffectFreshChannelWithSameIdentity]' passed (0.028 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testScannerStopDisconnectAndOwnerCloseDiscardSuspendedSignerInBothRoles]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testScannerStopDisconnectAndOwnerCloseDiscardSuspendedSignerInBothRoles]' passed (1.743 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedFactoryIsRetiredOnceAndNeverPublishesReady]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedFactoryIsRetiredOnceAndNeverPublishesReady]' passed (0.044 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedPolicySendAndFactoryExpireForBothRolesWithoutLatePublication]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedPolicySendAndFactoryExpireForBothRolesWithoutLatePublication]' passed (0.277 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedSignerStormKeepsWorkUntilReturnAndRejectsLimitPlusOne]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedSignerStormKeepsWorkUntilReturnAndRejectsLimitPlusOne]' passed (0.080 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedVaultExistenceAndSignerCannotSurviveCloseRevokeOrExpiry]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testSuspendedVaultExistenceAndSignerCannotSurviveCloseRevokeOrExpiry]' passed (1.119 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testValidAEADInnerMutationsCloseRealGateReleaseQuotaAndPreserveHealthySibling]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testValidAEADInnerMutationsCloseRealGateReleaseQuotaAndPreserveHealthySibling]' passed (9.905 seconds).
+Test Case '-[CellBaseTests.BridgePeerV3Tests testWrongHandshakeStateAndMalformedRecordsRetireOnlyOffendingGate]' started.
+Test Case '-[CellBaseTests.BridgePeerV3Tests testWrongHandshakeStateAndMalformedRecordsRetireOnlyOffendingGate]' passed (2.010 seconds).
+Test Suite 'BridgePeerV3Tests' passed at 2026-09-29 08:41:41.567.
+	 Executed 26 tests, with 0 failures (0 unexpected) in 16.987 (16.991) seconds
+Test Suite 'BridgeResponseLifetimeTests' started at 2026-09-29 08:41:41.567.
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorDescriptionCannotReplaceRenewedMetadataOrScope]' started.
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorDescriptionCannotReplaceRenewedMetadataOrScope]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorFeedCannotPublishIntoRenewedStream]' started.
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorFeedCannotPublishIntoRenewedStream]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorGetCannotConsumeSameKeypathInRenewedBase]' started.
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldAuditorGetCannotConsumeSameKeypathInRenewedBase]' passed (0.004 seconds).
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldFeedSendCompletionCannotReactivateRenewedBase]' started.
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testHeldFeedSendCompletionCannotReactivateRenewedBase]' passed (0.003 seconds).
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testTwoConcurrentGetsOnSamePathKeepTheirOwnCommandAndImmediateResult]' started.
+Test Case '-[CellBaseTests.BridgeResponseLifetimeTests testTwoConcurrentGetsOnSamePathKeepTheirOwnCommandAndImmediateResult]' passed (0.001 seconds).
+Test Suite 'BridgeResponseLifetimeTests' passed at 2026-09-29 08:41:41.581.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.013 (0.014) seconds
+Test Suite 'BridgeSigningLifetimeTests' started at 2026-09-29 08:41:41.581.
+Test Case '-[CellBaseTests.BridgeSigningLifetimeTests testOriginHeldExistenceOrReplayCannotSignExpiredChallengeWithLiveFeedPermit]' started.
+Test Case '-[CellBaseTests.BridgeSigningLifetimeTests testOriginHeldExistenceOrReplayCannotSignExpiredChallengeWithLiveFeedPermit]' passed (0.014 seconds).
+Test Case '-[CellBaseTests.BridgeSigningLifetimeTests testWSHeldExistenceChecksBothClocksAndCancellationBeforeAnySigning]' started.
+Test Case '-[CellBaseTests.BridgeSigningLifetimeTests testWSHeldExistenceChecksBothClocksAndCancellationBeforeAnySigning]' passed (0.003 seconds).
+Test Suite 'BridgeSigningLifetimeTests' passed at 2026-09-29 08:41:41.599.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.018 (0.018) seconds
+Test Suite 'EntityScannerConsumerSecurityTests' started at 2026-09-29 08:41:41.599.
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testConcurrentAcceptancesConsumePendingExactlyOnce]' started.
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testConcurrentAcceptancesConsumePendingExactlyOnce]' passed (0.069 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testEverySignedAcceptanceBindingRejectsBeforeStateOrStorageAndRealEncounterPersists]' started.
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testEverySignedAcceptanceBindingRejectsBeforeStateOrStorageAndRealEncounterPersists]' passed (0.259 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testGlobalCountAndByteBudgetsWithManyAuthenticatedPeersAndContactIDs]' started.
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testGlobalCountAndByteBudgetsWithManyAuthenticatedPeersAndContactIDs]' passed (2.161 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testPendingExpiryDuringVerificationAndFutureSignedAcceptanceCannotPersist]' started.
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testPendingExpiryDuringVerificationAndFutureSignedAcceptanceCannotPersist]' passed (0.154 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testPendingRequestFloodInvalidProofsTTLAndRetirementStayBoundedWithHealthyPeer]' started.
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testPendingRequestFloodInvalidProofsTTLAndRetirementStayBoundedWithHealthyPeer]' passed (0.490 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testRealConsumerRetainsLeaseAcrossEveryAwaitAndDropsRetiredGeneration]' started.
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testRealConsumerRetainsLeaseAcrossEveryAwaitAndDropsRetiredGeneration]' passed (1.666 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testRealRequestAndUserAcceptanceStoreBothSidesAndRejectSameUUIDOtherKey]' started.
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testRealRequestAndUserAcceptanceStoreBothSidesAndRejectSameUUIDOtherKey]' passed (0.082 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testSameSigningIdentityOnTwoSessionsPersistsTheResponderRole]' started.
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testSameSigningIdentityOnTwoSessionsPersistsTheResponderRole]' passed (0.135 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testSubscriberMayRevokeAfterCommitWithoutDeadlockOrLaterPublication]' started.
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testSubscriberMayRevokeAfterCommitWithoutDeadlockOrLaterPublication]' passed (0.036 seconds).
+Test Suite 'EntityScannerConsumerSecurityTests' passed at 2026-09-29 08:41:46.653.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 5.053 (5.054) seconds
+Test Suite 'PublisherAsyncLifetimeTests' started at 2026-09-29 08:41:46.653.
+Test Case '-[CellBaseTests.PublisherAsyncLifetimeTests testEmptyFailureAndTimeoutCompleteOnceAndCancelUpstream]' started.
+Test Case '-[CellBaseTests.PublisherAsyncLifetimeTests testEmptyFailureAndTimeoutCompleteOnceAndCancelUpstream]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PublisherAsyncLifetimeTests testSynchronousAndConcurrentFirstDeliveryWhileSubscriptionIsInstalled]' started.
+Test Case '-[CellBaseTests.PublisherAsyncLifetimeTests testSynchronousAndConcurrentFirstDeliveryWhileSubscriptionIsInstalled]' passed (0.004 seconds).
+Test Suite 'PublisherAsyncLifetimeTests' passed at 2026-09-29 08:41:46.657.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.004 (0.004) seconds
+Test Suite 'ScannerAdmissionTests' started at 2026-09-29 08:41:46.657.
+Test Case '-[CellBaseTests.ScannerAdmissionTests testEachResourceEnforcesGlobalAndPhysicalSourceCountAndByteBoundaries]' started.
+Test Case '-[CellBaseTests.ScannerAdmissionTests testEachResourceEnforcesGlobalAndPhysicalSourceCountAndByteBoundaries]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.ScannerAdmissionTests testGlobalBudgetIsSharedAcrossScannerInstances]' started.
+Inited radar service with peerId: <MCPeerID: 0x10f407b50 DisplayName = HAVEN-first890>
+Inited radar service with peerId: <MCPeerID: 0x10f407ab0 DisplayName = HAVEN-second89>
+Inited radar service with peerId: <MCPeerID: 0x10f405da0 DisplayName = HAVEN-first890>
+Inited radar service with peerId: <MCPeerID: 0x10f405d60 DisplayName = HAVEN-second89>
+Inited radar service with peerId: <MCPeerID: 0x10f406470 DisplayName = HAVEN-first01c>
+Inited radar service with peerId: <MCPeerID: 0x10f406870 DisplayName = HAVEN-second01>
+Inited radar service with peerId: <MCPeerID: 0x10f4065f0 DisplayName = HAVEN-first01c>
+Inited radar service with peerId: <MCPeerID: 0x10f406630 DisplayName = HAVEN-second01>
+Inited radar service with peerId: <MCPeerID: 0x10f4053b0 DisplayName = HAVEN-first20c>
+Inited radar service with peerId: <MCPeerID: 0x10f408780 DisplayName = HAVEN-second20>
+Inited radar service with peerId: <MCPeerID: 0x10f408740 DisplayName = HAVEN-first20c>
+Inited radar service with peerId: <MCPeerID: 0x10f408700 DisplayName = HAVEN-second20>
+Inited radar service with peerId: <MCPeerID: 0x10f406860 DisplayName = HAVEN-first42d>
+Inited radar service with peerId: <MCPeerID: 0x10f4054f0 DisplayName = HAVEN-second42>
+Inited radar service with peerId: <MCPeerID: 0x10f408340 DisplayName = HAVEN-first42d>
+Inited radar service with peerId: <MCPeerID: 0x10f408300 DisplayName = HAVEN-second42>
+Inited radar service with peerId: <MCPeerID: 0x10f408360 DisplayName = HAVEN-first9e4>
+Inited radar service with peerId: <MCPeerID: 0x10f408280 DisplayName = HAVEN-second9e>
+Inited radar service with peerId: <MCPeerID: 0x10f408220 DisplayName = HAVEN-first9e4>
+Inited radar service with peerId: <MCPeerID: 0x10f4081e0 DisplayName = HAVEN-second9e>
+Inited radar service with peerId: <MCPeerID: 0x10f408240 DisplayName = HAVEN-first9fd>
+Inited radar service with peerId: <MCPeerID: 0x10f405d80 DisplayName = HAVEN-second9f>
+Inited radar service with peerId: <MCPeerID: 0x10f4077a0 DisplayName = HAVEN-first9fd>
+Inited radar service with peerId: <MCPeerID: 0x10f407780 DisplayName = HAVEN-second9f>
+Inited radar service with peerId: <MCPeerID: 0x10f406610 DisplayName = HAVEN-first033>
+Inited radar service with peerId: <MCPeerID: 0x10f4051c0 DisplayName = HAVEN-second03>
+Inited radar service with peerId: <MCPeerID: 0x10f4050a0 DisplayName = HAVEN-first033>
+Inited radar service with peerId: <MCPeerID: 0x10f404980 DisplayName = HAVEN-second03>
+Inited radar service with peerId: <MCPeerID: 0x10f404fe0 DisplayName = HAVEN-first869>
+Inited radar service with peerId: <MCPeerID: 0x10f4085f0 DisplayName = HAVEN-second86>
+Inited radar service with peerId: <MCPeerID: 0x10f407ac0 DisplayName = HAVEN-first869>
+Inited radar service with peerId: <MCPeerID: 0x10f404e30 DisplayName = HAVEN-second86>
+Inited radar service with peerId: <MCPeerID: 0x10f405d70 DisplayName = HAVEN-firstdc4>
+Inited radar service with peerId: <MCPeerID: 0x10f4057b0 DisplayName = HAVEN-seconddc>
+Inited radar service with peerId: <MCPeerID: 0x10f405c80 DisplayName = HAVEN-firstdc4>
+Inited radar service with peerId: <MCPeerID: 0x10f407a20 DisplayName = HAVEN-seconddc>
+Inited radar service with peerId: <MCPeerID: 0x10f408600 DisplayName = HAVEN-firsta80>
+Inited radar service with peerId: <MCPeerID: 0x10f404d80 DisplayName = HAVEN-seconda8>
+Inited radar service with peerId: <MCPeerID: 0x10f4047a0 DisplayName = HAVEN-firsta80>
+Inited radar service with peerId: <MCPeerID: 0x10f404760 DisplayName = HAVEN-seconda8>
+Inited radar service with peerId: <MCPeerID: 0x10f4047c0 DisplayName = HAVEN-first776>
+Inited radar service with peerId: <MCPeerID: 0x10f4080e0 DisplayName = HAVEN-second77>
+Inited radar service with peerId: <MCPeerID: 0x10f405bf0 DisplayName = HAVEN-first776>
+Inited radar service with peerId: <MCPeerID: 0x10f405ba0 DisplayName = HAVEN-second77>
+Inited radar service with peerId: <MCPeerID: 0x10f405c10 DisplayName = HAVEN-firstfc7>
+Inited radar service with peerId: <MCPeerID: 0x10f407980 DisplayName = HAVEN-secondfc>
+Inited radar service with peerId: <MCPeerID: 0x10f407690 DisplayName = HAVEN-firstfc7>
+Inited radar service with peerId: <MCPeerID: 0x10f407650 DisplayName = HAVEN-secondfc>
+V3 gate mutation M1/envelope.ready
+V3 gate mutation M1/envelope.legacy
+V3 gate mutation M1/envelope.ws
+V3 gate mutation M1/envelope.cid
+V3 gate mutation M1/envelope.extra
+V3 gate mutation M1/envelope.trailing
+V3 gate mutation M1/envelope.HPC2
+V3 gate mutation M1/hello.profile
+V3 gate mutation M1/hello.role
+V3 gate mutation M1/hello.ephemeralPublicKey
+V3 gate mutation M1/hello.lowOrder
+V3 gate mutation M1/hello.nonce
+V3 gate mutation M1/hello.generation
+V3 gate mutation M1/hello.issuedAtMilliseconds
+V3 gate mutation M1/hello.negativeTime
+V3 gate mutation M1/hello.expiredTime
+V3 gate mutation M1/hello.futureTime
+V3 gate mutation M1/hello.missing
+V3 gate mutation M1/hello.extra
+V3 gate mutation M2/envelope.ready
+V3 gate mutation M2/envelope.legacy
+V3 gate mutation M2/envelope.ws
+V3 gate mutation M2/envelope.cid
+V3 gate mutation M2/envelope.extra
+V3 gate mutation M2/envelope.trailing
+V3 gate mutation M2/envelope.HPC2
+V3 gate mutation M2/paddingLength
+V3 gate mutation M2/duplicateJSON
+V3 gate mutation M2/nonce
+V3 gate mutation M2/sealedLength
+V3 gate mutation M2/ciphertext
+V3 gate mutation M2/hello.profile
+V3 gate mutation M2/hello.role
+V3 gate mutation M2/hello.ephemeralPublicKey
+V3 gate mutation M2/hello.lowOrder
+V3 gate mutation M2/hello.nonce
+V3 gate mutation M2/hello.generation
+V3 gate mutation M2/hello.issuedAtMilliseconds
+V3 gate mutation M2/hello.negativeTime
+V3 gate mutation M2/hello.expiredTime
+V3 gate mutation M2/hello.futureTime
+V3 gate mutation M2/hello.missing
+V3 gate mutation M2/hello.extra
+V3 gate mutation M2/endpoint.initiator
+V3 gate mutation M2/endpoint.responder
+V3 gate mutation M2/endpoint.setupID
+V3 gate mutation M2/endpoint.domain
+V3 gate mutation M2/identity.uuid
+V3 gate mutation M2/identity.algorithm
+V3 gate mutation M2/identity.curve
+V3 gate mutation M2/identity.publicKey
+V3 gate mutation M2/proof.sessionID
+V3 gate mutation M2/proof.generation
+V3 gate mutation M2/proof.signature
+V3 gate mutation M2/signed.resource
+V3 gate mutation M2/signed.audience
+V3 gate mutation M2/signed.domain
+V3 gate mutation M2/signed.nonce
+V3 gate mutation M2/signed.issuedAt
+V3 gate mutation M2/signed.expiresAt
+V3 gate mutation M2/signed.action
+V3 gate mutation M2/identityMAC
+V3 gate mutation M2/badMAC.missing
+V3 gate mutation M2/badMAC.truncated
+V3 gate mutation M2/badMAC.direction
+V3 gate mutation M2/badMAC.key
+V3 gate mutation M2/badMAC.transcript
+V3 gate mutation M2/extra
+V3 gate mutation M2/padding
+V3 gate mutation M2/jsonLength
+V3 gate mutation M2/tag
+V3 gate mutation M2/selfConsistentEndpoint.initiator
+V3 gate mutation M2/selfConsistentEndpoint.responder
+V3 gate mutation M2/selfConsistentEndpoint.setupID
+V3 gate mutation M2/selfConsistentEndpoint.domain
+V3 gate mutation M3/envelope.ready
+V3 gate mutation M3/envelope.legacy
+V3 gate mutation M3/envelope.ws
+V3 gate mutation M3/envelope.cid
+V3 gate mutation M3/envelope.extra
+V3 gate mutation M3/envelope.trailing
+V3 gate mutation M3/envelope.HPC2
+V3 gate mutation M3/paddingLength
+V3 gate mutation M3/duplicateJSON
+V3 gate mutation M3/nonce
+V3 gate mutation M3/sealedLength
+V3 gate mutation M3/ciphertext
+V3 gate mutation M3/endpoint.initiator
+V3 gate mutation M3/endpoint.responder
+V3 gate mutation M3/endpoint.setupID
+V3 gate mutation M3/endpoint.domain
+V3 gate mutation M3/identity.uuid
+V3 gate mutation M3/identity.algorithm
+V3 gate mutation M3/identity.curve
+V3 gate mutation M3/identity.publicKey
+V3 gate mutation M3/proof.sessionID
+V3 gate mutation M3/proof.generation
+V3 gate mutation M3/proof.signature
+V3 gate mutation M3/signed.resource
+V3 gate mutation M3/signed.audience
+V3 gate mutation M3/signed.domain
+V3 gate mutation M3/signed.nonce
+V3 gate mutation M3/signed.issuedAt
+V3 gate mutation M3/signed.expiresAt
+V3 gate mutation M3/signed.action
+V3 gate mutation M3/identityMAC
+V3 gate mutation M3/badMAC.missing
+V3 gate mutation M3/badMAC.truncated
+V3 gate mutation M3/badMAC.direction
+V3 gate mutation M3/badMAC.key
+V3 gate mutation M3/badMAC.transcript
+V3 gate mutation M3/extra
+V3 gate mutation M3/padding
+V3 gate mutation M3/jsonLength
+V3 gate mutation M3/tag
+V3 gate mutation M3/selfConsistentEndpoint.initiator
+V3 gate mutation M3/selfConsistentEndpoint.responder
+V3 gate mutation M3/selfConsistentEndpoint.setupID
+V3 gate mutation M3/selfConsistentEndpoint.domain
+V3 gate mutation M4/envelope.ready
+V3 gate mutation M4/envelope.legacy
+V3 gate mutation M4/envelope.ws
+V3 gate mutation M4/envelope.cid
+V3 gate mutation M4/envelope.extra
+V3 gate mutation M4/envelope.trailing
+V3 gate mutation M4/envelope.HPC2
+V3 gate mutation M4/paddingLength
+V3 gate mutation M4/duplicateJSON
+V3 gate mutation M4/nonce
+V3 gate mutation M4/sealedLength
+V3 gate mutation M4/ciphertext
+V3 gate mutation M4/ack.sessionID
+V3 gate mutation M4/ack.generation
+V3 gate mutation M4/ack.transcriptDigest
+V3 gate mutation M4/verifyData
+V3 gate mutation M4/badFinished.missing
+V3 gate mutation M4/badFinished.truncated
+V3 gate mutation M4/badFinished.direction
+V3 gate mutation M4/badFinished.key
+V3 gate mutation M4/badFinished.transcript
+V3 gate mutation M4/extra
+V3 gate mutation M4/padding
+V3 gate mutation M4/jsonLength
+V3 gate mutation M4/tag
+V3 gate mutation M5/envelope.ready
+V3 gate mutation M5/envelope.legacy
+V3 gate mutation M5/envelope.ws
+V3 gate mutation M5/envelope.cid
+V3 gate mutation M5/envelope.extra
+V3 gate mutation M5/envelope.trailing
+V3 gate mutation M5/envelope.HPC2
+V3 gate mutation M5/paddingLength
+V3 gate mutation M5/duplicateJSON
+V3 gate mutation M5/nonce
+V3 gate mutation M5/sealedLength
+V3 gate mutation M5/ciphertext
+V3 gate mutation M5/ack.sessionID
+V3 gate mutation M5/ack.generation
+V3 gate mutation M5/ack.transcriptDigest
+V3 gate mutation M5/verifyData
+V3 gate mutation M5/badFinished.missing
+V3 gate mutation M5/badFinished.truncated
+V3 gate mutation M5/badFinished.direction
+V3 gate mutation M5/badFinished.key
+V3 gate mutation M5/badFinished.transcript
+V3 gate mutation M5/extra
+V3 gate mutation M5/padding
+V3 gate mutation M5/jsonLength
+V3 gate mutation M5/tag
+Inited radar service with peerId: <MCPeerID: 0x10f409610 DisplayName = HAVEN-firstfc1>
+Inited radar service with peerId: <MCPeerID: 0x10f4095d0 DisplayName = HAVEN-secondfc>
+Initing Entity Anchor (Apple) cell for owner: 1BED42CE-61A8-444D-928C-904AC7E87B78
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x10f408830 DisplayName = HAVEN-first428>
+Inited radar service with peerId: <MCPeerID: 0x10f4087f0 DisplayName = HAVEN-second42>
+Initing Entity Anchor (Apple) cell for owner: 75B17E75-5AF9-41CB-B68F-A22BC48F1F30
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x10f409e40 DisplayName = HAVEN-thirdfec>
+Inited radar service with peerId: <MCPeerID: 0x10f4059d0 DisplayName = HAVEN-firste62>
+Inited radar service with peerId: <MCPeerID: 0x10f409ad0 DisplayName = HAVEN-seconde6>
+Initing Entity Anchor (Apple) cell for owner: DC0BF0CF-BD52-4657-9FB6-C75441975501
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x10f405940 DisplayName = HAVEN-thirdf32>
+Inited radar service with peerId: <MCPeerID: 0x10f406b90 DisplayName = HAVEN-third16a>
+Inited radar service with peerId: <MCPeerID: 0x10f406df0 DisplayName = HAVEN-third41d>
+Inited radar service with peerId: <MCPeerID: 0x10f40b1d0 DisplayName = HAVEN-thirdf9f>
+Inited radar service with peerId: <MCPeerID: 0x10f40b4f0 DisplayName = HAVEN-third15e>
+Inited radar service with peerId: <MCPeerID: 0x10f409970 DisplayName = HAVEN-third8d6>
+Inited radar service with peerId: <MCPeerID: 0x10f40b060 DisplayName = HAVEN-third9a2>
+Inited radar service with peerId: <MCPeerID: 0x10f4084b0 DisplayName = HAVEN-third1de>
+Inited radar service with peerId: <MCPeerID: 0x10f408a70 DisplayName = HAVEN-first55d>
+Inited radar service with peerId: <MCPeerID: 0x10f408eb0 DisplayName = HAVEN-second55>
+Initing Entity Anchor (Apple) cell for owner: B277FAF3-610F-4A89-BA1B-81008156C67F
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x10f409d10 DisplayName = HAVEN-firste4f>
+Inited radar service with peerId: <MCPeerID: 0x10f409dc0 DisplayName = HAVEN-seconde4>
+Initing Entity Anchor (Apple) cell for owner: AD7D8EC3-21B0-4A03-B123-85003959C2B7
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x10f40bdc0 DisplayName = HAVEN-thirdde9>
+Inited radar service with peerId: <MCPeerID: 0x10f40a440 DisplayName = HAVEN-first0e2>
+Inited radar service with peerId: <MCPeerID: 0x10f40a490 DisplayName = HAVEN-second0e>
+Initing Entity Anchor (Apple) cell for owner: BA336A58-B13A-4DD6-8513-BA53A53CBB8F
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x10f4055b0 DisplayName = HAVEN-first007>
+Inited radar service with peerId: <MCPeerID: 0x10f40a4e0 DisplayName = HAVEN-second00>
+Initing Entity Anchor (Apple) cell for owner: 45EC5E44-FB79-47EE-9E7B-E847ED3199B5
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x10f40b220 DisplayName = HAVEN-first775>
+Inited radar service with peerId: <MCPeerID: 0x10f4094a0 DisplayName = HAVEN-second77>
+Initing Entity Anchor (Apple) cell for owner: D64851B8-281B-44B1-8D3F-01496F13EB10
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x10f40a3e0 DisplayName = HAVEN-first376>
+Inited radar service with peerId: <MCPeerID: 0x10f40a3a0 DisplayName = HAVEN-second37>
+Initing Entity Anchor (Apple) cell for owner: 5A3ED0FE-3DBE-4F97-A17F-2197D5B24909
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x10f40bd10 DisplayName = HAVEN-first983>
+Inited radar service with peerId: <MCPeerID: 0x10f40bce0 DisplayName = HAVEN-second98>
+Initing Entity Anchor (Apple) cell for owner: 1000606B-94A6-4B70-B2A0-F0A28F47670A
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x10f40bc40 DisplayName = HAVEN-first056>
+Inited radar service with peerId: <MCPeerID: 0x10f40bc00 DisplayName = HAVEN-second05>
+Initing Entity Anchor (Apple) cell for owner: 40182C62-E389-48CF-B6B2-93EB5F35878A
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x10f406110 DisplayName = HAVEN-first7b6>
+Inited radar service with peerId: <MCPeerID: 0x10f408c10 DisplayName = HAVEN-second7b>
+Initing Entity Anchor (Apple) cell for owner: 812CC7FE-8FE3-4B5A-A4DD-8A909D7FC72C
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x10f406130 DisplayName = HAVEN-first209>
+Inited radar service with peerId: <MCPeerID: 0x10f409110 DisplayName = HAVEN-second20>
+Initing Entity Anchor (Apple) cell for owner: 3872D464-145B-400E-9C76-B6D610D155D6
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x10f4068f0 DisplayName = HAVEN-first271>
+Inited radar service with peerId: <MCPeerID: 0x10f406260 DisplayName = HAVEN-second27>
+Initing Entity Anchor (Apple) cell for owner: 11148210-118A-47FB-AC98-8D0E253E09B5
+*********** Finished setup keys in Entity Anchor ***********
+Initing Entity Anchor (Apple) cell for owner: E5CE3E74-98FC-457D-9769-9D8ECB7BA7F5
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x10f40ae10 DisplayName = HAVEN-first5fe>
+Inited radar service with peerId: <MCPeerID: 0x10f409b90 DisplayName = HAVEN-second5f>
+Initing Entity Anchor (Apple) cell for owner: F214358D-9BB6-4CB4-97A2-A818E007B254
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x10f40adb0 DisplayName = HAVEN-first400>
+Inited radar service with peerId: <MCPeerID: 0x10f40ae00 DisplayName = HAVEN-second40>
+Initing Entity Anchor (Apple) cell for owner: FC33474D-6593-474F-AA7C-D8092CD55906
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x10f4063c0 DisplayName = HAVEN-38fddb6a>
+Inited radar service with Test Case '-[CellBaseTests.ScannerAdmissionTests testGlobalBudgetIsSharedAcrossScannerInstances]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.ScannerAdmissionTests testManyUniquePeersAndContextsAreBoundedBeforeStorageTasksOrUIAndRecoverAfterExpiry]' started.
+Test Case '-[CellBaseTests.ScannerAdmissionTests testManyUniquePeersAndContextsAreBoundedBeforeStorageTasksOrUIAndRecoverAfterExpiry]' passed (1.317 seconds).
+Test Case '-[CellBaseTests.ScannerAdmissionTests testOversizedMetadataContextAndRotatingUUIDCannotEvadeSourceBudget]' started.
+Test Case '-[CellBaseTests.ScannerAdmissionTests testOversizedMetadataContextAndRotatingUUIDCannotEvadeSourceBudget]' passed (0.216 seconds).
+Test Case '-[CellBaseTests.ScannerAdmissionTests testRateSourceTableAndLeaseLifetimeAreBoundedWithoutForgedUUIDBuckets]' started.
+Test Case '-[CellBaseTests.ScannerAdmissionTests testRateSourceTableAndLeaseLifetimeAreBoundedWithoutForgedUUIDBuckets]' passed (0.002 seconds).
+Test Suite 'ScannerAdmissionTests' passed at 2026-09-29 08:41:48.195.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 1.537 (1.538) seconds
+Test Suite 'ScannerNearbyInteractionTests' started at 2026-09-29 08:41:48.196.
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testCloseRevokeDisconnectAndStopInvalidateAndDiscardQueuedAndLateCallbacks]' started.
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testCloseRevokeDisconnectAndStopInvalidateAndDiscardQueuedAndLateCallbacks]' passed (0.680 seconds).
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testConcurrentPeersKeepTokensSessionsAndResultsOnTheirAuthenticatedPeer]' started.
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testConcurrentPeersKeepTokensSessionsAndResultsOnTheirAuthenticatedPeer]' passed (0.180 seconds).
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testGenericCellFeedCannotInstallOrReplaceNearbyToken]' started.
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testGenericCellFeedCannotInstallOrReplaceNearbyToken]' passed (0.139 seconds).
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testPrincipalSetupTargetAndVersionRejectBeforeCreatingOrRunningNI]' started.
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testPrincipalSetupTargetAndVersionRejectBeforeCreatingOrRunningNI]' passed (0.097 seconds).
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testReconnectRejectsOldTokenContextAndCallbacksWithoutTouchingNewSession]' started.
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testReconnectRejectsOldTokenContextAndCallbacksWithoutTouchingNewSession]' passed (0.160 seconds).
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testSuspensionTimeoutAndInvalidationNeverCreateReplacementSessionOrReuseOldCallback]' started.
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testSuspensionTimeoutAndInvalidationNeverCreateReplacementSessionOrReuseOldCallback]' passed (0.060 seconds).
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testWrongTokenBindingOnRealWireClosesOnlyOffendingChannel]' started.
+Test Case '-[CellBaseTests.ScannerNearbyInteractionTests testWrongTokenBindingOnRealWireClosesOnlyOffendingChannel]' passed (0.174 seconds).
+Test Suite 'ScannerNearbyInteractionTests' passed at 2026-09-29 08:41:49.686.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 1.489 (1.491) seconds
+Test Suite 'ScannerPeerAuthenticationTests' started at 2026-09-29 08:41:49.686.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testActualScannerSetupLobbyDescriptionAttachAndFeedForEitherInviter]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testActualScannerSetupLobbyDescriptionAttachAndFeedForEitherInviter]' passed (0.533 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testAEADOverheadIsIncludedInExistingSendQuota]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testAEADOverheadIsIncludedInExistingSendQuota]' passed (0.069 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testBothFactoriesWaitForSealedConfirmationAndEarlyDataIsRejected]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testBothFactoriesWaitForSealedConfirmationAndEarlyDataIsRejected]' passed (0.070 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testDiscoveryTokenSkipsPendingThenRevokedPeerWithoutBreakingHandshake]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testDiscoveryTokenSkipsPendingThenRevokedPeerWithoutBreakingHandshake]' passed (0.216 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testDiscoveryTokenUsesExistingSendByteQuota]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testDiscoveryTokenUsesExistingSendByteQuota]' passed (0.096 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testExpiredScheduledSetupRevokesBeforeHeldWorkReturnsAndRetainsAdmission]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testExpiredScheduledSetupRevokesBeforeHeldWorkReturnsAndRetainsAdmission]' passed (0.055 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testIngressOverflowReusesOneRejectionTaskAndPreservesSibling]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testIngressOverflowReusesOneRejectionTaskAndPreservesSibling]' passed (0.132 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testLateReceiveFailureAndDisconnectLeaveReconnectAndSiblingAlive]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testLateReceiveFailureAndDisconnectLeaveReconnectAndSiblingAlive]' passed (0.249 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testMissingEphemeralKeyAndOldProfileCannotDowngrade]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testMissingEphemeralKeyAndOldProfileCannotDowngrade]' passed (0.095 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testMissingReceiptBoundsSequentialFeedAndCloseReleasesOnlyAfterPhysicalClose]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testMissingReceiptBoundsSequentialFeedAndCloseReleasesOnlyAfterPhysicalClose]' passed (0.203 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testMissingReceiptDeadlinePhysicallyRetiresOnlyExpiredPeer]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testMissingReceiptDeadlinePhysicallyRetiresOnlyExpiredPeer]' passed (1.035 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testOldCiphertextDuringHandshakeAndRewrittenGenerationBothFailClosed]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testOldCiphertextDuringHandshakeAndRewrittenGenerationBothFailClosed]' passed (0.195 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testOldCommandsAndResponsesCannotCrossReconnectWithCollidingCID]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testOldCommandsAndResponsesCannotCrossReconnectWithCollidingCID]' passed (0.586 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testPeerGenerationWireFieldIsRequiredAndAuthFramesRemainUntagged]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testPeerGenerationWireFieldIsRequiredAndAuthFramesRemainUntagged]' passed (0.044 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testQueuedArrivalOrderAndConcurrentSendsPreserveCounters]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testQueuedArrivalOrderAndConcurrentSendsPreserveCounters]' passed (0.107 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testRelayCannotCorrelateIdentityFieldsAcrossFreshHandshakes]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testRelayCannotCorrelateIdentityFieldsAcrossFreshHandshakes]' passed (0.110 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testRelayForwardsRealHandshakeButSeesOnlyCiphertextInBothDirections]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testRelayForwardsRealHandshakeButSeesOnlyCiphertextInBothDirections]' passed (0.031 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testRelayTamperInsertionReplayReorderReflectionAndMalformedRecordsCloseWithoutDispatch]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testRelayTamperInsertionReplayReorderReflectionAndMalformedRecordsCloseWithoutDispatch]' passed (0.801 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testReplacingEitherEphemeralKeyInvalidatesIdentitySignature]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testReplacingEitherEphemeralKeyInvalidatesIdentitySignature]' passed (0.172 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerCopiedPublicKeyAlwaysGetsProxyIncludingWithoutDelegate]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerCopiedPublicKeyAlwaysGetsProxyIncludingWithoutDelegate]' passed (0.049 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerDisconnectRetainsFeedQuotaUntilNoncooperativeWorkReturns]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerDisconnectRetainsFeedQuotaUntilNoncooperativeWorkReturns]' passed (0.149 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerForgedProofAndReplayedProofCannotCreateBase]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerForgedProofAndReplayedProofCannotCreateBase]' passed (0.159 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerMutualProofPrecedesBaseLookupAndRegistration]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerMutualProofPrecedesBaseLookupAndRegistration]' passed (0.042 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerPeerProofDoesNotOverrideLobbyOwnerApproval]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerPeerProofDoesNotOverrideLobbyOwnerApproval]' passed (0.119 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerQuotaPlusOneDoesNotCreateTransportOrBase]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerQuotaPlusOneDoesNotCreateTransportOrBase]' passed (0.404 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerReconnectSamePeerIDRetiresOldTransportAndRejectsOldProof]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerReconnectSamePeerIDRetiresOldTransportAndRejectsOldProof]' passed (0.244 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerReconnectSamePeerIDsCompletesFreshMutualProof]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerReconnectSamePeerIDsCompletesFreshMutualProof]' passed (0.153 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerRejectsCommandBeforeProofAndReportsConsumerFailure]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerRejectsCommandBeforeProofAndReportsConsumerFailure]' passed (0.007 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerRevocationClosesOnlyAffectedPeerAndReclaimsQuota]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerRevocationClosesOnlyAffectedPeerAndReclaimsQuota]' passed (0.170 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerWrongPeerBindingAndRoleAreRejected]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testScannerWrongPeerBindingAndRoleAreRejected]' passed (0.150 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testSlowReceiverResumesFullWindowProducerWhileSiblingContinues]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testSlowReceiverResumesFullWindowProducerWhileSiblingContinues]' passed (0.251 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testThirdPeerDiscoveryCollisionCannotStealAuthenticatedRouteOrGate]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testThirdPeerDiscoveryCollisionCannotStealAuthenticatedRouteOrGate]' passed (0.380 seconds).
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testUnusedResourcesAndStreamsCloseImmediatelyAcrossAuthRevokeAndReconnectWithSibling]' started.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testUnusedResourcesAndStreamsCloseImmediatelyAcrossAuthRevokeAndReconnectWithSibling]' passed (0.809 seconds).
+Test Suite 'ScannerPeerAuthenticationTests' passed at 2026-09-29 08:41:57.580.
+	 Executed 33 tests, with 0 failures (0 unexpected) in 7.885 (7.893) seconds
+Test Suite 'ScannerServiceInvitationTests' started at 2026-09-29 08:41:57.580.
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testAcceptanceTransitionExcludesDeterministicDiscoveryAndStopRace]' started.
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testAcceptanceTransitionExcludesDeterministicDiscoveryAndStopRace]' passed (0.162 seconds).
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testConcurrentInvitationsAreEachResolvedExactlyOnce]' started.
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testConcurrentInvitationsAreEachResolvedExactlyOnce]' passed (0.199 seconds).
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testCrossedInvitationsSelectOneSetupAndRequireExplicitAcceptance]' started.
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testCrossedInvitationsSelectOneSetupAndRequireExplicitAcceptance]' passed (0.597 seconds).
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testDiscoveryCallbackAtFormerRemoveInstallBoundaryCannotRetargetAcceptance]' started.
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testDiscoveryCallbackAtFormerRemoveInstallBoundaryCannotRetargetAcceptance]' passed (0.203 seconds).
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testInvitationOwnsPeerSessionAndEndpointAcrossDiscoveryLossBeforeAndAfterAcceptance]' started.
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testInvitationOwnsPeerSessionAndEndpointAcrossDiscoveryLossBeforeAndAfterAcceptance]' passed (0.014 seconds).
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testInvitationTimeoutRejects]' started.
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testInvitationTimeoutRejects]' passed (0.321 seconds).
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testKnownInvitationRequiresExplicitResponse]' started.
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testKnownInvitationRequiresExplicitResponse]' passed (0.203 seconds).
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testLateUnboundDisconnectCannotRetireNewInvitationOnSamePhysicalPeer]' started.
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testLateUnboundDisconnectCannotRetireNewInvitationOnSamePhysicalPeer]' passed (0.306 seconds).
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testPendingAcceptedAndOutgoingExpiryAllowsNewValidInvitationWithoutOldSetup]' started.
+peerId: <MCPeerID: 0x10f4073e0 DisplayName = HAVEN-a6f861c4>
+Inited radar service with peerId: <MCPeerID: 0x10f40aca0 DisplayName = HAVEN-local>
+Inited radar service with peerId: <MCPeerID: 0x10f4086a0 DisplayName = HAVEN-local>
+Inited radar service with peerId: <MCPeerID: 0x10f405370 DisplayName = HAVEN-first77b>
+Inited radar service with peerId: <MCPeerID: 0x10f406d80 DisplayName = HAVEN-second77>
+Inited radar service with peerId: <MCPeerID: 0x10f409700 DisplayName = HAVEN-third58b>
+Inited radar service with peerId: <MCPeerID: 0x10f40e3d0 DisplayName = HAVEN-firstf3a>
+Inited radar service with peerId: <MCPeerID: 0x10f40de00 DisplayName = HAVEN-secondf3>
+Inited radar service with peerId: <MCPeerID: 0x10f405a80 DisplayName = HAVEN-thirdd1f>
+Inited radar service with peerId: <MCPeerID: 0x10f40d840 DisplayName = HAVEN-first002>
+Inited radar service with peerId: <MCPeerID: 0x10f40ccc0 DisplayName = HAVEN-second00>
+Inited radar service with peerId: <MCPeerID: 0x10f4098d0 DisplayName = HAVEN-third841>
+Inited radar service with peerId: <MCPeerID: 0x10f405960 DisplayName = HAVEN-first895>
+Inited radar service with peerId: <MCPeerID: 0x10f410930 DisplayName = HAVEN-second89>
+Inited radar service with peerId: <MCPeerID: 0x10f411a10 DisplayName = HAVEN-thirdd5a>
+Inited radar service with peerId: <MCPeerID: 0x10f411a70 DisplayName = HAVEN-firste96>
+Inited radar service with peerId: <MCPeerID: 0x10f40e7b0 DisplayName = HAVEN-seconde9>
+Inited radar service with peerId: <MCPeerID: 0x10f40ded0 DisplayName = HAVEN-third246>
+Inited radar service with peerId: <MCPeerID: 0x10f40eb60 DisplayName = HAVEN-first389>
+Inited radar service with peerId: <MCPeerID: 0x10f409880 DisplayName = HAVEN-second38>
+Inited radar service with peerId: <MCPeerID: 0x10f4059a0 DisplayName = HAVEN-first72b>
+Inited radar service with peerId: <MCPeerID: 0x10f40f730 DisplayName = HAVEN-second72>
+Inited radar service with peerId: <MCPeerID: 0x10f40c600 DisplayName = HAVEN-thirdd38>
+Inited radar service with peerId: <MCPeerID: 0x10f40c270 DisplayName = HAVEN-first9cf>
+Inited radar service with peerId: <MCPeerID: 0x10f40c230 DisplayName = HAVEN-second9c>
+Inited radar service with peerId: <MCPeerID: 0x10f411520 DisplayName = HAVEN-first4e4>
+Inited radar service with peerId: <MCPeerID: 0x10f4114e0 DisplayName = HAVEN-second4e>
+Inited radar service with peerId: <MCPeerID: 0x10f40ca60 DisplayName = HAVEN-first3a2>
+Inited radar service with peerId: <MCPeerID: 0x10f40de60 DisplayName = HAVEN-second3a>
+Inited radar service with peerId: <MCPeerID: 0x10f4114a0 DisplayName = HAVEN-third8bd>
+Inited radar service with peerId: <MCPeerID: 0x10f40cbe0 DisplayName = HAVEN-firstb8d>
+Inited radar service with peerId: <MCPeerID: 0x10f40cfb0 DisplayName = HAVEN-secondb8>
+LobbyCell init. Owner: F41AA4E3-88B7-411F-A81A-93E4AE0AF1AA
+********* Finished setting up bridge for second-B8D49419-9559-4A6A-8C71-BC8890199CE0
+********* Finished setting up bridge for first-B8D49419-9559-4A6A-8C71-BC8890199CE0
+Inited radar service with peerId: <MCPeerID: 0x10f40fce0 DisplayName = HAVEN-second5e>
+Inited radar service with peerId: <MCPeerID: 0x10f40f070 DisplayName = HAVEN-first5e1>
+LobbyCell init. Owner: FA774F08-888E-4D1E-8BA7-CAC867A2DAB2
+********* Finished setting up bridge for first-5E11F089-267B-43AD-8D22-40DBE66E10E1
+********* Finished setting up bridge for second-5E11F089-267B-43AD-8D22-40DBE66E10E1
+Inited radar service with peerId: <MCPeerID: 0x10f40d220 DisplayName = HAVEN-first5c0>
+Inited radar service with peerId: <MCPeerID: 0x10f409d50 DisplayName = HAVEN-second5c>
+Inited radar service with peerId: <MCPeerID: 0x10f40d120 DisplayName = HAVEN-firstff3>
+Inited radar service with peerId: <MCPeerID: 0x10f40ac90 DisplayName = HAVEN-secondff>
+Inited radar service with peerId: <MCPeerID: 0x10f40c040 DisplayName = HAVEN-firstf14>
+Inited radar service with peerId: <MCPeerID: 0x10f40bd00 DisplayName = HAVEN-secondf1>
+Inited radar service with peerId: <MCPeerID: 0x10f40a820 DisplayName = HAVEN-thirdbb3>
+Inited radar service with peerId: <MCPeerID: 0x10f40dbb0 DisplayName = HAVEN-first52b>
+Inited radar service with peerId: <MCPeerID: 0x10f405490 DisplayName = HAVEN-second52>
+Inited radar service with peerId: <MCPeerID: 0x10f4088c0 DisplayName = HAVEN-firsta5e>
+Inited radar service with peerId: <MCPeerID: 0x10f40ceb0 DisplayName = HAVEN-seconda5>
+LobbyCell init. Owner: ACEADC06-CA9A-44C5-96BC-DCD9FF8F6E9C
+Inited radar service with peerId: <MCPeerID: 0x10f40d7a0 DisplayName = HAVEN-first6a7>
+Inited radar service with peerId: <MCPeerID: 0x10f40c4c0 DisplayName = HAVEN-second6a>
+Inited radar service with peerId: <MCPeerID: 0x10f40f090 DisplayName = HAVEN-third74e>
+Inited radar service with peerId: <MCPeerID: 0x10f406b30 DisplayName = HAVEN-first663>
+Inited radar service with peerId: <MCPeerID: 0x10f40a980 DisplayName = HAVEN-second66>
+Inited radar service with peerId: <MCPeerID: 0x10f4078f0 DisplayName = HAVEN-thirdbbf>
+LobbyCell init. Owner: C14E2B5B-3C76-401B-BCC0-A94E94D774AB
+Inited radar service with peerId: <MCPeerID: 0x10f40d5f0 DisplayName = HAVEN-firste8b>
+Inited radar service with peerId: <MCPeerID: 0x10f40c630 DisplayName = HAVEN-seconde8>
+Inited radar service with peerId: <MCPeerID: 0x10f40cb30 DisplayName = HAVEN-first703>
+Inited radar service with peerId: <MCPeerID: 0x10f40e1b0 DisplayName = HAVEN-second70>
+Inited radar service with peerId: <MCPeerID: 0x10f4119d0 DisplayName = HAVEN-first79d>
+Inited radar service with peerId: <MCPeerID: 0x10f4119c0 DisplayName = HAVEN-second79>
+Inited radar service with peerId: <MCPeerID: 0x10f406200 DisplayName = HAVEN-thirdd23>
+CP53 held feed RSS baseline=657866752 held=657915904; records=32 bytes=43638
+Inited radar service with peerId: <MCPeerID: 0x10f40c670 DisplayName = HAVEN-firstd64>
+Inited radar service with peerId: <MCPeerID: 0x10f40ff50 DisplayName = HAVEN-secondd6>
+Inited radar service with peerId: <MCPeerID: 0x10f4084c0 DisplayName = HAVEN-third306>
+Inited radar service with peerId: <MCPeerID: 0x10f40e120 DisplayName = HAVEN-first0df>
+Inited radar service with peerId: <MCPeerID: 0x10f411aa0 DisplayName = HAVEN-second0d>
+Inited radar service with peerId: <MCPeerID: 0x10f408860 DisplayName = HAVEN-first638>
+Inited radar service with peerId: <MCPeerID: 0x10f4066a0 DisplayName = HAVEN-second63>
+Inited radar service with peerId: <MCPeerID: 0x10f411130 DisplayName = HAVEN-firstc39>
+Inited radar service with peerId: <MCPeerID: 0x10f4089d0 DisplayName = HAVEN-secondc3>
+LobbyCell init. Owner: 9CECA2B3-1FCE-4F4B-A667-20750E967766
+Inited radar service with peerId: <MCPeerID: 0x10f40dbe0 DisplayName = HAVEN-third4fe>
+Inited radar service with peerId: <MCPeerID: 0x10f40e160 DisplayName = HAVEN-first97e>
+Inited radar service with peerId: <MCPeerID: 0x10f410a50 DisplayName = HAVEN-second97>
+LobbyCell init. Owner: 10CEC997-9B54-47F5-B039-982769FA26E3
+Inited radar service with peerId: <MCPeerID: 0x10f40ff00 DisplayName = HAVEN-thirdbc7>
+Inited radar service with peerId: <MCPeerID: 0x10f40f360 DisplayName = HAVEN-firstcff>
+Inited radar service with peerId: <MCPeerID: 0x10f410a00 DisplayName = HAVEN-secondcf>
+Inited radar service with peerId: <MCPeerID: 0x10f40f380 DisplayName = HAVEN-first370>
+Inited radar service with peerId: <MCPeerID: 0x10f4088f0 DisplayName = HAVEN-second37>
+Inited radar service with peerId: <MCPeerID: 0x10f406150 DisplayName = HAVEN-first35e>
+Inited radar service with peerId: <MCPeerID: 0x10f40c900 DisplayName = HAVEN-second35>
+Inited radar service with peerId: <MCPeerID: 0x10f40c470 DisplayName = HAVEN-first3cf>
+Inited radar service with peerId: <MCPeerID: 0x10f40c480 DisplayName = HAVEN-second3c>
+Inited radar service with peerId: <MCPeerID: 0x10f40d430 DisplayName = HAVEN-firstf89>
+Inited radar service with peerId: <MCPeerID: 0x10f40f530 DisplayName = HAVEN-secondf8>
+Inited radar service with peerId: <MCPeerID: 0x10f40f0d0 DisplayName = HAVEN-firstf4f>
+Inited radar service with peerId: <MCPeerID: 0x10f411830 DisplayName = HAVEN-secondf4>
+Inited radar service with peerId: <MCPeerID: 0x10f4117d0 DisplayName = HAVEN-firstf61>
+Inited radar service with peerId: <MCPeerID: 0x10f411790 DisplayName = HAVEN-secondf6>
+Inited radar service with peerId: <MCPeerID: 0x10f40e360 DisplayName = HAVEN-firstba0>
+Inited radar service with peerId: <MCPeerID: 0x10f405430 DisplayName = HAVEN-secondba>
+Inited radar service with peerId: <MCPeerID: 0x10f406ae0 DisplayName = HAVEN-firstf0a>
+Inited radar service with peerId: <MCPeerID: 0x10f40d1b0 DisplayName = HAVEN-secondf0>
+Inited radar service with peerId: <MCPeerID: 0x10f40dc80 DisplayName = HAVEN-first210>
+Inited radar service with peerId: <MCPeerID: 0x10f40d3e0 DisplayName = HAVEN-second21>
+Inited radar service with peerId: <MCPeerID: 0x10f40d2c0 DisplayName = HAVEN-firstf3d>
+Inited radar service with peerId: <MCPeerID: 0x10f40dcf0 DisplayName = HAVEN-secondf3>
+Inited radar service with peerId: <MCPeerID: 0x10f411740 DisplayName = HAVEN-first438>
+Inited radar service with peerId: <MCPeerID: 0x10f411700 DisplayName = HAVEN-second43>
+Inited radar service with peerId: <MCPeerID: 0x10f4109d0 DisplayName = HAVEN-firste02>
+Inited radar service with peerId: <MCPeerID: 0x10f408ac0 DisplayName = HAVEN-seconde0>
+Inited radar service with peerId: <MCPeerID: 0x10f4102e0 DisplayName = HAVEN-first40d>
+Inited radar service with peerId: <MCPeerID: 0x10f40c870 DisplayName = HAVEN-second40>
+Inited radar service with peerId: <MCPeerID: 0x10f410c00 DisplayName = HAVEN-first091>
+Inited radar service with peerId: <MCPeerID: 0x10f40fac0 DisplayName = HAVEN-second09>
+Inited radar service with peerId: <MCPeerID: 0x10f40c8a0 DisplayName = HAVEN-firstc83>
+Inited radar service with peerId: <MCPeerID: 0x10f410a80 DisplayName = HAVEN-secondc8>
+Inited radar service with peerId: <MCPeerID: 0x10f408f00 DisplayName = HAVEN-firsta1b>
+Inited radar service with peerId: <MCPeerID: 0x10f410690 DisplayName = HAVEN-seconda1>
+Inited radar service with peerId: <MCPeerID: 0x10f40bec0 DisplayName = HAVEN-first9da>
+Inited radar service with peerId: <MCPeerID: 0x10f40aab0 DisplayName = HAVEN-second9d>
+Inited radar service with peerId: <MCPeerID: 0x10f4106a0 DisplayName = HAVEN-firstee8>
+Inited radar service with peerId: <MCPeerID: 0x10f40f560 DisplayName = HAVEN-secondee>
+Inited radar service with peerId: <MCPeerID: 0x10f40ea60 DisplayName = HAVEN-firstef9>
+Inited radar service with peerId: <MCPeerID: 0x10f40ea80 DisplayName = HAVEN-secondef>
+LobbyCell init. Owner: B8DE49A3-90B7-4D75-BB5C-E778CE701A2D
+Inited radar service with peerId: <MCPeerID: 0x10f4102a0 DisplayName = HAVEN-firsta01>
+Inited radar service with peerId: <MCPeerID: 0x10f40da40 DisplayName = HAVEN-seconda0>
+Inited radar service with peerId: <MCPeerID: 0x10f4061f0 DisplayName = HAVEN-first44f>
+Inited radar service with peerId: <MCPeerID: 0x10f40a910 DisplayName = HAVEN-second44>
+Inited radar service with peerId: <MCPeerID: 0x10f40ce00 DisplayName = HAVEN-first4c3>
+Inited radar service with peerId: <MCPeerID: 0x10f40b540 DisplayName = HAVEN-second4c>
+Inited radar service with peerId: <MCPeerID: 0x10f40a7a0 DisplayName = HAVEN-firstd2c>
+Inited radar service with peerId: <MCPeerID: 0x10f411a30 DisplayName = HAVEN-secondd2>
+Inited radar service with peerId: <MCPeerID: 0x10f40d900 DisplayName = HAVEN-first9a6>
+Inited radar service with peerId: <MCPeerID: 0x10f40d4b0 DisplayName = HAVEN-second9a>
+LobbyCell init. Owner: A845FD87-EF36-4C51-9B8D-95207ABAF950
+********* Finished setting up bridge for second-9A61C928-B0F2-4804-9169-C09587EB3612
+Inited radar service with peerId: <MCPeerID: 0x10f4104e0 DisplayName = HAVEN-first71d>
+Inited radar service with peerId: <MCPeerID: 0x10f4104d0 DisplayName = HAVEN-second71>
+Inited radar service with peerId: <MCPeerID: 0x10f40bf00 DisplayName = HAVEN-first2d8>
+Inited radar service with peerId: <MCPeerID: 0x10f40bf20 DisplayName = HAVEN-second2d>
+Inited radar service with peerId: <MCPeerID: 0x10f407640 DisplayName = HAVEN-firsteb3>
+Inited radar service with peerId: <MCPeerID: 0x10f40e860 DisplayName = HAVEN-secondeb>
+Inited radar service with peerId: <MCPeerID: 0x10f4104c0 DisplayName = HAVEN-first288>
+Inited radar service with peerId: <MCPeerID: 0x10f40ce60 DisplayName = HAVEN-second28>
+Inited radar service with peerId: <MCPeerID: 0x10f410520 DisplayName = HAVEN-first2b0>
+Inited radar service with peerId: <MCPeerID: 0x10f40e5f0 DisplayName = HAVEN-second2b>
+Inited radar service with peerId: <MCPeerID: 0x10f40d060 DisplayName = HAVEN-first460>
+Inited radar service with peerId: <MCPeerID: 0x10f40af00 DisplayName = HAVEN-second46>
+Inited radar service with peerId: <MCPeerID: 0x10f408ee0 DisplayName = HAVEN-first554>
+Inited radar service with peerId: <MCPeerID: 0x10f410f60 DisplayName = HAVEN-second55>
+Inited radar service with peerId: <MCPeerID: 0x10f40c180 DisplayName = HAVEN-first50e>
+Inited radar service with peerId: <MCPeerID: 0x10f410440 DisplayName = HAVEN-second50>
+Inited radar service with peerId: <MCPeerID: 0x10f406d20 DisplayName = HAVEN-firstca6>
+Inited radar service with peerId: <MCPeerID: 0x10f411a20 DisplayName = HAVEN-secondca>
+Inited radar service with peerId: <MCPeerID: 0x10f405360 DisplayName = HAVEN-firstb05>
+Inited radar service with peerId: <MCPeerID: 0x10f40da30 DisplayName = HAVEN-secondb0>
+Inited radar service with peerId: <MCPeerID: 0x10f40ea50 DisplayName = HAVEN-firste45>
+Inited radar service with peerId: <MCPeerID: 0x10f40e7a0 DisplayName = HAVEN-seconde4>
+Inited radar service with peerId: <MCPeerID: 0x10f40af30 DisplayName = HAVEN-first98d>
+Inited radar service with peerId: <MCPeerID: 0x10f410a10 DisplayName = HAVEN-second98>
+Inited radar service with peerId: <MCPeerID: 0x10f40e7d0 DisplayName = HAVEN-first249>
+Inited radar service with peerId: <MCPeerID: 0x10f404250 DisplayName = HAVEN-second24>
+Inited radar service with peerId: <MCPeerID: 0x10f410190 DisplayName = HAVEN-firstcdd>
+Inited radar service with peerId: <MCPeerID: 0x10f40acb0 DisplayName = HAVEN-secondcd>
+Inited radar service with peerId: <MCPeerID: 0x10f40c9a0 DisplayName = HAVEN-third832>
+Inited radar service with peerId: <MCPeerID: 0x10f40b510 DisplayName = HAVEN-firstbdb>
+Inited radar service with peerId: <MCPeerID: 0x10f40cd90 DisplayName = HAVEN-secondbd>
+Inited radar service with peerId: <MCPeerID: 0x10f409750 DisplayName = HAVEN-third076>
+Inited radar service with peerId: <MCPeerID: 0x10f40aa90 DisplayName = HAVEN-first4bb>
+Inited radar service with peerId: <MCPeerID: 0x10f40ed80 DisplayName = HAVEN-second4b>
+Inited radar service with peerId: <MCPeerID: 0x10f40f680 DisplayName = HAVEN-third6db>
+Inited radar service with peerId: <MCPeerID: 0x10f40d5b0 DisplayName = HAVEN-firsta6f>
+Inited radar service with peerId: <MCPeerID: 0x10f40f7c0 DisplayName = HAVEN-seconda6>
+Inited radar service with peerId: <MCPeerID: 0x10f40d160 DisplayName = HAVEN-thirdd6b>
+Inited radar service with peerId: <MCPeerID: 0x10f40d690 DisplayName = HAVEN-firste73>
+Inited radar service with peerId: <MCPeerID: 0x10f40e810 DisplayName = HAVEN-seconde7>
+Inited radar service with peerId: <MCPeerID: 0x10f40eed0 DisplayName = HAVEN-thirdb5d>
+Inited radar service with peerId: <MCPeerID: 0x10f404bc0 DisplayName = HAVEN-first476>
+Inited radar service with peerId: <MCPeerID: 0x10f40a740 DisplayName = HAVEN-second47>
+Inited radar service with peerId: <MCPeerID: 0x10f40e700 DisplayName = HAVEN-thirdf1d>
+Inited radar service with peerId: <MCPeerID: 0x10f410150 DisplayName = HAVEN-local>
+Inited radar service with peerId: <MCPeerID: 0x10f410230 DisplayName = HAVEN-local>
+Inited radar service with peerId: <MCPeerID: 0x10f40de70 DisplayName = HAVEN-f6dd62a8>
+Inited radar service with peerId: <MCPeerID: 0x10f405fa0 DisplayName = HAVEN-a>
+Inited radar service with peerId: <MCPeerID: 0x10f40de40 DisplayName = HAVEN-b>
+Inited radar service with peerId: <MCPeerID: 0x10f411500 DisplayName = HAVEN-local>
+Inited radar service with peerId: <MCPeerID: 0x10f40a990 DisplayName = HAVEN-local>
+Inited radar service with peerId: <MCPeerID: 0x10f40db70 DisplayName = HAVEN-local>
+Inited radar service with peerId: <MCPeerID: 0x10f410fd0 DisplayName = HAVEN-local>
+Inited radar service with peerId: <MCPeerID: 0x10f4086a0 DisplayName = HAVEN-83ea20fe>
+Inited radar service with peerId: <MCPeerID: 0x10f40de70 DisplayName = HAVEN-90327250>
+Inited radar service with peerId: <MCPeerID: 0x10f408090 DisplayName = HAVEN-local>
+Inited radar service with peerId: <MCPeerID: 0x10f409650 DisplayName = HTest Case '-[CellBaseTests.ScannerServiceInvitationTests testPendingAcceptedAndOutgoingExpiryAllowsNewValidInvitationWithoutOldSetup]' passed (1.289 seconds).
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testStopRejectsPendingAndIsIdempotent]' started.
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testStopRejectsPendingAndIsIdempotent]' passed (0.182 seconds).
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testUnknownPeerIsRejectedImmediately]' started.
+Test Case '-[CellBaseTests.ScannerServiceInvitationTests testUnknownPeerIsRejectedImmediately]' passed (0.002 seconds).
+Test Suite 'ScannerServiceInvitationTests' passed at 2026-09-29 08:42:01.061.
+	 Executed 11 tests, with 0 failures (0 unexpected) in 3.477 (3.482) seconds
+Test Suite 'CellBaseTests.xctest' passed at 2026-09-29 08:42:01.062.
+	 Executed 135 tests, with 0 failures (0 unexpected) in 38.395 (38.422) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 08:42:01.062.
+	 Executed 135 tests, with 0 failures (0 unexpected) in 38.395 (38.423) seconds
+AVEN-local>
+Inited radar service with peerId: <MCPeerID: 0x10f409650 DisplayName = HAVEN-local>
+Inited radar service with peerId: <MCPeerID: 0x10f409650 DisplayName = HAVEN-local>
+Inited radar service with peerId: <MCPeerID: 0x10f40f760 DisplayName = HAVEN-df0aa205>
+Inited radar service with peerId: <MCPeerID: 0x10f40de70 DisplayName = HAVEN-12ede1ec>
+
+COMMAND_EXIT=0

@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<title>HAVEN på Apple Vision — mockups v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#f5f6f8; --ink2:rgba(245,246,248,.72); --ink3:rgba(245,246,248,.5);
+    --glass:rgba(255,255,255,.12); --glass2:rgba(255,255,255,.18); --edge:rgba(255,255,255,.28);
+    --accent:#7cc4ff; --ok:#69d88b; --warn:#ffcf5c; --bad:#ff7a7a; --mute:#a7b0bf;
+    --event:#7cc4ff; --alert:#ff7a7a; --content:#69d88b; --reference:#e0a5ff;
+    --note:#ffd166;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#0b0e13;color:var(--ink);font-family:Inter,-apple-system,"SF Pro Text","Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .board{position:relative;width:1600px;height:900px;overflow:hidden;margin:0 auto 24px;
+    background:
+      radial-gradient(1200px 500px at 70% 0%, rgba(255,214,170,.20), transparent 60%),
+      radial-gradient(900px 400px at 10% 100%, rgba(120,170,255,.16), transparent 60%),
+      linear-gradient(180deg,#1a1f28 0%,#141820 55%,#0e1117 100%);}
+  /* room hints: floor + wall */
+  .board::before{content:"";position:absolute;left:0;right:0;top:62%;height:38%;
+    background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));
+    border-top:1px solid rgba(255,255,255,.08)}
+  .board-title{position:absolute;left:24px;top:18px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+  .board-title b{color:var(--ink2);font-weight:600}
+
+  .glass{position:absolute;background:var(--glass);border:1px solid var(--edge);border-radius:28px;
+    box-shadow:0 30px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.25);backdrop-filter:blur(18px)}
+  .win{padding:26px 28px}
+  .win h2{margin:0 0 4px;font-size:22px;font-weight:600}
+  .win .sub{font-size:13px;color:var(--ink2);margin-bottom:14px}
+  .orn{position:absolute;left:50%;transform:translateX(-50%);display:flex;gap:10px;align-items:center;
+    background:rgba(255,255,255,.14);border:1px solid var(--edge);border-radius:999px;padding:8px 14px;
+    box-shadow:0 12px 30px rgba(0,0,0,.4);font-size:13px;white-space:nowrap}
+  .orn .btn{padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18)}
+  .orn .btn.on{background:rgba(124,196,255,.28);border-color:rgba(124,196,255,.55)}
+  .orn .name{font-weight:600;padding:0 6px}
+  .closebtn{position:absolute;left:-14px;top:50%;width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.35)}
+  .bar{position:absolute;left:50%;bottom:-14px;width:120px;height:6px;border-radius:3px;background:rgba(255,255,255,.45);transform:translateX(-50%)}
+
+  /* skeleton-ish content */
+  .card{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:12px 14px;margin-bottom:10px}
+  .card h4{margin:0 0 4px;font-size:14px;font-weight:600}
+  .card p{margin:0;font-size:12.5px;color:var(--ink2);line-height:1.35}
+  .row{display:flex;gap:10px;align-items:center}
+  .pill{display:inline-block;white-space:nowrap;font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:var(--ink2)}
+  .pill.ok{color:#0b2;background:rgba(105,216,139,.18);border-color:rgba(105,216,139,.45);color:var(--ok)}
+  .pill.bad{background:rgba(255,122,122,.16);border-color:rgba(255,122,122,.45);color:var(--bad)}
+  .pill.warn{background:rgba(255,207,92,.16);border-color:rgba(255,207,92,.45);color:var(--warn)}
+  .pill.mute{background:rgba(167,176,191,.14);border-color:rgba(167,176,191,.4);color:var(--mute)}
+  .chip{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+  .primary{white-space:nowrap;background:rgba(124,196,255,.28);border:1px solid rgba(124,196,255,.55);border-radius:12px;padding:9px 14px;font-size:13px;font-weight:600;display:inline-block}
+  .field{background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:9px 12px;font-size:12.5px;color:var(--ink3)}
+  .msg{display:flex;gap:8px;margin-bottom:8px;font-size:12.5px}
+  .msg .who{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.18);flex:none}
+  .msg .t{background:rgba(255,255,255,.08);border-radius:12px;padding:8px 10px;color:var(--ink2)}
+  .msg.me .t{background:rgba(124,196,255,.2);color:var(--ink)}
+
+  /* annotation callouts */
+  .note{position:absolute;font-size:12.5px;line-height:1.35;color:#1b1400;background:var(--note);padding:8px 11px;border-radius:10px;max-width:280px;box-shadow:0 8px 20px rgba(0,0,0,.35)}
+  .note b{font-weight:700}
+  .note::before{content:"";position:absolute;width:12px;height:12px;background:var(--note);transform:rotate(45deg)}
+  .note.l::before{left:-6px;top:14px}
+  .note.r::before{right:-6px;top:14px}
+  .note.t::before{top:-6px;left:18px}
+  .note.b::before{bottom:-6px;left:18px}
+
+  /* table */
+  table{border-collapse:collapse;width:100%;font-size:12px}
+  th{font-weight:600;text-align:left;color:var(--ink3);padding:4px 8px;border-bottom:1px solid rgba(255,255,255,.14)}
+  td{padding:5px 8px;border-bottom:1px solid rgba(255,255,255,.07);color:var(--ink2);vertical-align:middle}
+  td.k{color:var(--ink);font-family:ui-monospace,SFMono-Regular,Menlo,"DejaVu Sans Mono",monospace;font-size:11.5px}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,"DejaVu Sans Mono",monospace;font-size:11.5px;word-break:break-word}
+  td.k,td.seq{white-space:nowrap}
+  .zone{position:absolute;overflow:hidden;background:rgba(0,0,0,.16);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:14px 16px}
+  .zone h3{margin:0 0 8px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
+  .zone h3 span{color:var(--ink);letter-spacing:0;text-transform:none;font-size:14px;margin-left:8px}
+  .legend{display:flex;gap:14px;font-size:11.5px;color:var(--ink2)}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+</style>
+</head>
+<body>
+
+<!-- ===================== SCENE 1: ROMMET ===================== -->
+<section class="board" id="scene-1">
+  <div class="board-title">Bilde 1 · <b>Rommet med flere Portholes</b> · mockup v1 · ikke Porthole-preview</div>
+
+  <!-- back-left porthole (farther away) -->
+  <div class="glass win" style="left:120px;top:150px;width:420px;height:470px;transform:perspective(1800px) rotateY(18deg);transform-origin:right center;opacity:.92">
+    <div class="closebtn"></div>
+    <h2>Relasjoner</h2><div class="sub">cell:///PortholeInstance/2f9a · 3 celler absorbert</div>
+    <div class="card"><h4>Vegar</h4><p>DiMy · pilot correspondence · sist 2 t siden</p></div>
+    <div class="card"><h4>Victoria</h4><p>«Lille Robot» · invitasjon godtatt</p></div>
+    <div class="card"><h4>Andre — Palazzo Comunale</h4><p>Ukentlig møte · OrderX, GastroPlanner, Planday</p></div>
+    <div class="row" style="margin-top:8px"><span class="primary">Inviter</span><span class="pill">Datalokasjon</span></div>
+    <div class="bar"></div>
+  </div>
+  <div class="orn" style="left:330px;top:640px;transform:translateX(-50%) perspective(1800px) rotateY(18deg)"><span class="name">Relasjoner</span><span class="btn on">Forside</span><span class="btn">Bakside</span><span class="btn">Inspiser</span></div>
+
+  <!-- center porthole (main) -->
+  <div class="glass win" style="left:560px;top:110px;width:600px;height:540px">
+    <div class="closebtn"></div>
+    <h2>Butler Chat</h2><div class="sub">cell:///PortholeInstance/0 · absorberer chat, agenda, perspective</div>
+    <div class="msg"><div class="who"></div><div class="t">God morgen. Dagens agenda har 3 møter; det første er med Andre kl. 11.</div></div>
+    <div class="msg me"><div class="who"></div><div class="t">Sett opp bakside for Palazzo-flaten og vis meg trafikken før møtet.</div></div>
+    <div class="msg"><div class="who"></div><div class="t">Gjort. Palazzo Concierge har 2 abonnement og 14 elementer siste time. Tapp er satt inn (metadata).</div></div>
+    <div class="row" style="margin-top:16px"><div class="field" style="flex:1">Skriv til butleren…</div><span class="primary">Send</span></div>
+    <div class="card" style="margin-top:16px"><h4>Forslag</h4><p>Åpne Palazzo Concierge · Vis relasjoner · Start opptak på chat</p></div>
+    <div class="bar"></div>
+  </div>
+  <div class="orn" style="left:860px;top:672px"><span class="name">Butler Chat</span><span class="btn on">Forside</span><span class="btn">Bakside</span><span class="btn">Inspiser</span><span class="btn">＋ Ny Porthole</span></div>
+
+  <!-- right porthole -->
+  <div class="glass win" style="left:1190px;top:160px;width:400px;height:430px;transform:perspective(1800px) rotateY(-16deg);transform-origin:left center;opacity:.94">
+    <div class="closebtn"></div>
+    <h2>Palazzo Concierge</h2><div class="sub">cell:///PortholeInstance/7c1e · wss://staging…/palazzo-concierge</div>
+    <div class="field" style="margin-bottom:10px">Hva serverer dere i kveld?</div>
+    <div class="card"><h4>Svar · tillit: medium</h4><p>Siciliansk meny; pistasj fra Bronte. Allergener må verifiseres av staben.</p></div>
+    <div class="row"><span class="pill ok">2 kilder</span><span class="pill warn">krever verifisering</span></div>
+    <div class="bar"></div>
+  </div>
+  <div class="orn" style="left:1390px;top:610px;transform:translateX(-50%) perspective(1800px) rotateY(-16deg)"><span class="name">Palazzo</span><span class="btn on">Forside</span><span class="btn">Bakside</span><span class="btn">Inspiser</span></div>
+
+  <!-- porthole deck (dock) -->
+  <div class="glass" style="left:400px;top:760px;width:800px;height:96px;border-radius:22px;padding:12px 16px;display:flex;gap:12px;align-items:center">
+    <div style="font-size:12px;color:var(--ink3);width:92px;line-height:1.3">Porthole-kø<br><span style="color:var(--ink2)">5 åpne · 3 ute</span></div>
+    <div class="card" style="margin:0;width:118px;border-color:rgba(124,196,255,.6)"><h4 style="font-size:12px">Butler Chat</h4><p>ute i rommet</p></div>
+    <div class="card" style="margin:0;width:118px;border-color:rgba(124,196,255,.6)"><h4 style="font-size:12px">Palazzo</h4><p>ute i rommet</p></div>
+    <div class="card" style="margin:0;width:118px;border-color:rgba(124,196,255,.6)"><h4 style="font-size:12px">Relasjoner</h4><p>ute i rommet</p></div>
+    <div class="card" style="margin:0;width:118px;opacity:.7"><h4 style="font-size:12px">Deploy-kø</h4><p>i køen</p></div>
+    <div class="card" style="margin:0;width:118px;opacity:.7"><h4 style="font-size:12px">Kallimachos</h4><p>i køen</p></div>
+  </div>
+
+  <div class="note l" style="left:1185px;top:700px"><b>Én Porthole = én celle = ett vindu.</b> Vinduet bærer bare ID; cellen (template-instans) bærer konfigurasjon, referanser og historikk.</div>
+  <div class="note t" style="left:40px;top:690px"><b>Kø i stedet for «for mange vinduer»</b> (HIG). Alle instanser lever i cellelaget; du tar dem ut i rommet én og én.</div>
+  <div class="note b" style="left:1230px;top:40px"><b>Ornament</b> under hver Porthole: Forside · Bakside · Inspiser. Blir toolbar-ornament automatisk på visionOS.</div>
+</section>
+
+<!-- ===================== SCENE 2: BAKSIDEN ===================== -->
+<section class="board" id="scene-2">
+  <div class="board-title">Bilde 2 · <b>Baksiden av Palazzo Concierge (redigeringsmodus)</b> · mockup v1 · ikke Porthole-preview</div>
+
+  <!-- small front porthole hint to the left, flipped state indicator -->
+  <div class="glass win" style="left:60px;top:250px;width:300px;height:360px;transform:perspective(1600px) rotateY(28deg);transform-origin:right center;opacity:.55">
+    <h2 style="font-size:18px">Butler Chat</h2><div class="sub">forside</div>
+    <div class="msg"><div class="who"></div><div class="t">God morgen…</div></div>
+    <div class="msg me"><div class="who"></div><div class="t">Sett opp bakside…</div></div>
+  </div>
+
+  <!-- the flipped porthole -->
+  <div class="glass" style="left:420px;top:70px;width:1120px;height:735px;transform:perspective(2400px) rotateY(-4deg);background:rgba(20,26,36,.55)">
+    <div class="closebtn"></div>
+    <div style="position:absolute;left:28px;top:22px;right:28px;display:flex;justify-content:space-between;align-items:baseline">
+      <div><span style="font-size:22px;font-weight:600">Palazzo Concierge</span> <span class="pill mute" style="margin-left:10px">bakside</span> <span class="pill" style="margin-left:6px">cell:///PortholeInstance/7c1e</span></div>
+      <div class="legend"><span><i style="background:var(--event)"></i>event</span><span><i style="background:var(--alert)"></i>alert</span><span><i style="background:var(--content)"></i>content</span><span><i style="background:var(--reference)"></i>reference</span></div>
+    </div>
+
+    <!-- zone: absorbert -->
+    <div class="zone" style="left:28px;top:70px;width:520px;height:250px">
+      <h3>Absorbert <span>3 celler</span></h3>
+      <table>
+        <tr><th>label</th><th>endepunkt</th><th>tilstand</th><th>agreement</th></tr>
+        <tr><td class="k">palazzo</td><td class="mono">wss://staging…/palazzo-concierge/…/Knowledge</td><td><span class="pill ok">lest · 14/t</span></td><td>signert 26.08</td></tr>
+        <tr><td class="k">guest</td><td class="mono">cell:///EntityAnchor</td><td><span class="pill bad">uleselig · deniedNoGrant</span></td><td>mangler grant</td></tr>
+        <tr><td class="k">orders</td><td class="mono">cell://staging…/Orders</td><td><span class="pill warn">ikke koblet · bro nede</span></td><td>—</td></tr>
+      </table>
+      <div style="margin-top:8px;font-size:11.5px;color:var(--ink3)">Rolig = alt lest. To rader er ikke lest, så <span class="mono">claimsAllClear = false</span>.</div>
+    </div>
+
+    <!-- zone: abonnert -->
+    <div class="zone" style="left:566px;top:70px;width:526px;height:250px">
+      <h3>Abonnert <span>2 flows · 5 topics</span></h3>
+      <table>
+        <tr><th>referanse</th><th>subscribeFeed</th><th>topics</th><th>siste</th></tr>
+        <tr><td class="k">palazzo</td><td><span class="pill ok">på</span></td><td class="mono">concierge.answer · .sources · developer.warning</td><td>12 s</td></tr>
+        <tr><td class="k">palazzo → sources</td><td><span class="pill ok">på</span></td><td class="mono">sources.updated</td><td>4 min · <span class="pill mute">stille</span></td></tr>
+        <tr><td class="k">guest</td><td><span class="pill bad">nektet</span></td><td class="mono">interests.match</td><td>—</td></tr>
+        <tr><td class="k">orders</td><td><span class="pill mute">av</span></td><td class="mono">—</td><td>—</td></tr>
+      </table>
+    </div>
+
+    <!-- zone: puls -->
+    <div class="zone" style="left:28px;top:338px;width:1064px;height:150px">
+      <h3>Puls <span>siste 60 s · 9 FlowElements</span></h3>
+      <svg width="1030" height="96" viewBox="0 0 1030 96">
+        <g stroke="rgba(255,255,255,.12)"><line x1="70" y1="20" x2="1010" y2="20"/><line x1="70" y1="48" x2="1010" y2="48"/><line x1="70" y1="76" x2="1010" y2="76"/></g>
+        <g font-size="11" fill="rgba(245,246,248,.6)"><text x="0" y="24">palazzo</text><text x="0" y="52">sources</text><text x="0" y="80">guest</text></g>
+        <g font-size="10" fill="rgba(245,246,248,.4)"><text x="70" y="94">−60 s</text><text x="540" y="94">−30 s</text><text x="990" y="94">nå</text></g>
+        <!-- palazzo: content+event dots -->
+        <circle cx="120" cy="20" r="6" fill="#69d88b"/><circle cx="210" cy="20" r="6" fill="#7cc4ff"/><circle cx="380" cy="20" r="6" fill="#69d88b"/><circle cx="410" cy="20" r="6" fill="#69d88b"/>
+        <circle cx="640" cy="20" r="6" fill="#e0a5ff"/><circle cx="800" cy="20" r="6" fill="#69d88b"/><circle cx="990" cy="20" r="9" fill="#69d88b" opacity=".9"><animate attributeName="r" values="7;11;7" dur="1.2s" repeatCount="indefinite"/></circle>
+        <!-- sources: silent -->
+        <text x="540" y="52" font-size="11" fill="rgba(245,246,248,.45)">stille i 4 min — sist 08:41:12</text>
+        <!-- guest: denied marks -->
+        <g fill="#ff7a7a"><text x="300" y="80" font-size="12">✕</text><text x="700" y="80" font-size="12">✕</text></g>
+        <text x="720" y="80" font-size="11" fill="rgba(255,122,122,.9)">deniedNoGrant · 2 forsøk</text>
+      </svg>
+    </div>
+
+    <!-- zone: set/get -->
+    <div class="zone" style="left:28px;top:506px;width:1064px;height:210px">
+      <h3>set / get <span>siste 8 av 41 · fra samhandlingshendelser (seq 1 203–1 244)</span></h3>
+      <table>
+        <tr><th>tid</th><th>op</th><th>keypath</th><th>requester</th><th>utfall</th><th>ms</th></tr>
+        <tr><td>08:45:31.204</td><td class="k">get</td><td class="k">palazzo.answer.text</td><td>kjetil (private)</td><td><span class="pill ok">ok</span></td><td>38</td></tr>
+        <tr><td>08:45:31.190</td><td class="k">set</td><td class="k">palazzo.ask</td><td>kjetil (private)</td><td><span class="pill ok">ok · flowEffect concierge.answer</span></td><td>1 460</td></tr>
+        <tr><td>08:45:02.011</td><td class="k">get</td><td class="k">guest.interests.match</td><td>kjetil (private)</td><td><span class="pill bad">denied · deniedNoGrant</span></td><td>2</td></tr>
+        <tr><td>08:44:58.877</td><td class="k">get</td><td class="k">orders.today</td><td>kjetil (private)</td><td><span class="pill warn">error · bro nede</span></td><td>30 004</td></tr>
+        <tr><td>08:44:20.450</td><td class="k">get</td><td class="k">palazzo.sources</td><td>kjetil (private)</td><td><span class="pill ok">ok</span></td><td>41</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="orn" style="left:980px;top:812px"><span class="name">Palazzo</span><span class="btn">Forside</span><span class="btn on">Bakside</span><span class="btn">Inspiser guest ↗</span><span class="btn">Sett inn tapp</span></div>
+
+  <div class="note r" style="left:60px;top:60px"><b>Snu, ikke gå rundt.</b> «Bakside» er en handling (flipp om y-aksen). Samme visning på Mac og iPad; på visionOS kan den også være et ekte bakstykke i et volum.</div>
+  <div class="note l" style="left:1260px;top:815px;max-width:300px"><b>Tre tilstander som ikke ser rolige ut:</b> uleselig (grant nektet), ikke koblet (bro nede), stille (4 min). Bare «lest» får være rolig.</div>
+</section>
+
+<!-- ===================== SCENE 3: INSPEKTØR ===================== -->
+<section class="board" id="scene-3">
+  <div class="board-title">Bilde 3 · <b>Inspektør for cell://…/ChatCell med FlowTap i kjeden</b> · mockup v1 · ikke Porthole-preview</div>
+
+  <!-- the porthole (left, smaller) -->
+  <div class="glass win" style="left:70px;top:150px;width:420px;height:520px;transform:perspective(1800px) rotateY(14deg);transform-origin:right center">
+    <div class="closebtn"></div>
+    <h2>Butler Chat</h2><div class="sub">cell:///PortholeInstance/0</div>
+    <div class="msg"><div class="who"></div><div class="t">Dagens agenda har 3 møter…</div></div>
+    <div class="msg me"><div class="who"></div><div class="t">Vis meg trafikken før møtet.</div></div>
+    <div class="msg"><div class="who"></div><div class="t">Tapp er satt inn (metadata).</div></div>
+    <div class="row" style="margin-top:12px"><div class="field" style="flex:1">Skriv…</div><span class="primary">Send</span></div>
+    <div class="bar"></div>
+  </div>
+  <div class="orn" style="left:280px;top:690px;transform:translateX(-50%) perspective(1800px) rotateY(14deg)"><span class="name">Butler Chat</span><span class="btn">Forside</span><span class="btn">Bakside</span><span class="btn on">Inspiser chat ↗</span></div>
+
+  <!-- inspector window (placed trailing) -->
+  <div class="glass" style="left:560px;top:60px;width:980px;height:780px;background:rgba(20,26,36,.5)">
+    <div class="closebtn"></div>
+    <div style="position:absolute;left:28px;top:22px;right:28px;display:flex;justify-content:space-between;align-items:baseline">
+      <div><span style="font-size:22px;font-weight:600">Inspektør</span> <span class="pill" style="margin-left:10px">cell://staging.haven.digipomps.org/ChatCell</span> <span class="pill mute" style="margin-left:6px">via label chat</span></div>
+      <div style="font-size:12px;color:var(--ink3)">åpnet fra baksiden · plassert ved siden av Portholen</div>
+    </div>
+
+    <!-- chain -->
+    <div class="zone" style="left:28px;top:70px;width:924px;height:120px">
+      <h3>Kjede <span>Porthole → FlowTap → ChatCell</span></h3>
+      <svg width="890" height="64" viewBox="0 0 890 64">
+        <defs><marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="rgba(245,246,248,.6)"/></marker></defs>
+        <g font-size="12" fill="#f5f6f8">
+          <rect x="0" y="10" width="200" height="44" rx="12" fill="rgba(255,255,255,.10)" stroke="rgba(255,255,255,.2)"/><text x="16" y="30">Porthole</text><text x="16" y="46" fill="rgba(245,246,248,.55)" font-size="11">PortholeInstance/0</text>
+          <rect x="345" y="10" width="200" height="44" rx="12" fill="rgba(124,196,255,.18)" stroke="rgba(124,196,255,.55)"/><text x="361" y="30">FlowTap</text><text x="361" y="46" fill="rgba(245,246,248,.55)" font-size="11">cell:///FlowTap/9b2 · videresender</text>
+          <rect x="690" y="10" width="200" height="44" rx="12" fill="rgba(255,255,255,.10)" stroke="rgba(255,255,255,.2)"/><text x="706" y="30">ChatCell</text><text x="706" y="46" fill="rgba(245,246,248,.55)" font-size="11">staging · signert flow</text>
+        </g>
+        <g stroke="rgba(245,246,248,.6)" stroke-width="1.5" fill="none" marker-end="url(#ar)">
+          <path d="M545,26 L690,26"/><path d="M200,26 L345,26"/>
+        </g>
+        <g stroke="rgba(105,216,139,.8)" stroke-width="1.5" fill="none" marker-end="url(#ar)">
+          <path d="M690,40 L545,40"/><path d="M345,40 L200,40"/>
+        </g>
+        <g font-size="10.5" fill="rgba(245,246,248,.55)"><text x="228" y="18">get/set 41 →</text><text x="560" y="18">get/set 41 →</text><text x="228" y="58">← flow 212 (0 endret)</text><text x="560" y="58">← flow 212</text></g>
+      </svg>
+    </div>
+
+    <!-- explore -->
+    <div class="zone" style="left:28px;top:206px;width:450px;height:250px">
+      <h3>Explore <span>keys · typer · grants</span></h3>
+      <table>
+        <tr><th>key</th><th>type</th><th>meg</th></tr>
+        <tr><td class="k">messages</td><td>list(object)</td><td><span class="pill ok">r---</span></td></tr>
+        <tr><td class="k">compose.draft</td><td>string (requester-lokal)</td><td><span class="pill ok">rw--</span></td></tr>
+        <tr><td class="k">send</td><td>set(string) → flowEffect chat.message</td><td><span class="pill ok">-w--</span></td></tr>
+        <tr><td class="k">members</td><td>list(identity)</td><td><span class="pill bad">ingen grant</span></td></tr>
+        <tr><td class="k">purposeRefs</td><td>list(string)</td><td><span class="pill ok">r---</span></td></tr>
+      </table>
+    </div>
+
+    <!-- snapshot -->
+    <div class="zone" style="left:494px;top:206px;width:458px;height:250px">
+      <h3>Snapshot <span>StateSnapshotCell · 08:45:31</span></h3>
+      <table>
+        <tr><th>key</th><th>verdi</th><th>status</th></tr>
+        <tr><td class="k">messages.count</td><td>212</td><td><span class="pill ok">ok</span></td></tr>
+        <tr><td class="k">compose.draft</td><td class="mono">"Vis meg trafikken før møtet."</td><td><span class="pill ok">ok</span></td></tr>
+        <tr><td class="k">members</td><td>—</td><td><span class="pill bad">error · deniedNoGrant</span></td></tr>
+        <tr><td class="k">purposeRefs</td><td class="mono">[purpose://contact.communication]</td><td><span class="pill ok">ok</span></td></tr>
+      </table>
+    </div>
+
+    <!-- live -->
+    <div class="zone" style="left:28px;top:472px;width:600px;height:285px">
+      <h3>Live <span>samhandlingshendelser + tappens opptak (metadata)</span></h3>
+      <table>
+        <tr><th>seq</th><th>tid</th><th>kind</th><th>detalj</th><th>bytes</th></tr>
+        <tr><td class="seq">1&nbsp;244</td><td>08:45:31.204</td><td class="k">flowIn</td><td class="mono">chat.message · content · origin ChatCell</td><td>412</td></tr>
+        <tr><td class="seq">1&nbsp;243</td><td>08:45:31.190</td><td class="k">set</td><td class="mono">send ← "Vis meg trafikken…" · ok · 1 460 ms</td><td>31</td></tr>
+        <tr><td class="seq">1&nbsp;242</td><td>08:45:30.002</td><td class="k">get</td><td class="mono">compose.draft · ok · 3 ms</td><td>—</td></tr>
+        <tr><td class="seq">1&nbsp;241</td><td>08:45:02.011</td><td class="k">get</td><td class="mono">members · denied · deniedNoGrant</td><td>—</td></tr>
+        <tr><td class="seq">1&nbsp;240</td><td>08:44:58.877</td><td class="k">flowIn</td><td class="mono">developer.warning · alert · «connect»</td><td>288</td></tr>
+      </table>
+    </div>
+
+    <!-- recording + valve -->
+    <div class="zone" style="left:644px;top:472px;width:308px;height:280px">
+      <h3>Opptak <span>eier-skopet</span></h3>
+      <div class="row" style="margin-bottom:8px"><span class="pill">av</span><span class="pill ok">metadata</span><span class="pill">innhold</span></div>
+      <div style="font-size:12px;color:var(--ink2);margin-bottom:8px">Retention: <b>200 elementer / 24 t</b> · lagret i din entitet · 12 kB</div>
+      <div class="row" style="margin-bottom:14px;flex-wrap:wrap"><span class="primary">Ta opp</span><span class="pill bad">Slett opptak</span><span class="pill">Del med Kallimachos…</span></div>
+      <h3 style="margin-top:6px">Ventil <span>tap.valve</span></h3>
+      <div class="row" style="margin-bottom:8px"><span class="pill ok">pass</span><span class="pill">mute</span><span class="pill">throttle 10/min</span><span class="pill">tema…</span></div>
+      <div style="font-size:11.5px;color:var(--ink3)">Innstillingen er en celle-verdi og huskes. Kryptert innhold tas opp som bytes uten nøkkel.</div>
+    </div>
+  </div>
+
+  <div class="note b" style="left:1240px;top:20px;max-width:300px"><b>Tre celler som finnes</b> (Explore-manifest, StateSnapshotCell, FlowProbe-mønsteret) + to nye ting: samhandlingshendelser og FlowTap.</div>
+  <div class="note t" style="left:60px;top:745px;max-width:300px"><b>Tappen er en celle</b>: grant-mal (bare eier leser opptak), persistens (slettbart), Explore (inspektøren finner den), delbar med en agent uten live-tilgang.</div>
+</section>
+
+<!-- ===================== SCENE 4: INFORMASJONSPRESS ===================== -->
+<section class="board" id="scene-4">
+  <div class="board-title">Bilde 4 · <b>Rommet med informasjonspress (ImmersiveSpace · mixed)</b> · mockup v1 · ikke Porthole-preview</div>
+
+  <svg width="1600" height="900" viewBox="0 0 1600 900" style="position:absolute;left:0;top:0">
+    <defs>
+      <radialGradient id="src" cx="50%" cy="45%" r="55%"><stop offset="0" stop-color="rgba(255,255,255,.55)"/><stop offset="1" stop-color="rgba(255,255,255,.06)"/></radialGradient>
+      <radialGradient id="me" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="rgba(124,196,255,.0)"/><stop offset=".8" stop-color="rgba(124,196,255,.25)"/><stop offset="1" stop-color="rgba(124,196,255,.0)"/></radialGradient>
+    </defs>
+    <!-- me ring -->
+    <ellipse cx="800" cy="760" rx="150" ry="50" fill="url(#me)" stroke="rgba(124,196,255,.7)" stroke-width="2"/>
+    <text x="800" y="765" text-anchor="middle" font-size="14" fill="#f5f6f8" font-family="Inter,sans-serif">meg · 27 elementer/min</text>
+
+    <!-- sources with streams; each: circle + label + stream of dots along a path -->
+    <!-- Butler (left) -->
+    <g>
+      <circle cx="240" cy="300" r="48" fill="url(#src)" stroke="rgba(255,255,255,.35)"/>
+      <text x="240" y="304" text-anchor="middle" font-size="13" fill="#f5f6f8" font-weight="600">Butler</text>
+      <path id="p1" d="M280,320 C450,420 620,620 700,735" fill="none" stroke="rgba(255,255,255,.08)"/>
+      <g fill="#7cc4ff"><circle r="4"><animateMotion dur="3s" repeatCount="indefinite"><mpath href="#p1"/></animateMotion></circle><circle r="4"><animateMotion dur="3s" begin="1s" repeatCount="indefinite"><mpath href="#p1"/></animateMotion></circle><circle r="4"><animateMotion dur="3s" begin="2s" repeatCount="indefinite"><mpath href="#p1"/></animateMotion></circle></g>
+      <circle cx="330" cy="350" r="4" fill="#7cc4ff"/><circle cx="420" cy="410" r="4" fill="#7cc4ff"/><circle cx="500" cy="480" r="4" fill="#69d88b"/><circle cx="590" cy="580" r="4" fill="#7cc4ff"/><circle cx="650" cy="660" r="4" fill="#7cc4ff"/>
+    </g>
+    <!-- Correspondence (upper left) -->
+    <g>
+      <circle cx="460" cy="150" r="44" fill="url(#src)" stroke="rgba(255,255,255,.35)"/>
+      <text x="460" y="146" text-anchor="middle" font-size="13" fill="#f5f6f8" font-weight="600">Correspondence</text><text x="460" y="162" text-anchor="middle" font-size="11" fill="rgba(245,246,248,.6)">Vegar · Victoria</text>
+      <path d="M480,195 C560,380 690,560 760,730" fill="none" stroke="rgba(255,255,255,.08)"/>
+      <circle cx="520" cy="290" r="4" fill="#69d88b"/><circle cx="600" cy="420" r="4" fill="#69d88b"/>
+    </g>
+    <!-- Palazzo (top center, high rate) -->
+    <g>
+      <circle cx="800" cy="120" r="56" fill="url(#src)" stroke="rgba(255,255,255,.45)"/>
+      <text x="800" y="116" text-anchor="middle" font-size="13" fill="#f5f6f8" font-weight="600">Palazzo</text><text x="800" y="132" text-anchor="middle" font-size="11" fill="rgba(245,246,248,.6)">OrderX · concierge</text>
+      <path d="M800,176 L800,705" fill="none" stroke="rgba(255,255,255,.08)"/>
+      <g fill="#69d88b"><circle cx="796" cy="210" r="4"/><circle cx="806" cy="250" r="4"/><circle cx="798" cy="290" r="4"/><circle cx="804" cy="330" r="4"/><circle cx="795" cy="370" r="4"/><circle cx="807" cy="410" r="4"/><circle cx="799" cy="450" r="4"/><circle cx="803" cy="490" r="4"/><circle cx="796" cy="530" r="4"/><circle cx="805" cy="570" r="4"/><circle cx="800" cy="610" r="4"/><circle cx="802" cy="650" r="4"/></g>
+      <circle cx="812" cy="340" r="4" fill="#ff7a7a"/><circle cx="790" cy="470" r="4" fill="#ff7a7a"/>
+    </g>
+    <!-- Kallimachos (upper right) -->
+    <g>
+      <circle cx="1140" cy="150" r="44" fill="url(#src)" stroke="rgba(255,255,255,.35)"/>
+      <text x="1140" y="154" text-anchor="middle" font-size="13" fill="#f5f6f8" font-weight="600">Kallimachos</text>
+      <path d="M1120,195 C1040,380 910,560 840,730" fill="none" stroke="rgba(255,255,255,.08)"/>
+      <circle cx="1080" cy="290" r="4" fill="#e0a5ff"/><circle cx="1000" cy="420" r="4" fill="#e0a5ff"/><circle cx="930" cy="540" r="4" fill="#69d88b"/>
+    </g>
+    <!-- EntityRadar (right) -->
+    <g>
+      <circle cx="1360" cy="300" r="48" fill="url(#src)" stroke="rgba(255,255,255,.35)"/>
+      <text x="1360" y="296" text-anchor="middle" font-size="13" fill="#f5f6f8" font-weight="600">EntityRadar</text><text x="1360" y="312" text-anchor="middle" font-size="11" fill="rgba(245,246,248,.6)">i nærheten · 2</text>
+      <path d="M1320,320 C1150,420 980,620 900,735" fill="none" stroke="rgba(255,255,255,.08)"/>
+      <circle cx="1250" cy="360" r="4" fill="#7cc4ff"/><circle cx="1100" cy="470" r="4" fill="#7cc4ff"/>
+    </g>
+    <!-- Varsler / Deploy-kø (far right, muted) -->
+    <g opacity=".55">
+      <circle cx="1440" cy="520" r="40" fill="url(#src)" stroke="rgba(255,255,255,.25)" stroke-dasharray="4 4"/>
+      <text x="1440" y="516" text-anchor="middle" font-size="12" fill="#f5f6f8" font-weight="600">Deploy-kø</text><text x="1440" y="532" text-anchor="middle" font-size="11" fill="rgba(245,246,248,.6)">dempet · 0/min</text>
+    </g>
+    <!-- Varsler (left low, throttled) -->
+    <g>
+      <circle cx="170" cy="540" r="40" fill="url(#src)" stroke="rgba(255,255,255,.3)"/>
+      <text x="170" y="536" text-anchor="middle" font-size="12" fill="#f5f6f8" font-weight="600">Varsler</text><text x="170" y="552" text-anchor="middle" font-size="11" fill="rgba(245,246,248,.6)">throttle 10/min</text>
+      <path d="M210,550 C400,640 560,700 680,750" fill="none" stroke="rgba(255,255,255,.08)"/>
+      <circle cx="330" cy="612" r="4" fill="#ff7a7a"/><circle cx="520" cy="690" r="4" fill="#7cc4ff"/>
+    </g>
+  </svg>
+
+  <!-- valve panels (ViewAttachment) -->
+  <div class="glass" style="left:690px;top:190px;width:290px;padding:10px 12px;border-radius:16px;font-size:12px">
+    <div class="row" style="justify-content:space-between"><b>Palazzo</b><span class="pill warn">14/min</span></div>
+    <div style="margin:8px 0 6px;height:6px;border-radius:3px;background:rgba(255,255,255,.15)"><div style="width:70%;height:6px;border-radius:3px;background:var(--accent)"></div></div>
+    <div class="row"><span class="pill ok">pass</span><span class="pill">mute</span><span class="pill">throttle</span><span class="pill">bare bestillinger</span></div>
+  </div>
+  <div class="glass" style="left:60px;top:370px;width:210px;padding:10px 12px;border-radius:16px;font-size:12px">
+    <div class="row" style="justify-content:space-between"><b>Butler</b><span class="pill">6/min</span></div>
+    <div style="margin:8px 0 6px;height:6px;border-radius:3px;background:rgba(255,255,255,.15)"><div style="width:40%;height:6px;border-radius:3px;background:var(--accent)"></div></div>
+    <div class="row"><span class="pill ok">pass</span><span class="pill">mute</span><span class="pill">throttle</span></div>
+  </div>
+  <div class="glass" style="left:1330px;top:590px;width:210px;padding:10px 12px;border-radius:16px;font-size:12px;opacity:.8">
+    <div class="row" style="justify-content:space-between"><b>Deploy-kø</b><span class="pill mute">dempet</span></div>
+    <div class="row" style="margin-top:8px"><span class="pill">pass</span><span class="pill bad">mute</span><span class="pill">throttle</span></div>
+  </div>
+
+  <!-- filter panel (ornament-like, bottom) -->
+  <div class="glass" style="left:1010px;top:770px;width:540px;height:100px;border-radius:22px;padding:12px 16px">
+    <div class="row" style="justify-content:space-between;margin-bottom:8px"><b style="font-size:13px">Filter</b><span style="font-size:11.5px;color:var(--ink3)">siste 10 min · 7 kilder · 2 dempet</span></div>
+    <div class="row" style="flex-wrap:wrap;gap:8px">
+      <span class="pill ok"><i class="chip" style="background:var(--event)"></i>event</span><span class="pill ok"><i class="chip" style="background:var(--alert)"></i>alert</span><span class="pill ok"><i class="chip" style="background:var(--content)"></i>content</span><span class="pill"><i class="chip" style="background:var(--reference)"></i>reference</span>
+      <span class="pill">tema: concierge.*</span><span class="pill">bare det som krever meg</span><span class="pill">Trykkpanel (2D) ↗</span>
+    </div>
+  </div>
+
+  <div class="note b" style="left:40px;top:30px;max-width:320px"><b>Kilder ankret i rommet</b> i en halvsirkel innenfor synsfeltet (HIG: ikke hode-ankret). Partikkeltetthet = rate; farge = type; størrelse = bytes.</div>
+  <div class="note l" style="left:1000px;top:200px;max-width:260px"><b>Ventilen er en celle</b> (FlowTap.valve). Å skru ned Palazzo her endrer faktisk hva som når deg — og huskes.</div>
+  <div class="note t" style="left:330px;top:790px;max-width:330px"><b>«Gøy før nyttig»-vakten:</b> rommet regnes som nyttig først når folk justerer en ventil etter å ha sett det (H11). Samme aggregat finnes som 2D «Trykkpanel» på Mac/iPad.</div>
+</section>
+
+</body>
+</html>

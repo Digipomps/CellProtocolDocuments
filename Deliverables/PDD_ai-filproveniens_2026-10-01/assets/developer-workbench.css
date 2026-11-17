@@ -1,0 +1,546 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
+ *
+ * Workbench's existing Skeleton renderer, with a restrained desktop-tool theme.
+ * Loaded only by Workbench configuration themes. Keep every rule inside the
+ * skeleton host: Porthole's navigation, identity controls and editor are shared.
+ *
+ * Appearance follows the operating system. An explicit data-workbench-theme
+ * ("light" or "dark") on the host or an ancestor overrides that preference.
+ * !important is limited to presentation that existing factories set inline.
+ * No generated labels, hidden actions, status inference or data changes.
+ */
+
+#porthole-skeleton-root {
+  --wb-background: #f5f5f7;
+  --wb-sidebar: #ececef;
+  --wb-surface: #ffffff;
+  --wb-raised: #ffffff;
+  --wb-field: #ffffff;
+  --wb-hover: #e8e8ed;
+  --wb-border: #d4d4db;
+  --wb-control-border: #878791;
+  --wb-text: #1d1d1f;
+  --wb-secondary: #62626b;
+  --wb-accent: #0068d6;
+  --wb-accent-text: #ffffff;
+  --wb-selection: #deebff;
+  --wb-selection-text: #174c90;
+  --wb-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+  --wb-drawer-shadow: 0 12px 40px rgb(0 0 0 / 18%);
+  --wb-sidebar-width: 184px;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  #porthole-skeleton-root {
+    --wb-background: #1c1c1f;
+    --wb-sidebar: #242427;
+    --wb-surface: #29292d;
+    --wb-raised: #323237;
+    --wb-field: #202023;
+    --wb-hover: #3a3a40;
+    --wb-border: #45454c;
+    --wb-control-border: #85858f;
+    --wb-text: #f5f5f7;
+    --wb-secondary: #b5b5bf;
+    --wb-accent: #086cde;
+    --wb-accent-text: #ffffff;
+    --wb-selection: #193b60;
+    --wb-selection-text: #d1e6ff;
+    --wb-shadow: 0 1px 2px rgb(0 0 0 / 14%);
+    --wb-drawer-shadow: 0 12px 40px rgb(0 0 0 / 42%);
+    color-scheme: dark;
+  }
+}
+
+#porthole-skeleton-root[data-workbench-theme="light"],
+[data-workbench-theme="light"] #porthole-skeleton-root {
+  --wb-background: #f5f5f7;
+  --wb-sidebar: #ececef;
+  --wb-surface: #ffffff;
+  --wb-raised: #ffffff;
+  --wb-field: #ffffff;
+  --wb-hover: #e8e8ed;
+  --wb-border: #d4d4db;
+  --wb-control-border: #878791;
+  --wb-text: #1d1d1f;
+  --wb-secondary: #62626b;
+  --wb-accent: #0068d6;
+  --wb-accent-text: #ffffff;
+  --wb-selection: #deebff;
+  --wb-selection-text: #174c90;
+  --wb-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+  --wb-drawer-shadow: 0 12px 40px rgb(0 0 0 / 18%);
+  color-scheme: light;
+}
+
+#porthole-skeleton-root[data-workbench-theme="dark"],
+[data-workbench-theme="dark"] #porthole-skeleton-root {
+  --wb-background: #1c1c1f;
+  --wb-sidebar: #242427;
+  --wb-surface: #29292d;
+  --wb-raised: #323237;
+  --wb-field: #202023;
+  --wb-hover: #3a3a40;
+  --wb-border: #45454c;
+  --wb-control-border: #85858f;
+  --wb-text: #f5f5f7;
+  --wb-secondary: #b5b5bf;
+  --wb-accent: #086cde;
+  --wb-accent-text: #ffffff;
+  --wb-selection: #193b60;
+  --wb-selection-text: #d1e6ff;
+  --wb-shadow: 0 1px 2px rgb(0 0 0 / 14%);
+  --wb-drawer-shadow: 0 12px 40px rgb(0 0 0 / 42%);
+  color-scheme: dark;
+}
+
+#porthole-skeleton-root {
+  min-width: 0;
+  max-width: none;
+  padding: 0;
+  background: var(--wb-background);
+  color: var(--wb-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  accent-color: var(--wb-accent);
+  scrollbar-color: var(--wb-control-border) transparent;
+}
+
+#porthole-skeleton-root > .skeleton-vstack {
+  width: 100%;
+  max-width: none;
+  min-height: 100%;
+  margin: 0;
+  gap: 0 !important;
+}
+
+#porthole-skeleton-root :is(.skeleton-text, .skeleton-key-text) {
+  color: var(--wb-text) !important;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+#porthole-skeleton-root :is(.skeleton-section, .skeleton-grid-item,
+  .skeleton-vstack, .skeleton-tabs-panel, .skeleton-list-row-main) {
+  min-width: 0;
+}
+
+/* The real first section is the configuration title and live summary. */
+#porthole-skeleton-root > .skeleton-vstack > .skeleton-section:first-child {
+  padding: 22px 26px 20px !important;
+  gap: 8px;
+  border-width: 0 0 1px !important;
+  border-radius: 0 !important;
+  background: var(--wb-surface) !important;
+  box-shadow: none;
+}
+
+#porthole-skeleton-root > .skeleton-vstack > .skeleton-section:first-child > .skeleton-section-header {
+  padding: 0;
+  border: 0;
+}
+
+#porthole-skeleton-root > .skeleton-vstack > .skeleton-section:first-child > .skeleton-section-header .skeleton-text {
+  font-size: 22px !important;
+  font-weight: 650;
+  letter-spacing: -0.5px;
+}
+
+#porthole-skeleton-root > .skeleton-vstack > .skeleton-section:first-child > .skeleton-section-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#porthole-skeleton-root > .skeleton-vstack > .skeleton-section:first-child > .skeleton-section-content > .skeleton-text {
+  color: var(--wb-secondary) !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+}
+
+/* Existing Tabs supply navigation and preserve their original click handlers. */
+#porthole-skeleton-root > .skeleton-vstack > .skeleton-tabs {
+  display: grid;
+  grid-template-columns: var(--wb-sidebar-width) minmax(0, 1fr);
+  align-items: start;
+  min-height: 460px;
+  gap: 0;
+}
+
+#porthole-skeleton-root > .skeleton-vstack > .skeleton-tabs > .skeleton-tabs-list {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  max-height: 85vh;
+  margin: 0;
+  padding: 18px 10px;
+  gap: 3px;
+  overflow-y: auto;
+  border: 0;
+  border-radius: 0;
+  background: var(--wb-sidebar);
+}
+
+#porthole-skeleton-root .skeleton-tabs-tab {
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--wb-secondary);
+  font: inherit;
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: start;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+#porthole-skeleton-root .skeleton-tabs-tab:hover {
+  background: var(--wb-hover);
+  color: var(--wb-text);
+  border-color: transparent;
+  transform: none;
+}
+
+#porthole-skeleton-root .skeleton-tabs-tab:is(.is-active, [aria-selected="true"]) {
+  background: var(--wb-selection);
+  color: var(--wb-selection-text);
+  border-color: transparent;
+  box-shadow: inset 3px 0 var(--wb-accent);
+  font-weight: 600;
+}
+
+#porthole-skeleton-root > .skeleton-vstack > .skeleton-tabs > .skeleton-tabs-panel {
+  padding: 24px;
+  border-inline-start: 1px solid var(--wb-border);
+  min-height: 460px;
+}
+
+#porthole-skeleton-root .skeleton-tabs-panel > * + * {
+  margin-top: 16px;
+}
+
+#porthole-skeleton-root .skeleton-tabs-panel .skeleton-tabs-list {
+  padding: 4px;
+  gap: 4px;
+  border: 1px solid var(--wb-border);
+  border-radius: 9px;
+  background: var(--wb-sidebar);
+}
+
+#porthole-skeleton-root .skeleton-grid:not(.haven-work-board-grid) {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)) !important;
+  align-items: start;
+  gap: 16px !important;
+}
+
+#porthole-skeleton-root .skeleton-section:not(.haven-work-board-card-drop-zone) {
+  padding: 18px !important;
+  gap: 14px;
+  border-color: var(--wb-border) !important;
+  border-radius: 10px !important;
+  background: var(--wb-surface) !important;
+  box-shadow: var(--wb-shadow);
+}
+
+#porthole-skeleton-root .skeleton-section-header {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--wb-border);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+#porthole-skeleton-root .skeleton-section-content > * + * {
+  margin-top: 10px;
+}
+
+#porthole-skeleton-root .skeleton-section-footer {
+  border-color: var(--wb-border);
+}
+
+#porthole-skeleton-root .skeleton-hstack {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+
+/* dashboardBadgeKeyText already emits this portable style class. */
+#porthole-skeleton-root .conference-badge {
+  padding: 4px 8px !important;
+  border-color: var(--wb-border) !important;
+  border-radius: 5px !important;
+  background: var(--wb-background) !important;
+  color: var(--wb-secondary) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+#porthole-skeleton-root :is(.skeleton-list, .skeleton-list-row-shell) {
+  gap: 8px;
+}
+
+#porthole-skeleton-root .skeleton-list-row {
+  padding: 12px;
+  border: 1px solid var(--wb-border);
+  border-radius: 7px;
+  background: var(--wb-surface);
+  color: var(--wb-text);
+  box-shadow: none;
+}
+
+#porthole-skeleton-root .skeleton-list-row.is-selectable:hover {
+  background: var(--wb-hover);
+  border-color: var(--wb-control-border);
+  transform: none;
+}
+
+#porthole-skeleton-root .skeleton-list-row:is(.is-selected, .is-selection-pending) {
+  background: var(--wb-selection);
+  border-color: var(--wb-accent);
+  box-shadow: inset 2px 0 var(--wb-accent);
+}
+
+#porthole-skeleton-root .skeleton-list-row-main > .skeleton-vstack > .skeleton-text:first-child {
+  font-weight: 600 !important;
+}
+
+#porthole-skeleton-root .skeleton-list-row-main > .skeleton-vstack > .skeleton-text:not(:first-child) {
+  color: var(--wb-secondary) !important;
+}
+
+#porthole-skeleton-root :is(.skeleton-list-empty, .skeleton-grid-empty) {
+  padding: 26px 16px;
+  border: 1px dashed var(--wb-border);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--wb-secondary);
+  font-size: 13px;
+  font-style: normal;
+  text-align: center;
+}
+
+#porthole-skeleton-root :is(.skeleton-button, .skeleton-list-row-action,
+  .skeleton-list-row-toggle, .skeleton-rich-toolbar-button) {
+  min-height: 32px;
+  padding: 6px 11px !important;
+  border: 1px solid var(--wb-control-border) !important;
+  border-radius: 6px !important;
+  background: var(--wb-raised) !important;
+  color: var(--wb-text) !important;
+  box-shadow: var(--wb-shadow);
+  font: inherit;
+  font-weight: 500;
+  line-height: 1.35;
+  text-decoration: none;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+#porthole-skeleton-root :is(.skeleton-button, .skeleton-list-row-action,
+  .skeleton-list-row-toggle, .skeleton-rich-toolbar-button):hover:not(:disabled) {
+  background: var(--wb-hover) !important;
+  border-color: var(--wb-text) !important;
+  transform: none;
+}
+
+#porthole-skeleton-root .skeleton-button.primary-action {
+  border-color: var(--wb-accent) !important;
+  background: var(--wb-accent) !important;
+  color: var(--wb-accent-text) !important;
+}
+
+#porthole-skeleton-root .skeleton-button.primary-action:hover:not(:disabled) {
+  background: var(--wb-accent) !important;
+  border-color: var(--wb-text) !important;
+  box-shadow: inset 0 0 0 1px var(--wb-accent-text);
+}
+
+#porthole-skeleton-root :is(button, input, select, textarea):disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#porthole-skeleton-root :is(.skeleton-textfield, .skeleton-textarea,
+  .skeleton-rich-textarea, .skeleton-picker-select) {
+  width: 100%;
+  max-width: 100%;
+  min-height: 36px;
+  padding: 8px 10px !important;
+  border: 1px solid var(--wb-control-border) !important;
+  border-radius: 6px !important;
+  background: var(--wb-field) !important;
+  color: var(--wb-text) !important;
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 3%);
+  font: inherit;
+  line-height: 1.5;
+}
+
+#porthole-skeleton-root :is(.skeleton-textfield, .skeleton-textarea)::placeholder {
+  color: var(--wb-secondary);
+  opacity: 1;
+}
+
+#porthole-skeleton-root .skeleton-picker-label {
+  color: var(--wb-secondary) !important;
+}
+
+#porthole-skeleton-root .skeleton-textarea {
+  resize: vertical;
+}
+
+#porthole-skeleton-root .skeleton-rich-toolbar {
+  border-color: var(--wb-border);
+  background: var(--wb-sidebar);
+}
+
+#porthole-skeleton-root :is(button, input, select, textarea, a,
+  [tabindex]:not([tabindex="-1"]), [contenteditable="true"]):focus-visible {
+  outline: 3px solid var(--wb-accent);
+  outline-offset: 3px;
+}
+
+#porthole-skeleton-root :is(.skeleton-divider, .skeleton-reference,
+  .skeleton-fallback, .skeleton-visualization-fallback) {
+  border-color: var(--wb-border);
+  background: var(--wb-background);
+  color: var(--wb-text);
+}
+
+#porthole-skeleton-root :is(.skeleton-reference-title, .skeleton-object-key,
+  .skeleton-visualization-table-heading, .skeleton-visualization-axis-label) {
+  color: var(--wb-secondary);
+}
+
+#porthole-skeleton-root .skeleton-visualization-table {
+  border: 1px solid var(--wb-border);
+  background: var(--wb-surface);
+  color: var(--wb-text);
+}
+
+#porthole-skeleton-root .skeleton-visualization-table-header {
+  background: var(--wb-sidebar);
+  border-bottom: 1px solid var(--wb-border);
+}
+
+#porthole-skeleton-root .skeleton-visualization-table-row {
+  color: var(--wb-text);
+  border-bottom: 1px solid var(--wb-border);
+}
+
+#porthole-skeleton-root .skeleton-visualization-table-row:is(:hover, .is-selected) {
+  background: var(--wb-selection);
+}
+
+/* Preserve the existing horizontal board and its drop targets. */
+#porthole-skeleton-root .haven-work-board-grid {
+  gap: 12px !important;
+}
+
+#porthole-skeleton-root .haven-work-board-lane.skeleton-section {
+  padding: 12px !important;
+  background: var(--wb-sidebar) !important;
+  box-shadow: none;
+}
+
+#porthole-skeleton-root .haven-work-board-card {
+  padding: 12px !important;
+  border-color: var(--wb-border) !important;
+  border-radius: 7px !important;
+  background: var(--wb-surface) !important;
+  box-shadow: var(--wb-shadow);
+}
+
+#porthole-skeleton-root .haven-work-board-chip {
+  padding: 3px 6px !important;
+  border-color: var(--wb-border) !important;
+  border-radius: 4px !important;
+  background: var(--wb-background) !important;
+  color: var(--wb-secondary) !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+}
+
+#porthole-skeleton-root .haven-work-board-card-drop-zone {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#porthole-skeleton-root .haven-work-board-detail-drawer {
+  border-color: var(--wb-border) !important;
+  background: var(--wb-surface) !important;
+  color: var(--wb-text);
+  box-shadow: var(--wb-drawer-shadow);
+}
+
+@media (max-width: 760px) {
+  #porthole-skeleton-root > .skeleton-vstack > .skeleton-section:first-child {
+    padding: 18px 16px !important;
+  }
+
+  #porthole-skeleton-root > .skeleton-vstack > .skeleton-tabs {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+
+  #porthole-skeleton-root > .skeleton-vstack > .skeleton-tabs > .skeleton-tabs-list {
+    position: static;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    max-height: none;
+    padding: 10px 12px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--wb-border);
+  }
+
+  #porthole-skeleton-root .skeleton-tabs-tab {
+    flex-shrink: 0;
+    min-height: 44px;
+    white-space: nowrap;
+  }
+
+  #porthole-skeleton-root > .skeleton-vstack > .skeleton-tabs > .skeleton-tabs-panel {
+    padding: 16px;
+    border-inline-start: 0;
+    min-height: 0;
+  }
+
+  #porthole-skeleton-root :is(.skeleton-button, .skeleton-list-row-action,
+    .skeleton-textfield, .skeleton-picker-select) {
+    min-height: 44px;
+  }
+
+  #porthole-skeleton-root :is(.skeleton-textfield, .skeleton-textarea,
+    .skeleton-rich-textarea, .skeleton-picker-select) {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #porthole-skeleton-root *,
+  #porthole-skeleton-root *::before,
+  #porthole-skeleton-root *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (forced-colors: active) {
+  #porthole-skeleton-root .skeleton-tabs-tab[aria-selected="true"],
+  #porthole-skeleton-root .skeleton-list-row.is-selected {
+    border: 2px solid Highlight !important;
+  }
+
+  #porthole-skeleton-root :focus-visible {
+    outline-color: Highlight;
+  }
+}

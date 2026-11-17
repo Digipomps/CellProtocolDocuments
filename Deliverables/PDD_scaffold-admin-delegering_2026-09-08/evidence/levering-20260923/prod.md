@@ -1,0 +1,28 @@
+Skript: `scripts/provision-scaffold-administrator-production.sh` fra `03fc0effe8e2dcc5df322b9d745f499582d187b6`, md5 `1896dcc5f4106e10151a2cbbbc10fe83`.
+Representanter (prod): kjetil2 `87FA1CF0…`/identity `E027291A…`, Vegar `836F624A…`/identity `ABA68006…` (lest fra prods database 11:38Z).
+
+### `kjetil2` `--preflight` → exit 0
+
+```text
+status=preflight_ready revision=03fc0effe8e2dcc5df322b9d745f499582d187b6 dataKiB=273132 freeKiB=105819552 writableBinds=3
+writableBind=0 /app/CellsContainer
+writableBind=1 /app/IdentityVaults
+writableBind=2 /app/Database
+```
+
+### `kjetil2` `run` → exit 0
+
+```text
+scaffold_administrator_production_receipt={"schema":"haven.scaffold-administrator.production-operation.v1","status":"committed_verified","environment":"production","writableBindsBackedUp":3,"appRevision":"03fc0effe8e2dcc5df322b9d745f499582d187b6","transactionID":"20260924T040255Z-production-03fc0eff","networkDuringProvisioning":"none","backupDisposition":"deleted_after_verified_restart","completedAt":"2026-09-24T04:03:16Z","provisioning":{"administratorEntityRef":"entity:digipomps","appRevision":"03fc0effe8e2dcc5df322b9d745f499582d187b6","approvalReference":"G3:user-approved:2026-09-23","authorityActions":["mandate.issue","mandate.revoke","orgLink.issue","orgLink.revoke"],"environment":"production","registryReceiptID":"7D562AE9-5452-47CB-B396-78AF457243F7","representativeBindingSHA256":"sha256:9b6280fd203ab9f0eb28358057b2b22d36be5aa05542df4367adf9e6b1ff2fb9","requiredSignatures":1,"scaffoldRef":"scaffold:cellscaffold","schema":"haven.scaffold-administrator.provision-receipt.v1","status":"provisioned","validUntil":"2026-12-23T04:03:05Z"}}
+```
+
+### `vegar` `run` → exit 0
+
+```text
+scaffold_administrator_production_receipt={"schema":"haven.scaffold-administrator.production-operation.v1","status":"committed_verified","environment":"production","writableBindsBackedUp":3,"appRevision":"03fc0effe8e2dcc5df322b9d745f499582d187b6","transactionID":"20260924T040319Z-production-03fc0eff","networkDuringProvisioning":"none","backupDisposition":"deleted_after_verified_restart","completedAt":"2026-09-24T04:03:33Z","provisioning":{"administratorEntityRef":"entity:digipomps","appRevision":"03fc0effe8e2dcc5df322b9d745f499582d187b6","approvalReference":"G3:user-approved:2026-09-23","authorityActions":["mandate.issue","mandate.revoke","orgLink.issue","orgLink.revoke"],"environment":"production","registryReceiptID":"7D562AE9-5452-47CB-B396-78AF457243F7","representativeBindingSHA256":"sha256:169b40154ce8caa36d2e3bfa2aebad6d34f92dc9b68be7a2b24417d053f0bff1","requiredSignatures":1,"scaffoldRef":"scaffold:cellscaffold","schema":"haven.scaffold-administrator.provision-receipt.v1","status":"provisioned","validUntil":"2026-12-23T04:03:22Z"}}
+```
+
+## Readiness etterpaa
+
+```text
+{"runtimeDiagnostics":[],"runtimeAdvisories":["scaffold_administrator_threshold_below_two scaffold=scaffold:cellscaffold requiredSignatures=1 reason=utviklingsfase, styreleder alene setAt=2026-09-09T00:00:00Z"],"mode":"serving","status":"ready","acceptsNewTraffic":true,"updatedAt":1790222613.918191}```

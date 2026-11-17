@@ -512,6 +512,24 @@ def collect_modifier_bindings(
 ) -> None:
     if not isinstance(modifiers, dict):
         return
+    # Localization uses the same authorized host projection as other readable
+    # bindings. Item/context arguments are local data, never remote root reads.
+    localization = modifiers.get("localization")
+    if isinstance(localization, dict):
+        for slot, text in localization.items():
+            if not isinstance(text, dict):
+                continue
+            text_path = f"{path}.localization.{slot}"
+            if text.get("scope", "root") == "root":
+                add_binding(bindings, text_path, "Localization", "localizedValue", text.get("valueKeypath"),
+                            "get", OBJECT_TYPES, references, default_endpoint)
+            arguments = text.get("arguments")
+            if isinstance(arguments, dict):
+                for name, argument in arguments.items():
+                    if isinstance(argument, dict) and "value" not in argument and argument.get("scope", "root") == "root":
+                        add_binding(bindings, f"{text_path}.arguments.{name}", "Localization", "argument", argument.get("keypath"),
+                                    "get", SCALAR_TYPES, references, default_endpoint)
+
     visibility = modifiers.get("visibility")
     if isinstance(visibility, dict):
         when = visibility.get("when")

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digipomps.org/haven/contracts/scheduled-job-approval-v1.schema.json",
+  "title": "HAVEN scheduled job approval v1 (godkjenning)",
+  "description": "State/ScheduledJobs/<id>.approval.json. Skrives bare av ScheduledJobApprovalService.decide, som nås fra menylinjen (POST /challenges/respond) og fra kommandoen schedule-approve. Ingen MCP-verktøy skriver denne fila. Arbeideren kjører en jobb bare når decision er approved og specDigest er lik sjekksummen av spec-fila slik den ligger nå.",
+  "type": "object",
+  "required": [
+    "schema",
+    "id",
+    "specDigest",
+    "decision",
+    "decidedAt",
+    "reviewer",
+    "answeredVia"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "haven.scheduled-job-approval.v1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+    },
+    "specDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "decision": {
+      "enum": [
+        "approved",
+        "rejected"
+      ]
+    },
+    "decidedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reviewer": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "answeredVia": {
+      "const": "ScheduledJobApprovalService.decide"
+    }
+  }
+}

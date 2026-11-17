@@ -1,0 +1,1 @@
+One local CP8 then CS17 attempt; stop at first red. Requires AUTHORIZATION.json and fresh exclusive ADMISSION.json from Deploy prosjekt køadministrasjon. No push, CI, release or deploy. Never reactivate the previous job.

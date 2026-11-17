@@ -67,6 +67,24 @@ Current limits:
   compatibility. Strict mode rejects handler installation until an exact
   method contract exists.
 
+## Optional host operations and availability
+
+In the owner-attach candidate described in [Chapter 32](32_Cross_Scaffold_Entity_Enrollment.md)
+(CellProtocol PR #56, not merged as of 2026-10-23; not on `main`),
+`entityExtension.ownerAttach.offer` (GET) and `.accept` (SET) are advertised only
+while `OwnerAttachExtensionRuntime` has an installed receiver. Keys, method
+contracts, legacy metadata, descriptions and keypath audit use the same live
+availability. This applies even to cells created before the host is installed.
+The overlay is not persisted into cell JSON; removing the host removes these
+operations from discovery without changing existing cell contracts.
+
+Their empty permissions list means owner-only proof is required; it is not a
+public-access declaration. A skeleton or agent must not turn these operations
+into generic automatic form submissions: the native client verifies the offer,
+obtains human consent or exact saved policy, and signs the consent locally.
+Discovery itself provides no authority. New tests exercise host installation,
+uninstallation, decode, metadata consistency and unchanged persisted JSON.
+
 ## Normative Operation Contract
 
 Each public operation must advertise one contract identified by `(key,
@@ -414,3 +432,51 @@ Explore is ready for skeleton and cell building everywhere when:
 - agents can build a basic skeleton from manifests without reading Swift source
 - missing data/action support is reported as contract work, not hidden behind
   fake UI
+
+
+## Localization bindings (initial implementation, September 2026)
+
+Localization descriptors are presentation metadata, but their dynamic arguments still depend on declared data contracts. `skeleton_explore_validator.py` now collects root-scoped `modifiers.localization.<slot>.arguments.<name>.keypath` as scalar `get` bindings, and root-scoped `valueKeypath` as an object `get` binding. `item` and `context` reads remain local and do not add remote root requests. Literal arguments add no reads. This is a static contract check, not an authorization grant.
+
+For a localized configuration, run both checks from the sibling repositories:
+
+```sh
+node CellProtocol/Tools/Localization/validate.mjs path/to/configuration.json
+python3 CellProtocolDocuments/Tools/Explore/skeleton_explore_validator.py --help
+```
+
+Supply the normal manifests/contracts to the second command. The first validates the supported slot set, descriptor shapes, catalog envelope, approval/source hashes, ICU syntax and declared message arguments. The Explore collector validates referenced public reads against the supplied manifests. Neither check proves runtime access, freshness, translation quality, layout or publication preservation; those require the host/renderer tests.
+
+Current portable slots are `Text.text`, `Button.label`, `TextField.placeholder`, and `TextArea.placeholder`. Other slots from the localization implementation plan remain pending. Never translate `CellReference.label`, an action key, an option ID, or user-authored editable content by interpreting an arbitrary string as a translation key. See Book 12 section 7 and `CellProtocol/fixtures/localization/skeleton.json` for the current wire form.
+
+## Scaffold administrator contract example <a id="scaffold-administrator-contracts"></a>
+
+Last verified against code: 2026-09-09 — this section only, CellScaffold branch
+`pdd/scaffold-admin-delegering`, worktree `CellScaffold/_wt-sad-20260909`.
+
+The [administrator](scaffold-administrator_v1.json) and
+[mandate](scaffold-mandate_v1.json) contracts describe a bounded use of existing
+Explore/Meddle authorization. Registry GET operations are
+`administrator.state`, `administrator.thresholdPolicy` and
+`administrator.history`; SET operations are `administrator.register`,
+`administrator.transfer` and `administrator.thresholdPolicy.set`.
+Mandate operations are GET `mandate.list`, `mandate.read.<UUID>`, `orgLink.list`
+and SET `mandate.issue`, `mandate.revoke`, `orgLink.issue`, `orgLink.revoke`.
+Optional resource selection uses `mandate.list.<base64url(resourceRef)>`.
+
+GET has no payload. Mandate issuance requires the actual envelope
+`{ mandate, subject, signerAuthorities, reason }`, including signed mandate
+data and explicit representative Contracts. `orgLink.issue` also requires
+`subject` and `reason`. Query suffixes select private records/resources and
+are checked by normal authorization plus the handler's resource checks;
+private mandate IDs are not advertised as Explore keys. Namespace roots
+`mandate`/`orgLink` and bare `mandate.read` are not successful list/read aliases.
+
+Explicit Explore declarations are present, but several return schemas remain
+generic object/list shapes. A prior zero-error source audit had computed-key
+warnings requiring manual review; it is not full runtime schema proof. See
+[the contract evidence and fixture caveats](../Deliverables/PDD_scaffold-admin-delegering_2026-09-08/TESTRESULT.md#contract)
+and [WP9's handler inventory](../Deliverables/PDD_scaffold-admin-delegering_2026-09-08/ACCEPT.md#stubs).
+The role denial and target-Cell behavior evidence is in
+[the later green runs](../Deliverables/PDD_scaffold-admin-delegering_2026-09-08/TESTRESULT.md#auth).
+No new generic Explore semantics or administration GUI is delivered here.

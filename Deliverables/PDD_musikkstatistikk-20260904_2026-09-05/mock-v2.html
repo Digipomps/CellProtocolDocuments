@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="nb"><head><meta charset="utf-8">
+<title>Statistikk — mockup</title>
+<link rel="stylesheet" href="../../../../CellScaffold/Public/css/butterpop-studio.css">
+<style>
+  body { background: var(--paper); }
+  .mockframe { width: 1180px; margin: 0 auto 60px; padding: 28px 0 40px; }
+  /* Fem faner i stedet for fire — krever endring i .segmented */
+  .segmented.is-five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+
+  .stat-notice {
+    display: flex; gap: 12px; align-items: flex-start;
+    border: 1px solid var(--ink); border-left-width: 6px;
+    border-radius: var(--radius); background: var(--white);
+    padding: 14px 16px; margin: 0 0 22px;
+  }
+  .stat-notice strong { font-weight: 850; }
+  .stat-notice p { margin: 4px 0 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
+  .stat-notice-mark { font-weight: 900; font-size: 18px; line-height: 1.2; }
+
+  .stat-table { width: 100%; border-collapse: collapse; }
+  .stat-table th, .stat-table td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); }
+  .stat-table thead th { border-bottom: 1px solid var(--ink); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  .stat-group { font-size: 11px; font-weight: 850; letter-spacing: .04em; text-transform: uppercase; }
+  .stat-group-caption { display: block; margin-top: 3px; font-size: 11px; font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--muted); }
+  .stat-sep { border-left: 1px solid var(--line); }
+  .stat-num { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 800; font-size: 15px; }
+  .stat-sub { display: block; color: var(--muted); font-size: 12px; font-weight: 500; font-family: Inter, system-ui, sans-serif; }
+  .stat-title { font-weight: 850; }
+  .stat-title span { display: block; color: var(--muted); font-size: 12px; font-weight: 500; }
+
+  .legend { display: flex; gap: 18px; align-items: center; margin: 0 0 14px; font-size: 13px; }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  .swatch-levert { background: #2aaeb7; }
+  .swatch-lyttet { background: #ff634f; }
+
+  .bars { display: grid; gap: 10px; }
+  .barrow { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 12px; align-items: center; }
+  .barlabel { font-size: 12px; color: var(--muted); font-family: ui-monospace, Menlo, monospace; }
+  .bartrack { display: grid; gap: 2px; }
+  .bar { display: grid; grid-template-columns: minmax(0, 1fr) 48px; align-items: center; gap: 8px; }
+  .barwrap { min-width: 0; }
+  .barfill { display: block; height: 13px; border-radius: 0 4px 4px 0; }
+  .barval { font-size: 11px; font-weight: 800; color: var(--ink);
+    font-family: ui-monospace, Menlo, monospace; white-space: nowrap; text-align: right; }
+  .bar-levert { background: #2aaeb7; }
+  .bar-lyttet { background: #ff634f; }
+  .axis-note { margin-top: 14px; color: var(--muted); font-size: 12px; }
+  .panel-toolbar h3 { margin: 0; }
+
+  .usikret { display:inline-block; margin-left:8px; padding:2px 7px; border:1px solid var(--muted); border-radius:999px;
+    font-size:11px; font-weight:700; color:var(--muted); letter-spacing:.02em; vertical-align:2px; }
+  .section-h { font-size: 13px; font-weight: 850; text-transform: uppercase; letter-spacing: .05em; margin: 28px 0 4px; }
+  .section-p { margin: 0 0 12px; color: var(--muted); font-size: 13px; line-height: 1.45; max-width: 820px; }
+  .empty-detail { border:1px dashed var(--line); border-radius: var(--radius); padding: 18px; color: var(--muted); font-size: 14px; background: var(--white); }
+</style></head>
+<body>
+<div class="mockframe" id="v2-fylt">
+  <div class="segmented is-five" role="tablist" aria-label="Studioområder">
+    <button class="segment" role="tab" aria-selected="false">Mikser</button>
+    <button class="segment" role="tab" aria-selected="false">Publiser</button>
+    <button class="segment is-active" role="tab" aria-selected="true">Statistikk</button>
+    <button class="segment" role="tab" aria-selected="false">Medlemmer</button>
+    <button class="segment" role="tab" aria-selected="false">Brukskvote</button>
+  </div>
+  <div class="panel-toolbar" style="margin-bottom:18px">
+    <div><h3>Bruk av publiserte låter</h3>
+      <p class="subtle" style="margin:6px 0 0">Talt siden 25.09.2026</p></div>
+  </div>
+  <div class="section-h">Alle avspillinger <span class="usikret">usikret</span></div>
+  <p class="section-p">Talt for alle, også uten innlogging. Ingenting lagres om den som lytter — bare en teller på låta.
+     Tallene er ikke autentisert og kan pumpes opp av et skript. De sier hvor ofte noen trykket, ikke hvor mange som hørte.</p>
+  <table class="stat-table">
+    <thead><tr>
+      <th>Låt</th><th class="stat-sep">Startet</th><th>Utdrag</th><th class="stat-sep">Spilt til slutt</th><th class="stat-sep">Nedlastet</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="stat-title">So much fun<span>Publisert 28.08</span></td>
+        <td class="stat-sep"><span class="stat-num">312</span></td><td><span class="stat-num">41</span></td>
+        <td class="stat-sep"><span class="stat-num">97</span><span class="stat-sub">spilleren meldte slutt</span></td>
+        <td class="stat-sep"><span class="stat-num">0</span><span class="stat-sub">nedlasting er av</span></td></tr>
+      <tr><td class="stat-title">Langsomt nordover<span>Publisert 21.08</span></td>
+        <td class="stat-sep"><span class="stat-num">128</span></td><td><span class="stat-num">19</span></td>
+        <td class="stat-sep"><span class="stat-num">88</span><span class="stat-sub">spilleren meldte slutt</span></td>
+        <td class="stat-sep"><span class="stat-num">0</span><span class="stat-sub">nedlasting er av</span></td></tr>
+      <tr><td class="stat-title">Vinterlys<span>Publisert 09.08</span></td>
+        <td class="stat-sep"><span class="stat-num">31</span></td><td><span class="stat-num">6</span></td>
+        <td class="stat-sep"><span class="stat-num">4</span><span class="stat-sub">spilleren meldte slutt</span></td>
+        <td class="stat-sep"><span class="stat-num">0</span><span class="stat-sub">nedlasting er av</span></td></tr>
+    </tbody>
+  </table>
+  <p class="axis-note">«Startet» og «spilt til slutt» slås aldri sammen til ett tall.</p>
+  <div class="section-h">Med samtykke</div>
+  <p class="section-p">Bare innloggede lyttere som har sagt ja i et eget spørsmål. Du ser fordelinger, aldri hvem.</p>
+<div class="stat-notice">
+    <span class="stat-notice-mark">◐</span>
+    <div>
+      <strong>124 av 471 avspillinger har detaljer.</strong>
+      <p>347 avspillinger kom fra lyttere som ikke er innlogget eller ikke har samtykket. De er bare talt over, ikke med her.
+         Tallene viser altså et utsnitt, ikke totalen — og utsnittet er ikke tilfeldig.</p>
+    </div>
+  </div>
+
+  <table class="stat-table">
+    <thead>
+      <tr>
+        <th rowspan="2" style="vertical-align:bottom">Låt</th>
+        <th colspan="2" class="stat-group stat-sep">Levert
+          <span class="stat-group-caption">Byte serveren sendte. Sier ikke at noen hørte.</span></th>
+        <th colspan="2" class="stat-group stat-sep">Lyttet
+          <span class="stat-group-caption">Spilleren meldte fra. Sier ikke at noen fulgte med.</span></th>
+        <th class="stat-group stat-sep">Nedlastet
+          <span class="stat-group-caption">Filen er hentet.</span></th>
+      </tr>
+      <tr>
+        <th class="stat-sep" style="font-weight:500;text-transform:none">Økter</th>
+        <th style="font-weight:500;text-transform:none">Median dekning</th>
+        <th class="stat-sep" style="font-weight:500;text-transform:none">Økter</th>
+        <th style="font-weight:500;text-transform:none">Nådde slutten</th>
+        <th class="stat-sep" style="font-weight:500;text-transform:none">Ganger</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="stat-title">So much fun<span>Publisert 28.08</span></td>
+        <td class="stat-sep"><span class="stat-num">68</span></td>
+        <td><span class="stat-num">100 %</span><span class="stat-sub">hele fila hentet</span></td>
+        <td class="stat-sep"><span class="stat-num">61</span></td>
+        <td><span class="stat-num">22</span><span class="stat-sub">36 % av øktene</span></td>
+        <td class="stat-sep"><span class="stat-num">9</span></td>
+      </tr>
+      <tr>
+        <td class="stat-title">Langsomt nordover<span>Publisert 21.08</span></td>
+        <td class="stat-sep"><span class="stat-num">41</span></td>
+        <td><span class="stat-num">100 %</span><span class="stat-sub">hele fila hentet</span></td>
+        <td class="stat-sep"><span class="stat-num">38</span></td>
+        <td><span class="stat-num">30</span><span class="stat-sub">79 % av øktene</span></td>
+        <td class="stat-sep"><span class="stat-num">14</span></td>
+      </tr>
+      <tr>
+        <td class="stat-title">Vinterlys<span>Publisert 09.08</span></td>
+        <td class="stat-sep"><span class="stat-num">15</span></td>
+        <td><span class="stat-num">62 %</span><span class="stat-sub">avbrutt overføring</span></td>
+        <td class="stat-sep"><span class="stat-num">12</span></td>
+        <td><span class="stat-num">2</span><span class="stat-sub">17 % av øktene</span></td>
+        <td class="stat-sep"><span class="stat-num">0</span></td>
+      </tr>
+    </tbody>
+  </table>
+  
+</div>
+<div class="mockframe" id="v2-skive1">
+  <div class="segmented is-five" role="tablist" aria-label="Studioområder">
+    <button class="segment" role="tab" aria-selected="false">Mikser</button>
+    <button class="segment" role="tab" aria-selected="false">Publiser</button>
+    <button class="segment is-active" role="tab" aria-selected="true">Statistikk</button>
+    <button class="segment" role="tab" aria-selected="false">Medlemmer</button>
+    <button class="segment" role="tab" aria-selected="false">Brukskvote</button>
+  </div>
+  <div class="panel-toolbar" style="margin-bottom:18px">
+    <div><h3>Bruk av publiserte låter</h3>
+      <p class="subtle" style="margin:6px 0 0">Talt siden 25.09.2026</p></div>
+  </div>
+  <div class="section-h">Alle avspillinger <span class="usikret">usikret</span></div>
+  <p class="section-p">Talt for alle, også uten innlogging. Ingenting lagres om den som lytter — bare en teller på låta.
+     Tallene er ikke autentisert og kan pumpes opp av et skript. De sier hvor ofte noen trykket, ikke hvor mange som hørte.</p>
+  <table class="stat-table">
+    <thead><tr>
+      <th>Låt</th><th class="stat-sep">Startet</th><th>Utdrag</th><th class="stat-sep">Spilt til slutt</th><th class="stat-sep">Nedlastet</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="stat-title">So much fun<span>Publisert 28.08</span></td>
+        <td class="stat-sep"><span class="stat-num">312</span></td><td><span class="stat-num">41</span></td>
+        <td class="stat-sep"><span class="stat-num">97</span><span class="stat-sub">spilleren meldte slutt</span></td>
+        <td class="stat-sep"><span class="stat-num">0</span><span class="stat-sub">nedlasting er av</span></td></tr>
+      <tr><td class="stat-title">Langsomt nordover<span>Publisert 21.08</span></td>
+        <td class="stat-sep"><span class="stat-num">128</span></td><td><span class="stat-num">19</span></td>
+        <td class="stat-sep"><span class="stat-num">88</span><span class="stat-sub">spilleren meldte slutt</span></td>
+        <td class="stat-sep"><span class="stat-num">0</span><span class="stat-sub">nedlasting er av</span></td></tr>
+      <tr><td class="stat-title">Vinterlys<span>Publisert 09.08</span></td>
+        <td class="stat-sep"><span class="stat-num">31</span></td><td><span class="stat-num">6</span></td>
+        <td class="stat-sep"><span class="stat-num">4</span><span class="stat-sub">spilleren meldte slutt</span></td>
+        <td class="stat-sep"><span class="stat-num">0</span><span class="stat-sub">nedlasting er av</span></td></tr>
+    </tbody>
+  </table>
+  <p class="axis-note">«Startet» og «spilt til slutt» slås aldri sammen til ett tall.</p>
+  <div class="section-h">Med samtykke</div>
+  <div class="empty-detail"><strong style="color:var(--ink)">Ingen detaljer ennå.</strong><br>
+    Lyttere blir ikke spurt om samtykke før neste steg er bygget. Til da finnes bare tellerne over.</div>
+</div>
+</body></html>

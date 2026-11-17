@@ -1,0 +1,44 @@
+diff --git a/Tests/AppTests/CellScaffoldRuntimeIdentityProvisionerTests.swift b/Tests/AppTests/CellScaffoldRuntimeIdentityProvisionerTests.swift
+index 10184083..c0a63ba8 100644
+--- a/Tests/AppTests/CellScaffoldRuntimeIdentityProvisionerTests.swift
++++ b/Tests/AppTests/CellScaffoldRuntimeIdentityProvisionerTests.swift
+@@ -702,7 +702,7 @@ final class CellScaffoldRuntimeIdentityProvisionerTests: XCTestCase {
+     }
+ 
+     func testWriterRejectsOverwriteWithoutExactOldDigestAndUses0600() async throws {
+-        let directory = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
++        let directory = URL(fileURLWithPath: "/Users/kjetil/Build/Digipomps/HAVEN/CellScaffold/_wt-forvaltet-import-20260926/.hvelv-test-root", isDirectory: true)
+             .resolvingSymlinksInPath()
+             .appendingPathComponent("runtime-manifest-writer-\(UUID().uuidString)", isDirectory: true)
+         try FileManager.default.createDirectory(
+@@ -762,7 +762,7 @@ final class CellScaffoldRuntimeIdentityProvisionerTests: XCTestCase {
+     }
+ 
+     func testWriterRejectsSymlinkInParentTraversal() async throws {
+-        let root = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
++        let root = URL(fileURLWithPath: "/Users/kjetil/Build/Digipomps/HAVEN/CellScaffold/_wt-forvaltet-import-20260926/.hvelv-test-root", isDirectory: true)
+             .resolvingSymlinksInPath()
+             .appendingPathComponent("runtime-manifest-symlink-\(UUID().uuidString)", isDirectory: true)
+         let actual = root.appendingPathComponent("actual", isDirectory: true)
+@@ -808,7 +808,7 @@ final class CellScaffoldRuntimeIdentityProvisionerTests: XCTestCase {
+     }
+ 
+     func testWriterRejectsExtendedAttributesOnExistingManifest() async throws {
+-        let directory = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
++        let directory = URL(fileURLWithPath: "/Users/kjetil/Build/Digipomps/HAVEN/CellScaffold/_wt-forvaltet-import-20260926/.hvelv-test-root", isDirectory: true)
+             .resolvingSymlinksInPath()
+             .appendingPathComponent("runtime-manifest-xattr-\(UUID().uuidString)", isDirectory: true)
+         try FileManager.default.createDirectory(
+diff --git a/Tests/AppTests/SecureRuntimeIdentityManifestFileTests.swift b/Tests/AppTests/SecureRuntimeIdentityManifestFileTests.swift
+index b6fc5fe3..eb1dbc74 100644
+--- a/Tests/AppTests/SecureRuntimeIdentityManifestFileTests.swift
++++ b/Tests/AppTests/SecureRuntimeIdentityManifestFileTests.swift
+@@ -197,7 +197,7 @@ private final class FileFixture {
+ 
+     init(data: Data, keepWritableDescriptor: Bool = false) throws {
+         self.data = data
+-        directoryPath = "/private/tmp/cellscaffold-runtime-manifest-reader-\(UUID().uuidString)"
++        directoryPath = "/Users/kjetil/Build/Digipomps/HAVEN/CellScaffold/_wt-forvaltet-import-20260926/.hvelv-test-root/cellscaffold-runtime-manifest-reader-\(UUID().uuidString)"
+         try FileManager.default.createDirectory(
+             atPath: directoryPath,
+             withIntermediateDirectories: false,

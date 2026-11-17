@@ -136,7 +136,11 @@ Purpose and Interests:
 - are local to the domain  
 - are optional  
 
-All Purpose metadata is explicitly declared, never learned or predicted.
+All Purpose and Interest declarations are explicit, never inferred. A perspective may
+**learn patterns** across what its owner has explicitly declared or linked — and only that.
+Nothing is learned from observed behaviour, and no link to a shared root is made on the
+owner's behalf: linking to `purpose://root` is a deliberate act the owner makes and
+understands.
 
 ## 8. Summary
 

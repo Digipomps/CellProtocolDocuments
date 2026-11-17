@@ -1,0 +1,396 @@
+COMMAND=swift test --disable-sandbox --disable-automatic-resolution --cache-path /private/tmp/bro-swift-cache --jobs 4 --filter ScannerRetainedStateTests|EntityScannerConsumerSecurityTests
+warning: /Users/kjetil/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/kjetil/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: '_wt-bro-kanal-auth-20260927': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Using on-disk description]
+[1 / 123] X509
+[1 / 103] DequeModule
+[2 / 13] CellApple
+[4 / 15] CellApple
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:255:9: warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+253 | struct SkeletonBorderShape: Shape {
+254 |     let radius: CGFloat
+255 |     let edges: [SkeletonEdge]?
+    |         `- warning: stored property 'edges' of 'Sendable'-conforming struct 'SkeletonBorderShape' contains non-Sendable type 'SkeletonEdge'; this is an error in the Swift 6 language mode
+256 |     let rtl: Bool
+257 |     func path(in rect: CGRect) -> Path {
+
+CellBase.SkeletonEdge:1:13: note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+1 | public enum SkeletonEdge : String, Codable {
+  |             `- note: enum 'SkeletonEdge' does not conform to the 'Sendable' protocol
+2 |     case top
+3 |     case leading
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/Suggestion/SkeletonNativeStyle.swift:5:1: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  3 | 
+  4 | import SwiftUI
+  5 | import CellBase
+    | `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase' [#AddPreconcurrencyImport]
+  6 | #if os(macOS)
+  7 | import AppKit
+
+[#AddPreconcurrencyImport]: <https://docs.swift.org/compiler/documentation/diagnostics/add-preconcurrency-import>
+[9 / 17] CellApple
+[11 / 16] CellApple-product
+[11 / 16] CellBaseTests-product
+[15 / 27] CellBaseTests-product
+[17 / 27] CellBaseTests-product
+[18 / 27] CellBaseTests-product
+[19 / 27] CellBaseTests-product
+[20 / 27] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:172:31: warning: capture of 'service' with non-Sendable type 'ScannerService' in a '@Sendable' closure [#SendableClosureCaptures]
+170 |             service.duringInvitationAcceptance = { entered.fulfill(); _ = release.wait(timeout: .now() + 3) }
+171 |             DispatchQueue.global().async {
+172 |                 XCTAssertTrue(service.respondToInvitation(remoteUUID: "remote", accept: true)); accepted.fulfill()
+    |                               `- warning: capture of 'service' with non-Sendable type 'ScannerService' in a '@Sendable' closure [#SendableClosureCaptures]
+173 |             }
+174 |             await fulfillment(of: [entered], timeout: 2)
+
+CellApple.ScannerService:1:16: note: class 'ScannerService' does not conform to the 'Sendable' protocol
+ 1 | internal class ScannerService : NSObject, ObservableObject {
+   |                `- note: class 'ScannerService' does not conform to the 'Sendable' protocol
+ 2 |     @MainActor internal var advertisementExchange: CellApple.NearbyAdvertisementExchange?
+ 3 |     internal func readAdvertisement(remoteUUID: String) async -> CellApple.NearbyAdvertisement?
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:4:11: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellApple' [#AddPreconcurrencyImport]
+  2 | import Foundation
+  3 | import XCTest
+  4 | @testable import CellApple
+    |           `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellApple' [#AddPreconcurrencyImport]
+  5 | @testable import CellBase
+  6 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:177:42: warning: capture of 'service' with non-Sendable type 'ScannerService' in a '@Sendable' closure [#SendableClosureCaptures]
+175 |             DispatchQueue.global().async {
+176 |                 competing.fulfill()
+177 |                 if race == "collision" { service.browser(browser, foundPeer: c, withDiscoveryInfo: ["uuid": "remote"]) }
+    |                                          `- warning: capture of 'service' with non-Sendable type 'ScannerService' in a '@Sendable' closure [#SendableClosureCaptures]
+178 |                 else { service.stop() }
+179 |                 finished.fulfill()
+
+CellApple.ScannerService:1:16: note: class 'ScannerService' does not conform to the 'Sendable' protocol
+ 1 | internal class ScannerService : NSObject, ObservableObject {
+   |                `- note: class 'ScannerService' does not conform to the 'Sendable' protocol
+ 2 |     @MainActor internal var advertisementExchange: CellApple.NearbyAdvertisementExchange?
+ 3 |     internal func readAdvertisement(remoteUUID: String) async -> CellApple.NearbyAdvertisement?
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:177:58: warning: capture of 'browser' with non-Sendable type 'MCNearbyServiceBrowser' in a '@Sendable' closure [#SendableClosureCaptures]
+175 |             DispatchQueue.global().async {
+176 |                 competing.fulfill()
+177 |                 if race == "collision" { service.browser(browser, foundPeer: c, withDiscoveryInfo: ["uuid": "remote"]) }
+    |                                                          `- warning: capture of 'browser' with non-Sendable type 'MCNearbyServiceBrowser' in a '@Sendable' closure [#SendableClosureCaptures]
+178 |                 else { service.stop() }
+179 |                 finished.fulfill()
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/MultipeerConnectivity.framework/Headers/MCNearbyServiceBrowser.h:46:12: note: class 'MCNearbyServiceBrowser' does not conform to the 'Sendable' protocol
+44 | NS_ASSUME_NONNULL_BEGIN
+45 | API_DEPRECATED("Use Network Framework instead", macos(10.10, 27.0), ios(7.0, 27.0), tvos(10.0, 27.0))
+46 | @interface MCNearbyServiceBrowser : NSObject
+   |            `- note: class 'MCNearbyServiceBrowser' does not conform to the 'Sendable' protocol
+47 | - (instancetype)initWithPeer:(MCPeerID *)myPeerID serviceType:(NSString *)serviceType NS_DESIGNATED_INITIALIZER;
+48 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:1:1: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'MultipeerConnectivity' [#AddPreconcurrencyImport]
+  1 | import MultipeerConnectivity
+    | `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'MultipeerConnectivity' [#AddPreconcurrencyImport]
+  2 | import Foundation
+  3 | import XCTest
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerServiceInvitationTests.swift:177:78: warning: capture of 'c' with non-Sendable type 'MCPeerID' in a '@Sendable' closure [#SendableClosureCaptures]
+175 |             DispatchQueue.global().async {
+176 |                 competing.fulfill()
+177 |                 if race == "collision" { service.browser(browser, foundPeer: c, withDiscoveryInfo: ["uuid": "remote"]) }
+    |                                                                              `- warning: capture of 'c' with non-Sendable type 'MCPeerID' in a '@Sendable' closure [#SendableClosureCaptures]
+178 |                 else { service.stop() }
+179 |                 finished.fulfill()
+
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/MultipeerConnectivity.framework/Headers/MCPeerID.h:32:12: note: class 'MCPeerID' does not conform to the 'Sendable' protocol
+30 | NS_ASSUME_NONNULL_BEGIN
+31 | API_DEPRECATED("Use Network Framework instead", macos(10.10, 27.0), ios(7.0, 27.0), tvos(10.0, 27.0))
+32 | @interface MCPeerID : NSObject <NSCopying, NSSecureCoding>
+   |            `- note: class 'MCPeerID' does not conform to the 'Sendable' protocol
+33 | - (instancetype)initWithDisplayName:(NSString *)myDisplayName NS_DESIGNATED_INITIALIZER;
+34 | 
+
+[#AddPreconcurrencyImport]: <https://docs.swift.org/compiler/documentation/diagnostics/add-preconcurrency-import>
+[#SendableClosureCaptures]: <https://docs.swift.org/compiler/documentation/diagnostics/sendable-closure-captures>
+[24 / 28] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:18:14: warning: concurrently-executed local function 'data' must be marked as '@Sendable'; this is an error in the Swift 6 language mode
+  16 |     private func checkFullVector(_ name: String) async throws {
+  17 |         let v = try Self.vectors(name)
+  18 |         func data(_ name: String) -> Data { v[name]! }
+     |              `- warning: concurrently-executed local function 'data' must be marked as '@Sendable'; this is an error in the Swift 6 language mode
+  19 |         let endpoint = try A.decode(P.Endpoint.self, from: data("endpoint"))
+  20 |         let ih = try A.decode(P.Hello.self, from: data("hello0")), rh = try A.decode(P.Hello.self, from: data("hello1"))
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:266:54: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 264 |         i = try BridgeChannelTransport(underlying: it, peerEndpoint: endpoint, role: .initiator, owner: io,
+ 265 |             limits: limits, source: UUID().uuidString, disclosurePolicy: policy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 266 |             recheckPolicy: recheck, wallClock: clock.date, monotonic: clock.uptime) { [id] gate, session in
+     |                                                      `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 267 |                 if let factory, factoryRole == .initiator { return try await factory(gate, session) }
+ 268 |                 id.created(); gate.setDelegate(id)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:266:77: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 264 |         i = try BridgeChannelTransport(underlying: it, peerEndpoint: endpoint, role: .initiator, owner: io,
+ 265 |             limits: limits, source: UUID().uuidString, disclosurePolicy: policy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 266 |             recheckPolicy: recheck, wallClock: clock.date, monotonic: clock.uptime) { [id] gate, session in
+     |                                                                             `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 267 |                 if let factory, factoryRole == .initiator { return try await factory(gate, session) }
+ 268 |                 id.created(); gate.setDelegate(id)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:274:63: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 272 |         r = try BridgeChannelTransport(underlying: rt, peerEndpoint: endpoint, role: .responder, owner: ro,
+ 273 |             limits: limits, source: UUID().uuidString, disclosurePolicy: responderPolicy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 274 |             recheckPolicy: responderRecheck, wallClock: clock.date, monotonic: clock.uptime) { [rd] gate, session in
+     |                                                               `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 275 |                 if let factory, factoryRole == .responder { return try await factory(gate, session) }
+ 276 |                 rd.created(); gate.setDelegate(rd)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:274:86: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 272 |         r = try BridgeChannelTransport(underlying: rt, peerEndpoint: endpoint, role: .responder, owner: ro,
+ 273 |             limits: limits, source: UUID().uuidString, disclosurePolicy: responderPolicy ?? .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 274 |             recheckPolicy: responderRecheck, wallClock: clock.date, monotonic: clock.uptime) { [rd] gate, session in
+     |                                                                                      `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 275 |                 if let factory, factoryRole == .responder { return try await factory(gate, session) }
+ 276 |                 rd.created(); gate.setDelegate(rd)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:844:35: warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 842 |         operation = try P.Operation(owner: owner, endpoint: gate.session.peerEndpoint!, role: role,
+ 843 |             generation: UUID().uuidString, policy: .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 844 |             wallClock: pair.clock.date, monotonic: pair.clock.uptime, ephemeral: privateKey)
+     |                                   `- warning: converting non-Sendable function value to '@Sendable () -> Date' may introduce data races
+ 845 |     }
+ 846 |     func advance(to step: Int) async throws {
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:844:63: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 842 |         operation = try P.Operation(owner: owner, endpoint: gate.session.peerEndpoint!, role: role,
+ 843 |             generation: UUID().uuidString, policy: .anyProvenIdentity(allowUnauthenticatedInitiator: true),
+ 844 |             wallClock: pair.clock.date, monotonic: pair.clock.uptime, ephemeral: privateKey)
+     |                                                               `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 845 |     }
+ 846 |     func advance(to step: Int) async throws {
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:984:88: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 982 | extension BridgePeerV3Tests {
+ 983 |     func testValidAEADInnerMutationsCloseRealGateReleaseQuotaAndPreserveHealthySibling() async throws {
+ 984 |         let quotaClock = V3Clock(), limits = BridgeChannelLimits(monotonic: quotaClock.uptime)
+     |                                                                                        `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+ 985 |         let sibling = try V3GatePair(limits: limits), healthy = try await sibling.start()
+ 986 |         for step in 1...5 { try await sibling.step(step) }; try await healthy.value
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:1030:78: warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+1028 | extension BridgePeerV3Tests {
+1029 |     func testWrongHandshakeStateAndMalformedRecordsRetireOnlyOffendingGate() async throws {
+1030 |         let clock = V3Clock(), limits = BridgeChannelLimits(monotonic: clock.uptime)
+     |                                                                              `- warning: converting non-Sendable function value to '@Sendable () -> TimeInterval' (aka '@Sendable () -> Double') may introduce data races
+1031 |         let sibling = try V3GatePair(limits: limits), healthy = try await sibling.start()
+1032 |         for step in 1...5 { try await sibling.step(step) }; try await healthy.value
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/BridgePeerV3Tests.swift:1266:91: warning: left side of nil coalescing operator '??' has non-optional type 'String', so the right side is never used
+1264 |             let plain = try pair.i.openPeerFrame(data)
+1265 |             if let command = try? JSONDecoder().decode(BridgeCommand.self, from: plain),
+1266 |                case let .flowElement(value) = command.payload { values.append(value.title ?? "") }
+     |                                                                                           `- warning: left side of nil coalescing operator '??' has non-optional type 'String', so the right side is never used
+1267 |         }
+1268 |         XCTAssertEqual(values, ["1", "2", "1", "2"])
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:500:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 498 |         // concerns A's physical route, and preserves the receive sequence.
+ 499 |         _ = try pair.pb.gate.openPeerFrame(heldRequest.data)
+ 500 |         let pendingCommand = await bridge.auditor.loadBridgeCommandForCommandId(1)
+     |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 501 |         XCTAssertNotNil(pendingCommand)
+ 502 |         let forged = BridgeCommand(cmd: "response", payload: .string("from-c"), cid: 1,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:506:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 504 |         try await pc.gate.sendData(A.encode(forged))
+ 505 |         try await pair.deliverNext()
+ 506 |         let stillPending = await bridge.auditor.loadBridgeCommandForCommandId(1)
+     |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 507 |         XCTAssertNotNil(stillPending, "C's response must not consume B's pending cid")
+ 508 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:532:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 530 |             await pair.pb.bridge!.sendCommand(command: .description, identity: pair.b.owner, payload: nil)
+ 531 |             let oldCommand = try await pair.next(), captured = try pair.receiver(oldCommand)
+ 532 |             let firstCID = await pair.pb.bridge!.auditor.loadBridgeCommandForCommandId(1)
+     |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 533 |             XCTAssertEqual(firstCID?.cid, 1)
+ 534 |             try await pair.deliver(oldCommand)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:541:26: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 539 |             await fresh.1.bridge!.sendCommand(command: .description, identity: pair.b.owner, payload: nil)
+ 540 |             let newCommand = try await pair.next()
+ 541 |             let newCID = await fresh.1.bridge!.auditor.loadBridgeCommandForCommandId(1)
+     |                          `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 542 |             XCTAssertEqual(firstCID?.cid, newCID?.cid, "Actual Base cid reuse")
+ 543 |             // A callback already captured by an old transport cannot close the new one.
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:865:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 863 |                 XCTAssertNotEqual(oldKey, freshKey)
+ 864 |                 let request = BridgeCommand(cmd: "description", identity: pair.a.owner.publicIdentitySnapshot(), payload: nil, cid: 1)
+ 865 |                 let stored = await fresh.0.bridge!.auditor.storeBridgeCommand(request, for: 1)
+     |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 866 |                 XCTAssertTrue(stored)
+ 867 |                 // M knows the public new generation and the expected counter.
+
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+[25 / 28] CellBaseTests-product
+[27 / 31] CellBaseTests-product
+[29 / 31] CellBaseTests-product
+Build complete! (8,55 sek)
+Test Suite 'Selected tests' started at 2026-09-29 13:06:35.531.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-09-29 13:06:35.531.
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-09-29 13:06:35.531.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 13:06:35.531.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 13:06:35.598.
+Test Suite 'CellNearbyTests.xctest' started at 2026-09-29 13:06:35.598.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-09-29 13:06:35.598.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 13:06:35.598.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 13:06:35.669.
+Test Suite 'CellBaseTests.xctest' started at 2026-09-29 13:06:35.670.
+Test Suite 'EntityScannerConsumerSecurityTests' started at 2026-09-29 13:06:35.670.
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testConcurrentAcceptancesConsumePendingExactlyOnce]' started.
+Inited radar service with peerId: <MCPeerID: 0x77269980a0 DisplayName = HAVEN-firstaf1>
+Inited radar service with peerId: <MCPeerID: 0x77269980b0 DisplayName = HAVEN-secondaf>
+Initing Entity Anchor (Apple) cell for owner: BD4E8CDF-9542-46E5-8E03-3883DA657C96
+*********** Finished setup keys in Entity Anchor ***********
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testConcurrentAcceptancesConsumePendingExactlyOnce]' passed (0.060 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testEverySignedAcceptanceBindingRejectsBeforeStateOrStorageAndRealEncounterPersists]' started.
+Inited radar service with peerId: <MCPeerID: 0x7726998120 DisplayName = HAVEN-firstb84>
+Inited radar service with peerId: <MCPeerID: 0x7726998130 DisplayName = HAVEN-secondb8>
+Initing Entity Anchor (Apple) cell for owner: BBD54D6D-682D-4171-91B6-29F094338130
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x7726998140 DisplayName = HAVEN-third003>
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testEverySignedAcceptanceBindingRejectsBeforeStateOrStorageAndRealEncounterPersists]' passed (0.180 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testGlobalCountAndByteBudgetsWithManyAuthenticatedPeersAndContactIDs]' started.
+Inited radar service with peerId: <MCPeerID: 0x7726998190 DisplayName = HAVEN-first690>
+Inited radar service with peerId: <MCPeerID: 0x77269981a0 DisplayName = HAVEN-second69>
+Initing Entity Anchor (Apple) cell for owner: DCC2CA1E-DC1E-44EC-9AAC-045B0443DEC5
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x7726998180 DisplayName = HAVEN-thirda5c>
+Inited radar service with peerId: <MCPeerID: 0x77269981d0 DisplayName = HAVEN-third3ba>
+Inited radar service with peerId: <MCPeerID: 0x77269981f0 DisplayName = HAVEN-thirdde6>
+Inited radar service with peerId: <MCPeerID: 0x7726998210 DisplayName = HAVEN-thirdfc3>
+Inited radar service with peerId: <MCPeerID: 0x7726998230 DisplayName = HAVEN-third586>
+Inited radar service with peerId: <MCPeerID: 0x7726998250 DisplayName = HAVEN-third8e8>
+Inited radar service with peerId: <MCPeerID: 0x7726998270 DisplayName = HAVEN-third16b>
+Inited radar service with peerId: <MCPeerID: 0x7726998290 DisplayName = HAVEN-third045>
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testGlobalCountAndByteBudgetsWithManyAuthenticatedPeersAndContactIDs]' passed (2.103 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testOutgoingProbeRepliesValidateNoncePeerAndPayloadBeforeConsuming]' started.
+Inited radar service with peerId: <MCPeerID: 0x77269982e0 DisplayName = HAVEN-firstbac>
+Inited radar service with peerId: <MCPeerID: 0x77269982f0 DisplayName = HAVEN-secondba>
+Initing Entity Anchor (Apple) cell for owner: 668A2442-DD83-4897-A760-24A06B4D8518
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x7726998300 DisplayName = HAVEN-third009>
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testOutgoingProbeRepliesValidateNoncePeerAndPayloadBeforeConsuming]' passed (0.219 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testOutgoingProbesCannotCrossReconnectWithSameUUIDAndDifferentSigningKey]' started.
+Inited radar service with peerId: <MCPeerID: 0x7726998350 DisplayName = HAVEN-first316>
+Inited radar service with peerId: <MCPeerID: 0x7726998360 DisplayName = HAVEN-second31>
+Initing Entity Anchor (Apple) cell for owner: 8E6C4837-57A5-4F83-A7EF-0C8A5AB2CF8C
+*********** Finished setup keys in Entity Anchor ***********
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testOutgoingProbesCannotCrossReconnectWithSameUUIDAndDifferentSigningKey]' passed (0.206 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testOutgoingProbeTTLAndCombinedPendingCountAndBytesBoundUnfinishedRequests]' started.
+Inited radar service with peerId: <MCPeerID: 0x77269983a0 DisplayName = HAVEN-firstacd>
+Inited radar service with peerId: <MCPeerID: 0x77269983b0 DisplayName = HAVEN-secondac>
+Initing Entity Anchor (Apple) cell for owner: 984C2A0A-2FF6-419C-A8AB-FBC24E17B251
+*********** Finished setup keys in Entity Anchor ***********
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testOutgoingProbeTTLAndCombinedPendingCountAndBytesBoundUnfinishedRequests]' passed (0.138 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testPendingExpiryDuringVerificationAndFutureSignedAcceptanceCannotPersist]' started.
+Inited radar service with peerId: <MCPeerID: 0x77269983f0 DisplayName = HAVEN-firstf29>
+Inited radar service with peerId: <MCPeerID: 0x7726998400 DisplayName = HAVEN-secondf2>
+Initing Entity Anchor (Apple) cell for owner: E24BACB5-C102-4DB7-B161-0C86D31A46BA
+*********** Finished setup keys in Entity Anchor ***********
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testPendingExpiryDuringVerificationAndFutureSignedAcceptanceCannotPersist]' passed (0.048 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testPendingRequestFloodInvalidProofsTTLAndRetirementStayBoundedWithHealthyPeer]' started.
+Inited radar service with peerId: <MCPeerID: 0x7726998440 DisplayName = HAVEN-firsta96>
+Inited radar service with peerId: <MCPeerID: 0x7726998450 DisplayName = HAVEN-seconda9>
+Initing Entity Anchor (Apple) cell for owner: 01913E01-20EF-4BE8-8A9B-916388993139
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x7726998460 DisplayName = HAVEN-third122>
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testPendingRequestFloodInvalidProofsTTLAndRetirementStayBoundedWithHealthyPeer]' passed (0.340 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testRealConsumerRetainsLeaseAcrossEveryAwaitAndDropsRetiredGeneration]' started.
+Inited radar service with peerId: <MCPeerID: 0x77269984b0 DisplayName = HAVEN-firstc94>
+Inited radar service with peerId: <MCPeerID: 0x77269984c0 DisplayName = HAVEN-secondc9>
+Initing Entity Anchor (Apple) cell for owner: C7365304-0BA8-46D1-8707-0BB3E3770418
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x77269984f0 DisplayName = HAVEN-first8ee>
+Inited radar service with peerId: <MCPeerID: 0x7726998500 DisplayName = HAVEN-second8e>
+Initing Entity Anchor (Apple) cell for owner: C5AFA8CF-C1C8-411A-918A-628887A24B50
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x7726998530 DisplayName = HAVEN-first9ef>
+Inited radar service with peerId: <MCPeerID: 0x7726998540 DisplayName = HAVEN-second9e>
+Initing Entity Anchor (Apple) cell for owner: 87C29817-507C-45F5-B024-6378D7002F4B
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x7726998570 DisplayName = HAVEN-first6c9>
+Inited radar service with peerId: <MCPeerID: 0x7726998580 DisplayName = HAVEN-second6c>
+Initing Entity Anchor (Apple) cell for owner: 85611010-E372-44A8-B9AC-E0CB3006192F
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x77269985b0 DisplayName = HAVEN-first741>
+Inited radar service with peerId: <MCPeerID: 0x77269985c0 DisplayName = HAVEN-second74>
+Initing Entity Anchor (Apple) cell for owner: 9445E69D-4216-438A-A4AD-C34F94FEF000
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x77269985f0 DisplayName = HAVEN-first879>
+Inited radar service with peerId: <MCPeerID: 0x7726998600 DisplayName = HAVEN-second87>
+Initing Entity Anchor (Apple) cell for owner: C732D70C-73BD-46EB-BD7F-493777BFC7E1
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x7726998630 DisplayName = HAVEN-first15e>
+Inited radar service with peerId: <MCPeerID: 0x7726998640 DisplayName = HAVEN-second15>
+Initing Entity Anchor (Apple) cell for owner: B6372A43-0F31-49C2-8FCA-136AD45F670F
+*********** Finished setup keys in Entity Anchor ***********
+Inited radar service with peerId: <MCPeerID: 0x7726998670 DisplayName = HAVEN-firstf02>
+Inited radar service with peerId: <MCPeerID: 0x7726998680 DisplayName = HAVEN-secondf0>
+Initing Entity Anchor (Apple) cell for owner: 59F1EC17-2E8B-4484-BBE1-2E6F00A702BF
+*********** Finished setup keys in Entity Anchor ***********
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testRealConsumerRetainsLeaseAcrossEveryAwaitAndDropsRetiredGeneration]' passed (1.295 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testRealRequestAndUserAcceptanceStoreBothSidesAndRejectSameUUIDOtherKey]' started.
+Inited radar service with peerId: <MCPeerID: 0x77269986c0 DisplayName = HAVEN-firstb29>
+Inited radar service with peerId: <MCPeerID: 0x77269986d0 DisplayName = HAVEN-secondb2>
+Initing Entity Anchor (Apple) cell for owner: B7CC5A93-6D4D-4024-953F-7CAE4FA47B3A
+*********** Finished setup keys in Entity Anchor ***********
+Initing Entity Anchor (Apple) cell for owner: 7F95B73D-4BED-4E41-BE13-713CB2A4EB7D
+*********** Finished setup keys in Entity Anchor ***********
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testRealRequestAndUserAcceptanceStoreBothSidesAndRejectSameUUIDOtherKey]' passed (0.115 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testSameSigningIdentityOnTwoSessionsPersistsTheResponderRole]' started.
+Inited radar service with peerId: <MCPeerID: 0x7726998710 DisplayName = HAVEN-first7a8>
+Inited radar service with peerId: <MCPeerID: 0x7726998720 DisplayName = HAVEN-second7a>
+Initing Entity Anchor (Apple) cell for owner: 602B2608-D9FA-4ED4-B6A0-E11A3CE6981D
+*********** Finished setup keys in Entity Anchor ***********
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testSameSigningIdentityOnTwoSessionsPersistsTheResponderRole]' passed (0.104 seconds).
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testSubscriberMayRevokeAfterCommitWithoutDeadlockOrLaterPublication]' started.
+Inited radar service with peerId: <MCPeerID: 0x7726998760 DisplayName = HAVEN-first446>
+Inited radar service with peerId: <MCPeerID: 0x7726998770 DisplayName = HAVEN-second44>
+Initing Entity Anchor (Apple) cell for owner: A6182882-D34C-4166-B3EA-865F37904A27
+*********** Finished setup keys in Entity Anchor ***********
+Test Case '-[CellBaseTests.EntityScannerConsumerSecurityTests testSubscriberMayRevokeAfterCommitWithoutDeadlockOrLaterPublication]' passed (0.098 seconds).
+Test Suite 'EntityScannerConsumerSecurityTests' passed at 2026-09-29 13:06:40.577.
+	 Executed 12 tests, with 0 failures (0 unexpected) in 4.906 (4.907) seconds
+Test Suite 'ScannerRetainedStateTests' started at 2026-09-29 13:06:40.577.
+Test Case '-[CellBaseTests.ScannerRetainedStateTests testConnectedSnapshotIncludesSiblingAndOldCallbackCannotPublishAfterReconnect]' started.
+Inited radar service with peerId: <MCPeerID: 0x77269987b0 DisplayName = HAVEN-firstebd>
+Inited radar service with peerId: <MCPeerID: 0x77269987c0 DisplayName = HAVEN-secondeb>
+Inited radar service with peerId: <MCPeerID: 0x77269987d0 DisplayName = HAVEN-third0c6>
+Test Case '-[CellBaseTests.ScannerRetainedStateTests testConnectedSnapshotIncludesSiblingAndOldCallbackCannotPublishAfterReconnect]' passed (0.250 seconds).
+Test Case '-[CellBaseTests.ScannerRetainedStateTests testRealConsumerDiscoveryRotationLossAndExpiryRemainBoundedAcrossWindows]' started.
+Inited radar service with peerId: <MCPeerID: 0x77269987e0 DisplayName = HAVEN-local>
+Test Case '-[CellBaseTests.ScannerRetainedStateTests testRealConsumerDiscoveryRotationLossAndExpiryRemainBoundedAcrossWindows]' passed (0.034 seconds).
+Test Case '-[CellBaseTests.ScannerRetainedStateTests testTerminalStatusSurvivesFullEventQuotaAndStopIsIdempotentAcrossRestart]' started.
+Inited radar service with peerId: <MCPeerID: 0x7726998880 DisplayName = HAVEN-f768869b>
+Test Case '-[CellBaseTests.ScannerRetainedStateTests testTerminalStatusSurvivesFullEventQuotaAndStopIsIdempotentAcrossRestart]' passed (0.002 seconds).
+Test Suite 'ScannerRetainedStateTests' passed at 2026-09-29 13:06:40.862.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.285 (0.285) seconds
+Test Suite 'CellBaseTests.xctest' passed at 2026-09-29 13:06:40.862.
+	 Executed 15 tests, with 0 failures (0 unexpected) in 5.191 (5.193) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 13:06:40.862.
+	 Executed 15 tests, with 0 failures (0 unexpected) in 5.191 (5.193) seconds
+
+COMMAND_EXIT=0

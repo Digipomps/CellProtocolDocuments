@@ -1,0 +1,79 @@
+<!doctype html><html lang="nb"><head><meta charset="utf-8"><title>Verktøyflate fylt</title><style>
+:root{--bg:#f4f1ea;--panel:#fff;--ink:#1d2330;--mute:#667085;--line:#e3ddd0;--acc:#2f6fed;--ok:#1f8a4c;--warn:#b54708;--err:#c0362c;--soft:#eef3ff;--kid:#ffcc4d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--panel)}
+header b{font-size:17px}.lvl{margin-left:auto;display:flex;gap:4px;align-items:center;color:var(--mute);font-size:13px}
+.lvl i{width:22px;height:8px;border-radius:4px;background:var(--line)}.lvl i.on{background:var(--kid)}
+.who{font-size:13px;color:var(--mute)}
+main{display:grid;grid-template-columns:340px 1fr 300px;gap:14px;padding:14px;height:calc(100vh - 50px)}
+section{background:var(--panel);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+h2{margin:0;padding:12px 14px;font-size:14px;letter-spacing:.02em;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
+h2 small{margin-left:auto;font-weight:400;color:var(--mute)}
+.body{padding:12px 14px;overflow:auto;flex:1}
+.msg{max-width:92%;padding:9px 12px;border-radius:12px;margin:0 0 10px}.me{margin-left:auto;background:var(--soft)}.ai{background:#f7f5f0}
+.prop{border:1.5px solid var(--acc);border-radius:12px;padding:10px 12px;margin:4px 0 10px;background:#fbfcff}
+.prop .t{font-weight:600;margin-bottom:4px}.prop ul{margin:4px 0 8px 18px;padding:0}
+.why{font-size:13px;color:var(--mute);border-left:3px solid var(--kid);padding-left:8px;margin:6px 0}
+.btns{display:flex;gap:8px;flex-wrap:wrap}.b{border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 11px;font:inherit;font-size:14px}
+.b.p{background:var(--acc);border-color:var(--acc);color:#fff}
+.in{border-top:1px solid var(--line);padding:10px;display:flex;gap:8px}.in div{flex:1;border:1px solid var(--line);border-radius:10px;padding:8px 10px;color:var(--mute)}
+.stage{flex:1;display:grid;place-items:center;background:#1f2a44;margin:12px;border-radius:12px;position:relative;min-height:0}
+.stage svg{width:100%;height:100%}
+.tag{position:absolute;top:10px;left:10px;font-size:12px;background:rgba(255,255,255,.9);border-radius:6px;padding:3px 7px}
+.bar{display:flex;gap:8px;padding:0 12px 12px;align-items:center;font-size:13px;color:var(--mute)}
+.code{margin:0 12px 12px;background:#0f1525;color:#d8e1ff;border-radius:10px;padding:10px 12px;font:12.5px/1.5 ui-monospace,Menlo,monospace;white-space:pre;overflow:auto;max-height:150px}
+.code .hl{background:#2a3d6b;display:block;margin:0 -12px;padding:0 12px}
+.side{display:grid;grid-template-rows:1fr 1fr;gap:14px;min-height:0}
+.row{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.row:last-child{border:0}.dot{width:10px;height:10px;border-radius:50%;margin-top:5px;flex:none}
+.empty{color:var(--mute);text-align:center;padding:24px 10px;font-size:14px}.empty big{display:block;font-size:30px;margin-bottom:6px}
+.lib{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:8px;font-size:13.5px}
+.lib b{font-size:14px}.ref{font:11.5px ui-monospace,Menlo,monospace;color:var(--acc);overflow-wrap:anywhere}.lic{float:right;font-size:11.5px;color:var(--ok)}
+.err{border:1.5px solid var(--err);background:#fff6f5;border-radius:12px;padding:10px 12px;margin-bottom:10px}
+.err .t{color:var(--err);font-weight:600}
+.v{font-size:12.5px;color:var(--mute)}
+
+.tabs{display:flex;gap:4px;margin-left:18px}.tabs span{padding:6px 12px;border-radius:9px;font-size:14px;color:var(--mute)}.tabs span.on{background:var(--soft);color:var(--acc);font-weight:600}
+main.tools{grid-template-columns:280px 1fr 340px;grid-template-rows:auto 1fr;height:calc(100vh - 50px)}
+.engine{grid-column:1/-1;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 14px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:14px}
+.engine b{font-size:14px}.eng{border:1px solid var(--line);border-radius:10px;padding:6px 10px;display:flex;gap:8px;align-items:center}
+.eng.on{border-color:var(--ok);background:#f2fbf5}.pill{font-size:11.5px;border-radius:999px;padding:2px 8px;background:var(--line);color:var(--ink)}
+.pill.ok{background:#dcf3e4;color:var(--ok)}.pill.later{background:#eef0f4;color:var(--mute)}.pill.warn{background:#fff1dc;color:var(--warn)}
+.search{border:1px solid var(--line);border-radius:10px;padding:8px 10px;color:var(--mute);margin-bottom:10px;font-size:14px}.search.q{color:var(--ink)}
+.grp{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:12px 0 4px}
+.pur{display:flex;justify-content:space-between;gap:8px;padding:6px 8px;border-radius:8px;font-size:14px}.pur span{color:var(--mute);font-size:12.5px}
+.pur.on{background:var(--soft);color:var(--acc);font-weight:600}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.tool{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13.5px;background:#fff}.tool.on{border:2px solid var(--acc)}
+.tool b{font-size:15px;display:block;margin:2px 0}.kind{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.det h3{margin:0 0 4px;font-size:18px}.kv{display:grid;grid-template-columns:90px 1fr;gap:4px 10px;font-size:13px;margin:10px 0}.kv div:nth-child(odd){color:var(--mute)}
+.mini{background:#1f2a44;border-radius:10px;height:120px;margin:8px 0;overflow:hidden}.mini svg{width:100%;height:100%}
+.code.s{margin:8px 0;max-height:none;white-space:pre-wrap}
+.help{background:#f7f5f0;border-radius:10px;padding:8px 10px;font-size:13.5px;margin-top:10px}
+.warnbox{border:1.5px solid var(--warn);background:#fffaf2;border-radius:12px;padding:10px 12px;margin-top:10px;font-size:13.5px}.warnbox .t{color:var(--warn);font-weight:600}
+</style></head><body>
+<header><b>🎮 Spillverksted</b><span class="who">Sverre · prosjekt: Stjernehopp</span><span class="tabs"><span>Lag spill</span><span class="on">Verktøy</span><span>Prosjekter</span></span>
+<span class="lvl">Nivå 2&nbsp;<i class="on"></i><i class="on"></i><i></i><i></i><i></i></span></header>
+<main class="tools"><div class="engine"><b>Motor</b>
+<div class="eng on"><b>KAPLAY 3001</b><span class="pill ok">i bruk</span><span class="v">MIT · kort kode · 5 av 5 testspill virket</span></div>
+<div class="eng"><b>Phaser 4</b><span class="pill later">senere</span><span class="v">MIT · for større spill · bak samme adapter</span></div>
+<button class="b" style="margin-left:auto">Sammenlign motorene</button></div>
+<section id="formal"><h2>🎯 Hva vil du få til? <small>formål</small></h2><div class="body"><div class="search">🔎 Søk etter hva du vil få til …</div><div class="grp">Bevegelse</div><div class="pur">Reager på tastatur og berøring<span>1</span></div><div class="pur">Tyngdekraft og hopp<span>1</span></div><div class="pur">Flytt noe på skjermen<span>1</span></div><div class="grp">Treff og poeng</div><div class="pur on">Merk når to ting treffer hverandre<span>3</span></div><div class="pur">Lag og fjern ting<span>1</span></div><div class="pur">Vis poeng og tekst<span>1</span></div><div class="pur">Ting å samle<span>1</span></div><div class="grp">Skjermer og tid</div><div class="pur">Gjør noe etter en stund<span>1</span></div><div class="pur">Bytt mellom start, spill og ferdig<span>1</span></div><div class="grp">Utseende og lyd</div><div class="pur">Figurer og bakgrunner<span>1</span></div><div class="pur">Spill av lyd<span>2</span></div><div class="grp">Start et spill</div><div class="pur">Hoppespill<span>1</span></div><div class="pur">Labyrintspill<span>1</span></div><div class="pur">Fangespill<span>1</span></div></div></section>
+<section id="verktoy"><h2>🧰 Merk når to ting treffer hverandre <small>3 verktøy</small></h2><div class="body"><div class="cards">
+<div class="tool on"><span class="kind">funksjon</span><span class="lic">MIT</span><b>area() og onCollide</b><div class="ref">purpose://candidate.game.detect-collision</div>Merker når to ting treffer hverandre, og gjør noe da.<div class="meta"><span class="pill">brukt i 2 spill</span><span class="pill ok">KAPLAY</span><span class="pill later">Phaser senere</span></div></div>
+<div class="tool"><span class="kind">funksjon</span><span class="lic">MIT</span><b>isColliding()</b><div class="ref">purpose://candidate.game.detect-collision</div>Spør om to ting rører hverandre akkurat nå.<div class="meta"><span class="pill">ikke brukt ennå</span><span class="pill ok">KAPLAY</span></div></div>
+<div class="tool"><span class="kind">GUI</span><span class="lic">MIT (HAVEN)</span><b>Treffmarkør</b><div class="ref">purpose://candidate.game.detect-collision</div>Viser treffområdet som en stiplet ring mens du tester.<div class="meta"><span class="pill warn">bare i forhåndsvisning</span></div></div></div>
+<div class="grp">Brukes ofte sammen med</div><div class="cards">
+<div class="tool"><span class="kind">funksjon</span><span class="lic">MIT</span><b>destroy()</b><div class="ref">purpose://candidate.game.spawn-and-remove</div>Fjerner noe fra spillet.<div class="meta"><span class="pill">brukt i 2 spill</span></div></div>
+<div class="tool"><span class="kind">funksjon</span><span class="lic">MIT</span><b>text()</b><div class="ref">purpose://candidate.game.show-score</div>Skriver poeng på skjermen.<div class="meta"><span class="pill">brukt i 2 spill</span></div></div></div></div></section>
+<section id="detaljer"><h2>🔍 area() og onCollide</h2><div class="body"><div class="det"><h3>area() og onCollide</h3>Merker når to ting treffer hverandre. Gi begge et treffområde med <code>area()</code>, og si hva som skal skje med <code>onCollide</code>.
+<div class="mini"><svg viewBox="0 0 400 120"><rect width="400" height="120" fill="#1f2a44"/><rect y="100" width="400" height="20" fill="#3b7d4f"/><circle cx="150" cy="86" r="14" fill="#ffcc4d"/><circle cx="178" cy="88" r="9" fill="#ffd60a"/><circle cx="164" cy="86" r="26" fill="none" stroke="#ff6b6b" stroke-width="2" stroke-dasharray="4 3"/><text x="200" y="40" fill="#fff" font-family="system-ui" font-size="13">treff! poeng + 1</text></svg></div>
+<div class="code s">spiller.onCollide("mynt", (m) =&gt; {
+  destroy(m)
+  poeng = poeng + 1
+})</div>
+<div class="kv"><div>Formål</div><div class="ref">purpose://candidate.game.detect-collision</div><div>Lisens</div><div>MIT (KAPLAY)</div><div>Kilde</div><div>KAPLAY 3001.0.19, lest 9. okt.</div><div>Brukt i</div><div>Stjernehopp v2, Fang kulene v1</div></div>
+<div class="btns"><button class="b p">Be hjelperen bruke dette</button><button class="b">Vis i spillet mitt</button></div>
+<div class="help">Hjelperen velger dette når du ber om at noe skal skje når ting treffer hverandre, for eksempel «samle mynter» eller «miste liv».</div></div></div></section>
+</main></body></html>

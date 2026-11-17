@@ -1,0 +1,335 @@
+Focused control-plane gates	Run Thursday demo P0 browser proof	﻿2026-09-18T01:18:11.9192498Z ##[group]Run set -euo pipefail
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9193409Z [36;1mset -euo pipefail[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9194120Z [36;1mserver_log="$(mktemp)"[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9194888Z [36;1mtest_runtime_root="$(mktemp -d)"[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9195938Z [36;1mbin_path="$(swift build --show-bin-path --force-resolved-versions)"[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9197029Z [36;1mserver_binary="$bin_path/Run"[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9197913Z [36;1mseed_binary="$bin_path/ArendalsukaProgramSeed"[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9198808Z [36;1mtest -x "$server_binary"[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9199557Z [36;1mtest -x "$seed_binary"[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9200415Z [36;1mCELL_SCAFFOLD_RUNTIME_ROOT="$test_runtime_root" \[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9201654Z [36;1m  "$seed_binary" --snapshot \[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9202773Z [36;1m    playwright/fixtures/arendalsuka-demo-20260903/program-snapshot.v1.json[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9203993Z [36;1mbuild_timestamp="$(date -u +%Y-%m-%dT%H:%M:%SZ)"[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9204925Z [36;1mAPP_BUILD_REVISION="$GITHUB_SHA" \[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9205850Z [36;1mAPP_BUILD_TIMESTAMP="$build_timestamp" \[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9206826Z [36;1mARENDALSUKA_REMOTE_CONFIGURATION_ACCESS=released \[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9207871Z [36;1mCELL_SCAFFOLD_RUNTIME_ROOT="$test_runtime_root" \[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9208783Z [36;1mVAPOR_ENV=testing \[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9209728Z [36;1m  "$server_binary" serve --env testing --hostname 127.0.0.1 --port 9089 \[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9210745Z [36;1m  >"$server_log" 2>&1 &[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9211828Z [36;1mserver_pid=$![0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9212508Z [36;1mcleanup_server() {[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9213179Z [36;1m  status=$?[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9213812Z [36;1m  trap - EXIT[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9214428Z [36;1m  set +e[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9215063Z [36;1m  kill "$server_pid" 2>/dev/null[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9215848Z [36;1m  wait "$server_pid" 2>/dev/null[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9216622Z [36;1m  if [ "$status" -ne 0 ]; then[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9217410Z [36;1m    tail -n 200 "$server_log"[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9218189Z [36;1m  fi[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9218795Z [36;1m  exit "$status"[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9219450Z [36;1m}[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9220069Z [36;1mtrap cleanup_server EXIT[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9220799Z [36;1m[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9221865Z [36;1mready=0[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9222507Z [36;1mfor _ in $(seq 1 90); do[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9224207Z [36;1m  if node -e 'fetch("http://127.0.0.1:9089/health/build", { signal: AbortSignal.timeout(1000) }).then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))'; then[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9225913Z [36;1m    ready=1[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9226527Z [36;1m    break[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9227139Z [36;1m  fi[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9227818Z [36;1m  kill -0 "$server_pid" 2>/dev/null || break[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9228640Z [36;1m  sleep 1[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9229241Z [36;1mdone[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9229854Z [36;1mtest "$ready" -eq 1[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9230727Z [36;1m[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9231819Z [36;1mCONFERENCE_DEMO_BASE_URL=http://127.0.0.1:9089 \[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9232873Z [36;1mPORTHOLE_CHAT_BASE_URL=http://127.0.0.1:9089 \[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9233937Z [36;1mPORTHOLE_CHAT_PASSWORD='LocalButlerExplicitHelper!2026' \[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9235033Z [36;1mARENDALSUKA_DEMO_BASE_URL=http://127.0.0.1:9089 \[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9236135Z [36;1mARENDALSUKA_DEMO_PASSWORD='LocalArendalsukaUserProof!2026' \[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9237232Z [36;1mARENDALSUKA_EXPECTED_REVISION="$GITHUB_SHA" \[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9238253Z [36;1m  npx playwright test --config=playwright.config.js \[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9239350Z [36;1m    playwright/butler-explicit-helper-placement.spec.js \[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9240511Z [36;1m    playwright/skeleton-workbench-autoscroll.spec.js \[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9241971Z [36;1m    playwright/cellconfiguration-studio-upload.smoke.spec.js \[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9243666Z [36;1m    playwright/arendalsuka-onboarding-matching.smoke.spec.js \[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9244775Z [36;1m    playwright/butterpop-queue.spec.js \[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9245689Z [36;1m    playwright/butterpop-mix-tidy.spec.js \[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9246695Z [36;1m    playwright/skeleton-tabs-optimistic-hold.spec.js[0m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9247825Z shell: bash --noprofile --norc -e -o pipefail {0}
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9248643Z env:
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9249303Z   WEB_IMAGE: ghcr.io/digipomps/cellscaffold-web
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9250198Z   ADMIN_IMAGE: ghcr.io/digipomps/cellscaffold-admin
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9251231Z   NODE_TOOLS_IMAGE: ghcr.io/digipomps/cellscaffold-node-admin-tools
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9260881Z   CELLPROTOCOL_DOCUMENTS_REF: a08f72f369fad5be22364e35f92de52a41e04033
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:11.9262028Z ##[endgroup]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:12.6246403Z Seeding fresh local Arendalsuka program journal from playwright/fixtures/arendalsuka-demo-20260903/program-snapshot.v1.json (batch size 200)...
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:12.6248413Z   batch 1: received 1, created 1, updated 0, unchanged 0 (total: 1)
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:12.6249841Z Done. 1 batch(es), 1 session(s) received: 1 created, 0 updated, 0 unchanged. Cell now holds 1 session(s).
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:12.6251513Z Restart the local `Run` server (swift run Run ...) so it picks up the updated cell state.
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:16.5640774Z 
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:16.5641919Z Running 15 tests using 1 worker
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:18:16.5651896Z 
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:20:38.6106171Z   ✓   1 playwright/arendalsuka-onboarding-matching.smoke.spec.js:37:3 › Arendalsuka onboarding and consent-bounded matching › proves two synthetic participants on desktop and 375 px (2.3m)
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:21:35.9588022Z   ✓   2 playwright/butler-explicit-helper-placement.spec.js:16:5 › Butler explicit helper placement › desktop keeps the response in chat until the user opens one helper (57.3s)
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:22:25.4996636Z   ✓   3 playwright/butler-explicit-helper-placement.spec.js:16:5 › Butler explicit helper placement › mobile-375 keeps the response in chat until the user opens one helper (49.5s)
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:23:12.7843608Z   ✘   4 playwright/butler-explicit-helper-placement.spec.js:117:1 › unapproved external model is selectable and blocked without consent (46.5s)
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:23:14.9205896Z   ✓   5 playwright/butterpop-mix-tidy.spec.js:124:1 › bortryddede mikser er skjult til man ber om aa se dem (936ms)
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:23:15.3086594Z   ✓   6 playwright/butterpop-mix-tidy.spec.js:147:1 › uten bortryddede mikser finnes ingen bryter aa trykke paa (373ms)
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:23:15.8650946Z   ✓   7 playwright/butterpop-mix-tidy.spec.js:152:1 › avvisningen forklarer hvorfor en publisert miks ikke kan ryddes bort (535ms)
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:23:16.3343459Z   ✓   8 playwright/butterpop-mix-tidy.spec.js:180:1 › en bortryddet miks tilbyr aa bli hentet tilbake (452ms)
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:23:16.9316242Z   ✓   9 playwright/butterpop-queue.spec.js:82:1 › knappen sier Spiller for sangen som spiller (566ms)
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:23:17.6122274Z   ✓  10 playwright/butterpop-queue.spec.js:91:1 › koeen gaar videre til neste sang naar en er ferdig (665ms)
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:23:18.6697417Z   ✓  11 playwright/butterpop-queue.spec.js:101:1 › lista stopper etter siste sang, men looper naar du ber om det (1.0s)
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:23:19.2565711Z   ✓  12 playwright/butterpop-queue.spec.js:118:1 › Spill alle starter fra foerste sang (570ms)
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:05.0423412Z   ✓  13 playwright/cellconfiguration-studio-upload.smoke.spec.js:10:1 › an authenticated editor uploads, previews, and reloads a private CellConfiguration draft (45.8s)
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:06.4396612Z   ✓  14 playwright/skeleton-tabs-optimistic-hold.spec.js:84:1 › naar handlingen feiler, gaar markeringen tilbake i stedet for aa bli staaende (1.4s)
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:06.9140475Z   ✓  15 playwright/skeleton-workbench-autoscroll.spec.js:54:3 › Skeleton workbench auto-scroll › coalesces back-to-back renders without losing bottom or reader intent (435ms)
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0308650Z 
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0323870Z 
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0352585Z   1) playwright/butler-explicit-helper-placement.spec.js:117:1 › unapproved external model is selectable and blocked without consent 
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0353812Z 
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0354805Z     Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m failed
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0355681Z 
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0356668Z     Locator:  locator('.skeleton-list-row').filter({ hasText: 'Synthetic UI model' }).filter({ visible: true }).first()
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0358112Z     Expected: visible
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0359001Z     Received: <element(s) not found>
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0359834Z     Timeout:  30000ms
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0360172Z 
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0361205Z     Call log:
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0362341Z     [2m  - Expect "toBeVisible" with timeout 30000ms[22m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0363875Z     [2m  - waiting for locator('.skeleton-list-row').filter({ hasText: 'Synthetic UI model' }).filter({ visible: true }).first()[22m
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0364876Z 
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0364896Z 
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0365688Z       132 |   await clickAndWaitForPortholeAction(page, page.getByRole("button", { name: "Finn modeller", exact: true }));
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0367443Z       133 |   const row = page.locator(".skeleton-list-row").filter({ hasText: "Synthetic UI model" }).filter({ visible: true }).first();
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0368818Z     > 134 |   await expect(row).toBeVisible({ timeout: 30_000 });
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0369623Z           |                     ^
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0370633Z       135 |   const selected = unwrapActionResult(await clickAndWaitForPortholeAction(page, row));
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0372515Z       136 |   expect(selected.status).toBe("selected");
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0373944Z       137 |   await expect(page.getByText(/En gyldig tillitspakke må legges til/).first()).toBeVisible();
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0375590Z         at /__w/CellScaffold/CellScaffold/playwright/butler-explicit-helper-placement.spec.js:134:21
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0376753Z 
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0377820Z     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0379497Z     test-results/playwright/butler-explicit-helper-pla-2982d-and-blocked-without-consent/test-failed-1.png
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0381572Z     ────────────────────────────────────────────────────────────────────────────────────────────────
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0382538Z 
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0383387Z     attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0384987Z     test-results/playwright/butler-explicit-helper-pla-2982d-and-blocked-without-consent/video.webm
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0386723Z     ────────────────────────────────────────────────────────────────────────────────────────────────
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0387456Z 
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0388371Z     Error Context: test-results/playwright/butler-explicit-helper-pla-2982d-and-blocked-without-consent/error-context.md
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0389498Z 
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0390389Z     attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0392978Z     test-results/playwright/butler-explicit-helper-pla-2982d-and-blocked-without-consent/trace.zip
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0394194Z     Usage:
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0394541Z 
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0395503Z         npx playwright show-trace test-results/playwright/butler-explicit-helper-pla-2982d-and-blocked-without-consent/trace.zip
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0396673Z 
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0397483Z     ────────────────────────────────────────────────────────────────────────────────────────────────
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0398232Z 
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0398515Z   1 failed
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0400013Z     playwright/butler-explicit-helper-placement.spec.js:117:1 › unapproved external model is selectable and blocked without consent 
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.0401849Z   14 passed (5.9m)
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1031928Z Saving identity named cells: 7 identities, 184 references
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1033474Z Scaffold orchestrator got event feed item. Title: Resolver event, topic: register
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1035217Z Saving identity named cells: 7 identities, 185 references
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1036435Z Scaffold orchestrator got event feed item. Title: Resolver event, topic: register
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1037579Z Saving named cells: 32 entries
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1038623Z Scaffold orchestrator got event feed item. Title: Resolver event, topic: register
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1045463Z Saving identity named cells: 7 identities, 186 references
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1046926Z Scaffold orchestrator got event feed item. Title: Resolver event, topic: register
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1048241Z Saving identity named cells: 7 identities, 187 references
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1049410Z Scaffold orchestrator got event feed item. Title: Resolver event, topic: register
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1050659Z Saving identity named cells: 7 identities, 188 references
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1052577Z Did NOT find any EmitCell with name: PersonalIdentity!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1053628Z Did NOT find any EmitCell with name: PersonalIdentity!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1054747Z Did NOT find any EmitCell with name: PersonalProfileDraft!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1055870Z Did NOT find any EmitCell with name: PersonalProfileDraft!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1057043Z Did NOT find any EmitCell with name: PersonalPrivacyAudit!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1058478Z Did NOT find any EmitCell with name: PersonalPrivacyAudit!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1059632Z Did NOT find any EmitCell with name: AppleIntelligence!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1060777Z Did NOT find any EmitCell with name: AppleIntelligence!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1062341Z Did NOT find any EmitCell with name: EntityScanner!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1063461Z Did NOT find any EmitCell with name: EntityScanner!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1064578Z Did NOT find any EmitCell with name: WorkflowStudio!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1065671Z Did NOT find any EmitCell with name: WorkflowStudio!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1067069Z [ INFO ] GET /browserhead/porthole/bootstrap [request-id: 0D2D3819-1EDF-4D89-86D4-39BD4570A51F]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1070862Z ********Reading sessionId: D62B41F5-BC4B-408C-A61A-319511286804 sessions: ["D6E90379-C72B-4836-B666-72B6DE65DCC3": App.WebCellEmbeddings, "D7A0D116-1FD7-4F5F-968A-3F3EE00DEC07": App.WebCellEmbeddings, "D62B41F5-BC4B-408C-A61A-319511286804": App.WebCellEmbeddings, "EBD80302-2154-4176-BF4B-B34DF82E0106": App.WebCellEmbeddings, "926A8F21-D84E-408D-8C28-FE95AEAB514C": App.WebCellEmbeddings]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1077993Z ********Reading sessionId: D62B41F5-BC4B-408C-A61A-319511286804 sessions: ["D6E90379-C72B-4836-B666-72B6DE65DCC3": App.WebCellEmbeddings, "D7A0D116-1FD7-4F5F-968A-3F3EE00DEC07": App.WebCellEmbeddings, "D62B41F5-BC4B-408C-A61A-319511286804": App.WebCellEmbeddings, "EBD80302-2154-4176-BF4B-B34DF82E0106": App.WebCellEmbeddings, "926A8F21-D84E-408D-8C28-FE95AEAB514C": App.WebCellEmbeddings]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1081793Z **** Creating BrowserClientIdentityVault for identitydDomain: 38766A1E-7711-406D-9D32-7995AC9DA59E
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1083353Z vaultURL: file:///tmp/tmp.YDqZYdRxH8/CellsContainer/PrivateVaults/38766A1E-7711-406D-9D32-7995AC9DA59E
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1084620Z Did NOT find any EmitCell with name: TranscriptStore!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1085344Z Did NOT find any EmitCell with name: TranscriptStore!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1085890Z Did NOT find any EmitCell with name: PersonalIdentity!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1086573Z Did NOT find any EmitCell with name: PersonalIdentity!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1087106Z Did NOT find any EmitCell with name: PersonalProfileDraft!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1087794Z Did NOT find any EmitCell with name: PersonalProfileDraft!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1088635Z Did NOT find any EmitCell with name: PersonalPrivacyAudit!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1089541Z Did NOT find any EmitCell with name: PersonalPrivacyAudit!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1092116Z Did NOT find any EmitCell with name: AppleIntelligence!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1093090Z Did NOT find any EmitCell with name: AppleIntelligence!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1093664Z Did NOT find any EmitCell with name: EntityScanner!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1094643Z Did NOT find any EmitCell with name: EntityScanner!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1095190Z Did NOT find any EmitCell with name: WorkflowStudio!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1095812Z Did NOT find any EmitCell with name: WorkflowStudio!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1096320Z Did NOT find any EmitCell with name: TranscriptStore!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1096982Z Did NOT find any EmitCell with name: TranscriptStore!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1097513Z Did NOT find any EmitCell with name: PersonalIdentity!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1099258Z Did NOT find any EmitCell with name: PersonalIdentity!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1100361Z Did NOT find any EmitCell with name: PersonalProfileDraft!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1101851Z Did NOT find any EmitCell with name: PersonalProfileDraft!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1103044Z Did NOT find any EmitCell with name: PersonalPrivacyAudit!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1103973Z Did NOT find any EmitCell with name: PersonalPrivacyAudit!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1104944Z Did NOT find any EmitCell with name: AppleIntelligence!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1106293Z Did NOT find any EmitCell with name: AppleIntelligence!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1107193Z Did NOT find any EmitCell with name: EntityScanner!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1108052Z Did NOT find any EmitCell with name: EntityScanner!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1109075Z Did NOT find any EmitCell with name: WorkflowStudio!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1109947Z Did NOT find any EmitCell with name: WorkflowStudio!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1111139Z [ INFO ] GET /css/themes/Cell Configuration Studio.css [request-id: 001E6B67-3995-477E-B1C4-1A3F7825CF7F]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1112790Z [ INFO ] POST /browserhead/porthole/action [request-id: 6D21E5B2-0605-4775-8DCE-6B40BA38C05D]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1116072Z ********Reading sessionId: D62B41F5-BC4B-408C-A61A-319511286804 sessions: ["D6E90379-C72B-4836-B666-72B6DE65DCC3": App.WebCellEmbeddings, "D7A0D116-1FD7-4F5F-968A-3F3EE00DEC07": App.WebCellEmbeddings, "D62B41F5-BC4B-408C-A61A-319511286804": App.WebCellEmbeddings, "EBD80302-2154-4176-BF4B-B34DF82E0106": App.WebCellEmbeddings, "926A8F21-D84E-408D-8C28-FE95AEAB514C": App.WebCellEmbeddings]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1121575Z ********Reading sessionId: D62B41F5-BC4B-408C-A61A-319511286804 sessions: ["D6E90379-C72B-4836-B666-72B6DE65DCC3": App.WebCellEmbeddings, "D7A0D116-1FD7-4F5F-968A-3F3EE00DEC07": App.WebCellEmbeddings, "D62B41F5-BC4B-408C-A61A-319511286804": App.WebCellEmbeddings, "EBD80302-2154-4176-BF4B-B34DF82E0106": App.WebCellEmbeddings, "926A8F21-D84E-408D-8C28-FE95AEAB514C": App.WebCellEmbeddings]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1126440Z **** Creating BrowserClientIdentityVault for identitydDomain: 38766A1E-7711-406D-9D32-7995AC9DA59E
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1127497Z vaultURL: file:///tmp/tmp.YDqZYdRxH8/CellsContainer/PrivateVaults/38766A1E-7711-406D-9D32-7995AC9DA59E
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1128367Z Scaffold orchestrator got event feed item. Title: Resolver event, topic: register
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1129003Z Saving identity named cells: 7 identities, 189 references
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1129689Z [ INFO ] GET /browserhead/porthole/bootstrap [request-id: C27594C5-376C-4035-ABB0-3D680EE07156]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1132210Z ********Reading sessionId: D62B41F5-BC4B-408C-A61A-319511286804 sessions: ["D6E90379-C72B-4836-B666-72B6DE65DCC3": App.WebCellEmbeddings, "D7A0D116-1FD7-4F5F-968A-3F3EE00DEC07": App.WebCellEmbeddings, "D62B41F5-BC4B-408C-A61A-319511286804": App.WebCellEmbeddings, "EBD80302-2154-4176-BF4B-B34DF82E0106": App.WebCellEmbeddings, "926A8F21-D84E-408D-8C28-FE95AEAB514C": App.WebCellEmbeddings]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1135234Z ********Reading sessionId: D62B41F5-BC4B-408C-A61A-319511286804 sessions: ["D6E90379-C72B-4836-B666-72B6DE65DCC3": App.WebCellEmbeddings, "D7A0D116-1FD7-4F5F-968A-3F3EE00DEC07": App.WebCellEmbeddings, "D62B41F5-BC4B-408C-A61A-319511286804": App.WebCellEmbeddings, "EBD80302-2154-4176-BF4B-B34DF82E0106": App.WebCellEmbeddings, "926A8F21-D84E-408D-8C28-FE95AEAB514C": App.WebCellEmbeddings]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1137075Z **** Creating BrowserClientIdentityVault for identitydDomain: 38766A1E-7711-406D-9D32-7995AC9DA59E
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1138132Z vaultURL: file:///tmp/tmp.YDqZYdRxH8/CellsContainer/PrivateVaults/38766A1E-7711-406D-9D32-7995AC9DA59E
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1138833Z Did NOT find any EmitCell with name: TranscriptStore!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1139343Z Did NOT find any EmitCell with name: TranscriptStore!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1139864Z Did NOT find any EmitCell with name: PersonalIdentity!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1140377Z Did NOT find any EmitCell with name: PersonalIdentity!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1140904Z Did NOT find any EmitCell with name: PersonalProfileDraft!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1142029Z Did NOT find any EmitCell with name: PersonalProfileDraft!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1142607Z Did NOT find any EmitCell with name: PersonalPrivacyAudit!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1143150Z Did NOT find any EmitCell with name: PersonalPrivacyAudit!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1143674Z Did NOT find any EmitCell with name: AppleIntelligence!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1144195Z Did NOT find any EmitCell with name: AppleIntelligence!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1144710Z Did NOT find any EmitCell with name: EntityScanner!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1145199Z Did NOT find any EmitCell with name: EntityScanner!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1145690Z Did NOT find any EmitCell with name: WorkflowStudio!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1146194Z Did NOT find any EmitCell with name: WorkflowStudio!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1146802Z Did NOT find any EmitCell with name: TranscriptStore!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1147295Z Did NOT find any EmitCell with name: TranscriptStore!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1147790Z Did NOT find any EmitCell with name: PersonalIdentity!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1148300Z Did NOT find any EmitCell with name: PersonalIdentity!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1148819Z Did NOT find any EmitCell with name: PersonalProfileDraft!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1149364Z Did NOT find any EmitCell with name: PersonalProfileDraft!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1149895Z Did NOT find any EmitCell with name: PersonalPrivacyAudit!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1150426Z Did NOT find any EmitCell with name: PersonalPrivacyAudit!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1151035Z Did NOT find any EmitCell with name: AppleIntelligence!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1151829Z Did NOT find any EmitCell with name: AppleIntelligence!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1152342Z Did NOT find any EmitCell with name: EntityScanner!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1152832Z Did NOT find any EmitCell with name: EntityScanner!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1153327Z Did NOT find any EmitCell with name: WorkflowStudio!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1153812Z Did NOT find any EmitCell with name: WorkflowStudio!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1154269Z >> cancelled instantFeed publisher
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1154769Z Deiniting WebCellEmbeddings (D62B41F5-BC4B-408C-A61A-319511286804
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1155416Z [ INFO ] GET /browserhead/webo [request-id: 9BB7D49C-B95C-427E-A38D-D29A554199C6]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1156174Z **** Creating BrowserClientIdentityVault for identitydDomain: 38766A1E-7711-406D-9D32-7995AC9DA59E
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1156853Z * webo identityDomain: 38766A1E-7711-406D-9D32-7995AC9DA59E
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1157559Z vaultURL: file:///tmp/tmp.YDqZYdRxH8/CellsContainer/PrivateVaults/38766A1E-7711-406D-9D32-7995AC9DA59E
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1158250Z ** webo owner.uuid: DC65C7E4-4AE4-4D02-BD5F-1A7B2573E40D
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1158783Z ********Removing sessionId: D62B41F5-BC4B-408C-A61A-319511286804
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1159285Z Creating new WebCellEmbeddings as session
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1159816Z Init Web Cell Embeddings. Owner: DC65C7E4-4AE4-4D02-BD5F-1A7B2573E40D
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1160337Z ********* Configure start
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1160730Z Connected labels: ["configurationStudio"]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1162127Z Connection Statuses: [CellBase.ConnectionStatus(name: "configurationStudio", connected: true, active: false)]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1163254Z skeleton connections: list([CellBase.ValueType.object(["active": CellBase.ValueType.bool(false), "name": CellBase.ValueType.string("configurationStudio")])])
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1165970Z skeletonValue: Optional("<div id=\"overlay\" class=\"overlay\">\n    \n            <div id=\"4433FA87-9B50-400C-AEEF-CB858B83E797\" class=\"draggable\">Times</div>\n    \n            <div id=\"026E15DE-84A9-4A40-821D-F63C02680DBD\" class=\"draggable\">Entities</div>\n    \n</div>\n\n<div class=\"pagehead\">\n        <div class=\"header\"><h1 class=\"title\">Simple Project</h1></div>\n        <div class=\"infotext\">Short description Lorem ipsum </div>\n        <a href=\"/\">Logout</a>\n</div>\n<div class=\"headdivider\"></div>\n<div class=\"pagecontent dropable\">\n    \n        <div class=\"feedcontainer\" id=\"configurationStudio\"></div>\n\n\n    </div>\n</div>\n")
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1168406Z ********* Configure stop
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1168835Z ********Adding sessionId: D62B41F5-BC4B-408C-A61A-319511286804
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1169504Z [ INFO ] GET /browserhead/porthole/bootstrap [request-id: 51727BD9-9F7C-4457-94C1-1869375E7B1D]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1182576Z ********Reading sessionId: D62B41F5-BC4B-408C-A61A-319511286804 sessions: ["D6E90379-C72B-4836-B666-72B6DE65DCC3": App.WebCellEmbeddings, "D7A0D116-1FD7-4F5F-968A-3F3EE00DEC07": App.WebCellEmbeddings, "D62B41F5-BC4B-408C-A61A-319511286804": App.WebCellEmbeddings, "EBD80302-2154-4176-BF4B-B34DF82E0106": App.WebCellEmbeddings, "926A8F21-D84E-408D-8C28-FE95AEAB514C": App.WebCellEmbeddings]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1186155Z ********Reading sessionId: D62B41F5-BC4B-408C-A61A-319511286804 sessions: ["D6E90379-C72B-4836-B666-72B6DE65DCC3": App.WebCellEmbeddings, "D7A0D116-1FD7-4F5F-968A-3F3EE00DEC07": App.WebCellEmbeddings, "D62B41F5-BC4B-408C-A61A-319511286804": App.WebCellEmbeddings, "EBD80302-2154-4176-BF4B-B34DF82E0106": App.WebCellEmbeddings, "926A8F21-D84E-408D-8C28-FE95AEAB514C": App.WebCellEmbeddings]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1188040Z **** Creating BrowserClientIdentityVault for identitydDomain: 38766A1E-7711-406D-9D32-7995AC9DA59E
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1188922Z vaultURL: file:///tmp/tmp.YDqZYdRxH8/CellsContainer/PrivateVaults/38766A1E-7711-406D-9D32-7995AC9DA59E
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1189857Z [ INFO ] GET /browserhead/wsce/D62B41F5-BC4B-408C-A61A-319511286804 [request-id: 5668AB4C-C1CA-4039-8984-96481F424213]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1190666Z Got websocket request
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1192518Z ********Reading sessionId: D62B41F5-BC4B-408C-A61A-319511286804 sessions: ["D6E90379-C72B-4836-B666-72B6DE65DCC3": App.WebCellEmbeddings, "D7A0D116-1FD7-4F5F-968A-3F3EE00DEC07": App.WebCellEmbeddings, "D62B41F5-BC4B-408C-A61A-319511286804": App.WebCellEmbeddings, "EBD80302-2154-4176-BF4B-B34DF82E0106": App.WebCellEmbeddings, "926A8F21-D84E-408D-8C28-FE95AEAB514C": App.WebCellEmbeddings]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1195414Z ********Reading sessionId: D62B41F5-BC4B-408C-A61A-319511286804 sessions: ["D6E90379-C72B-4836-B666-72B6DE65DCC3": App.WebCellEmbeddings, "D7A0D116-1FD7-4F5F-968A-3F3EE00DEC07": App.WebCellEmbeddings, "D62B41F5-BC4B-408C-A61A-319511286804": App.WebCellEmbeddings, "EBD80302-2154-4176-BF4B-B34DF82E0106": App.WebCellEmbeddings, "926A8F21-D84E-408D-8C28-FE95AEAB514C": App.WebCellEmbeddings]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1197108Z absorb feed. owner: DC65C7E4-4AE4-4D02-BD5F-1A7B2573E40D
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1197821Z [ INFO ] GET /css/themes/Cell Configuration Studio.css [request-id: 3D5B776A-667C-43AE-AE56-E2D81517B3FE]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1198644Z [ INFO ] POST /browserhead/porthole/action [request-id: 973EA9B3-FCB0-4B29-A228-DD37C0BCB46E]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1200473Z ********Reading sessionId: D62B41F5-BC4B-408C-A61A-319511286804 sessions: ["D6E90379-C72B-4836-B666-72B6DE65DCC3": App.WebCellEmbeddings, "D7A0D116-1FD7-4F5F-968A-3F3EE00DEC07": App.WebCellEmbeddings, "D62B41F5-BC4B-408C-A61A-319511286804": App.WebCellEmbeddings, "EBD80302-2154-4176-BF4B-B34DF82E0106": App.WebCellEmbeddings, "926A8F21-D84E-408D-8C28-FE95AEAB514C": App.WebCellEmbeddings]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1203445Z ********Reading sessionId: D62B41F5-BC4B-408C-A61A-319511286804 sessions: ["D6E90379-C72B-4836-B666-72B6DE65DCC3": App.WebCellEmbeddings, "D7A0D116-1FD7-4F5F-968A-3F3EE00DEC07": App.WebCellEmbeddings, "D62B41F5-BC4B-408C-A61A-319511286804": App.WebCellEmbeddings, "EBD80302-2154-4176-BF4B-B34DF82E0106": App.WebCellEmbeddings, "926A8F21-D84E-408D-8C28-FE95AEAB514C": App.WebCellEmbeddings]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1205436Z **** Creating BrowserClientIdentityVault for identitydDomain: 38766A1E-7711-406D-9D32-7995AC9DA59E
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1206297Z vaultURL: file:///tmp/tmp.YDqZYdRxH8/CellsContainer/PrivateVaults/38766A1E-7711-406D-9D32-7995AC9DA59E
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1206995Z Did NOT find any EmitCell with name: TranscriptStore!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1207519Z Did NOT find any EmitCell with name: TranscriptStore!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1208042Z Did NOT find any EmitCell with name: PersonalIdentity!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1208566Z Did NOT find any EmitCell with name: PersonalIdentity!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1209097Z Did NOT find any EmitCell with name: PersonalProfileDraft!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1209642Z Did NOT find any EmitCell with name: PersonalProfileDraft!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1210173Z Did NOT find any EmitCell with name: PersonalPrivacyAudit!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1210719Z Did NOT find any EmitCell with name: PersonalPrivacyAudit!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1211379Z Did NOT find any EmitCell with name: AppleIntelligence!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1211913Z Did NOT find any EmitCell with name: AppleIntelligence!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1212426Z Did NOT find any EmitCell with name: EntityScanner!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1213006Z Did NOT find any EmitCell with name: EntityScanner!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1213502Z Did NOT find any EmitCell with name: WorkflowStudio!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1213997Z Did NOT find any EmitCell with name: WorkflowStudio!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1214547Z Deiniting WebCellEmbeddings (D62B41F5-BC4B-408C-A61A-319511286804
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1215112Z Did NOT find any EmitCell with name: TranscriptStore!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1215618Z Did NOT find any EmitCell with name: TranscriptStore!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1216126Z Did NOT find any EmitCell with name: PersonalIdentity!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1216641Z Did NOT find any EmitCell with name: PersonalIdentity!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1217250Z Did NOT find any EmitCell with name: PersonalProfileDraft!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1217792Z Did NOT find any EmitCell with name: PersonalProfileDraft!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1218323Z Did NOT find any EmitCell with name: PersonalPrivacyAudit!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1218851Z Did NOT find any EmitCell with name: PersonalPrivacyAudit!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1219380Z Did NOT find any EmitCell with name: AppleIntelligence!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1219896Z Did NOT find any EmitCell with name: AppleIntelligence!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1220403Z Did NOT find any EmitCell with name: EntityScanner!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1220902Z Did NOT find any EmitCell with name: EntityScanner!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1221733Z Did NOT find any EmitCell with name: WorkflowStudio!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1222255Z Did NOT find any EmitCell with name: WorkflowStudio!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1222901Z [ INFO ] GET /browserhead/porthole/bootstrap [request-id: 93E75803-D922-4BB3-BD68-2FC33B6FD6DC]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1224742Z ********Reading sessionId: D62B41F5-BC4B-408C-A61A-319511286804 sessions: ["D6E90379-C72B-4836-B666-72B6DE65DCC3": App.WebCellEmbeddings, "D7A0D116-1FD7-4F5F-968A-3F3EE00DEC07": App.WebCellEmbeddings, "D62B41F5-BC4B-408C-A61A-319511286804": App.WebCellEmbeddings, "EBD80302-2154-4176-BF4B-B34DF82E0106": App.WebCellEmbeddings, "926A8F21-D84E-408D-8C28-FE95AEAB514C": App.WebCellEmbeddings]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1227611Z ********Reading sessionId: D62B41F5-BC4B-408C-A61A-319511286804 sessions: ["D6E90379-C72B-4836-B666-72B6DE65DCC3": App.WebCellEmbeddings, "D7A0D116-1FD7-4F5F-968A-3F3EE00DEC07": App.WebCellEmbeddings, "D62B41F5-BC4B-408C-A61A-319511286804": App.WebCellEmbeddings, "EBD80302-2154-4176-BF4B-B34DF82E0106": App.WebCellEmbeddings, "926A8F21-D84E-408D-8C28-FE95AEAB514C": App.WebCellEmbeddings]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1229493Z **** Creating BrowserClientIdentityVault for identitydDomain: 38766A1E-7711-406D-9D32-7995AC9DA59E
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1230359Z vaultURL: file:///tmp/tmp.YDqZYdRxH8/CellsContainer/PrivateVaults/38766A1E-7711-406D-9D32-7995AC9DA59E
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1231329Z Did NOT find any EmitCell with name: TranscriptStore!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1231889Z Did NOT find any EmitCell with name: TranscriptStore!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1232399Z Did NOT find any EmitCell with name: PersonalIdentity!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1232921Z Did NOT find any EmitCell with name: PersonalIdentity!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1233451Z Did NOT find any EmitCell with name: PersonalProfileDraft!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1233998Z Did NOT find any EmitCell with name: PersonalProfileDraft!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1234538Z Did NOT find any EmitCell with name: PersonalPrivacyAudit!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1235078Z Did NOT find any EmitCell with name: PersonalPrivacyAudit!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1235607Z Did NOT find any EmitCell with name: AppleIntelligence!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1236130Z Did NOT find any EmitCell with name: AppleIntelligence!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1236647Z Did NOT find any EmitCell with name: EntityScanner!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1237144Z Did NOT find any EmitCell with name: EntityScanner!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1237647Z Did NOT find any EmitCell with name: WorkflowStudio!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1238146Z Did NOT find any EmitCell with name: WorkflowStudio!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1238654Z Did NOT find any EmitCell with name: TranscriptStore!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1239235Z Did NOT find any EmitCell with name: TranscriptStore!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1239737Z Did NOT find any EmitCell with name: PersonalIdentity!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1240243Z Did NOT find any EmitCell with name: PersonalIdentity!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1240763Z Did NOT find any EmitCell with name: PersonalProfileDraft!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1241420Z Did NOT find any EmitCell with name: PersonalProfileDraft!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1241962Z Did NOT find any EmitCell with name: PersonalPrivacyAudit!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1242493Z Did NOT find any EmitCell with name: PersonalPrivacyAudit!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1243017Z Did NOT find any EmitCell with name: AppleIntelligence!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1243612Z Did NOT find any EmitCell with name: AppleIntelligence!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1244121Z Did NOT find any EmitCell with name: EntityScanner!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1244616Z Did NOT find any EmitCell with name: EntityScanner!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1245111Z Did NOT find any EmitCell with name: WorkflowStudio!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1245612Z Did NOT find any EmitCell with name: WorkflowStudio!!!
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1246257Z [ INFO ] GET /browserhead/porthole/bootstrap [request-id: 83003E79-1555-4A84-974F-4A4F5809D53E]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1248099Z ********Reading sessionId: D62B41F5-BC4B-408C-A61A-319511286804 sessions: ["D6E90379-C72B-4836-B666-72B6DE65DCC3": App.WebCellEmbeddings, "D7A0D116-1FD7-4F5F-968A-3F3EE00DEC07": App.WebCellEmbeddings, "D62B41F5-BC4B-408C-A61A-319511286804": App.WebCellEmbeddings, "EBD80302-2154-4176-BF4B-B34DF82E0106": App.WebCellEmbeddings, "926A8F21-D84E-408D-8C28-FE95AEAB514C": App.WebCellEmbeddings]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1250947Z ********Reading sessionId: D62B41F5-BC4B-408C-A61A-319511286804 sessions: ["D6E90379-C72B-4836-B666-72B6DE65DCC3": App.WebCellEmbeddings, "D7A0D116-1FD7-4F5F-968A-3F3EE00DEC07": App.WebCellEmbeddings, "D62B41F5-BC4B-408C-A61A-319511286804": App.WebCellEmbeddings, "EBD80302-2154-4176-BF4B-B34DF82E0106": App.WebCellEmbeddings, "926A8F21-D84E-408D-8C28-FE95AEAB514C": App.WebCellEmbeddings]
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1252918Z **** Creating BrowserClientIdentityVault for identitydDomain: 38766A1E-7711-406D-9D32-7995AC9DA59E
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1253765Z vaultURL: file:///tmp/tmp.YDqZYdRxH8/CellsContainer/PrivateVaults/38766A1E-7711-406D-9D32-7995AC9DA59E
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1254418Z >> cancelled instantFeed publisher
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1254915Z Deiniting WebCellEmbeddings (D62B41F5-BC4B-408C-A61A-319511286804
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1255266Z 
+Focused control-plane gates	Run Thursday demo P0 browser proof	2026-09-18T01:24:07.1264978Z ##[error]Process completed with exit code 1.

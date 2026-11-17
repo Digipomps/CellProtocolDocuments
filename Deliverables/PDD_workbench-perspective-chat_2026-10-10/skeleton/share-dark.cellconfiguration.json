@@ -1,0 +1,297 @@
+{
+  "uuid": "fc9fb625-0d01-4c65-b3a3-b787e8e52101",
+  "name": "P1-GUI · share",
+  "description": "Designkandidat med syntetiske data. Nye Explore-kontrakter er ikke implementert.",
+  "cellReferences": [
+    {
+      "endpoint": "cell:///WorkbenchHelper",
+      "label": "helper",
+      "subscribeFeed": true
+    }
+  ],
+  "skeleton": {
+    "VStack": {
+      "elements": [
+        {
+          "VStack": {
+            "elements": [
+              {
+                "HStack": {
+                  "elements": [
+                    {
+                      "VStack": {
+                        "elements": [
+                          {
+                            "Text": {
+                              "text": "Del en pakkeversjon",
+                              "modifiers": {
+                                "fontSize": 25,
+                                "fontWeight": "semibold",
+                                "foregroundColor": "#f5f5f7"
+                              }
+                            }
+                          },
+                          {
+                            "Text": {
+                              "text": "Gjennomgå versjon og publikum før deling",
+                              "modifiers": {
+                                "fontSize": 13,
+                                "fontWeight": "regular",
+                                "foregroundColor": "#b5b5bf"
+                              }
+                            }
+                          }
+                        ],
+                        "spacing": 4,
+                        "modifiers": {
+                          "hAlignment": "leading",
+                          "flexGrow": 1
+                        }
+                      }
+                    },
+                    {
+                      "Button": {
+                        "label": "Admin Workbench",
+                        "keypath": "helper.openAdmin",
+                        "modifiers": {
+                          "fontSize": 13,
+                          "fontWeight": "medium",
+                          "background": "#29292d",
+                          "foregroundColor": "#f5f5f7",
+                          "cornerRadius": 8,
+                          "borderWidth": 1,
+                          "borderColor": "#45454c"
+                        }
+                      }
+                    }
+                  ],
+                  "spacing": 12,
+                  "modifiers": {
+                    "vAlignment": "top",
+                    "wrap": false,
+                    "padding": 22,
+                    "background": "#29292d",
+                    "layoutVariants": [
+                      {
+                        "maxAvailableWidth": 700,
+                        "axis": "vertical"
+                      }
+                    ],
+                    "styleClasses": [
+                      "helper-layout-row"
+                    ]
+                  }
+                }
+              },
+              {
+                "VStack": {
+                  "elements": [
+                    {
+                      "VStack": {
+                        "elements": [
+                          {
+                            "Text": {
+                              "text": "Min prosjektassistent · versjon 3",
+                              "modifiers": {
+                                "fontSize": 23,
+                                "fontWeight": "semibold",
+                                "foregroundColor": "#f5f5f7"
+                              }
+                            }
+                          },
+                          {
+                            "Picker": {
+                              "label": "Publikum",
+                              "keypath": "review.audiences",
+                              "optionLabelKeypath": "title",
+                              "selectionValueKeypath": "id",
+                              "selectionStateKeypath": "review.audience",
+                              "selectionActionKeypath": "helper.selectShareAudience",
+                              "selectionPayloadMode": "item_id",
+                              "allowsEmptySelection": false,
+                              "modifiers": {
+                                "fontSize": 13,
+                                "foregroundColor": "#f5f5f7",
+                                "background": "#29292d",
+                                "cornerRadius": 6
+                              }
+                            }
+                          },
+                          {
+                            "Text": {
+                              "text": "Dette blir delt",
+                              "modifiers": {
+                                "fontSize": 14,
+                                "fontWeight": "semibold",
+                                "foregroundColor": "#f5f5f7"
+                              }
+                            }
+                          },
+                          {
+                            "Text": {
+                              "text": "Instruksjonene i versjon 3 · valgte skill-referanser · referanse til prosjektets README",
+                              "modifiers": {
+                                "fontSize": 14,
+                                "fontWeight": "regular",
+                                "foregroundColor": "#f5f5f7"
+                              }
+                            }
+                          },
+                          {
+                            "Text": {
+                              "text": "Private notater, samtaler og personlige kontekstkilder er utelatt.",
+                              "modifiers": {
+                                "fontSize": 13,
+                                "fontWeight": "regular",
+                                "foregroundColor": "#f5f5f7"
+                              }
+                            }
+                          },
+                          {
+                            "Text": {
+                              "text": "Mottakerne bruker sine egne rettigheter når de åpner kildene.",
+                              "modifiers": {
+                                "fontSize": 13,
+                                "fontWeight": "regular",
+                                "foregroundColor": "#b5b5bf"
+                              }
+                            }
+                          },
+                          {
+                            "List": {
+                              "keypath": "review.notices",
+                              "selectionMode": "none",
+                              "flowElementSkeleton": {
+                                "VStack": {
+                                  "elements": [
+                                    {
+                                      "Text": {
+                                        "keypath": "title",
+                                        "modifiers": {
+                                          "fontSize": 14,
+                                          "fontWeight": "semibold",
+                                          "foregroundColor": "#f5f5f7"
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "Text": {
+                                        "keypath": "body",
+                                        "modifiers": {
+                                          "fontSize": 14,
+                                          "fontWeight": "regular",
+                                          "foregroundColor": "#f5f5f7"
+                                        }
+                                      }
+                                    }
+                                  ],
+                                  "spacing": 8,
+                                  "modifiers": {
+                                    "hAlignment": "leading"
+                                  }
+                                }
+                              },
+                              "modifiers": {
+                                "maxWidthInfinity": true,
+                                "styleClasses": [
+                                  "helper-rows"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "List": {
+                              "keypath": "review.actions",
+                              "selectionMode": "none",
+                              "flowElementSkeleton": {
+                                "VStack": {
+                                  "elements": [
+                                    {
+                                      "Button": {
+                                        "label": "Del versjon",
+                                        "keypath": "helper.sharePackageVersion",
+                                        "modifiers": {
+                                          "fontSize": 13,
+                                          "fontWeight": "medium",
+                                          "background": "#086cde",
+                                          "foregroundColor": "#ffffff",
+                                          "cornerRadius": 8,
+                                          "borderWidth": 1,
+                                          "borderColor": "#086cde",
+                                          "styleClasses": [
+                                            "primary-action"
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  ],
+                                  "spacing": 8,
+                                  "modifiers": {
+                                    "hAlignment": "leading"
+                                  }
+                                }
+                              },
+                              "modifiers": {
+                                "maxWidthInfinity": true,
+                                "styleClasses": [
+                                  "helper-rows"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "Button": {
+                              "label": "Behold privat",
+                              "keypath": "helper.cancelShare",
+                              "modifiers": {
+                                "fontSize": 13,
+                                "fontWeight": "medium",
+                                "background": "#29292d",
+                                "foregroundColor": "#f5f5f7",
+                                "cornerRadius": 8,
+                                "borderWidth": 1,
+                                "borderColor": "#45454c"
+                              },
+                              "payload": {
+                                "packageID": "demo-mine"
+                              }
+                            }
+                          }
+                        ],
+                        "spacing": 12,
+                        "modifiers": {
+                          "hAlignment": "leading",
+                          "padding": 18,
+                          "background": "#29292d",
+                          "cornerRadius": 12,
+                          "borderWidth": 1,
+                          "borderColor": "#45454c"
+                        }
+                      }
+                    }
+                  ],
+                  "spacing": 12,
+                  "modifiers": {
+                    "hAlignment": "leading",
+                    "padding": 24
+                  }
+                }
+              }
+            ],
+            "spacing": 0,
+            "modifiers": {
+              "hAlignment": "leading"
+            }
+          }
+        }
+      ],
+      "spacing": 0,
+      "modifiers": {
+        "hAlignment": "leading",
+        "background": "#1c1c1f",
+        "foregroundColor": "#f5f5f7",
+        "minHeight": 820
+      }
+    }
+  }
+}

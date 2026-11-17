@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="nb" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Det vi ikke vet ennå – HAVEN</title>
+  <meta name="description" content="Åpne forskningsspørsmål i HAVEN: unik representasjon uten å avsløre hvem man er, og personvernsikker simulering av en gruppe.">
+  <meta name="theme-color" content="#f4f3ee">
+  <meta property="og:title" content="Det vi ikke vet ennå – HAVEN">
+  <meta property="og:description" content="Åpne forskningsspørsmål i HAVEN: unik representasjon uten å avsløre hvem man er, og personvernsikker simulering av en gruppe.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="/assets/haven-control-loop-20260803.webp">
+  <link rel="canonical" href="https://digipomps.org/forklart/forskning/">
+  <link rel="icon" href="/assets/favicon.svg?v=20260803b" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/site.css?v=20261030a">
+  <script src="/assets/site.js?v=20260803c" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#innhold">Hopp til innhold</a>
+  <header class="site-header">
+    <div class="nav-shell">
+      <a class="brand" href="/" aria-label="HAVEN – forsiden"><img class="brand-logo" src="/assets/haven-logo.png" width="1006" height="478" alt=""><span class="brand-byline">et arbeid fra Digipomps</span></a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="hovedmeny" data-nav-toggle>Meny</button>
+      <nav class="site-nav" id="hovedmeny" aria-label="Hovedmeny" data-site-nav data-open="false">
+        <a href="/">Start her</a><a href="/forklart/">Slik er det bygd</a><a href="/forklart/status/">Status</a><a href="/forklart/forskning/" aria-current="page">Forskning</a><a href="/artikler/">Artikler</a><a class="nav-cta" href="/#kontakt">Bli med</a>
+      </nav>
+    </div>
+  </header>
+  <main id="innhold">
+    <header class="page-hero"><div class="section-shell"><p class="eyebrow">Nivå 3 · Forskning</p><h1>Det vi ikke vet ennå.</h1><p>Når dataene ligger hos hver person og ikke i én database, oppstår nye spørsmål. To av dem er så viktige at vi har gjort dem til masteroppgaver ved Institutt for informatikk, Universitetet i Oslo. Svarene er nyttige uavhengig av om HAVEN lykkes.</p><nav class="layer-nav" aria-label="Nivåer i forklaringen"><a href="/"><span>Nivå 1</span><strong>Forsiden</strong></a><a href="/forklart/"><span>Nivå 2</span><strong>Slik er HAVEN bygd</strong></a><a href="/forklart/status/"><span>Nivå 3</span><strong>Hva finnes i dag</strong></a><a href="/forklart/forskning/" aria-current="page"><span>Nivå 3</span><strong>Det vi ikke vet ennå</strong></a></nav></div></header>
+    <section class="site-section paper" id="to-sporsmal"><div class="section-shell">
+      <header class="section-heading wide-heading"><p class="eyebrow">To spørsmål</p><h2>Hvordan teller man folk som ikke står i en database?</h2></header>
+      <div class="concept-diagram">
+        <article class="diagram-panel"><p class="card-kicker">Tema A</p><h3>Unik representasjon</h3><p>Hvordan bevise at hver person er med bare én gang i en fritt valgt gruppe, minst like sikkert som ved et stortingsvalg, uten å avsløre hvem man er? Og hva betyr det å ha troverdige demokratiske verktøy som en del av infrastrukturen?</p><p><a href="#tema-a">Les om tema A →</a></p></article>
+        <article class="diagram-panel"><p class="card-kicker">Tema B</p><h3>Personvernsikker simulering</h3><p>Hvordan lære noe om en gruppe, og simulere konsekvensene av insentiver og verdistrømmer, uten å avsløre enkeltpersoner? Hvilke målinger kan bo i infrastrukturen?</p><p><a href="#tema-b">Les om tema B →</a></p></article>
+      </div>
+    </div></section>
+    <section class="site-section" id="tema-a"><div class="section-shell">
+      <header class="section-heading wide-heading"><p class="eyebrow">Tema A · Unik representasjon</p><h2>Én nøkkel er ikke én person.</h2><p>I dag teller avstemningscellen i HAVEN én stemme per identitetsnøkkel. Siden én person kan ha flere identiteter, kan Kari stemme tre ganger uten at cellen ser det. Og stemmen er ikke hemmelig: cellen ser hvilken nøkkel som stemte hva.</p></header>
+      <figure class="diagram-panel">
+        <p class="card-kicker">Problemet i dag</p>
+        <div class="diagram-row" aria-hidden="true">
+          <span class="diagram-box" data-kind="entity">Kari<small>én person</small></span><span class="diagram-arrow">→</span>
+          <span class="diagram-stack"><span class="diagram-box" data-kind="built">Identitet 1</span><span class="diagram-box" data-kind="built">Identitet 2</span><span class="diagram-box" data-kind="built">Identitet 3</span></span><span class="diagram-arrow">→</span>
+          <span class="diagram-box">Avstemning</span><span class="diagram-arrow">→</span><span class="diagram-box" data-kind="open">3 stemmer</span>
+        </div>
+        <figcaption>Identitet per sammenheng er bra for personvernet, men ingen kan telle personer på tvers av identiteter.</figcaption>
+      </figure>
+      <figure class="diagram-panel" style="margin-top:1.25rem">
+        <p class="card-kicker">Et mønster fra litteraturen (ingen kode i HAVEN)</p>
+        <div class="diagram-row" aria-hidden="true">
+          <span class="diagram-box" data-kind="entity">Kari</span><span class="diagram-arrow">→</span>
+          <span class="diagram-box" data-kind="open">Anker<small>hvem bekrefter at Kari er én person?</small></span><span class="diagram-arrow">→</span>
+          <span class="diagram-stack"><span class="diagram-box" data-kind="open">Avstemning 1<small>samme hemmelige merke hvis hun stemmer to ganger</small></span><span class="diagram-box" data-kind="open">Avstemning 2<small>et nytt merke som ikke kan kobles til det første</small></span></span>
+        </div>
+        <figcaption>Anonyme attester og «nullifiers» gjør det mulig å oppdage dobbeltstemming uten å vite hvem som stemte.</figcaption>
+      </figure>
+      <h3>Fire kjente veier til unikhet, og hva de koster</h3>
+<div class="comparison-table"><table class="method-table"><thead><tr><th scope="col">Tilnærming</th><th scope="col">Hvor unikheten kommer fra</th><th scope="col">Svakhet å undersøke</th></tr></thead><tbody><tr><td>Forankret utstedelse og anonyme attester</td><td>En utsteder sjekker eID og gir ett anonymt bevis per person</td><td>Når ikke dem uten ID. Utstederen blir et tillitspunkt.</td></tr><tr><td>Gruppemedlemskap med nullkunnskapsbevis</td><td>«Jeg er i mengden», pluss ett merke per avstemning</td><td>Bare så god som innmeldingen i mengden</td></tr><tr><td>Sosial garanti</td><td>Medlemmer går god for hverandre i et nettverk</td><td>Sannsynlighetsbasert, sårbar for grupper som samarbeider</td></tr><tr><td>Fysisk seremoni</td><td>Folk møtes samtidig og får ett bevis hver</td><td>Skalerer dårlig, krever at man kan møte opp</td></tr></tbody></table></div>
+      <div class="concept-diagram">
+        <div class="diagram-panel"><p class="card-kicker">HAVEN gir</p><p>Domenebundne nøkler, avtaler med vilkår som sjekkes ved hvert kall, verifiserbare attester (ikke anonyme), invitasjoner og nærhetsbevis.</p></div>
+        <div class="diagram-panel"><p class="card-kicker">Må bygges</p><p>Gruppe, anker, merke per avstemning og en angrepsmodell, og en presis forståelse av hva «like sikkert som et stortingsvalg» krever: hemmelig stemme, motstand mot tvang og etterprøvbarhet.</p></div>
+      </div>
+      <h3>Forskningsspørsmål</h3>
+      <ol class="question-list">
+        <li>Hvordan sikre at hver entitet er med én gang i en fritt valgt gruppe?</li>
+        <li>Hva betyr «minst like sikkert som stortingsvalg» som krav?</li>
+        <li>Hva skjer når demokratiske verktøy er en del av infrastrukturen?</li>
+        <li>Kan én løsning skalere fra vennegruppen til alle HAVEN-brukere?</li>
+        <li>Hvem blir med, og hvem stenges ute, når unikhet krever et anker?</li>
+        <li>Kan man bevise «én gang» anonymt og uten kvittering?</li>
+      </ol>
+    </div></section>
+    <section class="site-section paper" id="tema-b"><div class="section-shell">
+      <header class="section-heading wide-heading"><p class="eyebrow">Tema B · Personvernsikker simulering</p><h2>Å lære om en gruppe uten å se enkeltpersoner.</h2><p>I HAVEN finnes ingen sentral database å spørre. Kunnskap om en gruppe må bygges av mange enkeltsvar, gitt gjennom avtaler. De første stegene finnes; resten må bygges.</p></header>
+      <figure class="diagram-panel">
+        <p class="card-kicker">Å spørre en gruppe</p>
+        <div class="diagram-row" aria-hidden="true">
+          <span class="diagram-box" data-kind="built">1 · Forespørsel<small>formål og dataklasser i en avtale · finnes</small></span><span class="diagram-arrow">→</span>
+          <span class="diagram-box" data-kind="built">2 · Hver entitet svarer<small>ja, nei eller ingen svar · finnes</small></span><span class="diagram-arrow">→</span>
+          <span class="diagram-box" data-kind="open">3 · Personvernlag<small>før dataene forlater entiteten · må bygges</small></span><span class="diagram-arrow">→</span>
+          <span class="diagram-box" data-kind="open">4 · Øyeblikksbilde og målinger<small>må bygges</small></span><span class="diagram-arrow">→</span>
+          <span class="diagram-box" data-kind="open">5 · Simulering<small>insentiver og verdistrømmer · må bygges</small></span>
+        </div>
+        <figcaption>Utvalget velger seg selv. De som sier nei eller ikke svarer, gir skjevhet. Dagens simulator er laget for lasttest, ikke for atferd.</figcaption>
+      </figure>
+      <h3>Kjente verktøy, og hva de koster</h3>
+<div class="comparison-table"><table class="method-table"><thead><tr><th scope="col">Tilnærming</th><th scope="col">Idé</th><th scope="col">Avveining</th></tr></thead><tbody><tr><td>Lokalt differensielt personvern</td><td>Entiteten legger på støy før den svarer</td><td>Passer «spør hver celle», koster presisjon</td></tr><tr><td>Sikker aggregering</td><td>Den som spør, ser bare summen</td><td>Summen kan selv lekke, og frafall må håndteres</td></tr><tr><td>k-anonymitet</td><td>Hver rad deler kjennetegn med minst k−1 andre</td><td>Svak mot bakgrunnskunnskap og like sensitive verdier</td></tr><tr><td>Syntetiske data og agenter</td><td>Agenter bygges fra samtykkede aggregater</td><td>Ikke privat uten differensielt personvern, og gyldighet er vanskelig å vise</td></tr><tr><td>Anonyme registre med sperring</td><td>Bevis for «med» eller «ikke med» uten å si hvem</td><td>Sperring krever koblbarhet, ikke nødvendigvis identitet</td></tr></tbody></table></div>
+      <div class="example-box"><p>Et personvernbudsjett kunne bli et vilkår i avtalen, men det må regnes samlet for alle som spør. Det finnes ikke i dag.</p></div>
+      <h3>Forskningsspørsmål</h3>
+      <ol class="question-list">
+        <li>Hvilken metodikk gir personvernsikker simulering fra øyeblikksbilder?</li>
+        <li>Hvilke målinger i infrastrukturen bevarer personvern og gir nytte?</li>
+        <li>Hva kan vi spørre entitetene om: aggregater, metadata eller data?</li>
+        <li>Hvordan bygge anonyme registre som tillater sperringer?</li>
+        <li>Hvordan kan simulering vise konsekvenser av insentiver og verdistrømmer?</li>
+        <li>Hvem samtykker til et øyeblikksbilde av en hel gruppe?</li>
+      </ol>
+    </div></section>
+    <section class="site-section" id="spenninger"><div class="section-shell">
+      <header class="section-heading wide-heading"><p class="eyebrow">Spenninger å ta stilling til</p><h2>Man får ikke alt på en gang.</h2></header>
+      <div class="concept-diagram">
+        <div class="diagram-panel"><p class="card-kicker">Tema A</p><h3>Unikhet · anonymitet · inkludering</h3><p>Et sterkere anker stenger flere ute. Etterprøvbart uten kvittering er vanskelig. Den som fører «manntallet», har makt.</p></div>
+        <div class="diagram-panel"><p class="card-kicker">Tema B</p><h3>Nytte · personvern · desentralisering</h3><p>Uten en sentral database ser ingen helheten. Statistikk krever da kryptografi, og revisjon blir vanskeligere.</p></div>
+      </div>
+      <div class="boundary-box"><p><strong>Tvers over begge:</strong> mitt samtykke mot data om gruppen, tilbaketrekking mot historiske øyeblikksbilder, og realisme mot syntetiske data.</p></div>
+    </div></section>
+    <section class="site-section paper" id="hypoteser"><div class="section-shell">
+      <header class="section-heading wide-heading"><p class="eyebrow">Hypoteser vi holder adskilt</p><h2>Det håper vi å lære.</h2><p>Kjernen er kontroll over egne data. Spørsmålene under er forskning, ikke dokumenterte effekter.</p></header>
+      <aside class="democracy-pointer direction-panel"><div><p class="hypothesis-label">Retning / hypotese – ikke dokumentert effekt</p><p>Når avtaler er forståelige, kan det bli tryggere å si ja. Vi undersøker om et slikt økosystem kan bli mer produktivt enn dagens plattformøkonomi. Det må måles i avgrensede piloter.</p></div><a href="/artikler/produktivitet-uten-personscore/">Les produktivitetshypotesen →</a></aside>
+      <aside class="democracy-pointer"><div><p class="hypothesis-label">Hypotese – ikke dokumentert effekt</p><p>Om dette kan støtte demokratiske forutsetninger, vil vi teste i avgrensede piloter. HAVEN løser ikke demokrati.</p></div><a href="/artikler/demokrati-trenger-mer/">Se mekanismer og motargumenter →</a></aside>
+    </div></section>
+    <section class="site-section" id="bli-med"><div class="section-shell"><div class="callout">
+      <p class="eyebrow">For studenter og forskere</p><h2>Vil du jobbe med dette?</h2>
+      <p>Oppgavene er utlyst ved <a href="https://www.mn.uio.no/ifi/english/studies/masters-projects/is/haven.html">Institutt for informatikk, UiO</a>, med Petter Nielsen som veileder. Forskningen kan gjøres med HAVEN eller uavhengig av det. Begge temaene bygger kjernen selv; HAVEN gir byggesteinene.</p>
+      <ul class="plain-list">
+        <li><strong>Start med statusen.</strong> <a href="/forklart/status/">Hva finnes i dag</a> skiller kode fra planer. Les den før du bygger på en antakelse.</li>
+        <li><strong>Bruk de åpne repoene.</strong> CellProtocol (Swift), PyCellProtocol og GoCellProtocol. Python er ofte enklest for simulering.</li>
+        <li><strong>Bruk syntetiske data først.</strong> Det finnes ingen ekte brukermasse å måle på, og det gjør personvernvurderingen enklere.</li>
+      </ul>
+      <div class="hero-actions"><a class="button" href="mailto:digipomp@digipomps.org?subject=HAVEN%20og%20forskning">Ta kontakt</a><a class="button" href="https://github.com/Digipomps">Se koden</a></div>
+    </div></div></section>
+
+  </main>
+  <footer class="site-footer">
+    <div class="footer-shell">
+      <div><a class="brand" href="/"><img class="brand-logo" src="/assets/haven-logo.png" width="1006" height="478" alt="HAVEN"><span class="brand-byline">fra Stiftelsen Digipomps</span></a><p>Et åpent arbeid for en digisfære der teknologi tjener mennesker. Ingen analyseverktøy, informasjonskapsler eller tredjepartssporing på dette nettstedet.</p></div>
+      <nav class="footer-links" aria-label="Bunnmeny"><a href="/forklart/">Slik er det bygd</a><a href="/artikler/">Artikler</a><a href="/kilder/">Kilder og metode</a><a href="/om/">Om Digipomps</a><a href="/personvern/">Personvern</a><a href="/rettelser/">Rettelser</a><a href="https://github.com/Digipomps">GitHub</a><a href="mailto:digipomp@digipomps.org">Kontakt</a></nav>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,56 @@
+flowchart LR
+  classDef cellbase fill:#e8f0fe,stroke:#3b6fd6,color:#10233f
+  classDef agent fill:#e9f7ef,stroke:#2e8b57,color:#0f3d24
+  classDef gui fill:#fff4e5,stroke:#d98c1f,color:#4a2e05
+  classDef kjetil fill:#fde8e8,stroke:#c0392b,color:#4a0e0e,stroke-width:2px
+  classDef other fill:#f2f2f2,stroke:#888,color:#333,stroke-dasharray: 4 3
+
+  subgraph DEL1["Del 1 · Grunnmur i CellBase (fase A)\nCodex bygger · du godkjenner PR"]
+    direction TB
+    K3{{"K3 du svarer:\nendre Swift-composition?"}}:::kjetil
+    A1["A1 goalDefinition inn i Purpose (B1)"]:::cellbase
+    A2["A2 Composition-forsoning (B2)\ndelte testvektorer Swift + Python"]:::cellbase
+    A3["A3 Motor-invarianter (B5)\n6 rettelser i GoalEvaluationEngine"]:::cellbase
+    A4["A4 Commit-pakke\nførste grønne bygg → PR"]:::cellbase
+    A1 --> A2 --> A3 --> A4
+    K3 -.-> A2
+  end
+
+  subgraph DEL3["Del 3 · Denne PDD-ens celler (fase D)\nagent og scaffold"]
+    direction TB
+    D0["D0 Ny agent-binær kan startes\n(Launch Constraint) — BLOKKERER"]:::kjetil
+    K1{{"K1 du svarer:\ner agentens ord ditt ord?"}}:::kjetil
+    D1["D1 Kontrakter + fixtures\ngrant · bevis · baseline (L1–L3)"]:::agent
+    D2["D2 Grant-celle + baseline-celle\nto celler, to skriveregler (B9)"]:::agent
+    D3["D3 Bevis-utstedelse\nbærernøkkel + signert grant (B3)"]:::agent
+    D4["D4 Konsument: cellen avgjør ved inngang\nstale · utløpt · feil mask → nektet"]:::agent
+    D5["D5 Avdriftssjekk\nGoalDefinition + avdriftscelle + tidsplan"]:::agent
+    D6["D6 Web-flate uten Chrome-innlogging\nrecon først (L4)"]:::agent
+    D1 --> D2 --> D3 --> D4 --> D5
+    D4 --> D6
+    D0 -.->|grønn før test| D3
+    K1 -.-> D3
+  end
+
+  subgraph DEL4["Del 4 · Brukerens verktøy (fase E)"]
+    direction TB
+    E1["E1 Avvist steg → challenge → varsel → retry (M13)\ngjenbruker AdmissionChallengePayload"]:::agent
+  end
+
+  subgraph DEL5["Del 5 · GUI — bilde før kode"]
+    direction TB
+    G1["G1 Mockups L5–L9\ngrant-oversikt · avdriftsrapport"]:::gui
+    GK{{"G1-GUI du godkjenner\nbildene"}}:::kjetil
+    G2["G2 Flatene bygges"]:::gui
+    G1 --> GK --> G2
+  end
+
+  subgraph GRAF["Graf-PDD (fase B–C) — foreslått flyttet dit (K2)"]
+    direction TB
+    BC["Integritet i Perspective\nPerspectivePurposeProjection\nhaven-purpose CLI"]:::other
+  end
+
+  A4 ==>|GoalDefinition + motor klare| D5
+  A4 -.-> BC
+  D4 --> E1
+  D5 --> G2

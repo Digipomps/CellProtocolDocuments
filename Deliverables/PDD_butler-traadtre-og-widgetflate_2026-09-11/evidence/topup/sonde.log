@@ -1,0 +1,102 @@
+
+################ cellscaffold-app-1
+db: /mnt/disk1/app/CellsContainer.staging-f76de5a/db.sqlite
+relevante tabeller: ['funding_requests', 'topup_audit_events', 'admin_action_audit_events', 'topup_orders', 'topup_settlement_outbox']
+
+=== treff i funding_requests.id
+  id = D03228B6-4B53-4F8D-83CB-2E326DF63131
+  user_id = C8C99783-8522-40DE-A427-03E409090587
+  identity_domain = mvp-user:C8C99783-8522-40DE-A427-03E409090587
+  resource_id = cell:///Chat#entry
+  purpose_ref = purpose://communication.chat
+  goal_ref = goal://chat.send_message
+  required_minor_units = 10
+  available_minor_units = 0
+  requested_minor_units = 10
+  currency = NOK
+  status = approved
+  request_reason = User requested admin top-up from chat blocked panel.
+  admin_note = Test av manuell brukskvote 2026-09-23; ingen Stripe-betaling.
+  approved_by_user_id = C8C99783-8522-40DE-A427-03E409090587
+  approved_at = 1790147783.1328006
+  rejected_by_user_id = None
+  rejected_at = None
+  created_at = 1790147518.1029527
+  updated_at = 1790147783.1328614
+  idempotency_key = chat-topup-web-d19a4936-136
+  correlation_id = chat-topup-1790147518002-web-24a66c70-12a
+  risk_flags_json = None
+  approved_amount_minor_units = 10
+  applied_at = None
+  expires_at = 1790233918.102932
+  requester_ip = 172.17.0.1
+  requester_user_agent = Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36
+  decision_reason_code = ADMIN_APPROVED
+
+=== treff i topup_audit_events.target_request_id
+  id = 4EB83F74-0B6E-42AC-80BF-D31D5FC307BC
+  actor_user_id = C8C99783-8522-40DE-A427-03E409090587
+  action = TOPUP_REQUEST_CREATED
+  target_request_id = D03228B6-4B53-4F8D-83CB-2E326DF63131
+  correlation_id = chat-topup-1790147518002-web-24a66c70-12a
+  metadata_json = {"goalRef":"goal:\/\/chat.send_message","purposeRef":"purpose:\/\/communication.chat","requestedMinorUnits":"10","riskFlags":""}
+  ip_address = 172.17.0.1
+  user_agent = Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36
+  created_at = 1790147518.1080527
+
+=== treff i topup_audit_events.target_request_id
+  id = 1C9C2A2B-BD68-451C-8D96-C873A8B04ED1
+  actor_user_id = C8C99783-8522-40DE-A427-03E409090587
+  action = TOPUP_APPLY_FAILED
+  target_request_id = D03228B6-4B53-4F8D-83CB-2E326DF63131
+  correlation_id = chat-topup-1790147518002-web-24a66c70-12a
+  metadata_json = {"error":"denied(CellBase.CellAuthorizationDecision(allowed: false, path: CellBase.CellAuthorizationPath.deniedNoGrant, reason: \"No verified owner proof, signed contract, or cell-specific grant allowed the request.\", request: CellBase.CellAuthorizationRequest(cellUUID: \"79ADDDEA-FE54-4A00-A955-7A9AF6BFEBD0\", identityDomain: \"private\", keypath: \"issuePrepaid\", requestedAccess: \"-w--\", requesterUUID: \"DF8D4644-15B2-46F4-A708-CEEB323DA3FE\", requesterSigningKeyFingerprint: Optional(\"EdDSA:Curve25519:iUDDneLZ5llQYGpL53HAxp2+HDDTxRWAEUmAMfxc47U=\")), reasonCode: Optional(\"agreement_or_proof_required\"), userMessage: Optional(\"Access requires an owner proof, a signed contract, or a concrete policy proof.\"), requiredAction: Optional(\"request_contract_or_present_proof\"), canAutoResolve: Optional(false), developerHint: Optional(\"Route this denial to admission\/policy handling so the user can request a contract, present a proof, or complete an entity-extension flow.\"), agreementRef: nil, contractRef: nil, grantRef: nil, authorizationPolicyBinding: nil))"}
+  ip_address = 172.17.0.1
+  user_agent = Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36
+  created_at = 1790147783.1434035
+
+=== treff i topup_audit_events.target_request_id
+  id = 69F22AC0-3B3B-46AC-84B3-615EADCDCB71
+  actor_user_id = C8C99783-8522-40DE-A427-03E409090587
+  action = TOPUP_APPLY_FAILED
+  target_request_id = D03228B6-4B53-4F8D-83CB-2E326DF63131
+  correlation_id = chat-topup-1790147518002-web-24a66c70-12a
+  metadata_json = {"error":"denied(CellBase.CellAuthorizationDecision(allowed: false, path: CellBase.CellAuthorizationPath.deniedNoGrant, reason: \"No verified owner proof, signed contract, or cell-specific grant allowed the request.\", request: CellBase.CellAuthorizationRequest(cellUUID: \"79ADDDEA-FE54-4A00-A955-7A9AF6BFEBD0\", identityDomain: \"private\", keypath: \"issuePrepaid\", requestedAccess: \"-w--\", requesterUUID: \"DF8D4644-15B2-46F4-A708-CEEB323DA3FE\", requesterSigningKeyFingerprint: Optional(\"EdDSA:Curve25519:iUDDneLZ5llQYGpL53HAxp2+HDDTxRWAEUmAMfxc47U=\")), reasonCode: Optional(\"agreement_or_proof_required\"), userMessage: Optional(\"Access requires an owner proof, a signed contract, or a concrete policy proof.\"), requiredAction: Optional(\"request_contract_or_present_proof\"), canAutoResolve: Optional(false), developerHint: Optional(\"Route this denial to admission\/policy handling so the user can request a contract, present a proof, or complete an entity-extension flow.\"), agreementRef: nil, contractRef: nil, grantRef: nil, authorizationPolicyBinding: nil))"}
+  ip_address = 172.17.0.1
+  user_agent = Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36
+  created_at = 1790147791.987732
+
+=== siste 12 TOPUP-hendelser i topup_audit_events (sortert paa created_at)
+  {"id": "69F22AC0-3B3B-46AC-84B3-615EADCDCB71", "actor_user_id": "C8C99783-8522-40DE-A427-03E409090587", "action": "TOPUP_APPLY_FAILED", "target_request_id": "D03228B6-4B53-4F8D-83CB-2E326DF63131", "correlation_id": "chat-topup-1790147518002-web-24a66c70-12a", "metadata_json": "{\"error\":\"denied(CellBase.CellAuthorizationDecision(allowed: false, path: CellBase.CellAuthorizationPath.deniedNoGrant, reason: \\\"No verified owner proof, signed contract, or cell-specific grant allowed the request.\\\", request: CellBase.CellAuthorizationRequest(cellUUID: \\\"79ADDDEA-FE54-4A00-A955-7A9AF6BFEBD0\\\", identityDomain: \\\"private\\\", keypath: \\\"issuePrepaid\\\", requestedAccess: \\\"-w--\\\", requesterUUID: \\\"DF8D4644-15B2-46F4-A708-CEEB323DA3FE\\\", requesterSigningKeyFingerprint: Optional(\\\"EdDSA:Curve25519:iUDDneLZ5llQYGpL53HAxp2+HDDTxRWAEUmAMfxc47U=\\\")), reasonCode: Optional(\\\"agreement_or_proof_required\\\"), userMessage: Optional(\\\"Access requires an owner proof, a signed contract, or a concrete policy proof.\\\"), requiredAction: Optional(\\\"request_contract_or_present_proof\\\"), canAutoResolve: Optional(false), developerHint: Optional(\\\"Route this denial to admission\\/policy handling so the user can request a contract, present a proof, or complete an entity-extension flow.\\\"), agreementRef: nil, contractRef: nil, grantRef: nil, authorizationPolicyBinding: nil))\"}", "ip_address": "172.17.0.1", "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
+  {"id": "1C9C2A2B-BD68-451C-8D96-C873A8B04ED1", "actor_user_id": "C8C99783-8522-40DE-A427-03E409090587", "action": "TOPUP_APPLY_FAILED", "target_request_id": "D03228B6-4B53-4F8D-83CB-2E326DF63131", "correlation_id": "chat-topup-1790147518002-web-24a66c70-12a", "metadata_json": "{\"error\":\"denied(CellBase.CellAuthorizationDecision(allowed: false, path: CellBase.CellAuthorizationPath.deniedNoGrant, reason: \\\"No verified owner proof, signed contract, or cell-specific grant allowed the request.\\\", request: CellBase.CellAuthorizationRequest(cellUUID: \\\"79ADDDEA-FE54-4A00-A955-7A9AF6BFEBD0\\\", identityDomain: \\\"private\\\", keypath: \\\"issuePrepaid\\\", requestedAccess: \\\"-w--\\\", requesterUUID: \\\"DF8D4644-15B2-46F4-A708-CEEB323DA3FE\\\", requesterSigningKeyFingerprint: Optional(\\\"EdDSA:Curve25519:iUDDneLZ5llQYGpL53HAxp2+HDDTxRWAEUmAMfxc47U=\\\")), reasonCode: Optional(\\\"agreement_or_proof_required\\\"), userMessage: Optional(\\\"Access requires an owner proof, a signed contract, or a concrete policy proof.\\\"), requiredAction: Optional(\\\"request_contract_or_present_proof\\\"), canAutoResolve: Optional(false), developerHint: Optional(\\\"Route this denial to admission\\/policy handling so the user can request a contract, present a proof, or complete an entity-extension flow.\\\"), agreementRef: nil, contractRef: nil, grantRef: nil, authorizationPolicyBinding: nil))\"}", "ip_address": "172.17.0.1", "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
+  {"id": "4EB83F74-0B6E-42AC-80BF-D31D5FC307BC", "actor_user_id": "C8C99783-8522-40DE-A427-03E409090587", "action": "TOPUP_REQUEST_CREATED", "target_request_id": "D03228B6-4B53-4F8D-83CB-2E326DF63131", "correlation_id": "chat-topup-1790147518002-web-24a66c70-12a", "metadata_json": "{\"goalRef\":\"goal:\\/\\/chat.send_message\",\"purposeRef\":\"purpose:\\/\\/communication.chat\",\"requestedMinorUnits\":\"10\",\"riskFlags\":\"\"}", "ip_address": "172.17.0.1", "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36", "created_at": 1790147518.1080527}
+
+################ cellscaffold-production-app-1
+db: /mnt/HC_Volume_104775511/haven-production/Database/db.sqlite
+relevante tabeller: ['funding_requests', 'topup_audit_events', 'admin_action_audit_events', 'topup_orders', 'topup_settlement_outbox']
+
+=== siste 12 TOPUP-hendelser i topup_audit_events (sortert paa created_at)
+
+################ containere (ogsaa stoppede/omdoepte)
+cellscaffold-production-app-1	Up About an hour	2026-09-23 10:10:02 +0000 UTC
+cellscaffold-app-1	Up 2 hours	2026-09-23 09:39:26 +0000 UTC
+cellscaffold-production-app-1-rollback-20260923T100959Z-production-77a922bc	Exited (0) About an hour ago	2026-09-23 07:34:34 +0000 UTC
+cellscaffold-production-app-1-rollback-20260923T073431Z-production-77a922bc	Exited (0) 4 hours ago	2026-09-22 21:23:56 +0000 UTC
+cellscaffold-app-1-rollback-20260923T093913Z-staging-77a922bc	Exited (0) 2 hours ago	2026-09-22 16:03:13 +0000 UTC
+cellscaffold-admin-scaffold-1-failed-2447f0f52db94b4aa47da2f427805238	Exited (0) 2 days ago	2026-09-21 09:03:15 +0000 UTC
+cellscaffold-production-app-1-rollback-20260922T212341Z-production-77a922bc	Exited (0) 14 hours ago	2026-09-18 15:05:41 +0000 UTC
+cellscaffold-app-1-rollback-20260922T160255Z-staging-77a922bc	Exited (0) 19 hours ago	2026-09-18 15:02:59 +0000 UTC
+cellscaffold-admin-scaffold-1-failed-27a4b4edd32143da986a8328c87b392f	Exited (0) 5 days ago	2026-09-18 09:08:00 +0000 UTC
+cellscaffold-production-app-1-rollback-20260918T150524Z-production-e3ae9fc0	Exited (0) 4 days ago	2026-09-18 08:46:35 +0000 UTC
+cellscaffold-admin-scaffold-1-failed-852aece4a0784fecbfa60ff6103e125a	Exited (0) 5 days ago	2026-09-18 08:36:15 +0000 UTC
+cellscaffold-app-1-rollback-20260918T150253Z-staging-e3ae9fc0	Exited (0) 4 days ago	2026-09-18 08:31:30 +0000 UTC
+cellscaffold-production-app-1-rollback-20260918T084619Z-production-87256f9a	Exited (0) 5 days ago	2026-09-16 06:55:29 +0000 UTC
+cellscaffold-app-1-rollback-20260918T083112Z-staging-87256f9a	Exited (0) 5 days ago	2026-09-15 20:17:19 +0000 UTC
+cellscaffold-app-1-rollback-20260915T201702Z-staging-b4a2779a	Exited (0) 7 days ago	2026-09-15 08:55:12 +0000 UTC
+cellscaffold-app-1-rollback-20260915T085456Z-staging-6c391437	Exited (0) 8 days ago	2026-09-10 21:45:07 +0000 UTC
+cellscaffold-production-app-1-rollback-20260916T065523Z-production-b4a2779a	Exited (0) 7 days ago	2026-09-09 15:57:20 +0000 UTC
+cellscaffold-app-1-rollback-20260910T214450Z-staging-47912c28	Exited (0) 12 days ago	2026-09-09 15:50:25 +0000 UTC
+cellscaffold-app-1-rollback-20260909T155009Z-staging-3bdd622a	Exited (0) 13 days ago	2026-09-09 15:24:00 +0000 UTC
+cellscaffold-production-app-1-rollback-20260909T155714Z-production-3bdd622a	Exited (0) 13 days ago	2026-09-08 04:41:21 +0000 UTC
+
+################ approve-kall i containerlogger

@@ -1,0 +1,48 @@
+--- before/CellScaffold/Sources/App/Controllers/PortholeWebSessionSupport.swift
++++ CellScaffold/Sources/App/Controllers/PortholeWebSessionSupport.swift
+@@ -3659,6 +3659,45 @@
+             effectivePayload = payload
+         }
+ 
++        // purposeRef: purpose://candidate.palazzo-porthole-fjernt-scaffold.remote-lookup
++        // purposeRef: purpose://candidate.palazzo-porthole-fjernt-scaffold.trust-boundary
++        // Check remote lookups before active/catalogue shortcuts: neither a
++        // matching UUID nor an already loaded surface can bypass admission.
++        if let lookup = PortholeWebPayloads.decodeCellConfigurationLookup(from: effectivePayload),
++           let endpoint = lookup.sourceCellEndpoint,
++           endpoint.lowercased().hasPrefix("cell://"),
++           !endpoint.lowercased().hasPrefix("cell:///") {
++            guard let keypath = lookup.keypath else {
++                throw Abort(.badRequest, reason: "Remote configuration lookup requires an explicit keypath.")
++            }
++            guard let url = URL(string: endpoint), url.scheme == "cell",
++                  let host = url.host, !host.isEmpty,
++                  let port = url.port, (1...65535).contains(port),
++                  url.user == nil, url.password == nil, url.query == nil, url.fragment == nil,
++                  !url.path.isEmpty, url.path != "/" else {
++                throw Abort(.badRequest, reason: "Remote configuration source must be cell://host:port/Cell without credentials, query or fragment.")
++            }
++            // CellResolver reserves localhost for local cell resolution.
++            guard host.lowercased() != "localhost" else {
++                throw Abort(.badRequest, reason: "CellResolver treats localhost as local; use an explicit bridgehead host such as 127.0.0.1.")
++            }
++            guard RemoteBridgeheadAccess.allows(host: host, port: port) else {
++                throw Abort(.badRequest, reason: "Remote configuration source is not allowed by HAVEN_BRIDGEHEAD_HOSTS with HAVEN_BRIDGEHEAD_TOKEN.")
++            }
++            guard let resolver = CellBase.defaultCellResolver else {
++                throw Abort(.serviceUnavailable, reason: "Cell resolver is unavailable for remote configuration lookup.")
++            }
++            let cell = try await resolver.cellAtEndpoint(endpoint: endpoint, requester: requester)
++            guard let source = cell as? Meddle else {
++                throw Abort(.badRequest, reason: "Remote configuration source does not support keypath reads.")
++            }
++            let value = try await source.get(keypath: keypath, requester: requester)
++            guard let configuration = PortholeWebPayloads.decodeCellConfiguration(from: value) else {
++                throw Abort(.badRequest, reason: "Remote configuration keypath did not return a CellConfiguration.")
++            }
++            return PortholeWebPayloads.rewritingLocalReferences(configuration, toHost: host, port: port)
++        }
++
+         if let currentConfiguration = controlCell.getCellConfiguration(),
+            payloadRequestsConfiguration(effectivePayload, matching: currentConfiguration) {
+             return await EditableCellConfigurationOverlayResolver.overlay(

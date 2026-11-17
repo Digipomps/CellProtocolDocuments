@@ -1,0 +1,859 @@
+Building for debugging...
+[0/25] Write sources
+[1/25] Write swift-version--58304C5D6DBC2206.txt
+[3/8] Compiling AppTests AgentTrustPackageApprovalTests.swift
+/private/tmp/haven-prod-20260917/CellScaffold/Tests/AppTests/AgentTrustPackageApprovalTests.swift:143:9: warning: no calls to throwing functions occur within 'try' expression
+141 |             value: .object(["cellEndpoints": .list([.string("cell:///WebFetch")])]), requester: f.owner)
+142 |         let digest = try await package(f).packageDigest
+143 |         try await f.resolver.unregisterEmitCell(uuid: f.anchor.uuid)
+    |         `- warning: no calls to throwing functions occur within 'try' expression
+144 |         denied(try object(try await f.cell.set(keypath: C.approveKeypath,
+145 |             value: .object(["packageDigest": .string(digest)]), requester: f.owner)), "approval_storage_unavailable")
+[4/8] Emitting module AppTests
+/private/tmp/haven-prod-20260917/CellScaffold/Tests/AppTests/AgentTrustPackageAdjustTests.swift:378:64: warning: conformance of 'AdjustURLProtocol' to protocol 'Sendable' is already unavailable
+376 | }
+377 | 
+378 | private final class AdjustURLProtocol: URLProtocol, @unchecked Sendable {
+    |                     |                                          `- warning: conformance of 'AdjustURLProtocol' to protocol 'Sendable' is already unavailable
+    |                     `- note: 'AdjustURLProtocol' inherits conformance to protocol 'Sendable' from superclass here
+379 |     private static let lock = NSLock()
+380 |     nonisolated(unsafe) private static var count = 0
+
+/private/tmp/haven-prod-20260917/CellScaffold/Tests/AppTests/AgentTrustPackageAntiPurposeTests.swift:322:69: warning: conformance of 'AntiPurposeURLProtocol' to protocol 'Sendable' is already unavailable
+320 | }
+321 | 
+322 | private final class AntiPurposeURLProtocol: URLProtocol, @unchecked Sendable {
+    |                     |                                               `- warning: conformance of 'AntiPurposeURLProtocol' to protocol 'Sendable' is already unavailable
+    |                     `- note: 'AntiPurposeURLProtocol' inherits conformance to protocol 'Sendable' from superclass here
+323 |     private static let lock = NSLock()
+324 |     nonisolated(unsafe) private static var count = 0
+
+/private/tmp/haven-prod-20260917/CellScaffold/Tests/AppTests/AgentTrustPackageApprovalTests.swift:412:66: warning: conformance of 'ApprovalURLProtocol' to protocol 'Sendable' is already unavailable
+410 | }
+411 | 
+412 | private final class ApprovalURLProtocol: URLProtocol, @unchecked Sendable {
+    |                     |                                            `- warning: conformance of 'ApprovalURLProtocol' to protocol 'Sendable' is already unavailable
+    |                     `- note: 'ApprovalURLProtocol' inherits conformance to protocol 'Sendable' from superclass here
+413 |     private static let lock = NSLock()
+414 |     nonisolated(unsafe) private static var count = 0
+
+/private/tmp/haven-prod-20260917/CellScaffold/Tests/AppTests/AgentTrustPackageAuditTests.swift:373:63: warning: conformance of 'AuditURLProtocol' to protocol 'Sendable' is already unavailable
+371 |     }
+372 | }
+373 | private final class AuditURLProtocol: URLProtocol, @unchecked Sendable {
+    |                     |                                         `- warning: conformance of 'AuditURLProtocol' to protocol 'Sendable' is already unavailable
+    |                     `- note: 'AuditURLProtocol' inherits conformance to protocol 'Sendable' from superclass here
+374 |     override class func canInit(with request: URLRequest) -> Bool { true }
+375 |     override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+
+/private/tmp/haven-prod-20260917/CellScaffold/Tests/AppTests/AgentTrustPackageE2ETests.swift:246:73: warning: conformance of 'TrustPackageE2EURLProtocol' to protocol 'Sendable' is already unavailable
+244 | }
+245 | 
+246 | private final class TrustPackageE2EURLProtocol: URLProtocol, @unchecked Sendable {
+    |                     |                                                   `- warning: conformance of 'TrustPackageE2EURLProtocol' to protocol 'Sendable' is already unavailable
+    |                     `- note: 'TrustPackageE2EURLProtocol' inherits conformance to protocol 'Sendable' from superclass here
+247 |     static let body = Data("wp13-fixture-response".utf8)
+248 |     private static let lock = NSLock()
+
+/private/tmp/haven-prod-20260917/CellScaffold/Tests/AppTests/ConferenceConnectionHubCellTests.swift:724:14: warning: concurrently-executed local function 'resolveAndMakeVisible(ownerContext:displayName:)' must be marked as '@Sendable'; this is an error in the Swift 6 language mode
+ 722 |         let endpoint = "cell:///\(ArendalsukaConnectionHubCell.cellName)"
+ 723 | 
+ 724 |         func resolveAndMakeVisible(ownerContext: String, displayName: String) async -> Result<Bool, Error> {
+     |              `- warning: concurrently-executed local function 'resolveAndMakeVisible(ownerContext:displayName:)' must be marked as '@Sendable'; this is an error in the Swift 6 language mode
+ 725 |             do {
+ 726 |                 guard let requester = await vault.identity(for: ownerContext, makeNewIfNotFound: true) else {
+
+/private/tmp/haven-prod-20260917/CellScaffold/Tests/AppTests/EffectReceiptTests.swift:358:65: warning: conformance of 'ReceiptURLProtocol' to protocol 'Sendable' is already unavailable
+356 | }
+357 | 
+358 | private final class ReceiptURLProtocol: URLProtocol, @unchecked Sendable {
+    |                     |                                           `- warning: conformance of 'ReceiptURLProtocol' to protocol 'Sendable' is already unavailable
+    |                     `- note: 'ReceiptURLProtocol' inherits conformance to protocol 'Sendable' from superclass here
+359 |     static let body = Data("response-private-content".utf8)
+360 |     private static let lock = NSLock()
+
+/private/tmp/haven-prod-20260917/CellScaffold/Tests/AppTests/EventPlatformRoutesTests.swift:14:13: warning: stored property 'payload' of 'Sendable'-conforming struct 'EventActionRequest' contains non-Sendable type 'ValueType'; this is an error in the Swift 6 language mode
+ 12 |     private struct EventActionRequest: Content {
+ 13 |         var keypath: String
+ 14 |         var payload: ValueType?
+    |             `- warning: stored property 'payload' of 'Sendable'-conforming struct 'EventActionRequest' contains non-Sendable type 'ValueType'; this is an error in the Swift 6 language mode
+ 15 |     }
+ 16 | 
+
+/private/tmp/haven-prod-20260917/CellProtocol/Sources/CellBase/ValueTypes/ValueType.swift:11:22: note: enum 'ValueType' does not conform to the 'Sendable' protocol
+  9 | #endif
+ 10 | 
+ 11 | public indirect enum ValueType: Codable {
+    |                      `- note: enum 'ValueType' does not conform to the 'Sendable' protocol
+ 12 |     case flowElement(FlowElement)
+ 13 |     case bool(Bool)
+
+/private/tmp/haven-prod-20260917/CellScaffold/Tests/AppTests/EventPlatformRoutesTests.swift:9:1: warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase'
+  7 | import Fluent
+  8 | import Vapor
+  9 | import CellBase
+    | `- warning: add '@preconcurrency' to suppress 'Sendable'-related warnings from module 'CellBase'
+ 10 | 
+ 11 | final class EventPlatformRoutesTests: IsolatedCellTestCase {
+
+/private/tmp/haven-prod-20260917/CellScaffold/Tests/AppTests/PersonEntityLinkCompletionTests.swift:135:21: warning: instance method 'test' is unavailable from asynchronous contexts; Use the async method instead.; this is an error in the Swift 6 language mode
+133 |                                 challenge: challenge, signature: try XCTUnwrap(signature))
+134 |             let requestBytes = try C.encode(proof)
+135 |             try app.test(.POST, C.discoveryPath, beforeRequest: { request in
+    |                     `- warning: instance method 'test' is unavailable from asynchronous contexts; Use the async method instead.; this is an error in the Swift 6 language mode
+136 |                 request.headers.contentType = .json; request.body.writeBytes(requestBytes)
+137 |             }) { response in
+
+/private/tmp/haven-prod-20260917/CellScaffold/Tests/AppTests/PersonEntityLinkCompletionTests.swift:142:21: warning: instance method 'test' is unavailable from asynchronous contexts; Use the async method instead.; this is an error in the Swift 6 language mode
+140 |             }
+141 |             let completion = try JSONEncoder().encode(fixture.envelope)
+142 |             try app.test(.POST, "/link/api/complete", beforeRequest: { request in
+    |                     `- warning: instance method 'test' is unavailable from asynchronous contexts; Use the async method instead.; this is an error in the Swift 6 language mode
+143 |                 request.headers.contentType = .json; request.body.writeBytes(completion)
+144 |             }) { response in XCTAssertEqual(response.status, .ok, response.body.string) }
+
+/private/tmp/haven-prod-20260917/CellScaffold/Tests/AppTests/PersonEntityLinkCompletionTests.swift:146:21: warning: instance method 'test' is unavailable from asynchronous contexts; Use the async method instead.; this is an error in the Swift 6 language mode
+144 |             }) { response in XCTAssertEqual(response.status, .ok, response.body.string) }
+145 |             var descriptor: C.Descriptor?
+146 |             try app.test(.POST, C.discoveryPath, beforeRequest: { request in
+    |                     `- warning: instance method 'test' is unavailable from asynchronous contexts; Use the async method instead.; this is an error in the Swift 6 language mode
+147 |                 request.headers.contentType = .json; request.body.writeBytes(requestBytes)
+148 |             }) { response in
+
+/private/tmp/haven-prod-20260917/CellScaffold/Tests/AppTests/PersonEntityLinkCompletionTests.swift:177:21: warning: instance method 'test' is unavailable from asynchronous contexts; Use the async method instead.; this is an error in the Swift 6 language mode
+175 |             let publisherProvesControl = await PaymentGateOwnerIdentitySupport.canProve(publisher)
+176 |             XCTAssertTrue(publisherProvesControl, "transport requires the exact local signer, not its public descriptor")
+177 |             try app.test(.POST, C.discoveryPath, beforeRequest: { request in
+    |                     `- warning: instance method 'test' is unavailable from asynchronous contexts; Use the async method instead.; this is an error in the Swift 6 language mode
+178 |                 request.headers.contentType = .json; request.body.writeBytes(requestBytes)
+179 |             }) { response in XCTAssertEqual(response.status, .forbidden, "exact discovery retry must not allocate another setup") }
+
+/private/tmp/haven-prod-20260917/CellScaffold/Tests/AppTests/PersonEntityLinkCompletionTests.swift:180:21: warning: instance method 'test' is unavailable from asynchronous contexts; Use the async method instead.; this is an error in the Swift 6 language mode
+178 |                 request.headers.contentType = .json; request.body.writeBytes(requestBytes)
+179 |             }) { response in XCTAssertEqual(response.status, .forbidden, "exact discovery retry must not allocate another setup") }
+180 |             try app.test(.GET, C.bridgePath) { response in
+    |                     `- warning: instance method 'test' is unavailable from asynchronous contexts; Use the async method instead.; this is an error in the Swift 6 language mode
+181 |                 XCTAssertEqual(response.status, .badRequest, "missing signed upgrade proof must never return 101")
+182 |             }
+
+/private/tmp/haven-prod-20260917/CellScaffold/Tests/AppTests/PersonEntityLinkCompletionTests.swift:184:21: warning: instance method 'test' is unavailable from asynchronous contexts; Use the async method instead.; this is an error in the Swift 6 language mode
+182 |             }
+183 |             try await fixture.store.revoke(owner: fixture.owner, linkID: fixture.envelope.approval.approvalID)
+184 |             try app.test(.POST, C.discoveryPath, beforeRequest: { request in
+    |                     `- warning: instance method 'test' is unavailable from asynchronous contexts; Use the async method instead.; this is an error in the Swift 6 language mode
+185 |                 request.headers.contentType = .json; request.body.writeBytes(requestBytes)
+186 |             }) { response in XCTAssertEqual(response.status, .forbidden) }
+
+/private/tmp/haven-prod-20260917/CellScaffold/Tests/AppTests/WebFetchCeilingTests.swift:355:65: warning: conformance of 'CeilingURLProtocol' to protocol 'Sendable' is already unavailable
+353 | }
+354 | 
+355 | private final class CeilingURLProtocol: URLProtocol, @unchecked Sendable {
+    |                     |                                           `- warning: conformance of 'CeilingURLProtocol' to protocol 'Sendable' is already unavailable
+    |                     `- note: 'CeilingURLProtocol' inherits conformance to protocol 'Sendable' from superclass here
+356 |     private static let lock = NSLock()
+357 |     nonisolated(unsafe) private static var captured: [URLRequest] = []
+[5/8] Compiling AppTests AgentTrustPackageAuditTests.swift
+[6/8] Compiling AppTests AgentTrustPackageAdjustTests.swift
+[7/8] Compiling AppTests AgentTrustPackageAntiPurposeTests.swift
+[8/9] Compiling AppTests AgentTrustPackageE2ETests.swift
+[8/10] Write Objects.LinkFileList
+[9/10] Linking CellsContainerPackageTests
+Build complete! (9.33s)
+Test Suite 'Selected tests' started at 2026-09-18 01:55:38.455.
+Test Suite 'CellsContainerPackageTests.xctest' started at 2026-09-18 01:55:38.456.
+Test Suite 'AgentTrustPackageAdjustTests' started at 2026-09-18 01:55:38.456.
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testAddedDomainApexWildcardAndPortExpansionLeaveAllSourcesAndDigestUnchanged]' started.
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testAddedDomainApexWildcardAndPortExpansionLeaveAllSourcesAndDigestUnchanged]' passed (0.054 seconds).
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testApprovalDigestIsReadDefensivelyAndChangedLabelIsExact]' started.
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testApprovalDigestIsReadDefensivelyAndChangedLabelIsExact]' passed (0.079 seconds).
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testCredentialsTrueWithoutGrantIsRejectedEvenWithScopedCredentialInFleet]' started.
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testCredentialsTrueWithoutGrantIsRejectedEvenWithScopedCredentialInFleet]' passed (0.016 seconds).
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testEveryTargetIsValidatedBeforeAnyFleetCeilingIsWritten]' started.
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testEveryTargetIsValidatedBeforeAnyFleetCeilingIsWritten]' passed (0.027 seconds).
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testFalseTogglesPersistTargetCeilingsAndIdempotentRegenerationIsStable]' started.
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testFalseTogglesPersistTargetCeilingsAndIdempotentRegenerationIsStable]' passed (0.072 seconds).
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testFirstWhitelistFromMissingOrEmptyCeilingIsAllowedAndSurvivesReload]' started.
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testFirstWhitelistFromMissingOrEmptyCeilingIsAllowedAndSurvivesReload]' passed (0.070 seconds).
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testForeignPublicAndForgedRequestersCannotAdjustEvenWithDebugBypass]' started.
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testForeignPublicAndForgedRequestersCannotAdjustEvenWithDebugBypass]' passed (0.014 seconds).
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testGatewayPolicyManagementIsOwnerOnlyAndExploreContractsAreExplicit]' started.
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testGatewayPolicyManagementIsOwnerOnlyAndExploreContractsAreExplicit]' passed (0.003 seconds).
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testInvalidPatternsFailBeforeMutation]' started.
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testInvalidPatternsFailBeforeMutation]' passed (0.019 seconds).
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testPerProviderDataNarrowingChangesDigestEvenWhenSummaryUnionIsUnchanged]' started.
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testPerProviderDataNarrowingChangesDigestEvenWhenSummaryUnionIsUnchanged]' passed (0.020 seconds).
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testPolicyCeilingNarrowingIsProjectedPersistedAndCannotExpand]' started.
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testPolicyCeilingNarrowingIsProjectedPersistedAndCannotExpand]' passed (0.022 seconds).
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testRemovingDomainChangesDigestEmitsProjectionAndDeniesFetchBeforeNetwork]' started.
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testRemovingDomainChangesDigestEmitsProjectionAndDeniesFetchBeforeNetwork]' passed (0.030 seconds).
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testWebfetchWriteTrueWithoutAgentWriteGrantIsRejected]' started.
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testWebfetchWriteTrueWithoutAgentWriteGrantIsRejected]' passed (0.015 seconds).
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testWildcardSubsetAndEquivalentDefaultPortAreAccepted]' started.
+Test Case '-[AppTests.AgentTrustPackageAdjustTests testWildcardSubsetAndEquivalentDefaultPortAreAccepted]' passed (0.032 seconds).
+Test Suite 'AgentTrustPackageAdjustTests' passed at 2026-09-18 01:55:38.931.
+	 Executed 14 tests, with 0 failures (0 unexpected) in 0.475 (0.476) seconds
+Test Suite 'AgentTrustPackageAntiPurposeTests' started at 2026-09-18 01:55:38.931.
+Test Case '-[AppTests.AgentTrustPackageAntiPurposeTests testHandcraftedApprovedPackageCannotGrantFetchOrCredentialsAndIsNotDerived]' started.
+Test Case '-[AppTests.AgentTrustPackageAntiPurposeTests testHandcraftedApprovedPackageCannotGrantFetchOrCredentialsAndIsNotDerived]' passed (0.214 seconds).
+Test Case '-[AppTests.AgentTrustPackageAntiPurposeTests testModelOutputRemainsProposalWithoutToolLoopAndLogsFourOwnerDenials]' started.
+Test Case '-[AppTests.AgentTrustPackageAntiPurposeTests testModelOutputRemainsProposalWithoutToolLoopAndLogsFourOwnerDenials]' passed (0.465 seconds).
+Test Suite 'AgentTrustPackageAntiPurposeTests' passed at 2026-09-18 01:55:39.610.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.679 (0.679) seconds
+Test Suite 'AgentTrustPackageApprovalTests' started at 2026-09-18 01:55:39.610.
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testAdjustAfterApprovalDeniesUntilNewApprovalAndShowsDeviation]' started.
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testAdjustAfterApprovalDeniesUntilNewApprovalAndShowsDeviation]' passed (0.110 seconds).
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testAdmittedNonOwnerStillRequiresApprovalAndCannotReadOrCreateIt]' started.
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testAdmittedNonOwnerStillRequiresApprovalAndCannotReadOrCreateIt]' passed (0.043 seconds).
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testApprovalAndBindingExploreContractsAreExplicitUnderStrictMode]' started.
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testApprovalAndBindingExploreContractsAreExplicitUnderStrictMode]' passed (0.038 seconds).
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testApprovedFetchStillRequiresWhitelistAndOtherExistingLimits]' started.
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+General App.PurposeBoundAIGatewayCell. Got owner identity but it failed to prove ownership!
+General App.PurposeBoundAIGatewayCell. Got owner identity but it failed to prove ownership!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+Did NOT find any EmitCell with name: EntityAnchor!!!
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp8-FD43F8E8-A0C7-4AD0-AD9C-8F1F715158FB/CellsContainer/FA75FD24-FF15-4CB2-A93B-E22CC09FBDB1
+Initing Entity Anchor cell for owner: wp8-owner-AB4BCBA4-D30F-446C-97FA-27B61C69B38B
+*********** Finished setup keys in Entity Anchor ***********
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp8-FD43F8E8-A0C7-4AD0-AD9C-8F1F715158FB/CellsContainer/FC1D1C3C-8D69-49DC-A399-78FAA5C8CD0B
+Initing Entity Anchor cell for owner: wp8-owner-2388E201-E100-4B60-A2EC-AAD8D082E8BF
+*********** Finished setup keys in Entity Anchor ***********
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp8-CA24DCAA-839E-4011-97FC-571E36FF5088/CellsContainer/B514F110-2044-47E7-ACA7-7BDB46A7F9EF
+Initing Entity Anchor cell for owner: wp8-owner-D95F80BE-D44A-41B2-A175-871D439099D8
+*********** Finished setup keys in Entity Anchor ***********
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+AIInvokeStarted correlationId=nil provider=openai cacheKey=956e1330c34fdf0cdc7399375ee4ff995e1773fc20106d8a2c511338f15fa9f5
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+AIInvokeCompleted correlationId=nil provider=openai durationMs=9 cacheHit=false quotaStatus=notRequested
+AIInvokeStarted correlationId=nil provider=openai cacheKey=32d5f7e5cc1ab56da42b173988a6040d75f6bf40f4ef79884a49927d0d5d6c56
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+AIInvokeCompleted correlationId=nil provider=openai durationMs=8 cacheHit=false quotaStatus=notRequested
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+AIInvokeStarted correlationId=nil provider=openai cacheKey=956e1330c34fdf0cdc7399375ee4ff995e1773fc20106d8a2c511338f15fa9f5
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+AIInvokeCompleted correlationId=nil provider=openai durationMs=8 cacheHit=false quotaStatus=notRequested
+AIInvokeStarted correlationId=nil provider=openai cacheKey=3fa2a05483ba2ff0bb095466ef0cdfaa120e0011ce7a19745ea51ce6dc2b8910
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+AIInvokeCompleted correlationId=nil provider=openai durationMs=8 cacheHit=false quotaStatus=notRequested
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+AIInvokeStarted correlationId=nil provider=openai cacheKey=956e1330c34fdf0cdc7399375ee4ff995e1773fc20106d8a2c511338f15fa9f5
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+AIInvokeCompleted correlationId=nil provider=openai durationMs=8 cacheHit=false quotaStatus=notRequested
+AIInvokeStarted correlationId=nil provider=openai cacheKey=252269cbb81e200ac15e50d94661d7cef3f2bc340fd10f2c6c3613d59db0e29a
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+AIInvokeCompleted correlationId=nil provider=openai durationMs=8 cacheHit=false quotaStatus=notRequested
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+AIInvokeStarted correlationId=nil provider=openai cacheKey=956e1330c34fdf0cdc7399375ee4ff995e1773fc20106d8a2c511338f15fa9f5
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+AIInvokeCompleted correlationId=nil provider=openai durationMs=8 cacheHit=false quotaStatus=notRequested
+AIInvokeStarted correlationId=nil provider=openai cacheKey=205c7af06a48d790efa85b9ad8e0747e1f265c904ec677e475b695108482bdc4
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+AIInvokeCompleted correlationId=nil provider=openai durationMs=8 cacheHit=false quotaStatus=notRequested
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp7-approval-6AFFC322-36D1-4A06-8ECF-E474CC68F0E0/CellsContainer/582A1600-9C07-47CE-991F-A82CD2A750FD
+Initing Entity Anchor cell for owner: approval-1F4263A8-5F32-4B7B-AF6B-B2E7A74421AC
+*********** Finished setup keys in Entity Anchor ***********
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp7-approval-07B73BB5-23A8-4996-8ED7-1177799B0C58/CellsContainer/870B1496-D185-4A68-87DE-E6B4904798DF
+Initing Entity Anchor cell for owner: approval-A40ACC55-5400-4D42-B787-9551E0A02C6D
+*********** Finished setup keys in Entity Anchor ***********
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp7-approval-576A18D4-B623-4557-BB65-B013FF03240F/CellsContainer/93D308D8-9FC1-41B3-9D11-02BFA3BF83E8
+Initing Entity Anchor cell for owner: approval-1C4B4C8D-B05F-436A-8EDE-3A1DE09715C4
+*********** Finished setup keys in Entity Anchor ***********
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+******** DireTest Case '-[AppTests.AgentTrustPackageApprovalTests testApprovedFetchStillRequiresWhitelistAndOtherExistingLimits]' passed (0.057 seconds).
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testApproveSignsEntireSnapshotWithOwnerKeyAndCommitsVerifiableEntityRecord]' started.
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testApproveSignsEntireSnapshotWithOwnerKeyAndCommitsVerifiableEntityRecord]' passed (0.051 seconds).
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testBindingsSurviveReloadAndMalformedBindingCannotSilentlyUnbind]' started.
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testBindingsSurviveReloadAndMalformedBindingCannotSilentlyUnbind]' passed (0.013 seconds).
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testBoundWebFetchWithoutApprovalDeniedBeforeNetworkOrCredentialLookup]' started.
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testBoundWebFetchWithoutApprovalDeniedBeforeNetworkOrCredentialLookup]' passed (0.013 seconds).
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testCompleteCeilingAndInstanceAreBoundEvenWhenDisplayProjectionUnchanged]' started.
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testCompleteCeilingAndInstanceAreBoundEvenWhenDisplayProjectionUnchanged]' passed (0.042 seconds).
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testFailedPersistentUnbindRetainsClosedPort]' started.
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testFailedPersistentUnbindRetainsClosedPort]' passed (0.015 seconds).
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testForgedApprovalSignatureCannotOpenPortAfterReload]' started.
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testForgedApprovalSignatureCannotOpenPortAfterReload]' passed (0.040 seconds).
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testGatewayStartPortDeniesBeforeCredentialsAndDetectsPolicyChanges]' started.
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testGatewayStartPortDeniesBeforeCredentialsAndDetectsPolicyChanges]' passed (0.069 seconds).
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testMissingWrongFleetAndUnavailablePackageFailClosed]' started.
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testMissingWrongFleetAndUnavailablePackageFailClosed]' passed (0.015 seconds).
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testOtherPublicAndForgedRequestersCannotApproveStopReadOrRebind]' started.
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testOtherPublicAndForgedRequestersCannotApproveStopReadOrRebind]' passed (0.049 seconds).
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testPackageNotDerivedAndUnavailableArchiveCannotApprove]' started.
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testPackageNotDerivedAndUnavailableArchiveCannotApprove]' passed (0.014 seconds).
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testStopRevokesAndRetainsHistoryAcrossSnapshotReload]' started.
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testStopRevokesAndRetainsHistoryAcrossSnapshotReload]' passed (0.084 seconds).
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testUnboundCellsKeepExistingBehavior]' started.
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testUnboundCellsKeepExistingBehavior]' passed (0.012 seconds).
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testWrongAndStaleDigestRejectedAgainstRegeneratedSources]' started.
+Test Case '-[AppTests.AgentTrustPackageApprovalTests testWrongAndStaleDigestRejectedAgainstRegeneratedSources]' passed (0.027 seconds).
+Test Suite 'AgentTrustPackageApprovalTests' passed at 2026-09-18 01:55:40.302.
+	 Executed 17 tests, with 0 failures (0 unexpected) in 0.691 (0.692) seconds
+Test Suite 'AgentTrustPackageAuditTests' started at 2026-09-18 01:55:40.302.
+Test Case '-[AppTests.AgentTrustPackageAuditTests testApprovedSnapshotAndCollectedReceiptsSurviveAdjustmentSelectionStopAndReload]' started.
+Test Case '-[AppTests.AgentTrustPackageAuditTests testApprovedSnapshotAndCollectedReceiptsSurviveAdjustmentSelectionStopAndReload]' passed (0.120 seconds).
+Test Case '-[AppTests.AgentTrustPackageAuditTests testAuditExploreAndAfterSkeletonMatchAndOwnerProofIsRequired]' started.
+Test Case '-[AppTests.AgentTrustPackageAuditTests testAuditExploreAndAfterSkeletonMatchAndOwnerProofIsRequired]' passed (0.047 seconds).
+Test Case '-[AppTests.AgentTrustPackageAuditTests testEveryViolationKindAndMismatchedBindingAreDetected]' started.
+Test Case '-[AppTests.AgentTrustPackageAuditTests testEveryViolationKindAndMismatchedBindingAreDetected]' passed (0.056 seconds).
+Test Case '-[AppTests.AgentTrustPackageAuditTests testFixtureTwoDeniedAttemptsAreExactlyTwoViolationsSevenEffectsFiveWithin]' started.
+Test Case '-[AppTests.AgentTrustPackageAuditTests testFixtureTwoDeniedAttemptsAreExactlyTwoViolationsSevenEffectsFiveWithin]' passed (0.082 seconds).
+Test Case '-[AppTests.AgentTrustPackageAuditTests testNoApprovalHasNothingToAuditAndNoFalseOverholdt]' started.
+Test Case '-[AppTests.AgentTrustPackageAuditTests testNoApprovalHasNothingToAuditAndNoFalseOverholdt]' passed (0.014 seconds).
+Test Case '-[AppTests.AgentTrustPackageAuditTests testOldValidReceiptsExcludedAndChangedSameIDCannotOverwriteArchive]' started.
+Test Case '-[AppTests.AgentTrustPackageAuditTests testOldValidReceiptsExcludedAndChangedSameIDCannotOverwriteArchive]' passed (0.057 seconds).
+Test Case '-[AppTests.AgentTrustPackageAuditTests testOpenActionsReturnOnlyReferencesAndTargetsCanBeRead]' started.
+ctory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp7-approval-7F985290-7033-44C7-A4D8-2F459D0E485A/CellsContainer/CB4BEA52-3B9E-4EF3-87A2-B2BB6FD1108D
+Initing Entity Anchor cell for owner: approval-7FEB7007-AA75-4B00-8CE4-363542225ED9
+*********** Finished setup keys in Entity Anchor ***********
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp7-approval-67EEE3C3-CD6D-44AD-B7BB-ABF546C4AF40/CellsContainer/E08B832D-8251-47BC-9916-15805F75ECBA
+Initing Entity Anchor cell for owner: approval-D27473A7-CA48-46E7-9AB2-F85DF148BD87
+*********** Finished setup keys in Entity Anchor ***********
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp7-approval-BCFE0A0C-1F7F-4B33-8677-47D8614F3D7B/CellsContainer/55A0A917-CB0A-4AC7-872A-DC7ACB8432D9
+Initing Entity Anchor cell for owner: approval-961B3177-6AD1-4807-B378-B47B47E8F244
+*********** Finished setup keys in Entity Anchor ***********
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp7-approval-18528064-E94E-4F61-BC62-370038BA70CE/CellsContainer/E209871E-B44C-4205-911C-E63868FEC0AE
+Initing Entity Anchor cell for owner: approval-D8209948-2E47-4107-B30A-50F539775EA8
+*********** Finished setup keys in Entity Anchor ***********
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp7-approval-C82EF266-4022-42F8-AEA6-45105F48E003/CellsContainer/A8F2BA55-66B3-4452-9DF8-1451085C4CBF
+Initing Entity Anchor cell for owner: approval-0C1C48CF-2093-4CD5-92FA-DDBE220DD1F9
+*********** Finished setup keys in Entity Anchor ***********
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp7-approval-812131C1-67AC-40E3-82D4-A987F8FCBACF/CellsContainer/E2771200-6002-4C9F-88FA-1EAC6B4DC894
+Initing Entity Anchor cell for owner: approval-F17168BB-36C3-4D62-9A83-577171B7C98E
+*********** Finished setup keys in Entity Anchor ***********
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp7-approval-27595F1B-4657-4CEA-A40E-57053A933682/CellsContainer/089CDFEE-3CF2-43D6-8A2E-6D970AF7425B
+Initing Entity Anchor cell for owner: approval-EC1A5CCD-C399-4D2E-B37D-EEB56A872D48
+*********** Finished setup keys in Entity Anchor ***********
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp7-approval-6C405499-BE9B-40B1-9BE3-667C3D0DA2AD/CellsContainer/430C74F6-FA64-4AD6-9989-C5B50EE08921
+Initing Entity Anchor cell for owner: approval-82237459-E6F3-41A1-9C68-17CA039472EC
+*********** Finished setup keys in Entity Anchor ***********
+AIInvokeStarted correlationId=nil provider=openai cacheKey=6bcba88b2affb9a66a2ba2fa6b2f14ff41ec52eebdfde5e1416bbacb4e325fe7
+AIInvokeFailed correlationId=nil provider=openai durationMs=2 quotaStatus=failedBeforeInvoke error=Purpose-bound authorization denied: package_not_approved
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+AIInvokeStarted correlationId=nil provider=openai cacheKey=6bcba88b2affb9a66a2ba2fa6b2f14ff41ec52eebdfde5e1416bbacb4e325fe7
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+AIInvokeCompleted correlationId=nil provider=openai durationMs=9 cacheHit=false quotaStatus=notRequested
+AIInvokeStarted correlationId=nil provider=openai cacheKey=6bcba88b2affb9a66a2ba2fa6b2f14ff41ec52eebdfde5e1416bbacb4e325fe7
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+AIInvokeFailed correlationId=nil provider=openai durationMs=8 quotaStatus=failedBeforeInvoke error=Purpose-bound authorization denied: package_digest_mismatch
+AIInvokeStarted correlationId=nil provider=openai-compatible cacheKey=9d05f89b36d2830c4942d220f4ab42290cee0412a9bed8ca82dcd3d35b78196c
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+AIInvokeFailed correlationId=nil provider=openai-compatible durationMs=8 quotaStatus=failedBeforeInvoke error=Purpose-bound authorization denied: package_digest_mismatch
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp7-approval-D4076D87-51D8-4C09-B059-348A56ED4F80/CellsContainer/7A2343A9-F88E-4BA9-8BF6-0C29F7E1F4E4
+Initing Entity Anchor cell for owner: approval-EFD42782-A949-4878-AB9E-41F66B5EEFC8
+*********** Finished setup keys in Entity Anchor ***********
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp7-approval-81216DC7-743D-4A54-A7AB-C39AB511B88D/CellsContainer/79E20AB8-9D79-4F8D-BFDD-BAB12CAA86F1
+Initing Entity Anchor cell for owner: approval-38C39865-EEC8-452B-99B5-FAB2FAFDC411
+*********** Finished setup keys in Entity Anchor ***********
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Got no signed data!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+Got no signed data!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+Got no signed data!
+General App.WebFetchCell. Got owner identity but it failed to prove ownership!
+Got no signed data!
+General App.WebFetchCell. Got owner identity but it failed to prove ownership!
+Got no signed data!
+General App.PurposeBoundAIGatewayCell. Got owner identity but it failed to prove ownership!
+Got no signed data!
+General App.PurposeBoundAIGatewayCell. Got owner identity but it failed to prove ownership!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+General App.WebFetchCell. Got owner identity but it failed to prove ownership!
+General App.WebFetchCell. Got owner identity but it failed to prove ownership!
+General App.PurposeBoundAIGatewayCell. Got owner identity but it failed to prove ownership!
+General App.PurposeBoundAIGatewayCell. Got owner identity but it failed to prove ownership!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp7-approval-0102A563-A4D2-4A40-A398-0AC5CC0F6480/CellsContainer/F5E039B5-407A-4AE1-A8EB-2E5019BB4C4E
+Initing Entity Anchor cell for owner: approval-C66AA6F4-F795-48AC-A836-1E48A7E775BD
+*********** Finished setup keys in Entity Anchor ***********
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp7-approval-6CB3E84B-DA5E-4C6D-8E51-1404EA4DE877/CellsContainer/1B0D4405-5BEF-430B-B6B8-791895FC3E64
+Initing Entity Anchor cell for owner: approval-86882399-E202-4020-9F69-6926F699CBAB
+*********** Finished setup keys in Entity Anchor ***********
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp7-approval-A2F99988-0EA2-4524-96F9-A118424FF10F/CellsContainer/8FD1929D-F17C-42E6-BF7D-30CD9F9EF4BD
+Initing Entity Anchor cell for owner: approval-EA7C5DEB-1F7E-488B-8DC2-8FF80212C98E
+*********** Finished setup keys in Entity Anchor ***********
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp7-approval-C9127768-A627-43CF-BE01-E3CC3BD7234F/CellsContainer/50E8AA5D-12CB-4AF0-980D-0E5DEF832E2E
+Initing Entity Anchor cell for owner: approval-6CF581B5-E530-4603-B67B-116DC793642C
+*********** Finished setup keys in Entity Anchor ***********
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp10-8119C326-82CA-498B-B05F-CF9C8096EB76/CellsContainer/9C3A1FF5-B40D-4910-8050-E9DE79FC6BE3
+Initing Entity Anchor cell for owner: audit-ABE1B454-745A-44FF-A888-5C633EAE2467
+*********** Finished setup keys in Entity Anchor ***********
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp10-86605881-6AA9-42F5-910D-3111DD871E68/CellsContainer/7972D09B-1ED1-4F41-B4F3-C4E3F769FDD6
+Initing Entity Anchor cell for owner: audit-14ED3EF9-1FE3-4E12-AC79-A7A73CEDEABC
+*********** Finished setup keys in Entity Anchor ***********
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Got no signed data!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+Got no signed data!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+Got no signed data!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+Got no signed data!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+Got no signed data!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+Got no signed data!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+Got no signed data!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+Got no signed data!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+Got no signed data!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+Got no signed data!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+Got no signed data!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+Got no signed data!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+Got no signed data!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+Got no signed data!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+General App.AgentTrustPackageCell. Got owner identity but it failed to prove ownership!
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp10-47C1C64B-D508-4AF0-87BB-55AB704422B5/CellsContainer/B5C39669-F764-4199-B7DD-FF38C8452D19
+Initing Entity Anchor cell for owner: audit-4C8DF18F-A92C-48E1-BFF8-93D2691D44F7
+*********** Finished setup keys in Entity Anchor ***********
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp10-D36C9C32-6822-4529-A889-85AA0AF4C4C4/CellsContainer/9948E7D9-651B-4995-9DFA-7636EFEC9ACE
+Initing Entity Anchor cell for owner: audit-1AE74A6C-825E-43B3-B023-362A84D59B85
+*********** Finished setup keys in Entity Anchor ***********
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp10-D85014E9-52FE-4D84-AD03-3BEC3F38A878/CellsContainer/7D8D155A-09AB-4CAA-A60A-381405DCBFB0
+Initing Entity Anchor cell for owner: audit-27F4A955-D46C-49CF-B304-57865987B661
+*********** Finished setup keys in Entity Anchor ***********
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp10-99B53C2A-B774-4DD5-A6E6-60C2DA76D437/CellsContainer/D9893766-67CD-4D67-8092-1B194E93EEED
+Initing Entity Anchor cell for owner: audit-55F9BEE7-757E-441B-8BE3-EAD8847B5B51
+*********** Finished setup keys in Entity Anchor ***********
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp10-9439E795-0AC2-4E32-BBFE-23116B289608/CellsContainer/F59C73EE-06AB-4BC5-809B-20B14FC76FF9
+Initing Entity Anchor cell for owner: audit-52AC5C99-55A0-43B6-99F3-4247B9175DE7
+*********** Finished setup keys inTest Case '-[AppTests.AgentTrustPackageAuditTests testOpenActionsReturnOnlyReferencesAndTargetsCanBeRead]' passed (0.123 seconds).
+Test Case '-[AppTests.AgentTrustPackageAuditTests testProductionFetchAndAIReceiptsAreCollectedThroughOwnerGETs]' started.
+Test Case '-[AppTests.AgentTrustPackageAuditTests testProductionFetchAndAIReceiptsAreCollectedThroughOwnerGETs]' passed (0.089 seconds).
+Test Case '-[AppTests.AgentTrustPackageAuditTests testTamperedAndUnsignedReceiptsAreInvalidUnknownPolicyEvenWithOldForgedTime]' started.
+Test Case '-[AppTests.AgentTrustPackageAuditTests testTamperedAndUnsignedReceiptsAreInvalidUnknownPolicyEvenWithOldForgedTime]' passed (0.047 seconds).
+Test Case '-[AppTests.AgentTrustPackageAuditTests testUnavailableSourcesAndInvalidApprovedSnapshotCannotClaimCompliance]' started.
+Test Case '-[AppTests.AgentTrustPackageAuditTests testUnavailableSourcesAndInvalidApprovedSnapshotCannotClaimCompliance]' passed (0.043 seconds).
+Test Suite 'AgentTrustPackageAuditTests' passed at 2026-09-18 01:55:40.980.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.677 (0.678) seconds
+Test Suite 'AgentTrustPackageE2ETests' started at 2026-09-18 01:55:40.980.
+Test Case '-[AppTests.AgentTrustPackageE2ETests testFixtureModelGenerateNarrowApproveFetchAndAuditOneViolation]' started.
+Test Case '-[AppTests.AgentTrustPackageE2ETests testFixtureModelGenerateNarrowApproveFetchAndAuditOneViolation]' passed (1.366 seconds).
+Test Suite 'AgentTrustPackageE2ETests' passed at 2026-09-18 01:55:42.346.
+	 Executed 1 test, with 0 failures (0 unexpected) in 1.366 (1.366) seconds
+Test Suite 'WebFetchCeilingTests' started at 2026-09-18 01:55:42.346.
+Test Case '-[AppTests.WebFetchCeilingTests test302OutsideWhitelistNeverMakesSecondRequestAndRedactsLocation]' started.
+Test Case '-[AppTests.WebFetchCeilingTests test302OutsideWhitelistNeverMakesSecondRequestAndRedactsLocation]' passed (0.004 seconds).
+Test Case '-[AppTests.WebFetchCeilingTests testAdmittedNonOwnerCannotBypassCeilingOrResolveCredential]' started.
+Test Case '-[AppTests.WebFetchCeilingTests testAdmittedNonOwnerCannotBypassCeilingOrResolveCredential]' passed (0.009 seconds).
+Test Case '-[AppTests.WebFetchCeilingTests testAllElevenNormativeWhitelistFixtureRowsThroughCell]' started.
+Test Case '-[AppTests.WebFetchCeilingTests testAllElevenNormativeWhitelistFixtureRowsThroughCell]' passed (0.017 seconds).
+Test Case '-[AppTests.WebFetchCeilingTests testAllowedFetchHasNoCredentialsBodyOrCookiesAndHonoursMaxBytes]' started.
+Test Case '-[AppTests.WebFetchCeilingTests testAllowedFetchHasNoCredentialsBodyOrCookiesAndHonoursMaxBytes]' passed (0.003 seconds).
+Test Case '-[AppTests.WebFetchCeilingTests testAllowedSmallFetchPreservesContentAndLastFetch]' started.
+Test Case '-[AppTests.WebFetchCeilingTests testAllowedSmallFetchPreservesContentAndLastFetch]' passed (0.003 seconds).
+Test Case '-[AppTests.WebFetchCeilingTests testCaseInsensitiveHostExactWildcardAndExplicitPort]' started.
+Test Case '-[AppTests.WebFetchCeilingTests testCaseInsensitiveHostExactWildcardAndExplicitPort]' passed (0.012 seconds).
+Test Case '-[AppTests.WebFetchCeilingTests testCeilingExplorePermissionsAndOwnerMutationFlow]' started.
+Test Case '-[AppTests.WebFetchCeilingTests testCeilingExplorePermissionsAndOwnerMutationFlow]' passed (0.002 seconds).
+Test Case '-[AppTests.WebFetchCeilingTests testCeilingIsPerInstanceAndRereadOnEveryFetch]' started.
+Test Case '-[AppTests.WebFetchCeilingTests testCeilingIsPerInstanceAndRereadOnEveryFetch]' passed (0.006 seconds).
+Test Case '-[AppTests.WebFetchCeilingTests testCeilingPersistsThroughResolverSnapshotAndReload]' started.
+Test Case '-[AppTests.WebFetchCeilingTests testCeilingPersistsThroughResolverSnapshotAndReload]' passed (0.006 seconds).
+Test Case '-[AppTests.WebFetchCeilingTests testCredentialAliasDeniedBeforeFixtureStoreLookupEvenForOwner]' started.
+Test Case '-[AppTests.WebFetchCeilingTests testCredentialAliasDeniedBeforeFixtureStoreLookupEvenForOwner]' passed (0.009 seconds).
+Test Case '-[AppTests.WebFetchCeilingTests testEmptyCeilingDeniesAll]' started.
+Test Case '-[AppTests.WebFetchCeilingTests testEmptyCeilingDeniesAll]' passed (0.002 seconds).
+Test Case '-[AppTests.WebFetchCeilingTests testEvery3xxIsCheckedAndEvenAllowedRedirectIsNotFollowed]' started.
+Test Case '-[AppTests.WebFetchCeilingTests testEvery3xxIsCheckedAndEvenAllowedRedirectIsNotFollowed]' passed (0.055 seconds).
+Test Case '-[AppTests.WebFetchCeilingTests testInvalidPatternsAndWiderOrUnknownCeilingsNeverReplaceStoredData]' started.
+Test Case '-[AppTests.WebFetchCeilingTests testInvalidPatternsAndWiderOrUnknownCeilingsNeverReplaceStoredData]' passed (0.013 seconds).
+Test Case '-[AppTests.WebFetchCeilingTests testLegacyAndCorruptedPersistenceFailClosed]' started.
+Test Case '-[AppTests.WebFetchCeilingTests testLegacyAndCorruptedPersistenceFailClosed]' passed (0.007 seconds).
+Test Case '-[AppTests.WebFetchCeilingTests testMissingCeilingDeniesAllWithoutRequests]' started.
+Test Case '-[AppTests.WebFetchCeilingTests testMissingCeilingDeniesAllWithoutRequests]' passed (0.004 seconds).
+Test Case '-[AppTests.WebFetchCeilingTests testOnlyProvenOwnerCanSetCeilingEvenUnderDebugBypass]' started.
+Test Case '-[AppTests.WebFetchCeilingTests testOnlyProvenOwnerCanSetCeilingEvenUnderDebugBypass]' passed (0.002 seconds).
+Test Case '-[AppTests.WebFetchCeilingTests testTransferDelegateRejectsEveryRedirectBeforeFollowingIt]' started.
+Test Case '-[AppTests.WebFetchCeilingTests testTransferDelegateRejectsEveryRedirectBeforeFollowingIt]' passed (0.000 seconds).
+Test Case '-[AppTests.WebFetchCeilingTests testValidationOrderAndPayloadCannotOpenHTTPWritesOrCredentials]' started.
+Test Case '-[AppTests.WebFetchCeilingTests testValidationOrderAndPayloadCannotOpenHTTPWritesOrCredentials]' passed (0.013 seconds).
+Test Suite 'WebFetchCeilingTests' passed at 2026-09-18 01:55:42.514.
+	 Executed 18 tests, with 0 failures (0 unexpected) in 0.167 (0.168) seconds
+Test Suite 'WebKnowledgeCellsTests' started at 2026-09-18 01:55:42.514.
+Test Case '-[AppTests.WebKnowledgeCellsTests testKnowledgeConfigurationsAreAvailableInScaffoldCatalogs]' started.
+Test Case '-[AppTests.WebKnowledgeCellsTests testKnowledgeConfigurationsAreAvailableInScaffoldCatalogs]' passed (0.028 seconds).
+Test Case '-[AppTests.WebKnowledgeCellsTests testKnowledgeConfigurationsArePurposeDiscoverable]' started.
+Test Case '-[AppTests.WebKnowledgeCellsTests testKnowledgeConfigurationsArePurposeDiscoverable]' passed (0.001 seconds).
+Test Case '-[AppTests.WebKnowledgeCellsTests testScopedCredentialCellIsOwnerOnly]' started.
+Test Case '-[AppTests.WebKnowledgeCellsTests testScopedCredentialCellIsOwnerOnly]' passed (0.003 seconds).
+Test Case '-[AppTests.WebKnowledgeCellsTests testScopedCredentialCellRedactsSecretValues]' started.
+Test Case '-[AppTests.WebKnowledgeCellsTests testScopedCredentialCellRedactsSecretValues]' passed (0.003 seconds).
+Test Case '-[AppTests.WebKnowledgeCellsTests testSourceIngestionCanRegisterTruthSourceDescriptor]' started.
+Test Case '-[AppTests.WebKnowledgeCellsTests testSourceIngestionCanRegisterTruthSourceDescriptor]' passed (0.003 seconds).
+Test Case '-[AppTests.WebKnowledgeCellsTests testTruthSourceManagerRegistersRequesterScopedSourcesInCatalog]' started.
+Test Case '-[AppTests.WebKnowledgeCellsTests testTruthSourceManagerRegistersRequesterScopedSourcesInCatalog]' passed (0.002 seconds).
+Test Case '-[AppTests.WebKnowledgeCellsTests testWebFetchBlocksInsecureHTTPByDefault]' started.
+Test Case '-[AppTests.WebKnowledgeCellsTests testWebFetchBlocksInsecureHTTPByDefault]' passed (0.003 seconds).
+Test Case '-[AppTests.WebKnowledgeCellsTests testWebSearchIsSideEffectFreeWhenProviderIsMissing]' started.
+Test Case '-[AppTests.WebKnowledgeCellsTests testWebSearchIsSideEffectFreeWhenProviderIsMissing]' passed (0.002 seconds).
+Test Suite 'WebKnowledgeCellsTests' passed at 2026-09-18 01:55:42.560.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.045 (0.045) seconds
+Test Suite 'CellsContainerPackageTests.xctest' passed at 2026-09-18 01:55:42.560.
+	 Executed 70 tests, with 0 failures (0 unexpected) in 4.100 (4.104) seconds
+Test Suite 'Selected tests' passed at 2026-09-18 01:55:42.560.
+	 Executed 70 tests, with 0 failures (0 unexpected) in 4.100 (4.104) seconds
+ Entity Anchor ***********
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp10-3A1E54B0-E84D-477B-98E1-67DAB37B2364/CellsContainer/8C80B862-B567-4993-ABFD-3C5913BE093B
+Initing Entity Anchor cell for owner: audit-FCDB7A5E-ADCF-4BA6-B3F1-3C2CFA9D8EE3
+*********** Finished setup keys in Entity Anchor ***********
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+AIInvokeStarted correlationId=nil provider=openai cacheKey=272cd273d372b07d74c2adb64dfcbcac011283b6acc5d9a9bee06636097fc123
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+AIInvokeCompleted correlationId=nil provider=openai durationMs=9 cacheHit=false quotaStatus=notRequested
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp10-B48CFAED-771E-47EA-A78D-422C17B6D25F/CellsContainer/1F7DCC49-5102-4005-941E-386D982AD8D6
+Initing Entity Anchor cell for owner: audit-D3972762-CC0A-4855-82A7-28EA34EC9742
+*********** Finished setup keys in Entity Anchor ***********
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp10-5D768404-43B3-41A5-8B04-680B44CF6099/CellsContainer/B1341525-21B7-4CA0-834A-85B11224F531
+Initing Entity Anchor cell for owner: audit-F0EE0E95-5994-4C63-958E-AD28033C05DE
+*********** Finished setup keys in Entity Anchor ***********
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+******** Directory does not exist trying to create. path: /var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/wp13-e2e-5D09B6CE-1F4D-494A-9DDE-8578BAC51433/CellsContainer/C6376B02-A664-450C-B3CD-E22EAFE2AAEF
+Initing Entity Anchor cell for owner: wp13-owner
+*********** Finished setup keys in Entity Anchor ***********
+AIInvokeStarted correlationId=nil provider=openai cacheKey=d7d6a134d08ae7347e7c8c198a3b7fe7a9e7b479fc921cd9f455aae02ed338cb
+AIInvokeCompleted correlationId=nil provider=openai durationMs=1 cacheHit=false quotaStatus=notRequested
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+Did NOT find any EmitCell with name: TrustedIssuers!!!
+WP13_E2E fixtureProviderCalls=1 before=sha256:27e1bba77b890fea4918c42ff65a27064f3fbc72d747380b268d149165bc6bbc after=sha256:78530bc10816a430d1597f13017052c2201e753ca0a39b0b0395a7554d0f8fcd approved=sha256:78530bc10816a430d1597f13017052c2201e753ca0a39b0b0395a7554d0f8fcd
+WP13_E2E Siden godkjenning 2026-09-17T23:55:42Z: 3 effekter, 2 innenfor, 1 nektet. violation=new_destination signedVerified=3 networkRequests=2
+􀟈  Test run started.
+􀄵  Testing Library Version: 1501
+􀄵  Target Platform: arm64e-apple-macos14.0
+􁁛  Test run with 0 tests in 0 suites passed after 0.001 seconds.

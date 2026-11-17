@@ -1,0 +1,221 @@
+[haven-swiftpm] running swift test with cache 78c2e52a5799
+warning: 'cellprotocol': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Provisioning 89 / 169]
+[Using on-disk description]
+[1 / 89] NIOHPACK
+[2 / 13] CellBaseTests-product
+[13 / 24] CellBaseTests-product
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/PerspectiveContextTests.swift:137:89: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+135 |         let config = ContextConfiguration(sources: [.init(sourceID: "place", endpoint: "cell:///place")], rules: [.init(id: "home", definition: definition, label: "home", purposeWeights: [purpose.reference: 0])])
+136 |         let response = try await cell.set(keypath: "perspective.context.configure", value: ContextCodec.encode(config), requester: owner)
+137 |         guard case let .object(object) = response else { return XCTFail("bad response \(response)") }
+    |                                                                                         |- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+    |                                                                                         |- note: use a default value parameter to avoid this warning
+    |                                                                                         |- note: provide a default value to avoid this warning
+    |                                                                                         `- note: use 'String(describing:)' to silence this warning
+138 |         guard case let .string(status)? = object["status"] else { return XCTFail("missing status \(response)") }
+139 |         XCTAssertEqual(status, "ok", "\(response)")
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/PerspectiveContextTests.swift:138:100: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+136 |         let response = try await cell.set(keypath: "perspective.context.configure", value: ContextCodec.encode(config), requester: owner)
+137 |         guard case let .object(object) = response else { return XCTFail("bad response \(response)") }
+138 |         guard case let .string(status)? = object["status"] else { return XCTFail("missing status \(response)") }
+    |                                                                                                    |- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+    |                                                                                                    |- note: use a default value parameter to avoid this warning
+    |                                                                                                    |- note: provide a default value to avoid this warning
+    |                                                                                                    `- note: use 'String(describing:)' to silence this warning
+139 |         XCTAssertEqual(status, "ok", "\(response)")
+140 |         let changed = expectation(description: "home context")
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/PerspectiveContextTests.swift:139:41: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+137 |         guard case let .object(object) = response else { return XCTFail("bad response \(response)") }
+138 |         guard case let .string(status)? = object["status"] else { return XCTFail("missing status \(response)") }
+139 |         XCTAssertEqual(status, "ok", "\(response)")
+    |                                         |- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+    |                                         |- note: use a default value parameter to avoid this warning
+    |                                         |- note: provide a default value to avoid this warning
+    |                                         `- note: use 'String(describing:)' to silence this warning
+140 |         let changed = expectation(description: "home context")
+141 |         let departed = expectation(description: "departure context")
+[17 / 23] CellBaseTests-product
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/IntegrationTests.swift:1071:18: warning: weak variable 'releasedCell' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1069 |         let emitter = await CancellationObservingEmitter(owner: owner)
+1070 |         var cell: GeneralCell? = await GeneralCell(owner: owner)
+1071 |         weak var releasedCell = cell
+     |                  `- warning: weak variable 'releasedCell' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1072 | 
+1073 |         let state = try await cell?.attach(emitter: emitter, label: "source", requester: owner)
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/IntegrationTests.swift:1096:18: warning: weak variable 'releasedCell' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1094 |         let emitter = await CancellationObservingEmitter(owner: owner)
+1095 |         var cell: GeneralCell? = await GeneralCell(owner: owner)
+1096 |         weak var releasedCell = cell
+     |                  `- warning: weak variable 'releasedCell' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1097 | 
+1098 |         let downstreamEntered = expectation(description: "Downstream subscriber entered")
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/IntegrationTests.swift:1145:18: warning: weak variable 'releasedCell' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1143 |         let interceptGate = SuspendedFlowGate()
+1144 |         var cell: GeneralCell? = await GeneralCell(owner: owner)
+1145 |         weak var releasedCell = cell
+     |                  `- warning: weak variable 'releasedCell' was never mutated; consider changing to 'let' constant [#VariableNeverMutated::WeakMutability]
+1146 | 
+1147 |         await cell?.addIntercept(requester: owner) { element, _ in
+
+[#VariableNeverMutated]: <https://docs.swift.org/compiler/documentation/diagnostics/variable-never-mutated>
+[#WeakMutability]: <https://docs.swift.org/compiler/documentation/diagnostics/weak-mutability>
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/GeneralCellInterfaceTests.swift:127:51: warning: 'restoreStoredOwnerIdentity(using:)' is deprecated: renamed to 'bindStoredOwnerToRuntimeIdentity(_:)' [#DeprecatedDeclaration]
+ 125 |         let publicSnapshotOwnsCell = await restored.requesterProvesOwnership(publicOwner)
+ 126 |         let foreignOwnsCell = await restored.requesterProvesOwnership(foreign)
+ 127 |         let foreignRestoredOwner = await restored.restoreStoredOwnerIdentity(using: foreign)
+     |                                                   |- warning: 'restoreStoredOwnerIdentity(using:)' is deprecated: renamed to 'bindStoredOwnerToRuntimeIdentity(_:)' [#DeprecatedDeclaration]
+     |                                                   `- note: use 'bindStoredOwnerToRuntimeIdentity(_:)' instead
+ 128 | 
+ 129 |         let ownerRestoredOwner = await restored.restoreStoredOwnerIdentity(using: owner)
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/GeneralCellInterfaceTests.swift:129:49: warning: 'restoreStoredOwnerIdentity(using:)' is deprecated: renamed to 'bindStoredOwnerToRuntimeIdentity(_:)' [#DeprecatedDeclaration]
+ 127 |         let foreignRestoredOwner = await restored.restoreStoredOwnerIdentity(using: foreign)
+ 128 | 
+ 129 |         let ownerRestoredOwner = await restored.restoreStoredOwnerIdentity(using: owner)
+     |                                                 |- warning: 'restoreStoredOwnerIdentity(using:)' is deprecated: renamed to 'bindStoredOwnerToRuntimeIdentity(_:)' [#DeprecatedDeclaration]
+     |                                                 `- note: use 'bindStoredOwnerToRuntimeIdentity(_:)' instead
+ 130 |         let ownerOwnsCell = await restored.requesterProvesOwnership(owner)
+ 131 | 
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/GeneralCellInterfaceTests.swift:1425:20: warning: 'setInterceptValueForKey(requester:key:setValueForKeyIntercept:)' is deprecated [#DeprecatedDeclaration]
+1423 |         var rootWasMutated = false
+1424 | 
+1425 |         await cell.setInterceptValueForKey(requester: owner, key: "profile") { _ in
+     |                    `- warning: 'setInterceptValueForKey(requester:key:setValueForKeyIntercept:)' is deprecated [#DeprecatedDeclaration]
+1426 |             .object(["name": .string("Private"), "secret": .string("must-not-leak")])
+1427 |         }
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/GeneralCellInterfaceTests.swift:1428:20: warning: 'setInterceptSetValueForKey(requester:key:setValueForKeyIntercept:)' is deprecated [#DeprecatedDeclaration]
+1426 |             .object(["name": .string("Private"), "secret": .string("must-not-leak")])
+1427 |         }
+1428 |         await cell.setInterceptSetValueForKey(requester: owner, key: "profile") { _, _ in
+     |                    `- warning: 'setInterceptSetValueForKey(requester:key:setValueForKeyIntercept:)' is deprecated [#DeprecatedDeclaration]
+1429 |             rootWasMutated = true
+1430 |         }
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/BridgeIdentityBoundaryTests.swift:371:75: warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+369 |             XCTAssertEqual(admission, .signed)
+370 |             let localDecision = await cell.authorizationDecision(requestedAccess: "r---", at: "feed", for: identity)
+371 |             XCTAssertTrue(localDecision.allowed, "Fresh local contract: \(localDecision.reasonCode)")
+    |                                                                           |             |- note: provide a default value to avoid this warning
+    |                                                                           |             `- note: use 'String(describing:)' to silence this warning
+    |                                                                           `- warning: string interpolation produces a debug description for an optional value; did you mean to make this explicit?
+372 |             let outgoing = PairedTransport()
+373 |             let incoming = PairedTransport()
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/SkeletonLocalizationTests.swift:158:62: warning: 'accessibilityAttributeValue' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+156 |         // standalone XCTest host (the setting is scoped to this process).
+157 |         let accessibilityMode = NSAccessibility.Attribute(rawValue: "AXEnhancedUserInterface")
+158 |         let previousAccessibilityMode = NSApplication.shared.accessibilityAttributeValue(accessibilityMode)
+    |                                                              `- warning: 'accessibilityAttributeValue' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+159 |         NSApplication.shared.accessibilitySetValue(true, forAttribute: accessibilityMode)
+160 |         defer { NSApplication.shared.accessibilitySetValue(previousAccessibilityMode, forAttribute: accessibilityMode) }
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/SkeletonLocalizationTests.swift:159:30: warning: 'accessibilitySetValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+157 |         let accessibilityMode = NSAccessibility.Attribute(rawValue: "AXEnhancedUserInterface")
+158 |         let previousAccessibilityMode = NSApplication.shared.accessibilityAttributeValue(accessibilityMode)
+159 |         NSApplication.shared.accessibilitySetValue(true, forAttribute: accessibilityMode)
+    |                              `- warning: 'accessibilitySetValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+160 |         defer { NSApplication.shared.accessibilitySetValue(previousAccessibilityMode, forAttribute: accessibilityMode) }
+161 |         let host = NSHostingView(rootView: SkeletonView(element: element).environmentObject(model))
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/SkeletonLocalizationTests.swift:160:38: warning: 'accessibilitySetValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+158 |         let previousAccessibilityMode = NSApplication.shared.accessibilityAttributeValue(accessibilityMode)
+159 |         NSApplication.shared.accessibilitySetValue(true, forAttribute: accessibilityMode)
+160 |         defer { NSApplication.shared.accessibilitySetValue(previousAccessibilityMode, forAttribute: accessibilityMode) }
+    |                                      `- warning: 'accessibilitySetValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+161 |         let host = NSHostingView(rootView: SkeletonView(element: element).environmentObject(model))
+162 |         host.frame = NSRect(x: 0, y: 0, width: 600, height: 420)
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/SkeletonNativeTreeListTests.swift:403:58: warning: 'accessibilityAttributeValue' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+401 |     init(element: SkeletonElement, data: ValueType, width: CGFloat) {
+402 |         snapshot = TreeListSnapshot(data)
+403 |         previousAccessibilityMode = NSApplication.shared.accessibilityAttributeValue(accessibilityMode)
+    |                                                          `- warning: 'accessibilityAttributeValue' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+404 |         NSApplication.shared.accessibilitySetValue(true, forAttribute: accessibilityMode)
+405 |         window = NSWindow(contentRect: NSRect(x: -10000, y: -10000, width: width, height: 420),
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/SkeletonNativeTreeListTests.swift:404:30: warning: 'accessibilitySetValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+402 |         snapshot = TreeListSnapshot(data)
+403 |         previousAccessibilityMode = NSApplication.shared.accessibilityAttributeValue(accessibilityMode)
+404 |         NSApplication.shared.accessibilitySetValue(true, forAttribute: accessibilityMode)
+    |                              `- warning: 'accessibilitySetValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+405 |         window = NSWindow(contentRect: NSRect(x: -10000, y: -10000, width: width, height: 420),
+406 |                           styleMask: [.borderless], backing: .buffered, defer: false)
+
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/SkeletonNativeTreeListTests.swift:422:30: warning: 'accessibilitySetValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+420 |         window.orderOut(nil)
+421 |         window.close()
+422 |         NSApplication.shared.accessibilitySetValue(previousAccessibilityMode, forAttribute: accessibilityMode)
+    |                              `- warning: 'accessibilitySetValue(_:forAttribute:)' was deprecated in macOS 10.10: Use the NSAccessibility protocol methods instead (see NSAccessibilityProtocols.h) [#DeprecatedDeclaration]
+423 |     }
+424 | 
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+/Users/kjetil/.codex/worktrees/perspective-context-events/CellProtocol/Tests/CellBaseTests/TrustedIssuerCellTests.swift:1448:13: warning: variable 'missingProof' was never mutated; consider changing to 'let' constant [#VariableNeverMutated]
+1446 |         XCTAssertEqual(decision(unsignedTimeResult), "untrusted")
+1447 | 
+1448 |         var missingProof = try await makeClaim()
+     |             `- warning: variable 'missingProof' was never mutated; consider changing to 'let' constant [#VariableNeverMutated]
+1449 |         missingProof.proof.signatureData = Data()
+1450 |         let missingProofResult = try await evaluate(
+
+[#VariableNeverMutated]: <https://docs.swift.org/compiler/documentation/diagnostics/variable-never-mutated>
+[19 / 23] CellBaseTests-product
+[20 / 23] CellBaseTests-product
+[21 / 23] CellBaseTests-product
+[22 / 22] haven-commons-product
+[24 / 24] CellRuntimeBenchmarks-product
+[26 / 26] ReferenceLoadBenchmark-product
+Build complete! (9,49 sek)
+Test Suite 'Selected tests' started at 2026-10-12 09:29:28.610.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-10-12 09:29:28.611.
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-10-12 09:29:28.611.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-12 09:29:28.611.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-12 09:29:28.686.
+Test Suite 'CellNearbyTests.xctest' started at 2026-10-12 09:29:28.687.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-10-12 09:29:28.687.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-10-12 09:29:28.687.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-10-12 09:29:28.765.
+Test Suite 'CellBaseTests.xctest' started at 2026-10-12 09:29:28.765.
+Test Suite 'PerspectiveContextFlowTests' started at 2026-10-12 09:29:28.765.
+Test Case '-[CellBaseTests.PerspectiveContextFlowTests testRealSubscriptionChangesEffectivePurposesAndDepartureRestoresBaseline]' started.
+Test Case '-[CellBaseTests.PerspectiveContextFlowTests testRealSubscriptionChangesEffectivePurposesAndDepartureRestoresBaseline]' passed (0.015 seconds).
+Test Suite 'PerspectiveContextFlowTests' passed at 2026-10-12 09:29:28.781.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.015 (0.016) seconds
+Test Suite 'PerspectiveContextTests' started at 2026-10-12 09:29:28.781.
+Test Case '-[CellBaseTests.PerspectiveContextTests testDepartureDuplicateDelayedAndConflictingEvents]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testDepartureDuplicateDelayedAndConflictingEvents]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testExpiryAndRestartRequireFreshSnapshotEvenAtSameRevision]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testExpiryAndRestartRequireFreshSnapshotEvenAtSameRevision]' passed (0.002 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testFiltersIntersectWithinBaseAndUseBaseWhenUnknownOrExpired]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testFiltersIntersectWithinBaseAndUseBaseWhenUnknownOrExpired]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testMalformedConfigurationAndEventsAreRejected]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testMalformedConfigurationAndEventsAreRejected]' passed (0.000 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testMorningNeedsTimeAndHomeOrFamilyAndKnownEmptySources]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testMorningNeedsTimeAndHomeOrFamilyAndKnownEmptySources]' passed (0.001 seconds).
+Test Case '-[CellBaseTests.PerspectiveContextTests testPrioritySupportsLowerWeightsAndDeactivationAndStableTies]' started.
+Test Case '-[CellBaseTests.PerspectiveContextTests testPrioritySupportsLowerWeightsAndDeactivationAndStableTies]' passed (0.001 seconds).
+Test Suite 'PerspectiveContextTests' passed at 2026-10-12 09:29:28.785.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.004 (0.004) seconds
+Test Suite 'CellBaseTests.xctest' passed at 2026-10-12 09:29:28.785.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.020 (0.020) seconds
+Test Suite 'Selected tests' passed at 2026-10-12 09:29:28.785.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.020 (0.020) seconds
+PerspectiveCell init. Owner: 00000000-0000-0000-0000-000000000001
+Loading perspectiveJsonData failed with error: Error Domain=NSCocoaErrorDomain Code=260 "Filen «Perspective.json» kunne ikke åpnes fordi den ikke finnes." UserInfo={NSFilePath=/var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-10294/CellsContainer/EE56664E-BC8F-452F-B29F-332F17F28F8D/Perspective.json, NSURL=file:///var/folders/7s/xyjsdm211_xggqqzw1nmx8xc0000gn/T/CellProtocolTests/CellApple-10294/CellsContainer/EE56664E-BC8F-452F-B29F-332F17F28F8D/Perspective.json, NSUnderlyingError=0x7758899920 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+PespectiveCell Deinit!!!

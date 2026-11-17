@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "proposal.retention.v1",
+  "status": "policy-binding-design-not-a-new-default",
+  "beforeFirstPersistentWrite": "Resolve and record an explicit existing owner/project policy per class. If absent, request that concrete owner choice and block affected persistent collection; G2 is not a retention choice.",
+  "classes": [
+    {
+      "id": "private-chat-context",
+      "audience": "owner and explicit per-turn allowed recipient",
+      "policy": "existing owner policy; no new duration default",
+      "deletion": "payload, stored raw context, embeddings, snippets, caches; journal replay cannot restore deleted text",
+      "copies": "provider retention must be disclosed/accepted for selected route"
+    },
+    {
+      "id": "private-package",
+      "audience": "owner",
+      "policy": "existing owner package policy; explicit retained revisions",
+      "deletion": "package payload and derived context; active turn references retain only what its separate policy permits"
+    },
+    {
+      "id": "project-minimal-receipt",
+      "audience": "explicit project audience",
+      "policy": "explicit project evidence policy, separate from idea TTL",
+      "deletion": "only permitted minimal audit references can survive; never hide raw private payload in receipt",
+      "copies": "shared projection has own explicit audience and deletion policy"
+    },
+    {
+      "id": "derived-index-cache",
+      "audience": "no wider than source",
+      "policy": "derived; must not outlive source policy",
+      "deletion": "invalidate rights immediately, purge derived payload/embedding/cache; expose physical purge lag honestly"
+    },
+    {
+      "id": "migration-export",
+      "audience": "owner",
+      "policy": "explicit owner migration/recovery policy; no automatic source deletion",
+      "deletion": "owner-governed after proved migration/restore; never commit export to Git"
+    }
+  ],
+  "ideaTTL": "Existing idea TTL and dependency protection unchanged; not a retention policy for chat/receipts."
+}

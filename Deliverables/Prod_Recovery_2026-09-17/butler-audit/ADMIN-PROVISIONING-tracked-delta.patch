@@ -1,0 +1,326 @@
+diff --git a/Sources/App/Cells/Admin/AdminWorkspaceConfigurationFactory.swift b/Sources/App/Cells/Admin/AdminWorkspaceConfigurationFactory.swift
+index da921101..faa7fc99 100644
+--- a/Sources/App/Cells/Admin/AdminWorkspaceConfigurationFactory.swift
++++ b/Sources/App/Cells/Admin/AdminWorkspaceConfigurationFactory.swift
+@@ -359,6 +359,11 @@ enum AdminWorkspaceConfigurationFactory {
+             interests: ["admin", "products", "catalog", "conference", "events", "rag"],
+             purposeRefs: []
+         )
++        configuration.addReference(readReference(
++            endpoint: ScaffoldMandateContract.endpoint,
++            label: "scaffoldAdministrator",
++            keys: ["representative.status"]
++        ))
+ 
+         configuration.skeleton = AdminSkeleton.page(
+             nav: navigation,
+@@ -367,6 +372,12 @@ enum AdminWorkspaceConfigurationFactory {
+             title: "Produktadmin",
+             subtitle: "Dette er en katalog, ikke en superadmin. Hver målflate beholder egne Cells, Agreements, owner-bevis og auditgrenser.",
+             content: [
++                AdminSkeleton.panel("Din CellProtocol-myndighet", [
++                    AdminSkeleton.labeledValue("Status", "scaffoldAdministrator.representative.status.status"),
++                    AdminSkeleton.labeledValue("Administrator", "scaffoldAdministrator.representative.status.administratorEntityRef", monospaced: true),
++                    AdminSkeleton.labeledValue("Gyldig til", "scaffoldAdministrator.representative.status.validUntil", monospaced: true),
++                    AdminSkeleton.note("Webrollene observer/operator/security er separate. Bare en aktiv, eiersignert representantavtale gir CellProtocol-administratormyndighet.")
++                ]),
+                 AdminSkeleton.panelRow([
+                     AdminSkeleton.panel("Tjenesteadministrasjon", [
+                         AdminSkeleton.actionRow([
+diff --git a/Sources/App/Cells/Admin/ScaffoldMandateCell.swift b/Sources/App/Cells/Admin/ScaffoldMandateCell.swift
+index a23927e0..ccf9f51d 100644
+--- a/Sources/App/Cells/Admin/ScaffoldMandateCell.swift
++++ b/Sources/App/Cells/Admin/ScaffoldMandateCell.swift
+@@ -107,10 +107,10 @@ final class ScaffoldMandateCell: GeneralCell, MeddleOperationAuthorizationRequir
+         }
+         // GET has no payload. Optional resource/id selection is encoded as a
+         // suffix; base mandate.list filters to resources owned by the requester.
+-        for key in ["mandate", "mandate.list", "mandate.read", "orgLink", "orgLink.list"] {
++        for key in ["representative.status", "mandate", "mandate.list", "mandate.read", "orgLink", "orgLink.list"] {
+             await registerExploreContract(requester: owner, key: key, method: .get, input: .null,
+                 returns: Self.readResponseSchema,
+-                permissions: ["r---"], description: .string("mandate.read.<UUID>; mandate.list[.<base64url(resourceRef)>]; orgLink.list. Owner or verified mandate required; denial is never an empty-list disguise."))
++                permissions: ["r---"], description: .string("representative.status is requester-private and grants nothing; mandate.read.<UUID>; mandate.list[.<base64url(resourceRef)>]; orgLink.list require scoped proof."))
+             await addInterceptForGet(requester: owner, key: key) { [weak self] requestedKey, requester in
+                 guard let self else { throw ScaffoldMandateError.persistenceUnavailable }
+                 return try await self.read(key: requestedKey, requester: requester)
+@@ -133,7 +133,7 @@ final class ScaffoldMandateCell: GeneralCell, MeddleOperationAuthorizationRequir
+ 
+     func meddleAuthorizationRequirement(for method: ExploreContractMethod, keypath: String) async throws -> String? {
+         if method == .set && ScaffoldMandateContract.writes.contains(keypath) { return "-w-s" }
+-        if method == .get && ["mandate", "mandate.list", "mandate.read", "orgLink", "orgLink.list"].contains(keypath) { return "r---" }
++        if method == .get && ["representative.status", "mandate", "mandate.list", "mandate.read", "orgLink", "orgLink.list"].contains(keypath) { return "r---" }
+         // Query selectors use the normal resolver authorization decision and
+         // the same decision again in get(), without registering private IDs.
+         return nil
+@@ -377,6 +377,9 @@ final class ScaffoldMandateCell: GeneralCell, MeddleOperationAuthorizationRequir
+     }
+ 
+     private func read(key: String, requester: Identity) async throws -> ValueType {
++        if key == "representative.status" {
++            return await representativeStatus(requester: requester)
++        }
+         let current = snapshot()
+         if key == "orgLink.list" {
+             let issuer = try? await requireRepresentative(requester, action: "orgLink.issue")
+@@ -448,6 +451,43 @@ final class ScaffoldMandateCell: GeneralCell, MeddleOperationAuthorizationRequir
+         return .list(values)
+     }
+ 
++    private func representativeStatus(requester: Identity) async -> ValueType {
++        guard let context = try? await registry() else {
++            return .object([
++                "status": .string("not_provisioned"),
++                "authorized": .bool(false),
++                "authorizationSource": .string("none"),
++                "scaffoldRef": .string(ScaffoldAdministratorRegistryContract.configuredScaffoldRef),
++                "administratorEntityRef": .null,
++                "requiredSignatures": .null,
++                "authorityActions": .list([]),
++                "validUntil": .null
++            ])
++        }
++        var authorizedActions: [String] = []
++        for action in ScaffoldMandateContract.writes {
++            if (try? await requireRepresentative(requester, action: action)) != nil {
++                authorizedActions.append(action)
++            }
++        }
++        let isAdministrator = authorizedActions == ScaffoldMandateContract.writes
++        let authority = isAdministrator
++            ? try? await ScaffoldMandateProofSupport.storedRepresentativeAgreement(on: requester)
++            : nil
++        return .object([
++            "status": .string(isAdministrator ? "authorized" : "not_authorized"),
++            "authorized": .bool(isAdministrator),
++            "authorizationSource": .string(isAdministrator ? "owner_signed_representative_agreement" : "none"),
++            "scaffoldRef": .string(context.scaffoldRef),
++            "administratorEntityRef": .string(context.issuerEntityRef),
++            "requiredSignatures": .integer(context.requiredSignatures),
++            "authorityActions": .list(authorizedActions.map(ValueType.string)),
++            "validUntil": authority.map {
++                .string(ScaffoldMandate.timestamp(Date(timeIntervalSince1970: $0.expiresAt)))
++            } ?? .null
++        ])
++    }
++
+     private func isActiveForInspection(_ record: Record, current: State) async -> Bool {
+         do {
+             let context = try await registry()
+diff --git a/Sources/App/Support/ScaffoldAdministratorRuntimeSupport.swift b/Sources/App/Support/ScaffoldAdministratorRuntimeSupport.swift
+index 9c57629d..25f05a54 100644
+--- a/Sources/App/Support/ScaffoldAdministratorRuntimeSupport.swift
++++ b/Sources/App/Support/ScaffoldAdministratorRuntimeSupport.swift
+@@ -19,6 +19,20 @@ extension Application {
+                   let orchestrator else {
+                 throw ScaffoldAdministratorRegistryCell.RegistryError.persistenceUnavailable
+             }
++            let mappings = await resolver.namedCells(requester: owner)
++            let hasRegistry = mappings[ScaffoldAdministratorRegistryContract.cellName] != nil
++            let hasMandate = mappings[ScaffoldMandateContract.cellName] != nil
++            if !provisionIfMissing, !hasRegistry, !hasMandate {
++                // First deployment is a safe degraded state. It grants no
++                // authority and is distinct from a partial/corrupt mapping.
++                ScaffoldAdministratorRegistryCell.recordUnprovisionedRuntime()
++                CanonicalCellRuntimeReadinessStore.shared.markReady(component: component)
++                logger.notice("Scaffold administrator cells are not provisioned; authority remains disabled.")
++                return
++            }
++            guard provisionIfMissing || (hasRegistry && hasMandate) else {
++                throw ScaffoldAdministratorRegistryCell.RegistryError.persistenceUnavailable
++            }
+             // Use the same exact-mapping recovery gate as PaymentGate. A
+             // named endpoint lookup alone can create a replacement Cell.
+             try await orchestrator.requireSharedCanonicalMapping(
+@@ -27,10 +41,20 @@ extension Application {
+                 resolver: resolver,
+                 provisionIfMissing: provisionIfMissing
+             )
++            try await orchestrator.requireSharedCanonicalMapping(
++                name: ScaffoldMandateContract.cellName,
++                type: ScaffoldMandateCell.self,
++                resolver: resolver,
++                provisionIfMissing: provisionIfMissing
++            )
+             guard let registry = try await resolver.cellAtEndpoint(
+                     endpoint: ScaffoldAdministratorRegistryContract.endpoint,
+                     requester: owner
+-                  ) as? ScaffoldAdministratorRegistryCell else {
++                  ) as? ScaffoldAdministratorRegistryCell,
++                  (try await resolver.cellAtEndpoint(
++                    endpoint: ScaffoldMandateContract.endpoint,
++                    requester: owner
++                  )) is ScaffoldMandateCell else {
+                 throw ScaffoldAdministratorRegistryCell.RegistryError.persistenceUnavailable
+             }
+             _ = try await registry.get(keypath: ScaffoldAdministratorRegistryContract.state, requester: owner)
+diff --git a/Sources/App/configure.swift b/Sources/App/configure.swift
+index 349746fd..00ad7a32 100644
+--- a/Sources/App/configure.swift
++++ b/Sources/App/configure.swift
+@@ -947,11 +947,22 @@ public func configure(_ app: Application) async throws {
+         )
+         let eagerBootstrapProvisionOnly = try EagerBootstrapProvisioningPolicy
+             .provisionOnlyFlag()
++        let scaffoldAdministratorProvisionOnly = try ScaffoldAdministratorProvisioningMode
++            .enabled()
+         try EagerBootstrapProvisioningPolicy.validate(
+             policy: eagerBootstrapPolicy,
+             provisionOnly: eagerBootstrapProvisionOnly,
+             isProductionLikeEnvironment: isProductionLikeEnvironment
+         )
++        if scaffoldAdministratorProvisionOnly {
++            guard eagerBootstrapProvisionOnly,
++                  eagerBootstrapPolicy == .provisionIfMissing else {
++                throw AppConfigurationError.invalidEnvironmentVariable(
++                    ScaffoldAdministratorProvisioningMode.environmentKey
++                )
++            }
++            try ScaffoldAdministratorProvisioningMode.validateRuntimeBoundary()
++        }
+ 
+         let ownerContext = Environment.get("CELL_SCAFFOLD_OWNER_CONTEXT") ?? "Scaffold"
+         let ownerUUID = Environment.get("CELL_SCAFFOLD_OWNER_UUID")
+@@ -2295,9 +2306,13 @@ public func configure(_ app: Application) async throws {
+             // registeret og mandatcellen er scaffold-intern tilstand og hører ikke til
+             // det settet; de registreres ved ordinær oppstart eller når en mapping
+             // allerede finnes.
+-            guard eagerBootstrapProvisionOnly == false else { return }
++            guard eagerBootstrapProvisionOnly == false || scaffoldAdministratorProvisionOnly else {
++                return
++            }
+             let mappings = await resolver.namedCells(requester: owner)
+-            let provisionIfMissing = eagerBootstrapPolicy == .provisionIfMissing
++            let provisionIfMissing = scaffoldAdministratorProvisionOnly
++                || (eagerBootstrapProvisionOnly == false
++                    && eagerBootstrapPolicy == .provisionIfMissing)
+             if provisionIfMissing || mappings[ScaffoldAdministratorRegistryContract.cellName] != nil {
+                 try await addCellResolveIfNeeded(
+                     name: ScaffoldAdministratorRegistryContract.cellName,
+@@ -2326,7 +2341,8 @@ public func configure(_ app: Application) async throws {
+             await app.refreshScaffoldAdministratorReadiness(
+                 owner: identity,
+                 orchestrator: scaffoldPorthole,
+-                provisionIfMissing: eagerBootstrapPolicy == .provisionIfMissing
++                provisionIfMissing: scaffoldAdministratorProvisionOnly
++                    || eagerBootstrapPolicy == .provisionIfMissing
+             )
+         }
+ 
+@@ -2427,7 +2443,8 @@ public func configure(_ app: Application) async throws {
+             await app.refreshScaffoldAdministratorReadiness(
+                 owner: scaffoldIdentity,
+                 orchestrator: porthole,
+-                provisionIfMissing: eagerBootstrapPolicy == .provisionIfMissing
++                provisionIfMissing: scaffoldAdministratorProvisionOnly
++                    || eagerBootstrapPolicy == .provisionIfMissing
+             )
+             if stagingManifestBypassEnabled {
+                 app.logger.warning(
+diff --git a/Sources/Run/main.swift b/Sources/Run/main.swift
+index 6fcfd0b9..2f69c061 100644
+--- a/Sources/Run/main.swift
++++ b/Sources/Run/main.swift
+@@ -2,6 +2,7 @@
+ // SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
+ 
+ import App
++import Foundation
+ import Vapor
+ 
+ var env = try Environment.detect()
+@@ -9,12 +10,21 @@ try LoggingSystem.bootstrap(from: &env)
+ let app = Application(env)
+ defer { app.shutdown() }
+ try await configure(app)
++let scaffoldAdministratorProvisionOnly = try ScaffoldAdministratorProvisioningMode.enabled()
+ let eagerBootstrapProvisionOnly = ["1", "true", "yes", "on"].contains(
+     Environment.get("CELL_SCAFFOLD_EAGER_BOOTSTRAP_PROVISION_ONLY")?
+         .trimmingCharacters(in: .whitespacesAndNewlines)
+         .lowercased() ?? ""
+ )
+-if eagerBootstrapProvisionOnly {
++if scaffoldAdministratorProvisionOnly {
++    let requestData = FileHandle.standardInput.readDataToEndOfFile()
++    let receipt = try await ScaffoldAdministratorProvisioner.provision(
++        on: app,
++        requestData: requestData
++    )
++    let encodedReceipt = try ScaffoldAdministratorProvisioner.encodeReceipt(receipt)
++    print("scaffold_administrator_provisioning_receipt=" + String(decoding: encodedReceipt, as: UTF8.self))
++} else if eagerBootstrapProvisionOnly {
+     // `configure` has completed the owner-/Resolver-gated one-shot operation.
+     // Do not open a listener or turn provisioning authority into service
+     // runtime authority.
+@@ -23,4 +33,3 @@ if eagerBootstrapProvisionOnly {
+     try await app.execute()
+ }
+ //try app.run()
+-
+diff --git a/Tests/AppTests/AdminWorkspaceConfigurationFactoryTests.swift b/Tests/AppTests/AdminWorkspaceConfigurationFactoryTests.swift
+index 160f2006..4d57803d 100644
+--- a/Tests/AppTests/AdminWorkspaceConfigurationFactoryTests.swift
++++ b/Tests/AppTests/AdminWorkspaceConfigurationFactoryTests.swift
+@@ -120,9 +120,11 @@ final class AdminWorkspaceConfigurationFactoryTests: XCTestCase {
+     func testProductAdministrationIsDirectoryWithoutControlPlaneAuthority() throws {
+         let configuration = ConfigurationCatalogCell.adminProductAdministrationConfiguration()
+         XCTAssertEqual(configuration.discovery?.sourceCellEndpoint, "cell:///ConfigurationCatalog")
+-        XCTAssertTrue(configuration.cellReferences?.isEmpty ?? true)
++        XCTAssertEqual(configuration.cellReferences?.map(\.label), ["scaffoldAdministrator"])
+ 
+         let serialized = try serialized(configuration)
++        XCTAssertTrue(serialized.contains("representative.status"))
++        XCTAssertTrue(serialized.contains("Din CellProtocol-myndighet"))
+         XCTAssertTrue(serialized.contains("admin\\/funding"))
+         XCTAssertTrue(serialized.contains("admin\\/catalog"))
+         XCTAssertTrue(serialized.contains("admin\\/development"))
+diff --git a/Tests/AppTests/ScaffoldAdministratorRegistryTests.swift b/Tests/AppTests/ScaffoldAdministratorRegistryTests.swift
+index 81d3a79f..b09b6a58 100644
+--- a/Tests/AppTests/ScaffoldAdministratorRegistryTests.swift
++++ b/Tests/AppTests/ScaffoldAdministratorRegistryTests.swift
+@@ -258,6 +258,45 @@ final class ScaffoldAdministratorRegistryTests: IsolatedCellTestCase {
+         }
+     }
+ 
++    func testRequireExistingAcceptsAbsentPairButRejectsPartialMapping() async throws {
++        try await withRuntime { app in
++            let owner = try await self.owner(in: app)
++            let resolver = try XCTUnwrap(CellBase.defaultCellResolver)
++            let orchestrator = try XCTUnwrap(scaffoldPorthole)
++            let original = await resolver.namedCells(requester: owner)
++            let registryUUID = try XCTUnwrap(
++                original[ScaffoldAdministratorRegistryContract.cellName]
++            )
++
++            var absent = original
++            absent[ScaffoldAdministratorRegistryContract.cellName] = nil
++            absent[ScaffoldMandateContract.cellName] = nil
++            await resolver.setNamedCells(absent, requester: owner)
++            await app.refreshScaffoldAdministratorReadiness(
++                owner: owner,
++                orchestrator: orchestrator,
++                provisionIfMissing: false
++            )
++            try app.test(.GET, "/health/ready", afterResponse: { response in
++                XCTAssertEqual(response.status, .ok)
++                XCTAssertTrue(response.body.string.contains("scaffold_administrator_not_provisioned"))
++            })
++
++            var partial = absent
++            partial[ScaffoldAdministratorRegistryContract.cellName] = registryUUID
++            await resolver.setNamedCells(partial, requester: owner)
++            await app.refreshScaffoldAdministratorReadiness(
++                owner: owner,
++                orchestrator: orchestrator,
++                provisionIfMissing: false
++            )
++            try app.test(.GET, "/health/ready", afterResponse: { response in
++                XCTAssertEqual(response.status, .serviceUnavailable)
++                XCTAssertTrue(response.body.string.contains("scaffold_administrator_registry_unavailable"))
++            })
++        }
++    }
++
+     private func withRuntime(reference: String? = nil, createOwner: Bool = true, _ body: (Application) async throws -> Void) async throws {
+         let keys = ["CELL_SCAFFOLD_OWNER_CONTEXT", "CELL_SCAFFOLD_OWNER_CONTEXTS", "CELL_SCAFFOLD_OWNER_UUID", "CELL_SCAFFOLD_OWNER_CREATE_IF_MISSING", "CELL_SCAFFOLD_REF", "CELL_SCAFFOLD_RUNTIME_ROOT"]
+         let previous = keys.map { key in (key, getenv(key).map { String(cString: $0) }) }

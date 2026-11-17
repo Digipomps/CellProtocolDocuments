@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "x-contractRef": "haven://contract/aigateway/v1",
+  "title": "AIGateway i Binding — invoke-kontrakt",
+  "description": "Cellen registreres som cell:///AIGateway, identityUnique, eid av eierens private identitet. Den holder aldri skriverett: et kall gir et forslag, aldri en endring. Se dataflow.md §2.",
+  "type": "object",
+  "required": ["version", "requesterIdentityLinkID", "trustedModelID", "purposeRef", "prompt", "proposalScope"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {"const": 1},
+    "requesterIdentityLinkID": {
+      "description": "Lenken kallet autoriseres med. Autorisasjonen løser entiteten fra denne, ikke fra en naken identitets-UUID.",
+      "type": "string", "minLength": 1
+    },
+    "trustedModelID": {
+      "description": "Må finnes i trustedModels og være aktiv. Ukjent eller revokert id avvises før prompten i det hele tatt bygges.",
+      "type": "string", "minLength": 1
+    },
+    "purposeRef": {
+      "description": "Nøyaktig ett formål. purpose://prompt.unknown avvises — et kall uten formål er ikke et lovlig kall.",
+      "type": "string", "pattern": "^purpose://(?!prompt\\.unknown$)[a-z0-9][a-z0-9./-]*$"
+    },
+    "prompt": {"type": "string", "minLength": 1, "maxLength": 100000},
+    "context": {
+      "description": "Keypathene modellen får lese for dette kallet. Må være en delmengde av trustedModels.<id>.mayRead.",
+      "type": "array", "items": {"type": "string"}
+    },
+    "proposalScope": {
+      "description": "Keypathene dette kallet får foreslå i. Må være en delmengde av trustedModels.<id>.mayPropose.",
+      "type": "array", "items": {"type": "string"}, "minItems": 1
+    },
+    "idempotencyKey": {"type": "string"}
+  },
+  "x-responses": {
+    "proposal": {
+      "description": "Det eneste positive svaret. Ingen skriving har skjedd.",
+      "required": ["proposalID", "changes", "modelRef", "createdAt"],
+      "changes": "liste av {keypath, from, to}",
+      "note": "Forslaget står i kø til eieren signerer. Signaturen gir én entity.batchPersist og ett chronicle-innslag."
+    },
+    "refusals": [
+      {"code": "unknownModel", "when": "trustedModelID finnes ikke i trustedModels"},
+      {"code": "revokedModel", "when": "erklæringen har revokedAt eller er utløpt"},
+      {"code": "purposeNotAccepted", "when": "purposeRef mangler, er ukjent, eller er prompt.unknown"},
+      {"code": "scopeExceeded", "when": "proposalScope eller context går utenfor erklæringen"},
+      {"code": "entityProofMissing", "when": "requesterIdentityLinkID er inaktiv, revokert, eller binder til en annen entitet"},
+      {"code": "escalationRefused", "when": "en onDevice-rute ville gått videre til sky uten eierens ja"}
+    ]
+  },
+  "x-invariants": [
+    "Gatewayen har ingen skrivevei til EntityAnchor. Den produserer forslag.",
+    "Nøkler står aldri i kontrakten; apiKeyAlias peker inn i OwnerScopedCredentialStore innenfor entiteten.",
+    "Prompt og svar forlater ikke entiteten, uansett hvor modellen kjører.",
+    "Hvert avslag er en egen kode, ikke en generisk feil — negative tester skal kunne skille dem."
+  ]
+}

@@ -1,0 +1,120 @@
+diff --git a/Public/css/porthole-webo.css b/Public/css/porthole-webo.css
+index c07c127b..9ab622c4 100644
+--- a/Public/css/porthole-webo.css
++++ b/Public/css/porthole-webo.css
+@@ -2391,6 +2391,16 @@ body.panel-resizing * {
+   align-self: stretch;
+ }
+ 
++/* WP-F paritet: et element med fast bredde krymper ikke i en rad (som SwiftUI .frame(width:)). */
++[data-axis="row"] > [data-fixed-width] {
++  flex-shrink: 0;
++}
++
++/* WP-F format: en layoutvariant med hidden skjuler elementet uten å fjerne det. */
++[data-layout-hidden] {
++  display: none !important;
++}
++
+ /* WP-B4 paritet: TextArea med egen boks i skjelettet — feltet inni har ingen egen ramme. */
+ .skeleton-textarea-boxed > .skeleton-textarea {
+   border: 0 !important;
+diff --git a/Public/js/skeleton-runtime.js b/Public/js/skeleton-runtime.js
+index 288afaa5..fbcc823b 100644
+--- a/Public/js/skeleton-runtime.js
++++ b/Public/js/skeleton-runtime.js
+@@ -554,7 +554,13 @@
+       return validateElement(payload.rowSkeleton, depth + 1, `${path}.rowSkeleton`);
+     }
+     if (type === "ComponentSurface") {
+-      return validateRequiredStrings(payload, ["sourceKeypath", "instanceID"], path)
++      // WP-F format: nøyaktig én av instanceID og instanceIDKeypath.
++      const hasID = typeof payload.instanceID === "string" && payload.instanceID.trim() !== "";
++      const hasKeypath = typeof payload.instanceIDKeypath === "string" && payload.instanceIDKeypath.trim() !== "";
++      if (hasID === hasKeypath) {
++        return `Invalid skeleton at ${path}: expected exactly one of instanceID and instanceIDKeypath.`;
++      }
++      return validateRequiredStrings(payload, ["sourceKeypath"], path)
+         || (!["inline", "pinned"].includes(payload.variant)
+           ? `Invalid skeleton at ${path}.variant: expected inline or pinned.` : null);
+     }
+@@ -1027,19 +1033,31 @@
+   }
+ 
+   function renderComponentSurface(spec, state, context, key, path) {
++    // WP-F format: fast instanceID, eller ID lest fra radens data (instanceIDKeypath).
++    const resolvedID = typeof spec.instanceID === "string" && spec.instanceID
++      ? spec.instanceID
++      : resolveKeypath(spec.instanceIDKeypath, state.rootData, context);
++    const instanceID = typeof resolvedID === "string" || typeof resolvedID === "number" ? String(resolvedID) : "";
++    if (!instanceID) {
++      const failure = document.createElement("div");
++      failure.className = "skeleton-component-surface-error";
++      failure.textContent = "ComponentSurface: unresolved instanceID";
++      applySkeletonIdentity(failure, key, path);
++      return failure;
++    }
+     // The cache is keyed solely by instanceID, including when a List reorders.
+-    let binding = state.componentBindings.get(spec.instanceID);
++    let binding = state.componentBindings.get(instanceID);
+     if (!binding) {
+       const container = document.createElement("div");
+       container.className = "skeleton-component-surface";
+-      container.dataset.instanceId = spec.instanceID;
++      container.dataset.instanceId = instanceID;
+       binding = { container, itemContext: {}, renderer: null, definition: null };
+-      state.componentBindings.set(spec.instanceID, binding);
++      state.componentBindings.set(instanceID, binding);
+       applyElementModifiers(container, spec.modifiers, state, path, context);
+     }
+     Object.assign(binding, { spec, context, key, path });
+     binding.container.dataset.componentVariant = spec.variant || "inline";
+-    applySkeletonIdentity(binding.container, `component.${spec.instanceID}`, path);
++    applySkeletonIdentity(binding.container, `component.${instanceID}`, path);
+     return binding.container;
+   }
+ 
+@@ -5024,8 +5042,8 @@
+   }
+ 
+   const VARIANT_STYLE_PROPERTIES = ["flexDirection", "gridTemplateColumns", "gap", "paddingTop", "paddingInlineStart",
+-    "paddingBottom", "paddingInlineEnd", "minHeight", "maxHeight", "flexGrow", "fontSize", "borderColor", "color", "alignItems", "justifyContent"];
+-  const VARIANT_OVERRIDES = ["axis", "columns", "spacing", "paddingInsets", "minHeight", "maxHeight", "flexGrow", "fontSize", "borderColor", "foregroundColor"];
++    "paddingBottom", "paddingInlineEnd", "minHeight", "maxHeight", "flexGrow", "fontSize", "borderColor", "color", "alignItems", "justifyContent", "width"];
++  const VARIANT_OVERRIDES = ["axis", "columns", "spacing", "paddingInsets", "minHeight", "maxHeight", "flexGrow", "fontSize", "borderColor", "foregroundColor", "width"];
+ 
+   function layoutVariantMatches(variant, available, state, context) {
+     if (variant.when && !evaluateVisibilityCondition(variant.when, state, context)) return false;
+@@ -5108,6 +5126,14 @@
+         if (Number.isFinite(variant.flexGrow)) node.style.flexGrow = String(variant.flexGrow);
+         if (variant.borderColor) node.style.borderColor = variant.borderColor;
+         if (variant.foregroundColor) node.style.color = variant.foregroundColor;
++        // WP-F format: fast bredde eller skjult mens varianten gjelder; elementet og tilstanden beholdes.
++        if (Number.isFinite(variant.width)) {
++          node.style.width = `${variant.width}px`;
++          available.availableWidth = narrowDimension(available.availableWidth, variant.width);
++        }
++        // dataset, ikke toggleAttribute: samme attributter, og node-kontrakttestens DOM kjenner dataset.
++        if (variant.hidden === true) node.dataset.layoutHidden = "true"; else delete node.dataset.layoutHidden;
++        if (Number.isFinite(variant.width) || typeof modifiers.width === "number") node.dataset.fixedWidth = "true"; else delete node.dataset.fixedWidth;
+         // Bound colors are live in a mounted item as in a List row.
+         [["backgroundKeypath", "background"], ["foregroundColorKeypath", "color"]].forEach(([key, property]) => {
+           if (modifiers[key] && !(property === "color" && variant.foregroundColor)) {
+@@ -5261,6 +5287,7 @@
+     }
+     if (typeof modifiers.width === "number") {
+       element.style.width = `${modifiers.width}px`;
++      element.dataset.fixedWidth = "true"; // WP-F paritet: fast bredde krymper ikke i en rad (porthole-webo.css)
+     }
+     if (typeof modifiers.height === "number") {
+       element.style.height = `${modifiers.height}px`;
+diff --git a/ci/test-filter.txt b/ci/test-filter.txt
+index 7f00b352..0ef8055a 100644
+--- a/ci/test-filter.txt
++++ b/ci/test-filter.txt
+@@ -458,3 +458,5 @@ ButlerBuiltInConfigurationUpgradeTests
+ # WP-R4: public read-only policy and mounted source action integration.
+ ConferencePublicConfigurationPolicyTests
+ PortholeComponentSourceActionTests
++# WP-F (vei B): runtime-dekoderen slipper gjennom instanceIDKeypath og variant hidden/width.
++SkeletonFormatRoundBRuntimeTests

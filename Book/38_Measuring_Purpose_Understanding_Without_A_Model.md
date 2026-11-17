@@ -56,6 +56,7 @@ Hver regel kom av en feil noen har gjort.
 8. **Tolken får opake id-er.** Id-er i generatorrekkefølge avslører etiketten for en som ser mønsteret.
 9. **Et nytt korpus etter at grafen er frosset.** Holdout fra de samme personaene deler stil med treningen. Den ærlige testen er nye skribenter som aldri har sett grafen.
 10. **Dump katalogen før første poengsetting.** Etikett-kartet må bygges fra det matcheren faktisk kan treffe i testkjøringen, ikke fra det man tror står der.
+11. **Dommeren skriver før han velger.** Fritekst først, så valg blant et fast antall alternativer (fylt opp og stokket, riktig svar alltid med), med «Ingen av disse» og «Uklart — trenger kontekst» som egne svar. Eksempler og plassholdere hentes utenfor settet: i formålsregister-tråden ble eksempelet ordrett svaret i to av tretti saker. Friteksten er ofte mer verdt enn valget — den avslører etikettfeil og hva dommeren slår opp i kontekst (`Deliverables/PDD_formaalsregister-som-graf_2026-09-11/maaling/natt-2026-09-23/DOMMER_RUNDE2_FUNN.md`).
 
 ## 4. Resultater så langt
 
@@ -111,6 +112,18 @@ krevde én ny testmetode og ett formålskart.
 - **To regresjoner ble innført og fanget** av regresjonstestene i samme jobb (et AIGateway-statusspørsmål og «hjelp meg i gang med Arendalsuka» ble onboarding). Regresjonstestene hører hjemme i måle-jobben, ikke bare i CI.
 
 ## 7. Filer og kommandoer
+
+**Begrensning kontrollert 2026-09-29:** Regel 3 er et krav til måleporten, ikke en
+verifisert egenskap ved alle feilveier i `wp-butler-maaling-v3.sh`. Den leste
+versjonen returnerer exit 0 fra `stopp` og sluttgrenen for lukket port, fanger
+ikke hvert korpuskalls exitstatus og stopper ikke ved manglende katalog. Den
+bruker dessuten et fast eksisterende arbeidstre, tilbakestiller `Sources`, legger
+til en testeksklusjon, utelater setup-saker og kaller Swift direkte. Ikke kjør
+den uendret når oppdraget krever isolert arbeidstre, ingen eksklusjoner og
+bounded runner med kapasitetsvakt. Scriptnavn, prosesskode 0 og rapporteksistens
+er ikke tilstrekkelig akseptansebevis. Kildehenvisninger og stoppstatus står i
+[E1-BYGG](../Deliverables/PDD_butler-onboarding-og-formaalsforstaaelse_2026-09-23/handoff/E1-BYGG.md).
+Ingen retting eller ny måling av skriptet er gjennomført i dette forsøket.
 
 | Hva | Hvor |
 |---|---|

@@ -1,0 +1,271 @@
+commit f851df4990e6da595b8daec40d34f2d6df6b3d10
+Author:     Claude <noreply@anthropic.com>
+AuthorDate: Sat Sep 19 08:21:12 2026 +0200
+Commit:     Claude <noreply@anthropic.com>
+CommitDate: Sat Sep 19 08:21:12 2026 +0200
+
+    Integrate new skeleton cases with public policy and binding checks
+
+diff --git a/Sources/App/Cells/ConferenceMVP/Skeleton/ConferencePublicConfigurationPolicy.swift b/Sources/App/Cells/ConferenceMVP/Skeleton/ConferencePublicConfigurationPolicy.swift
+index f1b4ead7..f1a79b27 100644
+--- a/Sources/App/Cells/ConferenceMVP/Skeleton/ConferencePublicConfigurationPolicy.swift
++++ b/Sources/App/Cells/ConferenceMVP/Skeleton/ConferencePublicConfigurationPolicy.swift
+@@ -84,6 +84,10 @@ enum ConferencePublicConfigurationPolicy {
+             return "public configuration cannot contain write controls"
+         case .Reference:
+             return "public configuration cannot resolve nested skeleton references"
++        case .Tree:
++            return "public configuration cannot contain trees; they always dispatch selection and expansion actions"
++        case .ComponentSurface:
++            return "public configuration cannot mount component surfaces"
+         case .Unsupported:
+             return "public configuration cannot contain unsupported elements"
+         case .Visualization(let visualization):
+@@ -113,6 +117,8 @@ enum ConferencePublicConfigurationPolicy {
+     private static func modifiers(in element: SkeletonElement) -> SkeletonModifiers? {
+         switch element {
+         case .List(let value): return value.modifiers
++        case .Tree(let value): return value.modifiers
++        case .ComponentSurface(let value): return value.modifiers
+         case .Object(let value): return value.modifiers
+         case .Spacer(let value): return value.modifiers
+         case .Image(let value): return value.modifiers
+diff --git a/Tests/AppTests/ConferenceEntityDiscoveryCellTests.swift b/Tests/AppTests/ConferenceEntityDiscoveryCellTests.swift
+index edc44549..ac3e9f40 100644
+--- a/Tests/AppTests/ConferenceEntityDiscoveryCellTests.swift
++++ b/Tests/AppTests/ConferenceEntityDiscoveryCellTests.swift
+@@ -35,7 +35,7 @@ final class ConferenceEntityDiscoveryCellTests: IsolatedCellTestCase {
+         try await registerResolveIfNeeded(resolver, name: "ConferenceRecommendation", type: ConferenceRecommendationCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceConnectionHub", type: ConferenceConnectionHubCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferencePublicProfile", type: ConferencePublicProfileCell.self)
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceChatLaunch", type: ConferenceChatLaunchCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceProofChatLaunch", type: ConferenceProofChatLaunchCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceEntityDiscovery", type: ConferenceEntityDiscoveryCell.self)
+@@ -141,7 +141,7 @@ final class ConferenceEntityDiscoveryCellTests: IsolatedCellTestCase {
+         try await registerResolveIfNeeded(resolver, name: "ConferenceRecommendation", type: ConferenceRecommendationCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceConnectionHub", type: ConferenceConnectionHubCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferencePublicProfile", type: ConferencePublicProfileCell.self)
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceChatLaunch", type: ConferenceChatLaunchCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceProofChatLaunch", type: ConferenceProofChatLaunchCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceEntityDiscovery", type: ConferenceEntityDiscoveryCell.self)
+@@ -238,7 +238,7 @@ final class ConferenceEntityDiscoveryCellTests: IsolatedCellTestCase {
+         try await registerResolveIfNeeded(resolver, name: "ConferenceRecommendation", type: ConferenceRecommendationCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceConnectionHub", type: ConferenceConnectionHubCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferencePublicProfile", type: ConferencePublicProfileCell.self)
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceChatLaunch", type: ConferenceChatLaunchCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceProofChatLaunch", type: ConferenceProofChatLaunchCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceEntityDiscovery", type: ConferenceEntityDiscoveryCell.self)
+@@ -327,7 +327,7 @@ final class ConferenceEntityDiscoveryCellTests: IsolatedCellTestCase {
+         )
+         try await registerResolveIfNeeded(resolver, name: "ConferenceRegistration", type: ConferenceRegistrationCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceOnboarding", type: ConferenceOnboardingCell.self)
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceChatLaunch", type: ConferenceChatLaunchCell.self)
+ 
+         guard let owner = await vault.identity(for: "conference-chat-launch-owner-\(UUID().uuidString)", makeNewIfNotFound: true) else {
+@@ -429,7 +429,7 @@ final class ConferenceEntityDiscoveryCellTests: IsolatedCellTestCase {
+         )
+         try await registerResolveIfNeeded(resolver, name: "ConferenceRegistration", type: ConferenceRegistrationCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceOnboarding", type: ConferenceOnboardingCell.self)
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceChatLaunch", type: ConferenceChatLaunchCell.self)
+ 
+         guard let owner = await vault.identity(for: "conference-chat-member-owner-\(UUID().uuidString)", makeNewIfNotFound: true) else {
+@@ -546,7 +546,7 @@ final class ConferenceEntityDiscoveryCellTests: IsolatedCellTestCase {
+         )
+         try await registerResolveIfNeeded(resolver, name: "ConferenceRegistration", type: ConferenceRegistrationCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceOnboarding", type: ConferenceOnboardingCell.self)
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceChatLaunch", type: ConferenceChatLaunchCell.self)
+ 
+         guard let owner = await vault.identity(for: "conference-chat-bare-owner-\(UUID().uuidString)", makeNewIfNotFound: true) else {
+@@ -620,7 +620,7 @@ final class ConferenceEntityDiscoveryCellTests: IsolatedCellTestCase {
+         CellBase.defaultIdentityVault = centralVault
+         try await registerResolveIfNeeded(resolver, name: "ConferenceRegistration", type: ConferenceRegistrationCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceOnboarding", type: ConferenceOnboardingCell.self)
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+ 
+         let ownerContext = "conference-chat-owner-\(UUID().uuidString)"
+         guard let owner = await ownerVault.identity(for: ownerContext, makeNewIfNotFound: true) else {
+@@ -691,7 +691,7 @@ final class ConferenceEntityDiscoveryCellTests: IsolatedCellTestCase {
+         CellBase.defaultIdentityVault = centralVault
+         try await registerResolveIfNeeded(resolver, name: "ConferenceRegistration", type: ConferenceRegistrationCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceOnboarding", type: ConferenceOnboardingCell.self)
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+ 
+         guard let owner = await ownerVault.identity(
+             for: "conference-chat-proof-owner-\(UUID().uuidString)",
+@@ -748,7 +748,7 @@ final class ConferenceEntityDiscoveryCellTests: IsolatedCellTestCase {
+         CellBase.defaultIdentityVault = centralVault
+         try await registerResolveIfNeeded(resolver, name: "ConferenceRegistration", type: ConferenceRegistrationCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceOnboarding", type: ConferenceOnboardingCell.self)
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+ 
+         guard let owner = await ownerVault.identity(
+             for: "conference-chat-legacy-owner-\(UUID().uuidString)",
+diff --git a/Tests/AppTests/ConferencePublicConfigurationPolicyTests.swift b/Tests/AppTests/ConferencePublicConfigurationPolicyTests.swift
+new file mode 100644
+index 00000000..74a57143
+--- /dev/null
++++ b/Tests/AppTests/ConferencePublicConfigurationPolicyTests.swift
+@@ -0,0 +1,67 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++
++@testable import App
++import CellBase
++import XCTest
++
++final class ConferencePublicConfigurationPolicyTests: IsolatedCellTestCase {
++    func testPublicConfigurationRejectsTreeAtRootAndNestedInReadOnlyContent() {
++        let tree = SkeletonElement.Tree(SkeletonTree(
++            keypath: "conferencePublicShell.state.nodes",
++            idKeypath: "id",
++            parentIDKeypath: "parentID",
++            levelKeypath: "level",
++            leadingInsetKeypath: "leadingInset",
++            hasChildrenKeypath: "hasChildren",
++            expandedKeypath: "expanded",
++            selectedIDStateKeypath: "conferencePublicShell.state.selectedID",
++            selectionActionKeypath: "conferencePublicShell.selectNode",
++            expansionActionKeypath: "conferencePublicShell.expandNode",
++            rowSkeleton: SkeletonVStack(elements: [.Text(SkeletonText(keypath: "title"))])
++        ))
++
++        for skeleton in [tree, .VStack(SkeletonVStack(elements: [tree]))] {
++            var configuration = ConferenceShellConfigurationFactory.makePublicConfiguration()
++            configuration.skeleton = skeleton
++            XCTAssertEqual(
++                ConferencePublicConfigurationPolicy.validationError(for: configuration),
++                "public configuration cannot contain trees; they always dispatch selection and expansion actions"
++            )
++        }
++    }
++
++    func testPublicConfigurationRejectsComponentSurfaceAtRootAndNestedInReadOnlyContent() {
++        let surface = SkeletonElement.ComponentSurface(SkeletonComponentSurface(
++            sourceKeypath: "conferencePublicShell.state.widget",
++            instanceID: "public-widget",
++            variant: .pinned
++        ))
++
++        for skeleton in [surface, .VStack(SkeletonVStack(elements: [surface]))] {
++            var configuration = ConferenceShellConfigurationFactory.makePublicConfiguration()
++            configuration.skeleton = skeleton
++            XCTAssertEqual(
++                ConferencePublicConfigurationPolicy.validationError(for: configuration),
++                "public configuration cannot mount component surfaces"
++            )
++        }
++    }
++
++    func testValidPublicConfigurationRemainsValidWithVisualModifiers() throws {
++        var configuration = ConferenceShellConfigurationFactory.makePublicConfiguration()
++        XCTAssertNil(ConferencePublicConfigurationPolicy.validationError(for: configuration))
++
++        var modifiers = SkeletonModifiers()
++        modifiers.layoutVariants = [SkeletonLayoutVariant(minAvailableWidth: 640, spacing: 12)]
++        modifiers.interactionStyles = SkeletonInteractionStyles(
++            hover: SkeletonInteractionStyle(background: "#eeeeee"),
++            focusVisible: SkeletonInteractionStyle(foregroundColor: "#111111")
++        )
++        configuration.skeleton = .VStack(SkeletonVStack(
++            elements: [try XCTUnwrap(configuration.skeleton)],
++            modifiers: modifiers
++        ))
++        XCTAssertNil(ConferencePublicConfigurationPolicy.validationError(for: configuration))
++    }
++}
+diff --git a/Tests/AppTests/ConferenceShellCellsTests.swift b/Tests/AppTests/ConferenceShellCellsTests.swift
+index 9ade8a91..16f7e0e3 100644
+--- a/Tests/AppTests/ConferenceShellCellsTests.swift
++++ b/Tests/AppTests/ConferenceShellCellsTests.swift
+@@ -1340,7 +1340,7 @@ final class ConferenceShellCellsTests: IsolatedCellTestCase {
+         try await registerResolveIfNeeded(resolver, name: "ConferenceRecommendation", type: ConferenceRecommendationCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceScheduling", type: ConferenceSchedulingCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceConnectionHub", type: ConferenceConnectionHubCell.self)
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+         try await registerConferenceStoryCellsIfNeeded(resolver)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceParticipantShell", type: ConferenceParticipantShellCell.self)
+ 
+@@ -4815,7 +4815,7 @@ final class ConferenceShellCellsTests: IsolatedCellTestCase {
+     }
+ 
+     private func registerConferenceStoryCellsIfNeeded(_ resolver: CellResolver) async throws {
+-        try await registerResolveIfNeeded(resolver, name: "Chat", type: ChatCell.self)
++        try await registerResolveIfNeeded(resolver, name: "Chat", type: App.ChatCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceConcierge", type: ConferenceConciergeCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceLocationShare", type: ConferenceLocationShareCell.self)
+         try await registerResolveIfNeeded(resolver, name: "ConferenceConnectionHubShared", type: ConferenceConnectionHubSharedCell.self, cellScope: .identityUnique)
+diff --git a/Tests/AppTests/ProductionSkeletonBindingIntegrityTests.swift b/Tests/AppTests/ProductionSkeletonBindingIntegrityTests.swift
+index 47946344..d2bedb57 100644
+--- a/Tests/AppTests/ProductionSkeletonBindingIntegrityTests.swift
++++ b/Tests/AppTests/ProductionSkeletonBindingIntegrityTests.swift
+@@ -663,6 +663,41 @@ final class ProductionSkeletonBindingIntegrityTests: IsolatedCellTestCase {
+                     )
+                 }
+             }
++        case .Tree(let tree):
++            validateRead(tree.keypath, context: "Tree")
++            validateRead(tree.selectedIDStateKeypath, context: "Tree.selectedIDState")
++            validateAction(tree.selectionActionKeypath, context: "Tree.selectionAction")
++            validateAction(tree.expansionActionKeypath, context: "Tree.expansionAction")
++            if let treeKeypath = normalized(tree.keypath),
++               isAbsoluteKeypath(treeKeypath, labels: labels) {
++                let values = listValue(at: treeKeypath, in: rootState)
++                if requiredNonEmptyLists.contains(treeKeypath), values.isEmpty {
++                    failures.append("Tree: expected non-empty list at `\(treeKeypath)`")
++                }
++                if let firstRow = values.compactMap(asObject).first {
++                    for keypath in [tree.idKeypath, tree.parentIDKeypath, tree.levelKeypath,
++                                    tree.leadingInsetKeypath, tree.hasChildrenKeypath, tree.expandedKeypath] {
++                        if value(atRelativePath: keypath, in: firstRow) == nil {
++                            failures.append("Tree: row missing `\(keypath)`")
++                        }
++                    }
++                    validateElement(
++                        .VStack(tree.rowSkeleton),
++                        configurationName: configurationName,
++                        labels: labels,
++                        rootState: rootState,
++                        rowContext: firstRow,
++                        requiredNonEmptyLists: requiredNonEmptyLists,
++                        allowedNullableKeypaths: allowedNullableKeypaths,
++                        failures: &failures
++                    )
++                }
++            }
++        case .ComponentSurface(let surface):
++            validateRead(surface.sourceKeypath, context: "ComponentSurface.source")
++            // This validates the host binding. Resolved definitions dispatch to
++            // their source cell, not the host's cellReferences; mount and source
++            // action contracts have their own format/integration tests.
+         case .Reference(let reference):
+             validateRead(reference.keypath, context: "Reference")
+             if let referenceKeypath = normalized(reference.keypath),
+diff --git a/ci/test-filter.txt b/ci/test-filter.txt
+index 086de4f7..f9e7ee5a 100644
+--- a/ci/test-filter.txt
++++ b/ci/test-filter.txt
+@@ -452,3 +452,8 @@ ChatAIGatewayRequestTests
+ 
+ # Existing users must receive the current built-in Butler UI without losing custom layouts.
+ ButlerBuiltInConfigurationUpgradeTests
++
++---
++# WP-R4: public read-only policy and mounted source action integration.
++ConferencePublicConfigurationPolicyTests
++PortholeComponentSourceActionTests

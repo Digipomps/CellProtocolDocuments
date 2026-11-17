@@ -1,0 +1,222 @@
+{
+ "positive": [
+  {
+   "name": "create-string",
+   "keypath": "lists.list.create",
+   "request": "Handleliste",
+   "response": {
+    "status": "ok",
+    "stateVersion": 1,
+    "listId": "l-1",
+    "activeListId": "l-1"
+   }
+  },
+  {
+   "name": "create-object",
+   "keypath": "lists.list.create",
+   "request": {
+    "title": "Idéer",
+    "kind": "ideas"
+   },
+   "response": {
+    "status": "ok",
+    "stateVersion": 2,
+    "listId": "l-2",
+    "activeListId": "l-2"
+   }
+  },
+  {
+   "name": "select-renderer-payload",
+   "keypath": "lists.list.select",
+   "request": {
+    "selectionMode": "single",
+    "trigger": "select",
+    "selectedIndex": 0,
+    "selected": "l-1"
+   },
+   "response": {
+    "status": "ok",
+    "stateVersion": 2,
+    "activeListId": "l-1"
+   }
+  },
+  {
+   "name": "item-add-string-to-active",
+   "keypath": "lists.item.add",
+   "request": "Melk",
+   "response": {
+    "status": "ok",
+    "stateVersion": 3,
+    "listId": "l-1",
+    "itemId": "i-1"
+   }
+  },
+  {
+   "name": "item-add-object",
+   "keypath": "lists.item.add",
+   "request": {
+    "listId": "l-2",
+    "title": "Celle for lister"
+   },
+   "response": {
+    "status": "ok",
+    "stateVersion": 4,
+    "listId": "l-2",
+    "itemId": "i-2"
+   }
+  },
+  {
+   "name": "toggle",
+   "keypath": "lists.item.toggle",
+   "request": {
+    "listId": "l-1",
+    "itemId": "i-1"
+   },
+   "response": {
+    "status": "ok",
+    "stateVersion": 5,
+    "listId": "l-1",
+    "itemId": "i-1"
+   }
+  },
+  {
+   "name": "move-up",
+   "keypath": "lists.item.move",
+   "request": {
+    "listId": "l-1",
+    "itemId": "i-1",
+    "direction": "up"
+   },
+   "response": {
+    "status": "ok",
+    "stateVersion": 6
+   }
+  },
+  {
+   "name": "move-drop",
+   "keypath": "lists.item.move",
+   "request": {
+    "dragRole": "list-item",
+    "dragPayload": {
+     "listId": "l-1",
+     "itemId": "i-3"
+    },
+    "dropTargetRole": "list-item-slot",
+    "dropTargetPayload": {
+     "listId": "l-1",
+     "itemId": "i-1"
+    },
+    "dropIntent": "move",
+    "modifierActive": false
+   },
+   "response": {
+    "status": "ok",
+    "stateVersion": 7
+   }
+  },
+  {
+   "name": "clear-done-true",
+   "keypath": "lists.list.clearDone",
+   "request": true,
+   "response": {
+    "status": "ok",
+    "stateVersion": 8,
+    "listId": "l-1"
+   }
+  },
+  {
+   "name": "rename-string",
+   "keypath": "lists.list.rename",
+   "request": "Handleliste uke 40",
+   "response": {
+    "status": "ok",
+    "stateVersion": 9,
+    "listId": "l-1"
+   }
+  },
+  {
+   "name": "remove-list",
+   "keypath": "lists.list.remove",
+   "request": {
+    "listId": "l-2"
+   },
+   "response": {
+    "status": "ok",
+    "stateVersion": 10,
+    "activeListId": "l-1"
+   }
+  }
+ ],
+ "negative": [
+  {
+   "name": "blank-title",
+   "keypath": "lists.item.add",
+   "request": "   ",
+   "response": {
+    "status": "error",
+    "code": "invalid_title",
+    "message": "Punktet trenger en tekst."
+   }
+  },
+  {
+   "name": "unknown-list",
+   "keypath": "lists.item.add",
+   "request": {
+    "listId": "nope",
+    "title": "x"
+   },
+   "response": {
+    "status": "error",
+    "code": "list_not_found",
+    "message": "Fant ikke listen."
+   }
+  },
+  {
+   "name": "move-done-item",
+   "keypath": "lists.item.move",
+   "request": {
+    "listId": "l-1",
+    "itemId": "i-done",
+    "direction": "up"
+   },
+   "response": {
+    "status": "error",
+    "code": "item_done_cannot_move",
+    "message": "Utførte punkter ligger i bunn og kan ikke flyttes."
+   }
+  },
+  {
+   "name": "no-target-list",
+   "keypath": "lists.item.add",
+   "request": "Melk",
+   "precondition": "ingen lister",
+   "response": {
+    "status": "error",
+    "code": "no_target_list",
+    "message": "Lag en liste først."
+   }
+  },
+  {
+   "name": "bad-payload",
+   "keypath": "lists.item.toggle",
+   "request": 42,
+   "response": {
+    "status": "error",
+    "code": "invalid_payload",
+    "message": "Forventet {listId, itemId}."
+   }
+  },
+  {
+   "name": "other-requester",
+   "keypath": "lists.state",
+   "requester": "annen identitet",
+   "expect": "denied"
+  },
+  {
+   "name": "unknown-keypath",
+   "keypath": "lists.nope",
+   "requester": "eier",
+   "expect": "notFound"
+  }
+ ]
+}

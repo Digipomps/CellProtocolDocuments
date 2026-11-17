@@ -1,0 +1,55 @@
+{
+  "codeCommit": "943a3bce6ff8bbaa9a0e3884fecf78915fd1e8c5",
+  "branch": "pdd/skjelett-elementer-web",
+  "baseCommit": "e3ae9fc0526e3582128a0ae88ab2d93d5bd5f2d8",
+  "cellProtocolCommit": "d224a4ed2b6b6b384dff4b8942978bae9f56ade0",
+  "status": "DELVIS",
+  "recordedUTC": "2026-09-19T04:37:45.544381+00:00",
+  "fixtureSHA256": {
+    "component-mount-two-instances.json": "f05674de9fd6ae9023daa2c8470f8db5f1c990418eeb82310547ef335024e66c",
+    "modifiers.json": "43af03c4113c125b512a15fd71e517de0837d979821353b9c5b3a1a1a660d70f",
+    "tree.json": "293108e0b799e34a774f08b1b6a143be0cb9f8521e00d62131a83531ce959366"
+  },
+  "tests": {
+    "newNodeContract": {
+      "command": "node --test scripts/skeleton-wp-r2-contract.test.js",
+      "exitCode": 0,
+      "passed": 11,
+      "failed": 0,
+      "evidence": "node-contract.log"
+    },
+    "contractAndExistingNodeRegression": {
+      "command": "node --test scripts/skeleton-wp-r2-contract.test.js scripts/porthole-arendalsuka-action-state.test.js",
+      "exitCode": 1,
+      "passed": 20,
+      "failed": 1,
+      "evidence": "node-contract-and-regression.log"
+    },
+    "existingRegressionAtBase": {
+      "exitCode": 1,
+      "passed": 9,
+      "failed": 1,
+      "sameFailure": true,
+      "evidence": "node-main-baseline.log"
+    },
+    "playwrightCatalog": {
+      "command": "./node_modules/.bin/playwright test --config=playwright.config.js playwright/skeleton-element-catalog.spec.js",
+      "exitCode": 1,
+      "passed": 0,
+      "failedAtLaunch": 10,
+      "browserAssertionsExecuted": false,
+      "error": "Chromium MachPortRendezvous bootstrap_check_in Permission denied (1100)",
+      "evidence": "playwright-catalog.log"
+    }
+  },
+  "notRun": [
+    "Swift build/tests",
+    "native T-F3",
+    "staging",
+    "T-P1/T-P2"
+  ],
+  "open": [
+    "ComponentSurface source endpoint + mount transport in Porthole host",
+    "Browser T-F3 verification blocked by sandbox"
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "agent/challenges cell contract v0 (utkast, WP-A3)",
+  "status": "draft",
+  "cell": "agent/challenges",
+  "route": "agent-challenges",
+  "get": {
+    "inbox": {
+      "returns": "AgentChallengeInbox (agent-challenge-v1)",
+      "note": "Samme provider som GET /challenges; /challenges er projeksjon av denne."
+    }
+  },
+  "set": {
+    "respond": {
+      "input": {"challengeID": "string", "response": "approve|reject|open|dismiss-today"},
+      "note": "Går gjennom sakens answerPath. dismiss-today er tilstand i cellen med utløp ved døgnskifte (Kjetil 2026-09-12, §6 spm. 10 → ii)."
+    }
+  },
+  "flow": {
+    "topic": "haven.agent.challenge",
+    "events": ["haven.agent.challenge.created", "haven.agent.challenge.updated", "haven.agent.challenge.resolved"],
+    "payload": "sak uten meldingsinnhold; samme felt som i innbokskontrakten",
+    "note": "Én FlowElement per endring. Kildestatus (read / unreadable(grunn) / not-configured) er del av innboksen, ikke egen hendelse."
+  },
+  "authorization": {
+    "identity": "appens egen CellProtocol-identitet med kontrakt fra cellens mal (WP-M0)",
+    "transport": "WS-oppgradering krever kontrollbro-token; deretter autoriserer cellen på bro-kommandoens identitet"
+  },
+  "prohibited": [
+    "meldingsinnhold i sak, hendelse eller varsel",
+    "automatisk kvittering av correspondence-post",
+    "periodisk henting (Timer/sleep) i celle eller klient"
+  ]
+}

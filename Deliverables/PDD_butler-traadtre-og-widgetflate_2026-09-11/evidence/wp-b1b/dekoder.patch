@@ -1,0 +1,96 @@
+diff --git a/Sources/App/Support/SkeletonRuntimeDecoder.swift b/Sources/App/Support/SkeletonRuntimeDecoder.swift
+index 1cabb510..efab913a 100644
+--- a/Sources/App/Support/SkeletonRuntimeDecoder.swift
++++ b/Sources/App/Support/SkeletonRuntimeDecoder.swift
+@@ -29,7 +29,9 @@ enum SkeletonRuntimeDecoder {
+         "Grid",
+         "Toggle",
+         "Picker",
+-        "Visualization"
++        "Visualization",
++        "Tree",
++        "ComponentSurface"
+     ]
+ 
+     static func decode(from value: ValueType) -> SkeletonElement? {
+@@ -215,6 +217,17 @@ enum SkeletonRuntimeDecoder {
+             }
+             return true
+ 
++        case "Tree":
++            // The row template is required and is a VStack; the Codable
++            // decoder checks the required keypaths and actions.
++            guard let object = payload as? [String: Any],
++                  let rowSkeleton = object["rowSkeleton"] as? [String: Any],
++                  rowSkeleton.keys.first == "VStack",
++                  isElement(rowSkeleton, depth: depth + 1) else {
++                return false
++            }
++            return true
++
+         case "Object":
+             guard let object = payload as? [String: Any],
+                   let elements = object["elements"] as? [String: Any] else {
+@@ -258,6 +271,8 @@ enum SkeletonRuntimeDecoder {
+             return reference.flowElementSkeleton?.elements.contains(where: containsUnsupported) == true
+         case let .Object(object):
+             return object.elements.values.contains(where: containsUnsupported)
++        case let .Tree(tree):
++            return tree.rowSkeleton.elements.contains(where: containsUnsupported)
+         default:
+             return false
+         }
+diff --git a/Tests/AppTests/SkeletonRuntimeDecoderTests.swift b/Tests/AppTests/SkeletonRuntimeDecoderTests.swift
+index 7f74092f..cfc84507 100644
+--- a/Tests/AppTests/SkeletonRuntimeDecoderTests.swift
++++ b/Tests/AppTests/SkeletonRuntimeDecoderTests.swift
+@@ -87,6 +87,49 @@ final class SkeletonRuntimeDecoderTests: XCTestCase {
+         XCTAssertNotNil(SkeletonRuntimeDecoder.decode(from: wrapped))
+     }
+ 
++    func testAcceptsTreeAndComponentSurface() throws {
++        let value = try valueType(from: """
++        {
++          "VStack": [
++            { "Tree": {
++                "keypath": "tree.rows", "idKeypath": "id", "parentIDKeypath": "parentID",
++                "levelKeypath": "level", "leadingInsetKeypath": "inset", "hasChildrenKeypath": "hasChildren",
++                "expandedKeypath": "expanded", "selectedIDStateKeypath": "tree.selected",
++                "selectionActionKeypath": "tree.select", "expansionActionKeypath": "tree.expand",
++                "rowSkeleton": { "VStack": [ { "Text": { "keypath": "title" } } ] }
++            } },
++            { "ComponentSurface": { "sourceKeypath": "widgets.mount", "instanceID": "widget-1", "variant": "pinned" } }
++          ]
++        }
++        """)
++        let element = try XCTUnwrap(SkeletonRuntimeDecoder.decode(from: value))
++        guard case let .VStack(stack) = element, stack.elements.count == 2,
++              case .Tree = stack.elements[0], case .ComponentSurface = stack.elements[1] else {
++            return XCTFail("Expected Tree and ComponentSurface to survive the runtime decoder")
++        }
++    }
++
++    func testRejectsUnknownElementInsideTreeRow() throws {
++        let value = try valueType(from: """
++        {
++          "Tree": {
++            "keypath": "tree.rows", "idKeypath": "id", "parentIDKeypath": "parentID",
++            "levelKeypath": "level", "leadingInsetKeypath": "inset", "hasChildrenKeypath": "hasChildren",
++            "expandedKeypath": "expanded", "selectedIDStateKeypath": "tree.selected",
++            "selectionActionKeypath": "tree.select", "expansionActionKeypath": "tree.expand",
++            "rowSkeleton": { "VStack": [ { "NotAnElement": {} } ] }
++          }
++        }
++        """)
++        XCTAssertNil(SkeletonRuntimeDecoder.decode(from: value))
++    }
++
++    func testButlerChatSkeletonSurvivesTheRuntimeDecoder() throws {
++        let configuration = try XCTUnwrap(PersonalCopilotConfigurationFactory.configuration(for: PersonalChatHubContract.endpoint))
++        let value = try JSONDecoder().decode(ValueType.self, from: JSONEncoder().encode(try XCTUnwrap(configuration.skeleton)))
++        XCTAssertNotNil(SkeletonRuntimeDecoder.decode(from: value))
++    }
++
+     private func valueType(from json: String) throws -> ValueType {
+         try JSONDecoder().decode(ValueType.self, from: Data(json.utf8))
+     }

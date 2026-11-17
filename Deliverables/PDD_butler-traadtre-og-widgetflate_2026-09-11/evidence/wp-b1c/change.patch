@@ -1,0 +1,153 @@
+diff --git a/Sources/App/Cells/PersonalCopilot/PersonalCopilotCells+HelperTree.swift b/Sources/App/Cells/PersonalCopilot/PersonalCopilotCells+HelperTree.swift
+index f6939888..e53bc345 100644
+--- a/Sources/App/Cells/PersonalCopilot/PersonalCopilotCells+HelperTree.swift
++++ b/Sources/App/Cells/PersonalCopilot/PersonalCopilotCells+HelperTree.swift
+@@ -85,6 +85,7 @@ extension PersonalCopilotHelperTree {
+         tree["panelRows"] = ExploreContract.listSchema(item: ExploreContract.objectSchema())
+         tree["scope"] = ExploreContract.objectSchema(properties: ["mode": string, "nodeID": string], requiredKeys: ["mode", "nodeID"])
+         tree["isOpen"] = bool
++        tree["latestExchangeInScope"] = bool
+         var panel: Object = [:]
+         for key in ["mode", "title", "countLabel", "scopeDescription", "composerTargetLabel"] { panel[key] = string }
+         panel["count"] = integer
+diff --git a/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore+HelperTree.swift b/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore+HelperTree.swift
+index 81850a52..1c8c4b2c 100644
+--- a/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore+HelperTree.swift
++++ b/Sources/App/Cells/PersonalCopilot/PersonalCopilotCloudStore+HelperTree.swift
+@@ -243,6 +243,15 @@ struct PersonalCopilotHelperTree: Codable, Equatable {
+         panel["scopeDescription"] = .string(scope.mode == .subtree ? "\(selected.title) og alle underhjelpere" : "Bare \(selected.title)")
+         panel["scopeChips"] = .list(branches.map(chip))
+         panel["composerTargetLabel"] = .string("skriver til: \(selected.title)")
++        // WP-B1c: the clarification card and the composer help line belong to the
++        // latest exchange. Like the log, they follow the scope: when that exchange
++        // lies outside the selected scope, the card is hidden and the help cleared.
++        let latestExchangeInScope = chronological.last.map { inScope.contains(nodeID($0)) } ?? true
++        tree["latestExchangeInScope"] = .bool(latestExchangeInScope)
++        if !latestExchangeInScope {
++            ui["hasPromptHelp"] = .bool(false)
++            ui["promptHelpSummary"] = .string("")
++        }
+         ui["helperTree"] = .object(tree)
+         ui["chatPanelRows"] = .list([.object(panel)])
+         ui["promptMessages"] = .list(messages)
+diff --git a/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory.swift b/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory.swift
+index 703a6350..44948441 100644
+--- a/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory.swift
++++ b/Sources/App/Cells/PersonalCopilot/PersonalCopilotConfigurationFactory.swift
+@@ -3932,11 +3932,14 @@ enum PersonalCopilotConfigurationFactory {
+ 
+     private static func clarificationCardModifiers() -> SkeletonModifiers {
+         var modifiers = motionSurfaceModifiers(role: "chat-clarification-card", hint: .appear, sourceRole: "assistant-response-bubble")
+-        modifiers.visibility = SkeletonVisibilityRule(when: SkeletonCondition(
+-            scope: .root,
+-            keypath: "chatHub.state.assistant.clarification",
+-            exists: true
+-        ))
++        // WP-B1c: hidden while a helper-tree scope without the latest exchange is
++        // selected. `not(equals false)` keeps the card for states without a tree.
++        modifiers.visibility = SkeletonVisibilityRule(when: SkeletonCondition(allOf: [
++            SkeletonCondition(scope: .root, keypath: "chatHub.state.assistant.clarification", exists: true),
++            SkeletonCondition(not: SkeletonCondition(
++                scope: .root, keypath: "chatHub.state.ui.helperTree.latestExchangeInScope", equals: .bool(false)
++            ))
++        ]))
+         modifiers.styleClasses = ["chat-clarification-card", "motion-appear", "motion-source-assistant-response-bubble"]
+         return modifiers
+     }
+diff --git a/Tests/AppTests/PersonalCopilotHelperTreeTests.swift b/Tests/AppTests/PersonalCopilotHelperTreeTests.swift
+index 4137b4bf..299a1ebb 100644
+--- a/Tests/AppTests/PersonalCopilotHelperTreeTests.swift
++++ b/Tests/AppTests/PersonalCopilotHelperTreeTests.swift
+@@ -35,6 +35,40 @@ final class PersonalCopilotHelperTreeTests: IsolatedCellTestCase {
+     }
+ 
+     // §5 test.tree-model: stable root, three levels, shared tool, transactional cycle rejection.
++    func testClarificationAndHelpLineFollowTheScope() throws {
++        var tree = PersonalCopilotHelperTree.migrating(helperRows: [
++            ["id": .string("invite"), "title": .string("Inviter")]
++        ])
++        let message: Object = [
++            "id": .string("m1"), "role": .string("assistant"), "text": .string("Hei"),
++            "createdAt": .string("2026-09-19T10:00:00Z")
++        ]
++        let source: Object = [
++            "promptMessages": .list([.object(message)]),
++            "hasPromptHelp": .bool(true),
++            "promptHelpSummary": .string("Hva vil du få gjort?")
++        ]
++        func latest(_ ui: Object) -> ValueType? {
++            guard case let .object(helperTree)? = ui["helperTree"] else { return nil }
++            return helperTree["latestExchangeInScope"]
++        }
++        let atRoot = tree.project(into: source)
++        XCTAssertEqual(atRoot["hasPromptHelp"], .bool(true))
++        XCTAssertEqual(latest(atRoot), .bool(true))
++
++        XCTAssertNil(tree.apply(action: "selectNode", payload: .object(["nodeID": .string("helper-invite")])))
++        let atChild = tree.project(into: source)
++        XCTAssertEqual(atChild["hasPromptHelp"], .bool(false))
++        XCTAssertEqual(atChild["promptHelpSummary"], .string(""))
++        XCTAssertEqual(latest(atChild), .bool(false))
++
++        XCTAssertNil(tree.apply(action: "selectNode", payload: .object(["nodeID": .string(PersonalCopilotHelperTree.rootID)])))
++        let back = tree.project(into: source)
++        XCTAssertEqual(back["hasPromptHelp"], .bool(true))
++        XCTAssertEqual(back["promptHelpSummary"], .string("Hva vil du få gjort?"))
++        XCTAssertEqual(latest(back), .bool(true))
++    }
++
+     func testTreeRowsCarryLevelInsetAndStateBackground() throws {
+         var tree = PersonalCopilotHelperTree.migrating(helperRows: [
+             ["id": .string("docs-rag"), "title": .string("Kilder")]
+diff --git a/playwright/butler-helper-tree-purpose.spec.js b/playwright/butler-helper-tree-purpose.spec.js
+index bc0a99d9..622bc7ac 100644
+--- a/playwright/butler-helper-tree-purpose.spec.js
++++ b/playwright/butler-helper-tree-purpose.spec.js
+@@ -3,8 +3,9 @@
+ 
+ // T-P1 for Butler's helper tree (WP-B1; FORMAALSSPEC A2 `reference-tree.scope`):
+ // selecting a node sets the scope, and the chat log and counters follow it.
+-// Measurable signal: the number of visible messages and the composer target
+-// change when the scope changes and come back unchanged, so no history is lost.
++// Measurable signal: the number of visible messages, the composer target, the
++// clarification card and the composer help line change when the scope changes
++// and come back unchanged, so no history is lost.
+ // Also checks the Tree contract in the live chat: aria tree, levels, confirmed
+ // expansion and keyboard. Runs against a local test host with the CellProtocol
+ // candidate (PORTHOLE_CHAT_BASE_URL), never against staging by default.
+@@ -42,6 +43,15 @@ test("helper tree: selecting a node scopes the log and counters (A2)", async ({
+   await page.getByRole("button", { name: /^(Finn forslag|Send)$/ }).first().click();
+   await expect(promptRows).toHaveCount(2, { timeout: 45_000 });
+   measurement.rootRows = await promptRows.count();
++  // The clarification card and the composer help line belong to the latest
++  // exchange and must follow the scope too (WP-B1c).
++  const clarification = page.locator(".style-role-chat-clarification-card:visible");
++  const helpLine = page.locator(".style-role-chat-help-line:visible");
++  measurement.rootClarificationCards = await clarification.count();
++  measurement.rootHelpLines = await helpLine.count();
++  // Without them at the root, the scope signal for them would be empty.
++  expect(measurement.rootClarificationCards).toBeGreaterThan(0);
++  expect(measurement.rootHelpLines).toBeGreaterThan(0);
+ 
+   await clickAndWaitForPortholeAction(page, page.getByRole("button", { name: "Tråder" }).first());
+   const tree = page.getByRole("tree", { name: "Tråder" });
+@@ -76,6 +86,10 @@ test("helper tree: selecting a node scopes the log and counters (A2)", async ({
+   measurement.childComposerTarget = await composerTarget.innerText();
+   await expect(promptRows).toHaveCount(0, { timeout: 30_000 });
+   measurement.childRows = await promptRows.count();
++  await expect(clarification).toHaveCount(0, { timeout: 30_000 });
++  await expect(helpLine).toHaveCount(0);
++  measurement.childClarificationCards = await clarification.count();
++  measurement.childHelpLines = await helpLine.count();
+   await shot(page, testInfo, "2-child-selected.png");
+ 
+   // Mouse back to the root: the same log returns, nothing was lost.
+@@ -84,6 +98,8 @@ test("helper tree: selecting a node scopes the log and counters (A2)", async ({
+   await expect(promptRows).toHaveCount(measurement.rootRows, { timeout: 30_000 });
+   await expect(composerTarget).toHaveText("skriver til: Butler");
+   measurement.rootRowsAfterReturn = await promptRows.count();
++  await expect(clarification).toHaveCount(measurement.rootClarificationCards, { timeout: 30_000 });
++  await expect(helpLine).toHaveCount(measurement.rootHelpLines);
+ 
+   // Keyboard collapse: the Cell's confirmed list hides the children.
+   await root.focus();

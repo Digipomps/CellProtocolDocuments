@@ -1,0 +1,64 @@
+--- before/CellScaffold/scripts/skeleton-iterate.js
++++ CellScaffold/scripts/skeleton-iterate.js
+@@ -31,6 +31,8 @@
+     persona: config.persona || null,
+     configurationName: config.configurationName,
+     sourceCellEndpoint: config.sourceCellEndpoint,
++    // purposeRef: purpose://candidate.palazzo-porthole-fjernt-scaffold.preview-tool
++    configurationKeypath: config.configurationKeypath,
+     skeletonSource: config.skeletonSource,
+     outputDir,
+     viewports: [],
+@@ -363,6 +365,8 @@
+       configurationLookup: {
+         name: config.configurationName,
+         sourceCellEndpoint: config.sourceCellEndpoint,
++        // purposeRef: purpose://candidate.palazzo-porthole-fjernt-scaffold.preview-tool
++        ...(config.configurationKeypath ? { keypath: config.configurationKeypath } : {}),
+       },
+     });
+   } catch (error) {
+@@ -856,6 +860,8 @@
+     "action-timeout-ms": "actionTimeoutMs",
+     "base-url": "baseURL",
+     "configuration-name": "configurationName",
++    // purposeRef: purpose://candidate.palazzo-porthole-fjernt-scaffold.preview-tool
++    "configuration-keypath": "configurationKeypath",
+     "expect-button": "expectButton",
+     "export-dir": "exportDir",
+     "expect-text": "expectText",
+@@ -887,6 +893,8 @@
+   const baseURL = String(args.baseURL || scenario.baseURL || defaultBaseURL);
+   const configurationName = String(args.configurationName || scenario.configurationName || "");
+   const sourceCellEndpoint = String(args.sourceCellEndpoint || scenario.sourceCellEndpoint || "");
++  // purposeRef: purpose://candidate.palazzo-porthole-fjernt-scaffold.preview-tool
++  const configurationKeypath = String(args.configurationKeypath ?? scenario.configurationKeypath ?? "").trim();
+   const skeletonFile = String(args.skeletonFile || scenario.skeletonFile || "");
+   const skeletonSource = String(args.skeletonSource || scenario.skeletonSource || (skeletonFile ? "file" : ""));
+   const supportsActiveSkeleton = skeletonSource === "active-configuration";
+@@ -916,6 +924,8 @@
+     persona: args.persona || scenario.persona || "",
+     configurationName,
+     sourceCellEndpoint,
++    // purposeRef: purpose://candidate.palazzo-porthole-fjernt-scaffold.preview-tool
++    configurationKeypath,
+     skeletonSource: skeletonSource || "none",
+     skeletonPath,
+     runtimeProbeStyleClasses: normalizeRuntimeProbeStyleClasses(scenario.runtimeProbeStyleClasses),
+@@ -1014,6 +1024,8 @@
+       persona: config.persona || null,
+       configurationName: config.configurationName,
+       sourceCellEndpoint: config.sourceCellEndpoint,
++      // purposeRef: purpose://candidate.palazzo-porthole-fjernt-scaffold.preview-tool
++      configurationKeypath: config.configurationKeypath,
+       skeletonSource: config.skeletonSource,
+       skeletonPath: config.skeletonPath,
+       runtimeProbeStyleClasses: config.runtimeProbeStyleClasses,
+@@ -1126,6 +1138,7 @@
+ 
+ Flags:
+   CamelCase and common kebab-case aliases are accepted, e.g. --baseURL and --base-url.
++  --configurationKeypath (or --configuration-keypath) selects the published keypath for a remote configuration lookup.
+ 
+ Credentials:
+   Use CONFERENCE_DEMO_USERNAME / CONFERENCE_DEMO_PASSWORD or --username / --password for an existing host.

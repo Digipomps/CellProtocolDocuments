@@ -1,0 +1,1000 @@
+diff --git a/.github/workflows/security-regression-macos.yml b/.github/workflows/security-regression-macos.yml
+index 8711483..389a787 100644
+--- a/.github/workflows/security-regression-macos.yml
++++ b/.github/workflows/security-regression-macos.yml
+@@ -41,7 +41,7 @@ jobs:
+           for attempt in 1 2 3; do
+             echo "Peer, Scanner, consumer, record and mux Thread Sanitizer pass ${attempt}/3"
+             swift test --disable-automatic-resolution --jobs 2 \
+-              --sanitize thread --filter 'EphemeralIdentityVaultConcurrencyTests|PublisherAsyncLifetimeTests|BridgeDescriptionConcurrencyTests|EntityScannerConsumerSecurityTests|ScannerNearbyInteractionTests|ScannerPeerAuthenticationTests|ScannerServiceInvitationTests|ScannerAdmissionTests|BridgePeerV3Tests|BridgePeerRecordLayerTests|BridgePeerFlowControlTests|BridgeMultiplexingTests|BridgeMuxSendLifetimeTests|BridgeResponseLifetimeTests|BridgeFeedAndRPCOrderingTests|BridgeFactoryLifetimeTests|BridgeSigningLifetimeTests'
++              --sanitize thread --filter 'EphemeralIdentityVaultConcurrencyTests|PublisherAsyncLifetimeTests|BridgeDescriptionConcurrencyTests|EntityScannerConsumerSecurityTests|ScannerNearbyInteractionTests|ScannerPeerAuthenticationTests|ScannerServiceInvitationTests|ScannerAdmissionTests|BridgePeerV3Tests|BridgePeerRecordLayerTests|BridgePeerFlowControlTests|BridgeMultiplexingTests|BridgeMuxSendLifetimeTests|BridgeResponseLifetimeTests|BridgeFeedAndRPCOrderingTests|BridgeFactoryLifetimeTests|BridgeSigningLifetimeTests|VaporWebSocketAdmissionTests|BridgeChannelWebSocketTests'
+           done
+           git diff --exit-code -- Package.swift Package.resolved Sources Tests commons
+       - name: Reject a vulnerable downstream transport pin
+diff --git a/Documentation/BridgeLifecycle.md b/Documentation/BridgeLifecycle.md
+index 3300b02..b495504 100644
+--- a/Documentation/BridgeLifecycle.md
++++ b/Documentation/BridgeLifecycle.md
+@@ -97,3 +97,6 @@ Regression evidence lives in `BridgeResponseLifetimeTests`,
+ `BridgeFeedAndRPCOrderingTests`, `BridgeMuxSendLifetimeTests`, `BridgeFactoryLifetimeTests`,
+ `BridgeSigningLifetimeTests` and `BridgePeerV3Tests`. The barriers deliberately
+ ignore task cancellation and hold work at the relevant lifetime boundary.
++
++Vapor WebSocket receive admission and callback ordering are specified in
++[VaporWebSocketAdmission.md](VaporWebSocketAdmission.md).
+diff --git a/Documentation/VaporWebSocketAdmission.md b/Documentation/VaporWebSocketAdmission.md
+new file mode 100644
+index 0000000..a12b6fa
+--- /dev/null
++++ b/Documentation/VaporWebSocketAdmission.md
+@@ -0,0 +1,75 @@
++# Vapor WebSocket receive admission and ordering
++
++PDD_bro-paa-i-prod_2026-09-26 / N30. Applies to incoming and outgoing
++`VaporBridgeTransport` sockets, before the existing `BridgeChannelTransport`.
++There is still one authentication gate and one session per physical socket.
++
++The synchronous WebSocketKit `onText`/`onBinary` callbacks reserve count and
++wire-payload bytes before copying a frame, decoding JSON or creating receive
++Tasks. The async callback overload must not be used: WebSocketKit 2.16.1 creates
++an independent Task for each frame before invoking that callback.
++
++| Limit | Value | Ownership |
++| --- | ---: | --- |
++| One complete callback payload | 1 MiB | Existing inbound validator maximum |
++| Queued plus executing payloads | 64 / 4 MiB | Per transport instance |
++| Queued plus executing payloads | 1024 / 32 MiB | Shared process-wide ledger |
++
++All conditions must pass atomically with respect to that connection's enqueue;
++the shared ledger also locks its global acquisition. Failed acquisition creates
++no payload copy or receive worker and never releases another frame's reservation.
++Each accepted frame has one preparation Task and at most one dispatch Task.
++The count and bytes remain charged through validation, queue waits, gate work,
++identity lookup, consumer completion and awaited rejection auditing. A blocked
++security-event sink retains the accepted frame's reservation. Closing does not release executing or
++held queued work early. Existing gate/work/operation/send quotas also still apply.
++
++Preparation follows callback arrival order, including completion of each
++authentication message. Ordinary application dispatch has its own ordered tail,
++so the first held response prevents later feed values from entering the gate.
++Only a `sign` command or a response matched to a locally registered signing RPC
++may pass this tail. The latter lookup follows the gate and, for mux, the exact
++logical channel to its BridgeBase auditor. A signature-shaped payload is not a
++scheduling credential. The unchanged gate, principal, operation-permit and
++response validation still execute for every control message. The control lane
++uses the same receive budgets; a saturated connection is closed, not exempted.
++
++Overflow or malformed input stops further admission and closes the existing
++session synchronously. At most one adapter cleanup Task is scheduled; the
++existing session-close callback is also idempotent. Already executing work is
++revoked by the gate and retains receive accounting until it returns. Pending
++ordinary dispatch checks retirement before entering the gate. Physical close
++uses the host-owned NIO channel callback (or the outgoing adapter's owned event
++loop group), without waiting for a peer close acknowledgement. Concurrent close
++callers await the same physical-close Task before gate transport accounting can
++be released. All callers also await one shared resolver-unregistration Task;
++otherwise a second close could release a slot while the first cleanup still
++retains work. The gate notification runs afterward, outside that Task, so
++reentrant close cannot await itself. Public ingress
++hosts must continue supplying `closeUnderlyingChannel`. A retired adapter is
++single-use; reconnect uses a fresh transport instance.
++
++This bounds application-owned receive payloads and work at the callback
++boundary, not kernel buffers or WebSocketKit allocations/reassembly before the
++callback. Hosts must configure their frame/fragment/aggregate limits as well.
++Decoded objects and Task overhead are bounded in number, but wire-byte charging
++is not an exact RSS measurement. Global saturation can reject another connection;
++the isolation guarantee is that rejecting one connection does not close existing
++siblings or consume reservations for its rejected frames.
++
++## Regression evidence
++
++`VaporWebSocketAdmissionTests` drives WebSocketKit's actual aggregator and
++callback handlers on live NIO sockets. It injects complete frames in one event
++loop turn so the synchronous count/byte assertions do not depend on Swift Task
++scheduling. It covers pre-proof and authenticated bursts, 64 plus one, 1 MiB
++plus one, 4 MiB plus one, global count/byte plus one, retained accounting through
++held consumers, mixed text/binary feed order, malformed input, non-signing
++responses and a fresh sibling after rejection. Default public adapters are also
++checked against the same process-wide ledger.
++
++`BridgeChannelWebSocketTests` separately uses actual HTTP upgrade and socket
++framing to prove a protected read with origin signing for both ordinary and
++mux WebSockets, with no server signing vault. The full macOS regression and its
++existing three-pass TSAN job include both suites. No production host deployment,
++TLS proxy verification, or universal DoS guarantee follows from these tests.
+diff --git a/Sources/CellBase/Cells/Bridging/BridgeChannelTransport.swift b/Sources/CellBase/Cells/Bridging/BridgeChannelTransport.swift
+index 1ed5e4a..8d4d220 100644
+--- a/Sources/CellBase/Cells/Bridging/BridgeChannelTransport.swift
++++ b/Sources/CellBase/Cells/Bridging/BridgeChannelTransport.swift
+@@ -485,6 +485,15 @@ public final class BridgeChannelTransport: BridgeTransportProtocol, BridgeDelega
+             try await delegate.consumeCommand(command: command)
+         } catch { await close(); throw error }
+     }
++    /// Scheduling only; all response validation still runs through this gate.
++    public func isOriginSigningResponse(_ command: BridgeCommand) -> Bool {
++        let target = lock.withLock { stopped ? nil : delegate }
++        if let bridge = target as? BridgeBase { return bridge.isOriginSigningResponse(command) }
++        if let mux = target as? BridgeMultiplexSession { return mux.isOriginSigningResponse(command) }
++        if let mux = target as? BridgeMultiplexServerSession { return mux.isOriginSigningResponse(command) }
++        return false
++    }
++
+     public func consumeResponse(command: BridgeCommand) async throws {
+         do { try await trackedWork { try await self.processResponse(command) } }
+         catch { await close(); throw error }
+diff --git a/Sources/CellBase/Cells/Bridging/BridgeMultiplexing.swift b/Sources/CellBase/Cells/Bridging/BridgeMultiplexing.swift
+index ad20797..0255771 100644
+--- a/Sources/CellBase/Cells/Bridging/BridgeMultiplexing.swift
++++ b/Sources/CellBase/Cells/Bridging/BridgeMultiplexing.swift
+@@ -559,6 +559,12 @@ public final class BridgeMultiplexSession: BridgeDelegateProtocol, @unchecked Se
+         try await delegate.consumeCommand(command: command)
+     }
+ 
++    func isOriginSigningResponse(_ command: BridgeCommand) -> Bool {
++        guard command.protocolVersion == protocolVersion, let id = command.channelID,
++              let bridge = delegate(for: id) as? BridgeBase else { return false }
++        return bridge.isOriginSigningResponse(command)
++    }
++
+     public func consumeResponse(command: BridgeCommand) async throws {
+         if try handleSessionCommand(command) {
+             return
+@@ -966,6 +972,12 @@ public final class BridgeMultiplexServerSession: BridgeDelegateProtocol, @unchec
+         }
+     }
+ 
++    func isOriginSigningResponse(_ command: BridgeCommand) -> Bool {
++        guard command.protocolVersion == protocolVersion, let id = command.channelID,
++              let bridge = stateLock.withLock({ channels[id]?.delegate }) as? BridgeBase else { return false }
++        return bridge.isOriginSigningResponse(command)
++    }
++
+     public func consumeResponse(command: BridgeCommand) async throws {
+         guard let channelSession else { throw BridgeChannelAuthentication.Failure.unavailable }
+         try channelSession.check(identity: command.identity)
+diff --git a/Sources/CellVapor/CloudBridge/VaporBridgeReceiveBudget.swift b/Sources/CellVapor/CloudBridge/VaporBridgeReceiveBudget.swift
+new file mode 100644
+index 0000000..ea70f80
+--- /dev/null
++++ b/Sources/CellVapor/CloudBridge/VaporBridgeReceiveBudget.swift
+@@ -0,0 +1,36 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++
++import Foundation
++
++/// Process-wide admission at the synchronous WebSocketKit callback boundary.
++/// This is additional transport accounting; it does not replace gate quotas.
++final class VaporBridgeReceiveBudget: @unchecked Sendable {
++    static let shared = VaporBridgeReceiveBudget()
++    static let connectionCountLimit = 64
++    static let connectionByteLimit = 4 * 1024 * 1024
++    private let lock = NSLock()
++    private let maximumCount: Int
++    private let maximumBytes: Int
++    private var count = 0
++    private var bytes = 0
++
++    init(maximumCount: Int = 1024, maximumBytes: Int = 32 * 1024 * 1024) {
++        self.maximumCount = maximumCount
++        self.maximumBytes = maximumBytes
++    }
++
++    func acquire(bytes size: Int) -> Bool {
++        lock.withLock {
++            guard size >= 0, count < maximumCount, size <= maximumBytes - bytes else { return false }
++            count += 1; bytes += size
++            return true
++        }
++    }
++
++    func release(bytes size: Int) {
++        lock.withLock { count -= 1; bytes -= size }
++    }
++
++    var snapshot: (count: Int, bytes: Int) { lock.withLock { (count, bytes) } }
++}
+diff --git a/Sources/CellVapor/CloudBridge/VaporBridgeTransport.swift b/Sources/CellVapor/CloudBridge/VaporBridgeTransport.swift
+index cd7d17f..b10ff11 100644
+--- a/Sources/CellVapor/CloudBridge/VaporBridgeTransport.swift
++++ b/Sources/CellVapor/CloudBridge/VaporBridgeTransport.swift
+@@ -67,13 +67,35 @@ public class VaporBridgeTransport: BridgeTransportProtocol, @unchecked Sendable
+     private let stateLock = NSLock()
+     private var delegate: BridgeDelegateProtocol?
+     private var webSocket: WebSocket?
+-    private var closeCleanupCompleted = false
++    private var registrationCleanupTask: Task<Void, Never>?
+     private var connectionGeneration = UUID()
+     private var setupWaiter: VaporBridgeSetupWaiter?
+     private var outgoingGroup: MultiThreadedEventLoopGroup?
++    private var physicalCloseTask: Task<Void, Never>?
+     private var closeUnderlyingChannel: (@Sendable () async -> Void)?
+     
+ 
++    private let receiveLock = NSLock()
++    private var receiveBudget = VaporBridgeReceiveBudget.shared
++    private var queuedReceives = 0
++    private var queuedReceiveBytes = 0
++    private var receivesStopped = false
++    private var receiveTail: Task<Void, Never>?
++    private var dispatchTail: Task<Void, Never>?
++    private var receiveCloseTask: Task<Void, Never>?
++    // Deterministic test seams, installed before traffic; no production bypass.
++    var beforeReceivePreparation: (@Sendable () async -> Void)?
++    var receiveSnapshot: (count: Int, bytes: Int, stopped: Bool) {
++        receiveLock.withLock { (queuedReceives, queuedReceiveBytes, receivesStopped) }
++    }
++
++    convenience init(webSocket: WebSocket, receiveBudget: VaporBridgeReceiveBudget,
++                     closeUnderlyingChannel: (@Sendable () async -> Void)? = nil) {
++        self.init(closeUnderlyingChannel: closeUnderlyingChannel)
++        self.receiveBudget = receiveBudget
++        setWebSocket(webSocket)
++    }
++
+     var identityDomain:String
+     var delegateSource: (() async throws -> BridgeDelegateProtocol?)?
+     
+@@ -111,12 +133,12 @@ public class VaporBridgeTransport: BridgeTransportProtocol, @unchecked Sendable
+     private func setWebSocket(_ ws: WebSocket) {
+         withStateLock {
+             self.webSocket = ws
+-            self.closeCleanupCompleted = false
+         }
+         self.setupWebSocketCallbacks(on: ws)
+     }
+     
+     public func setup(_ endpointURL: URL, identity: Identity) async throws {
++        try checkReceiving() // A retired adapter cannot inherit a new generation.
+         guard let target = URLComponents(url: endpointURL, resolvingAgainstBaseURL: false),
+               let scheme = target.scheme, ["ws", "wss"].contains(scheme), let host = target.host else {
+             throw TransportError.InvalidURL
+@@ -131,10 +153,13 @@ public class VaporBridgeTransport: BridgeTransportProtocol, @unchecked Sendable
+         let client = WebSocketClient(eventLoopGroupProvider: .shared(group), configuration: configuration)
+         let generation = UUID(), loop = VaporBridgeTransportEventLoops.shared.next()
+         let waiter = VaporBridgeSetupWaiter(on: loop)
+-        let accepted = withStateLock { () -> Bool in
+-            guard outgoingGroup == nil, webSocket == nil, setupWaiter == nil else { return false }
+-            outgoingGroup = group; connectionGeneration = generation; setupWaiter = waiter
+-            return true
++        let accepted = receiveLock.withLock { () -> Bool in
++            guard !receivesStopped else { return false }
++            return withStateLock {
++                guard outgoingGroup == nil, webSocket == nil, setupWaiter == nil else { return false }
++                outgoingGroup = group; connectionGeneration = generation; setupWaiter = waiter
++                return true
++            }
+         }
+         guard accepted else {
+             waiter.complete(.failure(TransportError.TransportNotFound))
+@@ -151,7 +176,7 @@ public class VaporBridgeTransport: BridgeTransportProtocol, @unchecked Sendable
+             guard let self else { socket.close(promise: nil); waiter.complete(.failure(TransportError.TransportNotFound)); return }
+             let installed = self.withStateLock { () -> Bool in
+                 guard self.connectionGeneration == generation, self.setupWaiter === waiter else { return false }
+-                self.webSocket = socket; self.closeCleanupCompleted = false
++                self.webSocket = socket
+                 return true
+             }
+             guard installed else { socket.close(promise: nil); waiter.complete(.failure(TransportError.TransportNotFound)); return }
+@@ -192,6 +217,22 @@ public class VaporBridgeTransport: BridgeTransportProtocol, @unchecked Sendable
+     }
+ 
+     public func close() async {
++        stopReceiving()
++        // Overflow, the gate and socket onClose may race. Every caller must
++        // await the same physical retirement before it can release a gate slot.
++        let physical = withStateLock { () -> Task<Void, Never> in
++            if let physicalCloseTask { return physicalCloseTask }
++            let task = Task { [self] in await closePhysicalTransport() }
++            physicalCloseTask = task
++            return task
++        }
++        await physical.value
++        // Delegate cleanup is outside the physical Task: it may re-enter close
++        // through the gate, and must not await its own Task.
++        await cleanupClosedWebSocketRegistration()
++    }
++
++    private func closePhysicalTransport() async {
+         let pendingSetup = withStateLock { () -> VaporBridgeSetupWaiter? in
+             connectionGeneration = UUID()
+             let pending = setupWaiter; setupWaiter = nil; return pending
+@@ -210,20 +251,17 @@ public class VaporBridgeTransport: BridgeTransportProtocol, @unchecked Sendable
+             let group = outgoingGroup; outgoingGroup = nil; return group
+         }
+         try? await group?.shutdownGracefully()
+-        await cleanupClosedWebSocketRegistration()
+     }
+ 
+     private func setupWebSocketCallbacks(on webSocket: WebSocket) {
+-        webSocket.onText{[weak self] ws, text in
+-            if let incomingData = text.data(using: .utf8) {
+-                do { try await self?.extractCommand(incomingData) }
+-                catch { await self?.currentDelegate()?.pushError(errorMessage: "bridge_payload_rejected", error: error) }
+-            }
+-        }
+-        webSocket.onBinary{ [weak self] ws, buf in
+-            if let incomingData = buf.getData(at: 0, length: buf.readableBytes) {
+-                do { try await self?.extractCommand(incomingData) }
+-                catch { await self?.currentDelegate()?.pushError(errorMessage: "bridge_payload_rejected", error: error) }
++        // Explicit synchronous signatures: the async overload creates an
++        // unaccounted Task per frame before entering this adapter.
++        webSocket.onText { [weak self] (ws: WebSocket, text: String) -> Void in
++            self?.enqueueReceive(bytes: text.utf8.count) { Data(text.utf8) }
++        }
++        webSocket.onBinary { [weak self] (ws: WebSocket, buffer: ByteBuffer) -> Void in
++            self?.enqueueReceive(bytes: buffer.readableBytes) {
++                Data(buffer.readableBytesView)
+             }
+         }
+         webSocket.onClose.whenComplete { [weak self] result in
+@@ -231,25 +269,116 @@ public class VaporBridgeTransport: BridgeTransportProtocol, @unchecked Sendable
+         }
+     }
+ 
++    /// Count/bytes are reserved before copying payloads or creating Tasks.
++    /// Preparation is ordered, including handshake completion. Ordinary dispatch
++    /// is ordered separately so a held Cell can still complete origin signing.
++    private func enqueueReceive(bytes: Int, copy: () -> Data) {
++        receiveLock.withLock {
++            guard !receivesStopped else { return }
++            guard bytes <= BridgeInboundPayloadValidator.defaultMaximumBytes,
++                  queuedReceives < VaporBridgeReceiveBudget.connectionCountLimit,
++                  bytes <= VaporBridgeReceiveBudget.connectionByteLimit - queuedReceiveBytes,
++                  receiveBudget.acquire(bytes: bytes) else {
++                stopReceivingLocked()
++                scheduleReceiveCloseLocked()
++                return
++            }
++            queuedReceives += 1; queuedReceiveBytes += bytes
++            let data = copy(), previous = receiveTail
++            receiveTail = Task { [self] in
++                await previous?.value
++                await beforeReceivePreparation?()
++                do {
++                    try checkReceiving()
++                    let command = try prepareCommand(data)
++                    if command.cmd.hasPrefix("channelAuth") {
++                        try await dispatchCommand(command)
++                        releaseReceive(bytes: bytes)
++                        return
++                    }
++                    let gate = currentDelegate() as? BridgeChannelTransport
++                    let control = command.command == .sign || gate?.isOriginSigningResponse(command) == true
++                    receiveLock.withLock {
++                        let prior = control ? nil : dispatchTail
++                        let dispatch = Task { [self] in
++                            defer { releaseReceive(bytes: bytes) }
++                            await prior?.value
++                            do {
++                                try checkReceiving()
++                                try await dispatchCommand(command)
++                            } catch { rejectReceive() }
++                        }
++                        if !control { dispatchTail = dispatch }
++                    }
++                } catch {
++                    rejectReceive()
++                    // Auditing is work too. A non-cooperative event sink must
++                    // retain this admission rather than escape into close cleanup.
++                    if let error = error as? BridgeInboundPayloadError {
++                        await CellBase.recordSecurityEvent(.bridgePayloadRejected(
++                            transportIdentifier: "vapor-websocket", error: error))
++                    }
++                    releaseReceive(bytes: bytes)
++                }
++            }
++        }
++    }
++
++    private func releaseReceive(bytes: Int) {
++        receiveLock.withLock {
++            queuedReceives -= 1; queuedReceiveBytes -= bytes
++            receiveBudget.release(bytes: bytes)
++        }
++    }
++
++    private func checkReceiving() throws {
++        try receiveLock.withLock {
++            guard !receivesStopped else { throw BridgeChannelAuthentication.Failure.closed }
++        }
++    }
++
++    private func stopReceiving() { receiveLock.withLock { stopReceivingLocked() } }
++    private func stopReceivingLocked() {
++        receivesStopped = true
++        // Synchronous revocation, before asynchronous physical/delegate cleanup.
++        (currentDelegate() as? BridgeChannelTransport)?.session.close()
++    }
++    private func scheduleReceiveCloseLocked() {
++        guard receiveCloseTask == nil else { return }
++        receiveCloseTask = Task { [self] in await close() }
++    }
++    private func rejectReceive() {
++        receiveLock.withLock {
++            stopReceivingLocked()
++            scheduleReceiveCloseLocked()
++        }
++    }
++
+     func handleWebSocketClose(_ result: Result<Void, Error>) {
+         if case .failure = result {
+             CellBase.diagnosticLog("Vapor bridge websocket closed with failure: code=transport_failed", domain: .bridge)
+         }
+-        Task { [weak self] in
+-            await self?.close()
+-        }
++        rejectReceive()
+     }
+ 
+     func cleanupClosedWebSocketRegistration() async {
+-        guard let delegate = markCloseCleanupStartedAndGetDelegate() else {
+-            return
++        let cleanup = withStateLock { () -> (Task<Void, Never>, BridgeDelegateProtocol?) in
++            if let registrationCleanupTask { return (registrationCleanupTask, nil) }
++            let target = delegate
++            let task = Task {
++                if let target { await CellBase.defaultCellResolver?.unregisterEmitCell(uuid: target.uuid) }
++            }
++            registrationCleanupTask = task
++            return (task, target)
+         }
+-        if delegate is BridgeChannelTransport {
+-            await delegate.pushError(errorMessage: "bridge_transport_closed", error: TransportError.TransportNotFound)
++        // All close callers retain the gate slot through resolver cleanup too.
++        // Notify the gate afterward, outside the shared Task, to allow reentry.
++        await cleanup.0.value
++        if let gate = cleanup.1 as? BridgeChannelTransport {
++            await gate.pushError(errorMessage: "bridge_transport_closed", error: TransportError.TransportNotFound)
+         }
+-        await CellBase.defaultCellResolver?.unregisterEmitCell(uuid: delegate.uuid)
+     }
+-    
++
+     func extractCommand(_ incomingData: Data) async throws {
+         do {
+             try BridgeInboundPayloadValidator().validate(incomingData)
+@@ -265,24 +394,21 @@ public class VaporBridgeTransport: BridgeTransportProtocol, @unchecked Sendable
+             )
+             throw error
+         }
+-        let command = try? JSONDecoder().decode(BridgeCommand.self, from: incomingData)
+-        let delegate = currentDelegate()
+-        guard let command = command,
+-              let delegate = delegate
+-        else {
+-            return
+-        }
+-        let identity = command.identity
+-        let vault = await self.identityVault(for: identity)
+-        switch command.command {
+-        case .response:
+-            command.identity?.identityVault = vault
+-            try await delegate.consumeResponse(command: command)
+-        default:
+-            command.identity?.identityVault = vault
+-            try await delegate.consumeCommand(command: command)
+-        }
++        let command = try JSONDecoder().decode(BridgeCommand.self, from: incomingData)
++        try await dispatchCommand(command)
++    }
++
++    private func prepareCommand(_ incomingData: Data) throws -> BridgeCommand {
++        try BridgeInboundPayloadValidator().validate(incomingData)
++        try currentDelegate()?.validateInboundPayload(incomingData)
++        return try JSONDecoder().decode(BridgeCommand.self, from: incomingData)
++    }
+ 
++    private func dispatchCommand(_ command: BridgeCommand) async throws {
++        guard let delegate = currentDelegate() else { throw TransportError.TransportNotFound }
++        command.identity?.identityVault = await identityVault(for: command.identity)
++        if command.command == .response { try await delegate.consumeResponse(command: command) }
++        else { try await delegate.consumeCommand(command: command) }
+     }
+ 
+     public func identityVault(for identity: Identity?) async -> IdentityVaultProtocol {
+@@ -315,16 +441,6 @@ public class VaporBridgeTransport: BridgeTransportProtocol, @unchecked Sendable
+         }
+     }
+ 
+-    private func markCloseCleanupStartedAndGetDelegate() -> BridgeDelegateProtocol? {
+-        withStateLock {
+-            guard closeCleanupCompleted == false else {
+-                return nil
+-            }
+-            closeCleanupCompleted = true
+-            return delegate
+-        }
+-    }
+-
+     private func withStateLock<T>(_ body: () -> T) -> T {
+         stateLock.lock()
+         defer {
+diff --git a/Tests/CellBaseTests/BridgeChannelWebSocketTests.swift b/Tests/CellBaseTests/BridgeChannelWebSocketTests.swift
+index b12294b..787c5bc 100644
+--- a/Tests/CellBaseTests/BridgeChannelWebSocketTests.swift
++++ b/Tests/CellBaseTests/BridgeChannelWebSocketTests.swift
+@@ -42,6 +42,14 @@ final class BridgeChannelWebSocketTests: XCTestCase {
+     }
+ 
+     func testVaporSocketRequiresProofThenPerformsProtectedReadWithNoServerSigner() async throws {
++        try await protectedRead(multiplexed: false)
++    }
++
++    func testVaporMuxSocketPreservesOriginSigningProgressDuringProtectedRead() async throws {
++        try await protectedRead(multiplexed: true)
++    }
++
++    private func protectedRead(multiplexed: Bool) async throws {
+         let oldResolver = CellBase.defaultCellResolver, oldVault = CellBase.defaultIdentityVault
+         defer { CellBase.defaultCellResolver = oldResolver; CellBase.defaultIdentityVault = oldVault }
+         let vault = MockIdentityVault()
+@@ -59,6 +67,10 @@ final class BridgeChannelWebSocketTests: XCTestCase {
+                 let transport = VaporBridgeTransport(webSocket: socket)
+                 let gate = try BridgeChannelTransport(underlying: transport, endpoint: state.endpoint(), limits: limits, source: "127.0.0.1") { transport, _ in
+                     state.admitted()
++                    if multiplexed {
++                        return BridgeMultiplexServerSession(physicalTransport: transport,
++                            bridgeOwner: owner.publicIdentitySnapshot(), inboundPublisherLookupIdentity: owner.publicIdentitySnapshot())
++                    }
+                     let bridge = try await BridgeBase(.init(owner: owner.publicIdentitySnapshot(), transport: transport,
+                         connection: .inbound(publisherUuid: "Protected"), inboundPublisherLookupIdentity: owner.publicIdentitySnapshot()))
+                     try await bridge.setTransport(transport, connection: .inbound(publisherUuid: "Protected"))
+@@ -83,15 +95,19 @@ final class BridgeChannelWebSocketTests: XCTestCase {
+             XCTAssertEqual(state.gates.first?.session.state, .closed)
+             await raw.close()
+             let gate = try BridgeChannelTransport(underlying: VaporBridgeTransport(), endpoint: state.endpoint())
+-            let bridge = try await BridgeBase(.init(owner: owner, transport: gate, connection: .outbound,
++            let mux = multiplexed ? BridgeMultiplexSession(physicalTransport: gate) : nil
++            let transport = try mux?.channelTransport(targetEndpoint: "Protected") ?? gate
++            let bridge = try await BridgeBase(.init(owner: owner, transport: transport, connection: .outbound,
+                 identityProofScopes: [.init(domain: cell.identityDomain, resource: cell.uuid)]))
+-            try await bridge.setTransport(gate, connection: .outbound)
+-            try await gate.setup(url, identity: owner)
++            try await bridge.setTransport(transport, connection: .outbound)
++            try await transport.setup(url, identity: owner)
+             let value = try await bridge.get(keypath: "secret", requester: owner)
+             XCTAssertEqual(value, .string("socket-value"))
+             XCTAssertEqual(state.count, 1)
+             let signerCalls = await trap.calls; XCTAssertEqual(signerCalls, 0)
++            await transport.close()
+             await gate.close()
++            withExtendedLifetime(mux) {}
+             for connection in state.gates { await connection.close() }
+             XCTAssertEqual(limits.connectionCount, 0)
+             await app.server.shutdown()
+diff --git a/Tests/CellBaseTests/BridgeFeedAndRPCOrderingTests.swift b/Tests/CellBaseTests/BridgeFeedAndRPCOrderingTests.swift
+index 225ef9f..a8afa9b 100644
+--- a/Tests/CellBaseTests/BridgeFeedAndRPCOrderingTests.swift
++++ b/Tests/CellBaseTests/BridgeFeedAndRPCOrderingTests.swift
+@@ -308,6 +308,9 @@ extension BridgeFeedAndRPCOrderingTests {
+             await hold.release()
+             await orderingEventually { bridge.pendingFeedDeliveries == 0 && wire.channelSession?.state == .closed }
+             XCTAssertEqual(wire.commands.count, failSend ? 0 : 1)
++            // The final send releases its value before the next drain iteration
++            // retires the feed lease. Observe retirement, not that earlier count.
++            await orderingEventually { limits.retainedConnectionCount == 0 }
+             XCTAssertEqual(limits.retainedConnectionCount, 0)
+         }
+     }
+diff --git a/Tests/CellBaseTests/TestSupport/MockCellResolver.swift b/Tests/CellBaseTests/TestSupport/MockCellResolver.swift
+index 6593228..af02f6c 100644
+--- a/Tests/CellBaseTests/TestSupport/MockCellResolver.swift
++++ b/Tests/CellBaseTests/TestSupport/MockCellResolver.swift
+@@ -28,6 +28,11 @@ final class MockCellResolver: CellResolverProtocol {
+ 
+     // Scanner retires sibling channels concurrently; registry access must match.
+     private let stateLock = NSLock()
++    private var unregisterHook: (@Sendable () async -> Void)?
++    var beforeUnregister: (@Sendable () async -> Void)? {
++        get { stateLock.withLock { unregisterHook } }
++        set { stateLock.withLock { unregisterHook = newValue } }
++    }
+     private var lookupCount = 0
+     func lookupCountSnapshot() -> Int { stateLock.withLock { lookupCount } }
+ 
+@@ -67,6 +72,7 @@ final class MockCellResolver: CellResolverProtocol {
+     }
+ 
+     func unregisterEmitCell(uuid: String) async {
++        await beforeUnregister?()
+         stateLock.withLock {
+             unregisteredUUIDs.append(uuid)
+             if let name = nameByUUID[uuid] {
+diff --git a/Tests/CellBaseTests/VaporWebSocketAdmissionTests.swift b/Tests/CellBaseTests/VaporWebSocketAdmissionTests.swift
+new file mode 100644
+index 0000000..4636093
+--- /dev/null
++++ b/Tests/CellBaseTests/VaporWebSocketAdmissionTests.swift
+@@ -0,0 +1,390 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++#if canImport(CellVapor)
++import XCTest
++import WebSocketKit
++import NIOCore
++import NIOPosix
++import NIOWebSocket
++@testable import CellBase
++@testable import CellVapor
++
++/// Inject frames at WebSocketKit's real aggregator/handler on a live NIO socket.
++/// One event-loop turn makes admission assertions independent of Task scheduling.
++/// The existing BridgeChannelWebSocketTests additionally cover HTTP upgrade/wire.
++final class VaporWebSocketAdmissionTests: XCTestCase {
++    private func make(budget: VaporBridgeReceiveBudget? = nil, holdPhysicalClose: N30Barrier? = nil) async throws -> N30Socket {
++        let socket = try await N30Socket.make(budget: budget, holdPhysicalClose: holdPhysicalClose)
++        addTeardownBlock { await socket.close() }
++        return socket
++    }
++
++    func testPreProofBurstIsAdmittedBeforeTasksAndQuotaPlusOneClosesOnlyOffender() async throws {
++        let budget = VaporBridgeReceiveBudget()
++        let fixture = try await make(budget: budget)
++        let sibling = try await make(budget: budget)
++        let hold = N30Barrier()
++        addTeardownBlock { await hold.release() }
++        fixture.transport.beforeReceivePreparation = { await hold.wait() }
++        let data = try N30Socket.flow(0)
++        let usage = try await fixture.inject(Array(repeating: data, count: 64))
++        XCTAssertEqual(usage.count, 64)
++        XCTAssertEqual(usage.bytes, 64 * data.count)
++        XCTAssertFalse(usage.stopped)
++        XCTAssertEqual(fixture.gate.session.state, .unauthenticated)
++        XCTAssertEqual(fixture.consumer.values, [])
++        let rejected = try await fixture.inject(Array(repeating: data, count: 2000))
++        XCTAssertTrue(rejected.stopped)
++        XCTAssertEqual(rejected.count, 64, "No Tasks/copies/reservations for rejected frames")
++        XCTAssertEqual(fixture.gate.session.state, .closed, "Revocation is synchronous")
++        try await fixture.waitForClose()
++        XCTAssertEqual(fixture.physicalCloses.value, 1)
++        XCTAssertEqual(budget.snapshot.count, 64, "Held work stays charged after physical close")
++        await hold.release()
++        try await n30Eventually { budget.snapshot.count == 0 }
++        XCTAssertEqual(fixture.consumer.values, [])
++        try await sibling.authenticate()
++        _ = try await sibling.inject([N30Socket.flow(99)])
++        try await n30Eventually { sibling.consumer.values == [99] }
++        await fixture.close(); await sibling.close()
++    }
++
++    func testAuthenticatedFeedOrderSurvivesHeldFirstDispatchAndMixedTextBinaryBurst() async throws {
++        let fixture = try await make()
++        try await fixture.authenticate()
++        let hold = N30Barrier()
++        addTeardownBlock { await hold.release() }
++        fixture.consumer.holdFirst = hold
++        _ = try await fixture.inject([N30Socket.flow(0)])
++        try await n30Eventually { fixture.consumer.values == [0] }
++        let usage = try await fixture.inject((1..<64).map { try N30Socket.flow($0) })
++        XCTAssertEqual(usage.count, 64)
++        XCTAssertEqual(fixture.consumer.values, [0])
++        await hold.release()
++        try await n30Eventually { fixture.consumer.values.count == 64 }
++        XCTAssertEqual(fixture.consumer.values, Array(0..<64))
++        try await n30Eventually { fixture.transport.receiveSnapshot.count == 0 }
++        await fixture.close()
++    }
++
++    func testOnlySigningControlPassesHeldDispatchAndMalformedFrameFailsClosed() async throws {
++        let fixture = try await make()
++        try await fixture.authenticate()
++        let hold = N30Barrier()
++        addTeardownBlock { await hold.release() }
++        fixture.consumer.holdFirst = hold
++        _ = try await fixture.inject([N30Socket.flow(0)])
++        try await n30Eventually { fixture.consumer.values == [0] }
++        let sign = try JSONEncoder().encode(BridgeCommand(cmd: "sign", identity: fixture.owner.publicIdentitySnapshot(), payload: nil, cid: 900))
++        let fakeReply = try JSONEncoder().encode(BridgeCommand(cmd: "response", payload: .string("signature-shaped-but-unregistered"), cid: 901))
++        _ = try await fixture.inject([N30Socket.flow(1), fakeReply, sign])
++        try await n30Eventually { fixture.consumer.signs.value == 1 }
++        XCTAssertEqual(fixture.consumer.values, [0])
++        XCTAssertEqual(fixture.consumer.otherResponses.value, 0)
++        _ = try await fixture.inject([Data("{".utf8)])
++        try await fixture.waitForClose()
++        XCTAssertEqual(fixture.gate.session.state, .closed)
++        await hold.release()
++        try await n30Eventually { fixture.transport.receiveSnapshot.count == 0 }
++        XCTAssertEqual(fixture.consumer.values, [0])
++        XCTAssertEqual(fixture.consumer.otherResponses.value, 0)
++        await fixture.close()
++    }
++
++    func testAuthenticatedQuotaPlusOneKeepsInFlightChargeUntilConsumerReturns() async throws {
++        let budget = VaporBridgeReceiveBudget()
++        let fixture = try await make(budget: budget)
++        try await fixture.authenticate()
++        let hold = N30Barrier()
++        addTeardownBlock { await hold.release() }
++        fixture.consumer.holdFirst = hold
++        let data = try N30Socket.flow(0)
++        _ = try await fixture.inject([data])
++        try await n30Eventually { fixture.consumer.values == [0] }
++        _ = try await fixture.inject(Array(repeating: data, count: 64))
++        try await fixture.waitForClose()
++        XCTAssertGreaterThanOrEqual(budget.snapshot.count, 1)
++        XCTAssertGreaterThanOrEqual(budget.snapshot.bytes, data.count)
++        XCTAssertEqual(fixture.consumer.values, [0])
++        await hold.release()
++        try await n30Eventually { budget.snapshot.count == 0 }
++        XCTAssertEqual(budget.snapshot.bytes, 0)
++        await fixture.close()
++    }
++
++    func testLargeTextAndBinaryFramesAndConnectionByteQuotaRejectBeforePreparation() async throws {
++        for oversized in [true, false] {
++            for binary in [false, true] {
++                let fixture = try await make()
++                let hold = N30Barrier(), prepared = N30Counter()
++                addTeardownBlock { await hold.release() }
++                fixture.transport.beforeReceivePreparation = { prepared.increment(); await hold.wait() }
++                let size = BridgeInboundPayloadValidator.defaultMaximumBytes
++                let data = Data(repeating: 0x20, count: oversized ? size + 1 : size)
++                let usage = try await fixture.inject(Array(repeating: data, count: oversized ? 1 : 4), binary: binary)
++                XCTAssertEqual(usage.count, oversized ? 0 : 4)
++                XCTAssertEqual(usage.bytes, oversized ? 0 : 4 * size)
++                if !oversized {
++                    XCTAssertFalse(usage.stopped)
++                    try await n30Eventually { prepared.value == 1 }
++                    _ = try await fixture.inject([Data([0x20])], binary: binary)
++                }
++                try await fixture.waitForClose()
++                XCTAssertEqual(prepared.value, oversized ? 0 : 1)
++                XCTAssertEqual(fixture.gate.session.state, .closed)
++                await hold.release()
++                try await n30Eventually { fixture.transport.receiveSnapshot.count == 0 }
++                await fixture.close()
++            }
++        }
++    }
++
++    func testConcurrentCloseRetainsGateSlotUntilOwnedPhysicalCloseReturns() async throws {
++        let hold = N30Barrier()
++        let fixture = try await make(holdPhysicalClose: hold)
++        addTeardownBlock { await hold.release() }
++        try await fixture.authenticate()
++        let first = Task { await fixture.transport.close() }
++        try await n30Eventually { fixture.physicalCloses.value == 1 }
++        let secondFinished = expectation(description: "second physical close caller returned")
++        let second = Task { await fixture.transport.close(); secondFinished.fulfill() }
++        // Trigger the real socket-close observer as well as simultaneous callers.
++        fixture.transport.handleWebSocketClose(.success(()))
++        XCTAssertEqual(fixture.gate.session.state, .closed)
++        XCTAssertEqual(fixture.limits.retainedConnectionCount, 1)
++        let early = await XCTWaiter.fulfillment(of: [secondFinished], timeout: 0.05)
++        XCTAssertEqual(early, .timedOut, "No close caller may return before physical retirement")
++        await hold.release()
++        await first.value; await second.value
++        try await n30Eventually { fixture.limits.retainedConnectionCount == 0 }
++        XCTAssertEqual(fixture.physicalCloses.value, 1)
++    }
++
++    func testRejectedPayloadRetainsAdmissionUntilSecurityAuditReturns() async throws {
++        let previous = CellBase.securityEventSink
++        defer { CellBase.securityEventSink = previous }
++        let budget = VaporBridgeReceiveBudget(), sink = N30HeldSecuritySink()
++        let fixture = try await make(budget: budget)
++        addTeardownBlock { await sink.hold.release() }
++        try await fixture.authenticate()
++        CellBase.securityEventSink = sink
++        _ = try await fixture.inject([Data("{".utf8)])
++        try await n30Eventually { sink.entered.value == 1 }
++        try await fixture.waitForClose()
++        XCTAssertEqual(budget.snapshot.count, 1)
++        XCTAssertEqual(budget.snapshot.bytes, 1)
++        await sink.hold.release()
++        try await n30Eventually { budget.snapshot.count == 0 }
++        XCTAssertEqual(budget.snapshot.bytes, 0)
++    }
++
++    func testConcurrentCloseRetainsGateSlotUntilResolverCleanupReturns() async throws {
++        let previous = CellBase.defaultCellResolver
++        defer { CellBase.defaultCellResolver = previous }
++        let resolver = MockCellResolver(), entered = N30Counter(), hold = N30Barrier()
++        resolver.beforeUnregister = { entered.increment(); await hold.wait() }
++        CellBase.defaultCellResolver = resolver
++        let fixture = try await make()
++        addTeardownBlock { await hold.release() }
++        try await fixture.authenticate()
++        let first = Task { await fixture.transport.close() }
++        try await n30Eventually { entered.value == 1 }
++        let secondFinished = expectation(description: "resolver cleanup returned")
++        let second = Task { await fixture.transport.close(); secondFinished.fulfill() }
++        try await fixture.waitForClose()
++        let early = await XCTWaiter.fulfillment(of: [secondFinished], timeout: 0.05)
++        XCTAssertEqual(early, .timedOut)
++        XCTAssertEqual(fixture.limits.retainedConnectionCount, 1)
++        await hold.release()
++        await first.value; await second.value
++        try await n30Eventually { fixture.limits.retainedConnectionCount == 0 }
++        XCTAssertEqual(entered.value, 1)
++        XCTAssertEqual(resolver.unregisteredUUIDsSnapshot(), [fixture.gate.uuid])
++    }
++
++    func testDefaultAdaptersUseTheSameProcessWideBudget() async throws {
++        let baseline = VaporBridgeReceiveBudget.shared.snapshot
++        let a = try await make(), b = try await make()
++        let hold = N30Barrier()
++        addTeardownBlock { await hold.release() }
++        a.transport.beforeReceivePreparation = { await hold.wait() }
++        b.transport.beforeReceivePreparation = { await hold.wait() }
++        let data = try N30Socket.flow(1)
++        _ = try await a.inject([data])
++        _ = try await b.inject([data])
++        XCTAssertEqual(VaporBridgeReceiveBudget.shared.snapshot.count, baseline.count + 2)
++        XCTAssertEqual(VaporBridgeReceiveBudget.shared.snapshot.bytes, baseline.bytes + 2 * data.count)
++        await hold.release()
++        try await n30Eventually { a.transport.receiveSnapshot.count == 0 && b.transport.receiveSnapshot.count == 0 }
++        XCTAssertEqual(VaporBridgeReceiveBudget.shared.snapshot.count, baseline.count)
++        XCTAssertEqual(VaporBridgeReceiveBudget.shared.snapshot.bytes, baseline.bytes)
++    }
++
++    func testGlobalCountAndByteBudgetsSpanConnectionsAndReleaseForFreshSibling() async throws {
++        let data = try N30Socket.flow(1)
++        for byteLimited in [false, true] {
++            // Inject the same production ledger with smaller limits so each
++            // exact boundary is exercised without opening hundreds of sockets.
++            let budget = VaporBridgeReceiveBudget(maximumCount: byteLimited ? 100 : 3,
++                maximumBytes: byteLimited ? 3 * data.count : 1024 * 1024)
++            let a = try await make(budget: budget)
++            let b = try await make(budget: budget)
++            let offender = try await make(budget: budget)
++            let hold = N30Barrier()
++            addTeardownBlock { await hold.release() }
++            a.transport.beforeReceivePreparation = { await hold.wait() }
++            b.transport.beforeReceivePreparation = { await hold.wait() }
++            _ = try await a.inject([data, data])
++            _ = try await b.inject([data])
++            XCTAssertEqual(budget.snapshot.count, 3)
++            XCTAssertEqual(budget.snapshot.bytes, 3 * data.count)
++            let rejected = try await offender.inject([data])
++            XCTAssertTrue(rejected.stopped)
++            XCTAssertEqual(rejected.count, 0)
++            XCTAssertFalse(a.transport.receiveSnapshot.stopped)
++            XCTAssertFalse(b.transport.receiveSnapshot.stopped)
++            await hold.release()
++            try await n30Eventually { budget.snapshot.count == 0 }
++            let fresh = try await make(budget: budget)
++            try await fresh.authenticate()
++            _ = try await fresh.inject([data])
++            try await n30Eventually { fresh.consumer.values == [1] }
++            await a.close(); await b.close(); await offender.close(); await fresh.close()
++            XCTAssertEqual(budget.snapshot.count, 0)
++            XCTAssertEqual(budget.snapshot.bytes, 0)
++        }
++    }
++}
++
++private func n30Eventually(_ check: () -> Bool, file: StaticString = #filePath, line: UInt = #line) async throws {
++    let deadline = ProcessInfo.processInfo.systemUptime + 5
++    while !check(), ProcessInfo.processInfo.systemUptime < deadline { try await Task.sleep(nanoseconds: 1_000_000) }
++    guard check() else { XCTFail("Expected observed event before deadline", file: file, line: line); throw N30Error.timeout }
++}
++private enum N30Error: Error { case timeout }
++private final class N30HeldSecuritySink: CellSecurityEventSink, @unchecked Sendable {
++    let hold = N30Barrier(), entered = N30Counter()
++    func record(_ event: CellSecurityEvent) async { entered.increment(); await hold.wait() }
++}
++private final class N30Counter: @unchecked Sendable {
++    private let lock = NSLock()
++    private var count = 0
++    var value: Int { lock.withLock { count } }
++    func increment() { lock.withLock { count += 1 } }
++}
++private actor N30Barrier {
++    private var released = false
++    private var waiters: [CheckedContinuation<Void, Never>] = []
++    func wait() async { if !released { await withCheckedContinuation { waiters.append($0) } } }
++    func release() { released = true; let pending = waiters; waiters = []; pending.forEach { $0.resume() } }
++}
++private final class N30Consumer: BridgeDelegateProtocol, @unchecked Sendable {
++    let uuid = UUID().uuidString
++    let signs = N30Counter(), otherResponses = N30Counter()
++    private let lock = NSLock()
++    private var received: [Int] = []
++    var holdFirst: N30Barrier?
++    var values: [Int] { lock.withLock { received } }
++    func consumeCommand(command: BridgeCommand) async throws { if command.command == .sign { signs.increment() } }
++    func consumeResponse(command: BridgeCommand) async throws {
++        guard case .flowElement(let flow) = command.payload, let value = Int(flow.title ?? "") else { otherResponses.increment(); return }
++        let first = lock.withLock { received.append(value); return received.count == 1 }
++        if first { await holdFirst?.wait() }
++    }
++    func sendCommand(command: Command, identity: Identity, payload: ValueType?) async {}
++    func sendSetValueState(for requestedKey: String, setValueState: SetValueState) async {}
++    func pushError(errorMessage: String?, error: Error?) async {}
++    func ready() async throws {}
++}
++
++private final class N30Socket: @unchecked Sendable {
++    let group: MultiThreadedEventLoopGroup
++    let listener: any Channel
++    let peer: any Channel
++    let channel: any Channel
++    let transport: VaporBridgeTransport
++    let gate: BridgeChannelTransport
++    let consumer: N30Consumer
++    let owner: Identity
++    let physicalCloses: N30Counter
++    let limits: BridgeChannelLimits
++    let endpoint: BridgeChannelAuthentication.Endpoint
++    private let closeLock = NSLock()
++    private var closed = false
++
++    private init(group: MultiThreadedEventLoopGroup, listener: any Channel, peer: any Channel, channel: any Channel,
++                 transport: VaporBridgeTransport, gate: BridgeChannelTransport, consumer: N30Consumer, owner: Identity,
++                 physicalCloses: N30Counter, limits: BridgeChannelLimits, endpoint: BridgeChannelAuthentication.Endpoint) {
++        self.group = group; self.listener = listener; self.peer = peer; self.channel = channel
++        self.transport = transport; self.gate = gate; self.consumer = consumer; self.owner = owner
++        self.physicalCloses = physicalCloses; self.limits = limits; self.endpoint = endpoint
++    }
++
++    static func make(budget: VaporBridgeReceiveBudget? = nil, holdPhysicalClose: N30Barrier? = nil) async throws -> N30Socket {
++        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
++        let result = group.next().makePromise(of: (any Channel, VaporBridgeTransport, BridgeChannelTransport).self)
++        let consumer = N30Consumer(), closes = N30Counter(), limits = BridgeChannelLimits()
++        let owner = await MockIdentityVault().identity(for: UUID().uuidString, makeNewIfNotFound: true)!
++        let endpoint = try BridgeChannelAuthentication.Endpoint(url: URL(string: "wss://n30.example/bridge")!, domain: "bridge")
++        let listener = try await ServerBootstrap(group: group).childChannelInitializer { channel in
++            channel.pipeline.addHandler(WebSocketFrameEncoder()).flatMap {
++                WebSocket.server(on: channel) { socket in
++                    let close: @Sendable () async -> Void = {
++                        closes.increment()
++                        await holdPhysicalClose?.wait()
++                        try? await channel.close().get()
++                    }
++                    let transport: VaporBridgeTransport
++                    if let budget {
++                        transport = VaporBridgeTransport(webSocket: socket, receiveBudget: budget, closeUnderlyingChannel: close)
++                    } else {
++                        transport = VaporBridgeTransport(webSocket: socket, closeUnderlyingChannel: close)
++                    }
++                    do {
++                        let gate = try BridgeChannelTransport(underlying: transport, endpoint: endpoint, limits: limits, source: "loopback") { _, _ in consumer }
++                        result.succeed((channel, transport, gate))
++                    } catch { result.fail(error) }
++                }
++            }
++        }.bind(host: "127.0.0.1", port: 0).get()
++        let peer = try await ClientBootstrap(group: group).connect(host: "127.0.0.1", port: listener.localAddress!.port!).get()
++        let (channel, transport, gate) = try await result.futureResult.get()
++        return .init(group: group, listener: listener, peer: peer, channel: channel, transport: transport,
++                     gate: gate, consumer: consumer, owner: owner, physicalCloses: closes, limits: limits, endpoint: endpoint)
++    }
++
++    func authenticate() async throws {
++        let operation = try BridgeChannelClientOperation(owner: owner, endpoint: endpoint)
++        let challenge = try gate.session.issueChallenge(operation.hello)
++        let proof = try await operation.sign(challenge)
++        let data = try BridgeChannelAuthentication.encode(BridgeCommand(cmd: "channelAuthProof",
++            payload: .string(String(decoding: BridgeChannelAuthentication.encode(proof), as: UTF8.self)), cid: 0))
++        _ = try await inject([data])
++        try await n30Eventually { self.gate.session.state == .authenticated && self.transport.receiveSnapshot.count == 0 }
++    }
++
++    @discardableResult
++    func inject(_ data: [Data], binary: Bool? = nil) async throws -> (count: Int, bytes: Int, stopped: Bool) {
++        try await channel.eventLoop.submit { [self] in
++            for (index, bytes) in data.enumerated() {
++                let frame = WebSocketFrame(fin: true, opcode: (binary ?? index.isMultiple(of: 2)) ? .binary : .text,
++                    data: channel.allocator.buffer(bytes: bytes))
++                channel.pipeline.fireChannelRead(NIOAny(frame))
++            }
++            return transport.receiveSnapshot
++        }.get()
++    }
++
++    static func flow(_ value: Int) throws -> Data {
++        try JSONEncoder().encode(BridgeCommand(cmd: "response", payload: .flowElement(
++            FlowElement(title: String(value), content: .string(String(value)), properties: .init(type: .event, contentType: .string))), cid: 42))
++    }
++    func waitForClose() async throws { try await n30Eventually { !self.channel.isActive } }
++    func close() async {
++        guard closeLock.withLock({ if closed { return false }; closed = true; return true }) else { return }
++        await gate.close(); await transport.close()
++        try? await channel.close().get(); try? await peer.close().get(); try? await listener.close().get()
++        try? await group.shutdownGracefully()
++    }
++}
++#endif

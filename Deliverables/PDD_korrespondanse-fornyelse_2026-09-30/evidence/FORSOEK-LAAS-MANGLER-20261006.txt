@@ -1,0 +1,17 @@
+Forsøk i skyen 06.10.2026 18:16Z: spørsmålet om låsen til haven-deploy (laas_naa i bytt-invitasjoner.sh, fjerde runde).
+Stilt som en bruker uten rett til det root eier (uid 0 uten CAP_DAC_OVERRIDE og CAP_DAC_READ_SEARCH, filene eid av uid 12345),
+og som root. Testene i test_bytt.py kjører som root, og root ser forbi rettighetene; derfor dette forsøket ved siden av.
+Linja som prøves, står i skriptet: 1 treff (ventet 1).
+Maskin: Ubuntu 24.04.4 LTS, flock from util-linux 2.39.3, setpriv from util-linux 2.39.3.
+
+   tilstand                                                   uten rett til fila     som root
+A  mappe 755, fil 644, ingen holder den                       fri                    fri
+B  mappe 755, fil 600                                         ukjent                 fri
+C  mappe 700, fil 644                                         ukjent                 fri
+D  mappe 755, ingen fil                                       mangler                mangler
+E  ingen mappe                                                mangler                mangler
+F  mappe 755, fil 644, holdt med «exec 9>» og «flock -n 9» holdt                  holdt
+G  mappe 700, ingen fil                                       ukjent                 mangler
+F  etter at holderen er borte                                 fri                   
+
+Brukeren uten rett: kan ikke lese fila i B, kan ikke liste mappen i C.

@@ -1,0 +1,1419 @@
+{
+  "chat": {
+    "componentID": "haven.workbench.helper.candidate",
+    "revision": "gui-v1",
+    "sourceCellEndpoint": "cell:///WorkbenchHelper",
+    "skeleton": {
+      "VStack": {
+        "elements": [
+          {
+            "HStack": {
+              "elements": [
+                {
+                  "VStack": {
+                    "elements": [
+                      {
+                        "Text": {
+                          "text": "Hjelpechat",
+                          "modifiers": {
+                            "fontSize": 20,
+                            "fontWeight": "semibold",
+                            "foregroundColor": "#1d1d1f"
+                          }
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "sessionLabel",
+                          "modifiers": {
+                            "fontSize": 12,
+                            "fontWeight": "regular",
+                            "foregroundColor": "#62626b"
+                          }
+                        }
+                      }
+                    ],
+                    "spacing": 3,
+                    "modifiers": {
+                      "hAlignment": "leading",
+                      "flexGrow": 1
+                    }
+                  }
+                },
+                {
+                  "Button": {
+                    "label": "Historikk",
+                    "keypath": "helper.openHistory",
+                    "modifiers": {
+                      "fontSize": 13,
+                      "fontWeight": "medium",
+                      "background": "#ffffff",
+                      "foregroundColor": "#1d1d1f",
+                      "cornerRadius": 8,
+                      "borderWidth": 1,
+                      "borderColor": "#d4d4db"
+                    },
+                    "payload": {
+                      "scope": "private"
+                    }
+                  }
+                }
+              ],
+              "spacing": 12,
+              "modifiers": {
+                "vAlignment": "top",
+                "wrap": false,
+                "styleClasses": [
+                  "helper-layout-row"
+                ]
+              }
+            }
+          },
+          {
+            "Picker": {
+              "label": "Perspektiv",
+              "keypath": "perspectives",
+              "optionLabelKeypath": "title",
+              "selectionValueKeypath": "id",
+              "selectionStateKeypath": "selectedPerspective",
+              "selectionActionKeypath": "helper.selectPerspective",
+              "selectionPayloadMode": "item_id",
+              "allowsEmptySelection": false,
+              "modifiers": {
+                "fontSize": 13,
+                "foregroundColor": "#1d1d1f",
+                "background": "#ffffff",
+                "cornerRadius": 6
+              }
+            }
+          },
+          {
+            "Picker": {
+              "label": "Modell",
+              "keypath": "models",
+              "optionLabelKeypath": "title",
+              "selectionValueKeypath": "id",
+              "selectionStateKeypath": "selectedModel",
+              "selectionActionKeypath": "helper.selectModel",
+              "selectionPayloadMode": "item_id",
+              "allowsEmptySelection": false,
+              "modifiers": {
+                "fontSize": 13,
+                "foregroundColor": "#1d1d1f",
+                "background": "#ffffff",
+                "cornerRadius": 6
+              }
+            }
+          },
+          {
+            "Text": {
+              "keypath": "recipientLabel",
+              "modifiers": {
+                "fontSize": 12,
+                "fontWeight": "regular",
+                "foregroundColor": "#62626b"
+              }
+            }
+          },
+          {
+            "HStack": {
+              "elements": [
+                {
+                  "Text": {
+                    "text": "Privat samtale",
+                    "modifiers": {
+                      "fontSize": 12,
+                      "fontWeight": "medium",
+                      "foregroundColor": "#174c90",
+                      "padding": 6,
+                      "background": "#deebff",
+                      "cornerRadius": 6
+                    }
+                  }
+                },
+                {
+                  "Button": {
+                    "label": "Kontekst",
+                    "keypath": "helper.inspectContext",
+                    "modifiers": {
+                      "fontSize": 13,
+                      "fontWeight": "medium",
+                      "background": "#ffffff",
+                      "foregroundColor": "#1d1d1f",
+                      "cornerRadius": 8,
+                      "borderWidth": 1,
+                      "borderColor": "#d4d4db"
+                    }
+                  }
+                },
+                {
+                  "Button": {
+                    "label": "Pakker",
+                    "keypath": "helper.openPackages",
+                    "modifiers": {
+                      "fontSize": 13,
+                      "fontWeight": "medium",
+                      "background": "#ffffff",
+                      "foregroundColor": "#1d1d1f",
+                      "cornerRadius": 8,
+                      "borderWidth": 1,
+                      "borderColor": "#d4d4db"
+                    }
+                  }
+                }
+              ],
+              "spacing": 8,
+              "modifiers": {
+                "vAlignment": "top",
+                "wrap": false,
+                "styleClasses": [
+                  "helper-layout-row"
+                ]
+              }
+            }
+          },
+          {
+            "Text": {
+              "keypath": "contextSummary",
+              "modifiers": {
+                "fontSize": 12,
+                "fontWeight": "regular",
+                "foregroundColor": "#62626b"
+              }
+            }
+          },
+          {
+            "List": {
+              "keypath": "notices",
+              "selectionMode": "none",
+              "flowElementSkeleton": {
+                "VStack": {
+                  "elements": [
+                    {
+                      "Text": {
+                        "keypath": "title",
+                        "modifiers": {
+                          "fontSize": 14,
+                          "fontWeight": "semibold",
+                          "foregroundColor": "#805516"
+                        }
+                      }
+                    },
+                    {
+                      "Text": {
+                        "keypath": "body",
+                        "modifiers": {
+                          "fontSize": 13,
+                          "fontWeight": "regular",
+                          "foregroundColor": "#1d1d1f"
+                        }
+                      }
+                    }
+                  ],
+                  "spacing": 8,
+                  "modifiers": {
+                    "hAlignment": "leading"
+                  }
+                }
+              },
+              "modifiers": {
+                "maxWidthInfinity": true,
+                "styleClasses": [
+                  "helper-rows"
+                ]
+              }
+            }
+          },
+          {
+            "List": {
+              "keypath": "messages",
+              "selectionMode": "none",
+              "flowElementSkeleton": {
+                "VStack": {
+                  "elements": [
+                    {
+                      "Text": {
+                        "keypath": "speaker",
+                        "modifiers": {
+                          "fontSize": 12,
+                          "fontWeight": "semibold",
+                          "foregroundColor": "#62626b"
+                        }
+                      }
+                    },
+                    {
+                      "Text": {
+                        "keypath": "text",
+                        "modifiers": {
+                          "fontSize": 14,
+                          "fontWeight": "regular",
+                          "foregroundColor": "#1d1d1f"
+                        }
+                      }
+                    }
+                  ],
+                  "spacing": 8,
+                  "modifiers": {
+                    "hAlignment": "leading"
+                  }
+                }
+              },
+              "modifiers": {
+                "maxWidthInfinity": true,
+                "styleClasses": [
+                  "helper-rows"
+                ]
+              }
+            }
+          },
+          {
+            "List": {
+              "keypath": "proposals",
+              "selectionMode": "none",
+              "flowElementSkeleton": {
+                "VStack": {
+                  "elements": [
+                    {
+                      "Text": {
+                        "keypath": "title",
+                        "modifiers": {
+                          "fontSize": 15,
+                          "fontWeight": "semibold",
+                          "foregroundColor": "#1d1d1f"
+                        }
+                      }
+                    },
+                    {
+                      "Text": {
+                        "keypath": "summary",
+                        "modifiers": {
+                          "fontSize": 13,
+                          "fontWeight": "regular",
+                          "foregroundColor": "#1d1d1f"
+                        }
+                      }
+                    },
+                    {
+                      "Text": {
+                        "keypath": "scope",
+                        "modifiers": {
+                          "fontSize": 12,
+                          "fontWeight": "regular",
+                          "foregroundColor": "#62626b"
+                        }
+                      }
+                    },
+                    {
+                      "HStack": {
+                        "elements": [
+                          {
+                            "Button": {
+                              "label": "Legg i kø",
+                              "keypath": "helper.enqueue",
+                              "modifiers": {
+                                "fontSize": 13,
+                                "fontWeight": "medium",
+                                "background": "#0068d6",
+                                "foregroundColor": "#ffffff",
+                                "cornerRadius": 8,
+                                "borderWidth": 1,
+                                "borderColor": "#0068d6",
+                                "styleClasses": [
+                                  "primary-action"
+                                ]
+                              },
+                              "payloadKeypath": "command"
+                            }
+                          },
+                          {
+                            "Button": {
+                              "label": "Se arbeidsordre",
+                              "keypath": "helper.inspectProposal",
+                              "modifiers": {
+                                "fontSize": 13,
+                                "fontWeight": "medium",
+                                "background": "#ffffff",
+                                "foregroundColor": "#1d1d1f",
+                                "cornerRadius": 8,
+                                "borderWidth": 1,
+                                "borderColor": "#d4d4db"
+                              },
+                              "payloadKeypath": "id"
+                            }
+                          }
+                        ],
+                        "spacing": 8,
+                        "modifiers": {
+                          "vAlignment": "top",
+                          "wrap": false,
+                          "styleClasses": [
+                            "helper-layout-row"
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "spacing": 8,
+                  "modifiers": {
+                    "hAlignment": "leading"
+                  }
+                }
+              },
+              "modifiers": {
+                "maxWidthInfinity": true,
+                "styleClasses": [
+                  "helper-rows"
+                ]
+              }
+            }
+          },
+          {
+            "List": {
+              "keypath": "blocked",
+              "selectionMode": "none",
+              "flowElementSkeleton": {
+                "VStack": {
+                  "elements": [
+                    {
+                      "Text": {
+                        "keypath": "title",
+                        "modifiers": {
+                          "fontSize": 14,
+                          "fontWeight": "semibold",
+                          "foregroundColor": "#805516"
+                        }
+                      }
+                    },
+                    {
+                      "Text": {
+                        "keypath": "reason",
+                        "modifiers": {
+                          "fontSize": 13,
+                          "fontWeight": "regular",
+                          "foregroundColor": "#1d1d1f"
+                        }
+                      }
+                    },
+                    {
+                      "Button": {
+                        "label": "Se krav",
+                        "keypath": "helper.inspectRequirements",
+                        "modifiers": {
+                          "fontSize": 13,
+                          "fontWeight": "medium",
+                          "background": "#ffffff",
+                          "foregroundColor": "#1d1d1f",
+                          "cornerRadius": 8,
+                          "borderWidth": 1,
+                          "borderColor": "#d4d4db"
+                        },
+                        "payloadKeypath": "command"
+                      }
+                    }
+                  ],
+                  "spacing": 8,
+                  "modifiers": {
+                    "hAlignment": "leading"
+                  }
+                }
+              },
+              "modifiers": {
+                "maxWidthInfinity": true,
+                "styleClasses": [
+                  "helper-rows"
+                ]
+              }
+            }
+          },
+          {
+            "List": {
+              "keypath": "starters",
+              "selectionMode": "none",
+              "flowElementSkeleton": {
+                "VStack": {
+                  "elements": [
+                    {
+                      "Text": {
+                        "keypath": "title",
+                        "modifiers": {
+                          "fontSize": 14,
+                          "fontWeight": "semibold",
+                          "foregroundColor": "#1d1d1f"
+                        }
+                      }
+                    },
+                    {
+                      "Text": {
+                        "keypath": "body",
+                        "modifiers": {
+                          "fontSize": 13,
+                          "fontWeight": "regular",
+                          "foregroundColor": "#1d1d1f"
+                        }
+                      }
+                    },
+                    {
+                      "Button": {
+                        "label": "Utforsk idé",
+                        "keypath": "helper.useStarter",
+                        "modifiers": {
+                          "fontSize": 13,
+                          "fontWeight": "medium",
+                          "background": "#ffffff",
+                          "foregroundColor": "#1d1d1f",
+                          "cornerRadius": 8,
+                          "borderWidth": 1,
+                          "borderColor": "#d4d4db"
+                        },
+                        "payloadKeypath": "id"
+                      }
+                    }
+                  ],
+                  "spacing": 8,
+                  "modifiers": {
+                    "hAlignment": "leading"
+                  }
+                }
+              },
+              "modifiers": {
+                "maxWidthInfinity": true,
+                "styleClasses": [
+                  "helper-rows"
+                ]
+              }
+            }
+          },
+          {
+            "TextArea": {
+              "sourceKeypath": "draft",
+              "targetKeypath": "helper.setDraftMessage",
+              "placeholder": "Skriv en melding …",
+              "minLines": 2,
+              "maxLines": 10,
+              "submitOnEnter": false,
+              "editorMode": "plain",
+              "modifiers": {
+                "fontSize": 14,
+                "foregroundColor": "#1d1d1f",
+                "background": "#ffffff",
+                "padding": 10,
+                "cornerRadius": 8,
+                "borderWidth": 1,
+                "borderColor": "#d4d4db",
+                "maxWidthInfinity": true
+              }
+            }
+          },
+          {
+            "HStack": {
+              "elements": [
+                {
+                  "VStack": {
+                    "elements": [
+                      {
+                        "Text": {
+                          "keypath": "eventStatus",
+                          "modifiers": {
+                            "fontSize": 11,
+                            "fontWeight": "regular",
+                            "foregroundColor": "#62626b"
+                          }
+                        }
+                      }
+                    ],
+                    "spacing": 0,
+                    "modifiers": {
+                      "hAlignment": "leading",
+                      "flexGrow": 1
+                    }
+                  }
+                },
+                {
+                  "Button": {
+                    "label": "Send",
+                    "keypath": "helper.send",
+                    "modifiers": {
+                      "fontSize": 13,
+                      "fontWeight": "medium",
+                      "background": "#0068d6",
+                      "foregroundColor": "#ffffff",
+                      "cornerRadius": 8,
+                      "borderWidth": 1,
+                      "borderColor": "#0068d6",
+                      "styleClasses": [
+                        "primary-action"
+                      ]
+                    },
+                    "payloadKeypath": "sendCommand"
+                  }
+                }
+              ],
+              "spacing": 12,
+              "modifiers": {
+                "vAlignment": "top",
+                "wrap": false,
+                "styleClasses": [
+                  "helper-layout-row"
+                ]
+              }
+            }
+          }
+        ],
+        "spacing": 12,
+        "modifiers": {
+          "hAlignment": "leading",
+          "padding": 18,
+          "background": "#ffffff",
+          "cornerRadius": 12,
+          "borderWidth": 1,
+          "borderColor": "#d4d4db"
+        }
+      }
+    },
+    "item": {
+      "sessionID": "demo-session-01",
+      "sessionLabel": "CellScaffold · ny arbeidsøkt",
+      "perspectives": [
+        {
+          "id": "ideas",
+          "title": "Idéutvikling"
+        },
+        {
+          "id": "surfaces",
+          "title": "CellConfiguration og flater"
+        },
+        {
+          "id": "purpose",
+          "title": "Formålstrær"
+        },
+        {
+          "id": "agreement",
+          "title": "Agreement og tilgang"
+        },
+        {
+          "id": "delivery",
+          "title": "Fra idé til produksjon"
+        },
+        {
+          "id": "mine",
+          "title": "Min prosjektassistent"
+        }
+      ],
+      "selectedPerspective": "delivery",
+      "models": [
+        {
+          "id": "local-fixture",
+          "title": "Lokal modell"
+        },
+        {
+          "id": "openai-fixture",
+          "title": "OpenAI · tillatt rute"
+        },
+        {
+          "id": "anthropic-fixture",
+          "title": "Anthropic · tillatt rute"
+        }
+      ],
+      "selectedModel": "local-fixture",
+      "recipientLabel": "Mottaker: lokal modell · innholdet forblir lokalt",
+      "contextSummary": "Kontekst: DEMO-014 · prosjektets README · 2 valgte kildeutdrag",
+      "messages": [
+        {
+          "id": "m1",
+          "speaker": "DU",
+          "text": "Gjør denne ideen klar for en agentjobb."
+        },
+        {
+          "id": "m2",
+          "speaker": "HJELPER · LOKAL MODELL",
+          "text": "Jeg foreslår å avgrense jobben til å rette tilbakeknappen og teste at riktig arbeidsflate gjenåpnes."
+        }
+      ],
+      "notices": [],
+      "proposals": [
+        {
+          "id": "demo-proposal-01",
+          "title": "Forslag til arbeidsordre",
+          "summary": "Rett tilbakeknappen i prosjektporteføljen. Kjør lokal navigasjonstest før PR.",
+          "scope": "Codex · CellScaffold · isolert arbeidskopi · maks 20 min",
+          "command": {
+            "proposalID": "demo-proposal-01",
+            "sessionID": "demo-session-01",
+            "expectedRevision": 12,
+            "commandID": "demo-queue-demo-session-01"
+          }
+        }
+      ],
+      "blocked": [],
+      "starters": [],
+      "draft": "",
+      "eventStatus": "Oppdatert fra hendelser · nå",
+      "sendCommand": {
+        "sessionID": "demo-session-01",
+        "expectedRevision": 12,
+        "commandID": "demo-send-demo-session-01"
+      }
+    }
+  },
+  "chatB": {
+    "componentID": "haven.workbench.helper.candidate",
+    "revision": "gui-v1",
+    "sourceCellEndpoint": "cell:///WorkbenchHelper",
+    "skeleton": {
+      "VStack": {
+        "elements": [
+          {
+            "HStack": {
+              "elements": [
+                {
+                  "VStack": {
+                    "elements": [
+                      {
+                        "Text": {
+                          "text": "Hjelpechat",
+                          "modifiers": {
+                            "fontSize": 20,
+                            "fontWeight": "semibold",
+                            "foregroundColor": "#1d1d1f"
+                          }
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "sessionLabel",
+                          "modifiers": {
+                            "fontSize": 12,
+                            "fontWeight": "regular",
+                            "foregroundColor": "#62626b"
+                          }
+                        }
+                      }
+                    ],
+                    "spacing": 3,
+                    "modifiers": {
+                      "hAlignment": "leading",
+                      "flexGrow": 1
+                    }
+                  }
+                },
+                {
+                  "Button": {
+                    "label": "Historikk",
+                    "keypath": "helper.openHistory",
+                    "modifiers": {
+                      "fontSize": 13,
+                      "fontWeight": "medium",
+                      "background": "#ffffff",
+                      "foregroundColor": "#1d1d1f",
+                      "cornerRadius": 8,
+                      "borderWidth": 1,
+                      "borderColor": "#d4d4db"
+                    },
+                    "payload": {
+                      "scope": "private"
+                    }
+                  }
+                }
+              ],
+              "spacing": 12,
+              "modifiers": {
+                "vAlignment": "top",
+                "wrap": false,
+                "styleClasses": [
+                  "helper-layout-row"
+                ]
+              }
+            }
+          },
+          {
+            "Picker": {
+              "label": "Perspektiv",
+              "keypath": "perspectives",
+              "optionLabelKeypath": "title",
+              "selectionValueKeypath": "id",
+              "selectionStateKeypath": "selectedPerspective",
+              "selectionActionKeypath": "helper.selectPerspective",
+              "selectionPayloadMode": "item_id",
+              "allowsEmptySelection": false,
+              "modifiers": {
+                "fontSize": 13,
+                "foregroundColor": "#1d1d1f",
+                "background": "#ffffff",
+                "cornerRadius": 6
+              }
+            }
+          },
+          {
+            "Picker": {
+              "label": "Modell",
+              "keypath": "models",
+              "optionLabelKeypath": "title",
+              "selectionValueKeypath": "id",
+              "selectionStateKeypath": "selectedModel",
+              "selectionActionKeypath": "helper.selectModel",
+              "selectionPayloadMode": "item_id",
+              "allowsEmptySelection": false,
+              "modifiers": {
+                "fontSize": 13,
+                "foregroundColor": "#1d1d1f",
+                "background": "#ffffff",
+                "cornerRadius": 6
+              }
+            }
+          },
+          {
+            "Text": {
+              "keypath": "recipientLabel",
+              "modifiers": {
+                "fontSize": 12,
+                "fontWeight": "regular",
+                "foregroundColor": "#62626b"
+              }
+            }
+          },
+          {
+            "HStack": {
+              "elements": [
+                {
+                  "Text": {
+                    "text": "Privat samtale",
+                    "modifiers": {
+                      "fontSize": 12,
+                      "fontWeight": "medium",
+                      "foregroundColor": "#174c90",
+                      "padding": 6,
+                      "background": "#deebff",
+                      "cornerRadius": 6
+                    }
+                  }
+                },
+                {
+                  "Button": {
+                    "label": "Kontekst",
+                    "keypath": "helper.inspectContext",
+                    "modifiers": {
+                      "fontSize": 13,
+                      "fontWeight": "medium",
+                      "background": "#ffffff",
+                      "foregroundColor": "#1d1d1f",
+                      "cornerRadius": 8,
+                      "borderWidth": 1,
+                      "borderColor": "#d4d4db"
+                    }
+                  }
+                },
+                {
+                  "Button": {
+                    "label": "Pakker",
+                    "keypath": "helper.openPackages",
+                    "modifiers": {
+                      "fontSize": 13,
+                      "fontWeight": "medium",
+                      "background": "#ffffff",
+                      "foregroundColor": "#1d1d1f",
+                      "cornerRadius": 8,
+                      "borderWidth": 1,
+                      "borderColor": "#d4d4db"
+                    }
+                  }
+                }
+              ],
+              "spacing": 8,
+              "modifiers": {
+                "vAlignment": "top",
+                "wrap": false,
+                "styleClasses": [
+                  "helper-layout-row"
+                ]
+              }
+            }
+          },
+          {
+            "Text": {
+              "keypath": "contextSummary",
+              "modifiers": {
+                "fontSize": 12,
+                "fontWeight": "regular",
+                "foregroundColor": "#62626b"
+              }
+            }
+          },
+          {
+            "List": {
+              "keypath": "notices",
+              "selectionMode": "none",
+              "flowElementSkeleton": {
+                "VStack": {
+                  "elements": [
+                    {
+                      "Text": {
+                        "keypath": "title",
+                        "modifiers": {
+                          "fontSize": 14,
+                          "fontWeight": "semibold",
+                          "foregroundColor": "#805516"
+                        }
+                      }
+                    },
+                    {
+                      "Text": {
+                        "keypath": "body",
+                        "modifiers": {
+                          "fontSize": 13,
+                          "fontWeight": "regular",
+                          "foregroundColor": "#1d1d1f"
+                        }
+                      }
+                    }
+                  ],
+                  "spacing": 8,
+                  "modifiers": {
+                    "hAlignment": "leading"
+                  }
+                }
+              },
+              "modifiers": {
+                "maxWidthInfinity": true,
+                "styleClasses": [
+                  "helper-rows"
+                ]
+              }
+            }
+          },
+          {
+            "List": {
+              "keypath": "messages",
+              "selectionMode": "none",
+              "flowElementSkeleton": {
+                "VStack": {
+                  "elements": [
+                    {
+                      "Text": {
+                        "keypath": "speaker",
+                        "modifiers": {
+                          "fontSize": 12,
+                          "fontWeight": "semibold",
+                          "foregroundColor": "#62626b"
+                        }
+                      }
+                    },
+                    {
+                      "Text": {
+                        "keypath": "text",
+                        "modifiers": {
+                          "fontSize": 14,
+                          "fontWeight": "regular",
+                          "foregroundColor": "#1d1d1f"
+                        }
+                      }
+                    }
+                  ],
+                  "spacing": 8,
+                  "modifiers": {
+                    "hAlignment": "leading"
+                  }
+                }
+              },
+              "modifiers": {
+                "maxWidthInfinity": true,
+                "styleClasses": [
+                  "helper-rows"
+                ]
+              }
+            }
+          },
+          {
+            "List": {
+              "keypath": "proposals",
+              "selectionMode": "none",
+              "flowElementSkeleton": {
+                "VStack": {
+                  "elements": [
+                    {
+                      "Text": {
+                        "keypath": "title",
+                        "modifiers": {
+                          "fontSize": 15,
+                          "fontWeight": "semibold",
+                          "foregroundColor": "#1d1d1f"
+                        }
+                      }
+                    },
+                    {
+                      "Text": {
+                        "keypath": "summary",
+                        "modifiers": {
+                          "fontSize": 13,
+                          "fontWeight": "regular",
+                          "foregroundColor": "#1d1d1f"
+                        }
+                      }
+                    },
+                    {
+                      "Text": {
+                        "keypath": "scope",
+                        "modifiers": {
+                          "fontSize": 12,
+                          "fontWeight": "regular",
+                          "foregroundColor": "#62626b"
+                        }
+                      }
+                    },
+                    {
+                      "HStack": {
+                        "elements": [
+                          {
+                            "Button": {
+                              "label": "Legg i kø",
+                              "keypath": "helper.enqueue",
+                              "modifiers": {
+                                "fontSize": 13,
+                                "fontWeight": "medium",
+                                "background": "#0068d6",
+                                "foregroundColor": "#ffffff",
+                                "cornerRadius": 8,
+                                "borderWidth": 1,
+                                "borderColor": "#0068d6",
+                                "styleClasses": [
+                                  "primary-action"
+                                ]
+                              },
+                              "payloadKeypath": "command"
+                            }
+                          },
+                          {
+                            "Button": {
+                              "label": "Se arbeidsordre",
+                              "keypath": "helper.inspectProposal",
+                              "modifiers": {
+                                "fontSize": 13,
+                                "fontWeight": "medium",
+                                "background": "#ffffff",
+                                "foregroundColor": "#1d1d1f",
+                                "cornerRadius": 8,
+                                "borderWidth": 1,
+                                "borderColor": "#d4d4db"
+                              },
+                              "payloadKeypath": "id"
+                            }
+                          }
+                        ],
+                        "spacing": 8,
+                        "modifiers": {
+                          "vAlignment": "top",
+                          "wrap": false,
+                          "styleClasses": [
+                            "helper-layout-row"
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "spacing": 8,
+                  "modifiers": {
+                    "hAlignment": "leading"
+                  }
+                }
+              },
+              "modifiers": {
+                "maxWidthInfinity": true,
+                "styleClasses": [
+                  "helper-rows"
+                ]
+              }
+            }
+          },
+          {
+            "List": {
+              "keypath": "blocked",
+              "selectionMode": "none",
+              "flowElementSkeleton": {
+                "VStack": {
+                  "elements": [
+                    {
+                      "Text": {
+                        "keypath": "title",
+                        "modifiers": {
+                          "fontSize": 14,
+                          "fontWeight": "semibold",
+                          "foregroundColor": "#805516"
+                        }
+                      }
+                    },
+                    {
+                      "Text": {
+                        "keypath": "reason",
+                        "modifiers": {
+                          "fontSize": 13,
+                          "fontWeight": "regular",
+                          "foregroundColor": "#1d1d1f"
+                        }
+                      }
+                    },
+                    {
+                      "Button": {
+                        "label": "Se krav",
+                        "keypath": "helper.inspectRequirements",
+                        "modifiers": {
+                          "fontSize": 13,
+                          "fontWeight": "medium",
+                          "background": "#ffffff",
+                          "foregroundColor": "#1d1d1f",
+                          "cornerRadius": 8,
+                          "borderWidth": 1,
+                          "borderColor": "#d4d4db"
+                        },
+                        "payloadKeypath": "command"
+                      }
+                    }
+                  ],
+                  "spacing": 8,
+                  "modifiers": {
+                    "hAlignment": "leading"
+                  }
+                }
+              },
+              "modifiers": {
+                "maxWidthInfinity": true,
+                "styleClasses": [
+                  "helper-rows"
+                ]
+              }
+            }
+          },
+          {
+            "List": {
+              "keypath": "starters",
+              "selectionMode": "none",
+              "flowElementSkeleton": {
+                "VStack": {
+                  "elements": [
+                    {
+                      "Text": {
+                        "keypath": "title",
+                        "modifiers": {
+                          "fontSize": 14,
+                          "fontWeight": "semibold",
+                          "foregroundColor": "#1d1d1f"
+                        }
+                      }
+                    },
+                    {
+                      "Text": {
+                        "keypath": "body",
+                        "modifiers": {
+                          "fontSize": 13,
+                          "fontWeight": "regular",
+                          "foregroundColor": "#1d1d1f"
+                        }
+                      }
+                    },
+                    {
+                      "Button": {
+                        "label": "Utforsk idé",
+                        "keypath": "helper.useStarter",
+                        "modifiers": {
+                          "fontSize": 13,
+                          "fontWeight": "medium",
+                          "background": "#ffffff",
+                          "foregroundColor": "#1d1d1f",
+                          "cornerRadius": 8,
+                          "borderWidth": 1,
+                          "borderColor": "#d4d4db"
+                        },
+                        "payloadKeypath": "id"
+                      }
+                    }
+                  ],
+                  "spacing": 8,
+                  "modifiers": {
+                    "hAlignment": "leading"
+                  }
+                }
+              },
+              "modifiers": {
+                "maxWidthInfinity": true,
+                "styleClasses": [
+                  "helper-rows"
+                ]
+              }
+            }
+          },
+          {
+            "TextArea": {
+              "sourceKeypath": "draft",
+              "targetKeypath": "helper.setDraftMessage",
+              "placeholder": "Skriv en melding …",
+              "minLines": 2,
+              "maxLines": 10,
+              "submitOnEnter": false,
+              "editorMode": "plain",
+              "modifiers": {
+                "fontSize": 14,
+                "foregroundColor": "#1d1d1f",
+                "background": "#ffffff",
+                "padding": 10,
+                "cornerRadius": 8,
+                "borderWidth": 1,
+                "borderColor": "#d4d4db",
+                "maxWidthInfinity": true
+              }
+            }
+          },
+          {
+            "HStack": {
+              "elements": [
+                {
+                  "VStack": {
+                    "elements": [
+                      {
+                        "Text": {
+                          "keypath": "eventStatus",
+                          "modifiers": {
+                            "fontSize": 11,
+                            "fontWeight": "regular",
+                            "foregroundColor": "#62626b"
+                          }
+                        }
+                      }
+                    ],
+                    "spacing": 0,
+                    "modifiers": {
+                      "hAlignment": "leading",
+                      "flexGrow": 1
+                    }
+                  }
+                },
+                {
+                  "Button": {
+                    "label": "Send",
+                    "keypath": "helper.send",
+                    "modifiers": {
+                      "fontSize": 13,
+                      "fontWeight": "medium",
+                      "background": "#0068d6",
+                      "foregroundColor": "#ffffff",
+                      "cornerRadius": 8,
+                      "borderWidth": 1,
+                      "borderColor": "#0068d6",
+                      "styleClasses": [
+                        "primary-action"
+                      ]
+                    },
+                    "payloadKeypath": "sendCommand"
+                  }
+                }
+              ],
+              "spacing": 12,
+              "modifiers": {
+                "vAlignment": "top",
+                "wrap": false,
+                "styleClasses": [
+                  "helper-layout-row"
+                ]
+              }
+            }
+          }
+        ],
+        "spacing": 12,
+        "modifiers": {
+          "hAlignment": "leading",
+          "padding": 18,
+          "background": "#ffffff",
+          "cornerRadius": 12,
+          "borderWidth": 1,
+          "borderColor": "#d4d4db"
+        }
+      }
+    },
+    "item": {
+      "sessionID": "demo-session-02",
+      "sessionLabel": "Ny privat samtale",
+      "perspectives": [
+        {
+          "id": "ideas",
+          "title": "Idéutvikling"
+        },
+        {
+          "id": "surfaces",
+          "title": "CellConfiguration og flater"
+        },
+        {
+          "id": "purpose",
+          "title": "Formålstrær"
+        },
+        {
+          "id": "agreement",
+          "title": "Agreement og tilgang"
+        },
+        {
+          "id": "delivery",
+          "title": "Fra idé til produksjon"
+        },
+        {
+          "id": "mine",
+          "title": "Min prosjektassistent"
+        }
+      ],
+      "selectedPerspective": "ideas",
+      "models": [
+        {
+          "id": "local-fixture",
+          "title": "Lokal modell"
+        },
+        {
+          "id": "openai-fixture",
+          "title": "OpenAI · tillatt rute"
+        },
+        {
+          "id": "anthropic-fixture",
+          "title": "Anthropic · tillatt rute"
+        }
+      ],
+      "selectedModel": "local-fixture",
+      "recipientLabel": "Mottaker: lokal modell · innholdet forblir lokalt",
+      "contextSummary": "Ingen prosjektdata er lagt til i samtalen.",
+      "messages": [],
+      "notices": [],
+      "proposals": [],
+      "blocked": [],
+      "starters": [
+        {
+          "id": "demo-starter",
+          "title": "Hva vil du utforske?",
+          "body": "Start med en idé. Hjelperen stiller spørsmål og samler neste steg."
+        }
+      ],
+      "draft": "Mitt eget idéutkast",
+      "eventStatus": "Klar for en ny samtale",
+      "sendCommand": {
+        "sessionID": "demo-session-02",
+        "expectedRevision": 12,
+        "commandID": "demo-send-demo-session-02"
+      }
+    }
+  },
+  "package": {
+    "title": "Min prosjektassistent",
+    "titleLabel": "Min prosjektassistent",
+    "versionLabel": "Privat · mitt utkast · basert på Idéutvikling v3",
+    "skillsLabel": "haven-work-intake · formålsdrevet utvikling",
+    "contextLabel": "Prosjektets README · valgt oppgave · mine notater",
+    "notices": [],
+    "purposes": [
+      {
+        "id": "demo-purpose-01",
+        "title": "Sammenhengende navigasjon"
+      },
+      {
+        "id": "demo-purpose-02",
+        "title": "Fra idé til utførbar oppgave"
+      }
+    ],
+    "purpose": "demo-purpose-01",
+    "instructions": "Hjelp meg å utforske ideer for CellScaffold.\nStill ett avklarende spørsmål om gangen.\nKnytt forslag til formål og konkrete akseptkriterier.\nOpprett arbeidsordre først når omfanget er tydelig."
+  },
+  "history": {
+    "scopes": [
+      {
+        "id": "private",
+        "title": "Min private historikk"
+      },
+      {
+        "id": "project",
+        "title": "Prosjektets delte historikk"
+      }
+    ],
+    "scope": "private",
+    "scopeLabel": "Privat historikk · bare du ser samtaletekst og personlige notater",
+    "modes": [
+      {
+        "id": "text",
+        "title": "Tekst"
+      },
+      {
+        "id": "purpose",
+        "title": "Formål"
+      }
+    ],
+    "mode": "text",
+    "query": "tilbakeknapp",
+    "notices": [],
+    "results": [
+      {
+        "id": "demo-event-01",
+        "title": "Idé om en bedre tilbakeknapp",
+        "provenance": "10. oktober, 10:34 · Hjelpechat · privat",
+        "excerpt": "«Jeg vil komme tilbake til samme prosjekt når jeg lukker porteføljen.»",
+        "relations": "Knyttet til: DEMO-014 · CellScaffold · sammenhengende navigasjon"
+      },
+      {
+        "id": "demo-event-02",
+        "title": "Prosjektet fikk en ny oppgave",
+        "provenance": "10. oktober, 10:39 · Work Item · delt med prosjektet",
+        "excerpt": "DEMO-014 ble opprettet med mål og akseptkriterier. Privat samtale er ikke vedlagt.",
+        "relations": "Kilde: Work Item DEMO-014"
+      }
+    ]
+  },
+  "context": {
+    "skills": [
+      {
+        "id": "demo-skill-01",
+        "title": "haven-work-intake",
+        "detail": "Valgt · idéfangst og arbeidsordre",
+        "label": "Fjern"
+      },
+      {
+        "id": "demo-skill-02",
+        "title": "Formålsdrevet utvikling",
+        "detail": "Tilgjengelig · formål og mål",
+        "label": "Legg til"
+      }
+    ],
+    "sources": [
+      {
+        "id": "demo-source-01",
+        "title": "Oppgave DEMO-014",
+        "detail": "Valgt · prosjektdata",
+        "label": "Fjern"
+      },
+      {
+        "id": "demo-source-02",
+        "title": "Offentlig README",
+        "detail": "Valgt · to avgrensede utdrag",
+        "label": "Fjern"
+      },
+      {
+        "id": "demo-source-03",
+        "title": "Mine private notater",
+        "detail": "Ikke valgt · kun synlig for meg",
+        "label": "Legg til"
+      }
+    ]
+  },
+  "review": {
+    "audiences": [
+      {
+        "id": "demo-project",
+        "title": "CellScaffold · prosjektmedlemmer"
+      },
+      {
+        "id": "private",
+        "title": "Bare meg"
+      }
+    ],
+    "audience": "demo-project",
+    "notices": [],
+    "actions": [
+      {
+        "label": "Bruk dette datagrunnlaget",
+        "keypath": "helper.confirmModelContext",
+        "payload": {
+          "contextPreviewID": "demo-context-01",
+          "expectedRevision": 2
+        }
+      }
+    ]
+  }
+}

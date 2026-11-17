@@ -1,0 +1,1608 @@
+diff --git a/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift b/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift
+index 79af0b0..e21edad 100644
+--- a/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift	
++++ b/Sources/CellApple/Cells/Porthole/Utility Views/Skeleton/AppInitializer.swift	
+@@ -250,6 +250,14 @@ public enum AppInitializer {
+             identityDomain: "private",
+             type: PerspectiveCell.self
+         )
++        try await registerResolve(
++            on: resolver,
++            name: "ContextFlowFilter",
++            cellScope: .identityUnique,
++            persistency: .persistant,
++            identityDomain: "private",
++            type: ContextFlowFilterCell.self
++        )
+         try await registerResolve(
+             on: resolver,
+             name: "Vault",
+diff --git a/Sources/CellApple/PurposeAndInterest/Cells/PerspectiveCell.swift b/Sources/CellApple/PurposeAndInterest/Cells/PerspectiveCell.swift
+index fde6054..c52d9ad 100644
+--- a/Sources/CellApple/PurposeAndInterest/Cells/PerspectiveCell.swift
++++ b/Sources/CellApple/PurposeAndInterest/Cells/PerspectiveCell.swift
+@@ -9,6 +9,7 @@
+ //
+ @_spi(HAVENRuntime) import CellBase
+ import Foundation
++import Combine
+ 
+ 
+ /*
+@@ -37,6 +38,13 @@ public class PerspectiveCell: GeneralCell {
+ //    var running: Bool = false
+     
+     
++    let contextGate = ContextTransactionGate()
++    let contextConnectionGate = ContextTransactionGate()
++    var contextState = PerspectiveContextState()
++    var contextSources: [String: ContextRuntimeSource] = [:]
++    var contextEmitter: ((FlowElement) -> Void)?
++    var lastContextDecision: ContextDecision?
++    var contextExpiryTask: Task<Void, Never>?
+     var context: Perspective
+     var publicPurposeDict = ["Test": "Test"]
+     let prespectiveFilename = "Perspective.json"
+@@ -68,8 +76,15 @@ public class PerspectiveCell: GeneralCell {
+         let bindingOwner = storedOwnerIdentity
+         await setupPermissions(owner: bindingOwner)
+         await setupKeys(owner: bindingOwner)
++        try await setupContextKeys(owner: bindingOwner)
+     }
+     
++    public override func flow(requester: Identity) async throws -> AnyPublisher<FlowElement, Error> {
++        let publisher = try await super.flow(requester: requester)
++        try await connectContextSources(requester: storedOwnerIdentity)
++        return publisher
++    }
++
+     deinit {
+         print("PespectiveCell Deinit!!!")
+     }
+@@ -115,7 +130,7 @@ public class PerspectiveCell: GeneralCell {
+         await addInterceptForGet(requester: owner, key: "perspective", getValueIntercept:  { [weak self] keypath, requester in
+             guard let self = self else { return .string("failure") }
+             if await self.validateAccess("r---", at: "perspective", for: requester) {
+-                return .object(["state": await self.perspectiveStatePayload()])
++                return .object(["state": await self.perspectiveStatePayload(), "context": await self.contextPayload()])
+             }
+             return .string("denied")
+         })
+@@ -476,7 +491,7 @@ public class PerspectiveCell: GeneralCell {
+     }
+ 
+     private func perspectiveStatePayload() async -> ValueType {
+-        let activePurposeCount = (await context.getActivePurposes(minWeight: 0.0, limit: Int.max)).count
++        let activePurposeCount = (await effectiveActivePurposes(minWeight: 0.0, limit: Int.max)).count
+         let activeInterestCount = (await context.getActiveInterests(minWeight: 0.0, limit: Int.max)).count
+         let activeEntityCount = (await context.getActiveEntities(minWeight: 0.0, limit: Int.max)).count
+         return .object([
+@@ -507,7 +522,7 @@ public class PerspectiveCell: GeneralCell {
+     }
+ 
+     private func activePurposesPayload(minPurposeWeight: Double, limit: Int, includeInterests: Bool, referenceMode: ReferenceMode) async -> ValueType {
+-        let activePurposes = await context.getActivePurposes(minWeight: minPurposeWeight, limit: limit)
++        let activePurposes = await effectiveActivePurposes(minWeight: minPurposeWeight, limit: limit)
+         var purposesList = ValueTypeList()
+         for weightedPurpose in activePurposes {
+             let snapshot = await purposeSnapshot(from: weightedPurpose, includeInterests: includeInterests)
+@@ -535,7 +550,7 @@ public class PerspectiveCell: GeneralCell {
+         let limit = max(1, intValue(payload["limit"]) ?? 50)
+         let mode = referenceMode(payload["referenceMode"])
+ 
+-        let activePurposes = await context.getActivePurposes(minWeight: minPurposeWeight, limit: Int.max)
++        let activePurposes = await effectiveActivePurposes(minWeight: minPurposeWeight, limit: Int.max)
+         var aggregated = [String: (interest: InterestSnapshot, weight: Double, supportingPurposes: [Object])]()
+ 
+         for weightedPurpose in activePurposes {
+@@ -657,7 +672,7 @@ public class PerspectiveCell: GeneralCell {
+         let allowViaInterests = boolValue(payload["allowViaInterests"]) ?? true
+         let mode = referenceMode(payload["referenceMode"])
+ 
+-        let sourceActive = await context.getActivePurposes(minWeight: minPurposeWeight, limit: Int.max)
++        let sourceActive = await effectiveActivePurposes(minWeight: minPurposeWeight, limit: Int.max)
+         var sourcePurposes = [PurposeSnapshot]()
+         for weighted in sourceActive {
+             sourcePurposes.append(await purposeSnapshot(from: weighted, includeInterests: true))
+@@ -917,7 +932,7 @@ public class PerspectiveCell: GeneralCell {
+             input: .null,
+             returns: ExploreContract.oneOfSchema(
+                 options: [
+-                    ExploreContract.schema(type: "object", description: "Object with a `state` field holding the perspective state snapshot."),
++                    ExploreContract.objectSchema(properties: ["state": Self.perspectiveStateSchema(), "context": ExploreContract.oneOfSchema(options: [ContextSchemas.perspective(), ContextSchemas.acknowledgement()])], requiredKeys: ["state", "context"]),
+                     ExploreContract.schema(type: "string")
+                 ],
+                 description: "Returns an object whose `state` field holds the perspective state snapshot, or a denial/failure string."
+diff --git a/Docs/Perspective_Context_Events.md b/Docs/Perspective_Context_Events.md
+new file mode 100644
+index 0000000..4cda2da
+--- /dev/null
++++ b/Docs/Perspective_Context_Events.md
+@@ -0,0 +1,128 @@
++# Perspective context events
++
++Last verified against code: 2026-10-12, candidate based on 253b4afe.
++
++PerspectiveCell subscribes to configured semantic source Cells. Sources interpret
++location areas, time windows, physical/digital presence or significant news events.
++Perspective does not implement GPS, geofencing, schedules or presence detection.
++
++## Source contract
++
++Source get key defaults to `context.observation`. Source Flow topic is
++`context.observation.changed`, object content (`contentType: object`, type event).
++Every payload is a full source snapshot, not a delta. JSON dates are ISO 8601 UTC.
++
++```json
++{"schemaVersion":1,"revision":12,"observedAt":"2026-10-12T07:00:00Z","validUntil":"2026-10-12T08:00:00Z","transition":"entered","labels":["home"],"configurationRevision":3}
++```
++
++`transition` is snapshot, entered, left or configurationChanged. Source revisions
++are nonnegative and strictly increase for changed data. Snapshot get returns the
++last observation unchanged, including transition. FlowElement.id identifies an
++event; the source ID comes from the configured subscription label, not origin.
++Same revision/different observation is rejected; older revisions and duplicate
++observations have no effect. Configuration revisions must be nonnegative.
++
++An empty labels list is known absence. Missing, expired, disabled and unconfirmed
++sources are unknown. Labels are case/diacritic normalized by the existing Goal
++engine when matching. Observed times over 30 seconds into the future are rejected.
++There may be at most 128 unique nonempty labels, each up to 256 UTF-8 bytes.
++
++Source bindings use the requesting Perspective owner's existing resolver/admission
++rights. Authorizing a rule never grants new access to a source or to content.
++
++## Perspective operations
++
++| Method | Key | Shape |
++|---|---|---|
++| get | perspective.context | state (ContextDecision) and configuration |
++| get | perspective.context.state | Nested state through perspective root |
++| get | perspective.context.configuration | Nested configuration through perspective root |
++| set | perspective.context.configure | ContextConfiguration; acknowledgement/error |
++| set | perspective.context.sources.attach | Configured sourceID string; re-enable and reconnect |
++| set | perspective.context.sources.detach | Configured sourceID string; persist disabled state and disconnect |
++
++The existing perspective root includes state and context. Read permission uses
++`perspective`; mutations use its write permission. Runtime readiness restores
++configuration and source revision history from PerspectiveContext.json, a separate
++Cell-local file. Confirmations are never encoded. Authorized snapshot reads can
++reconfirm the same saved revision after restart. Flow subscription and ordinary
++purpose queries also reconnect configured sources. Disabled bindings remain disabled
++across restart. A changed source endpoint/snapshot key resets that binding's history;
++turning it off and on preserves history.
++
++Configure persists before installing sources. A connection failure returns error;
++the saved configuration remains available for correction/retry. Observation writes and disconnect/expiry revisions
++persist before becoming visible or emitting decisions. A Perspective-only restart
++therefore resumes after its last emitted revision when fresh sources reconfirm. Storage failures are not
++acknowledged as durable success. For expiry, snapshot and emission use one captured
++evaluation time and the same transaction/revision; automatic expiry is also scheduled.
++
++## Rules and purpose weights
++
++Configuration has sources `{sourceID, endpoint, snapshotKey, enabled}` and rules
++`{id, priority, definition, label, purposeWeights}`. definition is the existing
++GoalDefinition with explicit evidenceSources and a GoalPredicate. Its Codable
++fields schema, helperCells, privacy and tags must also be supplied; predicate nodes
++require kind, all and any, including empty arrays on leaves. Explore publishes
++these requirements; its recursive child descriptors describe the repeated shape. For example:
++
++```json
++{"kind":"all","any":[],"all":[{"kind":"contains-label","sourceID":"time","expected":"morning","all":[],"any":[]},{"kind":"any","all":[],"any":[{"kind":"contains-label","sourceID":"place","expected":"home","all":[],"any":[]},{"kind":"contains-label","sourceID":"presence","expected":"family","all":[],"any":[]}]}]}
++```
++
++Supply observations for every declared source, including an empty labels list for
++known absence: GoalEvaluationEngine returns unknown if a declared source is missing.
++Rule matches produce context labels. For purpose overrides, highest priority wins;
++lexicographically first rule ID breaks a priority tie. An override can increase,
++lower or set weight zero. Zero is omitted from the active set; definitions and manual
++ground weights are preserved. Without an active override, the ground weight returns.
++Existing purpose reads, derived interests and matching use the effective set.
++
++Purpose references must resolve to known definitions before a rule is configured.
++Local references and portable references to known purposes are supported. Configure
++normalizes both to the local reference before rule priority is applied. Two aliases
++to the same Purpose within one rule are rejected as ambiguous. Define
++purposes first (an inactive weight-zero purpose can be activated by a rule). A local
++catalogue definition outside the active ground set can also be materialized by its
++rule; deleting definitions through unrelated APIs is outside this contract.
++
++Flow `perspective.context.changed` carries ContextDecision: revision, validUntil,
++labels, activeRules, purposeWeights, purposeRules, sourceRevisions and unknownSources.
++Source observations remain internal. A revision/evidence change is observable even
++when effective purpose weights do not change. Input context events are consumed and
++are not forwarded as user content. Existing GeneralCell topic loop protection applies.
++
++## Content filter
++
++ContextFlowFilterCell is registered as `cell:///ContextFlowFilter` by AppInitializer.
++Its get root `filter` contains state and configuration; mutation `filter.configure`
++accepts `{perspectiveEndpoint, contentEndpoints, baseTopics, topicsByLabel}`. It saves
++configuration in ContextFilter.json and rebuilds authorized runtime subscriptions.
++
++The Cell subscribes to Perspective control before taking its snapshot, and consumes
++all control events. It subscribes separately to authorized content endpoints. Topic
++patterns are exact names, prefix.* or *. Every active context restriction intersects
++with baseTopics. No restriction expands that base. Unknown/expired context uses the
++explicit base policy. Previously delivered content is not removed retroactively.
++
++Malformed control is ignored; conflicting snapshots at equal revision are rejected.
++Reconfiguring the same policy preserves the latest control state. A changed policy
++blocks delivery from the old binding while reconnection takes place.
++
++A CellConfiguration can subscribe its root to the filter through a CellReference.
++The integration test uses the actual resolver loadCell → root.flow path consumed by
++CellViewModel, with a configured Perspective and content source. This establishes
++Flow delivery to the Porthole input, not screen rendering, phone sensors or deployment.
++
++## Verification boundaries
++
++Model tests cover morning/home/family, office, physical parent meeting, digital group,
++news labels, duplicate/delayed/conflicting events, expiry/restart, priority, zero weights
++and filter intersection. Runtime tests cover real subscriptions, restored configuration,
++non-owner rejection with bypass disabled, same-policy reconfirmation and resolver-loaded
++Porthole input. Production phone sources remain a separate integration.
++
++Fixtures: Tests/CellBaseTests/Fixtures/PerspectiveContext. Their observation validator
++is in the companion PDD checks/validate_contract.py; Swift also round-trips the same
++fixtures. Broad suite status is recorded separately; focused tests alone do not certify it.
+diff --git a/Sources/CellApple/PurposeAndInterest/Cells/ContextFlowFilterCell.swift b/Sources/CellApple/PurposeAndInterest/Cells/ContextFlowFilterCell.swift
+new file mode 100644
+index 0000000..fe4f031
+--- /dev/null
++++ b/Sources/CellApple/PurposeAndInterest/Cells/ContextFlowFilterCell.swift
+@@ -0,0 +1,131 @@
++// SPDX-License-Identifier: Apache-2.0
++@_spi(HAVENRuntime) import CellBase
++import Foundation
++import Combine
++
++/// Content policy is downstream of admission. Semantic context never grants access.
++public final class ContextFlowFilterCell: GeneralCell {
++    private var configuration: ContextFilterConfiguration?
++    private var decision: ContextDecision?
++    private let gate = ContextTransactionGate()
++    private let connectionGate = ContextTransactionGate()
++    private var connectedConfiguration: ContextFilterConfiguration?
++    public required init(owner: Identity) async { await super.init(owner: owner); try? await ensureRuntimeReady() }
++    public required init(from decoder: Decoder) throws { try super.init(from: decoder) }
++    public override func installCellRuntimeBindingsForAccess() async throws {
++        let owner = storedOwnerIdentity
++        agreementTemplate.ensureGrant("rw--", for: "filter")
++        do {
++            let data = try await getFileDataInCellDirectory(filename: "ContextFilter.json")
++            configuration = try JSONDecoder().decode(ContextFilterConfiguration.self, from: data)
++        } catch {
++            let e = error as NSError
++            guard (e.domain == NSCocoaErrorDomain && e.code == NSFileReadNoSuchFileError) || (e.domain == NSPOSIXErrorDomain && e.code == ENOENT) else { throw error }
++        }
++        let object = ContextSchemas.acknowledgement()
++        await registerGet(key: "filter", owner: owner, returns: ContextSchemas.filterState(), permissions: ["r---"], description: .string("Configured content filter and latest semantic control state.")) { [weak self] requester in
++            guard let self else { return .string("failure") }
++            guard await self.validateAccess("r---", at: "filter", for: requester) else { return .string("denied") }
++            do {
++                try await self.connectSources(requester: owner)
++                await self.gate.enter()
++                let config = self.configuration, decision = self.decision
++                await self.gate.leave()
++                return .object(["configuration": try config.map(ContextCodec.encode) ?? .null, "state": try decision.map(ContextCodec.encode) ?? .null])
++            } catch { return ContextCodec.error(error) }
++        }
++        await registerSet(key: "filter.configure", owner: owner, input: ContextSchemas.filterConfiguration(), returns: object, permissions: ["-w--"], description: .string("Persist an owner-approved base policy and semantic restrictions, then connect authorized sources.")) { [weak self] requester, value in
++            guard let self else { return .string("failure") }
++            guard await self.validateAccess("-w--", at: "filter", for: requester) else { return .string("denied") }
++            do {
++                let config = try ContextCodec.decode(value, as: ContextFilterConfiguration.self)
++                guard !config.perspectiveEndpoint.isEmpty, config.contentEndpoints.count <= 128, Set(config.contentEndpoints).count == config.contentEndpoints.count else { throw ContextError.invalidConfiguration }
++                await self.connectionGate.enter()
++                await self.gate.enter()
++                do {
++                    try await self.writeFileDataInCellDirectory(fileData: JSONEncoder().encode(config), filename: "ContextFilter.json")
++                    if self.configuration != config { self.decision = nil }
++                    self.configuration = config
++                    await self.gate.leave()
++                    await self.connectionGate.leave()
++                } catch { await self.gate.leave(); await self.connectionGate.leave(); throw error }
++                try await self.connectSources(requester: owner)
++                return .object(["status": .string("ok")])
++            } catch { return ContextCodec.error(error) }
++        }
++        await addInterceptForTopic(requester: owner, topic: "*") { [weak self] element, label, _ in
++            guard let self else { return nil }
++            await self.gate.enter()
++
++            if label == "filter:perspective" {
++                if element.topic == "perspective.context.changed", case let .object(object) = element.content,
++                   let incoming = try? ContextCodec.decode(.object(object), as: ContextDecision.self),
++                   (try? incoming.validate()) != nil,
++                   self.connectedConfiguration == self.configuration,
++                   self.decision == nil || incoming.revision > self.decision!.revision {
++                    self.decision = incoming
++                }
++                await self.gate.leave(); return nil
++            }
++            guard label.hasPrefix("filter:content:"),
++                  let config = self.configuration, self.connectedConfiguration == config,
++                  config.permits(topic: element.topic, decision: self.decision, now: Date()) else { await self.gate.leave(); return nil }
++            await self.gate.leave()
++            return element
++        }
++    }
++    private func connectSources(requester: Identity) async throws {
++        try await ContextConnectionScope.perform(uuid) {
++            try await connectSourcesInScope(requester: requester)
++        }
++    }
++    private func connectSourcesInScope(requester: Identity) async throws {
++        await connectionGate.enter()
++        do {
++            await gate.enter(); let config = configuration; await gate.leave()
++            guard let config else { await connectionGate.leave(); return }
++            if connectedConfiguration == config { await connectionGate.leave(); return }
++            if let old = connectedConfiguration {
++                await detachAndWait(label: "filter:perspective", requester: requester)
++                for index in old.contentEndpoints.indices { await detachAndWait(label: "filter:content:\(index)", requester: requester) }
++            }
++            await gate.enter(); connectedConfiguration = nil; await gate.leave()
++            guard let resolver = CellBase.defaultCellResolver else { throw ContextError.unknownSource }
++            let perspective = try await resolver.cellAtEndpoint(endpoint: config.perspectiveEndpoint, requester: requester)
++            agreementTemplate.ensureGrant("rw--", for: "filter:perspective")
++            guard try await attach(emitter: perspective, label: "filter:perspective", requester: requester) == .connected else { throw ContextError.unknownSource }
++            await gate.enter(); connectedConfiguration = config; await gate.leave()
++            try await absorbFlow(label: "filter:perspective", requester: requester)
++            guard let readable = perspective as? Meddle else { throw ContextError.unknownSource }
++            let payload = try await readable.get(keypath: "perspective.context.state", requester: requester)
++            let incoming = try ContextCodec.decode(payload, as: ContextDecision.self)
++            try incoming.validate()
++            await gate.enter()
++            if let current = decision, incoming.revision == current.revision && incoming != current {
++                await gate.leave(); throw ContextError.conflictingRevision
++            }
++            if decision == nil || incoming.revision > decision!.revision { decision = incoming }
++            await gate.leave()
++            for (index, endpoint) in config.contentEndpoints.enumerated() {
++                let cell = try await resolver.cellAtEndpoint(endpoint: endpoint, requester: requester)
++                let label = "filter:content:\(index)"
++                agreementTemplate.ensureGrant("rw--", for: label)
++                guard try await attach(emitter: cell, label: label, requester: requester) == .connected else { throw ContextError.unknownSource }
++                try await absorbFlow(label: label, requester: requester)
++            }
++            await gate.enter(); connectedConfiguration = config; await gate.leave()
++            await connectionGate.leave()
++        } catch {
++            await gate.enter(); decision = nil; connectedConfiguration = nil; await gate.leave()
++            await detachAndWait(label: "filter:perspective", requester: requester)
++            if let config = configuration { for index in config.contentEndpoints.indices { await detachAndWait(label: "filter:content:\(index)", requester: requester) } }
++            await connectionGate.leave(); throw error
++        }
++    }
++    public override func flow(requester: Identity) async throws -> AnyPublisher<FlowElement, Error> {
++        // Admission is checked by the existing implementation before startup work.
++        let publisher = try await super.flow(requester: requester)
++        try await connectSources(requester: storedOwnerIdentity)
++        return publisher
++    }
++}
+diff --git a/Sources/CellApple/PurposeAndInterest/Cells/PerspectiveCell+Context.swift b/Sources/CellApple/PurposeAndInterest/Cells/PerspectiveCell+Context.swift
+new file mode 100644
+index 0000000..fd64949
+--- /dev/null
++++ b/Sources/CellApple/PurposeAndInterest/Cells/PerspectiveCell+Context.swift
+@@ -0,0 +1,253 @@
++// SPDX-License-Identifier: Apache-2.0
++@_spi(HAVENRuntime) import CellBase
++import Foundation
++
++extension PerspectiveCell {
++    func contextPayload() async -> ValueType {
++        do {
++            try await connectContextSources(requester: storedOwnerIdentity)
++            let (decision, configuration) = try await currentContextSnapshot()
++            return .object(["state": try ContextCodec.encode(decision), "configuration": try ContextCodec.encode(configuration)])
++        } catch { return ContextCodec.error(error) }
++    }
++
++    func setupContextKeys(owner: Identity) async throws {
++        do {
++            let data = try await getFileDataInCellDirectory(filename: "PerspectiveContext.json")
++            let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
++            contextState = try decoder.decode(PerspectiveContextState.self, from: data)
++        } catch {
++            let e = error as NSError
++            guard (e.domain == NSCocoaErrorDomain && e.code == NSFileReadNoSuchFileError) || (e.domain == NSPOSIXErrorDomain && e.code == ENOENT) else { throw error }
++        }
++        contextEmitter = await makeCellOwnedFlowEmitterForRuntimeBinding(requester: owner)
++        let object = ContextSchemas.acknowledgement()
++        await registerGet(key: "perspective.context", owner: owner, returns: ContextSchemas.perspective(), permissions: ["r---"], description: .string("Semantic context and its current rule evidence.")) { [weak self] requester in
++            guard let self else { return .string("failure") }
++            guard await self.validateAccess("r---", at: "perspective", for: requester) else { return .string("denied") }
++            return await self.contextPayload()
++        }
++        await registerSet(key: "perspective.context.configure", owner: owner, input: ContextSchemas.configuration(), returns: object, permissions: ["-w--"], description: .string("Configure semantic sources and context rules; source bindings must be explicitly authorized.")) { [weak self] requester, value in
++            guard let self else { return .string("failure") }
++            guard await self.validateAccess("-w--", at: "perspective", for: requester) else { return .string("denied") }
++            do {
++                var configuration = try ContextCodec.decode(value, as: ContextConfiguration.self)
++                try configuration.validate()
++                // Resolve aliases before priority selection so one Purpose has one weight.
++                for index in configuration.rules.indices {
++                    var canonical: [String: Double] = [:]
++                    for (reference, weight) in configuration.rules[index].purposeWeights {
++                        guard let purpose = await self.resolveContextPurpose(reference),
++                              canonical[purpose.reference] == nil else { throw ContextError.invalidConfiguration }
++                        canonical[purpose.reference] = weight
++                    }
++                    configuration.rules[index].purposeWeights = canonical
++                }
++                await self.contextConnectionGate.enter()
++                await self.contextGate.enter()
++                do {
++                    let evaluationTime = Date()
++                    var candidate = self.contextState; try candidate.configure(configuration)
++                    candidate.expire(now: evaluationTime)
++                    try await self.saveContextState(candidate)
++                    self.contextState = candidate
++                    self.emitContextDecision(now: evaluationTime)
++                    await self.contextGate.leave()
++                    await self.contextConnectionGate.leave()
++                } catch { await self.contextGate.leave(); await self.contextConnectionGate.leave(); throw error }
++                // Binding changes are serialized separately; attach must not hold the event transaction gate.
++                try await self.connectContextSources(requester: owner)
++                return .object(["status": .string("ok")])
++            } catch { return ContextCodec.error(error) }
++        }
++        await registerSet(key: "perspective.context.sources.detach", owner: owner, input: ExploreContract.schema(type: "string"), returns: object, permissions: ["-w--"], description: .string("Detach and invalidate one semantic source.")) { [weak self] requester, value in
++            guard let self else { return .string("failure") }
++            guard await self.validateAccess("-w--", at: "perspective", for: requester) else { return .string("denied") }
++            guard case let .string(sourceID) = value else { return .string("invalid_source") }
++            await self.contextConnectionGate.enter()
++            await self.contextGate.enter()
++            var candidate = self.contextState
++            var configuration = candidate.configuration
++            guard let index = configuration.sources.firstIndex(where: { $0.sourceID == sourceID }) else {
++                await self.contextGate.leave(); await self.contextConnectionGate.leave(); return .string("unknown_source")
++            }
++            configuration.sources[index].enabled = false
++            do { try candidate.configure(configuration); try await self.saveContextState(candidate) }
++            catch { await self.contextGate.leave(); await self.contextConnectionGate.leave(); return ContextCodec.error(error) }
++            self.contextState = candidate
++            self.contextSources.removeValue(forKey: sourceID)
++            await self.contextGate.leave()
++            await self.detachAndWait(label: "context:" + sourceID, requester: owner)
++            do { try await self.disconnectContextSource(sourceID) }
++            catch { await self.contextConnectionGate.leave(); return ContextCodec.error(error) }
++            await self.contextConnectionGate.leave()
++            return .object(["status": .string("ok")])
++        }
++        await registerSet(key: "perspective.context.sources.attach", owner: owner, input: ExploreContract.schema(type: "string"), returns: object, permissions: ["-w--"], description: .string("Re-enable one configured semantic source; source admission still applies.")) { [weak self] requester, value in
++            guard let self else { return .string("failure") }
++            guard await self.validateAccess("-w--", at: "perspective", for: requester) else { return .string("denied") }
++            guard case let .string(sourceID) = value else { return .string("invalid_source") }
++            await self.contextGate.enter()
++            var configuration = self.contextState.configuration
++            await self.contextGate.leave()
++            guard let index = configuration.sources.firstIndex(where: { $0.sourceID == sourceID }) else { return .string("unknown_source") }
++            configuration.sources[index].enabled = true
++            do { return try await self.set(keypath: "perspective.context.configure", value: ContextCodec.encode(configuration), requester: requester) }
++            catch { return ContextCodec.error(error) }
++        }
++        await addInterceptForTopic(requester: owner, topic: "context.observation.changed") { [weak self] event, label, _ in
++            guard let self else { return nil }
++            let sourceID = String(label.dropFirst("context:".count))
++            guard label.hasPrefix("context:") else { return nil }
++            // Labels are assigned by this Cell's source binding, not event.origin.
++            if case let .object(object) = event.content {
++                do { try await self.ingestContext(try ContextCodec.decode(.object(object), as: ContextObservation.self), sourceID: sourceID, eventID: event.id, snapshot: false) }
++                catch { CellBase.diagnosticLog("context event rejected: \(error)", domain: .flow) }
++            }
++            return nil
++        }
++    }
++
++    func connectContextSources(requester: Identity) async throws {
++        try await ContextConnectionScope.perform(uuid) {
++            try await connectContextSourcesInScope(requester: requester)
++        }
++    }
++    private func connectContextSourcesInScope(requester: Identity) async throws {
++        await contextConnectionGate.enter()
++        do {
++            await contextGate.enter()
++            let wanted = contextState.configuration.sources.filter(\.enabled)
++            await contextGate.leave()
++            for (id, binding) in contextSources where !wanted.contains(binding.configuration) {
++                await detachAndWait(label: "context:" + id, requester: requester)
++                await contextGate.enter(); contextSources.removeValue(forKey: id); await contextGate.leave()
++                try await disconnectContextSource(id)
++            }
++            for source in wanted where contextSources[source.sourceID] == nil {
++                guard let resolver = CellBase.defaultCellResolver,
++                      let cell = try await resolver.cellAtEndpoint(endpoint: source.endpoint, requester: requester) as? GeneralCell else { throw ContextError.unknownSource }
++                let label = "context:" + source.sourceID
++                agreementTemplate.ensureGrant("rw--", for: label)
++                let status = try await attach(emitter: cell, label: label, requester: requester)
++                guard status == .connected else { throw ContextError.unknownSource }
++                // Install binding before subscription so incoming events can be accepted.
++                await contextGate.enter()
++                contextSources[source.sourceID] = ContextRuntimeSource(configuration: source, cell: cell)
++                await contextGate.leave()
++                do {
++                    try await absorbFlow(label: label, requester: requester)
++                    let value = try await cell.get(keypath: source.snapshotKey, requester: requester)
++                    let observation = try ContextCodec.decode(value, as: ContextObservation.self)
++                    try await ingestContext(observation, sourceID: source.sourceID, eventID: "snapshot:\(observation.revision)", snapshot: true)
++                } catch {
++                    await contextGate.enter(); contextSources.removeValue(forKey: source.sourceID); await contextGate.leave()
++                    await detachAndWait(label: label, requester: requester)
++                    try await disconnectContextSource(source.sourceID)
++                    throw error
++                }
++            }
++            await contextConnectionGate.leave()
++        } catch { await contextConnectionGate.leave(); throw error }
++    }
++    private func ingestContext(_ observation: ContextObservation, sourceID: String, eventID: String, snapshot: Bool) async throws {
++        await contextGate.enter()
++        do {
++            guard let binding = contextSources[sourceID], contextState.configuration.sources.contains(binding.configuration) else { throw ContextError.unknownSource }
++            var candidate = contextState
++            let evaluationTime = Date()
++            let updated = try candidate.ingest(observation, sourceID: sourceID, eventID: eventID, snapshot: snapshot, now: evaluationTime)
++            let expired = candidate.expire(now: evaluationTime)
++            if updated || expired {
++                try await saveContextState(candidate)
++                contextState = candidate
++                emitContextDecision(now: evaluationTime)
++            }
++            await contextGate.leave()
++        } catch { await contextGate.leave(); throw error }
++    }
++    private func saveContextState(_ state: PerspectiveContextState) async throws {
++        let encoder = JSONEncoder(); encoder.dateEncodingStrategy = .iso8601
++        try await writeFileDataInCellDirectory(fileData: encoder.encode(state), filename: "PerspectiveContext.json")
++    }
++    private func currentContextSnapshot() async throws -> (ContextDecision, ContextConfiguration) {
++        await contextGate.enter()
++        do {
++            let evaluationTime = Date()
++            var candidate = contextState
++            if candidate.expire(now: evaluationTime) {
++                try await saveContextState(candidate); contextState = candidate; emitContextDecision(now: evaluationTime)
++            }
++            let decision = contextState.decision(now: evaluationTime), configuration = contextState.configuration
++            await contextGate.leave()
++            return (decision, configuration)
++        } catch { await contextGate.leave(); throw error }
++    }
++    // Disconnect revisions must also survive a Perspective-only restart.
++    private func disconnectContextSource(_ sourceID: String) async throws {
++        await contextGate.enter()
++        do {
++            let evaluationTime = Date()
++            var candidate = contextState
++            candidate.disconnect(sourceID)
++            candidate.expire(now: evaluationTime)
++            if candidate.revision != contextState.revision {
++                try await saveContextState(candidate)
++                contextState = candidate
++            }
++            emitContextDecision(now: evaluationTime)
++            await contextGate.leave()
++        } catch { await contextGate.leave(); throw error }
++    }
++    private func emitContextDecision(now: Date) {
++        let decision = contextState.decision(now: now)
++        if decision != lastContextDecision {
++            lastContextDecision = decision
++            if let value = try? ContextCodec.encode(decision), case let .object(object) = value {
++                var event = FlowElement(title: "Perspective context changed", content: .object(object), properties: .init(type: .event, contentType: .object))
++                event.topic = "perspective.context.changed"; event.origin = uuid
++                contextEmitter?(event)
++            }
++        }
++        contextExpiryTask?.cancel()
++        if let expiry = contextState.observations.values.map(\.validUntil).filter({ $0 > now }).min() {
++            contextExpiryTask = Task { [weak self] in
++                do { try await Task.sleep(nanoseconds: UInt64(max(0, expiry.timeIntervalSinceNow) * 1_000_000_000)) } catch { return }
++                guard let self, !Task.isCancelled else { return }
++                await self.contextGate.enter()
++                let evaluationTime = Date()
++                var candidate = self.contextState
++                do { if candidate.expire(now: evaluationTime) { try await self.saveContextState(candidate); self.contextState = candidate }; self.emitContextDecision(now: evaluationTime) }
++                catch { CellBase.diagnosticLog("context expiry persistence failed: \(error)", domain: .flow) }
++                await self.contextGate.leave()
++            }
++        }
++    }
++    private func resolveContextPurpose(_ reference: String) async -> Purpose? {
++        if let purpose = await context.findPurposeByReference(reference) { return purpose }
++        let active = await context.getActivePurposes(minWeight: 0, limit: Int.max)
++        let known = active.compactMap { $0.value as? Purpose } + (await context.findPurpose(name: "*", weightedPurposes: []))
++        return known.first { $0.reference == reference || PortableReference.make(kind: "purpose", localReference: $0.reference, name: $0.name) == reference }
++    }
++    func effectiveActivePurposes(minWeight: Double, limit: Int) async -> [Weight<Purpose>] {
++        try? await connectContextSources(requester: storedOwnerIdentity)
++        let overrides = (try? await currentContextSnapshot())?.0.purposeWeights ?? [:]
++        var effective = [Weight<Purpose>]()
++        for var weighted in await context.getActivePurposes(minWeight: 0, limit: Int.max) {
++            let purpose = weighted.value as? Purpose
++            let local = weighted.reference ?? purpose?.reference
++            let portable = PortableReference.make(kind: "purpose", localReference: local, name: purpose?.name)
++            if let override = local.flatMap({ overrides[$0] }) ?? portable.flatMap({ overrides[$0] }) { weighted.weight = override }
++            if weighted.weight > 0 && weighted.weight >= minWeight { effective.append(weighted) }
++        }
++        let represented = Set(effective.compactMap { $0.reference ?? $0.value?.reference })
++        for (reference, weight) in overrides where weight > 0 && weight >= minWeight && !represented.contains(reference) {
++            if let purpose = await resolveContextPurpose(reference),
++               !effective.contains(where: { ($0.reference ?? $0.value?.reference) == purpose.reference }) {
++                effective.append(Weight<Purpose>(weight: weight, value: purpose))
++            }
++        }
++        return Array(effective.sorted { $0.weight > $1.weight }.prefix(max(0, limit)))
++    }
++}
++struct ContextRuntimeSource { var configuration: ContextSource; var cell: GeneralCell }
+diff --git a/Sources/CellBase/PurposeAndInterest/ContextFilterConfiguration.swift b/Sources/CellBase/PurposeAndInterest/ContextFilterConfiguration.swift
+new file mode 100644
+index 0000000..cb496e8
+--- /dev/null
++++ b/Sources/CellBase/PurposeAndInterest/ContextFilterConfiguration.swift
+@@ -0,0 +1,31 @@
++// SPDX-License-Identifier: Apache-2.0
++import Foundation
++#if canImport(Combine)
++import Combine
++#else
++import OpenCombine
++#endif
++
++public struct ContextFilterConfiguration: Codable, Equatable, Sendable {
++    public var perspectiveEndpoint: String
++    public var contentEndpoints: [String]
++    public var baseTopics: [String]
++    /// Each active semantic label adds an intersection constraint.
++    public var topicsByLabel: [String: [String]]
++    public init(perspectiveEndpoint: String, contentEndpoints: [String], baseTopics: [String], topicsByLabel: [String: [String]] = [:]) {
++        self.perspectiveEndpoint = perspectiveEndpoint; self.contentEndpoints = contentEndpoints
++        self.baseTopics = baseTopics; self.topicsByLabel = topicsByLabel
++    }
++    public func permits(topic: String, decision: ContextDecision?, now: Date) -> Bool {
++        func matches(_ patterns: [String]) -> Bool {
++            patterns.contains { $0 == "*" || $0 == topic || ($0.hasSuffix(".*") && topic.hasPrefix(String($0.dropLast()))) }
++        }
++        guard matches(baseTopics) else { return false }
++        guard let decision, let expiry = decision.validUntil, expiry > now else { return true }
++        for label in decision.labels {
++            if let topics = topicsByLabel[label], !matches(topics) { return false }
++        }
++        return true
++    }
++}
++
+diff --git a/Sources/CellBase/PurposeAndInterest/ContextSchemas.swift b/Sources/CellBase/PurposeAndInterest/ContextSchemas.swift
+new file mode 100644
+index 0000000..61c6243
+--- /dev/null
++++ b/Sources/CellBase/PurposeAndInterest/ContextSchemas.swift
+@@ -0,0 +1,56 @@
++// SPDX-License-Identifier: Apache-2.0
++import Foundation
++
++public enum ContextSchemas {
++    static let string = ExploreContract.schema(type: "string")
++    static let integer = ExploreContract.schema(type: "integer")
++    static let strings = ExploreContract.listSchema(item: string)
++    static let numberMap = ExploreContract.schema(type: "object", description: "Map from purpose reference to finite nonnegative weight; zero deactivates.")
++    public static func decision() -> ValueType {
++        ExploreContract.objectSchema(properties: ["revision": integer, "validUntil": ExploreContract.oneOfSchema(options: [string, .null]), "labels": strings,
++            "activeRules": strings, "purposeWeights": numberMap,
++            "purposeRules": ExploreContract.schema(type: "object", description: "Map from purpose reference to winning rule ID."),
++            "sourceRevisions": ExploreContract.schema(type: "object", description: "Map from source ID to last accepted revision."), "unknownSources": strings],
++            requiredKeys: ["revision", "labels", "activeRules", "purposeWeights", "purposeRules", "sourceRevisions", "unknownSources"])
++    }
++    public static func configuration() -> ValueType {
++        let source = ExploreContract.objectSchema(properties: ["sourceID": string, "endpoint": string, "snapshotKey": string, "enabled": ExploreContract.schema(type: "bool")], requiredKeys: ["sourceID", "endpoint", "snapshotKey", "enabled"])
++        let predicateNode = ExploreContract.objectSchema(properties: [
++            "kind": string, "sourceID": string, "keypath": string, "operation": string,
++            "expected": string, "metric": string,
++            "all": ExploreContract.listSchema(item: ExploreContract.schema(type: "object", description: "Recursive GoalPredicate; each child requires kind, all and any.")),
++            "any": ExploreContract.listSchema(item: ExploreContract.schema(type: "object", description: "Recursive GoalPredicate; each child requires kind, all and any."))
++        ], requiredKeys: ["kind", "all", "any"], description: "Recursive GoalPredicate; include empty all/any arrays on leaves. Runtime decodes each child with the same shape.")
++        let privacy = ExploreContract.objectSchema(properties: [
++            "rawEvidenceVisibility": string, "publishableStatuses": strings,
++            "doNotExportRawLocation": ExploreContract.schema(type: "bool"), "retentionSeconds": integer
++        ], requiredKeys: ["rawEvidenceVisibility", "publishableStatuses", "doNotExportRawLocation"])
++        let evidence = ExploreContract.objectSchema(properties: [
++            "sourceID": string, "visibility": string, "endpoint": string, "keypath": string,
++            "topic": string, "eventType": string, "requiredGrant": string,
++            "freshnessSeconds": integer, "summary": string
++        ], requiredKeys: ["sourceID", "visibility"])
++        let helper = ExploreContract.objectSchema(properties: ["endpoint": string, "purposeRef": string, "actionKeypath": string, "title": string], requiredKeys: ["endpoint"])
++        let definition = ExploreContract.objectSchema(properties: [
++            "schema": string, "goalID": string, "purposeRef": string, "title": string,
++            "description": string, "lifecycle": string, "evaluatorKind": string,
++            "metric": string, "baseline": string, "target": string, "timeframe": string,
++            "evidenceSources": ExploreContract.listSchema(item: evidence),
++            "predicate": ExploreContract.oneOfSchema(options: [predicateNode, .null]),
++            "tolerance": ExploreContract.schema(type: "object", description: "Optional GoalTolerance; all fields optional."),
++            "statusPolicy": ExploreContract.schema(type: "object", description: "Optional GoalStatusPolicy; all fields optional."),
++            "helperCells": ExploreContract.listSchema(item: helper), "privacy": privacy, "tags": strings
++        ], requiredKeys: ["schema", "goalID", "purposeRef", "title", "description", "lifecycle", "evaluatorKind", "evidenceSources", "helperCells", "privacy", "tags"])
++        let rule = ExploreContract.objectSchema(properties: ["id": string, "priority": integer, "definition": definition, "label": string, "purposeWeights": numberMap], requiredKeys: ["id", "priority", "definition", "label", "purposeWeights"])
++        return ExploreContract.objectSchema(properties: ["sources": ExploreContract.listSchema(item: source), "rules": ExploreContract.listSchema(item: rule)], requiredKeys: ["sources", "rules"])
++    }
++    public static func perspective() -> ValueType { ExploreContract.objectSchema(properties: ["state": decision(), "configuration": configuration()], requiredKeys: ["state", "configuration"]) }
++    public static func acknowledgement() -> ValueType {
++        ExploreContract.objectSchema(properties: ["status": string, "message": string], requiredKeys: ["status"], description: "ok after storage and connection succeed; error otherwise.")
++    }
++    public static func filterConfiguration() -> ValueType {
++        ExploreContract.objectSchema(properties: ["perspectiveEndpoint": string, "contentEndpoints": strings, "baseTopics": strings,
++            "topicsByLabel": ExploreContract.schema(type: "object", description: "Map from semantic label to array of allowed topics/patterns; active entries intersect.")], requiredKeys: ["perspectiveEndpoint", "contentEndpoints", "baseTopics", "topicsByLabel"])
++    }
++    public static func filterState() -> ValueType { ExploreContract.objectSchema(properties: ["configuration": ExploreContract.oneOfSchema(options: [filterConfiguration(), .null]), "state": ExploreContract.oneOfSchema(options: [decision(), .null])], requiredKeys: ["configuration", "state"]) }
++}
+diff --git a/Sources/CellBase/PurposeAndInterest/PerspectiveContext.swift b/Sources/CellBase/PurposeAndInterest/PerspectiveContext.swift
+new file mode 100644
+index 0000000..2ede341
+--- /dev/null
++++ b/Sources/CellBase/PurposeAndInterest/PerspectiveContext.swift
+@@ -0,0 +1,204 @@
++// SPDX-License-Identifier: Apache-2.0
++import Foundation
++
++/// Semantic source state. A source owns sensing and interpretation of its labels.
++public struct ContextObservation: Codable, Equatable, Sendable {
++    public var schemaVersion: Int
++    public var revision: Int
++    public var observedAt: Date
++    public var validUntil: Date
++    public var transition: String
++    public var labels: [String]
++    public var configurationRevision: Int
++    public init(revision: Int, observedAt: Date, validUntil: Date, transition: String, labels: [String], configurationRevision: Int = 0) {
++        self.schemaVersion = 1; self.revision = revision; self.observedAt = observedAt
++        self.validUntil = validUntil; self.transition = transition; self.labels = labels
++        self.configurationRevision = configurationRevision
++    }
++    public func validate(now: Date) throws {
++        guard schemaVersion == 1, revision >= 0, configurationRevision >= 0,
++              validUntil > observedAt, observedAt <= now.addingTimeInterval(30),
++              ["snapshot", "entered", "left", "configurationChanged"].contains(transition),
++              labels.count <= 128, Set(labels).count == labels.count,
++              labels.allSatisfy({ !$0.isEmpty && $0.utf8.count <= 256 }) else {
++            throw ContextError.invalidObservation
++        }
++    }
++}
++
++public struct ContextSource: Codable, Equatable, Sendable {
++    public var sourceID: String
++    public var endpoint: String
++    public var enabled: Bool
++    public var snapshotKey: String
++    public init(sourceID: String, endpoint: String, snapshotKey: String = "context.observation", enabled: Bool = true) {
++        self.sourceID = sourceID; self.endpoint = endpoint; self.snapshotKey = snapshotKey; self.enabled = enabled
++    }
++}
++public struct ContextRule: Codable, Sendable {
++    public var id: String
++    public var priority: Int
++    public var definition: GoalDefinition
++    public var label: String
++    public var purposeWeights: [String: Double]
++    public init(id: String, priority: Int = 0, definition: GoalDefinition, label: String, purposeWeights: [String: Double] = [:]) {
++        self.id = id; self.priority = priority; self.definition = definition; self.label = label; self.purposeWeights = purposeWeights
++    }
++}
++public struct ContextConfiguration: Codable, Sendable {
++    public var sources: [ContextSource]
++    public var rules: [ContextRule]
++    public init(sources: [ContextSource] = [], rules: [ContextRule] = []) { self.sources = sources; self.rules = rules }
++    public func validate() throws {
++        guard sources.count <= 128, rules.count <= 256,
++              Set(sources.map(\.sourceID)).count == sources.count,
++              Set(rules.map(\.id)).count == rules.count,
++              sources.allSatisfy({ !$0.sourceID.isEmpty && !$0.endpoint.isEmpty && !$0.snapshotKey.isEmpty }) else { throw ContextError.invalidConfiguration }
++        let ids = Set(sources.map(\.sourceID))
++        for rule in rules {
++            guard !rule.id.isEmpty, !rule.label.isEmpty,
++                  rule.purposeWeights.values.allSatisfy({ $0.isFinite && $0 >= 0 }),
++                  Set(rule.definition.evidenceSources.map(\.sourceID)).count == rule.definition.evidenceSources.count,
++                  rule.definition.evidenceSources.allSatisfy({ ids.contains($0.sourceID) }) else { throw ContextError.invalidConfiguration }
++        }
++    }
++}
++public enum ContextError: Error { case invalidObservation, invalidConfiguration, unknownSource, conflictingRevision }
++public struct ContextDecision: Codable, Equatable, Sendable {
++    public var revision: Int
++    public var validUntil: Date?
++    public var labels: [String]
++    public var activeRules: [String]
++    public var purposeWeights: [String: Double]
++    public var purposeRules: [String: String]
++    public var sourceRevisions: [String: Int]
++    public var unknownSources: [String]
++}
++
++extension ContextDecision {
++    public func validate() throws {
++        guard revision >= 0, labels.count <= 256, Set(labels).count == labels.count,
++              labels.allSatisfy({ !$0.isEmpty && $0.utf8.count <= 256 }),
++              Set(activeRules).count == activeRules.count,
++              purposeWeights.values.allSatisfy({ $0.isFinite && $0 >= 0 }),
++              sourceRevisions.values.allSatisfy({ $0 >= 0 }),
++              (validUntil != nil || (labels.isEmpty && activeRules.isEmpty && purposeWeights.isEmpty)) else {
++            throw ContextError.invalidObservation
++        }
++    }
++}
++
++/// Pure, persistable state machine. Runtime serializes access and controls source admission.
++public struct PerspectiveContextState: Codable, Sendable {
++    public private(set) var revision: Int = 0
++    public var configuration: ContextConfiguration
++    public private(set) var observations: [String: ContextObservation]
++    public private(set) var eventIDs: [String: String]
++    // Runtime confirmation is intentionally not persisted.
++    public private(set) var confirmed: Set<String> = []
++    private enum CodingKeys: String, CodingKey { case revision, configuration, observations, eventIDs }
++    public init(configuration: ContextConfiguration = .init()) { self.configuration = configuration; observations = [:]; eventIDs = [:] }
++    public init(from decoder: Decoder) throws {
++        let c = try decoder.container(keyedBy: CodingKeys.self)
++        revision = try c.decodeIfPresent(Int.self, forKey: .revision) ?? 0
++        configuration = try c.decode(ContextConfiguration.self, forKey: .configuration)
++        observations = try c.decode([String: ContextObservation].self, forKey: .observations)
++        eventIDs = try c.decode([String: String].self, forKey: .eventIDs)
++        try configuration.validate()
++    }
++    public mutating func configure(_ configuration: ContextConfiguration) throws {
++        try configuration.validate()
++        // Changing a binding invalidates observations and revision history for that binding.
++        for source in self.configuration.sources where !configuration.sources.contains(where: { $0.sourceID == source.sourceID && $0.endpoint == source.endpoint && $0.snapshotKey == source.snapshotKey }) {
++            observations.removeValue(forKey: source.sourceID); eventIDs.removeValue(forKey: source.sourceID); confirmed.remove(source.sourceID)
++        }
++        for source in configuration.sources where !source.enabled { confirmed.remove(source.sourceID) }
++        self.configuration = configuration
++        revision += 1
++    }
++    @discardableResult public mutating func ingest(_ observation: ContextObservation, sourceID: String, eventID: String, snapshot: Bool, now: Date) throws -> Bool {
++        guard configuration.sources.contains(where: { $0.sourceID == sourceID && $0.enabled }) else { throw ContextError.unknownSource }
++        try observation.validate(now: now)
++        if let old = observations[sourceID] {
++            if observation.revision < old.revision { return false }
++            if observation.revision == old.revision {
++                guard observation == old else { throw ContextError.conflictingRevision }
++                if snapshot && observation.validUntil > now { let changed = confirmed.insert(sourceID).inserted; if changed { revision += 1 }; return changed }
++                return false
++            }
++            if eventIDs[sourceID] == eventID { throw ContextError.conflictingRevision }
++        }
++        revision += 1
++        observations[sourceID] = observation; eventIDs[sourceID] = eventID; if observation.validUntil > now { confirmed.insert(sourceID) } else { confirmed.remove(sourceID) }
++        return true
++    }
++    public mutating func disconnect(_ sourceID: String) { if confirmed.remove(sourceID) != nil { revision += 1 } }
++    @discardableResult public mutating func expire(now: Date) -> Bool {
++        let expired = confirmed.filter { (observations[$0]?.validUntil ?? .distantPast) <= now }
++        guard !expired.isEmpty else { return false }
++        confirmed.subtract(expired); revision += 1; return true
++    }
++    public func decision(now: Date) -> ContextDecision {
++        let fmt = ISO8601DateFormatter()
++        let observations = configuration.sources.compactMap { source -> GoalObservation? in
++            guard confirmed.contains(source.sourceID), let event = self.observations[source.sourceID] else { return nil }
++            return GoalObservation(sourceID: source.sourceID, status: event.validUntil > now ? .fresh : .stale,
++                                   observedAt: fmt.string(from: event.observedAt), labels: event.labels)
++        }
++        var active = [ContextRule]()
++        for rule in configuration.rules {
++            let required = Set(rule.definition.evidenceSources.map(\.sourceID))
++            let result = GoalEvaluationEngine.evaluate(definition: rule.definition, observations: observations.filter { required.contains($0.sourceID) }, evaluatedAt: fmt.string(from: now))
++            if result.status == .satisfied { active.append(rule) }
++        }
++        active.sort { $0.priority == $1.priority ? $0.id < $1.id : $0.priority > $1.priority }
++        var weights = [String: Double](), reasons = [String: String]()
++        for rule in active { for (ref, weight) in rule.purposeWeights where weights[ref] == nil { weights[ref] = weight; reasons[ref] = rule.id } }
++        return ContextDecision(revision: revision, validUntil: self.observations.filter { confirmed.contains($0.key) && $0.value.validUntil > now }.values.map(\.validUntil).min(), labels: Set(active.map(\.label)).sorted(), activeRules: active.map(\.id), purposeWeights: weights, purposeRules: reasons,
++                               sourceRevisions: self.observations.mapValues(\.revision),
++                               unknownSources: configuration.sources.filter { source in !confirmed.contains(source.sourceID) || (self.observations[source.sourceID]?.validUntil ?? .distantPast) <= now }.map(\.sourceID).sorted())
++    }
++}
++public enum ContextCodec {
++    public static func encode<T: Encodable>(_ value: T) throws -> ValueType {
++        let e = JSONEncoder(); e.dateEncodingStrategy = .iso8601
++        return try JSONDecoder().decode(ValueType.self, from: e.encode(value))
++    }
++    public static func decode<T: Decodable>(_ value: ValueType, as type: T.Type) throws -> T {
++        let d = JSONDecoder(); d.dateDecodingStrategy = .iso8601
++        return try d.decode(type, from: JSONEncoder().encode(value))
++    }
++    public static func error(_ error: Error) -> ValueType { .object(["status": .string("error"), "message": .string(String(describing: error))]) }
++}
++/// Serializes whole async transactions, including storage and emission, across actor suspension.
++public actor ContextTransactionGate {
++    private var held = false
++    private var waiters: [CheckedContinuation<Void, Never>] = []
++    public init() {}
++    public func enter() async {
++        if !held { held = true; return }
++        await withCheckedContinuation { waiters.append($0) }
++    }
++    public func leave() { if waiters.isEmpty { held = false } else { waiters.removeFirst().resume() } }
++}
++
++/// A startup dependency cycle must fail before waiting on a Cell's connection gate.
++public enum ContextConnectionScope {
++    @TaskLocal public static var cells: Set<String> = []
++    private static let startupGate = ContextTransactionGate()
++    /// Serialize independent roots; nested connections share their root's scope.
++    /// This prevents two startup Tasks taking opposite per-Cell gate orders.
++    public static func perform<T>(_ cellID: String, operation: () async throws -> T) async throws -> T {
++        guard !cells.contains(cellID) else { throw ContextError.invalidConfiguration }
++        let root = cells.isEmpty
++        if root { await startupGate.enter() }
++        do {
++            let result = try await $cells.withValue(cells.union([cellID]), operation: operation)
++            if root { await startupGate.leave() }
++            return result
++        } catch {
++            if root { await startupGate.leave() }
++            throw error
++        }
++    }
++}
+diff --git a/Tests/CellBaseTests/Fixtures/PerspectiveContext/duplicate-labels.json b/Tests/CellBaseTests/Fixtures/PerspectiveContext/duplicate-labels.json
+new file mode 100644
+index 0000000..a86da42
+--- /dev/null
++++ b/Tests/CellBaseTests/Fixtures/PerspectiveContext/duplicate-labels.json
+@@ -0,0 +1,16 @@
++{
++  "valid": false,
++  "evaluatedAt": "2026-10-12T07:00:00Z",
++  "observation": {
++    "schemaVersion": 1,
++    "revision": 12,
++    "observedAt": "2026-10-12T07:00:00Z",
++    "validUntil": "2026-10-12T08:00:00Z",
++    "transition": "entered",
++    "labels": [
++      "home",
++      "home"
++    ],
++    "configurationRevision": 3
++  }
++}
+diff --git a/Tests/CellBaseTests/Fixtures/PerspectiveContext/entered.json b/Tests/CellBaseTests/Fixtures/PerspectiveContext/entered.json
+new file mode 100644
+index 0000000..5461a5a
+--- /dev/null
++++ b/Tests/CellBaseTests/Fixtures/PerspectiveContext/entered.json
+@@ -0,0 +1,15 @@
++{
++  "valid": true,
++  "evaluatedAt": "2026-10-12T07:00:00Z",
++  "observation": {
++    "schemaVersion": 1,
++    "revision": 12,
++    "observedAt": "2026-10-12T07:00:00Z",
++    "validUntil": "2026-10-12T08:00:00Z",
++    "transition": "entered",
++    "labels": [
++      "home"
++    ],
++    "configurationRevision": 3
++  }
++}
+diff --git a/Tests/CellBaseTests/Fixtures/PerspectiveContext/invalid-window.json b/Tests/CellBaseTests/Fixtures/PerspectiveContext/invalid-window.json
+new file mode 100644
+index 0000000..a3da472
+--- /dev/null
++++ b/Tests/CellBaseTests/Fixtures/PerspectiveContext/invalid-window.json
+@@ -0,0 +1,15 @@
++{
++  "valid": false,
++  "evaluatedAt": "2026-10-12T07:00:00Z",
++  "observation": {
++    "schemaVersion": 1,
++    "revision": 12,
++    "observedAt": "2026-10-12T07:00:00Z",
++    "validUntil": "2026-10-12T07:00:00Z",
++    "transition": "entered",
++    "labels": [
++      "home"
++    ],
++    "configurationRevision": 3
++  }
++}
+diff --git a/Tests/CellBaseTests/Fixtures/PerspectiveContext/negative-revision.json b/Tests/CellBaseTests/Fixtures/PerspectiveContext/negative-revision.json
+new file mode 100644
+index 0000000..e1fcae2
+--- /dev/null
++++ b/Tests/CellBaseTests/Fixtures/PerspectiveContext/negative-revision.json
+@@ -0,0 +1,15 @@
++{
++  "valid": false,
++  "evaluatedAt": "2026-10-12T07:00:00Z",
++  "observation": {
++    "schemaVersion": 1,
++    "revision": -1,
++    "observedAt": "2026-10-12T07:00:00Z",
++    "validUntil": "2026-10-12T08:00:00Z",
++    "transition": "entered",
++    "labels": [
++      "home"
++    ],
++    "configurationRevision": 3
++  }
++}
+diff --git a/Tests/CellBaseTests/Fixtures/PerspectiveContext/schema-unknown.json b/Tests/CellBaseTests/Fixtures/PerspectiveContext/schema-unknown.json
+new file mode 100644
+index 0000000..954802f
+--- /dev/null
++++ b/Tests/CellBaseTests/Fixtures/PerspectiveContext/schema-unknown.json
+@@ -0,0 +1,15 @@
++{
++  "valid": false,
++  "evaluatedAt": "2026-10-12T07:00:00Z",
++  "observation": {
++    "schemaVersion": 2,
++    "revision": 12,
++    "observedAt": "2026-10-12T07:00:00Z",
++    "validUntil": "2026-10-12T08:00:00Z",
++    "transition": "entered",
++    "labels": [
++      "home"
++    ],
++    "configurationRevision": 3
++  }
++}
+diff --git a/Tests/CellBaseTests/PerspectiveContextTests.swift b/Tests/CellBaseTests/PerspectiveContextTests.swift
+new file mode 100644
+index 0000000..754bb4f
+--- /dev/null
++++ b/Tests/CellBaseTests/PerspectiveContextTests.swift
+@@ -0,0 +1,542 @@
++// SPDX-License-Identifier: Apache-2.0
++import XCTest
++#if canImport(Combine)
++import Combine
++#else
++import OpenCombine
++#endif
++@_spi(HAVENRuntime) @testable import CellBase
++@testable import CellApple
++
++final class PerspectiveContextTests: XCTestCase {
++    private let now = ISO8601DateFormatter().date(from: "2026-10-12T07:00:00Z")!
++    private func event(_ revision: Int, _ labels: [String], transition: String = "entered") -> ContextObservation {
++        .init(revision: revision, observedAt: now, validUntil: now.addingTimeInterval(3600), transition: transition, labels: labels)
++    }
++    private func config(weight: Double = 0.8) -> ContextConfiguration {
++        let predicate = GoalPredicate(kind: "all", all: [
++            .init(kind: "contains-label", sourceID: "time", expected: "morning"),
++            .init(kind: "any", any: [
++                .init(kind: "contains-label", sourceID: "place", expected: "home"),
++                .init(kind: "contains-label", sourceID: "presence", expected: "family")
++            ])
++        ])
++        let definition = GoalDefinition(goalID: "morning", purposeRef: "purpose://family", title: "Family morning", description: "Morning at home or with family", lifecycle: .continuous, evaluatorKind: .composite,
++                                        evidenceSources: ["time", "place", "presence"].map { .init(sourceID: $0) }, predicate: predicate)
++        return .init(sources: ["time", "place", "presence"].map { .init(sourceID: $0, endpoint: "cell:///" + $0) },
++                     rules: [.init(id: "morning", definition: definition, label: "morning", purposeWeights: ["purpose://family": weight])])
++    }
++    func testMorningNeedsTimeAndHomeOrFamilyAndKnownEmptySources() throws {
++        for home in [false, true] { for family in [false, true] { for morning in [false, true] {
++            var state = PerspectiveContextState(configuration: config())
++            try state.ingest(event(1, home ? ["home"] : []), sourceID: "place", eventID: "p", snapshot: false, now: now)
++            try state.ingest(event(1, family ? ["family"] : []), sourceID: "presence", eventID: "e", snapshot: false, now: now)
++            try state.ingest(event(1, morning ? ["morning"] : []), sourceID: "time", eventID: "t", snapshot: false, now: now)
++            XCTAssertEqual(state.decision(now: now).labels, morning && (home || family) ? ["morning"] : [])
++        } } }
++    }
++    func testDepartureDuplicateDelayedAndConflictingEvents() throws {
++        var state = PerspectiveContextState(configuration: config())
++        XCTAssertTrue(try state.ingest(event(1, ["home"]), sourceID: "place", eventID: "p1", snapshot: false, now: now))
++        XCTAssertFalse(try state.ingest(event(1, ["home"]), sourceID: "place", eventID: "p1", snapshot: false, now: now))
++        try state.ingest(event(2, [], transition: "left"), sourceID: "place", eventID: "p2", snapshot: false, now: now)
++        XCTAssertFalse(try state.ingest(event(1, ["home"]), sourceID: "place", eventID: "old", snapshot: false, now: now))
++        XCTAssertEqual(state.observations["place"]?.labels, [])
++        XCTAssertThrowsError(try state.ingest(event(2, ["home"]), sourceID: "place", eventID: "conflict", snapshot: false, now: now))
++        XCTAssertThrowsError(try state.ingest(event(3, []), sourceID: "outsider", eventID: "x", snapshot: false, now: now))
++    }
++    func testExpiryAndRestartRequireFreshSnapshotEvenAtSameRevision() throws {
++        var state = PerspectiveContextState(configuration: config())
++        for (id, labels) in [("place", ["home"]), ("time", ["morning"]), ("presence", [])] {
++            try state.ingest(event(1, labels), sourceID: id, eventID: id, snapshot: false, now: now)
++        }
++        XCTAssertEqual(state.decision(now: now).labels, ["morning"])
++        XCTAssertEqual(state.decision(now: now.addingTimeInterval(3600)).labels, [])
++        let restored = try ContextCodec.decode(ContextCodec.encode(state), as: PerspectiveContextState.self)
++        var reload = restored
++        XCTAssertEqual(reload.decision(now: now).labels, [])
++        for id in ["place", "time", "presence"] {
++            XCTAssertFalse(try reload.ingest(state.observations[id]!, sourceID: id, eventID: id, snapshot: false, now: now))
++            XCTAssertTrue(try reload.ingest(state.observations[id]!, sourceID: id, eventID: id, snapshot: true, now: now))
++        }
++        XCTAssertEqual(reload.decision(now: now).labels, ["morning"])
++    }
++    func testPrioritySupportsLowerWeightsAndDeactivationAndStableTies() throws {
++        var configuration = config(weight: 0.9)
++        var low = configuration.rules[0]; low.id = "a"; low.priority = 2; low.purposeWeights = ["purpose://family": 0]
++        var tied = low; tied.id = "b"; tied.purposeWeights = ["purpose://family": 0.4]
++        configuration.rules += [tied, low]
++        var state = PerspectiveContextState(configuration: configuration)
++        for (id, labels) in [("place", ["home"]), ("time", ["morning"]), ("presence", [])] { try state.ingest(event(1, labels), sourceID: id, eventID: id, snapshot: false, now: now) }
++        XCTAssertEqual(state.decision(now: now).purposeWeights["purpose://family"], 0)
++        XCTAssertEqual(state.decision(now: now).purposeRules["purpose://family"], "a")
++        try state.ingest(event(2, [], transition: "left"), sourceID: "time", eventID: "t2", snapshot: false, now: now)
++        XCTAssertEqual(state.decision(now: now).purposeWeights, [:])
++    }
++    func testMalformedConfigurationAndEventsAreRejected() throws {
++        var c = config(); c.sources.append(c.sources[0]); XCTAssertThrowsError(try c.validate())
++        c = config(); c.rules[0].purposeWeights = ["bad": .nan]; XCTAssertThrowsError(try c.validate())
++        var e = event(1, ["x", "x"]); XCTAssertThrowsError(try e.validate(now: now))
++        e = event(1, []); e.schemaVersion = 2; XCTAssertThrowsError(try e.validate(now: now))
++    }
++    func testFiltersIntersectWithinBaseAndUseBaseWhenUnknownOrExpired() throws {
++        let policy = ContextFilterConfiguration(perspectiveEndpoint: "cell:///Perspective", contentEndpoints: ["cell:///News"], baseTopics: ["news.*"], topicsByLabel: ["morning": ["news.family"], "work": ["news.work"]])
++        var state = PerspectiveContextState(configuration: config())
++        for (id, labels) in [("place", ["home"]), ("time", ["morning"]), ("presence", [])] { try state.ingest(event(1, labels), sourceID: id, eventID: id, snapshot: false, now: now) }
++        var decision = state.decision(now: now)
++        XCTAssertTrue(policy.permits(topic: "news.family", decision: decision, now: now))
++        XCTAssertFalse(policy.permits(topic: "news.work", decision: decision, now: now))
++        XCTAssertFalse(policy.permits(topic: "private", decision: nil, now: now))
++        decision.labels.append("work")
++        XCTAssertFalse(policy.permits(topic: "news.family", decision: decision, now: now))
++        XCTAssertTrue(policy.permits(topic: "news.work", decision: decision, now: now.addingTimeInterval(3601)))
++    }
++}
++
++private final class SemanticSourceFixture: GeneralCell {
++    var observation = ContextObservation(revision: 1, observedAt: Date(timeIntervalSince1970: floor(Date().timeIntervalSince1970)), validUntil: Date(timeIntervalSince1970: floor(Date().timeIntervalSince1970) + 3600), transition: "snapshot", labels: [])
++    var emitter: ((FlowElement) -> Void)?
++    required init(owner: Identity) async { await super.init(owner: owner); try? await ensureRuntimeReady() }
++    required init(from decoder: Decoder) throws { try super.init(from: decoder) }
++    override func installCellRuntimeBindingsForAccess() async throws {
++        let owner = storedOwnerIdentity
++        agreementTemplate.ensureGrant("r---", for: "context")
++        emitter = await makeCellOwnedFlowEmitterForRuntimeBinding(requester: owner)
++        await registerGet(key: "context", owner: owner, returns: ExploreContract.schema(type: "object"), permissions: ["r---"], description: .string("Source snapshot")) { [weak self] _ in
++            guard let self else { return .null }; return .object(["observation": try! ContextCodec.encode(self.observation)])
++        }
++    }
++    func send(_ labels: [String], topic: String = "context.observation.changed") {
++        observation.revision += 1; observation.labels = labels; observation.transition = labels.isEmpty ? "left" : "entered"
++        let value = try! ContextCodec.encode(observation)
++        guard case let .object(object) = value else { return }
++        var event = FlowElement(title: "Changed", content: .object(object), properties: .init(type: .event, contentType: .object))
++        event.topic = topic; emitter?(event)
++    }
++}
++
++final class PerspectiveContextFlowTests: XCTestCase {
++    private var oldVault: IdentityVaultProtocol?
++    private var oldResolver: CellResolverProtocol?
++    private var oldDebug = false
++    override func setUp() { oldVault = CellBase.defaultIdentityVault; oldResolver = CellBase.defaultCellResolver; oldDebug = CellBase.debugValidateAccessForEverything; CellBase.debugValidateAccessForEverything = true }
++    override func tearDown() { CellBase.defaultIdentityVault = oldVault; CellBase.defaultCellResolver = oldResolver; CellBase.debugValidateAccessForEverything = oldDebug }
++    func testRealSubscriptionChangesEffectivePurposesAndDepartureRestoresBaseline() async throws {
++        let vault = MockIdentityVault(); CellBase.defaultIdentityVault = vault
++        let owner = await vault.identity(for: "private", makeNewIfNotFound: true)!
++        let resolver = MockCellResolver(); CellBase.defaultCellResolver = resolver
++        let source = await SemanticSourceFixture(owner: owner)
++        try await resolver.registerNamedEmitCell(name: "place", emitCell: source, scope: .scaffoldUnique, identity: owner)
++        let cell = await PerspectiveCell(owner: owner)
++        let purpose = Purpose(name: "Family", description: "family")
++        await cell.context.upsertActivePurpose(weighedPurpose: Weight<Purpose>(weight: 0.5, value: purpose))
++        let definition = GoalDefinition(goalID: "at-home", purposeRef: purpose.reference, title: "Home", description: "At home", lifecycle: .continuous, evaluatorKind: .statePredicate,
++                                        evidenceSources: [.init(sourceID: "place")], predicate: .init(kind: "contains-label", sourceID: "place", expected: "home"))
++        let config = ContextConfiguration(sources: [.init(sourceID: "place", endpoint: "cell:///place")], rules: [.init(id: "home", definition: definition, label: "home", purposeWeights: [purpose.reference: 0])])
++        let response = try await cell.set(keypath: "perspective.context.configure", value: ContextCodec.encode(config), requester: owner)
++        guard case let .object(object) = response else { return XCTFail("bad response \(response)") }
++        guard case let .string(status)? = object["status"] else { return XCTFail("missing status \(response)") }
++        XCTAssertEqual(status, "ok", "\(response)")
++        let changed = expectation(description: "home context")
++        let departed = expectation(description: "departure context")
++        let feed = try await cell.flow(requester: owner).sink(receiveCompletion: { _ in }, receiveValue: { event in
++            guard event.topic == "perspective.context.changed", case let .object(value) = event.content, let state = try? ContextCodec.decode(.object(value), as: ContextDecision.self) else { return }
++            if state.labels == ["home"] { changed.fulfill() }
++            if state.labels.isEmpty && state.sourceRevisions["place"] == 3 { departed.fulfill() }
++        })
++        defer { feed.cancel() }
++        source.send(["home"])
++        await fulfillment(of: [changed], timeout: 3)
++        let active = await cell.effectiveActivePurposes(minWeight: 0, limit: 100)
++        XCTAssertFalse(active.contains { $0.value?.reference == purpose.reference })
++        source.send([])
++        await fulfillment(of: [departed], timeout: 3)
++        let restored = await cell.effectiveActivePurposes(minWeight: 0, limit: 100)
++        XCTAssertEqual(restored.first(where: { $0.value?.reference == purpose.reference })?.weight, 0.5)
++    }
++}
++
++final class PerspectiveContextIntegrationTests: XCTestCase {
++    private var oldVault: IdentityVaultProtocol?
++    private var oldResolver: CellResolverProtocol?
++    private var oldDebug = false
++    override func setUp() { oldVault = CellBase.defaultIdentityVault; oldResolver = CellBase.defaultCellResolver; oldDebug = CellBase.debugValidateAccessForEverything; CellBase.debugValidateAccessForEverything = true }
++    override func tearDown() { CellBase.defaultIdentityVault = oldVault; CellBase.defaultCellResolver = oldResolver; CellBase.debugValidateAccessForEverything = oldDebug }
++    private func fixture() async throws -> (Identity, CellResolver, SemanticSourceFixture, PerspectiveCell) {
++        let vault = MockIdentityVault(); CellBase.defaultIdentityVault = vault
++        let owner = await vault.identity(for: "private", makeNewIfNotFound: true)!
++        let resolver = CellResolver.sharedInstance; CellBase.defaultCellResolver = resolver
++        let source = await SemanticSourceFixture(owner: owner)
++        try await resolver.registerNamedEmitCell(name: source.uuid, emitCell: source, scope: .scaffoldUnique, identity: owner)
++        let perspective = await PerspectiveCell(owner: owner)
++        try await resolver.registerNamedEmitCell(name: perspective.uuid, emitCell: perspective, scope: .scaffoldUnique, identity: owner)
++        let definition = GoalDefinition(goalID: "home", purposeRef: "purpose://family", title: "Home", description: "At home", lifecycle: .continuous, evaluatorKind: .statePredicate,
++                                        evidenceSources: [.init(sourceID: "place")], predicate: .init(kind: "contains-label", sourceID: "place", expected: "home"))
++        let configuration = ContextConfiguration(sources: [.init(sourceID: "place", endpoint: "cell:///" + source.uuid)], rules: [.init(id: "home", definition: definition, label: "home")])
++        try assertOK(await perspective.set(keypath: "perspective.context.configure", value: ContextCodec.encode(configuration), requester: owner))
++        return (owner, resolver, source, perspective)
++    }
++    private func assertOK(_ optionalValue: ValueType?, file: StaticString = #filePath, line: UInt = #line) throws {
++        guard let value = optionalValue else { return XCTFail("missing response", file: file, line: line) }
++        guard case let .object(object) = value, case let .string(status)? = object["status"] else { return XCTFail("Expected status: \(value)", file: file, line: line) }
++        XCTAssertEqual(status, "ok", "\(value)", file: file, line: line)
++    }
++    func testResolverLoadedPortholeInputFiltersContentAndConsumesControlEvents() async throws {
++        let (owner, resolver, source, perspective) = try await fixture()
++        let news = await SemanticSourceFixture(owner: owner)
++        try await resolver.registerNamedEmitCell(name: news.uuid, emitCell: news, scope: .scaffoldUnique, identity: owner)
++        let filter = await ContextFlowFilterCell(owner: owner)
++        try await resolver.registerNamedEmitCell(name: filter.uuid, emitCell: filter, scope: .scaffoldUnique, identity: owner)
++        let config = ContextFilterConfiguration(perspectiveEndpoint: "cell:///" + perspective.uuid, contentEndpoints: ["cell:///" + news.uuid], baseTopics: ["news.*"], topicsByLabel: ["home": ["news.family"]])
++        try assertOK(await filter.set(keypath: "filter.configure", value: ContextCodec.encode(config), requester: owner))
++        let root = await GeneralCell(owner: owner)
++        let reference = CellReference(endpoint: "cell:///" + filter.uuid, label: "filtered")
++        _ = try await resolver.loadCell(from: CellConfiguration(name: "Filtered Porthole input", cellReferences: [reference]), into: root, requester: owner)
++        let home = expectation(description: "home control")
++        let pfeed = try await perspective.flow(requester: owner).sink(receiveCompletion: { _ in }, receiveValue: { event in
++            guard event.topic == "perspective.context.changed", case let .object(object) = event.content,
++                  let decision = try? ContextCodec.decode(.object(object), as: ContextDecision.self), decision.labels == ["home"] else { return }; home.fulfill()
++        })
++        defer { pfeed.cancel() }
++        let delivered = expectation(description: "family news delivered")
++        let forbidden = expectation(description: "restricted content or control leaked"); forbidden.isInverted = true
++        let feed = try await root.flow(requester: owner).sink(receiveCompletion: { _ in }, receiveValue: { event in
++            if event.topic == "news.family" { delivered.fulfill() }
++            else if event.topic == "news.work" || event.topic == "perspective.context.changed" { forbidden.fulfill() }
++        })
++        defer { feed.cancel() }
++        source.send(["home"])
++        await fulfillment(of: [home], timeout: 3)
++        // The control delivery is asynchronous; reading state waits behind its transaction.
++        let stateValue = try await filter.get(keypath: "filter.state", requester: owner)
++        let decision = try ContextCodec.decode(stateValue, as: ContextDecision.self)
++        XCTAssertEqual(decision.labels, ["home"])
++        news.send([], topic: "news.work")
++        news.send([], topic: "news.family")
++        await fulfillment(of: [delivered, forbidden], timeout: 1)
++    }
++    func testDurableContextReadAfterFreshCellDecodeAndDetachPersists() async throws {
++        let (owner, _, _, perspective) = try await fixture()
++        try assertOK(await perspective.set(keypath: "perspective.context.sources.detach", value: .string("place"), requester: owner))
++        let data = try JSONEncoder().encode(perspective)
++        let restored = try JSONDecoder().decode(PerspectiveCell.self, from: data)
++        let rebound = await restored.bindStoredOwnerToRuntimeIdentity(owner)
++        XCTAssertTrue(rebound)
++        let value = try await restored.get(keypath: "perspective.context.configuration", requester: owner)
++        let config = try ContextCodec.decode(value, as: ContextConfiguration.self)
++        XCTAssertEqual(config.sources.first?.enabled, false)
++        let stateValue = try await restored.get(keypath: "perspective.context.state", requester: owner)
++        let decision = try ContextCodec.decode(stateValue, as: ContextDecision.self)
++        XCTAssertEqual(decision.unknownSources, ["place"])
++    }
++    func testConfigurationRejectsNonOwnerWithoutDebugBypass() async throws {
++        let (owner, _, _, perspective) = try await fixture()
++        CellBase.debugValidateAccessForEverything = false
++        let outsider = await CellBase.defaultIdentityVault!.identity(for: "outsider", makeNewIfNotFound: true)!
++        do {
++            let response = try await perspective.set(keypath: "perspective.context.configure", value: ContextCodec.encode(ContextConfiguration()), requester: outsider)
++            guard case .string("denied") = response else { return XCTFail("Unprivileged config accepted: \(response)") }
++        } catch { /* Existing runtime may reject before the registered handler. */ }
++        let value = try await perspective.get(keypath: "perspective.context.configuration", requester: owner)
++        let config = try ContextCodec.decode(value, as: ContextConfiguration.self)
++        XCTAssertEqual(config.sources.count, 1)
++    }
++}
++
++extension PerspectiveContextTests {
++    func testJobParentMeetingDigitalGroupAndNewsLabelsAreIndependentRules() throws {
++        let sources = ["place", "physical", "digital", "news"].map { ContextSource(sourceID: $0, endpoint: "cell:///" + $0) }
++        let cases = [("job", "place", "office"), ("parent-meeting", "physical", "parents"), ("digital-meeting", "digital", "parents"), ("news-alert", "news", "important")]
++        let rules = cases.map { id, source, label in
++            ContextRule(id: id, definition: GoalDefinition(goalID: id, purposeRef: "purpose://" + id, title: id, description: id, lifecycle: .continuous, evaluatorKind: .statePredicate,
++                        evidenceSources: [.init(sourceID: source)], predicate: .init(kind: "contains-label", sourceID: source, expected: label)), label: id)
++        }
++        var state = PerspectiveContextState(configuration: .init(sources: sources, rules: rules))
++        for (index, item) in cases.enumerated() {
++            var e = event(1, [item.2]); e.transition = "configurationChanged"; e.configurationRevision = 1
++            try state.ingest(e, sourceID: item.1, eventID: "event-\(index)", snapshot: false, now: now)
++        }
++        XCTAssertEqual(Set(state.decision(now: now).labels), Set(cases.map { $0.0 }))
++        try state.ingest(event(2, [], transition: "left"), sourceID: "physical", eventID: "left", snapshot: false, now: now)
++        XCTAssertFalse(state.decision(now: now).labels.contains("parent-meeting"))
++        XCTAssertTrue(state.decision(now: now).labels.contains("digital-meeting"))
++    }
++    func testExpiryAdvancesRevisionOnceAndExpiredSnapshotCannotConfirm() throws {
++        var state = PerspectiveContextState(configuration: config())
++        try state.ingest(event(1, ["home"]), sourceID: "place", eventID: "p", snapshot: false, now: now)
++        let before = state.revision
++        XCTAssertTrue(state.expire(now: now.addingTimeInterval(3600)))
++        XCTAssertEqual(state.revision, before + 1)
++        XCTAssertFalse(state.expire(now: now.addingTimeInterval(3601)))
++        XCTAssertFalse(try state.ingest(event(1, ["home"]), sourceID: "place", eventID: "p", snapshot: true, now: now.addingTimeInterval(3601)))
++        XCTAssertEqual(state.revision, before + 1)
++    }
++    func testMalformedControlCannotClaimActiveRulesWithoutValidity() throws {
++        var state = PerspectiveContextState(configuration: config())
++        let valid = state.decision(now: now)
++        XCTAssertNoThrow(try valid.validate())
++        var invalid = valid; invalid.labels = ["home"]
++        XCTAssertThrowsError(try invalid.validate())
++        invalid = valid; invalid.revision = -1
++        XCTAssertThrowsError(try invalid.validate())
++    }
++}
++
++extension PerspectiveContextIntegrationTests {
++    func testSameFilterConfigurationPreservesActiveRestrictions() async throws {
++        let (owner, resolver, source, perspective) = try await fixture()
++        let news = await SemanticSourceFixture(owner: owner)
++        try await resolver.registerNamedEmitCell(name: news.uuid, emitCell: news, scope: .scaffoldUnique, identity: owner)
++        let filter = await ContextFlowFilterCell(owner: owner)
++        let configuration = ContextFilterConfiguration(perspectiveEndpoint: "cell:///" + perspective.uuid, contentEndpoints: ["cell:///" + news.uuid], baseTopics: ["news.*"], topicsByLabel: ["home": ["news.family"]])
++        // Change upstream state before startup so the authoritative snapshot contains the restriction.
++        let changed = expectation(description: "home")
++        let pfeed = try await perspective.flow(requester: owner).sink(receiveCompletion: { _ in }, receiveValue: { event in
++            guard event.topic == "perspective.context.changed", case let .object(object) = event.content,
++                  let state = try? ContextCodec.decode(.object(object), as: ContextDecision.self), state.labels == ["home"] else { return }; changed.fulfill()
++        })
++        defer { pfeed.cancel() }
++        source.send(["home"]); await fulfillment(of: [changed], timeout: 2)
++        try assertOK(await filter.set(keypath: "filter.configure", value: ContextCodec.encode(configuration), requester: owner))
++        try assertOK(await filter.set(keypath: "filter.configure", value: ContextCodec.encode(configuration), requester: owner))
++        let value = try await filter.get(keypath: "filter.state", requester: owner)
++        let state = try ContextCodec.decode(value, as: ContextDecision.self)
++        XCTAssertEqual(state.labels, ["home"])
++        let blocked = expectation(description: "work news blocked"); blocked.isInverted = true
++        let feed = try await filter.flow(requester: owner).sink(receiveCompletion: { _ in }, receiveValue: { event in if event.topic == "news.work" { blocked.fulfill() } })
++        defer { feed.cancel() }
++        news.send([], topic: "news.work")
++        await fulfillment(of: [blocked], timeout: 0.2)
++    }
++}
++
++extension PerspectiveContextTests {
++    func testGoldenObservationFixturesRoundTripAndRejectInvalidExamples() throws {
++        struct Fixture: Decodable { let valid: Bool; let evaluatedAt: Date; let observation: ContextObservation }
++        let directory = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("Fixtures/PerspectiveContext")
++        let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
++        let files = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil).filter { $0.pathExtension == "json" }
++        XCTAssertEqual(files.count, 5)
++        for file in files {
++            let fixture = try decoder.decode(Fixture.self, from: Data(contentsOf: file))
++            if fixture.valid {
++                XCTAssertNoThrow(try fixture.observation.validate(now: fixture.evaluatedAt), file.lastPathComponent)
++                let encoded = try ContextCodec.encode(fixture.observation)
++                XCTAssertEqual(try ContextCodec.decode(encoded, as: ContextObservation.self), fixture.observation)
++            } else { XCTAssertThrowsError(try fixture.observation.validate(now: fixture.evaluatedAt), file.lastPathComponent) }
++        }
++    }
++}
++
++extension PerspectiveContextIntegrationTests {
++    func testFreshDecodeAndOrdinaryFlowReconnectConfirmActiveState() async throws {
++        let (owner, _, source, perspective) = try await fixture()
++        let changed = expectation(description: "source at home")
++        let feed = try await perspective.flow(requester: owner).sink(receiveCompletion: { _ in }, receiveValue: { event in
++            guard event.topic == "perspective.context.changed", case let .object(object) = event.content,
++                  let state = try? ContextCodec.decode(.object(object), as: ContextDecision.self), state.labels == ["home"] else { return }; changed.fulfill()
++        })
++        source.send(["home"]); await fulfillment(of: [changed], timeout: 2); feed.cancel()
++        let restored = try JSONDecoder().decode(PerspectiveCell.self, from: JSONEncoder().encode(perspective))
++        let bound = await restored.bindStoredOwnerToRuntimeIdentity(owner); XCTAssertTrue(bound)
++        let ordinaryFeed = try await restored.flow(requester: owner)
++        let cancellable = ordinaryFeed.sink(receiveCompletion: { _ in }, receiveValue: { _ in }); defer { cancellable.cancel() }
++        let value = try await restored.get(keypath: "perspective.context.state", requester: owner)
++        let state = try ContextCodec.decode(value, as: ContextDecision.self)
++        XCTAssertEqual(state.labels, ["home"])
++        XCTAssertEqual(state.unknownSources, [])
++    }
++    func testStorageFailureDoesNotAcknowledgeOrApplyNewConfiguration() async throws {
++        let (owner, _, _, perspective) = try await fixture()
++        let old = perspective.contextState.configuration
++        var changed = old; changed.rules[0].label = "changed"
++        let oldName = perspective.name
++        perspective.name = "../invalid-context-storage-component"
++        defer { perspective.name = oldName }
++        let result = try await perspective.set(keypath: "perspective.context.configure", value: ContextCodec.encode(changed), requester: owner)
++        guard case let .object(object)? = result, case let .string(status)? = object["status"] else { return XCTFail("Missing failure receipt") }
++        XCTAssertEqual(status, "error")
++        XCTAssertEqual(perspective.contextState.configuration.rules.first?.label, old.rules.first?.label)
++    }
++}
++
++extension PerspectiveContextIntegrationTests {
++    func testPurposeAliasesUseOnePriorityWinnerAndDuplicateAliasesAreRejected() async throws {
++        let (owner, _, source, perspective) = try await fixture()
++        let purpose = Purpose(name: "Alias family", description: "Family")
++        await perspective.context.upsertActivePurpose(weighedPurpose: Weight<Purpose>(weight: 0.5, value: purpose))
++        let portable = try XCTUnwrap(PortableReference.make(kind: "purpose", localReference: purpose.reference, name: purpose.name))
++        var configuration = perspective.contextState.configuration
++        var high = configuration.rules[0]
++        high.id = "high"; high.priority = 10; high.purposeWeights = [purpose.reference: 0]
++        var low = high; low.id = "low"; low.priority = 1; low.purposeWeights = [portable: 1]
++        configuration.rules = [low, high]
++        try assertOK(await perspective.set(keypath: "perspective.context.configure", value: ContextCodec.encode(configuration), requester: owner))
++        XCTAssertEqual(perspective.contextState.configuration.rules[0].purposeWeights[purpose.reference], 1)
++        XCTAssertNil(perspective.contextState.configuration.rules[0].purposeWeights[portable])
++        let changed = expectation(description: "home aliases")
++        let feed = try await perspective.flow(requester: owner).sink(receiveCompletion: { _ in }, receiveValue: { event in
++            guard event.topic == "perspective.context.changed", case let .object(object) = event.content,
++                  let state = try? ContextCodec.decode(.object(object), as: ContextDecision.self), state.labels == ["home"] else { return }; changed.fulfill()
++        })
++        defer { feed.cancel() }
++        source.send(["home"]); await fulfillment(of: [changed], timeout: 2)
++        let active = await perspective.effectiveActivePurposes(minWeight: 0, limit: 100)
++        XCTAssertFalse(active.contains { ($0.reference ?? $0.value?.reference) == purpose.reference })
++        configuration.rules = [high]
++        configuration.rules[0].purposeWeights = [purpose.reference: 0, portable: 1]
++        let result = try await perspective.set(keypath: "perspective.context.configure", value: ContextCodec.encode(configuration), requester: owner)
++        guard case let .object(object)? = result, case .string("error")? = object["status"] else { return XCTFail("Alias conflict accepted: \(String(describing: result))") }
++        XCTAssertEqual(perspective.contextState.configuration.rules.count, 2)
++    }
++    func testCircularPerspectiveSourceReturnsErrorWithoutBlocking() async throws {
++        let (owner, _, _, perspective) = try await fixture()
++        let configuration = ContextConfiguration(sources: [.init(sourceID: "self", endpoint: "cell:///" + perspective.uuid)])
++        let finished = expectation(description: "cycle rejected")
++        Task {
++            do {
++                let result = try await perspective.set(keypath: "perspective.context.configure", value: ContextCodec.encode(configuration), requester: owner)
++                guard case let .object(object)? = result, case .string("error")? = object["status"] else { XCTFail("Cycle accepted: \(String(describing: result))"); finished.fulfill(); return }
++            } catch { /* Rejection before the handler also terminates the cycle. */ }
++            finished.fulfill()
++        }
++        await fulfillment(of: [finished], timeout: 3)
++    }
++}
++
++extension PerspectiveContextTests {
++    func testExploreGoalSchemaPublishesRequiredCodableFields() throws {
++        func object(_ value: ValueType) throws -> Object {
++            guard case let .object(result) = value else { throw ContextError.invalidConfiguration }; return result
++        }
++        func property(_ schema: ValueType, _ key: String) throws -> ValueType {
++            let properties = try object(try XCTUnwrap(try object(schema)["properties"]))
++            return try XCTUnwrap(properties[key])
++        }
++        func required(_ schema: ValueType) throws -> Set<String> {
++            guard case let .list(keys)? = try object(schema)["requiredKeys"] else { throw ContextError.invalidConfiguration }
++            return Set(keys.compactMap { if case let .string(value) = $0 { return value }; return nil })
++        }
++        let rules = try property(ContextSchemas.configuration(), "rules")
++        let rule = try XCTUnwrap(try object(rules)["item"])
++        let definition = try property(rule, "definition")
++        XCTAssertEqual(try required(definition), Set(["schema", "goalID", "purposeRef", "title", "description", "lifecycle", "evaluatorKind", "evidenceSources", "helperCells", "privacy", "tags"]))
++        let evidence = try property(definition, "evidenceSources")
++        XCTAssertEqual(try required(XCTUnwrap(try object(evidence)["item"])), ["sourceID", "visibility"])
++        XCTAssertEqual(try required(property(definition, "privacy")), ["rawEvidenceVisibility", "publishableStatuses", "doNotExportRawLocation"])
++        let predicate = try property(definition, "predicate")
++        guard case let .list(options)? = try object(predicate)["oneOf"] else { return XCTFail("missing predicate options") }
++        XCTAssertEqual(try required(XCTUnwrap(options.first)), ["kind", "all", "any"])
++        // Every advertised required definition field is genuinely required by Codable.
++        let encoded = try object(ContextCodec.encode(config().rules[0].definition))
++        for key in try required(definition) {
++            var missing = encoded; missing.removeValue(forKey: key)
++            XCTAssertThrowsError(try ContextCodec.decode(.object(missing), as: GoalDefinition.self), key)
++        }
++        XCTAssertNoThrow(try ContextCodec.decode(.object(encoded), as: GoalDefinition.self))
++    }
++}
++
++extension PerspectiveContextIntegrationTests {
++    func testConcurrentCircularStartupRejectsBothRoots() async throws {
++        let (owner, resolver, _, a) = try await fixture()
++        let b = await PerspectiveCell(owner: owner)
++        try await resolver.registerNamedEmitCell(name: b.uuid, emitCell: b, scope: .scaffoldUnique, identity: owner)
++        let first = ContextConfiguration(sources: [.init(sourceID: "b", endpoint: "cell:///" + b.uuid)])
++        let second = ContextConfiguration(sources: [.init(sourceID: "a", endpoint: "cell:///" + a.uuid)])
++        // Install the cyclic fixture before launching two independent startup roots.
++        a.contextState = PerspectiveContextState(configuration: first)
++        b.contextState = PerspectiveContextState(configuration: second)
++        let finished = expectation(description: "both startup roots rejected"); finished.expectedFulfillmentCount = 2
++        for (cell, configuration) in [(a, first), (b, second)] {
++            Task {
++                do {
++                    let result = try await cell.set(keypath: "perspective.context.configure", value: ContextCodec.encode(configuration), requester: owner)
++                    guard case let .object(object)? = result, case .string("error")? = object["status"] else { XCTFail("Cycle accepted"); finished.fulfill(); return }
++                } catch { /* Runtime rejection also terminates the cycle. */ }
++                finished.fulfill()
++            }
++        }
++        await fulfillment(of: [finished], timeout: 3)
++    }
++    func testDetachedSourceEventsCannotChangeStateAndUnknownPurposeIsRejected() async throws {
++        let (owner, _, source, perspective) = try await fixture()
++        var bad = perspective.contextState.configuration
++        bad.rules[0].purposeWeights = ["purpose://prompt.unknown": 1]
++        let result = try await perspective.set(keypath: "perspective.context.configure", value: ContextCodec.encode(bad), requester: owner)
++        guard case let .object(object)? = result, case .string("error")? = object["status"] else { return XCTFail("Unknown purpose accepted") }
++        try assertOK(await perspective.set(keypath: "perspective.context.sources.detach", value: .string("place"), requester: owner))
++        let before = perspective.contextState.revision
++        let forbidden = expectation(description: "detached context change"); forbidden.isInverted = true
++        let feed = try await perspective.flow(requester: owner).sink(receiveCompletion: { _ in }, receiveValue: { event in if event.topic == "perspective.context.changed" { forbidden.fulfill() } })
++        defer { feed.cancel() }
++        source.send(["home"])
++        await fulfillment(of: [forbidden], timeout: 0.2)
++        XCTAssertEqual(perspective.contextState.revision, before)
++        XCTAssertEqual(perspective.contextState.decision(now: Date()).labels, [])
++    }
++    func testContextDepartureRestoresBaseFilterOnPortholeInput() async throws {
++        let (owner, resolver, source, perspective) = try await fixture()
++        let news = await SemanticSourceFixture(owner: owner)
++        try await resolver.registerNamedEmitCell(name: news.uuid, emitCell: news, scope: .scaffoldUnique, identity: owner)
++        let filter = await ContextFlowFilterCell(owner: owner)
++        try await resolver.registerNamedEmitCell(name: filter.uuid, emitCell: filter, scope: .scaffoldUnique, identity: owner)
++        let configuration = ContextFilterConfiguration(perspectiveEndpoint: "cell:///" + perspective.uuid, contentEndpoints: ["cell:///" + news.uuid], baseTopics: ["news.*"], topicsByLabel: ["home": ["news.family"]])
++        try assertOK(await filter.set(keypath: "filter.configure", value: ContextCodec.encode(configuration), requester: owner))
++        let root = await GeneralCell(owner: owner)
++        _ = try await resolver.loadCell(from: CellConfiguration(name: "Departure input", cellReferences: [CellReference(endpoint: "cell:///" + filter.uuid, label: "filtered")]), into: root, requester: owner)
++        source.send(["home"])
++        try await waitForLabels(["home"], filter: filter, owner: owner)
++        let blocked = expectation(description: "work blocked at home"); blocked.isInverted = true
++        let firstFeed = try await root.flow(requester: owner).sink(receiveCompletion: { _ in }, receiveValue: { event in if event.topic == "news.work" { blocked.fulfill() } })
++        news.send([], topic: "news.work"); await fulfillment(of: [blocked], timeout: 0.2); firstFeed.cancel()
++        source.send([])
++        try await waitForLabels([], filter: filter, owner: owner)
++        let restored = expectation(description: "work delivered after departure")
++        let secondFeed = try await root.flow(requester: owner).sink(receiveCompletion: { _ in }, receiveValue: { event in if event.topic == "news.work" { restored.fulfill() } })
++        defer { secondFeed.cancel() }
++        news.send([], topic: "news.work"); await fulfillment(of: [restored], timeout: 2)
++    }
++    private func waitForLabels(_ labels: [String], filter: ContextFlowFilterCell, owner: Identity) async throws {
++        let deadline = Date().addingTimeInterval(2)
++        while Date() < deadline {
++            let value = try await filter.get(keypath: "filter.state", requester: owner)
++            if let decision = try? ContextCodec.decode(value, as: ContextDecision.self), decision.labels == labels { return }
++            try await Task.sleep(nanoseconds: 10_000_000)
++        }
++        XCTFail("Control decision did not reach filter: \(labels)")
++    }
++}
++
++extension PerspectiveContextIntegrationTests {
++    func testSourceSnapshotFailurePersistsDisconnectRevisionBeforeEmission() async throws {
++        let (owner, _, source, perspective) = try await fixture()
++        let emitted = expectation(description: "durable disconnect decision")
++        var emittedRevision: Int?
++        let feed = try await perspective.flow(requester: owner).sink(receiveCompletion: { _ in }, receiveValue: { event in
++            guard event.topic == "perspective.context.changed", case let .object(object) = event.content,
++                  let state = try? ContextCodec.decode(.object(object), as: ContextDecision.self), state.unknownSources == ["place"] else { return }
++            emittedRevision = state.revision; emitted.fulfill()
++        })
++        defer { feed.cancel() }
++        let before = perspective.contextState.revision
++        // Simulate reconnect while the source's authoritative same-revision snapshot conflicts.
++        perspective.contextSources.removeValue(forKey: "place")
++        source.observation.labels = ["conflicting-snapshot"]
++        let result = try await perspective.get(keypath: "perspective.context", requester: owner)
++        guard case let .object(object) = result, case .string("error")? = object["status"] else { return XCTFail("Conflicting snapshot accepted: \(result)") }
++        await fulfillment(of: [emitted], timeout: 2)
++        let data = try await perspective.getFileDataInCellDirectory(filename: "PerspectiveContext.json")
++        let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
++        let saved = try decoder.decode(PerspectiveContextState.self, from: data)
++        XCTAssertEqual(saved.revision, before + 1)
++        XCTAssertEqual(saved.revision, emittedRevision)
++        // A standalone restore can only emit revisions after the live filter's last revision.
++        source.observation.labels = []
++        let restored = try JSONDecoder().decode(PerspectiveCell.self, from: JSONEncoder().encode(perspective))
++        let bound = await restored.bindStoredOwnerToRuntimeIdentity(owner); XCTAssertTrue(bound)
++        let value = try await restored.get(keypath: "perspective.context.state", requester: owner)
++        let decision = try ContextCodec.decode(value, as: ContextDecision.self)
++        XCTAssertGreaterThan(decision.revision, try XCTUnwrap(emittedRevision))
++    }
++}

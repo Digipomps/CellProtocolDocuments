@@ -1,0 +1,214 @@
+{
+  "name": "Palazzo samtykke",
+  "_note": "Utvidelse av PalazzoConsentConfigurationFactory: samme modal-presentasjon, men to grants med hver sin knapperad. Data kommer fra entity.consent.prompt der forespørselen er av typen match.",
+  "cellReferences": [
+    {
+      "endpoint": "cell:///PalazzoEntity",
+      "subscribeFeed": true,
+      "label": "entity"
+    }
+  ],
+  "skeleton": {
+    "VStack": {
+      "spacing": 14,
+      "modifiers": {
+        "padding": 20,
+        "maxWidthInfinity": true,
+        "hAlignment": "leading",
+        "styleClasses": [
+          "pz-consent"
+        ],
+        "presentation": {
+          "kind": "modal",
+          "placement": "center",
+          "closeActionKeypath": "entity.consent.dismiss",
+          "dismissOnBackdrop": false,
+          "backdropStyle": "dim",
+          "focusTrap": true,
+          "mobileFallback": {
+            "kind": "sheet",
+            "placement": "bottom"
+          },
+          "accessibilityLabel": "Palazzo spør"
+        }
+      },
+      "elements": [
+        {
+          "Text": {
+            "text": "Palazzo Comunale spør",
+            "modifiers": {
+              "fontStyle": "title2",
+              "fontWeight": "bold"
+            }
+          }
+        },
+        {
+          "Text": {
+            "keypath": "entity.consent.prompt.match.signalTitle",
+            "modifiers": {
+              "fontStyle": "headline"
+            }
+          }
+        },
+        {
+          "Text": {
+            "keypath": "entity.consent.prompt.match.explanation",
+            "modifiers": {
+              "fontStyle": "body"
+            }
+          }
+        },
+        {
+          "VStack": {
+            "spacing": 4,
+            "modifiers": {
+              "padding": 12,
+              "cornerRadius": 10,
+              "maxWidthInfinity": true,
+              "hAlignment": "leading",
+              "styleClasses": [
+                "pz-consent-items"
+              ]
+            },
+            "elements": [
+              {
+                "Text": {
+                  "text": "Det Palazzo får",
+                  "modifiers": {
+                    "fontStyle": "caption",
+                    "fontWeight": "bold"
+                  }
+                }
+              },
+              {
+                "Text": {
+                  "text": "Én linje med dine ord ovenfor, signert av deg. Ikke notatet ditt, ikke noe annet.",
+                  "modifiers": {
+                    "fontStyle": "caption"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "Text": {
+            "text": "Innsyn — Palazzo får vite at dette traff deg",
+            "modifiers": {
+              "fontStyle": "headline"
+            }
+          }
+        },
+        {
+          "HStack": {
+            "spacing": 8,
+            "elements": [
+              {
+                "Button": {
+                  "keypath": "entity.match.decide",
+                  "label": "Denne gangen",
+                  "payload": {
+                    "matchID": "$matchID",
+                    "grant": "insight",
+                    "decision": "approve",
+                    "standing": false
+                  },
+                  "icon": "checkmark.circle"
+                }
+              },
+              {
+                "Button": {
+                  "keypath": "entity.match.decide",
+                  "label": "Alltid",
+                  "payload": {
+                    "matchID": "$matchID",
+                    "grant": "insight",
+                    "decision": "approve",
+                    "standing": true
+                  },
+                  "icon": "checkmark.seal"
+                }
+              },
+              {
+                "Button": {
+                  "keypath": "entity.match.decide",
+                  "label": "Nei",
+                  "payload": {
+                    "matchID": "$matchID",
+                    "grant": "insight",
+                    "decision": "decline"
+                  },
+                  "icon": "xmark.circle"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "Text": {
+            "text": "Handling — kelneren kan gjøre noe med det ved bordet",
+            "modifiers": {
+              "fontStyle": "headline"
+            }
+          }
+        },
+        {
+          "HStack": {
+            "spacing": 8,
+            "elements": [
+              {
+                "Button": {
+                  "keypath": "entity.match.decide",
+                  "label": "Denne gangen",
+                  "payload": {
+                    "matchID": "$matchID",
+                    "grant": "action",
+                    "decision": "approve",
+                    "standing": false
+                  },
+                  "icon": "checkmark.circle"
+                }
+              },
+              {
+                "Button": {
+                  "keypath": "entity.match.decide",
+                  "label": "Alltid",
+                  "payload": {
+                    "matchID": "$matchID",
+                    "grant": "action",
+                    "decision": "approve",
+                    "standing": true
+                  },
+                  "icon": "checkmark.seal"
+                }
+              },
+              {
+                "Button": {
+                  "keypath": "entity.match.decide",
+                  "label": "Nei",
+                  "payload": {
+                    "matchID": "$matchID",
+                    "grant": "action",
+                    "decision": "decline"
+                  },
+                  "icon": "xmark.circle"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "Text": {
+            "text": "«Alltid» gjelder menyendringer hos Palazzo, for dette valget alene. Trekk tilbake under «Delt med Palazzo».",
+            "modifiers": {
+              "fontStyle": "caption"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "_verify_in_porthole": [
+    "Payload-verdien $matchID fylles av fabrikken ved bygging av prompten (som requestID i dag) — ikke runtime-substitusjon."
+  ]
+}

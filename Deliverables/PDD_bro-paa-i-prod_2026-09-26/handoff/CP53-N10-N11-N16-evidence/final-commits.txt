@@ -1,0 +1,59 @@
+commit e1d011faafe0d0d8ed76071078c3337a5c5bca2f
+Author: Kjetil Hustveit <kjetil@digipomps.org>
+Commit: Kjetil Hustveit <kjetil@digipomps.org>
+
+    PDD_bro-paa-i-prod_2026-09-26 N10/N11/N16: revoke expired setup before suspended work returns
+    
+    Tie the scheduled setup lease to its physical instance. Expiry synchronously
+    revokes that session and cancels setup, and continuation guards recheck the
+    lease before late registration. Retain admission until noncooperative work
+    actually returns. The production-callback regression fails before this fix
+    and passes after it, with the remote session remaining usable.
+    
+    Full swift build succeeds. Full swift test: 1441 tests, 12 existing skips,
+    only the 3 known local Keychain failures. Real Multipeer in both directions:
+    1 test, 0 failures.
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_011CHU13qBKbb5szsQQo53rW
+
+commit 337566b2b647df60a807b384f51368449b616b8b
+Author: Kjetil Hustveit <kjetil@digipomps.org>
+Commit: Kjetil Hustveit <kjetil@digipomps.org>
+
+    PDD_bro-paa-i-prod_2026-09-26 N10/N11/N16: bound Scanner admission before retention and publication
+    
+    Share global and physical-source count, byte, rate and lifetime budgets before
+    discovery metadata, invitation handlers, context work and UI notifications are
+    retained. Drain one expiring main-actor queue, deduplicate physical setup tasks,
+    and preserve the invitation instance when transferring it to the gate. Ignore
+    unbound disconnect callbacks that cannot identify the invitation they belong to.
+    
+    Document payload accounting, lifetime and Sybil limits. Test 1000 unique peers,
+    1000 contexts, each quota boundary, atomic acceptance, stale unbound disconnect,
+    expiry/recovery and real ordered feeds with live origin-signature RPCs.
+    
+    Full swift build succeeds. Full swift test: 1440 tests, 12 existing skips,
+    only 3 known local Keychain failures. Real Multipeer in both directions:
+    1 test, 0 failures. Selective N10/N11/N16 mutations each fail their regressions;
+    production sources were restored before full validation.
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_011CHU13qBKbb5szsQQo53rW
+
+commit f48826aa6f48fc2e2e4f2531166db48b6fba4c3e
+Author: Kjetil Hustveit <kjetil@digipomps.org>
+Commit: Kjetil Hustveit <kjetil@digipomps.org>
+
+    PDD_bro-paa-i-prod_2026-09-26 N10/N11/N16: order Scanner dispatch and bind invitation lifetime
+    
+    Serialize application consumption after record opening while allowing locally
+    registered origin-signature RPCs to progress. Bind pending/accepted/outgoing
+    invitations to their original physical peer, session, endpoint and generation;
+    make acceptance atomic and expire setups with one maintenance timer.
+    
+    N10/N11 focused validation: 36 tests, zero failures. N16 admission budgets follow
+    in the next commit; full build/test and real Multipeer validation are pending.
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+    Claude-Session: https://claude.ai/code/session_011CHU13qBKbb5szsQQo53rW

@@ -1,0 +1,1289 @@
+diff --git a/.github/workflows/security-regression-macos.yml b/.github/workflows/security-regression-macos.yml
+index 389a787..e8102ef 100644
+--- a/.github/workflows/security-regression-macos.yml
++++ b/.github/workflows/security-regression-macos.yml
+@@ -41,7 +41,7 @@ jobs:
+           for attempt in 1 2 3; do
+             echo "Peer, Scanner, consumer, record and mux Thread Sanitizer pass ${attempt}/3"
+             swift test --disable-automatic-resolution --jobs 2 \
+-              --sanitize thread --filter 'EphemeralIdentityVaultConcurrencyTests|PublisherAsyncLifetimeTests|BridgeDescriptionConcurrencyTests|EntityScannerConsumerSecurityTests|ScannerNearbyInteractionTests|ScannerPeerAuthenticationTests|ScannerServiceInvitationTests|ScannerAdmissionTests|BridgePeerV3Tests|BridgePeerRecordLayerTests|BridgePeerFlowControlTests|BridgeMultiplexingTests|BridgeMuxSendLifetimeTests|BridgeResponseLifetimeTests|BridgeFeedAndRPCOrderingTests|BridgeFactoryLifetimeTests|BridgeSigningLifetimeTests|VaporWebSocketAdmissionTests|BridgeChannelWebSocketTests'
++              --sanitize thread --filter 'EphemeralIdentityVaultConcurrencyTests|PublisherAsyncLifetimeTests|BridgeDescriptionConcurrencyTests|EntityScannerConsumerSecurityTests|ScannerNearbyInteractionTests|ScannerPeerAuthenticationTests|ScannerServiceInvitationTests|ScannerAdmissionTests|ScannerRetainedStateTests|BridgePeerV3Tests|BridgePeerRecordLayerTests|BridgePeerFlowControlTests|BridgeMultiplexingTests|BridgeMuxSendLifetimeTests|BridgeResponseLifetimeTests|BridgeFeedAndRPCOrderingTests|BridgeFactoryLifetimeTests|BridgeSigningLifetimeTests|VaporWebSocketAdmissionTests|BridgeChannelWebSocketTests'
+           done
+           git diff --exit-code -- Package.swift Package.resolved Sources Tests commons
+       - name: Reject a vulnerable downstream transport pin
+diff --git a/Docs/ScannerMultipeer.md b/Docs/ScannerMultipeer.md
+index dd92156..1d9ea30 100644
+--- a/Docs/ScannerMultipeer.md
++++ b/Docs/ScannerMultipeer.md
+@@ -106,3 +106,9 @@ If native discovery fails, inspect both worker logs and the process host's
+ local-network access. App hosts need `NSLocalNetworkUsageDescription` and the
+ `_haven-radar._tcp` Bonjour service; see [Apple Multipeer documentation](https://developer.apple.com/documentation/multipeerconnectivity)
+ and [local-network privacy](https://developer.apple.com/documentation/technotes/tn3179-understanding-local-network-privacy).
++
++Consumer discovery lifetime, outgoing probe reply binding, terminal status and
++per-peer aggregate connection snapshots are specified in
++[consumer security](../Documentation/ScannerConsumerSecurity.md#discovery-retention-and-outgoing-probes-n28n29)
++and [Scanner admission](../Documentation/ScannerAdmissionAndOrdering.md#terminal-status-and-connected-snapshots-n32n33).
++Their application-owned bounds do not establish a hard MC reassembly/RSS limit.
+diff --git a/Documentation/ScannerAdmissionAndOrdering.md b/Documentation/ScannerAdmissionAndOrdering.md
+index e85df7e..999c5db 100644
+--- a/Documentation/ScannerAdmissionAndOrdering.md
++++ b/Documentation/ScannerAdmissionAndOrdering.md
+@@ -40,13 +40,14 @@ heap or Multipeer OS allocation. Count limits also bound object overhead.
+ | Resource | Global count / bytes | Per MCPeerID count / bytes | Lifetime |
+ |---|---|---|---|
+ | Discovery | 128 / 128 KiB | 1 / 4096 | 60 s, refreshed only by admitted discovery |
++| Consumer peer state | 128 / 128 KiB | 1 / 4096 | 60 s and the exact source-token lifetime; charged until cleanup |
+ | Invitations (pending + accepted + outgoing) | 32 / 64 KiB | 1 / 4096 | min(local invitation timeout, 30 s) |
+ | Context/setup work | 16 / 64 KiB | 2 / 8192 | 10 s |
+ | Queued UI notification batches | 64 / 64 KiB | 8 / 8192 | 5 s |
+ | Physical MCSession slots | 32 / 8192 | 2 / 512 | Held until physical retirement |
+ 
+ One fixed ten-second rate window permits 256 reservations globally and 24 per
+-MCPeerID, across all five resources. Capacity-rejected attempts consume rate;
++MCPeerID, across all six resources. Capacity-rejected attempts consume rate;
+ oversized inputs are rejected before source bookkeeping. The source table has
+ at most 256 entries and expires idle entries after 60 seconds on its next use.
+ Active reservations keep their bucket alive. Discovery permits at most 32
+@@ -75,3 +76,22 @@ No honest-admission guarantee is possible during full global saturation. Bounds
+ limit retained application state and work; they do not bound allocations made by
+ Multipeer before calling this delegate or establish N14/N15/N18 OS guarantees.
+ After expiry or release, a fresh legitimate invitation can be handled again.
++
++## Terminal status and connected snapshots (N32/N33)
++
++Stop records one terminal status for the retired service generation and rejects
++its ordinary queued events. A single coalesced lifecycle wakeup delivers that
++terminal status exactly once, outside the discovery event admission budget.
++Repeated stop is idempotent. A requested restart waits for terminal publication;
++a subsequent stop can cancel that pending restart. This retains at most one
++terminal record and one restart bit, including when MainActor is blocked.
++Deinitialization does not create new publication work.
++
++Each physical slot records the latest accepted MC connection-state callback.
++The callback must identify the exact owned MCSession and peer before it changes
++state. Lifecycle publication derives a sorted list from all current connected,
++non-retiring slots. Closing B leaves C in the list, and an old B callback cannot
++publish its own session's list before a generation guard. This is connection
++status, not a claim that discovery identity or proximity is authenticated.
++`ScannerRetainedStateTests` forwards these callbacks to a real EntityScanner and
++holds an old callback through reconnect before draining it.
+diff --git a/Documentation/ScannerConsumerSecurity.md b/Documentation/ScannerConsumerSecurity.md
+index 25f6914..4270788 100644
+--- a/Documentation/ScannerConsumerSecurity.md
++++ b/Documentation/ScannerConsumerSecurity.md
+@@ -10,8 +10,9 @@ It cannot be constructed from payload UUIDs. Responses use that captured adapter
+ never a new channel found by discovery UUID after an await.
+ 
+ All EntityScanner mutable state, action intercepts and delegate callbacks run
+-on MainActor. Discovery/status events use Scanner's existing bounded notification
+-queue. A physical frame source schedules setup once, including after completion;
++on MainActor. Discovery events use Scanner's bounded notification queue. Terminal status,
++peer-state cleanup and aggregate connection snapshots use one coalesced lifecycle
++wakeup; they cannot be dropped because the discovery event quota is full. A physical frame source schedules setup once, including after completion;
+ ingress overflow reuses the one existing rejection task before allocating more
+ work. The process-wide gate limits still bound admitted asynchronous work. A
+ closed consumer which ignores cancellation keeps its lease until it returns.
+@@ -28,8 +29,8 @@ remain responsible for their own authorization and effect lifetimes.
+ 
+ ## Pending records and replay
+ 
+-One MainActor table combines incoming contacts, outgoing contacts and incoming
+-detail requests. Each record binds its request ID to its kind, exact channel,
++One MainActor table combines incoming/outgoing contacts, incoming detail requests,
++outgoing aggregate probes and outgoing detail requests. Each record binds its request ID to its kind, exact channel,
+ principal and generation. Payloads are copied to their wire representation before
+ retention, so a mutable Identity reference cannot change a stored proof.
+ 
+@@ -41,7 +42,7 @@ retention, so a mutable Identity reference cannot change a stored proof.
+ | Canonical payload bytes per remote peer | 128 KiB |
+ | One canonical payload | 64 KiB |
+ | Request ID | 128 UTF-8 bytes; contact IDs are canonical UUIDs |
+-| Pending lifetime | 60 monotonic seconds, never refreshed by replay |
++| Pending lifetime | Aggregate replies: 15 monotonic seconds; all others: 60; never refreshed by replay |
+ 
+ The cell is scoped to one app/identity. These are limits across all its peers;
+ they are not a process heap measurement. The transport's shared admission/work
+@@ -56,6 +57,41 @@ every lookup/insertion also checks deadline and channel validity. Retirement
+ removes that generation, while service stop clears the cell's table. Cancellation
+ does not release the separate gate work reservation prematurely.
+ 
++## Discovery retention and outgoing probes (N28/N29)
++
++The three peer dictionaries (state machines, beacons and overlaps) share one
++retention entry per peer. The entry holds the exact discovery/invitation/physical
++admission token plus a separate process-shared consumer reservation. Consumer
++count, bytes, per-source bounds and TTL use the discovery configuration: 128
++entries / 128 KiB globally, one entry / 4096 bytes per MCPeerID, 60 seconds.
++Both reservations count toward the unchanged rate limit. Costs are encoded
++metadata plus the fixed entry charge, not exact heap size.
++
++Every insertion reconciles current tokens first. UUID replacement, discovery
++loss, invitation/physical retirement, expiry and stop retire all three dictionaries,
++automatic-probe bookkeeping and stored probe results. A single lifecycle wakeup
++also reconciles idle consumers, independent of the lossy event queue. If MainActor
++is held, expired consumer copies stay charged until cleanup actually runs; a
++second Scanner cannot reuse that consumer capacity. No per-discovery timer or Task
++is created. This bounds retained application state, not Multipeer pre-callback
++allocations. Saturation can reject a legitimate peer until capacity is released.
++
++Outgoing aggregate/detail records carry the same immutable context as contact
++records: physical adapter, session, generation, principal and setup. Aggregate
++records also retain the nonce. All replies validate kind, context, deadline,
++nonce (aggregate), result size and required state transition before consume.
++Invalid replies cannot spend another peer's pending request. A consumed result
++is a charged tombstone until its original TTL; close/reconnect removes the old
++generation even if no discovery-loss event reaches the cell. Sending and later
++failure cleanup use the captured context, never a replacement selected by UUID.
++The one pending timer also restores probing state after aggregate timeout.
++
++`ScannerRetainedStateTests` exercises the actual EntityScanner across repeated
++rate/TTL windows, UUID rotation, loss, quota saturation and two Scanner instances.
++`EntityScannerConsumerSecurityTests.testOutgoingProbe*` exercises actual action
++intercepts, real authenticated gates, wrong peer/nonce/oversized replies,
++same-UUID reconnect with a different key, bounded pending requests and expiry.
++
+ ## Contact validation and wire representation
+ 
+ `entity-contact-v1` retains its field names. Hashes and signatures now use
+diff --git a/Sources/CellApple/EntityRadar/EntityScannerCell.swift b/Sources/CellApple/EntityRadar/EntityScannerCell.swift
+index 4a5fffd..a47de8a 100644
+--- a/Sources/CellApple/EntityRadar/EntityScannerCell.swift
++++ b/Sources/CellApple/EntityRadar/EntityScannerCell.swift
+@@ -60,7 +60,6 @@ private enum EntityScannerContactProtocol {
+ 
+ @MainActor
+ class EntityScannerCell: GeneralCell, ConnectServiceDelegate {
+-    private static let probeResponseTimeoutNanoseconds: UInt64 = 15_000_000_000
+ 
+     var connectService: ScannerService?
+     var requester: Identity?
+@@ -73,13 +72,18 @@ class EntityScannerCell: GeneralCell, ConnectServiceDelegate {
+     private var deferredConsumerEvents: [FlowElement]?
+     private var disclosurePolicy = NearbyDisclosurePolicy.strict
+     private var localBeacon: NearbyBeacon?
++    func configureProbeForTesting(_ policy: NearbyDisclosurePolicy) {
++        disclosurePolicy = policy
++        localBeacon = policy.beacon
++    }
+     private var peerBeacons = [String: NearbyBeacon]()
+     private var peerOverlaps = [String: NearbyBeaconOverlap]()
+     private var peerStates = [String: NearbyPeerStateMachine]()
++    private var peerStateLeases = [String: (source: ScannerAdmission.Lease, retention: ScannerAdmission.Lease)]()
++    var retainedPeerStateForTesting: (states: Int, beacons: Int, overlaps: Int, bytes: Int) {
++        (peerStates.count, peerBeacons.count, peerOverlaps.count, peerStateLeases.values.reduce(0) { $0 + $1.retention.retainedBytes })
++    }
+     private var probeSession = NearbyProbeSession()
+-    private var outgoingProbeRequests = [String: (remoteUUID: String, nonce: String)]()
+-    private var probeResponseTimeoutTasks = [String: Task<Void, Never>]()
+-    private var outgoingDetailRequests = [String: String]()
+     private var automaticProbeRemoteUUIDs = Set<String>()
+     private var policyExpiryTask: Task<Void, Never>?
+     /// The current picture, kept by the cell itself so a skeleton can draw a
+@@ -533,16 +537,13 @@ class EntityScannerCell: GeneralCell, ConnectServiceDelegate {
+         peerBeacons.removeAll()
+         peerOverlaps.removeAll()
+         peerStates.removeAll()
++        peerStateLeases.removeAll()
+         radarLedger.clear()
+         selectedAdvertisement = nil
+         selectedAccessChallenge = nil
+         advertisementSelectionID = UUID()
+         advertisementStatus = "Velg et treff for å lese det som er annonsert."
+         probeSession.reset()
+-        probeResponseTimeoutTasks.values.forEach { $0.cancel() }
+-        probeResponseTimeoutTasks.removeAll()
+-        outgoingProbeRequests.removeAll()
+-        outgoingDetailRequests.removeAll()
+         automaticProbeRemoteUUIDs.removeAll()
+         localBeacon = nil
+         policyExpiryTask?.cancel()
+@@ -1149,6 +1150,32 @@ class EntityScannerCell: GeneralCell, ConnectServiceDelegate {
+         pushScannerEvent(topic: EntityScannerTopics.connected, title: "Connected Devices Changed", payload: payload, requesterOverride: requester)
+     }
+ 
++    func scannerPeerStateChanged(manager: ScannerService) {
++        guard manager === connectService else { return }
++        for (remote, lease) in peerStateLeases where !lease.source.isLive || !lease.retention.isLive || manager.peerStateLease(remoteUUID: remote) !== lease.source {
++            retirePeerState(remote)
++        }
++    }
++
++    private func retirePeerState(_ remoteUUID: String) {
++        peerStates[remoteUUID] = nil; peerBeacons[remoteUUID] = nil; peerOverlaps[remoteUUID] = nil
++        peerStateLeases[remoteUUID] = nil; automaticProbeRemoteUUIDs.remove(remoteUUID)
++        probeSession.removeResult(for: remoteUUID)
++    }
++
++    @discardableResult private func retainPeerState(_ remoteUUID: String, manager: ScannerService) -> Bool {
++        scannerPeerStateChanged(manager: manager)
++        guard manager === connectService, let lease = manager.peerStateLease(remoteUUID: remoteUUID), lease.isLive else { return false }
++        if peerStateLeases[remoteUUID]?.source === lease { return true }
++        let budget = manager.admission.configuration.discovery
++        guard peerStateLeases.count < budget.count,
++              lease.retainedBytes <= budget.bytes - peerStateLeases.values.reduce(0, { $0 + $1.retention.retainedBytes }) else { return false }
++        guard let retention = lease.retainForConsumer() else { return false }
++        peerStateLeases[remoteUUID] = (lease, retention)
++        peerStates[remoteUUID] = NearbyPeerStateMachine()
++        return true
++    }
++
+     func foundDevicesChanged(
+         manager: ScannerService,
+         foundDevice: MCPeerID,
+@@ -1156,10 +1183,9 @@ class EntityScannerCell: GeneralCell, ConnectServiceDelegate {
+         discoveryInfo: [String: String]?
+     ) {
+         let requester = activeLocalIdentity(service: manager)
++        scannerPeerStateChanged(manager: manager)
+         let isNewPeer = peerStates[remoteUUID] == nil
+-        if isNewPeer {
+-            peerStates[remoteUUID] = NearbyPeerStateMachine()
+-        }
++        guard retainPeerState(remoteUUID, manager: manager) else { return }
+         let peerBeacon = discoveryInfo.flatMap(NearbyBeacon.init(discoveryInfo:))
+         if let peerBeacon { peerBeacons[remoteUUID] = peerBeacon }
+         let overlap = localBeacon.flatMap { local in peerBeacon.map { local.overlap(with: $0) } }
+@@ -1194,19 +1220,9 @@ class EntityScannerCell: GeneralCell, ConnectServiceDelegate {
+ 
+     func lostDeviceChanged(manager: ScannerService, lostDevice: MCPeerID, remoteUUID: String) {
+         let requester = activeLocalIdentity(service: manager)
+-        if peerStates[remoteUUID] != nil {
+-            do {
+-                try peerStates[remoteUUID]?.transition(to: .lost)
+-            } catch {
+-                emitStateTransitionError(error, remoteUUID: remoteUUID)
+-            }
+-        }
+-        peerBeacons[remoteUUID] = nil
+-        peerOverlaps[remoteUUID] = nil
+-        automaticProbeRemoteUUIDs.remove(remoteUUID)
+-        cancelOutgoingProbes(for: remoteUUID)
++        // Loss is a retirement, not a permanent dictionary entry in .lost.
++        retirePeerState(remoteUUID)
+         pendingRequests.prune()
+-        outgoingDetailRequests = outgoingDetailRequests.filter { $0.value != remoteUUID }
+         let payload = makeScannerEventObject(
+             event: "lost",
+             remoteUUID: remoteUUID,
+@@ -1219,9 +1235,7 @@ class EntityScannerCell: GeneralCell, ConnectServiceDelegate {
+ 
+     func invitationReceived(manager: ScannerService, peerID: MCPeerID, remoteUUID: String) {
+         let requester = activeLocalIdentity(service: manager)
+-        if peerStates[remoteUUID] == nil {
+-            peerStates[remoteUUID] = NearbyPeerStateMachine()
+-        }
++        guard retainPeerState(remoteUUID, manager: manager) else { return }
+         var payload = makeScannerEventObject(
+             event: "invitationReceived",
+             remoteUUID: remoteUUID,
+@@ -1305,6 +1319,7 @@ class EntityScannerCell: GeneralCell, ConnectServiceDelegate {
+ 
+     func scannerChannelRetired(manager: ScannerService, generation: String) {
+         pendingRequests.retire(generation)
++        scannerPeerStateChanged(manager: manager)
+     }
+ 
+     func scannerFlowReceived(manager: ScannerService, flowElement: FlowElement, context: ScannerConsumerContext) async throws {
+@@ -1318,11 +1333,11 @@ class EntityScannerCell: GeneralCell, ConnectServiceDelegate {
+         case EntityScannerTopics.probeRequest:
+             try await handleIncomingProbeRequest(manager: manager, flowElement: flowElement, context: context)
+         case EntityScannerTopics.probeAggregate:
+-            try consumerEffect(context) { handleIncomingProbeAggregate(flowElement: flowElement, remoteUUID: context.remoteUUID) }
++            try handleIncomingProbeAggregate(flowElement: flowElement, context: context)
+         case EntityScannerTopics.probeDetailRequest:
+             handleIncomingProbeDetailRequest(flowElement: flowElement, context: context)
+         case EntityScannerTopics.probeDetail:
+-            try consumerEffect(context) { handleIncomingProbeDetail(flowElement: flowElement, remoteUUID: context.remoteUUID) }
++            try handleIncomingProbeDetail(flowElement: flowElement, context: context)
+         default: break
+         }
+         try context.check()
+@@ -1348,9 +1363,19 @@ class EntityScannerCell: GeneralCell, ConnectServiceDelegate {
+                   (try? JSONEncoder().encode(request).count) ?? .max <= NearbyProbeSession.maximumPayloadBytes else {
+                 throw NearbyProbeSession.ProbeError.payloadTooLarge
+             }
+-            outgoingProbeRequests[request.requestId] = (remoteUUID, request.nonce)
++            let context = try service.consumerContext(remoteUUID: remoteUUID)
++            pendingRequests.expired = { [weak self] kind, record in
++                guard kind == .outgoingAggregate, let self else { return }
++                try? record.context.perform {
++                    if self.peerStates[record.context.remoteUUID]?.state == .probing {
++                        try? self.transitionPeer(record.context.remoteUUID, to: .beaconMatched)
++                    }
++                }
++            }
++            try pendingRequests.insert(.outgoingAggregate, id: request.requestId,
++                payload: ["nonce": .string(request.nonce)], context: context, lifetime: 15)
+             do {
+-                try transitionPeer(remoteUUID, to: .probing)
++                try context.perform { try transitionPeer(remoteUUID, to: .probing) }
+                 var element = FlowElement(
+                     title: "Nearby Aggregate Probe",
+                     content: content,
+@@ -1358,12 +1383,13 @@ class EntityScannerCell: GeneralCell, ConnectServiceDelegate {
+                 )
+                 element.topic = EntityScannerTopics.probeRequest
+                 element.origin = uuid
+-                try await service.sendScannerFlowElement(element, remoteUUID: remoteUUID)
+-                scheduleProbeResponseTimeout(requestId: request.requestId, remoteUUID: remoteUUID)
++                try await service.sendScannerFlowElement(element, context: context)
+             } catch {
+-                outgoingProbeRequests.removeValue(forKey: request.requestId)
+-                if peerStates[remoteUUID]?.state == .probing {
+-                    try? transitionPeer(remoteUUID, to: .beaconMatched)
++                pendingRequests.remove(.outgoingAggregate, id: request.requestId, context: context)
++                try? context.perform {
++                    if peerStates[remoteUUID]?.state == .probing {
++                        try? transitionPeer(remoteUUID, to: .beaconMatched)
++                    }
+                 }
+                 throw error
+             }
+@@ -1410,59 +1436,22 @@ class EntityScannerCell: GeneralCell, ConnectServiceDelegate {
+         }
+     }
+ 
+-    private func handleIncomingProbeAggregate(flowElement: FlowElement, remoteUUID: String?) {
++    private func handleIncomingProbeAggregate(flowElement: FlowElement, context: ScannerConsumerContext) throws {
+         guard disclosurePolicy.isActive(),
+-              let remoteUUID,
+               let aggregate = decode(NearbyProbeAggregate.self, from: flowElement.content),
+-              let outgoing = outgoingProbeRequests.removeValue(forKey: aggregate.requestId),
+-              outgoing.remoteUUID == remoteUUID,
+-              outgoing.nonce == aggregate.nonce else {
+-            CellBase.diagnosticLog("Nearby aggregate probe response rejected due to requestId/nonce mismatch", domain: .flow)
+-            return
+-        }
+-        probeResponseTimeoutTasks.removeValue(forKey: aggregate.requestId)?.cancel()
+-        do {
+-            try probeSession.store(.aggregate(aggregate), for: remoteUUID)
+-            try transitionPeer(remoteUUID, to: .probed)
+-            var payload = makeScannerEventObject(event: "probeAggregate", remoteUUID: remoteUUID, status: "received")
++              let outgoing = pendingRequests.find(.outgoingAggregate, id: aggregate.requestId, context: context),
++              string(from: outgoing.payload["nonce"]) == aggregate.nonce else { return }
++        // Validate result size and the state transition on copies before consuming.
++        var nextSession = probeSession
++        try nextSession.store(.aggregate(aggregate), for: context.remoteUUID)
++        guard var nextState = peerStates[context.remoteUUID] else { return }
++        try nextState.transition(to: .probed)
++        _ = try pendingRequests.consume(.outgoingAggregate, id: aggregate.requestId, context: context)
++        try consumerEffect(context) {
++            probeSession = nextSession; peerStates[context.remoteUUID] = nextState
++            var payload = makeScannerEventObject(event: "probeAggregate", remoteUUID: context.remoteUUID, status: "received")
+             payload["probeDisclosure"] = valueType(from: aggregate) ?? .null
+             pushScannerEvent(topic: EntityScannerTopics.probeAggregate, title: "Nearby Aggregate Probe Result", payload: payload)
+-        } catch {
+-            CellBase.diagnosticLog("Nearby aggregate probe result rejected: \(error)", domain: .flow)
+-        }
+-    }
+-
+-    private func scheduleProbeResponseTimeout(requestId: String, remoteUUID: String) {
+-        probeResponseTimeoutTasks[requestId]?.cancel()
+-        probeResponseTimeoutTasks[requestId] = Task { @MainActor [weak self] in
+-            do {
+-                try await Task.sleep(nanoseconds: Self.probeResponseTimeoutNanoseconds)
+-            } catch {
+-                return
+-            }
+-            guard let self,
+-                  !Task.isCancelled,
+-                  self.outgoingProbeRequests[requestId]?.remoteUUID == remoteUUID else {
+-                return
+-            }
+-            self.outgoingProbeRequests.removeValue(forKey: requestId)
+-            self.probeResponseTimeoutTasks.removeValue(forKey: requestId)
+-            guard self.peerStates[remoteUUID]?.state == .probing else { return }
+-            do {
+-                try self.transitionPeer(remoteUUID, to: .beaconMatched)
+-            } catch {
+-                self.emitStateTransitionError(error, remoteUUID: remoteUUID)
+-            }
+-        }
+-    }
+-
+-    private func cancelOutgoingProbes(for remoteUUID: String) {
+-        let requestIds = outgoingProbeRequests.compactMap { requestId, request in
+-            request.remoteUUID == remoteUUID ? requestId : nil
+-        }
+-        for requestId in requestIds {
+-            outgoingProbeRequests.removeValue(forKey: requestId)
+-            probeResponseTimeoutTasks.removeValue(forKey: requestId)?.cancel()
+         }
+     }
+ 
+@@ -1492,18 +1481,18 @@ class EntityScannerCell: GeneralCell, ConnectServiceDelegate {
+         try? consumerEffect(context) { pushScannerEvent(topic: EntityScannerTopics.probeDetailRequest, title: "Nearby Detail Request", payload: payload) }
+     }
+ 
+-    private func handleIncomingProbeDetail(flowElement: FlowElement, remoteUUID: String?) {
++    private func handleIncomingProbeDetail(flowElement: FlowElement, context: ScannerConsumerContext) throws {
+         guard disclosurePolicy.isActive(),
+-              let remoteUUID,
+               let detail = decode(NearbyProbeDetail.self, from: flowElement.content),
+-              outgoingDetailRequests.removeValue(forKey: detail.requestId) == remoteUUID else { return }
+-        do {
+-            try probeSession.store(.detail(detail), for: remoteUUID)
+-            var payload = makeScannerEventObject(event: "probeDetail", remoteUUID: remoteUUID, status: "received")
++              pendingRequests.find(.outgoingDetail, id: detail.requestId, context: context) != nil else { return }
++        var nextSession = probeSession
++        try nextSession.store(.detail(detail), for: context.remoteUUID)
++        _ = try pendingRequests.consume(.outgoingDetail, id: detail.requestId, context: context)
++        try consumerEffect(context) {
++            probeSession = nextSession
++            var payload = makeScannerEventObject(event: "probeDetail", remoteUUID: context.remoteUUID, status: "received")
+             payload["probeDisclosure"] = valueType(from: detail) ?? .null
+             pushScannerEvent(topic: EntityScannerTopics.probeDetail, title: "Nearby Detail Result", payload: payload)
+-        } catch {
+-            CellBase.diagnosticLog("Nearby detail result rejected: \(error)", domain: .flow)
+         }
+     }
+ 
+@@ -1525,13 +1514,10 @@ class EntityScannerCell: GeneralCell, ConnectServiceDelegate {
+             let content: FlowElementValueType
+             switch action {
+             case "request":
+-                guard outgoingDetailRequests[requestId] == nil else {
+-                    throw NearbyProbeSession.ProbeError.duplicateRequest
+-                }
+                 topic = EntityScannerTopics.probeDetailRequest
+                 title = "Nearby Detail Request"
+                 content = .object(["requestId": .string(requestId)])
+-                outgoingDetailRequests[requestId] = remoteUUID
++                try pendingRequests.insert(.outgoingDetail, id: requestId, payload: ["requestId": .string(requestId)], context: context)
+             case "approve":
+                 _ = try pendingRequests.consume(.detail, id: requestId, context: context)
+                 guard let overlap = peerOverlaps[remoteUUID] else {
+@@ -1556,7 +1542,7 @@ class EntityScannerCell: GeneralCell, ConnectServiceDelegate {
+                 throw NearbyProbeSession.ProbeError.invalidRequest
+             }
+             guard (try? JSONEncoder().encode(content).count) ?? .max <= NearbyProbeSession.maximumPayloadBytes else {
+-                if action == "request" { outgoingDetailRequests.removeValue(forKey: requestId) }
++                if action == "request" { pendingRequests.remove(.outgoingDetail, id: requestId, context: context) }
+                 throw NearbyProbeSession.ProbeError.payloadTooLarge
+             }
+             var element = FlowElement(
+@@ -1569,7 +1555,7 @@ class EntityScannerCell: GeneralCell, ConnectServiceDelegate {
+             do {
+                 try await service.sendScannerFlowElement(element, context: context)
+             } catch {
+-                if action == "request" { outgoingDetailRequests.removeValue(forKey: requestId) }
++                if action == "request" { pendingRequests.remove(.outgoingDetail, id: requestId, context: context) }
+                 throw error
+             }
+             return .object(["status": .string("sent"), "requestId": .string(requestId)])
+@@ -2587,7 +2573,9 @@ class EntityScannerCell: GeneralCell, ConnectServiceDelegate {
+ 
+     private func transitionPeerToContactRequested(_ remoteUUID: String) throws {
+         if peerStates[remoteUUID] == nil {
+-            peerStates[remoteUUID] = NearbyPeerStateMachine()
++            guard let service = connectService, retainPeerState(remoteUUID, manager: service) else {
++                throw NearbyPeerStateMachine.TransitionError.unknownPeer(remoteUUID: remoteUUID)
++            }
+         }
+         guard peerStates[remoteUUID]?.state != .contactRequested else { return }
+         try transitionPeer(remoteUUID, to: .contactRequested)
+diff --git a/Sources/CellApple/EntityRadar/NearbyProbe.swift b/Sources/CellApple/EntityRadar/NearbyProbe.swift
+index e6f4d33..6ff1496 100644
+--- a/Sources/CellApple/EntityRadar/NearbyProbe.swift
++++ b/Sources/CellApple/EntityRadar/NearbyProbe.swift
+@@ -129,6 +129,8 @@ public struct NearbyProbeSession: Sendable {
+         resultsByRemoteUUID[remoteUUID] = result
+     }
+ 
++    mutating func removeResult(for remoteUUID: String) { resultsByRemoteUUID[remoteUUID] = nil }
++
+     public mutating func reset() {
+         resultsByRemoteUUID.removeAll()
+         handledRequestIDs.removeAll()
+diff --git a/Sources/CellApple/EntityRadar/ScannerAdmission.swift b/Sources/CellApple/EntityRadar/ScannerAdmission.swift
+index 28d62dc..bb4f382 100644
+--- a/Sources/CellApple/EntityRadar/ScannerAdmission.swift
++++ b/Sources/CellApple/EntityRadar/ScannerAdmission.swift
+@@ -7,7 +7,7 @@ import MultipeerConnectivity
+ /// context, NOT a verified device or person; a Sybil can exhaust the global cap.
+ /// No attacker-supplied UUID/displayName creates a quota bucket.
+ final class ScannerAdmission {
+-    enum Kind: CaseIterable { case discovery, invitation, task, event, physical }
++    enum Kind: CaseIterable { case discovery, consumer, invitation, task, event, physical }
+     struct Budget {
+         var count: Int
+         var bytes: Int
+@@ -27,7 +27,7 @@ final class ScannerAdmission {
+         var rate = 256
+         var perSourceRate = 24
+         func budget(_ kind: Kind) -> Budget {
+-            switch kind { case .discovery: return discovery; case .invitation: return invitation; case .task: return task; case .event: return event; case .physical: return physical }
++            switch kind { case .discovery, .consumer: return discovery; case .invitation: return invitation; case .task: return task; case .event: return event; case .physical: return physical }
+         }
+     }
+     struct Usage { var count = 0; var bytes = 0 }
+@@ -46,11 +46,13 @@ final class ScannerAdmission {
+         fileprivate var bytes: Int
+         fileprivate var released = false
+         fileprivate var deadline: TimeInterval
++        var retainedBytes: Int { owner.lock.withLock { bytes } }
+         let source: String
+         var isLive: Bool { owner.lock.withLock { !released && owner.now() < deadline } }
+         fileprivate init(owner: ScannerAdmission, peer: MCPeerID, kind: Kind, bytes: Int, source: String, deadline: TimeInterval) {
+             self.owner = owner; self.peer = peer; self.kind = kind; self.bytes = bytes; self.source = source; self.deadline = deadline
+         }
++        func retainForConsumer() -> Lease? { owner.reserve(.consumer, peer: peer, bytes: retainedBytes) }
+         func release() { owner.release(self) }
+         deinit { release() }
+     }
+diff --git a/Sources/CellApple/EntityRadar/ScannerConsumerContext.swift b/Sources/CellApple/EntityRadar/ScannerConsumerContext.swift
+index c3ecc99..c4e7d9b 100644
+--- a/Sources/CellApple/EntityRadar/ScannerConsumerContext.swift
++++ b/Sources/CellApple/EntityRadar/ScannerConsumerContext.swift
+@@ -43,11 +43,11 @@ final class ScannerConsumerContext: @unchecked Sendable {
+     }
+ }
+ 
+-/// One combined budget for incoming/outgoing contact and detail records.
++/// One combined budget for all incoming/outgoing contact and probe records.
+ /// Consumed entries are bounded tombstones until their original TTL, preventing
+ /// a second effect from a replay. Retirement removes the whole generation.
+ @MainActor final class ScannerPendingRequests {
+-    enum Kind: Hashable { case incoming, outgoing, detail }
++    enum Kind: Hashable { case incoming, outgoing, detail, outgoingAggregate, outgoingDetail }
+     struct Key: Hashable { let kind: Kind; let generation: String; let id: String }
+     struct Record {
+         let context: ScannerConsumerContext
+@@ -64,18 +64,21 @@ final class ScannerConsumerContext: @unchecked Sendable {
+     static let ttl: TimeInterval = 60
+     var clock: () -> TimeInterval = { ProcessInfo.processInfo.systemUptime }
+     private var records: [Key: Record] = [:]
++    var expired: ((Kind, Record) -> Void)?
+     private var expiryTask: Task<Void, Never>?
+ 
+     func prune() {
+         let now = clock()
++        let removed = records.filter { now >= $0.value.deadline || !$0.value.context.isLive }
+         records = records.filter { now < $0.value.deadline && $0.value.context.isLive }
++        for (key, record) in removed where !record.consumed { expired?(key.kind, record) }
+     }
+     func retire(_ generation: String) { records = records.filter { $0.key.generation != generation } }
+     func reset() { records.removeAll(); expiryTask?.cancel(); expiryTask = nil }
+     var retainedCountForTesting: Int { records.count }
+     var snapshot: (count: Int, bytes: Int) { prune(); return (records.count, records.values.reduce(0) { $0 + $1.bytes }) }
+ 
+-    func insert(_ kind: Kind, id: String, payload: Object, context: ScannerConsumerContext) throws {
++    func insert(_ kind: Kind, id: String, payload: Object, context: ScannerConsumerContext, lifetime: TimeInterval? = nil) throws {
+         prune()
+         let key = Key(kind: kind, generation: context.generation, id: id)
+         let payload = try JSONDecoder().decode(Object.self, from: JSONEncoder().encode(payload))
+@@ -88,7 +91,7 @@ final class ScannerConsumerContext: @unchecked Sendable {
+               bytes <= Self.maximumBytesPerPeer - peer.reduce(0, { $0 + $1.bytes }) else {
+             throw BridgeChannelAuthentication.Failure.capacity
+         }
+-        try context.perform { records[key] = Record(context: context, payload: payload, bytes: bytes, deadline: clock() + Self.ttl) }
++        try context.perform { records[key] = Record(context: context, payload: payload, bytes: bytes, deadline: clock() + min(Self.ttl, max(0, lifetime ?? Self.ttl))) }
+         if expiryTask == nil {
+             expiryTask = Task { @MainActor [weak self] in
+                 while !Task.isCancelled {
+@@ -100,6 +103,9 @@ final class ScannerConsumerContext: @unchecked Sendable {
+             }
+         }
+     }
++    func remove(_ kind: Kind, id: String, context: ScannerConsumerContext) {
++        records[Key(kind: kind, generation: context.generation, id: id)] = nil
++    }
+     func find(_ kind: Kind, id: String, context: ScannerConsumerContext) -> Record? {
+         prune()
+         guard let record = records[Key(kind: kind, generation: context.generation, id: id)],
+diff --git a/Sources/CellApple/EntityRadar/ScannerService.swift b/Sources/CellApple/EntityRadar/ScannerService.swift
+index db89290..94a5d82 100644
+--- a/Sources/CellApple/EntityRadar/ScannerService.swift
++++ b/Sources/CellApple/EntityRadar/ScannerService.swift
+@@ -55,10 +55,12 @@ protocol ConnectServiceDelegate {
+     )
+     @MainActor func scannerFlowReceived(manager: ScannerService, flowElement: FlowElement, context: ScannerConsumerContext) async throws
+     @MainActor func scannerChannelRetired(manager: ScannerService, generation: String)
++    @MainActor func scannerPeerStateChanged(manager: ScannerService)
+ }
+ 
+ extension ConnectServiceDelegate {
+     @MainActor func scannerChannelRetired(manager: ScannerService, generation: String) {}
++    @MainActor func scannerPeerStateChanged(manager: ScannerService) {}
+ }
+ 
+ private enum ScannerServiceError: Error {
+@@ -381,6 +383,12 @@ class ScannerService :  NSObject, ObservableObject {
+     private var scheduledSetups: [UUID: (physical: ScannerPeerTransport, lease: ScannerAdmission.Lease)] = [:]
+     private var serviceGeneration = UUID()
+     private var stopped = false
++    // One coalesced lifecycle wakeup, independent of lossy discovery event quotas.
++    private var deinitializing = false
++    private var restartRequested = false
++    private var lifecycleScheduled = false
++    private var terminalGeneration: UUID?
++    private var connectionsDirty = false
+     private var maintenance: DispatchSourceTimer?
+     var invitationClock: () -> TimeInterval = { ProcessInfo.processInfo.systemUptime }
+     // Runs INSIDE the transition lock, at the former remove/install race.
+@@ -456,6 +464,7 @@ class ScannerService :  NSObject, ObservableObject {
+         let session: MCSession
+         let lease: ScannerAdmission.Lease
+         var retiring = false
++        var connected = false
+         var waiter: CheckedContinuation<Void, Never>?
+         init(peer: MCPeerID, session: MCSession, lease: ScannerAdmission.Lease) {
+             self.peer = peer; self.session = session; self.lease = lease
+@@ -490,6 +499,7 @@ class ScannerService :  NSObject, ObservableObject {
+         withState {
+             guard let slot = physicalSlots[ObjectIdentifier(session)], !slot.retiring else { return }
+             slot.retiring = true
++            connectionsDirty = true; scheduleLifecyclePublication()
+             nearby.retire(session: session)
+             session.disconnect()
+             reapPhysicalSessions()
+@@ -552,8 +562,10 @@ class ScannerService :  NSObject, ObservableObject {
+         }
+     }
+ 
+-    @MainActor func drainEventsForTesting() { drainEvents(generation: withState { serviceGeneration }) }
++    @MainActor func drainLifecycleForTesting() { publishLifecycle() }
++    @MainActor func drainEventsForTesting() { publishLifecycle(); drainEvents(generation: withState { serviceGeneration }) }
+     @MainActor private func drainEvents(generation: UUID) {
++        publishLifecycle()
+         while let event = withState({ () -> PendingEvent? in
+             guard generation == serviceGeneration else { return nil }
+             guard !eventOrder.isEmpty else { eventDrainScheduled = false; return nil }
+@@ -569,6 +581,51 @@ class ScannerService :  NSObject, ObservableObject {
+     }
+     var queuedEventCount: Int { withState { events.count } }
+ 
++    /// Shared lifetime token: retaining consumer state keeps the original
++    /// admission charged. Replacement invalidates the old token immediately.
++    func peerStateLease(remoteUUID: String) -> ScannerAdmission.Lease? {
++        withState {
++            guard !stopped else { return nil }
++            if let peer = _foundPeersDict[remoteUUID], let lease = discoveries[peer], lease.isLive { return lease }
++            if let physical = bridgeTransportsByRemoteUUID[remoteUUID],
++               let slot = physicalSlots[ObjectIdentifier(physical.mcSession)], !slot.retiring { return slot.lease }
++            if let invitation = invitations[remoteUUID], invitation.admission.isLive { return invitation.admission }
++            return nil
++        }
++    }
++
++    private func scheduleLifecyclePublication() {
++        guard !lifecycleScheduled, !deinitializing else { return }
++        lifecycleScheduled = true
++        if !deferEventDrainForTesting {
++            Task { @MainActor [weak self] in self?.publishLifecycle() }
++        }
++    }
++
++    @MainActor private func publishLifecycle() {
++        withState {
++            lifecycleScheduled = false
++            // The terminal record belongs to the retired generation. It is
++            // delivered once even though normal events from it are forbidden.
++            if terminalGeneration != nil {
++                terminalGeneration = nil
++                radarDelegate?.scannerStatusChanged(manager: self, status: "stopped", remoteUUID: nil)
++            }
++            if restartRequested {
++                restartRequested = false
++                start()
++            }
++            radarDelegate?.scannerPeerStateChanged(manager: self)
++            if connectionsDirty {
++                connectionsDirty = false
++                let names = physicalSlots.values.filter { !$0.retiring && $0.connected }
++                    .map { $0.peer.displayName }.sorted()
++                connectedDevices = names
++                radarDelegate?.connectedDevicesChanged(manager: self, connectedDevices: names)
++            }
++        }
++    }
++
+     func makeInvitation(remoteUUID: String) throws -> BridgePeerChannelAuthentication.Endpoint {
+         try withState {
+             expireInvitations()
+@@ -701,46 +758,59 @@ class ScannerService :  NSObject, ObservableObject {
+     }
+ 
+     deinit {
++        deinitializing = true
+         stop()
+     }
+ 
+     func start() {
+-        print("@@@@@ start")
+-        withState { stopped = false }
+-        self.serviceAdvertiser.startAdvertisingPeer()
+-        self.serviceBrowser.startBrowsingForPeers()
+-        enqueueEvent(peer: myPeerId, bytes: 256) { service in service.radarDelegate?.scannerStatusChanged(manager: service, status: "started", remoteUUID: nil) }
+-//       startup()
+-    }
+-    
+-    
+-    func stop() {
+-        self.serviceAdvertiser.stopAdvertisingPeer()
+-        self.serviceBrowser.stopBrowsingForPeers()
+-        // Deinitializing an unstarted service must not create a session whose
+-        // weak delegate is already in deinit.
+-        disconnect()
+         withState {
+-            nearby.stop()
+-            stopped = true; serviceGeneration = UUID()
+-            let pending = Array(invitations.values)
+-            invitations.removeAll()
+-            let queued = Array(events.values); events.removeAll(); eventOrder.removeAll(); eventDrainScheduled = false
+-            for event in queued { event.discard(); event.lease.release() }
+-            discoveries.removeAll()
+-            for invitation in pending { invitation.handler?(false, nil); invitation.handler = nil }
++            if terminalGeneration != nil {
++                restartRequested = true
++                scheduleLifecyclePublication()
++                return
++            }
++            stopped = false
++            serviceAdvertiser.startAdvertisingPeer()
++            serviceBrowser.startBrowsingForPeers()
++            enqueueEvent(peer: myPeerId, bytes: 256) { service in
++                service.radarDelegate?.scannerStatusChanged(manager: service, status: "started", remoteUUID: nil)
++            }
+         }
+-        connectedRemoteUUID = nil
+-        connectedPeer = nil
+-        let remotes = withState { Set(bridgeTransportsByRemoteUUID.keys).union(bridgeSetupTasks.keys).union(registeredBridgeUUIDsByRemoteUUID.keys) }
+-        for remote in remotes { removeBridge(for: remote) }
++    }
++
++    func stop() {
+         withState {
+-            invitations.removeAll()
+-            _foundPeersDict.removeAll(); _reversedFoundPeersDict.removeAll()
+-            advertisementPeers.removeAll(); advertisementProofPeers.removeAll()
+-            _connectedPeersDict.removeAll(); _reversedConnectedPeersDict.removeAll()
++            restartRequested = false
++            guard !stopped else { return }
++            terminalGeneration = serviceGeneration
++            self.serviceAdvertiser.stopAdvertisingPeer()
++            self.serviceBrowser.stopBrowsingForPeers()
++            // Deinitializing an unstarted service must not create a session whose
++            // weak delegate is already in deinit.
++            disconnect()
++            withState {
++                nearby.stop()
++                stopped = true; serviceGeneration = UUID()
++                let pending = Array(invitations.values)
++                invitations.removeAll()
++                let queued = Array(events.values); events.removeAll(); eventOrder.removeAll(); eventDrainScheduled = false
++                for event in queued { event.discard(); event.lease.release() }
++                discoveries.removeAll()
++                for invitation in pending { invitation.handler?(false, nil); invitation.handler = nil }
++            }
++            connectedRemoteUUID = nil
++            connectedPeer = nil
++            let remotes = withState { Set(bridgeTransportsByRemoteUUID.keys).union(bridgeSetupTasks.keys).union(registeredBridgeUUIDsByRemoteUUID.keys) }
++            for remote in remotes { removeBridge(for: remote) }
++            withState {
++                invitations.removeAll()
++                _foundPeersDict.removeAll(); _reversedFoundPeersDict.removeAll()
++                advertisementPeers.removeAll(); advertisementProofPeers.removeAll()
++                _connectedPeersDict.removeAll(); _reversedConnectedPeersDict.removeAll()
++            }
++            connectionsDirty = true
++            scheduleLifecyclePublication()
+         }
+-        enqueueEvent(peer: myPeerId, bytes: 256) { service in service.radarDelegate?.scannerStatusChanged(manager: service, status: "stopped", remoteUUID: nil) }
+     }
+ 
+     var pendingInvitationCount: Int { withState { invitations.values.filter { $0.state == .pending }.count } }
+@@ -773,6 +843,7 @@ class ScannerService :  NSObject, ObservableObject {
+     func expireInvitations() {
+         withState {
+             reapPhysicalSessions()
++            scheduleLifecyclePublication()
+             let now = invitationClock()
+             for setup in scheduledSetups.values where !setup.lease.isLive {
+                 // Revoke synchronously at expiry, while keeping the worker and
+@@ -785,6 +856,7 @@ class ScannerService :  NSObject, ObservableObject {
+                 if let remote = _reversedFoundPeersDict.removeValue(forKey: peer), _foundPeersDict[remote] == peer {
+                     _foundPeersDict[remote] = nil; advertisementPeers.remove(remote); advertisementProofPeers.remove(remote)
+                     enqueueEvent(peer: peer, bytes: 256) { service in
++                        guard service._foundPeersDict[remote] == nil else { return }
+                         service.discoveredDevices = service.withState { service._foundPeersDict.values.map(\.displayName) }
+                         service.radarDelegate?.lostDeviceChanged(manager: service, lostDevice: peer, remoteUUID: remote)
+                     }
+@@ -1193,18 +1265,23 @@ extension ScannerService : MCNearbyServiceBrowserDelegate {
+             if let invitation = invitations[remoteUUID], invitation.peer != peerID { return }
+             if invitations.values.contains(where: { $0.peer == peerID && $0.remoteUUID != remoteUUID }) { return }
+             guard let lease = admission.reserve(.discovery, peer: peerID, bytes: bytes, replacing: discoveries[peerID]) else { return }
+-            if let previous = _reversedFoundPeersDict[peerID], previous != remoteUUID {
++            let replacedUUID = _reversedFoundPeersDict[peerID].flatMap { $0 != remoteUUID ? $0 : nil }
++            if let previous = replacedUUID {
+                 _foundPeersDict[previous] = nil; advertisementPeers.remove(previous); advertisementProofPeers.remove(previous)
+             }
+             if let previous = _foundPeersDict[remoteUUID], previous != peerID {
+                 _reversedFoundPeersDict[previous] = nil; discoveries[previous] = nil
+             }
+             discoveries[peerID] = lease
++            scheduleLifecyclePublication()
+             _foundPeersDict[remoteUUID] = peerID; _reversedFoundPeersDict[peerID] = remoteUUID
+             if info["ad"] == "1" { advertisementPeers.insert(remoteUUID) } else { advertisementPeers.remove(remoteUUID) }
+             if info["ad"] == "1", info["adp"] == "2" { advertisementProofPeers.insert(remoteUUID) } else { advertisementProofPeers.remove(remoteUUID) }
+-            enqueueEvent(peer: peerID, bytes: bytes) { [weak lease] service in
++            enqueueEvent(peer: peerID, bytes: bytes + (replacedUUID?.utf8.count ?? 0)) { [weak lease] service in
+                 guard let lease, service.withState({ service.discoveries[peerID] === lease && lease.isLive }) else { return }
++                if let replacedUUID, service._foundPeersDict[replacedUUID] == nil {
++                    service.radarDelegate?.lostDeviceChanged(manager: service, lostDevice: peerID, remoteUUID: replacedUUID)
++                }
+                 service.discoveredDevices = service.withState { service._foundPeersDict.values.map(\.displayName) }
+                 service.radarDelegate?.foundDevicesChanged(manager: service, foundDevice: peerID, remoteUUID: remoteUUID, discoveryInfo: info)
+                 service.radarDelegate?.scannerStatusChanged(manager: service, status: "peerFound", remoteUUID: remoteUUID)
+@@ -1216,6 +1293,7 @@ extension ScannerService : MCNearbyServiceBrowserDelegate {
+         withState {
+             guard let remoteUUID = _reversedFoundPeersDict.removeValue(forKey: peerID), _foundPeersDict[remoteUUID] == peerID else { return }
+             _foundPeersDict[remoteUUID] = nil; discoveries[peerID] = nil
++            scheduleLifecyclePublication()
+             advertisementPeers.remove(remoteUUID); advertisementProofPeers.remove(remoteUUID)
+             enqueueEvent(peer: peerID, bytes: 256) { service in
+                 guard service.withState({ service._foundPeersDict[remoteUUID] == nil }) else { return }
+@@ -1267,7 +1345,14 @@ extension ScannerService : MCSessionDelegate {
+     }
+ 
+     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
+-        if state == .notConnected { withState { reapPhysicalSessions() } }
++        let accepted = withState { () -> Bool in
++            guard !stopped, let slot = physicalSlots[ObjectIdentifier(session)],
++                  slot.peer == peerID, !slot.retiring else { reapPhysicalSessions(); return false }
++            slot.connected = state == .connected
++            connectionsDirty = true; scheduleLifecyclePublication()
++            return true
++        }
++        guard accepted else { return }
+         let physical = try? capturePeerTransport(session: session, peerID: peerID, prepare: state == .connected)
+         // Retire synchronously; an old queued UI callback cannot retire a reconnect.
+         if state == .notConnected, let physical { peerDisconnected(physical) }
+@@ -1277,8 +1362,6 @@ extension ScannerService : MCSessionDelegate {
+         guard let physical else { return }
+         enqueueEvent(peer: peerID, bytes: 256) { [weak physical] service in
+             guard let physical else { return }
+-            service.connectedDevices = session.connectedPeers.map(\.displayName)
+-            service.radarDelegate?.connectedDevicesChanged(manager: service, connectedDevices: session.connectedPeers.map(\.displayName))
+             guard service.withState({ service.bridgeTransportsByRemoteUUID[physical.remoteUUID] === physical }) else { return }
+             switch state {
+             case .connecting:
+diff --git a/Tests/CellBaseTests/EntityScannerConsumerSecurityTests.swift b/Tests/CellBaseTests/EntityScannerConsumerSecurityTests.swift
+index b013a33..e02399c 100644
+--- a/Tests/CellBaseTests/EntityScannerConsumerSecurityTests.swift
++++ b/Tests/CellBaseTests/EntityScannerConsumerSecurityTests.swift
+@@ -392,3 +392,151 @@ private actor ConsumerBarrier {
+         request["requestSignature"] = .data(try XCTUnwrap(signature)); return request
+     }
+ }
++
++extension EntityScannerConsumerSecurityTests {
++    @MainActor func testOutgoingProbeRepliesValidateNoncePeerAndPayloadBeforeConsuming() async throws {
++        let f = try await ConsumerFixture(); defer { f.stop() }
++        try await f.prepareProbes()
++        try await f.pair.addThirdPeer()
++        var published: [String] = []
++        f.cell.consumerEventForTesting = { published.append($0) }
++        let request = try await f.aggregateRequest()
++        let id = request.0, nonce = request.1
++        let valid = NearbyProbeAggregate(requestId: id, nonce: nonce, entityKind: .person, purposeMatches: .one, interestMatches: nil)
++        let wrong = NearbyProbeAggregate(requestId: id, nonce: "wrong", entityKind: .person, purposeMatches: .one, interestMatches: nil)
++        try await f.receiveProbe(wrong, topic: "scanner.probe.aggregate")
++        let stranger = try f.pair.a.consumerContext(remoteUUID: f.pair.c!.mySessionUUID)
++        try await f.receiveProbe(valid, topic: "scanner.probe.aggregate", context: stranger)
++        XCTAssertNotNil(f.cell.pendingRequests.find(.outgoingAggregate, id: id, context: f.context))
++        XCTAssertFalse(published.contains("scanner.probe.aggregate"))
++        try await f.receiveProbe(valid, topic: "scanner.probe.aggregate")
++        try await f.receiveProbe(valid, topic: "scanner.probe.aggregate")
++        XCTAssertEqual(published.filter { $0 == "scanner.probe.aggregate" }.count, 1)
++
++        let detailID = try await f.detailRequest("detail-binding")
++        let detail = NearbyProbeDetail(requestId: detailID, references: ["purpose://test"])
++        try await f.receiveProbe(detail, topic: "scanner.probe.detail", context: stranger)
++        do {
++            try await f.receiveProbe(NearbyProbeDetail(requestId: detailID, references: [String(repeating: "x", count: 2048)]), topic: "scanner.probe.detail")
++            XCTFail("Oversized result accepted")
++        } catch {}
++        XCTAssertNotNil(f.cell.pendingRequests.find(.outgoingDetail, id: detailID, context: f.context))
++        try await f.receiveProbe(detail, topic: "scanner.probe.detail")
++        try await f.receiveProbe(detail, topic: "scanner.probe.detail")
++        XCTAssertEqual(published.filter { $0 == "scanner.probe.detail" }.count, 1)
++    }
++
++    @MainActor func testOutgoingProbesCannotCrossReconnectWithSameUUIDAndDifferentSigningKey() async throws {
++        let f = try await ConsumerFixture(); defer { f.stop() }
++        try await f.prepareProbes()
++        let aggregate = try await f.aggregateRequest()
++        let detailID = try await f.detailRequest("old-detail")
++        var published: [String] = []
++        f.cell.consumerEventForTesting = { published.append($0) }
++        await f.pair.pa.gate.close(); await f.pair.pb.gate.close()
++        XCTAssertEqual(f.cell.pendingRequests.retainedCountForTesting, 0)
++        let vault = MockIdentityVault()
++        var otherKey = Identity(f.pair.b.owner.uuid, displayName: "same UUID new key", identityVault: vault)
++        await vault.addIdentity(identity: &otherKey, for: "new-key")
++        f.pair.b.owner = otherKey
++        let fresh = try f.pair.prepareReconnect()
++        try await f.pair.authenticateTransports(fresh.0, fresh.1)
++        let context = try f.pair.a.consumerContext(remoteUUID: f.pair.b.mySessionUUID)
++        XCTAssertEqual(context.remoteUUID, f.context.remoteUUID)
++        XCTAssertEqual(context.identity.uuid, f.context.identity.uuid)
++        XCTAssertNotEqual(context.identity, f.context.identity)
++        XCTAssertNotEqual(context.generation, f.context.generation)
++        try await f.receiveProbe(NearbyProbeAggregate(requestId: aggregate.0, nonce: aggregate.1,
++            entityKind: .person, purposeMatches: .one, interestMatches: nil), topic: "scanner.probe.aggregate", context: context)
++        try await f.receiveProbe(NearbyProbeDetail(requestId: detailID, references: ["purpose://old"]), topic: "scanner.probe.detail", context: context)
++        XCTAssertFalse(published.contains("scanner.probe.aggregate")); XCTAssertFalse(published.contains("scanner.probe.detail"))
++        _ = try await f.detailRequest("fresh-detail")
++        try await f.receiveProbe(NearbyProbeDetail(requestId: "fresh-detail", references: ["purpose://fresh"]), topic: "scanner.probe.detail", context: context)
++        XCTAssertEqual(published.filter { $0 == "scanner.probe.detail" }.count, 1)
++    }
++
++    @MainActor func testOutgoingProbeTTLAndCombinedPendingCountAndBytesBoundUnfinishedRequests() async throws {
++        let f = try await ConsumerFixture(); defer { f.stop() }
++        try await f.prepareProbes()
++        var now = ProcessInfo.processInfo.systemUptime
++        f.cell.pendingRequests.clock = { now }
++        let aggregate = try await f.aggregateRequest()
++        for i in 0..<(ScannerPendingRequests.maximumPerPeer - 1) { _ = try await f.detailRequest("pending-\(i)") }
++        let result = try await f.cell.set(keypath: "probeDetail", value: .object([
++            "remoteUUID": .string(f.pair.b.mySessionUUID), "action": .string("request"), "requestId": .string("overflow")]), requester: f.pair.a.owner)
++        guard case let .object(object)? = result else { return XCTFail("Missing rejection") }
++        XCTAssertNotEqual(object["status"], .string("sent"))
++        XCTAssertEqual(f.cell.pendingRequests.snapshot.count, ScannerPendingRequests.maximumPerPeer)
++        XCTAssertLessThanOrEqual(f.cell.pendingRequests.snapshot.bytes, ScannerPendingRequests.maximumBytesPerPeer)
++        now += 16
++        XCTAssertNil(f.cell.pendingRequests.find(.outgoingAggregate, id: aggregate.0, context: f.context))
++        XCTAssertEqual(f.cell.pendingRequests.snapshot.count, ScannerPendingRequests.maximumPerPeer - 1)
++        // Timeout returns the peer to beaconMatched, allowing a real new request.
++        _ = try await f.aggregateRequest()
++        now += 61
++        f.cell.pendingRequests.prune()
++        XCTAssertEqual(f.cell.pendingRequests.retainedCountForTesting, 0)
++        _ = try await f.detailRequest("after-expiry")
++        var published = 0
++        f.cell.consumerEventForTesting = { if $0 == "scanner.probe.detail" { published += 1 } }
++        try await f.receiveProbe(NearbyProbeDetail(requestId: "pending-0", references: []), topic: "scanner.probe.detail")
++        XCTAssertEqual(published, 0)
++        try await f.receiveProbe(NearbyProbeDetail(requestId: "after-expiry", references: []), topic: "scanner.probe.detail")
++        XCTAssertEqual(published, 1)
++    }
++}
++
++private extension ConsumerFixture {
++    func prepareProbes() async throws {
++        cell.configureProbeForTesting(.approved(entityKind: .person, purposeRefs: ["purpose://test"], interestRefs: []))
++        pair.a.deferEventDrainForTesting = true
++        let browser = MCNearbyServiceBrowser(peer: pair.aPeer, serviceType: "haven-radar")
++        pair.a.browser(browser, foundPeer: pair.bPeer, withDiscoveryInfo: NearbyBeacon(sessionUUID: pair.b.mySessionUUID,
++            entityKind: .person, purposeTokens: [NearbyBeacon.token(forCanonicalReference: "purpose://test")]).encodeToDiscoveryInfo())
++        pair.a.drainEventsForTesting()
++    }
++    func aggregateRequest() async throws -> (String, String) {
++        let value = try await cell.set(keypath: "probeRequest", value: .string(pair.b.mySessionUUID), requester: pair.a.owner)
++        guard case let .object(reply)? = value, case let .string(id)? = reply["requestId"], reply["status"] == .string("sent") else {
++            throw NSError(domain: "Aggregate request failed: \(String(describing: value))", code: 1)
++        }
++        let observer = ProbeRequestObserver()
++        let previous = pair.b.radarDelegate; pair.b.radarDelegate = observer
++        defer { pair.b.radarDelegate = previous }
++        try await pair.deliverNext()
++        let requestFlow = try XCTUnwrap(observer.flow)
++        let request = try JSONDecoder().decode(NearbyProbeRequest.self, from: JSONEncoder().encode(requestFlow.content))
++        XCTAssertEqual(request.requestId, id)
++        let nonce = request.nonce
++        return (id, nonce)
++    }
++    func detailRequest(_ id: String) async throws -> String {
++        let value = try await cell.set(keypath: "probeDetail", value: .object([
++            "remoteUUID": .string(pair.b.mySessionUUID), "action": .string("request"), "requestId": .string(id)]), requester: pair.a.owner)
++        guard case let .object(reply)? = value, reply["status"] == .string("sent") else {
++            throw NSError(domain: "Detail request failed: \(String(describing: value))", code: 1)
++        }
++        try await pair.deliverNext()
++        return id
++    }
++    func receiveProbe<T: Encodable>(_ payload: T, topic: String, context: ScannerConsumerContext? = nil) async throws {
++        let value = try JSONDecoder().decode(FlowElementValueType.self, from: JSONEncoder().encode(payload))
++        var flow = FlowElement(title: "probe", content: value, properties: .init(type: .event, contentType: .object))
++        flow.topic = topic
++        let current = context ?? self.context
++        try await current.physical.gate.withAuthenticatedWork { @MainActor [self] in
++            try await cell.scannerFlowReceived(manager: pair.a, flowElement: flow, context: current)
++        }
++    }
++}
++
++@MainActor private final class ProbeRequestObserver: ConnectServiceDelegate {
++    var flow: FlowElement?
++    func connectedDevicesChanged(manager: ScannerService, connectedDevices: [String]) {}
++    func foundDevicesChanged(manager: ScannerService, foundDevice: MCPeerID, remoteUUID: String, discoveryInfo: [String: String]?) {}
++    func lostDeviceChanged(manager: ScannerService, lostDevice: MCPeerID, remoteUUID: String) {}
++    func invitationReceived(manager: ScannerService, peerID: MCPeerID, remoteUUID: String) {}
++    func scannerStatusChanged(manager: ScannerService, status: String, remoteUUID: String?) {}
++    func proximityChanged(manager: ScannerService, remoteUUID: String, distanceMeters: Float?, directionX: Float?, directionY: Float?, directionZ: Float?) {}
++    func scannerFlowReceived(manager: ScannerService, flowElement: FlowElement, context: ScannerConsumerContext) async throws { flow = flowElement }
++}
+diff --git a/Tests/CellBaseTests/ScannerAdmissionTests.swift b/Tests/CellBaseTests/ScannerAdmissionTests.swift
+index 75c5fb8..8828ab6 100644
+--- a/Tests/CellBaseTests/ScannerAdmissionTests.swift
++++ b/Tests/CellBaseTests/ScannerAdmissionTests.swift
+@@ -16,7 +16,7 @@ final class ScannerAdmissionTests: XCTestCase {
+                     perSourceCount: dimension == "sourceCount" ? 1 : 10,
+                     perSourceBytes: dimension == "sourceBytes" ? 100 : 1000, lifetime: 10)
+                 switch kind {
+-                case .discovery: config.discovery = budget
++                case .discovery, .consumer: config.discovery = budget
+                 case .invitation: config.invitation = budget
+                 case .task: config.task = budget
+                 case .event: config.event = budget
+diff --git a/Tests/CellBaseTests/ScannerPhysicalIsolationTests.swift b/Tests/CellBaseTests/ScannerPhysicalIsolationTests.swift
+index 2c98663..f2e2789 100644
+--- a/Tests/CellBaseTests/ScannerPhysicalIsolationTests.swift
++++ b/Tests/CellBaseTests/ScannerPhysicalIsolationTests.swift
+@@ -139,10 +139,14 @@ extension ScannerMultipeerProcessTests {
+         } else {
+             try await isolationWait { observer.flows > 0 }
+             let baseline = isolationRSS()
++            let sibling = try XCTUnwrap(service.foundPeersDict[prefix + "c"])
++            let siblingNames = [sibling.displayName]
+             for phase in ["resource", "streams", "expiry"] {
+                 let before = observer.flows
+                 try await isolationWait(seconds: 65) { isolationExists(folder, "\(phase).done") }
+-                try await isolationWait { service.retainedPhysicalCount == 1 && observer.flows > before }
++                try await isolationWait { service.retainedPhysicalCount == 1 && observer.flows > before && observer.connectionNames == siblingNames }
++                let remainingNames = await MainActor.run { service.connectedDevices }
++                XCTAssertEqual(remainingNames, siblingNames)
+                 XCTAssertTrue(service.isConnected(remoteUUID: prefix + "c"))
+                 XCTAssertEqual(service.admission.snapshot(.physical).count, 1)
+                 if phase == "resource" { XCTAssertGreaterThan(observer.cancelledResources, 0) }
+@@ -154,7 +158,13 @@ extension ScannerMultipeerProcessTests {
+                 let before = observer.flows
+                 let peer = try XCTUnwrap(service.foundPeersDict[prefix + "b" + phase])
+                 let physical = try service.capturePeerTransport(session: service.sessionForPeer(peer), peerID: peer)
+-                try await isolationWait { physical.gate.peerOutstandingUsage.dataRecords == 0 }
++                let bothNames = [peer.displayName, sibling.displayName].sorted()
++                try await isolationWait { physical.gate.peerOutstandingUsage.dataRecords == 0 && observer.connectionNames == bothNames }
++                let publishedNames = await MainActor.run { service.connectedDevices }
++                XCTAssertEqual(publishedNames, bothNames)
++                XCTAssertTrue(physical.mcSession.connectedPeers.contains(peer))
++                XCTAssertTrue(try service.sessionForPeer(sibling).connectedPeers.contains(sibling))
++                try isolationMark(folder, "connections-" + phase, "two owned MC sessions; published=\(bothNames)")
+                 try isolationMark(folder, "host-drained-" + phase, "startup application records receipted")
+                 try await isolationWait { isolationExists(folder, phase + ".ready") }
+                 if phase == "revoke" {
+@@ -179,7 +189,9 @@ extension ScannerMultipeerProcessTests {
+                     }
+                     return isolationExists(folder, phase + ".done")
+                 }
+-                try await isolationWait { service.retainedPhysicalCount == 1 && observer.flows > before }
++                try await isolationWait { service.retainedPhysicalCount == 1 && observer.flows > before && observer.connectionNames == siblingNames }
++                let remainingNames = await MainActor.run { service.connectedDevices }
++                XCTAssertEqual(remainingNames, siblingNames)
+                 XCTAssertTrue(physical.mcSession.connectedPeers.isEmpty)
+                 XCTAssertEqual(physical.gate.peerOutstandingUsage.bytes, 0)
+                 XCTAssertTrue(service.isConnected(remoteUUID: prefix + "c"))
+@@ -247,6 +259,8 @@ private final class IsolationObserver: ConnectServiceDelegate {
+     private let lock = NSLock(); private var ready = false; private var count = 0; private var invited = false
+     init(prefix: String, host: Bool, autoInvite: Bool, folder: URL) { self.prefix = prefix; self.host = host; self.autoInvite = autoInvite; self.folder = folder }
+     private var resources = 0, streams = 0
++    private var names: [String] = []
++    var connectionNames: [String] { lock.withLock { names } }
+     var cancelledResources: Int { lock.withLock { resources } }
+     var closedStreams: Int { lock.withLock { streams } }
+     func disposed(_ kind: String) { lock.withLock { if kind == "resource" { resources += 1 } else { streams += 1 } } }
+@@ -270,7 +284,7 @@ private final class IsolationObserver: ConnectServiceDelegate {
+         }
+     }
+     func scannerFlowReceived(manager: ScannerService, flowElement: FlowElement, context: ScannerConsumerContext) async throws { if context.remoteUUID == prefix + "c" { lock.withLock { count += 1 } } }
+-    func connectedDevicesChanged(manager: ScannerService, connectedDevices: [String]) {}
++    func connectedDevicesChanged(manager: ScannerService, connectedDevices: [String]) { lock.withLock { names = connectedDevices } }
+     func lostDeviceChanged(manager: ScannerService, lostDevice: MCPeerID, remoteUUID: String) {}
+     func proximityChanged(manager: ScannerService, remoteUUID: String, distanceMeters: Float?, directionX: Float?, directionY: Float?, directionZ: Float?) {}
+ }
+diff --git a/Tests/CellBaseTests/ScannerRetainedStateTests.swift b/Tests/CellBaseTests/ScannerRetainedStateTests.swift
+new file mode 100644
+index 0000000..62e431f
+--- /dev/null
++++ b/Tests/CellBaseTests/ScannerRetainedStateTests.swift
+@@ -0,0 +1,179 @@
++// SPDX-License-Identifier: Apache-2.0
++// SPDX-FileCopyrightText: Copyright (c) 2026 Stiftelsen Digipomps and HAVEN contributors
++import Foundation
++import MultipeerConnectivity
++import XCTest
++@testable import CellApple
++@testable import CellBase
++
++final class ScannerRetainedStateTests: XCTestCase {
++    @MainActor func testRealConsumerDiscoveryRotationLossAndExpiryRemainBoundedAcrossWindows() async throws {
++        let clock = RetentionClock()
++        var config = ScannerAdmission.Configuration()
++        config.discovery.count = 4; config.discovery.bytes = 1400; config.event.count = 1
++        let admission = ScannerAdmission(configuration: config, now: { clock.now })
++        let service = ScannerService(admission: admission, owner: Identity(), sessionUUID: "local")
++        service.deferEventDrainForTesting = true
++        let cell = await EntityScannerCell(owner: service.owner)
++        cell.connectService = service; service.radarDelegate = cell
++        cell.configureProbeForTesting(.approved(entityKind: .person, purposeRefs: ["purpose://test"], interestRefs: []))
++        defer { service.stop(); cell.connectService = nil; service.radarDelegate = nil }
++        let browser = MCNearbyServiceBrowser(peer: MCPeerID(displayName: "local"), serviceType: "haven-radar")
++        let rotating = MCPeerID(displayName: "rotating")
++        func announce(_ peer: MCPeerID, _ id: String) {
++            service.browser(browser, foundPeer: peer, withDiscoveryInfo: NearbyBeacon(sessionUUID: id, entityKind: .person,
++                purposeTokens: [NearbyBeacon.token(forCanonicalReference: "purpose://test")]).encodeToDiscoveryInfo())
++        }
++        for window in 0..<20 {
++            for index in 0..<4 {
++                announce(rotating, "rotation-\(window)-\(index)")
++                service.drainEventsForTesting()
++                XCTAssertEqual(cell.retainedPeerStateForTesting.states, 1)
++                XCTAssertEqual(cell.retainedPeerStateForTesting.beacons, 1)
++                XCTAssertEqual(cell.retainedPeerStateForTesting.overlaps, 1)
++            }
++            for index in 0..<8 {
++                announce(MCPeerID(displayName: "peer-\(window)-\(index)"), "remote-\(window)-\(index)")
++                service.drainEventsForTesting()
++                XCTAssertLessThanOrEqual(cell.retainedPeerStateForTesting.states, config.discovery.count)
++                XCTAssertLessThanOrEqual(cell.retainedPeerStateForTesting.bytes, config.discovery.bytes)
++            }
++            // Expiry cleanup must work even when the ordinary event budget is full.
++            clock.advance(61); service.expireInvitations(); service.drainEventsForTesting()
++            XCTAssertEqual(cell.retainedPeerStateForTesting.states, 0)
++            XCTAssertEqual(cell.retainedPeerStateForTesting.beacons, 0)
++            XCTAssertEqual(cell.retainedPeerStateForTesting.overlaps, 0)
++            XCTAssertEqual(admission.snapshot(.discovery).count, 0)
++        }
++        announce(rotating, "legitimate"); service.drainEventsForTesting()
++        XCTAssertEqual(cell.retainedPeerStateForTesting.states, 1)
++        service.browser(browser, lostPeer: rotating); service.drainEventsForTesting()
++        XCTAssertEqual(cell.retainedPeerStateForTesting.states, 0)
++        announce(rotating, "after-loss"); service.drainEventsForTesting()
++        XCTAssertEqual(cell.retainedPeerStateForTesting.states, 1)
++        service.stop(); service.drainEventsForTesting()
++        XCTAssertEqual(cell.retainedPeerStateForTesting.states, 0)
++    }
++
++    @MainActor func testConsumerBudgetIsGlobalWhileAnotherScannersCleanupIsHeld() async throws {
++        let clock = RetentionClock()
++        var config = ScannerAdmission.Configuration(); config.discovery.count = 2
++        let admission = ScannerAdmission(configuration: config, now: { clock.now })
++        let a = ScannerService(admission: admission, owner: Identity()), b = ScannerService(admission: admission, owner: Identity())
++        a.deferEventDrainForTesting = true; b.deferEventDrainForTesting = true
++        let ca = await EntityScannerCell(owner: a.owner), cb = await EntityScannerCell(owner: b.owner)
++        ca.connectService = a; cb.connectService = b; a.radarDelegate = ca; b.radarDelegate = cb
++        defer { a.stop(); b.stop(); a.drainEventsForTesting(); b.drainEventsForTesting(); a.radarDelegate = nil; b.radarDelegate = nil }
++        let browser = MCNearbyServiceBrowser(peer: MCPeerID(displayName: "local"), serviceType: "haven-radar")
++        let peers = (0..<2).map { MCPeerID(displayName: "a-\($0)") }
++        for (i, peer) in peers.enumerated() {
++            a.browser(browser, foundPeer: peer, withDiscoveryInfo: ["uuid": "a-\(i)"])
++            a.drainEventsForTesting()
++        }
++        XCTAssertEqual(ca.retainedPeerStateForTesting.states, 2)
++        // Replacement releases service admission, but cannot release the old
++        // consumer's independently charged copies while its cleanup is held.
++        for (i, peer) in peers.enumerated() {
++            a.browser(browser, foundPeer: peer, withDiscoveryInfo: ["uuid": "replacement-\(i)"])
++        }
++        clock.advance(61); a.expireInvitations()
++        XCTAssertEqual(admission.snapshot(.discovery).count, 0)
++        // A's consumer still retains expired entries until its one cleanup drains.
++        let peer = MCPeerID(displayName: "fresh")
++        b.browser(browser, foundPeer: peer, withDiscoveryInfo: ["uuid": "fresh"]); b.drainEventsForTesting()
++        XCTAssertEqual(admission.snapshot(.consumer).count, 2)
++        XCTAssertEqual(cb.retainedPeerStateForTesting.states, 0)
++        a.drainEventsForTesting()
++        b.browser(browser, foundPeer: peer, withDiscoveryInfo: ["uuid": "fresh"]); b.drainEventsForTesting()
++        XCTAssertEqual(ca.retainedPeerStateForTesting.states, 0)
++        XCTAssertEqual(cb.retainedPeerStateForTesting.states, 1)
++        XCTAssertEqual(admission.snapshot(.consumer).count, 1)
++    }
++
++    @MainActor func testTerminalStatusSurvivesFullEventQuotaAndStopIsIdempotentAcrossRestart() async throws {
++        var config = ScannerAdmission.Configuration(); config.event.count = 1
++        let service = ScannerService(admission: ScannerAdmission(configuration: config), owner: Identity())
++        service.deferEventDrainForTesting = true
++        let cell = await EntityScannerCell(owner: service.owner)
++        cell.connectService = service
++        let observer = RetentionObserver(cell); service.radarDelegate = observer
++        defer { service.stop(); service.radarDelegate = nil; cell.connectService = nil }
++        service.start(); service.drainEventsForTesting()
++        XCTAssertEqual(observer.statuses, ["started"])
++        let browser = MCNearbyServiceBrowser(peer: MCPeerID(displayName: "local"), serviceType: "haven-radar")
++        let peer = MCPeerID(displayName: "old")
++        service.browser(browser, foundPeer: peer, withDiscoveryInfo: ["uuid": "old"])
++        XCTAssertEqual(service.queuedEventCount, 1)
++        service.stop(); service.stop(); service.drainEventsForTesting()
++        XCTAssertEqual(observer.statuses, ["started", "stopped"])
++        service.start(); service.drainEventsForTesting()
++        service.browser(browser, lostPeer: peer); service.drainEventsForTesting()
++        XCTAssertEqual(observer.statuses, ["started", "stopped", "started"])
++        service.stop(); service.start(); service.drainEventsForTesting()
++        XCTAssertEqual(observer.statuses, ["started", "stopped", "started", "stopped", "started"])
++    }
++
++    @MainActor func testConnectedSnapshotIncludesSiblingAndOldCallbackCannotPublishAfterReconnect() async throws {
++        // This test starts the real gates explicitly; deny unrelated Lobby setup work.
++        var config = ScannerAdmission.Configuration(); config.task.count = 0
++        let pair = try await ScannerPair(admissionA: ScannerAdmission(configuration: config)); defer { pair.stop() }
++        try await pair.finish(pair.start()); try await pair.addThirdPeer()
++        let cell = await EntityScannerCell(owner: pair.a.owner)
++        cell.connectService = pair.a
++        let observer = RetentionObserver(cell); pair.a.radarDelegate = observer
++        pair.a.deferEventDrainForTesting = true
++        defer { pair.a.radarDelegate = nil; cell.connectService = nil }
++        let bSession = pair.pa.mcSession, cSession = pair.ac!.mcSession
++        pair.a.session(bSession, peer: pair.bPeer, didChange: .connected)
++        pair.a.session(cSession, peer: pair.cPeer, didChange: .connected)
++        pair.a.drainEventsForTesting()
++        XCTAssertEqual(pair.a.connectedDevices, ["test-b", "test-c"])
++        XCTAssertEqual(observer.connections.last, ["test-b", "test-c"])
++        // Keep an old connected callback queued, close B, and install B2.
++        pair.a.session(bSession, peer: pair.bPeer, didChange: .connected)
++        await pair.pa.gate.close(); await pair.pb.gate.close()
++        pair.a.drainLifecycleForTesting()
++        XCTAssertEqual(observer.connections.last, ["test-c"])
++        let fresh = try pair.prepareReconnect()
++        try await pair.authenticateTransports(fresh.0, fresh.1)
++        let beforeHeldCallback = observer.connections.count
++        pair.a.session(fresh.0.mcSession, peer: pair.bPeer, didChange: .connected)
++        pair.a.drainEventsForTesting()
++        XCTAssertEqual(observer.connections.last, ["test-b", "test-c"])
++        XCTAssertEqual(observer.connections.count, beforeHeldCallback + 1, "Held old callback must not publish before its generation guard")
++        let publications = observer.connections.count
++        pair.a.session(bSession, peer: pair.bPeer, didChange: .notConnected)
++        pair.a.session(bSession, peer: pair.bPeer, didChange: .connected)
++        pair.a.drainEventsForTesting()
++        XCTAssertEqual(observer.connections.count, publications, "Old physical generation cannot publish")
++        XCTAssertEqual(pair.a.connectedDevices, ["test-b", "test-c"])
++        XCTAssertEqual(pair.ac!.gate.session.state, .authenticated)
++    }
++}
++
++private final class RetentionClock: @unchecked Sendable {
++    private let lock = NSLock(); private var value: TimeInterval = 100
++    var now: TimeInterval { lock.withLock { value } }
++    func advance(_ delta: TimeInterval) { lock.withLock { value += delta } }
++}
++@MainActor private final class RetentionObserver: ConnectServiceDelegate {
++    let cell: EntityScannerCell
++    var statuses: [String] = []; var connections: [[String]] = []
++    init(_ cell: EntityScannerCell) { self.cell = cell }
++    func connectedDevicesChanged(manager: ScannerService, connectedDevices: [String]) {
++        connections.append(connectedDevices); cell.connectedDevicesChanged(manager: manager, connectedDevices: connectedDevices)
++    }
++    func foundDevicesChanged(manager: ScannerService, foundDevice: MCPeerID, remoteUUID: String, discoveryInfo: [String: String]?) {
++        cell.foundDevicesChanged(manager: manager, foundDevice: foundDevice, remoteUUID: remoteUUID, discoveryInfo: discoveryInfo)
++    }
++    func lostDeviceChanged(manager: ScannerService, lostDevice: MCPeerID, remoteUUID: String) {
++        cell.lostDeviceChanged(manager: manager, lostDevice: lostDevice, remoteUUID: remoteUUID)
++    }
++    func invitationReceived(manager: ScannerService, peerID: MCPeerID, remoteUUID: String) {}
++    func scannerStatusChanged(manager: ScannerService, status: String, remoteUUID: String?) {
++        statuses.append(status); cell.scannerStatusChanged(manager: manager, status: status, remoteUUID: remoteUUID)
++    }
++    func scannerPeerStateChanged(manager: ScannerService) { cell.scannerPeerStateChanged(manager: manager) }
++    func proximityChanged(manager: ScannerService, remoteUUID: String, distanceMeters: Float?, directionX: Float?, directionY: Float?, directionZ: Float?) {}
++    func scannerFlowReceived(manager: ScannerService, flowElement: FlowElement, context: ScannerConsumerContext) async throws {}
++}

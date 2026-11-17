@@ -8,6 +8,18 @@ subscription lifecycle described below. Durable replay, universal per-event
 signatures, and live remote teardown acknowledgement are not generic guarantees
 of the current implementation.
 
+Source-only follow-up, 2026-09-29: the local working copies contain separate
+implementations for process-local `FlowCacheCell` replay, EntityAuthority
+journal reconstruction, resolver TTL and bridge quarantine. These must not be
+read as one generic durable replay/lifecycle guarantee. In particular, the
+resolver's newer timing-wheel integration remains a shadow path, while its
+legacy sweep performs eviction/deletion. Subscription resource cleanup is
+implemented outside the mostly diagnostic `GeneralCell.deinit` body.
+See the [cross-repository lifecycle and Chronicle review](../Deliverables/Replay_TTL_Quarantine_Deinit_Chronicle_Review_2026-09-29.md)
+for exact source anchors, integration gaps and proposed history/search design.
+No tests were rerun for this follow-up; the verified revision and counts below
+remain historical evidence for their stated scope.
+
 Flows are the outbound event mechanism exposed through `Emit`. A `GeneralCell`
 can attach labelled emitters, start and stop subscriptions, transform incoming
 events through an intercept, and forward accepted events to its own feed.

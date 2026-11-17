@@ -1,0 +1,225 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "x-contractRef": "haven://contract/trustedmodels/v1",
+  "title": "trustedModels — eierens tillitserklæringer",
+  "description": "En erklæring eieren gjør om én modellvei. Ligger under EntityAnchor som trustedModels.<id>. Eiersignert, inspiserbar, revokerbar. Ingen modell utenfor registeret får foreslå noe.",
+  "type": "object",
+  "required": [
+    "id",
+    "version",
+    "displayName",
+    "route",
+    "mayPropose",
+    "declaredAt",
+    "ownerSignature"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+    },
+    "version": {
+      "const": 1
+    },
+    "displayName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "route": {
+      "$ref": "#/definitions/route"
+    },
+    "mayPropose": {
+      "description": "Keypath-prefiksene modellen får foreslå endringer i. Tom liste betyr ingenting. Jokertegn over hele ankeret er ikke tillatt.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(?!\\*$)[A-Za-z0-9_.\\[\\]-]+$"
+      },
+      "minItems": 1
+    },
+    "mayRead": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(?!\\*$)[A-Za-z0-9_.\\[\\]-]+$"
+      }
+    },
+    "declaredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revokedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revocationReason": {
+      "type": "string"
+    },
+    "ownerSignature": {
+      "$ref": "#/definitions/signature"
+    }
+  },
+  "definitions": {
+    "signature": {
+      "type": "object",
+      "required": [
+        "identityLinkID",
+        "algorithm",
+        "value"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "identityLinkID": {
+          "description": "Lenken signaturen skal verifiseres mot. Ikke en naken identitets-UUID — det er dette som gjør at autorisasjonen kan løse entiteten.",
+          "type": "string",
+          "minLength": 1
+        },
+        "algorithm": {
+          "type": "string",
+          "enum": [
+            "ed25519",
+            "ecdsa-p256"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "contentEncoding": "base64"
+        }
+      }
+    },
+    "route": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "oneOf": [
+        {
+          "$ref": "#/definitions/routeLocal"
+        },
+        {
+          "$ref": "#/definitions/routeHosted"
+        },
+        {
+          "$ref": "#/definitions/routeAppleIntelligence"
+        }
+      ]
+    },
+    "routeLocal": {
+      "type": "object",
+      "required": [
+        "kind",
+        "providerID",
+        "model",
+        "endpoint"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "local"
+        },
+        "providerID": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "endpoint": {
+          "description": "Må være en loopback-adresse. Alt annet er ikke en lokal modell.",
+          "type": "string",
+          "pattern": "^http://(127\\.0\\.0\\.1|\\[::1\\]|localhost)(:[0-9]{1,5})?(/.*)?$"
+        },
+        "dataLeavesDevice": {
+          "const": false
+        },
+        "enforcedByUs": {
+          "const": true
+        }
+      }
+    },
+    "routeHosted": {
+      "type": "object",
+      "required": [
+        "kind",
+        "providerID",
+        "model",
+        "baseURL",
+        "apiKeyAlias"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "hosted"
+        },
+        "providerID": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "baseURL": {
+          "type": "string",
+          "pattern": "^https://"
+        },
+        "apiPath": {
+          "type": "string"
+        },
+        "apiKeyAlias": {
+          "description": "Peker inn i OwnerScopedCredentialStore. Selve nøkkelen står aldri her.",
+          "type": "string",
+          "minLength": 1
+        },
+        "dataLeavesDevice": {
+          "const": true
+        },
+        "enforcedByUs": {
+          "const": true
+        }
+      }
+    },
+    "routeAppleIntelligence": {
+      "description": "Én rute per vei, ikke én per leverandør. De tre veiene gir tre ulike svar på hvor dataene havner, og ingen av dem kan håndheves av vår egress-policy — et rammeverkskall passerer den ikke.",
+      "type": "object",
+      "required": [
+        "kind",
+        "path",
+        "dataLeavesDevice",
+        "enforcedByUs"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "appleIntelligence"
+        },
+        "path": {
+          "type": "string",
+          "enum": [
+            "onDevice",
+            "privateCloudCompute",
+            "thirdPartyViaApple"
+          ]
+        },
+        "model": {
+          "type": "string"
+        },
+        "dataLeavesDevice": {
+          "type": "boolean"
+        },
+        "enforcedByUs": {
+          "description": "Alltid false. Vi kan erklære veien, ikke håndheve den. Står den som true, lyver erklæringen.",
+          "const": false
+        },
+        "escalationAllowed": {
+          "description": "Om eieren har sagt ja til at en onDevice-rute får gå videre til sky. Standard er nei, og en stille eskalering skal avvises og logges.",
+          "type": "boolean",
+          "default": false
+        }
+      }
+    }
+  }
+}

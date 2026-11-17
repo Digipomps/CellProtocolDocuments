@@ -1,0 +1,646 @@
+{
+  "schema": "haven.purpose-composition-run.v0",
+  "description": "Iterasjon 2: formålstreet A–E i FORMAALSSPEC §1 og standardmalen for arbeidsflyt (I8). Tillegg 2026-09-28: E8 er P0-inntak til P1, ikke godkjent spesifikasjon. Tidligere portvedtak i STATUS.md utvides ikke av inntaket. E er visning/handling over B/C, ingen ny lagring. Ingen kjøring registrert.",
+  "nodes": [
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.oppgaven-forst",
+      "parentRef": "purpose://project-work.work-items",
+      "title": "Oppgaven først: fra løs idé til levert endring uten å miste tråden",
+      "status": "candidate",
+      "composition": {
+        "kind": "allOf"
+      },
+      "verifier": [
+        "test.benk.walkthrough-per-rolle",
+        "test.plangraf.staging-brukersti"
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.ideer",
+      "parentRef": "purpose://candidate.utviklerbenk.oppgaven-forst",
+      "title": "Idéer i tre og graf",
+      "status": "candidate",
+      "composition": {
+        "kind": "allOf"
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.ideer.fangst",
+      "parentRef": "purpose://candidate.utviklerbenk.ideer",
+      "title": "Fangst uten beslutninger",
+      "status": "candidate",
+      "verifier": [
+        "test.idea.capture-two-actions",
+        "test.idea.raw-immutable"
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.ideer.tre",
+      "parentRef": "purpose://candidate.utviklerbenk.ideer",
+      "title": "Idéer har struktur",
+      "status": "candidate",
+      "verifier": [
+        "test.tree.move-keeps-subtree",
+        "test.tree.rejects-cycle",
+        "parity.U2.binding"
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.ideer.graf-er-samme-data",
+      "parentRef": "purpose://candidate.utviklerbenk.ideer",
+      "title": "Grafen er en annen visning, ikke en annen lagring",
+      "status": "candidate",
+      "verifier": [
+        "test.graph.node-count-equals-tree",
+        "test.graph.selection-shared"
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.ideer.frys-og-ko-er-kjetils",
+      "parentRef": "purpose://candidate.utviklerbenk.ideer",
+      "title": "Idé blir oppgave og går i kø når Kjetil vil",
+      "status": "candidate",
+      "verifier": [
+        "test.idea.freeze-human-only",
+        "test.queue.enqueue-creates-post"
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.ideer.agentforslag-i-eget-lag",
+      "parentRef": "purpose://candidate.utviklerbenk.ideer",
+      "title": "Skal ikke: agenter skriver rett inn i treet",
+      "status": "candidate",
+      "verifier": [
+        "test.idea.agent-writes-are-proposals"
+      ],
+      "polarity": "prohibited"
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.oppgave-i-kontekst",
+      "parentRef": "purpose://candidate.utviklerbenk.oppgaven-forst",
+      "title": "Oppgaven i sin sammenheng",
+      "status": "candidate",
+      "composition": {
+        "kind": "allOf"
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.oppgave.plass-i-helheten",
+      "parentRef": "purpose://candidate.utviklerbenk.oppgave-i-kontekst",
+      "title": "Deloppgave i en større sammenheng",
+      "status": "candidate",
+      "verifier": [
+        "test.task.single-parent",
+        "test.task.subtask-migration-lossless",
+        "test.task.purposeref-resolves"
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.oppgave.typede-kilder",
+      "parentRef": "purpose://candidate.utviklerbenk.oppgave-i-kontekst",
+      "title": "Kilder som typede referanser",
+      "status": "candidate",
+      "verifier": [
+        "test.source.types-validate",
+        "test.source.resolvability-honest"
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.oppgave.avhengighetsgraf",
+      "parentRef": "purpose://candidate.utviklerbenk.oppgave-i-kontekst",
+      "title": "Grafen den som vurderer trenger",
+      "status": "candidate",
+      "verifier": [
+        "test.depgraph.complete-for-fixture",
+        "test.depgraph.unreadable-visible",
+        "test.depgraph.same-context-for-agent"
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.oppgave.graf-er-projeksjon",
+      "parentRef": "purpose://candidate.utviklerbenk.oppgave-i-kontekst",
+      "title": "Grafen kan bygges på nytt",
+      "status": "candidate",
+      "verifier": [
+        "test.depgraph.rebuild-identical"
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.oppgave.referanse-er-ikke-tilgang",
+      "parentRef": "purpose://candidate.utviklerbenk.oppgave-i-kontekst",
+      "title": "Skal ikke: en referanse gir innsyn",
+      "status": "candidate",
+      "verifier": [
+        "test.cell.auth-negative"
+      ],
+      "polarity": "prohibited"
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.arbeidsflyt",
+      "parentRef": "purpose://candidate.utviklerbenk.oppgaven-forst",
+      "title": "Arbeidsflyten er en del av oppgaven",
+      "status": "candidate",
+      "composition": {
+        "kind": "allOf"
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.arbeidsflyt.sekvens",
+      "parentRef": "purpose://candidate.utviklerbenk.arbeidsflyt",
+      "title": "Stegene er en sekvens, ikke en huskeliste",
+      "status": "candidate",
+      "verifier": [
+        "test.flow.sequence-enforced",
+        "test.flow.templates-validate"
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.arbeidsflyt.steg-har-bevis",
+      "parentRef": "purpose://candidate.utviklerbenk.arbeidsflyt",
+      "title": "Grønt krever bevis",
+      "status": "candidate",
+      "verifier": [
+        "test.flow.green-requires-evidence"
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.arbeidsflyt.utforer-per-steg",
+      "parentRef": "purpose://candidate.utviklerbenk.arbeidsflyt",
+      "title": "Riktig utfører per steg",
+      "status": "candidate",
+      "verifier": [
+        "test.flow.executor-rules"
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.arbeidsflyt.en-ko",
+      "parentRef": "purpose://candidate.utviklerbenk.arbeidsflyt",
+      "title": "Én kø, status tilbake på steget",
+      "status": "candidate",
+      "verifier": [
+        "test.queue.round-trip"
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.arbeidsflyt.menneskelige-porter",
+      "parentRef": "purpose://candidate.utviklerbenk.arbeidsflyt",
+      "title": "Portene er Kjetils",
+      "status": "candidate",
+      "verifier": [
+        "test.flow.gate-human-only",
+        "test.ko.no-escalation"
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.arbeidsflyt.feil-blir-laerdom",
+      "parentRef": "purpose://candidate.utviklerbenk.arbeidsflyt",
+      "title": "Gjentatt feil blir lærdom",
+      "status": "candidate",
+      "verifier": [
+        "test.ko.lesson"
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.tre-linser",
+      "parentRef": "purpose://candidate.utviklerbenk.oppgaven-forst",
+      "title": "Én benk, tre linser",
+      "status": "candidate",
+      "composition": {
+        "kind": "allOf"
+      }
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.linser.valgt-binder",
+      "parentRef": "purpose://candidate.utviklerbenk.tre-linser",
+      "title": "Valgt idé eller oppgave binder alle linser",
+      "status": "candidate",
+      "verifier": [
+        "test.gui.context-propagation"
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.linser.tilgang-fra-grant",
+      "parentRef": "purpose://candidate.utviklerbenk.tre-linser",
+      "title": "Linsene åpnes av grants",
+      "status": "candidate",
+      "verifier": [
+        "test.agreement.operator-scopes"
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.linser.netto-null-flater",
+      "parentRef": "purpose://candidate.utviklerbenk.tre-linser",
+      "title": "Ingen niende flate",
+      "status": "candidate",
+      "verifier": [
+        "test.catalog.entry-count-not-increased"
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.plangraf",
+      "parentRef": "purpose://candidate.utviklerbenk.oppgaven-forst",
+      "title": "Plangrafen som visning og handlingsflate",
+      "summary": "Projeksjon av oppgavens plan og arbeidsflyt med detaljer, egne handlinger og forklaring ved siden av.",
+      "status": "candidate",
+      "composition": {
+        "kind": "allOf"
+      },
+      "goal": {
+        "goalRef": "goal.candidate.utviklerbenk.plangraf",
+        "lifecycle": "continuous",
+        "outcome": "Alle seks E-blad oppfylles fra den samme valgte oppgaven.",
+        "successSignals": [
+          "Hver E-verifier er målt grønn med bevis."
+        ],
+        "verifier": "FORMAALSSPEC.md §5 E-testene samlet"
+      },
+      "derivedTests": [
+        {
+          "testRef": "test.plangraf.renderer-kontrakt",
+          "kind": "inspection",
+          "description": "Gå elementkartet mot faktisk dekoder og begge renderere: lane, kort, statusmerke, piler, nodevalg, Utfør, Forklar, panel og Fest.",
+          "how": "Gå elementkartet mot faktisk dekoder og begge renderere: lane, kort, statusmerke, piler, nodevalg, Utfør, Forklar, panel og Fest. Hvert felt/handling må ha kilde og keypath/kontrakt; gap hindrer godkjenning av implementeringsparitet. Kjør senere reachability-audit for det faktisk serverte skjelettet.",
+          "evidence": "TESTRESULT.md#plangraf-renderer-kontrakt"
+        },
+        {
+          "testRef": "test.plangraf.kildeadgang",
+          "kind": "command",
+          "description": "Gi to identiteter ulike PDD-kildesett.",
+          "how": "Gi to identiteter ulike PDD-kildesett. Be om den andres WP, artefakt og forklaringskontekst samt sti utenfor tillatt rot; krev avvisning uten innholdslekkasje. Tillatt identitet skal få fil:linje/anker, versjon og ferskhetsstatus. Reell synk-/tilbakevei skal være navngitt i dataflow og svare gjennom samme kontrakt som GUI bruker.",
+          "evidence": "TESTRESULT.md#plangraf-kildeadgang"
+        },
+        {
+          "testRef": "test.plangraf.staging-brukersti",
+          "kind": "inspection",
+          "description": "Fra levert meny med Kjetils testidentitet: velg oppgave, åpne graf/boks, utfør tillatt webhandling og separat lokal broprøve, les kildebevis, bruk Forklar/Fest.",
+          "how": "Fra levert meny med Kjetils testidentitet: velg oppgave, åpne graf/boks, utfør tillatt webhandling og separat lokal broprøve, les kildebevis, bruk Forklar/Fest. Gjenta i Binding og uten grant. Mål lastetid ≤ 5 s tre ganger; logg faktisk konfigurasjonsnavn/rute, build-SHA, kildeversjon, kjørings-ID-er og bilder. Mockup eller direkte API-prøve alene består ikke denne testen.",
+          "evidence": "TESTRESULT.md#plangraf-staging"
+        }
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.plangraf.visning",
+      "parentRef": "purpose://candidate.utviklerbenk.plangraf",
+      "title": "Plangrafen viser planen i web og app",
+      "summary": "Kjetil ser planen som lanes per gren, én boks per arbeidspakke, navngitt utfører, status og piler for eksplisitte avhengigheter fra samme PDD-kildesett i web og Binding.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.candidate.utviklerbenk.plangraf.visning",
+        "lifecycle": "continuous",
+        "outcome": "Kjetil ser planen som lanes per gren, én boks per arbeidspakke, navngitt utfører, status og piler for eksplisitte avhengigheter fra samme PDD-kildesett i web og Binding.",
+        "successSignals": [
+          "Samme normaliserte kildeversjon gir identiske WP-ID-er, lanes, utførere og kanter i web (1900×1100) og app (780×1688); appen kan panorere uten å miste innhold eller handlinger.",
+          "Levert, kjører, din handling og senere har både farge og tekst. Blokkert, feil og ukjent kilde er synlige med grunn. Manglende PLAN/TESTRESULT gir erklært fravær, aldri oppdiktede bokser eller grønt.",
+          "Mine handlinger er et filter på samme bokser; hver viser når, hva, hvorfor bare Kjetil og hva som skjer etterpå. Planlagt tidspunkt tolkes ikke som faktisk startet."
+        ],
+        "verifier": "test.plangraf.visning-paritet; test.plangraf.plan-normalisering"
+      },
+      "verifier": [
+        "test.plangraf.visning-paritet",
+        "test.plangraf.plan-normalisering"
+      ],
+      "derivedTests": [
+        {
+          "testRef": "test.plangraf.visning-paritet",
+          "kind": "inspection",
+          "description": "Åpne samme kildesnapshot i web 1900×1100 og Binding 780×1688.",
+          "how": "Åpne samme kildesnapshot i web 1900×1100 og Binding 780×1688. Tell lanes/bokser/kanter og sammenlign utfører, status og valg med fasit; inspiser panorering, tastatur, tekst og alle §3-bildepar mot godkjent referanse. Alle handlinger må være nåbare i begge klienter.",
+          "evidence": "ACCEPT.md#plangraf-paritet"
+        },
+        {
+          "testRef": "test.plangraf.plan-normalisering",
+          "kind": "command",
+          "description": "Kjør fremtidig normaliseringsleser mot kopier av de tre auditerte PLAN/STATUS/TESTRESULT-settene.",
+          "how": "Kjør fremtidig normaliseringsleser mot kopier av de tre auditerte PLAN/STATUS/TESTRESULT-settene. Avstem alle WP-ID-er, fullstendige purposeRefs, artefakter og eksplisitte kanter mot gjennomlest fasit. Prøv tabell, avsnitt, flere purposeRefs, manglende eier/lane/TESTRESULT og tvetydig kortnavn; krev diagnose fremfor gjetting. Kommandolinjen fastsettes i PLAN etter G1/G2.",
+          "evidence": "TESTRESULT.md#plangraf-plan-normalisering"
+        }
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.plangraf.drilldown",
+      "parentRef": "purpose://candidate.utviklerbenk.plangraf",
+      "title": "En boks åpner arbeidets detaljer",
+      "summary": "Kjetil åpner en boks og forstår hva arbeidet gjelder, hvem som eier det og hvilket bevis statusen bygger på.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.candidate.utviklerbenk.plangraf.drilldown",
+        "lifecycle": "continuous",
+        "outcome": "Kjetil åpner en boks og forstår hva arbeidet gjelder, hvem som eier det og hvilket bevis statusen bygger på.",
+        "successSignals": [
+          "Detaljene viser WP-ID, purposeRef(s), gjør, tester, artefakter, avhengigheter, eier og utfører som separate felt, samt status med kildehenvisning og bevis.",
+          "Hver opplysning peker på fil:linje/anker og kildeversjon. Manglende eier eller tvetydig kort purposeRef vises som ukjent med grunn, ikke arvet fra utfører uten eksplisitt regel.",
+          "Tilbake til grafen beholder valgt boks og utsnitt i begge klienter; dokumentlenker og handlinger nås med tastatur."
+        ],
+        "verifier": "test.plangraf.drilldown-kilder"
+      },
+      "verifier": [
+        "test.plangraf.drilldown-kilder"
+      ],
+      "derivedTests": [
+        {
+          "testRef": "test.plangraf.drilldown-kilder",
+          "kind": "inspection",
+          "description": "Åpne én boks per lane og alle feiltilstander i begge klienter.",
+          "how": "Åpne én boks per lane og alle feiltilstander i begge klienter. Følg purposeRef, gjør, tester, artefakter og statusbevis til riktig kildeversjon/anker; kontroller eier separat fra utfører. Lukk/åpne og krev samme valg/utsnitt. Logg manglende kilde som avvik.",
+          "evidence": "TESTRESULT.md#plangraf-drilldown-kilder"
+        }
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.plangraf.mine-handlinger-utforbare",
+      "parentRef": "purpose://candidate.utviklerbenk.plangraf",
+      "title": "Mine handlinger kan startes fra boksen",
+      "summary": "En boks med Kjetil som utfører tilbyr den konkrete handlingen, og trykk utfører eller starter den via en dokumentert svarvei med bevis tilbake til kilden.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.candidate.utviklerbenk.plangraf.mine-handlinger-utforbare",
+        "lifecycle": "continuous",
+        "outcome": "En boks med Kjetil som utfører tilbyr den konkrete handlingen, og trykk utfører eller starter den via en dokumentert svarvei med bevis tilbake til kilden.",
+        "successSignals": [
+          "Åpne PR åpner rett URL; det fullfører bare et eventuelt navigasjonssteg. Opprette PR eller registrere «godkjent» krever autentisert tjeneste, konkret mål/revisjon, grant og kvittering. Mangler svarvei, er knappen deaktivert med grunn.",
+          "KJØR-SELV-skript og deploy starter bare gjennom verifisert HAVEN Agent.app/AgentD-adapter på Kjetils maskin, med forhåndsdefinert handling, tillatt omfang og Kjetils eksplisitte handling. Nettleseren kjører ikke lokal shell, og staging overtar ikke kjøring.",
+          "Før trykk vises når/hva/hvorfor bare deg/etterpå, mål og sidevirkning; etter trykk vises startet med kjørings-ID, deretter levert med riktig artefaktbevis eller feil/blokkert med grunn. Dobbelttrykk gir høyst én kjøring; transportkvittering alene gjør ikke boksen grønn.",
+          "Feil requester, feil grant/keypath, endret kildeversjon, avslått godkjenning og utilgjengelig bro avvises uten kjøring eller grønn status. Portene forblir menneskelige. Q7 avgjør om manuell overgang med bevis kan godtas i første leveranse."
+        ],
+        "verifier": "test.plangraf.handling-web; test.plangraf.handling-maskin; test.plangraf.grant-og-porter"
+      },
+      "verifier": [
+        "test.plangraf.handling-web",
+        "test.plangraf.handling-maskin",
+        "test.plangraf.grant-og-porter"
+      ],
+      "derivedTests": [
+        {
+          "testRef": "test.plangraf.handling-web",
+          "kind": "inspection",
+          "description": "Med tillatt testidentitet: Åpne PR går til eksakt PR; bare et navigasjonssteg kan kvitteres av dette.",
+          "how": "Med tillatt testidentitet: Åpne PR går til eksakt PR; bare et navigasjonssteg kan kvitteres av dette. Registrer deretter en testgodkjenning fra boksen via faktisk skrivevei, les kildens beslutning/kvittering og grafens oppdatering. Prøv avbryt, serverfeil og dobbelttrykk; ingen falsk levert-status eller dobbel handling. Ingen ekte PR/port i denne runden.",
+          "evidence": "TESTRESULT.md#plangraf-handling-web"
+        },
+        {
+          "testRef": "test.plangraf.handling-maskin",
+          "kind": "inspection",
+          "description": "Etter at broen finnes: fra boks i web og app start samme forhåndsdefinerte ufarlige lokale prøve på Kjetils Mac.",
+          "how": "Etter at broen finnes: fra boks i web og app start samme forhåndsdefinerte ufarlige lokale prøve på Kjetils Mac. Bekreft handlings-ID, grant, én kjørings-ID og resultatbevis tilbake i kilde og graf; avbryt, koble fra og prøv uautorisert handlings-ID. Deploy må senere ha sin egen staging-kvittering; en ufarlig prøve beviser ikke deploy. Velges manuell Q7-variant, dokumenteres kopier/registrer-bevis særskilt og brokravet er fortsatt ikke målt grønt.",
+          "evidence": "TESTRESULT.md#plangraf-handling-maskin"
+        },
+        {
+          "testRef": "test.plangraf.grant-og-porter",
+          "kind": "command",
+          "description": "Mot handlingsbehandleren: feil requester, keypath, manglende/tilbakekalt grant, agent som prøver menneskeport, endret mål/revisjon og utgått forespørsel skal avvises før bivirkning.",
+          "how": "Mot handlingsbehandleren: feil requester, keypath, manglende/tilbakekalt grant, agent som prøver menneskeport, endret mål/revisjon og utgått forespørsel skal avvises før bivirkning. Tell kjøringer = 0 og uendret kildestatus. Positiv prøve krever Kjetils identitet/handling og riktig grant; gjenbruk C sine negative porttester.",
+          "evidence": "TESTRESULT.md#plangraf-grant-og-porter"
+        }
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.plangraf.forklaring-ved-siden-av",
+      "parentRef": "purpose://candidate.utviklerbenk.plangraf",
+      "title": "Forklaringen kommer ved siden av punktet",
+      "summary": "Kjetil får AI-forklaring av valgt punkt i sidepanel, overlay eller flytende vindu og kan feste forklaringen uten å legge noe i chatloggen.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.candidate.utviklerbenk.plangraf.forklaring-ved-siden-av",
+        "lifecycle": "continuous",
+        "outcome": "Kjetil får AI-forklaring av valgt punkt i sidepanel, overlay eller flytende vindu og kan feste forklaringen uten å legge noe i chatloggen.",
+        "successSignals": [
+          "Forklar finnes på hver boks og ved formål, gjør, test, artefakt, status/bevis, avhengighet og handling i detaljene. Kontekst er valgt WP/felt, formål og lesbare kilder med versjon; svaret viser kildehenvisninger og skiller manglende informasjon fra forklaring.",
+          "Før/etter åpne, oppfølgingsspørsmål, feil, lukke, feste og gjenåpne er chatmeldings-ID-er og innhold uendret; ingen bruker-, assistent- eller verktøymelding skrives gjennom chatveien.",
+          "Feste bruker Butler B-mønsteret: bruker-eid element med kilde og valgt skop i Portholens CellConfiguration; ny økt beholder festet element. Endret kilde merker forklaringen utdatert og tilbyr ny forklaring. AI-feil gir synlig feiltilstand med prøv igjen.",
+          "Bare kilder requester kan lese sendes til forklareren; formålsmatching kan velge hjelper, men gir ingen tilgang og oppretter ingen chatmelding."
+        ],
+        "verifier": "test.plangraf.forklaring-uten-chat; test.plangraf.forklaring-festet"
+      },
+      "verifier": [
+        "test.plangraf.forklaring-uten-chat",
+        "test.plangraf.forklaring-festet"
+      ],
+      "derivedTests": [
+        {
+          "testRef": "test.plangraf.forklaring-uten-chat",
+          "kind": "inspection",
+          "description": "Ta snapshot av chatmeldings-ID-er og innhold.",
+          "how": "Ta snapshot av chatmeldings-ID-er og innhold. Bruk Forklar på hvert feltslag i E4, still oppfølging, prøv AI-feil og lukk panelet i begge klienter. Inspiser forespørselens WP/felt/formål og tillatte kilder samt svarets referanser. Krev identisk chatinnhold og null chat-append-kall gjennom hele løpet, også ved feil; utilgjengelige kilder skal ikke sendes.",
+          "evidence": "TESTRESULT.md#plangraf-forklaring-uten-chat"
+        },
+        {
+          "testRef": "test.plangraf.forklaring-festet",
+          "kind": "inspection",
+          "description": "Fest et svar, lukk klienten og åpne igjen med samme identitet og valgt skop; kontroller at kildebindingen og festingen overlever i CellConfiguration.",
+          "how": "Fest et svar, lukk klienten og åpne igjen med samme identitet og valgt skop; kontroller at kildebindingen og festingen overlever i CellConfiguration. Endre kilden og krev merket utdatert forklaring og ny forklaring fra ny versjon. Chatlogg er identisk før/etter feste, gjenåpning og oppdatering.",
+          "evidence": "TESTRESULT.md#plangraf-forklaring-festet"
+        }
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.plangraf.aldri-utdatert",
+      "parentRef": "purpose://candidate.utviklerbenk.plangraf",
+      "title": "Grafen viser samme sannhet som filene",
+      "summary": "Grafens status, detaljer og handlinger er en versjonert projeksjon av PLAN.md, STATUS.md og TESTRESULT.md, og påstår aldri å være fersk eller levert uten tilsvarende kildebevis.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.candidate.utviklerbenk.plangraf.aldri-utdatert",
+        "lifecycle": "continuous",
+        "outcome": "Grafens status, detaljer og handlinger er en versjonert projeksjon av PLAN.md, STATUS.md og TESTRESULT.md, og påstår aldri å være fersk eller levert uten tilsvarende kildebevis.",
+        "successSignals": [
+          "Ved lesbar aktiv kilde slår endring i hver av de tre filene gjennom uten manuell omlasting innen 5 s i tre forsøk per klient. Kildeversjon og sist verifisert vises; eldre eller delvise oppdateringer kan ikke overskrive en nyere konsistent projeksjon.",
+          "Ved frakobling eller ulesbar kilde merkes siste snapshot som sist kjent/ukjent ferskhet, aldri dagens sannhet; utførelse er sperret til server og kildeeier har bekreftet versjonen på nytt. «Aldri» er denne sannhetsgrensen, ikke et løfte om null overføringstid.",
+          "PLAN eier beskrivelsen/avhengighetene, STATUS de uttrykkelige portene og daterte statusopplysningene, TESTRESULT testbeviset. Uenighet vises med begge kilder. Grønn WP krever alle relevante steg/tester og bevis for riktig forsøk og artefakt; en portgodkjenning alene er ikke leveranse.",
+          "Ingen separat grafstatus kan settes. Handling oppdaterer kildens arbeidsflyt/bevis og projiseres tilbake. Fjernet bevis, feil artefakt, rollback eller nyere rød måling trekker grønt tilbake; slettbar cache kan bygges identisk fra samme kildeversjon."
+        ],
+        "verifier": "test.plangraf.kildeendring; test.plangraf.bevis-og-konflikt"
+      },
+      "verifier": [
+        "test.plangraf.kildeendring",
+        "test.plangraf.bevis-og-konflikt"
+      ],
+      "derivedTests": [
+        {
+          "testRef": "test.plangraf.kildeendring",
+          "kind": "measurement",
+          "description": "Endre PLAN, STATUS og TESTRESULT hver for seg i godkjent testkilde, tre forsøk per fil per klient, uten reload.",
+          "how": "Endre PLAN, STATUS og TESTRESULT hver for seg i godkjent testkilde, tre forsøk per fil per klient, uten reload. Mål fra atomisk kildeendring til riktig synlig graf: ≤ 5 s. Send eldre snapshot etter nyere og bryt forbindelsen: eldre data kan ikke overskrive nyere, frakobling markeres, og handling må avvises hvis kilderevisjonen ikke kan bekreftes. Lagre tidsstempler og versjoner.",
+          "evidence": "TESTRESULT.md#plangraf-kildeendring"
+        },
+        {
+          "testRef": "test.plangraf.bevis-og-konflikt",
+          "kind": "command",
+          "description": "Fixture med PLAN G2 venter/STATUS godkjent skal vise kildespenning og kildenes roller.",
+          "how": "Fixture med PLAN G2 venter/STATUS godkjent skal vise kildespenning og kildenes roller. Prøv levert uten bevis, manglende bevisfil, feil artefakt/forsøk, nyere rød test og ROLLED_BACK_VERIFIED: ingen grønn levert-boks. Riktig bevis gir grønt; fjern det og krev tilbakekall. Forsøk direkte grafstatusskriving avvises. Bygg projeksjonen på nytt fra samme input og sammenlign kanonisk JSON.",
+          "evidence": "TESTRESULT.md#plangraf-bevis-og-konflikt"
+        }
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.plangraf.ingen-niende-inngang",
+      "parentRef": "purpose://candidate.utviklerbenk.plangraf",
+      "title": "Skal ikke: plangrafen blir en niende inngang",
+      "summary": "Plangrafen inngår i den eksisterende benkens oppgavevalg og øker ikke antall toppnivåinnganger for arbeid.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.candidate.utviklerbenk.plangraf.ingen-niende-inngang",
+        "lifecycle": "continuous",
+        "outcome": "Plangrafen inngår i den eksisterende benkens oppgavevalg og øker ikke antall toppnivåinnganger for arbeid.",
+        "successSignals": [
+          "Før/etter-inventar av faktisk servert navigasjon viser ingen ny toppnivåinngang for plangraf; Mine handlinger, detalj og Forklar åpnes fra samme valgte oppgave.",
+          "Bytte mellom prosjekt-, utvikler- og driftslinse beholder WP-valg og forklaringskontekst. En intern rute eller et festet element teller ikke som en ny app/benk og oppretter ingen ekstra oppgavelagring."
+        ],
+        "verifier": "test.plangraf.netto-null"
+      },
+      "verifier": [
+        "test.plangraf.netto-null"
+      ],
+      "polarity": "prohibited",
+      "derivedTests": [
+        {
+          "testRef": "test.plangraf.netto-null",
+          "kind": "inspection",
+          "description": "Ta før/etter-inventar av toppnivåinnganger fra faktisk servert meny og navigasjonsdestinasjoner i web og app (gjenbruk D-testen).",
+          "how": "Ta før/etter-inventar av toppnivåinnganger fra faktisk servert meny og navigasjonsdestinasjoner i web og app (gjenbruk D-testen). Plangraf/Mine handlinger/drilldown/Forklar skal finnes i den eksisterende benken uten økning. Bytt linse og kontroller at valgt oppgave/boks bevares.",
+          "evidence": "TESTRESULT.md#plangraf-netto-null"
+        }
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.mal.standard",
+      "parentRef": null,
+      "title": "Standard arbeidsflytmal (I8)",
+      "status": "candidate",
+      "composition": {
+        "kind": "sequence"
+      },
+      "childOrder": [
+        "purpose://candidate.utviklerbenk.mal.standard.analyse",
+        "purpose://candidate.utviklerbenk.mal.standard.informasjonsinnhenting",
+        "purpose://candidate.utviklerbenk.mal.standard.drofting",
+        "purpose://candidate.utviklerbenk.mal.standard.beslutning",
+        "purpose://candidate.utviklerbenk.mal.standard.implementering",
+        "purpose://candidate.utviklerbenk.mal.standard.testing",
+        "purpose://candidate.utviklerbenk.mal.standard.commit",
+        "purpose://candidate.utviklerbenk.mal.standard.push",
+        "purpose://candidate.utviklerbenk.mal.standard.ci",
+        "purpose://candidate.utviklerbenk.mal.standard.pr-og-merge",
+        "purpose://candidate.utviklerbenk.mal.standard.deploy",
+        "purpose://candidate.utviklerbenk.mal.standard.verifisert-i-miljo"
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.mal.standard.analyse",
+      "parentRef": "purpose://candidate.utviklerbenk.mal.standard",
+      "title": "Analyse",
+      "status": "candidate"
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.mal.standard.informasjonsinnhenting",
+      "parentRef": "purpose://candidate.utviklerbenk.mal.standard",
+      "title": "Informasjonsinnhenting",
+      "status": "candidate"
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.mal.standard.drofting",
+      "parentRef": "purpose://candidate.utviklerbenk.mal.standard",
+      "title": "Drøfting",
+      "status": "candidate"
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.mal.standard.beslutning",
+      "parentRef": "purpose://candidate.utviklerbenk.mal.standard",
+      "title": "Beslutning (lagt til, venter ja)",
+      "status": "candidate"
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.mal.standard.implementering",
+      "parentRef": "purpose://candidate.utviklerbenk.mal.standard",
+      "title": "Implementering",
+      "status": "candidate"
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.mal.standard.testing",
+      "parentRef": "purpose://candidate.utviklerbenk.mal.standard",
+      "title": "Testing",
+      "status": "candidate"
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.mal.standard.commit",
+      "parentRef": "purpose://candidate.utviklerbenk.mal.standard",
+      "title": "Commit",
+      "status": "candidate"
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.mal.standard.push",
+      "parentRef": "purpose://candidate.utviklerbenk.mal.standard",
+      "title": "Push",
+      "status": "candidate"
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.mal.standard.ci",
+      "parentRef": "purpose://candidate.utviklerbenk.mal.standard",
+      "title": "CI",
+      "status": "candidate"
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.mal.standard.pr-og-merge",
+      "parentRef": "purpose://candidate.utviklerbenk.mal.standard",
+      "title": "PR og merge (lagt til, venter ja)",
+      "status": "candidate"
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.mal.standard.deploy",
+      "parentRef": "purpose://candidate.utviklerbenk.mal.standard",
+      "title": "Deploy",
+      "status": "candidate",
+      "composition": {
+        "kind": "sequence"
+      },
+      "childOrder": [
+        "purpose://candidate.utviklerbenk.mal.standard.deploy.staging",
+        "purpose://candidate.utviklerbenk.mal.standard.deploy.prod"
+      ]
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.mal.standard.verifisert-i-miljo",
+      "parentRef": "purpose://candidate.utviklerbenk.mal.standard",
+      "title": "Verifisert i miljø (lagt til, venter ja)",
+      "status": "candidate"
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.mal.standard.deploy.staging",
+      "parentRef": "purpose://candidate.utviklerbenk.mal.standard.deploy",
+      "title": "Staging kjører main-sha",
+      "status": "candidate"
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.mal.standard.deploy.prod",
+      "parentRef": "purpose://candidate.utviklerbenk.mal.standard.deploy",
+      "title": "Prod kjører main-sha (port: Kjetil)",
+      "status": "candidate"
+    },
+    {
+      "purposeRef": "purpose://candidate.utviklerbenk.plangraf.sporsmallister",
+      "parentRef": "purpose://candidate.utviklerbenk.plangraf",
+      "title": "Eierens spørsmål og svar har ett sted å bo",
+      "summary": "E8, P0-inntak 2026-09-28 fra Kjetil. Delvis dekket av E3/E5, Valgbenken og Dommerbenken; ny kandidatoppgave for spørsmålslistens livsløp og sporbar innføring. P1 skal avklare gjenbruk, kildeeierskap, tilbakeføring og gjenåpning. Ikke ferdig spesifikasjon eller implementasjonsmandat. Se FORMAALSSPEC.md#e8-sporsmallister og ../BENK_SPOERSMAALSLISTER_2026-09-28.md.",
+      "status": "candidate",
+      "goal": {
+        "goalRef": "goal.candidate.utviklerbenk.plangraf.sporsmallister",
+        "lifecycle": "continuous",
+        "outcome": "Eieren kan vise og besvare spørsmålslister i utviklerbenken, og hver beslutning har ett autoritativt sted fra spørsmålet stilles til svaret er ført inn i det det påvirker.",
+        "successSignals": [
+          "Hvert spørsmål har synlig status: åpent, besvart eller ført inn. Dette er spørsmålets livsløp, ikke nye statuser for WorkItem.",
+          "Eieren kan svare med et listevalg eller fritekst når valgene ikke passer.",
+          "Anbefaling og eiersvar er tydelig atskilt; en anbefaling er aldri et avgitt svar.",
+          "Et besvart spørsmål kan spores til hva svaret endret. Besvart betyr ikke at endringen er ført inn.",
+          "Et spørsmål kan gjenåpnes, og gjenåpningen og tidligere svar må fortsatt være synlige.",
+          "Benk, dokumentasjon og eventuelle skjema viser samme beslutningsgrunnlag. Eieren skal slippe å gjenta svaret i chat eller få det kopiert manuelt mellom uavhengige originaler."
+        ],
+        "verifier": "P0: observerbart mål i FORMAALSSPEC.md#e8-sporsmallister. P1 skal avlede konkrete mål/tester og beviskrav før G1; ikke kjørt eller godkjent."
+      }
+    }
+  ],
+  "execution": {
+    "attempts": [],
+    "measurements": [],
+    "reports": [],
+    "opinions": []
+  }
+}

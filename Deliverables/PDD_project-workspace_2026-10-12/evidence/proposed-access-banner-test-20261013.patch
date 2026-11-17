@@ -1,0 +1,28 @@
+--- a/Tests/AppTests/PortholeConfigurationLoadingTests.swift
++++ b/Tests/AppTests/PortholeConfigurationLoadingTests.swift
+@@ -1793,6 +1793,14 @@
+                 guard case let .Text(text) = element else { return false }
+                 return text.keypath == "$porthole.accessRequirementSummary"
+             }
++            let requestButton = flattened.first { element in
++                guard case let .Button(button) = element else { return false }
++                return button.keypath == "porthole.requestAccessRequirement"
++            }
++            let recheckButton = flattened.first { element in
++                guard case let .Button(button) = element else { return false }
++                return button.keypath == "porthole.recheckAccessRequirement"
++            }
+             let approveButton = flattened.first { element in
+                 guard case let .Button(button) = element else { return false }
+                 return button.keypath == "porthole.approveAccessRequirement"
+@@ -1803,7 +1811,9 @@
+             }
+ 
+             XCTAssertTrue(summaryText)
+-            XCTAssertNotNil(approveButton)
++            XCTAssertNotNil(requestButton)
++            XCTAssertNotNil(recheckButton)
++            XCTAssertNil(approveButton, "A grant request must not offer ineffective inline approval.")
+             XCTAssertNotNil(denyButton)
+ 
+             guard let prompt = try await resolver.cellAtEndpoint(

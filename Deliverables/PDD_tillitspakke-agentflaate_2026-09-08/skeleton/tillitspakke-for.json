@@ -1,0 +1,330 @@
+{
+  "name": "Agent Trust Package",
+  "_note": "«Før»-flaten for cell:///AgentTrustPackage. Alle keypaths leses fra cellen; handlinger skriver til cellen. Ingen keypath finnes i dag — dette er kontrakten cellen skal oppfylle (contract/).",
+  "discovery": {
+    "sourceCellEndpoint": "cell:///AgentTrustPackage",
+    "sourceCellName": "AgentTrustPackage",
+    "purpose": "purpose://candidate.tillitspakke-agentflaate.root"
+  },
+  "skeleton": {
+    "VStack": {
+      "spacing": 14,
+      "modifiers": {
+        "padding": 16
+      },
+      "elements": [
+        {
+          "Section": {
+            "header": {
+              "Text": {
+                "text": "Tillitspakke"
+              }
+            },
+            "content": [
+              {
+                "Text": {
+                  "keypath": "trustPackage.state.statusLabel",
+                  "modifiers": {
+                    "fontStyle": "headline",
+                    "fontWeight": "bold"
+                  }
+                }
+              },
+              {
+                "Text": {
+                  "keypath": "trustPackage.state.summaryLabel",
+                  "modifiers": {
+                    "fontStyle": "body"
+                  }
+                }
+              },
+              {
+                "Text": {
+                  "keypath": "trustPackage.state.packageDigestLabel",
+                  "modifiers": {
+                    "fontStyle": "caption",
+                    "styleClasses": [
+                      "tp-mono"
+                    ]
+                  }
+                }
+              },
+              {
+                "Text": {
+                  "keypath": "trustPackage.state.approvalLabel",
+                  "modifiers": {
+                    "fontStyle": "caption"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "Section": {
+            "header": {
+              "Text": {
+                "text": "Celler i flåten"
+              }
+            },
+            "content": [
+              {
+                "List": {
+                  "keypath": "trustPackage.state.fleet.cells",
+                  "flowElementSkeleton": {
+                    "VStack": {
+                      "spacing": 4,
+                      "modifiers": {
+                        "padding": 12,
+                        "cornerRadius": 12,
+                        "maxWidthInfinity": true,
+                        "hAlignment": "leading",
+                        "styleClasses": [
+                          "tp-cell-card"
+                        ]
+                      },
+                      "elements": [
+                        {
+                          "Text": {
+                            "keypath": "title",
+                            "modifiers": {
+                              "fontStyle": "headline",
+                              "fontWeight": "bold"
+                            }
+                          }
+                        },
+                        {
+                          "Text": {
+                            "keypath": "roleLabel",
+                            "modifiers": {
+                              "fontStyle": "caption"
+                            }
+                          }
+                        },
+                        {
+                          "Text": {
+                            "keypath": "modelLabel"
+                          }
+                        },
+                        {
+                          "Text": {
+                            "keypath": "instructionLabel",
+                            "modifiers": {
+                              "fontStyle": "caption",
+                              "styleClasses": [
+                                "tp-mono"
+                              ],
+                              "visibility": {
+                                "when": {
+                                  "scope": "item",
+                                  "keypath": "hasInstruction",
+                                  "equals": true
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "Text": {
+                            "keypath": "grantsLabel",
+                            "modifiers": {
+                              "fontStyle": "caption"
+                            }
+                          }
+                        },
+                        {
+                          "Text": {
+                            "keypath": "ceilingLabel",
+                            "modifiers": {
+                              "fontStyle": "caption"
+                            }
+                          }
+                        },
+                        {
+                          "Text": {
+                            "keypath": "providerToolsLabel",
+                            "modifiers": {
+                              "fontStyle": "caption",
+                              "visibility": {
+                                "when": {
+                                  "scope": "item",
+                                  "keypath": "hasModel",
+                                  "equals": true
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "Button": {
+                            "keypath": "trustPackage.open.instruction",
+                            "label": "Åpne instruksjon",
+                            "payload": {
+                              "cellID": "$id"
+                            },
+                            "modifiers": {
+                              "visibility": {
+                                "when": {
+                                  "scope": "item",
+                                  "keypath": "hasInstruction",
+                                  "equals": true
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "Section": {
+            "header": {
+              "Text": {
+                "text": "Rekkevidde (transitiv)"
+              }
+            },
+            "content": [
+              {
+                "Text": {
+                  "text": "Hva hver agent kan nå gjennom cellene den har Grants til — summert.",
+                  "modifiers": {
+                    "fontStyle": "caption"
+                  }
+                }
+              },
+              {
+                "List": {
+                  "keypath": "trustPackage.state.reach",
+                  "flowElementSkeleton": {
+                    "VStack": {
+                      "spacing": 2,
+                      "modifiers": {
+                        "padding": 10,
+                        "cornerRadius": 10,
+                        "maxWidthInfinity": true,
+                        "hAlignment": "leading",
+                        "styleClasses": [
+                          "tp-reach-row"
+                        ]
+                      },
+                      "elements": [
+                        {
+                          "Text": {
+                            "keypath": "pathLabel",
+                            "modifiers": {
+                              "fontWeight": "bold"
+                            }
+                          }
+                        },
+                        {
+                          "Text": {
+                            "keypath": "summaryLabel",
+                            "modifiers": {
+                              "fontStyle": "caption"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "Section": {
+            "header": {
+              "Text": {
+                "text": "Snevre inn før oppsett"
+              }
+            },
+            "content": [
+              {
+                "Text": {
+                  "text": "Du kan bare fjerne. Templaten i cellen er taket; ingenting her kan legge til rettigheter.",
+                  "modifiers": {
+                    "fontStyle": "caption"
+                  }
+                }
+              },
+              {
+                "Text": {
+                  "text": "Whitelist for WebFetch (mønstre, ett per linje)",
+                  "modifiers": {
+                    "fontStyle": "caption"
+                  }
+                }
+              },
+              {
+                "TextArea": {
+                  "sourceKeypath": "trustPackage.state.adjust.whitelistText",
+                  "targetKeypath": "trustPackage.adjust.whitelist",
+                  "placeholder": "*.example.org",
+                  "minLines": 2,
+                  "maxLines": 4
+                }
+              },
+              {
+                "Toggle": {
+                  "label": "WebFetch får bruke credentials (ScopedCredential)",
+                  "keypath": "trustPackage.adjust.credentials",
+                  "isOn": false
+                }
+              },
+              {
+                "Toggle": {
+                  "label": "AIGateway får skrive til WebFetch (ellers bare lese)",
+                  "keypath": "trustPackage.adjust.webfetchWrite",
+                  "isOn": false
+                }
+              },
+              {
+                "Text": {
+                  "keypath": "trustPackage.state.adjust.providerToolsLabel",
+                  "modifiers": {
+                    "fontStyle": "caption"
+                  }
+                }
+              },
+              {
+                "HStack": {
+                  "spacing": 8,
+                  "elements": [
+                    {
+                      "Button": {
+                        "keypath": "trustPackage.regenerate",
+                        "label": "Regenerer pakke"
+                      }
+                    },
+                    {
+                      "Button": {
+                        "keypath": "trustPackage.approve",
+                        "label": "Godkjenn pakke",
+                        "payload": {
+                          "packageDigest": "$packageDigest"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "_verify_in_porthole": [
+    "Button i List-rad med payload som bærer radens id ($id) — samme forbehold som husk-PDD.",
+    "Toggle skriver bool til keypath; bekreft at cellen får {isOn} i set-payload.",
+    "TextArea med sourceKeypath+targetKeypath på samme celle: bekreft at submit ikke krever submitOnEnter.",
+    "$packageDigest i Button-payload er fabrikk-substitusjon ved bygging, ikke runtime.",
+    "Item-scoped visibility (scope: item, keypath: hasInstruction/hasModel, equals: true) inne i List-rad — riktig plassering per lesson.unresolvable-condition-is-invisible; bekreft at rendereren leser radens verdi."
+  ]
+}

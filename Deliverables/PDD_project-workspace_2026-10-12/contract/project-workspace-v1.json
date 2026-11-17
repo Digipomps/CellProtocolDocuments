@@ -1,0 +1,150 @@
+{
+  "schemaVersion": "project-workspace-plan-v1",
+  "status": "proposed-not-implemented",
+  "purposeRef": "purpose://project-work.overview-and-sharing",
+  "projectContext": {
+    "required": [
+      "portfolioUUID",
+      "projectID",
+      "viewInstanceID"
+    ],
+    "optional": [
+      "mountID"
+    ],
+    "authority": "resolver-validated requester and explicit project grant; IDs are not grants"
+  },
+  "projectionSnapshot": {
+    "required": [
+      "projectRef",
+      "projectionRevision",
+      "cursor",
+      "sourceVersions",
+      "completeness",
+      "freshness",
+      "authorizedObjects",
+      "authorizedRelations"
+    ],
+    "completeness": [
+      "complete",
+      "partial",
+      "unknown"
+    ]
+  },
+  "sourceEvent": {
+    "required": [
+      "sourceRef",
+      "sourceRevision",
+      "eventID",
+      "kind"
+    ],
+    "note": "Source cursors independent; gap requires authorized reconciliation"
+  },
+  "projectionEvent": {
+    "required": [
+      "projectRef",
+      "projectionSequence",
+      "eventID",
+      "kind",
+      "sourceVersion"
+    ],
+    "kinds": [
+      "objectChanged",
+      "relationChanged",
+      "jobChanged",
+      "accessRevoked",
+      "resyncRequired"
+    ]
+  },
+  "relation": {
+    "required": [
+      "relationID",
+      "sourceRef",
+      "from",
+      "to",
+      "type",
+      "direction",
+      "visibility"
+    ],
+    "rule": "authorize endpoints, relation and labels before including; no hidden counts"
+  },
+  "command": {
+    "required": [
+      "commandID",
+      "projectRef",
+      "requesterRef",
+      "grantRef",
+      "purposeRef",
+      "expectedRevision",
+      "operation",
+      "payload"
+    ],
+    "operations": [
+      "submit",
+      "startRegistered",
+      "cancel",
+      "replaceQueued"
+    ],
+    "note": "Server validates grants; arbitrary requesterRef/grantRef values never confer authority; immutable registered specs"
+  },
+  "commandReceipt": {
+    "required": [
+      "commandID",
+      "status"
+    ],
+    "statuses": [
+      "accepted",
+      "rejected",
+      "conflict",
+      "cancelRequested",
+      "completed",
+      "cancelled",
+      "failed"
+    ],
+    "note": "accepted is durable admission, never proof of execution; terminal receipt follows executor evidence",
+    "optional": [
+      "jobRef",
+      "observedRevision",
+      "rejectionReason"
+    ],
+    "fieldRules": {
+      "jobRef": "Absent or null until job assignment; required once accepted against an assigned job and for job terminal receipts.",
+      "observedRevision": "Absent or null when admission cannot disclose an authorized revision."
+    }
+  },
+  "privacy": {
+    "private": "owner partition",
+    "shared": "explicit authorized metadata only"
+  },
+  "versioning": "Additive versioned Visualization spec; old readers get supported list/basic-network fallback. New focus acceptance requires actual upgraded renderer.",
+  "sourceSnapshot": {
+    "required": [
+      "sourceRef",
+      "sourceRevision",
+      "authorizedObjects",
+      "completeness"
+    ],
+    "note": "Snapshot from one admitted source; unrelated sources need independent revisions/cursors. Not a claim that existing source APIs already use this envelope."
+  },
+  "executionCommand": {
+    "extends": "command",
+    "additionalRequired": [
+      "executor",
+      "workspaceRef",
+      "localPolicyDecisionRef"
+    ],
+    "note": "The Workbench adapter carries verified requester/project admission into the daemon. Local policy is independently validated again before side effects; user supplied references alone are never authorization."
+  },
+  "jobEvent": {
+    "required": [
+      "jobRef",
+      "projectRef",
+      "commandID",
+      "sourceRevision",
+      "status"
+    ],
+    "optional": [
+      "terminalReceiptRef"
+    ],
+    "note": "Daemon execution observation, projected into projectionEvent only after scope checks. Cancel requested is not cancelled."
+  }
+}

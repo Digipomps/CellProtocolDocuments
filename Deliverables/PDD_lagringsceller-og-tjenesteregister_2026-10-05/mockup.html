@@ -1,0 +1,57 @@
+<!doctype html><html lang="nb"><meta charset="utf-8"><title>Lagring – skisse</title>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--ink:#1c2430;--mut:#5d6877;--line:#dcd9d0;--acc:#0f5c6e;--ok:#1d6b3a;--warn:#8a5a00;--err:#a12a2a;--okbg:#e4f2e8;--warnbg:#fbf0d6;--errbg:#f8e1e1;--mutbg:#eceae4}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+main{max-width:1040px;margin:0 auto;padding:24px 16px 40px}
+h1{font-size:24px;margin:0 0 4px}h2{font-size:16px;margin:0 0 10px}.sub{color:var(--mut);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+label{display:block;font-size:12px;color:var(--mut);margin-bottom:4px}
+select,input{font:inherit;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:#fff;min-width:150px}
+button{font:inherit;padding:8px 13px;border-radius:7px;border:1px solid var(--acc);background:var(--acc);color:#fff}
+button.sec{background:#fff;color:var(--acc)}
+.item{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:0}.item b{display:block}.item small,.mut{color:var(--mut);font-size:13px}
+.num{font-variant-numeric:tabular-nums}.big{font-size:17px;font-weight:600}
+.chip{display:inline-block;font-size:12px;padding:2px 8px;border-radius:99px;background:var(--okbg);color:var(--ok);margin-top:4px}
+.chip.warn{background:var(--warnbg);color:var(--warn)}.chip.mut{background:var(--mutbg);color:var(--mut)}.chip.err{background:var(--errbg);color:var(--err)}
+.out{opacity:.62}.banner{border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.banner.warn{background:var(--warnbg);color:#5c3c00}.banner.err{background:var(--errbg);color:#6d1b1b}.banner.info{background:#e3eef1;color:#0b3f4c}
+.kv{display:grid;grid-template-columns:190px 1fr;gap:6px 14px}.kv dt{color:var(--mut)}.kv dd{margin:0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stats>div{border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+code{font:13px ui-monospace,Menlo,monospace;color:var(--mut)}
+.hide{display:none}
+@media(max-width:700px){.item{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr}.kv{grid-template-columns:1fr}}
+</style>
+<main id="m"></main>
+<script>
+const q=new URLSearchParams(location.search),view=q.get('view')||'register',state=q.get('state')||'fylt';
+const S=[["Hetzner Object Storage","Tyskland · europeisk selskap","€6,49 inkl. 1 TB, så €6,47","€1 per TB","€94","Kontrollert 01.10.2026",""],
+["Scaleway (én sone)","Frankrike · europeisk selskap","€8,03","€10 per TB","€379","Kontrollert 01.10.2026",""],
+["Bunny Storage","Slovenia · europeisk selskap","$10","ca. $10 per TB","ca. $400","Ikke kontrollert · meldt inn av DiMy","mut"],
+["Safespring","Sverige · nordisk drift","€44,50","Gratis","€445","Kontrollert 01.10.2026",""],
+["Cloudflare R2","USA · EU-region kan låses","$15","Gratis","$150","Utelukket: ikke europeisk selskap","x"],
+["Backblaze B2","USA · EU-region Amsterdam","$6,95","Gratis opp til 3× lagret","$70","Utelukket: ikke europeisk selskap","x"]];
+const m=document.getElementById('m');
+function register(){
+ let h=`<h1>Lagringstjenester</h1><p class="sub">Hvilke tjenester finnes, hva de løser og hva de koster. Åpent for alle i HAVEN.</p>`;
+ if(state==='selskap')h+=`<div class="banner info"><b>Du ser dette som DiMy AS (selskap).</b> Oppslag i registeret koster 1 øre for selskaper. Enkeltpersoner og ideelle godkjent av Digipomps bruker det gratis.<div style="margin-top:10px"><button>Betal 1 øre og vis</button> <button class="sec">Vi er en ideell organisasjon</button></div></div>`;
+ h+=`<div class="card"><h2>Mine krav</h2><div class="row"><div><label>Hvor skal filene ligge</label><select><option>Europeisk selskap</option><option>EU-region holder</option><option>Hvor som helst</option></select></div><div><label>Lagret (TB)</label><input value="10" size="5"></div><div><label>Trafikk ut per måned (TB)</label><input value="30" size="5"></div><div><label>Bruk</label><select><option>Offentlig avspilling</option><option>Arkiv og kopi</option><option>Privat lagring</option></select></div></div></div>`;
+ if(state==='tom'){h+=`<div class="card"><h2>Ingen tjenester er registrert ennå</h2><p class="mut">Registeret er tomt. Det betyr ikke at det ikke finnes tjenester, bare at ingen er meldt inn.</p><button>Foreslå en tjeneste</button></div>`;return h}
+ if(state==='selskap'){h+=`<div class="card"><h2>6 tjenester</h2><p class="mut">Listen vises når oppslaget er betalt.</p></div>`;return h}
+ h+=`<div class="card"><h2>Tjenester, rangert etter anslått kost</h2>`;
+ S.forEach((s,i)=>{let chip=s[6]==='x'?`<span class="chip err">${s[5]}</span>`:`<span class="chip ${s[6]}">${s[5]}</span>`;
+  if(state==='utdatert'&&i===1)chip=`<span class="chip warn">Utdatert · pris sist kontrollert 12.06.2026</span>`;
+  h+=`<div class="item ${s[6]==='x'?'out':''}"><div><b>${s[0]}</b><small>${s[1]}</small><br>${chip}</div><div><small>Lagring per TB/mnd</small><div class="num">${s[2]}</div></div><div><small>Trafikk ut</small><div class="num">${s[3]}</div></div><div><small>Anslått per måned</small><div class="num big">${state==='utdatert'&&i===1?'€379 ?':s[4]}</div></div><div>${s[6]==='x'?'':'<button class="sec">Velg</button>'}</div></div>`});
+ h+=`</div>`;
+ if(state==='utdatert')h+=`<div class="banner warn"><b>1 oppføring er utdatert.</b> Prisen for Scaleway er eldre enn 90 dager. Anslaget kan være feil.<div style="margin-top:10px"><button class="sec">Meld inn ny pris</button></div></div>`;
+ h+=`<div class="row"><button class="sec">Foreslå en tjeneste</button><span class="mut">Forslag vises som «Ikke kontrollert» til Digipomps har godkjent dem.</span></div>`;return h}
+function lager(){
+ let h=`<h1>Mitt lager</h1><p class="sub">Hvor filene dine ligger, og hva det koster.</p>`;
+ if(state==='ikke-satt-opp'){h+=`<div class="banner warn"><b>Du har ikke valgt lagringstjeneste.</b> Filene dine lagres på HAVEN-vertens egen disk. Det er ment som en midlertidig løsning.</div><div class="card"><h2>Velg hvor filene skal ligge</h2><p class="mut">Du kan bruke din egen konto hos en tjeneste, eller senere et tilbud fra en leverandør.</p><div class="row"><button>Finn en tjeneste i registeret</button><button class="sec">Jeg har allerede en konto</button></div></div><div class="card"><h2>På vertens disk nå</h2><div class="stats"><div><small>Lagret</small><div class="big num">12,4 GB</div></div><div><small>Filer</small><div class="big num">318</div></div><div><small>Kost</small><div class="big">Dekket av HAVEN</div></div></div></div>`;return h}
+ if(state==='feil')h+=`<div class="banner err"><b>Fikk ikke kontakt med Hetzner Object Storage kl. 10:14.</b> Tjenesten svarte «403 Forbidden». Filene som allerede er lagret er ikke berørt. 2 nye opplastinger venter.<div style="margin-top:10px"><button>Prøv igjen</button> <button class="sec">Bytt nøkkel</button> <button class="sec">Bytt tjeneste</button></div></div>`;
+ h+=`<div class="card"><h2>Tjeneste</h2><dl class="kv"><dt>Tjeneste</dt><dd><b>Hetzner Object Storage</b> · Helsinki, Finland</dd><dt>Konto</dt><dd>Min egen</dd><dt>Bøtte</dt><dd>haven-kjetil</dd><dt>Nøkkel</dt><dd>Ligger i nøkkelregisteret ditt · vises aldri her</dd><dt>Sist kontrollert</dt><dd>${state==='feil'?'<span class="chip err">Feilet kl. 10:14</span>':'<span class="chip">Virket kl. 10:14</span>'}</dd></dl><div class="row" style="margin-top:12px"><button class="sec">Test forbindelsen</button><button class="sec">Bytt tjeneste</button></div></div>`;
+ h+=`<div class="card"><h2>Bruk denne måneden</h2><div class="stats"><div><small>Lagret</small><div class="big num">12,4 GB</div></div><div><small>Trafikk ut</small><div class="big num">3,1 GB</div></div><div><small>Anslått kost</small><div class="big num">€6,49</div><small>grunnpris, innenfor inkludert kvote</small></div></div></div>`;
+ h+=`<div class="card"><h2>Siste filer</h2>`+[["nordlys-master.wav","412 MB","i dag 09:58","9f2c…a71e",state==='feil'?"Venter":"Lagret"],["omslag.png","2,1 MB","i dag 09:57","41bd…0c3f",state==='feil'?"Venter":"Lagret"],["demo-03.mp3","8,4 MB","i går 21:12","c07a…55d2","Lagret"]].map(f=>`<div class="item"><div><b>${f[0]}</b><small>${f[2]}</small></div><div class="num">${f[1]}</div><div><small>sha256</small><div><code>${f[3]}</code></div></div><div><span class="chip ${f[4]==='Venter'?'warn':''}">${f[4]}</span></div><div></div></div>`).join('')+`</div>`;return h}
+m.innerHTML=view==='register'?register():lager();
+</script></html>

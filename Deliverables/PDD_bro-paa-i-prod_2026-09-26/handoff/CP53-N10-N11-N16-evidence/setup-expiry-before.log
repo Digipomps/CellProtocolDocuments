@@ -1,0 +1,89 @@
+warning: /Users/kjetil/Library/org.swift.swiftpm/configuration is not accessible or not writable, disabling user-level cache features.
+warning: /Users/kjetil/Library/org.swift.swiftpm/security is not accessible or not writable, disabling user-level cache features.
+warning: '_wt-bro-kanal-auth-20260927': found 3 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/AppleIntelligenceCell-Design.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/Architecture.md
+    /Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Sources/CellApple/Intelligence/ChatLog.md
+Building for debugging...
+[Computing dependencies]
+[Provisioning 17 / 169]
+[Using on-disk description]
+[1 / 106] Random
+[1 / 31] CellBase
+[2 / 7] CellBaseTests-product
+[4 / 9] CellBaseTests-product
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:367:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+365 |         // concerns A's physical route, and preserves the receive sequence.
+366 |         _ = try pair.pb.gate.openPeerFrame(heldRequest.data)
+367 |         let pendingCommand = await bridge.auditor.loadBridgeCommandForCommandId(1)
+    |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+368 |         XCTAssertNotNil(pendingCommand)
+369 |         let forged = BridgeCommand(cmd: "response", payload: .string("from-c"), cid: 1,
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:373:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+371 |         try await pc.gate.sendData(A.encode(forged))
+372 |         try await pair.deliverNext()
+373 |         let stillPending = await bridge.auditor.loadBridgeCommandForCommandId(1)
+    |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+374 |         XCTAssertNotNil(stillPending, "C's response must not consume B's pending cid")
+375 | 
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:399:28: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+397 |             await pair.pb.bridge!.sendCommand(command: .description, identity: pair.b.owner, payload: nil)
+398 |             let oldCommand = try await pair.next(), captured = try pair.receiver(oldCommand)
+399 |             let firstCID = await pair.pb.bridge!.auditor.loadBridgeCommandForCommandId(1)
+    |                            `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+400 |             XCTAssertEqual(firstCID?.cid, 1)
+401 |             try await pair.deliver(oldCommand)
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:408:26: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+406 |             await fresh.1.bridge!.sendCommand(command: .description, identity: pair.b.owner, payload: nil)
+407 |             let newCommand = try await pair.next()
+408 |             let newCID = await fresh.1.bridge!.auditor.loadBridgeCommandForCommandId(1)
+    |                          `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+409 |             XCTAssertEqual(firstCID?.cid, newCID?.cid, "Actual Base cid reuse")
+410 |             // A callback already captured by an old transport cannot close the new one.
+
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:727:30: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+725 |                 XCTAssertNotEqual(oldKey, freshKey)
+726 |                 let request = BridgeCommand(cmd: "description", identity: pair.a.owner.publicIdentitySnapshot(), payload: nil, cid: 1)
+727 |                 let stored = await fresh.0.bridge!.auditor.storeBridgeCommand(request, for: 1)
+    |                              `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+728 |                 XCTAssertTrue(stored)
+729 |                 // M knows the public new generation and the expected counter.
+
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+[7 / 10] CellBaseTests-product
+[9 / 13] CellBaseTests-product
+[11 / 13] CellBaseTests-product
+Build complete! (4,56 sek)
+Test Suite 'Selected tests' started at 2026-09-29 04:27:50.820.
+Test Suite 'HavenCommonsTests.xctest' started at 2026-09-29 04:27:50.820.
+Test Suite 'HavenCommonsTests.xctest' passed at 2026-09-29 04:27:50.820.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 04:27:50.820.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 04:27:50.874.
+Test Suite 'CellNearbyTests.xctest' started at 2026-09-29 04:27:50.875.
+Test Suite 'CellNearbyTests.xctest' passed at 2026-09-29 04:27:50.875.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-29 04:27:50.875.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'Selected tests' started at 2026-09-29 04:27:50.931.
+Test Suite 'CellBaseTests.xctest' started at 2026-09-29 04:27:50.932.
+Test Suite 'ScannerPeerAuthenticationTests' started at 2026-09-29 04:27:50.932.
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testExpiredScheduledSetupRevokesBeforeHeldWorkReturnsAndRetainsAdmission]' started.
+/Users/kjetil/Build/Digipomps/HAVEN/CellProtocol/_wt-bro-kanal-auth-20260927/Tests/CellBaseTests/ScannerPeerAuthenticationTests.swift:305: error: -[CellBaseTests.ScannerPeerAuthenticationTests testExpiredScheduledSetupRevokesBeforeHeldWorkReturnsAndRetainsAdmission] : XCTAssertThrowsError failed: did not throw an error - Expired setup must already be revoked, before held code returns
+Test Case '-[CellBaseTests.ScannerPeerAuthenticationTests testExpiredScheduledSetupRevokesBeforeHeldWorkReturnsAndRetainsAdmission]' failed (2.164 seconds).
+Test Suite 'ScannerPeerAuthenticationTests' failed at 2026-09-29 04:27:53.096.
+	 Executed 1 test, with 1 failure (0 unexpected) in 2.164 (2.164) seconds
+Test Suite 'CellBaseTests.xctest' failed at 2026-09-29 04:27:53.096.
+	 Executed 1 test, with 1 failure (0 unexpected) in 2.164 (2.164) seconds
+Test Suite 'Selected tests' failed at 2026-09-29 04:27:53.096.
+	 Executed 1 test, with 1 failure (0 unexpected) in 2.164 (2.165) seconds
+Inited radar service with peerId: <MCPeerID: 0x105b83660 DisplayName = HAVEN-firstf83>
+Inited radar service with peerId: <MCPeerID: 0x105b85800 DisplayName = HAVEN-secondf8>
+LobbyCell init. Owner: FB41DED7-05EE-47E4-82F2-8520AB74E272
+********* Finished setting up bridge for second-F83CAC50-79AD-4393-A54C-2E66F0B411B1
+Note: Some test targets reported failures:
+  - CellBaseTests (XCTest)

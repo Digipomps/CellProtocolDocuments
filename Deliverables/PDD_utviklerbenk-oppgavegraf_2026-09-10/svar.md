@@ -1,0 +1,5 @@
+6 nye blad (1 skal-ikke), 14 nye tester i FORMAALSSPEC.md/JSON. Tre hovedfunn: PLAN må normaliseres (CellProtocolDocuments/Deliverables/PDD_agent-menylinje-og-varsler_2026-09-09/PLAN.md:12 mot CellProtocolDocuments/Deliverables/PDD_butler-traadtre-og-widgetflate_2026-09-11/PLAN.md:48); webgrafen mangler lanes/kort/egne knapper (CellScaffold/Public/js/skeleton-runtime.js:3530, origin/main 649255bb); generell maskinbro er ikke bevist, HD-0069 står PREPARING (HAVEN-Deploy/queue/tasks/HD-0069.json:50).  
+§6 Q7: HAVEN Agent.app-bro eller kopier kommando + marker gjort med bevis først? Forslag: bro; manuell variant bare ved uttrykkelig valg.  
+§6 Q8: PDD-filer eller PLAN/STATUS som celler først? Forslag: filer først, normalisert projeksjon og kontrollert bevisretur.  
+§6 Q9: Butler eller benken eier forklaringsoverlayet? Forslag: benken, med Butler B-festing og gjenbrukbar hjelper, aldri chatlogg.  
+Validate: exit 0, 19 Book 23-migreringsadvarsler; fullt utdata i STATUS.md. Ikke gjort: git-mutasjon, bygg, docker, nett, bilder, implementering, ny PLAN eller godkjenning av porter; bare PDD-mappen skrevet.

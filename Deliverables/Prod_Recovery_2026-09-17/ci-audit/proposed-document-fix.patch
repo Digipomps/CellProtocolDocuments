@@ -1,0 +1,99 @@
+diff --git a/Public/js/porthole-webo.js b/Public/js/porthole-webo.js
+index fad6ef9d..0649d031 100644
+--- a/Public/js/porthole-webo.js
++++ b/Public/js/porthole-webo.js
+@@ -8119,6 +8119,18 @@ function renderEmptyState() {
+   `;
+ }
+ 
++function skeletonRenderSignature(value) {
++  // JSON object field order is not layout. A bootstrap may encode the same
++  // Skeleton in a different order; remounting would discard editor state and
++  // pending asynchronous input such as a document's FileReader image load.
++  return JSON.stringify(value, (_key, nested) => {
++    if (nested && typeof nested === "object" && !Array.isArray(nested)) {
++      return Object.fromEntries(Object.keys(nested).sort().map((key) => [key, nested[key]]));
++    }
++    return nested;
++  });
++}
++
+ function renderSkeletonCanvas() {
+   const root = document.getElementById("porthole-skeleton-root");
+   if (!(root instanceof HTMLElement)) {
+@@ -8164,7 +8176,7 @@ function renderSkeletonCanvas() {
+   const currentConfigurationName = configuration && typeof configuration.name === "string"
+     ? configuration.name
+     : null;
+-  const signature = JSON.stringify({ currentConfigurationName, renderedSkeleton });
++  const signature = skeletonRenderSignature({ currentConfigurationName, renderedSkeleton });
+   const hostChanged = hasSkeletonHostChanged(root);
+   if (!portholeWebState.renderer || signature !== portholeWebState.skeletonSignature || hostChanged) {
+     const previousRenderer = portholeWebState.renderer;
+diff --git a/playwright/porthole-skeleton-atomic-swap.spec.js b/playwright/porthole-skeleton-atomic-swap.spec.js
+index 294b112f..427c6c00 100644
+--- a/playwright/porthole-skeleton-atomic-swap.spec.js
++++ b/playwright/porthole-skeleton-atomic-swap.spec.js
+@@ -32,6 +32,62 @@ function bootstrapWith(skeleton) {
+   };
+ }
+ 
++test('reordered JSON object fields preserve a document and its pending image read', async ({ page }) => {
++  const skeleton = { Visualization: { kind: 'richDocument', keypath: 'document.current', actionKeypath: 'document.change' } };
++  const snapshot = { schema: 'haven.document.v1', documentId: 'json-order-proof', revision: 0, sequence: 0,
++    ops: [{ insert: 'Preserved document\n' }], events: [], comments: [], presence: [], messages: [], help: [] };
++  let reorder = false;
++  const reverseObjectFields = value => Array.isArray(value) ? value.map(reverseObjectFields)
++    : value && typeof value === 'object' ? Object.fromEntries(Object.entries(value).reverse().map(([key, nested]) => [key, reverseObjectFields(nested)])) : value;
++  await page.route('**/*', async route => {
++    const pathname = new URL(route.request().url()).pathname;
++    if (pathname === '/') return route.fulfill({ contentType: 'text/html; charset=utf-8', body:
++      '<!doctype html><html><head><link rel="stylesheet" href="/css/porthole-webo.css"></head><body><main id="porthole-webo-app"></main><script src="/vendor/quill/quill.js"></script><script src="/js/skeleton-runtime.js"></script><script src="/js/porthole-webo.js"></script></body></html>' });
++    if (pathname === '/browserhead/porthole/bootstrap') {
++      const bootstrap = bootstrapWith(reorder ? reverseObjectFields(skeleton) : skeleton);
++      bootstrap.portholeState.state = { document: { current: snapshot } };
++      return route.fulfill({ contentType: 'application/json', body: JSON.stringify(bootstrap) });
++    }
++    if (pathname.startsWith('/js/') || pathname.startsWith('/vendor/') || pathname === '/css/porthole-webo.css' || pathname === '/css/rich-document.css') {
++      return route.fulfill({ path: path.join(publicDir, pathname), contentType: pathname.endsWith('.css') ? 'text/css' : 'application/javascript; charset=utf-8' });
++    }
++    return route.abort();
++  });
++  await page.goto('https://document-order.test/');
++  await expect(page.locator('.ql-editor')).toHaveAttribute('contenteditable', 'true');
++  await page.evaluate(snapshot => {
++    window.documentBeforeRefresh = document.querySelector('.ql-container');
++    window.documentCommands = [];
++    requestActionPayload = async (key, payload) => {
++      documentCommands.push(payload);
++      if (payload.kind === 'delta') {
++        const Delta = Quill.import('delta'); snapshot.ops = new Delta(snapshot.ops).compose(new Delta(payload.ops)).ops;
++        snapshot.revision++; snapshot.events.push({ revision: snapshot.revision, command: payload });
++      }
++      snapshot.sequence++;
++      return { result: { status: 'accepted', current: structuredClone(snapshot) } };
++    };
++    const NativeFileReader = FileReader;
++    window.FileReader = class extends NativeFileReader {
++      readAsDataURL(file) { window.finishDocumentImageRead = () => super.readAsDataURL(file); }
++    };
++  }, snapshot);
++  const png = Buffer.from(await page.evaluate(() => {
++    const canvas = document.createElement('canvas'); canvas.width = 32; canvas.height = 16;
++    canvas.getContext('2d').fillRect(0, 0, 32, 16); return canvas.toDataURL('image/png').split(',')[1];
++  }), 'base64');
++  await page.locator('input[type=file]').setInputFiles({ name: 'pending.png', mimeType: 'image/png', buffer: png });
++  await page.waitForFunction(() => typeof finishDocumentImageRead === 'function');
++  reorder = true;
++  await page.evaluate(() => refreshBootstrap({ silent: true }));
++  expect.soft(await page.evaluate(() => document.querySelector('.ql-container') === documentBeforeRefresh)).toBe(true);
++  await page.evaluate(() => finishDocumentImageRead());
++  await expect(page.locator('.ql-editor img')).toHaveCount(1, { timeout: 3000 });
++  await expect(page.locator('.ql-editor')).toContainText('Preserved document');
++  await expect(page.locator('.document-status')).toContainText('Alle endringer er lagret');
++  expect(await page.evaluate(() => documentCommands.filter(command => command.kind === 'delta').length)).toBe(1);
++});
++
+ test("Porthole retains the rendered node when a refreshed skeleton is malformed", async ({ page }) => {
+   const responses = [
+     // `initializePorthole` deliberately bootstraps twice on load since e4a84c16

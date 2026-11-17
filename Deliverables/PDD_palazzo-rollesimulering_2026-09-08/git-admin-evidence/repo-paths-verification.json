@@ -1,0 +1,254 @@
+{
+  "base": "/private/tmp/git-admin-docs-20260909-b7n5z899",
+  "tool_sha256": "4436b88fe234dfbfb39417aaa2d9126075f3997c3829299516da3d6bc08d42af",
+  "tests": [
+    {
+      "name": "init-temporary-device-only",
+      "passed": true,
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "2 repoer erkl\u00e6rt i /private/tmp/git-admin-docs-20260909-b7n5z899/device/repos.json\nverkt\u00f8yet kopiert til /private/tmp/git-admin-docs-20260909-b7n5z899/device/haven_path.py \u2014 bruk den stien i skript\n  CellProtocolDocuments\n  PalazzoScaffold\n",
+      "stderr": ""
+    },
+    {
+      "name": "check-real-markers",
+      "passed": true,
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "  ok   CellProtocolDocuments::  ->  /private/tmp/git-admin-docs-20260909-b7n5z899/common/CellProtocolDocuments\n  ok   PalazzoScaffold::  ->  /private/tmp/git-admin-docs-20260909-b7n5z899/common/PalazzoScaffold\n\n2/2 repoer lot seg avlede (/private/tmp/git-admin-docs-20260909-b7n5z899/device/repos.json)\n",
+      "stderr": ""
+    },
+    {
+      "name": "path-from-tmp",
+      "passed": true,
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "/private/tmp/git-admin-docs-20260909-b7n5z899/common/PalazzoScaffold/sample.txt\n",
+      "stderr": ""
+    },
+    {
+      "name": "path-from-another-cwd",
+      "passed": true,
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "/private/tmp/git-admin-docs-20260909-b7n5z899/common/PalazzoScaffold/sample.txt\n",
+      "stderr": ""
+    },
+    {
+      "name": "path-allows-new-target",
+      "passed": true,
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "/private/tmp/git-admin-docs-20260909-b7n5z899/common/PalazzoScaffold/new.txt\n",
+      "stderr": ""
+    },
+    {
+      "name": "environment-config",
+      "passed": true,
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "/private/tmp/git-admin-docs-20260909-b7n5z899/common/PalazzoScaffold/sample.txt\n",
+      "stderr": ""
+    },
+    {
+      "name": "unknown-repo",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "haven-path: repo_not_declared: AbsentRepo (in /private/tmp/git-admin-docs-20260909-b7n5z899/device/repos.json)\n"
+    },
+    {
+      "name": "escape-dotdot",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "haven-path: escapes_repo: PalazzoScaffold::../other -> /private/tmp/git-admin-docs-20260909-b7n5z899/common/other\n"
+    },
+    {
+      "name": "absolute-relative-component",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "haven-path: not_repo_relative: PalazzoScaffold::/etc/passwd\n"
+    },
+    {
+      "name": "escape-symlink",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "haven-path: escapes_repo: PalazzoScaffold::outside/evidence -> /private/tmp/git-admin-docs-20260909-b7n5z899/evidence\n"
+    },
+    {
+      "name": "scattered-renamed-repo",
+      "passed": true,
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "/private/tmp/git-admin-docs-20260909-b7n5z899/scattered/renamed-palazzo/sample.txt\n",
+      "stderr": ""
+    },
+    {
+      "name": "check-scattered-renamed",
+      "passed": true,
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "  ok   CellProtocolDocuments::  ->  /private/tmp/git-admin-docs-20260909-b7n5z899/common/CellProtocolDocuments\n  ok   PalazzoScaffold::  ->  /private/tmp/git-admin-docs-20260909-b7n5z899/scattered/renamed-palazzo\n\n2/2 repoer lot seg avlede (/private/tmp/git-admin-docs-20260909-b7n5z899/moved.json)\n",
+      "stderr": ""
+    },
+    {
+      "name": "scan-existing",
+      "passed": true,
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "2/2 referanser gav en eksisterende full path\n",
+      "stderr": ""
+    },
+    {
+      "name": "scan-missing-target",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "0/1 referanser gav en eksisterende full path\n",
+      "stderr": "  FAIL /private/tmp/git-admin-docs-20260909-b7n5z899/missing.md: PalazzoScaffold::missing.txt  target_missing: /private/tmp/git-admin-docs-20260909-b7n5z899/common/PalazzoScaffold/missing.txt\n"
+    },
+    {
+      "name": "scan-strict-unknown",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "0/1 referanser gav en eksisterende full path\n",
+      "stderr": "  FAIL /private/tmp/git-admin-docs-20260909-b7n5z899/unknown.md: UndeclaredRepo::thing  repo_not_declared: UndeclaredRepo (in /private/tmp/git-admin-docs-20260909-b7n5z899/device/repos.json)\n"
+    },
+    {
+      "name": "documented-decoy-negative",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "\n0/2 repoer lot seg avlede (/private/tmp/git-admin-docs-20260909-b7n5z899/decoy.json)\n",
+      "stderr": "  FAIL CellProtocolDocuments::  marker_mismatch: CellProtocolDocuments -> /private/tmp/git-admin-docs-20260909-b7n5z899/common/CellProtocolDocuments/README.md lacks 'WRONG MARKER'\n  FAIL PalazzoScaffold::  repo_missing: PalazzoScaffold -> /private/tmp/git-admin-docs-20260909-b7n5z899/common/missing-repo\n"
+    },
+    {
+      "name": "missing-config",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "haven-path: config_missing: /private/tmp/git-admin-docs-20260909-b7n5z899/absent.json\n"
+    },
+    {
+      "name": "malformed-json",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "haven-path: config_invalid: /private/tmp/git-admin-docs-20260909-b7n5z899/bad.json: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)\n"
+    },
+    {
+      "name": "unknown-schema",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "haven-path: config_invalid: /private/tmp/git-admin-docs-20260909-b7n5z899/bad.json: schema is 'future'\n"
+    },
+    {
+      "name": "empty-repos",
+      "passed": true,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "haven-path: config_invalid: /private/tmp/git-admin-docs-20260909-b7n5z899/bad.json: no repos declared\n"
+    },
+    {
+      "name": "invalid-top-level-type-named-failure",
+      "passed": false,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Tools/RepoPaths/haven_path.py\", line 235, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Tools/RepoPaths/haven_path.py\", line 228, in main\n    return args.fn(args)\n           ~~~~~~~^^^^^^\n  File \"/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Tools/RepoPaths/haven_path.py\", line 171, in cmd_check\n    cfg = load(args.config)\n  File \"/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Tools/RepoPaths/haven_path.py\", line 60, in load\n    if cfg.get(\"schema\") != SCHEMA:\n       ^^^^^^^\nAttributeError: 'list' object has no attribute 'get'\n"
+    },
+    {
+      "name": "missing-path-named-failure",
+      "passed": false,
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Tools/RepoPaths/haven_path.py\", line 235, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Tools/RepoPaths/haven_path.py\", line 228, in main\n    return args.fn(args)\n           ~~~~~~~^^^^^^\n  File \"/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Tools/RepoPaths/haven_path.py\", line 175, in cmd_check\n    print(f\"  ok   {repo}::  ->  {repo_root(repo, cfg)}\")\n                                  ~~~~~~~~~^^^^^^^^^^^\n  File \"/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Tools/RepoPaths/haven_path.py\", line 72, in repo_root\n    raw = entry[\"path\"]\n          ~~~~~^^^^^^^^\nKeyError: 'path'\n"
+    },
+    {
+      "name": "relative-root-cwd-a-must-reject",
+      "passed": false,
+      "expected_exit": 1,
+      "actual_exit": 0,
+      "stdout": "/private/tmp/git-admin-docs-20260909-b7n5z899/cwd-a/repos/Project\n",
+      "stderr": ""
+    },
+    {
+      "name": "relative-root-cwd-b-must-reject",
+      "passed": false,
+      "expected_exit": 1,
+      "actual_exit": 0,
+      "stdout": "/private/tmp/git-admin-docs-20260909-b7n5z899/cwd-b/repos/Project\n",
+      "stderr": ""
+    }
+  ],
+  "inventory": [
+    {
+      "path": "Tools/RepoPaths/README.md",
+      "bytes": 2626,
+      "sha256": "ecc21d71b3f04d911af0b2b8158e0fb97317e42e86922c1215d003fe9473fddc",
+      "symlink": false
+    },
+    {
+      "path": "Tools/RepoPaths/haven_path.py",
+      "bytes": 9162,
+      "sha256": "4436b88fe234dfbfb39417aaa2d9126075f3997c3829299516da3d6bc08d42af",
+      "symlink": false
+    },
+    {
+      "path": "Deliverables/PDD_palazzo-rollesimulering_2026-09-08/FORMAALSSPEC.md",
+      "bytes": 30025,
+      "sha256": "b5a62f69c77bfbaa6308d1bd67457840628150ebc8c3170c82bb6d72e113f56e",
+      "symlink": false
+    },
+    {
+      "path": "Deliverables/PDD_palazzo-rollesimulering_2026-09-08/PLAN.md",
+      "bytes": 4094,
+      "sha256": "2d8fa2c78e4c0958b8e29b4e9622b7ed4991ac06c537b03bf2bbe57c3f5963df",
+      "symlink": false
+    },
+    {
+      "path": "Deliverables/PDD_palazzo-rollesimulering_2026-09-08/STATUS.md",
+      "bytes": 1646,
+      "sha256": "ae679ff36b804177088249945db69aca401b00d0532f41e02c4e3aee2b87fc4c",
+      "symlink": false
+    },
+    {
+      "path": "Deliverables/PDD_palazzo-rollesimulering_2026-09-08/TESTRESULT.md",
+      "bytes": 3559,
+      "sha256": "632fc40e32545738188407bada2490175355bbd3315d0081c6e7f8d5dad11e56",
+      "symlink": false
+    },
+    {
+      "path": "Deliverables/PDD_palazzo-rollesimulering_2026-09-08/_selftest_raw.txt",
+      "bytes": 1049,
+      "sha256": "edba82428746f670eead5fb2ebe07fcd7d022cd5d3877dc0463f7b03769f37a9",
+      "symlink": false
+    },
+    {
+      "path": "Deliverables/PDD_palazzo-rollesimulering_2026-09-08/images/README.md",
+      "bytes": 110,
+      "sha256": "4dd1c1fdf8b8b08dc7d5c9ee50b258dec8cd29de75829f9fbb2ca49c9b976c51",
+      "symlink": false
+    },
+    {
+      "path": "Deliverables/Repo_Path_Konvensjon_2026-09-09.md",
+      "bytes": 60862,
+      "sha256": "30442fa8f96ad9ed39062efe5cc1758826d591209b25fba729dc19a08696b412",
+      "symlink": false
+    }
+  ]
+}

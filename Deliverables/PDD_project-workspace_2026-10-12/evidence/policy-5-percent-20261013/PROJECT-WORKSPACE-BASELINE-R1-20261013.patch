@@ -1,0 +1,11 @@
+--- run.py.before
++++ run.py
+@@ -51,7 +51,7 @@
+     admission()
+     env = {k:os.environ[k] for k in ('HOME','USER','LOGNAME','TMPDIR') if k in os.environ}
+     env.update(PATH='/usr/bin:/bin:/usr/sbin:/sbin', LC_ALL='C', HAVEN_SWIFTPM_JOBS='2',
+-        HAVEN_BUILD_MIN_FREE_PERCENT='10', HAVEN_BUILD_MIN_FREE_GIB='40', HAVEN_BUILD_RESERVE_GIB='10',
++        HAVEN_BUILD_MIN_FREE_PERCENT='5', HAVEN_BUILD_MIN_FREE_GIB='40', HAVEN_BUILD_RESERVE_GIB='10',
+         HAVEN_SWIFTPM_WAIT_SECONDS='60', HAVEN_SWIFTPM_CACHE_ROOT='/private/tmp/haven-swiftpm-bounded',
+         HAVEN_SWIFTPM_RUNNER=str(HERE/'report-only-swiftpm.sh'))
+     subprocess.run(['/bin/bash',str(CS/'scripts/check_build_capacity.sh'),str(CS)],env=env,check=True)

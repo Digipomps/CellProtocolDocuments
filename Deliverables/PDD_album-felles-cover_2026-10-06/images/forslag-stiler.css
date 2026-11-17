@@ -1,0 +1,155 @@
+/* Forslag: stilene som følger med hvis bildene godkjennes. Alt bygger på
+   variablene og klassene som alt finnes i butterpop-studio.css. */
+
+/* ── Album: ett cover, flere sanger ─────────────────────────────────────── */
+.album { border-bottom: 2px solid var(--ink); }
+.album-head {
+  display: grid;
+  grid-template-columns: 168px minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 26px;
+  padding: 28px 0 24px;
+}
+.album-cover {
+  display: block;
+  width: 168px;
+  aspect-ratio: 1;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--ink);
+  object-fit: cover;
+}
+.album-kicker { margin: 0 0 8px; color: var(--blue); font-size: 12px; font-weight: 850; text-transform: uppercase; }
+.album-title { margin: 0 0 8px; font-size: 34px; font-weight: 900; line-height: 1.02; }
+.album-detail { max-width: 62ch; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
+.album-actions { display: flex; align-items: center; gap: 12px; }
+/* Sporlista er ett rutenett, radene arver kolonnene: prisene står under hverandre
+   uansett hvor bred knappen i raden er. */
+.album-tracks {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto auto;
+  column-gap: 18px;
+  border-top: 1px solid var(--line);
+}
+.album .track-row { grid-column: 1 / -1; grid-template-columns: subgrid; min-height: 68px; padding: 10px 0; }
+.album .track-row:last-child { border-bottom: 0; }
+.album .track-title { margin: 0; font-size: 18px; }
+.album .track-actions { justify-content: flex-end; }
+.track-no {
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: right;
+}
+
+/* Coveret følger sangen ned i spilleren. */
+.player-meta.has-cover { display: grid; grid-template-columns: 52px minmax(0, 1fr); align-items: center; column-gap: 12px; }
+.player-cover { grid-row: 1 / span 3; width: 52px; height: 52px; border-radius: 4px; object-fit: cover; }
+.player-meta.has-cover > :not(.player-cover) { grid-column: 2; }
+
+/* ── Studio › Utgivelser: ordne det som er publisert ────────────────────── */
+.segmented.has-statistics.has-profile.has-releases { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.studio-shell:has(#releases-tab.is-active) { background: var(--paper); }
+.arrange-card { margin-bottom: 40px; border: 1px solid var(--line); border-radius: 8px; padding: 28px; background: var(--white); }
+.arrange-intro { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
+.arrange-intro h3 { margin: 0 0 6px; }
+.arrange-list { border-top: 2px solid var(--ink); }
+.arrange-row {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  min-height: 60px;
+  border-bottom: 1px solid var(--line);
+  padding: 9px 8px 9px 0;
+}
+.arrange-row strong { display: block; font-size: 16px; font-weight: 850; }
+.arrange-row small { color: var(--muted); font-size: 12px; }
+/* Raden du nettopp flyttet. Samme gule som en valgt miks. */
+.arrange-row.is-moved { background: #fff8c9; box-shadow: inset 5px 0 0 var(--yellow); }
+.arrange-row.is-moved .track-no { color: var(--ink); }
+.move-buttons { display: inline-flex; gap: 6px; }
+.move-button {
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--white);
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+}
+.move-button:disabled { border-color: var(--line); color: var(--line); cursor: default; }
+.arrange-save {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+  border-left: 8px solid var(--cyan);
+  padding: 12px 16px;
+  background: #e8f7f5;
+}
+.arrange-save p { margin: 0; font-size: 14px; font-weight: 750; }
+.arrange-save-actions { display: flex; align-items: center; gap: 16px; }
+.arrange-save-actions .link-button { margin-top: 0; }
+
+/* Albumet i Studio: bilde og tittel øverst, sangene under. */
+.arrange-album { border-bottom: 2px solid var(--ink); }
+.arrange-album-head {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 20px;
+  padding: 18px 8px 16px 0;
+}
+.arrange-cover { display: grid; gap: 8px; justify-items: start; }
+.arrange-cover img { width: 120px; aspect-ratio: 1; border: 1px solid var(--ink); border-radius: var(--radius); object-fit: cover; }
+.arrange-cover-empty {
+  display: grid;
+  width: 120px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px dashed #8f928c;
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+  text-align: center;
+}
+.arrange-album-fields { display: grid; gap: 12px; }
+.arrange-album-fields label { color: var(--muted); }
+.arrange-album-fields input { border-color: var(--line); border-radius: 6px; background: var(--paper); font-weight: 600; }
+.arrange-album-tools { display: grid; gap: 10px; justify-items: end; }
+.arrange-album .arrange-row { padding-left: 14px; }
+.arrange-album .arrange-row:last-child { border-bottom: 0; }
+.arrange-row select { width: auto; min-width: 150px; border-color: var(--line); border-radius: 6px; padding: 8px 10px; font-size: 13px; font-weight: 700; }
+.arrange-hint { margin: 0; color: var(--muted); font-size: 12px; }
+
+@media (max-width: 760px) {
+  .album-head { grid-template-columns: 96px minmax(0, 1fr); align-items: start; gap: 14px; padding: 20px 0 16px; }
+  .album-cover { width: 96px; }
+  .album-title { font-size: 24px; }
+  .album-actions { grid-column: 1 / -1; }
+  /* På telefon har hver rad sitt eget rutenett: ellers bestemmer den bredeste
+     knappen i albumet hvor lite plass alle titlene får. */
+  .album-tracks { display: block; }
+  .album .track-row { grid-template-columns: 22px minmax(0, 1fr) auto; }
+  .album .track-no { grid-row: 1 / span 2; text-align: left; }
+  .album .track-copy, .album .track-price { grid-column: 2; }
+  .album .track-actions { grid-column: 3; grid-row: 1 / span 2; }
+  .segmented.has-statistics.has-profile.has-releases { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .segmented.has-statistics.has-profile.has-releases .segment:nth-child(-n+4) { border-bottom: 1px solid var(--ink); }
+  .segmented.has-statistics.has-profile.has-releases .segment:nth-child(3n) { border-right: 1px solid var(--ink); }
+  .segmented.has-statistics.has-profile.has-releases .segment:nth-child(4n) { border-right: 0; }
+  .arrange-card { padding: 18px; }
+  .arrange-row { grid-template-columns: 22px minmax(0, 1fr) auto; }
+  .arrange-row select { grid-column: 2 / -1; width: 100%; }
+  .arrange-album-head { grid-template-columns: 96px minmax(0, 1fr); }
+  .arrange-cover img, .arrange-cover-empty { width: 96px; }
+  .arrange-album-tools { grid-column: 1 / -1; justify-items: start; }
+  .arrange-save { flex-direction: column; align-items: flex-start; }
+}

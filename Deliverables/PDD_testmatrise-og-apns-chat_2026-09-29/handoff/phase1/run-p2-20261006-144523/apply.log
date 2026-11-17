@@ -1,0 +1,32 @@
+gren pdd/testmatrise-apns-dev fra origin/main i /Users/kjetil/Build/pdd-check/impl/CellScaffold, bygget mot /Users/kjetil/Build/pdd-check/impl/CellProtocol (gren pdd/testmatrise-apns)
+legger inn: InviteApnsPush, InvitePushDispatcher (+ tester), sendInvite i PushProviderAdapter, try-rettelse i VaporPersonEntityReadRoute (kompatibilitet med CellProtocol main)
+  DiMyMint står på fbdd1b6
+  DiMyMicropayments står på fadaddb
+står på e5c34345 (pdd/testmatrise-apns-dev)
+sendInvite lagt inn
+try-rettelse lagt inn (CellProtocol #53 gjorde BridgeTransport.sendData throwing)
+try-rettelse lagt inn i EntityPersonBridgeProcessTests (samme årsak)
+== build ==
+build: OK
+== test: nye tester (InviteApnsPushTests|InvitePushDispatcherTests) ==
+AppTests-linje: [	 Executed 20 tests, with 0 failures (0 unexpected) in 0.020 (0.021) seconds] → GRØNN
+== regresjon: hele CellScaffold-suiten mot CellProtocol-grenen, sammenlignet med baseline-failures-pinned.txt ==
+AppTests-linje: [	 Executed 2766 tests, with 17 tests skipped and 152 failures (10 unexpected) in 342.810 (342.984) seconds]
+røde tester nå:       42 · baseline:       36
+NYE RØDE (ikke i baseline):
+AppTests.AdminEntryRemoteBridgeLoopbackTests.testStoredEntryCredentialVerifiesThroughRunningAdminScaffoldBridge
+AppTests.EntityPersonBridgeProcessTests.testAuthenticatedRouteDiscoversScopesAndRevokesAnOpenRemoteConnection
+AppTests.EntityPersonBridgeProcessTests.testRemotePersonReadAndRevocationOnExistingConnection
+AppTests.PortholeWebRemoteConfigurationTests.testRemoteLookupLoadsExportOverInMemoryBridgeAndReadsLivePublisher
+AppTests.SkeletonElementParityMatrixTests.testMatrixRevisionMatchesPackagePin
+AppTests.SkeletonElementParityMatrixTests.testNamedCorpusMatchesPinnedSkeletonElementEnumAndRoundTrips
+== endringer (ikke committet) ==
+ M Package.resolved
+ M Sources/App/Cells/ConferenceMVP/Notifications/PushProviderAdapter.swift
+ M Sources/App/Controllers/VaporPersonEntityReadRoute.swift
+ M Tests/AppTests/EntityPersonBridgeProcessTests.swift
+?? Sources/App/Cells/ConferenceMVP/Notifications/InviteApnsPush.swift
+?? Sources/App/Cells/ConferenceMVP/Notifications/InvitePushDispatcher.swift
+?? Tests/AppTests/InviteApnsPushTests.swift
+?? Tests/AppTests/InvitePushDispatcherTests.swift
+logger: /Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/PDD_testmatrise-og-apns-chat_2026-09-29/handoff/phase1/run-p2-20261006-144523
