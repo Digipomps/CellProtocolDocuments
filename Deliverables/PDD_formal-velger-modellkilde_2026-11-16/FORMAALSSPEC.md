@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — La formålet velge språkmodellkilde
 
-Oppgavemappe: `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/PDD_formal-velger-modellkilde_2026-11-16/` · Opprettet 2026-11-16 · Iterasjon 2 (ikke godkjent)
+Oppgavemappe: `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/PDD_formal-velger-modellkilde_2026-11-16/` · Opprettet 2026-11-16 · Iterasjon 3 (G1 godkjent 2026-11-17, med tillegg)
 
 Målt mot: CellScaffold `0b42ea5` (main 16.11), CellProtocolDocuments `e7808fe`. Vertsfakta fra tråden «Få språkmodellen på staging tilbake» (lest 16.11 med Kjetils ja).
 
@@ -12,6 +12,10 @@ Målt mot: CellScaffold `0b42ea5` (main 16.11), CellProtocolDocuments `e7808fe`.
 Kjetil 16.11.2026 13:45Z i tråden «Få språkmodellen på staging tilbake» (ordrett):
 
 > Jeg sjekk på verten. Bruk dette til å lære arbeidsflyten i å undersøke hva som er tilgjengelig på verten. Og - hvilke muligheter det ligger i min entitet - jeg er feks representert på min laptop. For utvikling og testing er det greit - men ikke for en prod tjeneste. Dette bør kunne finnes ut av med formål - når brukerens uttalte formål er å få støtte av språkmodell.
+
+Kjetil 17.11.2026 08:13Z i denne tråden (ordrett), samtidig som G1 ble godkjent:
+
+> Laptopen min må må be en celle på verten publisere tilgjenglighet av lokal modell på laptop'en min når jeg sier den er tilgjengelig slik at det dukker opp som likeverdig valg for brukeren. Vi bør også poste et flow element som  sier den er tilgjengelig eller blir gjort utilgjengelig og eventuelle andre nyttige hendelser. G1 godkjent.
 
 Lesning: Når noen sier «jeg vil ha støtte av en språkmodell», skal HAVEN finne kildene entiteten faktisk har (enheter, verten, hostede leverandører), og velge den som *egner seg for det formålet*. Kjetils laptop er en del av hans entitet. Den er god nok når formålet er å utvikle og teste, men ikke når formålet er en tjeneste andre er avhengige av. Arbeidsflyten for å undersøke verten er allerede skrevet i den andre tråden (`/Users/kjetil/Build/Digipomps/HAVEN/MasterHAVEN26/sprakmodell-staging-2026-11-16/ARBEIDSFLYT.md`). Her blir vertsfakta *data som formålet kan sjekkes mot*.
 
@@ -34,6 +38,9 @@ Lesning: Når noen sier «jeg vil ha støtte av en språkmodell», skal HAVEN fi
 | Et formål gir aldri rettigheter | retrieved | lærdom `lesson.purpose-never-grants-rights` |
 | Serveren ser bare `providerID` fra laptopen, ikke hva slags maskin eller rolle den har | retrieved | `NativeLocalModelBridge.swift` `acceptRegistration`: leser bare `contractID` og `providerID`. Samme funn i staging-trådens gjennomgang `/Users/kjetil/Build/Digipomps/HAVEN/MasterHAVEN26/sprakmodell-staging-2026-11-16/ENTITET_OG_FORMAAL.md` |
 | AgentD merker modellen som test (`test-playground` / `isExperimental`), men det når aldri kildevalget | recalled (fra staging-trådens gjennomgang, ikke lest her) | `ENTITET_OG_FORMAAL.md` over; finnes ikke i CellScaffold (grep gir null treff), ligger i AgentD |
+| Laptopen sier selv fra når den er tilgjengelig | **contradicted** | AgentD setter `native.localModel.register` (`contractID`, `providerID`) på `OrchestratorCell` (`OrchestratorCell.swift:340`) når broen kobles til. Det finnes ingen «tilgjengelig»/«utilgjengelig» som eieren styrer, og ingen nøkkelsti for å trekke tilbake. Den forsvinner bare når socketen lukkes eller kontrakten går ut (`VaporSproutResolver.swift:88–100`) |
+| Det postes en hendelse når laptop-modellen kommer eller går | **contradicted** | `NativeLocalModelBridgeRegistry` sender bare selve forespørselen til laptopen (`NativeLocalModelBridge.swift:201`, emne `haven.agent.local-model.generate.v1`). `register`/`unregister` sender ingenting |
+| Kildevalget vises for brukeren som en liste | retrieved | Co-Pilot Chat, AI-panelet: `providerChoices` over `chatHub.state.assistant.assistantProviders` med valg til `chatHub.assistant.provider.select` (`PersonalCopilotConfigurationFactory.swift:2270–2290`) |
 | Det finnes et register over entitetens enheter med rolle og kapabilitet | **contradicted** | `ENTITET_OG_FORMAAL.md` over. Maskinprofil F1 i Sprout-PDD-en er nevnt som grunnlag; ikke lest her |
 
 ## 1. Formålstre
@@ -51,6 +58,10 @@ Rot: **Når en person ber om støtte fra en språkmodell, velger HAVEN en kilde 
 | purpose://candidate.formal-velger-modellkilde.laptop-utvikling | Laptopen er god til utvikling | formal-krav | Eieren kan velge sin egen laptop (AgentD) for utvikle-og-teste og egen bruk. Svaret merkes «din maskin, bare for deg». Laptopen tilbys aldri andre, heller ikke gjennom en tjeneste eieren driver | T-LAPTOP: eier ja; student nei (som i dag, `activeProviderID`); Kallimachos med eier som operatør nei | candidate |
 | purpose://candidate.formal-velger-modellkilde.tjeneste-for-andre | En tjeneste andre bruker står på egne ben | formal-krav | Kallimachos, studentflatene og felles chat bruker bare kilder som er der når eieren sover: hostede modeller fra DiMys liste med kvote (eies av tråden «Mistral med dagsgrense»), eller en `operator_host`-modell som er målt å holde svartidskravet. Kallimachos «lokal» mot `127.0.0.1:8083` slutter å regnes som tilgjengelig før den er målt | T-TJENESTE: Kallimachos på staging med lokal nede velger hostet rute eller sier fra; spion viser null kall til `127.0.0.1:8083` når helsen er ukjent | candidate |
 | purpose://candidate.formal-velger-modellkilde.enhetsregister | Entitetens enheter med rolle | kilde-fakta | Entiteten har et register over sine enheter (laptop, telefon, vert) med rolle (`utvikling`, `personlig`, `tjeneste`) og kapabilitet (modell, GPU/CPU, om den er oppe når eieren sover). Laptopen melder rollen sin ved paring, sammen med AgentDs eget testmerke, slik at serveren vet mer enn `providerID`. Bygger på maskinprofil F1 i Sprout-PDD-en | T-ENHET: paret laptop med testmerke gir `servingClass: personal_device`, rolle `utvikling`; uten melding gir `unknown`, aldri `tjeneste` | candidate |
+| purpose://candidate.formal-velger-modellkilde.si-fra-tilgjengelig | Eieren sier når laptopen er tilgjengelig | laptop-utvikling | Når Kjetil sier at laptop-modellen er tilgjengelig (i AgentD eller Binding på samme Mac), ber laptopen en celle på verten publisere det. Bare laptopen selv kan publisere «tilgjengelig», signert med broens identitet. Eieren kan trekke den tilbake fra hvor som helst (web, Binding, AgentD); da er den borte fra valglistene ved neste oppslag. Lukket bro, utløpt kontrakt eller mislykket helsesjekk trekker den også tilbake | T-SI-FRA: erklær → synlig; trekk tilbake fra web → borte; lukk socket → borte; fremmed identitet prøver å erklære → avvist |
+| purpose://candidate.formal-velger-modellkilde.vertscelle-tilgjengelighet | En celle på verten holder tilgjengeligheten | si-fra-tilgjengelig | En celle på verten har tilstanden for hver erklært laptop-modell: modell, `servingClass: personal_device`, rolle, erklært når, gyldig til (til eieren trekker den, eller en tid eieren velger), siste helsemåling og hvem som kan se den (Agreement). Hvem som kan lese, avgjøres av cellens Agreement-vilkår, ikke av formålet | T-VERTSCELLE: tilstanden har feltene; lesing uten Agreement gir `denied` |
+| purpose://candidate.formal-velger-modellkilde.likeverdig-valg | Laptopen er et likeverdig valg | si-fra-tilgjengelig | En erklært laptop-modell står i samme valgliste som hostede modeller og vertsmodeller (Co-Pilot-panelet «AI», Kallimachos og felles chat), med samme felt: navn, hvor den kjører, svartid, pris, og «kan forsvinne når maskinen sover». Den er ikke gjemt bak ord i meldingen. Den vises for eieren og for dem eieren gir Agreement til cellen; de må velge den selv, og automatisk valg for tjeneste-for-andre tar den aldri (Kjetils valg 17.11) | T-LIKEVERDIG: liste med laptop + hostet + regler har samme felt for alle rader; bilde (G1-GUI) |
+| purpose://candidate.formal-velger-modellkilde.hendelser | Hendelser når laptop-modellen kommer og går | si-fra-tilgjengelig | Cellen på verten poster FlowElement på eget emne (forslag `haven.agent.local-model.availability.v1`): `available`, `unavailable` med grunn (`owner_withdrew`, `bridge_closed`, `contract_expired`, `health_failed`), `health` (svartid ok/treg), `fallback_used` (en forespørsel gikk til en annen kilde fordi laptopen ikke svarte) og `selected` (laptopen svarte). Hendelsene bærer ikke spørsmål eller svar, bare kilde, tid og grunn. Den som har Agreement til cellen, kan abonnere | T-HENDELSER: erklær, helse, tilbakefall og tilbaketrekking gir hendelsene i riktig rekkefølge med riktig grunn; ingen prompttekst i noen hendelse |
 | purpose://candidate.formal-velger-modellkilde.malt-helse | Tilgjengelig betyr målt | kilde-fakta | En kilde regnes som tilgjengelig bare når en måling siste N minutter har lyktes (lett helsesjekk, ikke et ekte spørsmål). Erklæringer som `gatewayConnected: true` og «trusted loopback» teller ikke | T-HELSE: ingen måling → `unknown` → ikke valgt for tjeneste-for-andre; målt ok → valgt; målt feil → ikke valgt og grunnen logges | candidate |
 | purpose://candidate.formal-velger-modellkilde.tilgang-via-agreement | Formålet gir ingen tilgang | root | En kilde personen ikke har Agreement til, blir aldri kandidat, uansett formål. Formålet kan bare snevre inn | test.cell.auth-negative: fremmed spørrer, utløpt Agreement, `purpose://prompt.unknown` gir ingen kandidat | candidate |
 | purpose://candidate.formal-velger-modellkilde.ingen-egnet | Ærlig når ingen egner seg | root | Når ingen kilde består, får personen en kort beskjed som sier hvilket krav som mangler («ingen modell er oppe nå som kan svare deg uten Kjetils maskin»), og svaret uten modell. Bruker beskjedkortet fra CellScaffold #445 | T-INGEN + bilde (G1-GUI) | candidate |
@@ -87,6 +98,8 @@ Avhengigheter (hvert steg før det som endres, målt eller merket):
 | Co-Pilot-svar med kilde og «valgt fordi …», eier med laptop (utvikle og teste) | bilde, så kjørende flate | Co-Pilot på staging, web og Binding | `images/valgt-kilde-laptop-…-v1.png` (lages etter G1) | nei |
 | Samme spørsmål fra studentkonto (tjeneste for andre): hostet kilde | bilde, så kjørende flate | Kallimachos på staging | `images/valgt-kilde-tjeneste-…-v1.png` | nei |
 | Ingen egnet kilde: beskjed med manglende krav | bilde, så kjørende flate | Kallimachos og Co-Pilot | `images/ingen-egnet-…-v1.png` | nei |
+| Laptop-modellen som likeverdig valg i AI-panelet, og som trukket tilbake | bilde, så kjørende flate | Co-Pilot Chat på staging, web og Binding | `images/valgliste-laptop-tilgjengelig-…-v1.png`, `images/valgliste-laptop-trukket-…-v1.png` | nei |
+| Hendelseslogg for laptop-modellen | bilde, så kjørende flate | samme panel | `images/hendelser-laptop-…-v1.png` | nei |
 | Kravdata for de tre formålene + kontrakt og fixtures | fil | CellProtocolDocuments `Book/` (kontrakt) og CellScaffold (Swift) | — | nei |
 | Swift-endring i velger og Kallimachos med tester | PR | CellScaffold | — | nei |
 | Samme fixtures grønne i Python og Go | testutdata | PyCellProtocol, GoCellProtocol | — | nei |
@@ -338,6 +351,10 @@ Avhengigheter (hvert steg før det som endres, målt eller merket):
 | T-LAPTOP | laptop-utvikling | XCTest: eier får laptop med merket «din maskin, bare for deg»; student får ikke; Kallimachos med eier som operatør får ikke | TESTRESULT.md#laptop | venter |
 | T-TJENESTE | tjeneste-for-andre | XCTest med transportspion: Kallimachos uten målt lokal helse gjør null kall til `127.0.0.1:8083`; hostet rute eller beskjed | TESTRESULT.md#tjeneste | venter |
 | T-ENHET | enhetsregister | XCTest: registrering med rolle og testmerke gir riktige fakta; gammel AgentD uten rolle gir `unknown` | TESTRESULT.md#enhet | venter |
+| T-SI-FRA | si-fra-tilgjengelig | XCTest: erklæring signert av broens identitet godtas; samme erklæring fra en annen identitet avvises; tilbaketrekking fra eierens web-økt virker; lukket socket og utløpt kontrakt trekker tilbake | TESTRESULT.md#si-fra | venter |
+| T-VERTSCELLE | vertscelle-tilgjengelighet | XCTest: tilstand har alle felt; lesing uten Agreement gir `denied` (inngår i test.cell.auth-negative) | TESTRESULT.md#vertscelle | venter |
+| T-LIKEVERDIG | likeverdig-valg | XCTest på `assistantProviders`: alle rader har samme felt; skjermbilde web + Binding mot godkjent bilde | TESTRESULT.md#likeverdig, ACCEPT.md#parity | venter |
+| T-HENDELSER | hendelser | XCTest med flow-spion: rekkefølge og grunner; grep i hendelsene etter prompttekst gir null treff | TESTRESULT.md#hendelser | venter |
 | T-HELSE | malt-helse | XCTest: ingen måling / målt ok / målt feil / måling eldre enn N min | TESTRESULT.md#helse | venter |
 | T-INGEN | ingen-egnet | XCTest: alle kilder feiler kravene → svar uten modell + beskjed med navngitt krav; skjermbilde mot godkjent bilde | TESTRESULT.md#ingen, ACCEPT.md#parity | venter |
 | T-FORKLART | forklart-valg | XCTest: kvittering har `purposeRef`, `servingClass`, `requirementsRevision` | TESTRESULT.md#forklart | venter |
@@ -350,15 +367,16 @@ Avhengigheter (hvert steg før det som endres, målt eller merket):
 
 ## 6. Åpne spørsmål til Kjetil
 
-1. **Tre formål.** Er «utvikle og teste», «egen støtte i daglig bruk» og «tjeneste for andre» riktig inndeling? Forslag: ja. Laptopen er lov i de to første (i daglig bruk bare med reservekilde, som i dag), aldri i den tredje.
-2. **Svartid for tjeneste for andre.** Forslag: svar innen 30 s i chat og 90 s i Kallimachos (dagens tidsavbrudd), målt som p50 siste time.
-3. **Hvor kravene ligger.** Forslag: som data på formålene i Book 23 / formålspakkene (leses likt av Swift, Python og Go). Personens profil kan bare stramme.
-4. **Kallimachos «lokal».** Forslag: regnes som utilgjengelig til en måling viser at den svarer innen kravet. På staging betyr det hostet modell fra DiMys liste eller svar uten modell.
+Spørsmål 1–4 fra iterasjon 1 er godkjent med G1 17.11 (forslagene gjelder).
+
+5. **Hvem ser laptopen som valg.** Avgjort 17.11 08:14Z på beslutningskortet: deg og dem du gir Agreement, og de må velge den selv; automatisk valg for tjenester tar den aldri.
+6. **Hvor du sier fra.** Forslag: «tilgjengelig» bare fra laptopen selv (AgentD-menyen eller Binding på samme Mac), «utilgjengelig» fra hvor som helst. Avgjøres med bildene til G1-GUI.
 
 ## 7. Revisjonslogg
 
 | Iterasjon | Dato | Hva endret seg | Hvem |
 |---|---|---|---|
 | 0 | 2026-11-16 | Opprettet | Losen |
+| 3 | 2026-11-17 | G1 godkjent av Kjetil med tillegg: laptopen ber en vertscelle publisere tilgjengelighet når eieren sier det, som likeverdig valg, og FlowElement-hendelser. Tre nye audit-rader (registrering skjer automatisk ved tilkobling, ingen tilbaketrekking, ingen hendelser), fire nye formål (si-fra-tilgjengelig, vertscelle-tilgjengelighet, likeverdig-valg, hendelser) med fire tester. Spørsmål 5–6. 18 formål, 17 formålstester | Claude |
 | 2 | 2026-11-16 | Fra staging-trådens gjennomgang av entiteten: tre audit-rader (serveren ser bare `providerID`, AgentDs testmerke når ikke valget, ingen enhetsregister); nytt formål `enhetsregister` med T-ENHET; maskinprofil F1 som avhengighet. `serviceContinuityStatus` dekkes allerede av `malt-helse`/`formal-krav`. 14 formål, 13 formålstester | Claude |
 | 1 | 2026-11-16 | Brief-audit mot CellScaffold `0b42ea5`. Én påstand i startforslaget motsagt: laptopen tilbys ikke studenter i dag (`activeProviderID` sjekker entitet). Hullet er tjenester for andre som peker på erklærte, umålte kilder (Kallimachos lokal) og at ordrangering kan overstyre egnethet. 13 formål, 12 formålstester, 4 spørsmål | Claude |
