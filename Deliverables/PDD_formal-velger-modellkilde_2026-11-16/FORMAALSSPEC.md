@@ -98,8 +98,8 @@ Avhengigheter (hvert steg før det som endres, målt eller merket):
 | Co-Pilot-svar med kilde og «valgt fordi …», eier med laptop (utvikle og teste) | bilde, så kjørende flate | Co-Pilot på staging, web og Binding | `images/valgt-kilde-laptop-…-v1.png` (lages etter G1) | nei |
 | Samme spørsmål fra studentkonto (tjeneste for andre): hostet kilde | bilde, så kjørende flate | Kallimachos på staging | `images/valgt-kilde-tjeneste-…-v1.png` | nei |
 | Ingen egnet kilde: beskjed med manglende krav | bilde, så kjørende flate | Kallimachos og Co-Pilot | `images/ingen-egnet-…-v1.png` | nei |
-| Laptop-modellen som likeverdig valg i AI-panelet, og som trukket tilbake | bilde, så kjørende flate | Co-Pilot Chat på staging, web og Binding | `images/valgliste-laptop-tilgjengelig-…-v1.png`, `images/valgliste-laptop-trukket-…-v1.png` | nei |
-| Hendelseslogg for laptop-modellen | bilde, så kjørende flate | samme panel | `images/hendelser-laptop-…-v1.png` | nei |
+| Laptop-modellen som likeverdig valg i AI-panelet, og som trukket tilbake | bilde, så kjørende flate | Co-Pilot Chat på staging, web og Binding | `images/valgliste-laptop-tilgjengelig-{laptop,iphone}-v1.png`, `images/valgliste-laptop-trukket-{laptop,iphone}-v1.png`, `images/valgliste-laptop-annen-bruker-{laptop,iphone}-v1.png` | nei |
+| Hendelseslogg for laptop-modellen | bilde, så kjørende flate | samme panel | nederst i de samme seks bildene | nei |
 | Kravdata for de tre formålene + kontrakt og fixtures | fil | CellProtocolDocuments `Book/` (kontrakt) og CellScaffold (Swift) | — | nei |
 | Swift-endring i velger og Kallimachos med tester | PR | CellScaffold | — | nei |
 | Samme fixtures grønne i Python og Go | testutdata | PyCellProtocol, GoCellProtocol | — | nei |
