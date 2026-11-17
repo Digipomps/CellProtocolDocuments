@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — Informasjonssystemer som gruppeentitet
 
-Oppgavemappe: `PDD_informasjonssystemer-gruppeentitet_2026-11-17` · Opprettet 2026-11-17 · Iterasjon 1 (ikke godkjent)
+Oppgavemappe: `PDD_informasjonssystemer-gruppeentitet_2026-11-17` · Opprettet 2026-11-17 · Iterasjon 2 (ikke godkjent)
 
 > Regel: ingen plan før G1 er godkjent av Kjetil. For GUI: ingen implementering før G1-GUI (rendret bilde) er godkjent.
 > Et dokument om leveransen teller aldri som leveransen.
@@ -50,6 +50,7 @@ studentene trenger, og samtidig bygge det samme i Python og Go.
 | purpose://candidate.informasjonssystemer-gruppeentitet.approve | Eier godkjenner med egen nøkkel | vault | Eieren ser hva som skal signeres (sammendrag laget av hvelvet fra payloaden), og godkjenner i Binding med Face ID eller på web med passkey | Godkjenning fra Binding og fra web gir samme bundle-format; et sammendrag som ikke svarer til payloaden avvises | test.ge.approve-binding, test.ge.approve-web | candidate |
 | purpose://candidate.informasjonssystemer-gruppeentitet.roles | Gruppa gir roller som VC | vault | Gruppa utsteder rolle-VC-er (`InformasjonssystemerRoleCredential` med `role` = `student`, `researcher`, `supervisor`, kull og gyldighet) til en persons domene-identitet. Utstederen er gruppas nøkkel | En utstedt VC verifiseres mot gruppas nøkkel i Swift, Python og Go fra samme fixture | test.ge.role-vc-fixture | candidate (rollenavn: §6 spm. 3) |
 | purpose://candidate.informasjonssystemer-gruppeentitet.revoke | Roller kan trekkes tilbake | roles | Gruppa fører en statusliste. En tilbaketrukket rolle slutter å oppfylle vilkår ved neste tilgang, ikke ved neste innlogging | Etter tilbaketrekking avvises neste kall i en celle som allerede har gitt kontrakt | test.ge.revoke-next-access | candidate |
+| purpose://candidate.informasjonssystemer-gruppeentitet.status-offline | Rollen sjekkes per kall uten å spørre gruppa | revoke | Statuslisten er signert av gruppa og speiles til noden ved hver endring. Vilkåret sjekker VC og status lokalt per kall. Er speilet eldre enn en fast grense (forslag 10 min) eller utilgjengelig, feiler vilkåret lukket med en egen grunn («rollestatus ukjent»), ikke som «ingen rolle» | Med gruppas side nede: gyldig rolle slippes inn mens speilet er ferskt; etter grensen avvises kallet med grunnen «rollestatus ukjent»; ingen nettverkskall til gruppa per kall | test.ge.status-offline | candidate |
 | purpose://candidate.informasjonssystemer-gruppeentitet.condition | Celler sjekker rollen gjennom Agreement-vilkår, likt i tre språk | roles | Ett vilkår «har rolle R fra Informasjonssystemer» (`ProvedClaimCondition` med `requiredCredentialType`, utsteder godkjent i TrustedIssuer). Samme vilkår gir samme svar i Swift, Python og Go. Ingen språkspesifikk snarvei | Én positiv og fire negative (fremmed, feil rolle, tilbaketrukket, utløpt) gir likt utfall i 3 × 5 kjøringer | test.ge.condition-interop | candidate |
 | purpose://candidate.informasjonssystemer-gruppeentitet.trust-anchor | Gruppa er en godkjent utsteder bare der noden sier det | condition | Nodens eier (staging: Digipomps-administratoren) legger gruppas nøkkel inn som godkjent utsteder for rollene, med formål. Å finnes som gruppe gir ingen tillit i seg selv | Uten oppføring i TrustedIssuer avvises en ellers gyldig rolle-VC | test.ge.issuer-not-trusted | candidate |
 | purpose://candidate.informasjonssystemer-gruppeentitet.not-uio | Gruppa later ikke som den er UiO | root | Profilen sier «forskningsgruppe ved Institutt for informatikk, UiO», `legalIdentifier` er tom, og evidensen er en lenke til gruppas side. Ingen flate viser gruppa som UiO eller som juridisk enhet | Inspeksjon av profil og flater; ingen `legalIdentifier`, ingen UiO-logo | test.ge.profile-honest | candidate |
@@ -357,6 +358,7 @@ Lærdommer som former dette treet (sitert fra `purpose_dev.py lookup`):
 | test.ge.approve-web | approve | Web: passkey-godkjenning gir samme bundle-format (fixture-likhet) | TESTRESULT.md#approve | venter |
 | test.ge.role-vc-fixture | roles | Én rolle-VC i `fixtures/interop/v1` verifiseres byte-likt i Swift, Py, Go | TESTRESULT.md#roles | venter |
 | test.ge.revoke-next-access | revoke | Celle har gitt kontrakt; rolle trekkes; neste `get` avvises i alle tre språk | TESTRESULT.md#revoke | venter |
+| test.ge.status-offline | status-offline | Swift, Py, Go: speil ferskt → godtatt; speil eldre enn grensen → avvist med `role_status_unknown`; tell nettverkskall til gruppa = 0 per vilkårssjekk | TESTRESULT.md#status-offline | venter |
 | test.ge.condition-interop | condition | Matrise 3 språk × {positiv, fremmed, feil rolle, tilbaketrukket, utløpt}: 15 rader, likt utfall | TESTRESULT.md#condition-interop | venter |
 | test.ge.issuer-not-trusted | trust-anchor | Gyldig rolle-VC fra gruppa uten TrustedIssuer-oppføring: avvist i alle tre | TESTRESULT.md#condition-interop | venter |
 | test.ge.profile-honest | not-uio | Inspeksjon av profil-JSON og flatebilder | ACCEPT.md#profil | venter |
@@ -400,3 +402,4 @@ Bare spørsmål som endrer treet:
 |---|---|---|---|
 | 0 | 2026-11-17 | Opprettet | Claude |
 | 1 | 2026-11-17 | Brief-audit mot kode (Digipomps er bare en registrert referanse, DiMy finnes ikke, organisasjonsmodellen har bare PR 1 i Swift, ingen Py/Go), 14 formål, 29 tester, 5 spørsmål | Claude |
+| 2 | 2026-11-17 | Nytt formål status-offline etter krav fra Mistral-kvote-tråden: sjekk per kall uten nettverk til gruppa, kjent oppførsel når status er ukjent | Claude |
