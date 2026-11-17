@@ -22,7 +22,7 @@ Swift først i hver pakke som har Swift. Python og Go kommer etter, mot Swift-fi
 | WP9 | dashboard-template | Malen «Mitt forskningsdashbord» som CellConfiguration, importert i Studio | Claude | test.fd.mal-naabar | — |
 | WP10 | share-with-supervisor | Lese-Agreement for veileder på dashbordet | Claude | test.fd.deling-veileder | — |
 | WP11 | onboarding | Trinn i `KOM_I_GANG.md` + måling med ny testkonto | Claude, Kjetil (invitasjon) | test.fd.onboarding-tid | KOM_I_GANG, TESTRESULT.md#onboarding |
-| WP12 | researcher-role (interop) | Rolle-vilkår som fixtures i Py og Go | Claude | test.fd.rolle-interop | TESTRESULT.md#interop |
+| WP12 | researcher-role (interop) | Rolle-vilkår som fixtures i Py og Go. Bruker `ProvedClaimCondition`-porten fra `PDD_informasjonssystemer-gruppeentitet`; bygges ikke her | Claude | test.fd.rolle-interop | TESTRESULT.md#interop |
 
 Avhengighet: WP9–WP11 trenger nåbarhetssjekken fra `PDD_studentflater` (WP «studio-audit» eller `skeleton-check`).
 
