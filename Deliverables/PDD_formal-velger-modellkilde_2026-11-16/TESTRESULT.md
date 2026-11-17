@@ -35,5 +35,11 @@ Fylles ut etter hvert som arbeidspakkene lander. Rader uten utdata er ikke kjør
 ## CI på #454
 - `b2b344c`: «Focused control-plane gates» feilet i `ci/test-suite-coverage.sh` før Swift-bygget, fordi de nye testsuitene ikke sto i `ci/test-filter.txt`. Rettet i `51538da`.
 
+## laptopsiden (WP7)
+<a id="enhet"></a>
+- 2026-11-17, HavenAgentD `a7142d9` (utkast-PR #43), bygget på Kjetil-sin-M5 i eget arbeidstre: `Build complete!`. `LocalModelAvailabilityTests` → `Executed 5 tests, with 0 failures`. `LocalModelAvailabilityClientTests` → `Executed 2 tests, with 0 failures`. `PortholeIngressSessionTests` → 3 tester bestått.
+- CellScaffold #454 `b533ecd`: CI «Focused control-plane gates» grønn; `LocalModelAvailabilityTests`, `LocalModelAvailabilityCellTests`, `ModelSourceEligibilityTests`, `ModelSourceRoutingTests` og `NativeLocalModelBridgeTests` kjørte og besto der.
+- Ikke kjørt: en ekte kunngjøring fra AgentD mot en vert med #454. Helsemålinger fra laptopen er ikke skrevet.
+
 ## Ikke kjørt ennå
-T-ROT (staging), T-VERT, T-LIKEVERDIG, T-ENHET, T-TJENESTE, T-INGEN, T-FORKLART, test.cell.auth-negative på tvers, test.regression, test.gui.*. T-SI-FRA på laptopsiden (HavenAgentD) er ikke skrevet.
+T-ROT (staging), T-VERT, T-LIKEVERDIG, T-ENHET, T-TJENESTE, T-INGEN, T-FORKLART, test.cell.auth-negative på tvers, test.regression, test.gui.*. Ende-til-ende laptop mot vert er ikke kjørt.
