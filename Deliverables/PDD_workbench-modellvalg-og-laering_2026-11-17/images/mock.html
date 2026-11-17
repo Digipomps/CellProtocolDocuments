@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="nb"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI-hjelper skisse</title>
+<style>
+:root{--bg:#f4f1ea;--panel:#fff;--ink:#1d2330;--mute:#667085;--line:#e3ddd0;--acc:#2f6fed;--ok:#1f8a4c;--warn:#b54708;--err:#c0362c;--soft:#eef3ff;--gold:#ffcc4d;--add:#e8f6ec;--del:#fdecea}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--panel)}
+header b{font-size:17px}.who{font-size:13px;color:var(--mute)}
+.butler{margin-left:auto;display:flex;align-items:center;gap:6px;border:1.5px solid var(--ink);border-radius:999px;padding:5px 12px;font-size:14px;background:#fff}
+.tabs{display:flex;gap:2px;padding:0 18px;background:var(--panel);border-bottom:1px solid var(--line)}
+.tabs span{padding:9px 12px;font-size:14px;color:var(--mute);border-bottom:2px solid transparent}.tabs span.on{color:var(--ink);border-color:var(--acc);font-weight:600}
+.tabs .n{font-size:11.5px;background:var(--line);border-radius:8px;padding:0 6px;margin-left:4px;color:var(--ink)}
+main{display:grid;grid-template-columns:1fr 400px;gap:14px;padding:14px;height:calc(100vh - 92px)}
+main.edit{grid-template-columns:260px 1fr 340px}
+section{background:var(--panel);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+h2{margin:0;padding:12px 14px;font-size:14px;letter-spacing:.02em;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
+h2 small{margin-left:auto;font-weight:400;color:var(--mute)}
+.body{padding:12px 14px;overflow:auto;flex:1}
+.item{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:start;padding:10px 4px;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border:0}.box{width:16px;height:16px;border:1.5px solid var(--mute);border-radius:4px;margin-top:3px}
+.item.sel{background:#f6f9ff;box-shadow:inset 3px 0 0 var(--acc)}.item.sel .box{background:var(--acc);border-color:var(--acc)}
+.st{font-size:12px;border-radius:6px;padding:2px 7px;background:#f2efe8;color:var(--mute);white-space:nowrap}
+.st.to{background:var(--soft);color:var(--acc)}
+.v{font-size:12.5px;color:var(--mute)}
+.ctx{display:flex;flex-wrap:wrap;gap:6px;padding:8px 14px;border-bottom:1px solid var(--line);font-size:12.5px;background:#fbfaf7}
+.chip{border:1px solid var(--line);border-radius:999px;padding:2px 9px;background:#fff}.chip b{font-weight:600}
+.set{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.sel-set{flex:1;border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-weight:600;display:flex;justify-content:space-between}
+.msg{max-width:92%;padding:9px 12px;border-radius:12px;margin:0 0 10px}.me{margin-left:auto;background:var(--soft)}.ai{background:#f7f5f0}
+.prop{border:1.5px solid var(--acc);border-radius:12px;padding:10px 12px;margin:4px 0 10px;background:#fbfcff}
+.prop .t{font-weight:600;margin-bottom:4px}.prop ul{margin:4px 0 8px 18px;padding:0;font-size:14px}
+.why{font-size:13px;color:var(--mute);border-left:3px solid var(--gold);padding-left:8px;margin:6px 0}
+code,.mono{font:12.5px ui-monospace,Menlo,monospace}
+.btns{display:flex;gap:8px;flex-wrap:wrap}.b{border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 11px;font:inherit;font-size:14px}
+.b.p{background:var(--acc);border-color:var(--acc);color:#fff}.b.k{border-color:var(--ink)}
+.in{border-top:1px solid var(--line);padding:10px;display:flex;gap:8px}.in div{flex:1;border:1px solid var(--line);border-radius:10px;padding:8px 10px;color:var(--mute)}
+.empty{color:var(--mute);text-align:center;padding:18px 10px;font-size:14px}.empty big{display:block;font-size:30px;margin-bottom:6px}
+.sugg{display:flex;flex-direction:column;gap:6px;margin-top:6px}.sugg .b{text-align:left}
+.err{border:1.5px solid var(--err);background:#fff6f5;border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:14px}
+.err .t{color:var(--err);font-weight:600;margin-bottom:4px}
+.missing{font-size:13px;margin:6px 0;padding-left:18px}
+.foot{font-size:12px;color:var(--mute);padding:0 14px 10px}
+.list .row{padding:9px 10px;border-radius:9px;margin-bottom:4px;font-size:14px}.list .row.on{background:var(--soft);font-weight:600}
+.list .row .v{font-weight:400}
+label{display:block;font-size:12.5px;color:var(--mute);margin:12px 0 4px}
+.ta{border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:13.5px/1.55 ui-monospace,Menlo,monospace;white-space:pre-wrap;background:#fffefb}
+.ta .add{background:var(--add)}
+.lock{border:1px dashed var(--line);border-radius:10px;padding:8px 10px;font-size:13px;background:#faf9f6}
+.lock div{padding:2px 0}
+.ver{border-bottom:1px dashed var(--line);padding:8px 0;font-size:14px}.ver:last-child{border:0}
+.diff{font:12.5px/1.6 ui-monospace,Menlo,monospace;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:8px}
+.diff div{padding:1px 10px}.diff .a{background:var(--add)}.diff .d{background:var(--del);text-decoration:line-through;color:#7a2a24}
+.model{display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--line);font-size:13.5px}
+.model .sel-set{font-weight:500}.dot{width:9px;height:9px;border-radius:50%;background:var(--ok);display:inline-block}.dot.off{background:var(--mute)}.dot.bad{background:var(--err)}
+.note{border:1.5px solid var(--warn);background:#fff8ef;border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:14px}.note .t{color:var(--warn);font-weight:600;margin-bottom:4px}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center}
+.card.on{border-color:var(--acc);background:#fbfcff}.tag{font-size:11.5px;border-radius:6px;padding:1px 7px;background:var(--soft);color:var(--acc);margin-left:6px}
+.fld{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fffefb;display:flex;justify-content:space-between}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.ex{border-bottom:1px solid var(--line);padding:9px 2px;font-size:14px;display:grid;grid-template-columns:1fr auto;gap:2px 10px}.ex:last-child{border:0}
+.ex{align-items:start}.out{align-self:start;font-size:12px;border-radius:6px;padding:2px 7px;white-space:nowrap}.out.ok{background:var(--add);color:var(--ok)}.out.no{background:var(--del);color:var(--err)}.out.un{background:#f2efe8;color:var(--mute)}
+.sw{width:38px;height:22px;border-radius:11px;background:var(--ok);position:relative;display:inline-block;vertical-align:middle}.sw:after{content:"";position:absolute;right:2px;top:2px;width:18px;height:18px;border-radius:50%;background:#fff}
+.kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}.kpi div{border:1px solid var(--line);border-radius:10px;padding:8px 10px}.kpi b{display:block;font-size:20px}
+main.three{grid-template-columns:260px 1fr 400px}
+</style></head><body>
+<header><b>🧰 Developer Workbench</b><span class="who">Kjetil · Prosjektene dine. Arbeidet ditt. Ett sted å fortsette.</span>
+<span class="butler">🛎️ Butler</span></header>
+<div class="tabs" id="tabs"></div>
+<main id="main"></main>
+<script>
+const S=new URLSearchParams(location.search).get("state")||"valgt";
+const $=id=>document.getElementById(id);
+const tabs=(on)=>["prosjekter","formål","hjelper","intake","board","all","triage","active","done","arbeidsflyt"]
+  .map(t=>`<span class="${t===on?"on":""}">${t}${t==="intake"?'<span class="n">7</span>':t==="triage"?'<span class="n">2</span>':""}</span>`).join("");
+const items=[["Innlogging feiler etter passkey-bytte","Vegar · 16.11"],["Butler-knapp mangler i Formål-fanen","Kjetil · 15.11"],["Kan ikke logge inn fra Binding på iPad","Victoria · 15.11"],
+["Fornye skills-pakken til Victoria","Kjetil · 14.11"],["Lyd når figuren hopper","Sverre · 14.11"],["Paritet purposeTree i Binding","Kjetil · 13.11"],["Lastetid Relasjoner over 5 s","Vegar · 12.11"]];
+const list=()=>items.map(([t,m])=>`<div class="item"><span class="box"></span><div><b>${t}</b><div class="v">${m}</div></div><span class="st">ny</span></div>`).join("");
+const center=`<section><h2>📥 Intake <small>7 nye</small></h2><div class="body">${list()}</div></section>`;
+const head=(model)=>`<h2>✨ Hjelper <small>foreslår, du bestemmer</small></h2>
+<div class="set"><div class="sel-set">Denne flaten<span>▾</span></div><button class="b k">🛎️ Butler</button></div>
+<div class="model"><span class="v">Modell</span>${model}</div>
+<div class="ctx"><span class="v">Hjelperen ser:</span><span class="chip">fane <b>intake</b></span><span class="chip">valgt <b>ingenting</b></span><span class="chip">handlinger <b>3</b></span></div>`;
+const input=`<div class="in"><div>Skriv hva du vil ha gjort …</div><button class="b p">Send</button></div>`;
+const ask=`<div class="msg me">Flytt de som handler om innlogging til triage</div>`;
+const setsCol=`<section><h2>📚 Hjelper</h2><div class="body list"><div class="row">Sett<div class="v">4 sett</div></div><div class="row ROW1">Mine modeller<div class="v">MODN</div></div><div class="row ROW2">Læring<div class="v">LRN</div></div></div></section>`;
+const col=(a,n,l)=>setsCol.replace("ROW1",a==1?"on":"").replace("ROW2",a==2?"on":"").replace("MODN",n).replace("LRN",l);
+const addForm=`<label>Leverandør</label><div class="fld">Anthropic<span>▾</span></div>
+<div class="grid2"><div><label>Modell</label><div class="fld">claude-sonnet-5-5<span>▾</span></div></div><div><label>Navn i listen</label><div class="fld">Anthropic · Sonnet</div></div></div>
+<label>API-nøkkel (vises aldri igjen)</label><div class="fld"><span>••••••••••••••••••••••••••••</span><span>🔒</span></div>
+<div class="v" style="margin-top:6px">Nøkkelen forsegles i din entitet. Leverandøren fakturerer deg direkte.</div>
+<div class="btns" style="margin-top:12px"><button class="b p">Lagre og test</button><button class="b">Avbryt</button></div>`;
+const card=(on,name,sub,test,dot)=>`<div class="card ${on?"on":""}"><div><b>${name}</b>${on?'<span class="tag">i bruk</span>':""}<div class="v">${sub}</div><div class="v"><span class="dot ${dot||""}"></span> ${test}</div></div>
+<div class="btns">${on?"":'<button class="b p">Bruk denne</button>'}<button class="b">Test</button><button class="b">Bytt nøkkel</button><button class="b">Fjern</button></div></div>`;
+const D={
+valgt:{tab:"intake",main:`${center}<section>${head('<div class="sel-set"><span><span class="dot"></span> Anthropic · claude-sonnet-5-5</span><span>▾</span></div>')}
+<div class="body">${ask}
+<div class="msg ai">Jeg fant 2 elementer som handler om innlogging. Her er forslaget.</div>
+<div class="prop"><div class="t">Forslag: 2 elementer fra ny til triage</div>
+<ul><li>Innlogging feiler etter passkey-bytte</li><li>Kan ikke logge inn fra Binding på iPad</li></ul>
+<div class="why">Tolket av modellen (Anthropic · claude-sonnet-5-5, 1,8 s, 412 tokens). Cellen har sjekket at handlingen står i settet.</div>
+<div class="btns"><button class="b p">Utfør 2</button><button class="b">Forkast</button></div></div></div>${input}
+<div class="foot">Bestillingen og hva du velger lagres som læring hos deg. Slå av under hjelper › Læring.</div></section>`},
+mangler:{tab:"intake",main:`${center}<section>${head('<div class="sel-set"><span><span class="dot off"></span> Ingen modell valgt</span><span>▾</span></div>')}
+<div class="body">${ask}
+<div class="note"><div class="t">Ingen språkmodell er koblet til</div>Uten modell forstår jeg bare «flytt … fra … til …». Denne bestillingen trenger en modell.
+<div class="btns" style="margin-top:8px"><button class="b p">Legg til modell</button><button class="b k">🛎️ Gi saken til Butler</button></div></div></div>${input}
+<div class="foot">Modeller legges inn under hjelper › Mine modeller.</div></section>`},
+feil:{tab:"intake",main:`${center}<section>${head('<div class="sel-set"><span><span class="dot bad"></span> Anthropic · claude-sonnet-5-5</span><span>▾</span></div>')}
+<div class="body">${ask}
+<div class="err"><div class="t">Modellen svarte ikke</div>Anthropic avviste nøkkelen (401). Ingenting er endret.
+<div class="v" style="margin-top:6px">Andre meldinger du kan få her: «Kreditten er brukt opp (429)», «Fikk ikke kontakt med leverandøren», «Nøkkellageret er ikke satt opp på denne serveren».</div>
+<div class="btns" style="margin-top:8px"><button class="b p">Bytt nøkkel</button><button class="b">Velg en annen modell</button><button class="b k">🛎️ Butler</button></div></div></div>${input}
+<div class="foot">Feilen lagres uten nøkkel og uten svartekst.</div></section>`},
+"modeller-tom":{tab:"hjelper",three:true,main:`${col(1,"ingen ennå","på · 0 eksempler")}
+<section><h2>🧠 Mine modeller <small>0 av 8</small></h2><div class="body"><div class="empty"><big>🧠</big>Du har ikke lagt inn noen modell ennå.<br>Hjelperen forstår bare faste bestillinger til du gjør det.</div></div></section>
+<section><h2>➕ Legg til modell</h2><div class="body">${addForm}</div></section>`},
+"modeller-fylt":{tab:"hjelper",three:true,main:`${col(1,"4 modeller · Anthropic i bruk","på · 37 eksempler")}
+<section><h2>🧠 Mine modeller <small>4 av 8</small></h2><div class="body">
+${card(true,"Anthropic · Sonnet","anthropic-messages · claude-sonnet-5-5 · api.anthropic.com","Testet 17.11 14:02 · svarte på 1,8 s")}
+${card(false,"Anthropic · Haiku","anthropic-messages · claude-haiku-5-5 · api.anthropic.com","Testet 17.11 14:03 · svarte på 0,6 s")}
+${card(false,"OpenAI","openai-responses · gpt-6.1-sol · api.openai.com","Testet 17.11 14:05 · kreditten er brukt opp (429)","bad")}
+${card(false,"Mistral EU","openai-chat · mistral-small-2603 · api.eu.mistral.ai","Ikke testet","off")}
+<div class="v">Nøklene vises aldri. «Bytt nøkkel» erstatter den gamle.</div></div></section>
+<section><h2>➕ Legg til modell</h2><div class="body">${addForm.replace("Anthropic<span>","Velg leverandør<span>").replace("claude-sonnet-5-5<span>","—<span>").replace("Anthropic · Sonnet","").replace("••••••••••••••••••••••••••••","Lim inn nøkkelen")}</div></section>`},
+laering:{tab:"hjelper",three:true,main:`${col(2,"4 modeller · Anthropic i bruk","på · 37 eksempler")}
+<section><h2>🌱 Læring <small>lagres hos deg <span class="sw"></span></small></h2><div class="body">
+<div class="kpi"><div><b>37</b><span class="v">eksempler</span></div><div><b>29</b><span class="v">utført av deg</span></div><div><b>6</b><span class="v">forkastet eller angret</span></div></div>
+<div class="ex"><div><b>Flytt de som handler om innlogging til triage</b><div class="v">Denne flaten · Anthropic Sonnet · formål: flytte elementer mellom faner · 2 elementer</div></div><span class="out ok">utført</span></div>
+<div class="ex"><div><b>Rydd bort alt som er eldre enn en uke</b><div class="v">Denne flaten · Anthropic Sonnet · modellen foreslo wont-do for 3</div></div><span class="out no">forkastet</span></div>
+<div class="ex"><div><b>Sett bildetekst på Slumbering Stones</b><div class="v">Flater og GUI · regel · mangler: tekstfelt i PublicationCell</div></div><span class="out un">kan ikke i dag</span></div>
+<div class="ex"><div><b>Flytt alt fra postkassa til triage</b><div class="v">Denne flaten · regel (lært ord: postkassa) · 7 elementer</div></div><span class="out no">angret</span></div>
+<div class="ex"><div><b>Hva er det eldste som venter?</b><div class="v">Denne flaten · Anthropic Haiku · ingen handling</div></div><span class="out un">ikke vurdert</span></div>
+<div class="btns" style="margin-top:12px"><button class="b">Slett valgte</button><button class="b">Slett alt</button></div></div></section>
+<section><h2>🎯 Tren formålsanalysen</h2><div class="body">
+<div class="v">Eksempler du har utført blir fasit. Forkastede og angrede blir moteksempler.</div>
+<label>Treffrate for formålsmatching på dine eksempler</label>
+<div class="kpi" style="grid-template-columns:1fr 1fr"><div><b>61 %</b><span class="v">uten eksemplene</span></div><div><b>84 %</b><span class="v">med eksemplene</span></div></div>
+<div class="v">Tallene her er eksempler i skissen. De ekte måles når testsettet kjøres.</div>
+<label>Forslag til nye ord i settet «Denne flaten»</label>
+<div class="lock"><div>«rydd bort» → spør før wont-do</div><div>«de som handler om …» → filtrer på tittel</div></div>
+<div class="btns" style="margin-top:12px"><button class="b p">Eksporter testsett</button><button class="b">Legg ordene i et utkast</button></div>
+<div class="v" style="margin-top:10px">Ingenting forlater entiteten din før du eksporterer. Nøkler lagres aldri her.</div></div></section>`}};
+const d=D[S];$("tabs").innerHTML=tabs(d.tab);if(d.three)$("main").className="three";$("main").innerHTML=d.main;
+</script></body></html>

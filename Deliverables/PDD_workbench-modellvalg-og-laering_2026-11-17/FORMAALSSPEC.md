@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — workbench modellvalg og laering
 
-Oppgavemappe: `PDD_workbench-modellvalg-og-laering_2026-11-17` · Opprettet 2026-11-17 · Iterasjon 0 (ikke godkjent)
+Oppgavemappe: `PDD_workbench-modellvalg-og-laering_2026-11-17` · Opprettet 2026-11-17 · Iterasjon 0 (G1 godkjent 2026-11-17)
 
 > Regel: ingen plan før G1 er godkjent av Kjetil. For GUI: ingen implementering før G1-GUI (rendret bilde) er godkjent.
 > Et dokument om leveransen teller aldri som leveransen.
