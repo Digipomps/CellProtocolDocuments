@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 import unicodedata
@@ -17,6 +18,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
 from urllib.parse import quote, unquote, urlparse
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import haven_docs_sources as extra_sources  # noqa: E402  (prototype: ekstra kildetyper og ferskhet)
 
 
 SERVER_NAME = "haven-docs-mcp"
@@ -57,14 +61,28 @@ class DocEntry:
     status: str
     order: int
     mime_type: str = "text/markdown"
+    # Prototype-felter. Standardverdiene gir uendret oppførsel for Book-dokumenter.
+    source: str = "book"
+    root: str = ""
+    implementation_status: str = "unknown"
+    status_basis: str = "unverified"
+    owner: str = ""
+    last_verified: str = ""
 
     @property
     def uri(self) -> str:
+        if self.source != "book":
+            rel = self.doc_id[len(self.source) + 1 :]
+            return f"haven-docs://{self.source}/{quote(rel, safe='/')}"
         return f"haven-docs://book/{quote(self.doc_id, safe='')}"
 
     @property
     def absolute_path(self) -> Path:
-        return resolve_repo_path(self.path)
+        return resolve_repo_path(self.path, Path(self.root) if self.root else None)
+
+    @property
+    def git_root(self) -> Path:
+        return Path(self.root) if self.root else ROOT
 
     def metadata(self) -> dict[str, Any]:
         return {
@@ -78,6 +96,11 @@ class DocEntry:
             "order": self.order,
             "uri": self.uri,
             "mimeType": self.mime_type,
+            "source": self.source,
+            "implementation_status": self.implementation_status,
+            "status_basis": self.status_basis,
+            "owner": self.owner,
+            "last_verified": self.last_verified,
         }
 
 
@@ -90,6 +113,11 @@ class Section:
     line_start: int
     line_end: int
     text: str
+    implementation_status: str = ""
+
+    @property
+    def effective_implementation_status(self) -> str:
+        return self.implementation_status or self.doc.implementation_status
 
     def citation(self) -> dict[str, Any]:
         return {
@@ -102,12 +130,14 @@ class Section:
             "line_start": self.line_start,
             "line_end": self.line_end,
             "status": self.doc.status,
+            "source": self.doc.source,
+            "implementation_status": self.effective_implementation_status,
         }
 
 
-def resolve_repo_path(path_text: str) -> Path:
-    path = (ROOT / path_text).resolve()
-    root = ROOT.resolve()
+def resolve_repo_path(path_text: str, base: Path | None = None) -> Path:
+    path = ((base or ROOT) / path_text).resolve()
+    root = (base or ROOT).resolve()
     if path != root and root not in path.parents:
         raise DocsError(f"Path escapes repository root: {path_text}", data={"path": path_text})
     if not path.is_file():
@@ -131,6 +161,10 @@ def load_catalog() -> tuple[dict[str, Any], list[DocEntry]]:
             audience=item.get("audience", "both"),
             status=item.get("status", "active"),
             order=int(item.get("order", 0)),
+            implementation_status=extra_sources.normalize_status(item.get("implementation_status")),
+            status_basis=extra_sources.normalize_basis(item.get("status_basis")),
+            owner=str(item.get("owner", "")),
+            last_verified=str(item.get("last_verified", "")),
         )
         for item in catalog.get("documents", [])
     ]
@@ -220,6 +254,7 @@ def parse_sections(doc: DocEntry) -> list[Section]:
         )
     ]
 
+    marker_stack: list[tuple[int, str]] = []
     for pos, (start, level, heading, anchor) in enumerate(headings):
         end = len(lines)
         for next_start, next_level, _next_heading, _next_anchor in headings[pos + 1 :]:
@@ -227,6 +262,12 @@ def parse_sections(doc: DocEntry) -> list[Section]:
                 end = next_start
                 break
         section_text = "\n".join(lines[start:end]).strip()
+        # <!-- haven:implementation_status=decided --> rett under overskriften; arves av undernivåer.
+        while marker_stack and marker_stack[-1][0] >= level:
+            marker_stack.pop()
+        found = extra_sources.SECTION_MARKER.search("\n".join(lines[start + 1 : start + 5]))
+        own = extra_sources.normalize_status(found.group(1)) if found else ""
+        marker_stack.append((level, own or (marker_stack[-1][1] if marker_stack else "")))
         sections.append(
             Section(
                 doc=doc,
@@ -236,6 +277,7 @@ def parse_sections(doc: DocEntry) -> list[Section]:
                 line_start=start + 1,
                 line_end=max(start + 1, end),
                 text=section_text,
+                implementation_status=marker_stack[-1][1],
             )
         )
     return sections
@@ -246,11 +288,21 @@ def tokenize(text: str) -> list[str]:
 
 
 class DocsIndex:
-    def __init__(self) -> None:
+    def __init__(self, with_sources: bool | None = None, sources_config: dict[str, Any] | None = None) -> None:
         self.catalog, self.docs = load_catalog()
+        self.with_sources = extra_sources.env_flag("HAVEN_DOCS_WITH_SOURCES") if with_sources is None else with_sources
+        self.sources_config: dict[str, Any] = {"sources": []}
+        self.source_reports: list[dict[str, Any]] = []
+        if self.with_sources:
+            self.sources_config = sources_config if sources_config is not None else extra_sources.load_config()
+            found, self.source_reports = extra_sources.discover_docs(self.sources_config, ROOT)
+            self.docs = sorted(self.docs + [DocEntry(**item) for item in found], key=lambda doc: (doc.order, doc.path))
         self.by_id = {doc.doc_id: doc for doc in self.docs}
-        self.by_slug = {doc.slug: doc for doc in self.docs}
-        self.by_path = {doc.path: doc for doc in self.docs}
+        book_docs = [doc for doc in self.docs if doc.source == "book"]
+        self.by_slug = {doc.slug: doc for doc in book_docs}
+        self.by_path = {doc.path: doc for doc in book_docs}
+        self.source_ids = {doc.source for doc in self.docs if doc.source != "book"}
+        self._section_cache: dict[str, tuple[int, list[Section]]] = {}
 
     def list_docs(
         self,
@@ -258,6 +310,8 @@ class DocsIndex:
         status: str | None = None,
         group: str | None = None,
         audience: str | None = None,
+        implementation_status: str | None = None,
+        source: str | None = None,
     ) -> list[DocEntry]:
         docs = self.docs
         if status:
@@ -266,6 +320,10 @@ class DocsIndex:
             docs = [doc for doc in docs if doc.group == group]
         if audience:
             docs = [doc for doc in docs if doc.audience in (audience, "both")]
+        if implementation_status:
+            docs = [doc for doc in docs if doc.implementation_status == implementation_status]
+        if source:
+            docs = [doc for doc in docs if doc.source == source]
         return docs
 
     def resolve_doc(self, identifier: str) -> DocEntry:
@@ -282,6 +340,10 @@ class DocsIndex:
                 doc_id = unquote(parsed.path.lstrip("/"))
                 if doc_id in self.by_id:
                     return self.by_id[doc_id]
+            elif parsed.netloc in self.source_ids:
+                doc_id = f"{parsed.netloc}/{unquote(parsed.path.lstrip('/'))}"
+                if doc_id in self.by_id:
+                    return self.by_id[doc_id]
         raise DocsError(
             f"Unknown documentation identifier: {identifier}",
             code=-32002,
@@ -289,7 +351,42 @@ class DocsIndex:
         )
 
     def sections(self, doc: DocEntry) -> list[Section]:
-        return parse_sections(doc)
+        if not self.with_sources:
+            return parse_sections(doc)
+        # Med mange flere filer parser vi hver fil én gang per endring, ikke per spørring.
+        mtime = doc.absolute_path.stat().st_mtime_ns
+        cached = self._section_cache.get(doc.doc_id)
+        if cached and cached[0] == mtime:
+            return cached[1]
+        parsed = parse_sections(doc)
+        self._section_cache[doc.doc_id] = (mtime, parsed)
+        return parsed
+
+    # --- proveniens og ferskhet (prototype) ---------------------------------
+
+    def provenance_for(self, doc: DocEntry) -> dict[str, Any] | None:
+        if not self.with_sources:
+            return None
+        return extra_sources.provenance(doc.git_root, doc.path)
+
+    def freshness_for(self, docs: Iterable[DocEntry]) -> list[dict[str, Any]]:
+        if not self.with_sources:
+            return []
+        check_remote = extra_sources.env_flag("HAVEN_DOCS_CHECK_REMOTE")
+        by_source = {item["id"]: item for item in self.sources_config.get("sources", [])}
+        seen: dict[str, dict[str, Any]] = {}
+        for doc in docs:
+            if doc.source in seen:
+                continue
+            config = by_source.get(doc.source, {})
+            seen[doc.source] = extra_sources.freshness(
+                doc.git_root,
+                label=config.get("repo", "CellProtocolDocuments") if doc.source != "book" else "CellProtocolDocuments",
+                base_ref=config.get("base_ref", "origin/main"),
+                expected_branch=config.get("expected_branch", "main"),
+                check_remote=check_remote,
+            )
+        return list(seen.values())
 
     def read_section(
         self,
@@ -325,7 +422,7 @@ class DocsIndex:
                 )
             selected = matches[0]
         text = truncate_text(selected.text, max_chars)
-        return {
+        result = {
             "document": doc.metadata(),
             "citation": selected.citation(),
             "text": text,
@@ -336,11 +433,16 @@ class DocsIndex:
                     "heading_anchor": section.heading_anchor,
                     "level": section.level,
                     "line_start": section.line_start,
+                    "implementation_status": section.effective_implementation_status,
                 }
                 for section in sections
                 if section.level > 0
             ],
         }
+        if self.with_sources:
+            result["provenance"] = self.provenance_for(doc)
+            result["freshness"] = self.freshness_for([doc])
+        return result
 
     def search(
         self,
@@ -349,6 +451,8 @@ class DocsIndex:
         status: str | None = None,
         group: str | None = None,
         max_results: int = 8,
+        implementation_status: str | None = None,
+        source: str | None = None,
     ) -> dict[str, Any]:
         query = query.strip()
         if not query:
@@ -357,9 +461,13 @@ class DocsIndex:
         tokens = set(tokenize(query))
         scored: list[tuple[float, Section, str]] = []
 
-        for doc in self.list_docs(status=status, group=group):
-            for section in self.sections(doc):
-                if section.level == 0:
+        for doc in self.list_docs(status=status, group=group, source=source):
+            doc_sections = self.sections(doc)
+            for section in doc_sections:
+                # Filer uten overskrifter (JSON-skjema) har bare nivå 0-seksjonen og må kunne finnes.
+                if section.level == 0 and len(doc_sections) > 1:
+                    continue
+                if implementation_status and section.effective_implementation_status != implementation_status:
                     continue
                 score = score_section(query, tokens, section)
                 if score <= 0:
@@ -376,12 +484,26 @@ class DocsIndex:
             }
             for score, section, snippet in scored[:max_results]
         ]
-        return {
+        response_body: dict[str, Any] = {
             "query": query,
             "result_count": len(results),
             "results": results,
             "note": "Read-only lexical search over canonical repo docs; use haven_docs_read for full sections.",
         }
+        if self.with_sources:
+            hit_docs = [section.doc for _score, section, _snippet in scored[:max_results]]
+            for item, (_score, section, _snippet) in zip(results, scored[:max_results]):
+                item["provenance"] = self.provenance_for(section.doc)
+                item["status_basis"] = section.doc.status_basis
+            # Uten treff viser vi likevel ferskheten til alle aktive kilder, så et tomt svar ikke ser autoritativt ut.
+            response_body["freshness"] = self.freshness_for(hit_docs or self.one_doc_per_source())
+        return response_body
+
+    def one_doc_per_source(self) -> list[DocEntry]:
+        first: dict[str, DocEntry] = {}
+        for doc in self.docs:
+            first.setdefault(doc.source, doc)
+        return list(first.values())
 
     def resources(self) -> list[dict[str, Any]]:
         resources = [
@@ -400,7 +522,11 @@ class DocsIndex:
                     "uri": doc.uri,
                     "name": doc.doc_id,
                     "title": doc.title,
-                    "description": f"{doc.path} ({doc.group}, {doc.status})",
+                    "description": (
+                        f"{doc.path} ({doc.group}, {doc.status})"
+                        if doc.source == "book"
+                        else f"{doc.source}:{doc.path} ({doc.group}, {doc.status}, {doc.implementation_status})"
+                    ),
                     "mimeType": doc.mime_type,
                     "annotations": {"audience": ["user", "assistant"], "priority": 0.85},
                 }
@@ -421,8 +547,10 @@ class DocsIndex:
                     }
                 ]
             }
-        if parsed.netloc == "book":
+        if parsed.netloc == "book" or parsed.netloc in self.source_ids:
             doc_id = unquote(parsed.path.lstrip("/"))
+            if parsed.netloc != "book":
+                doc_id = f"{parsed.netloc}/{doc_id}"
             result = self.read_section(doc_id, anchor=parsed.fragment or None, max_chars=0)
             return {
                 "contents": [
@@ -482,6 +610,11 @@ def tool_definitions() -> list[dict[str, Any]]:
                     "status": {"type": "string", "description": "Optional status filter such as active or draft."},
                     "group": {"type": "string", "description": "Optional catalog group filter."},
                     "audience": {"type": "string", "description": "Optional audience filter: human, assistant, or both."},
+                    "implementation_status": {
+                        "type": "string",
+                        "description": "Optional filter: implemented, decided, proposal, mixed or unknown.",
+                    },
+                    "source": {"type": "string", "description": "Optional source filter, e.g. book or cp-docs (needs --with-sources)."},
                 },
                 "additionalProperties": False,
             },
@@ -496,6 +629,11 @@ def tool_definitions() -> list[dict[str, Any]]:
                     "query": {"type": "string", "description": "Search query, symbol, endpoint, keypath, or topic."},
                     "status": {"type": "string", "description": "Optional status filter such as active or draft."},
                     "group": {"type": "string", "description": "Optional catalog group filter."},
+                    "implementation_status": {
+                        "type": "string",
+                        "description": "Optional filter: implemented, decided, proposal, mixed or unknown.",
+                    },
+                    "source": {"type": "string", "description": "Optional source filter, e.g. book or cp-docs (needs --with-sources)."},
                     "max_results": {"type": "integer", "minimum": 1, "maximum": MAX_SEARCH_RESULTS},
                 },
                 "required": ["query"],
@@ -577,24 +715,28 @@ def call_tool(index: DocsIndex, name: str, args: dict[str, Any] | None) -> dict[
         if not isinstance(args, dict):
             raise DocsError("Tool arguments must be an object.")
         if name == "haven_docs_list":
-            validate_args(args, {"status", "group", "audience"})
+            validate_args(args, {"status", "group", "audience", "implementation_status", "source"})
             docs = [
                 doc.metadata()
                 for doc in index.list_docs(
                     status=args.get("status"),
                     group=args.get("group"),
                     audience=args.get("audience"),
+                    implementation_status=args.get("implementation_status"),
+                    source=args.get("source"),
                 )
             ]
             structured = {"documents": docs, "count": len(docs)}
             return tool_success(structured, f"Listed {len(docs)} HAVEN documentation records.")
 
         if name == "haven_docs_search":
-            validate_args(args, {"query", "status", "group", "max_results"})
+            validate_args(args, {"query", "status", "group", "max_results", "implementation_status", "source"})
             structured = index.search(
                 required_string(args, "query"),
                 status=args.get("status"),
                 group=args.get("group"),
+                implementation_status=args.get("implementation_status"),
+                source=args.get("source"),
                 max_results=bounded_int(args.get("max_results", 8), "max_results", 1, MAX_SEARCH_RESULTS),
             )
             return tool_success(structured, format_search_text(structured))
@@ -608,6 +750,11 @@ def call_tool(index: DocsIndex, name: str, args: dict[str, Any] | None) -> dict[
                 max_chars=bounded_int(args.get("max_chars", DEFAULT_MAX_CHARS), "max_chars", 0, 200000),
             )
             text = f"{structured['citation']['path']}#{structured['citation']['heading_anchor']}\n\n{structured['text']}"
+            if "freshness" in structured:
+                header = [
+                    f"[{structured['citation']['implementation_status']}] {format_provenance(structured.get('provenance'))}"
+                ] + [item["summary"] for item in structured["freshness"]]
+                text = "\n".join(header) + "\n\n" + text
             return tool_success(structured, text)
 
         if name == "haven_docs_resolve":
@@ -666,8 +813,23 @@ def format_search_text(structured: dict[str, Any]) -> str:
         citation = item["citation"]
         anchor = citation["heading_anchor"]
         suffix = f"#{anchor}" if anchor else ""
-        lines.append(f"- {citation['path']}{suffix}: {citation['heading']} - {item['snippet']}")
+        status = citation.get("implementation_status", "unknown")
+        # Etiketten vises alltid når den finnes, og alltid i prototype-modus (også «unknown»).
+        tag = f"[{status}] " if status != "unknown" or "freshness" in structured else ""
+        source = f"{citation['source']}:" if citation.get("source", "book") != "book" else ""
+        age = f" ({format_provenance(item['provenance'])})" if item.get("provenance") else ""
+        lines.append(f"- {tag}{source}{citation['path']}{suffix}: {citation['heading']}{age} - {item['snippet']}")
+    for fresh in structured.get("freshness", []):
+        lines.append(f"Ferskhet: {fresh['summary']}")
     return "\n".join(lines)
+
+
+def format_provenance(provenance: dict[str, Any] | None) -> str:
+    if not provenance or not provenance.get("tracked"):
+        return "ikke sporet i git"
+    day = (provenance.get("committed_at") or "")[:10]
+    dirty = ", lokalt endret" if provenance.get("dirty") else ""
+    return f"commit {provenance['commit_short']} {day}{dirty}"
 
 
 def get_prompt(name: str, args: dict[str, Any] | None) -> dict[str, Any]:
@@ -856,9 +1018,32 @@ def main(argv: Iterable[str] | None = None) -> int:
     parser.add_argument("--list-tools", action="store_true", help="Print tool definitions as JSON and exit.")
     parser.add_argument("--list-resources", action="store_true", help="Print resources as JSON and exit.")
     parser.add_argument("--search", help="Run local search once and exit.")
+    parser.add_argument(
+        "--with-sources",
+        action="store_true",
+        help="PROTOTYPE: also index external sources from sources.json and add provenance/freshness to answers.",
+    )
+    parser.add_argument("--check-remote", action="store_true", help="PROTOTYPE: compare with origin via git ls-remote (network).")
+    parser.add_argument("--lint-status", action="store_true", help="PROTOTYPE: report implementation_status conflicts and exit.")
+    parser.add_argument("--source-report", action="store_true", help="PROTOTYPE: report what each source indexed/skipped and exit.")
     args = parser.parse_args(list(argv) if argv is not None else None)
 
+    if args.with_sources or args.lint_status or args.source_report:
+        os.environ["HAVEN_DOCS_WITH_SOURCES"] = "1"
+    if args.check_remote:
+        os.environ["HAVEN_DOCS_CHECK_REMOTE"] = "1"
+
     server = MCPServer()
+    if args.lint_status:
+        print(json.dumps(extra_sources.lint(server.index), indent=2, ensure_ascii=False))
+        return 0
+    if args.source_report:
+        report = {
+            "sources": server.index.source_reports,
+            "freshness": server.index.freshness_for(server.index.one_doc_per_source()),
+        }
+        print(json.dumps(report, indent=2, ensure_ascii=False))
+        return 0
     if args.list_tools:
         print(json.dumps(tool_definitions(), indent=2, ensure_ascii=False))
         return 0

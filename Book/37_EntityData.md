@@ -233,6 +233,7 @@ flow førsteklasses, og i OpenAPI ville de blitt fritekst. OpenAPI 3.1 bygger p�
 HTTP-grense faktisk skal dokumenteres for noen utenfor HAVEN.
 
 ## 7. Besluttet 16.09.2026 — ikke implementert
+<!-- haven:implementation_status=decided -->
 
 Kjetil gikk gjennom alle 253 elementene i `EntityData.review.schema.json` og besvarte hvert
 enkelt. Dette er beslutningene som endrer strukturen. **Ingen av dem er implementert i kode.**
