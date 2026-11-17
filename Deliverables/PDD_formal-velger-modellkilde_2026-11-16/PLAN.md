@@ -59,6 +59,10 @@ I dag blir laptop-modellen synlig for deg i det øyeblikket AgentD kobler til. E
 | Kandidater | `LocalModelAvailability` + AIGateway + katalog → `ChatScopedAIProviderRouter.route` | `get localModel.availability.state` | WP1 |
 | Valg | `route` → Co-Pilot-panel / Kallimachos | `chatHub.state.assistant.providerChoices` | WP1 |
 
+## Kobling til Informasjonssystemer-gruppa (lagt til 17.11, ikke godkjent)
+
+Tråden «Opprett Informasjonssystemer som gruppeentitet» (CellProtocolDocuments PR #46, G1 spurt) foreslår at gruppa utsteder rolle-VC-er (student med kull, researcher, supervisor) som celler sjekker med `ProvedClaimCondition` og `TrustedIssuer`. WP5 kan da bruke «har studentrolle fra Informasjonssystemer» som Agreement-vilkår for hvem som ser laptop-modellen, i stedet for et eget vilkår. Det forutsetter at den PDD-en får G1; inntil da bygges WP5 med eierens egne Agreement.
+
 ## Ikke i denne planen
 
 - Binding-knapp for «tilgjengelig» på laptopen. AgentD-menyen er første vei inn; Binding viser panelet (web-skjelettet) og kan trekke tilbake.
