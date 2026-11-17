@@ -91,7 +91,8 @@ Prototypen kjører aldri `fetch`, `pull` eller noe annet som endrer klonen.
 - Fortsatt leksikalsk søk. Ingen vektorer.
 - JSON-skjema er én seksjon. Treff er riktige, men snippeten er grov.
 - `implemented` er ikke automatisk verifisert mot koden; prototypen har ingen kode-til-dokument-sjekk.
-- Regex-linten gir både falske positive og falske negative (f.eks. `EntityData.review.schema.json`, merket `implemented`, har en beskrivelse som nevner «ikke implementert»; bør sjekkes av eier).
+- Regex-linten gir både falske positive og falske negative. Eksempel: `EntityData.review.schema.json` er merket `implemented`, men beskrivelsen nevner «ikke implementert». Den ble kontrollert mot koden 2026-11-17: alle 233 nøkkelstier finnes i CellScaffolds nøkkelregister (`EntityAnchorDataV1Contract.swift`), uendret siden 2026-09-11. `implemented` gjelder lagringsformen, ikke JSON-filen som kontrakt. Se `evidence` i `sources.json`.
+- EntityData er dynamisk. Bare systemnøkkelstiene er faste; brukere kan lage nye, og mye brukte nøkkelstier skal foreslås for andre. Et svar fra søket må derfor ikke behandle et skjema over nøkkelstier som en fullstendig liste over hva som er tillatt.
 - Ytelse: 644 dokumenter parses én gang per prosess og cacher på filens mtime. Første søk tar rundt et sekund.
 - Ikke dekket: CellScaffolds egne skills som *kilde til sannhet* (de indekseres bare som tekst), `Documentation/` i andre repoer (Binding, DiMyDocuments), og CellProtocolDocuments sin egen `Website/` og `Prompts/`.
 
