@@ -849,6 +849,67 @@
       }
     },
     {
+      "name": "daglig: enheten spørreren sitter ved, uten reserve",
+      "purposeRef": "purpose://candidate.model-source.personal-daily-use",
+      "source": {
+        "id": "chat.apple-intelligence",
+        "servingClass": "requester_device",
+        "servesWhom": "owner_only",
+        "availableWhenOwnerOffline": "no",
+        "declaredAvailable": false,
+        "health": {
+          "status": "unknown"
+        },
+        "region": "unknown"
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": true,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": false
+      },
+      "expect": {
+        "eligible": true,
+        "unmet": [],
+        "effectivePurposeRef": "purpose://candidate.model-source.personal-daily-use",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "tjeneste: enheten spørreren sitter ved kan ikke bære en tjeneste",
+      "purposeRef": "purpose://candidate.model-source.service-for-others",
+      "source": {
+        "id": "chat.apple-intelligence",
+        "servingClass": "requester_device",
+        "servesWhom": "owner_only",
+        "availableWhenOwnerOffline": "no",
+        "declaredAvailable": false,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899940,
+          "p50Ms": 3000
+        },
+        "region": "unknown"
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": true,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "serving_class_allowed",
+          "available_when_owner_offline"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": []
+      }
+    },
+    {
       "name": "ukjent formål gir strengeste",
       "purposeRef": "purpose://prompt.unknown",
       "source": {
@@ -1068,6 +1129,7 @@
       "profile": {
         "allowedServingClasses": [
           "rules",
+          "requester_device",
           "personal_device",
           "operator_host",
           "hosted_provider"
