@@ -6,7 +6,7 @@
 ## Porter
 - G1: godkjent 2026-11-17 (Kjetil i tråden 08:13Z, med tillegg om publisering og hendelser)
 - G1-GUI: godkjent 2026-11-17 (Kjetil i tråden 08:43Z; seks bilder i images/)
-- G2: venter        (plan godkjent; arbeidspakker 1:1 mot bladformål)
+- G2: godkjent 2026-11-17 (Kjetil i tråden 08:53Z)
 - G3: venter        (akseptanse: forventning mot faktisk, alle avledede tester grønne)
 
 Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py validate <mappe>` nekter porter uten artefakter.
@@ -21,3 +21,4 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
 - 2026-11-17: seks bilder til G1-GUI rendret (images/README.md). Venter på G1-GUI.
 - 2026-11-17: G1-GUI godkjent av Kjetil. Neste: PLAN.md til G2.
 - 2026-11-17: PLAN.md skrevet (18 arbeidspakker). Venter på G2.
+- 2026-11-17: G2 godkjent av Kjetil. Implementering startet med WP0–WP2.
