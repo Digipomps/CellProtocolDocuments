@@ -22,3 +22,4 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
 - 2026-11-17: G1-GUI godkjent av Kjetil. Neste: PLAN.md til G2.
 - 2026-11-17: PLAN.md skrevet (18 arbeidspakker). Venter på G2.
 - 2026-11-17: G2 godkjent av Kjetil. Implementering startet med WP0–WP2.
+- 2026-11-17: WP1–WP4 skrevet. CellScaffold utkast-PR #454 (egnethetskontrakt, kildefakta, hardt filter). TESTRESULT.md startet. Tillegg i kontrakten: servingClass requester_device (Apple Intelligence på enheten spørreren sitter ved).
