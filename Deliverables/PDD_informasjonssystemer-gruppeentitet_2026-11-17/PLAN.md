@@ -1,6 +1,6 @@
 # PLAN — Informasjonssystemer som gruppeentitet
 
-G1 godkjent 2026-11-18 · G1-GUI godkjent 2026-11-18 · **G2: venter**
+G1 godkjent 2026-11-18 · G1-GUI godkjent 2026-11-18 · **G2: godkjent 2026-11-18**
 
 Én arbeidspakke per bladformål i FORMAALSSPEC §1, i rekkefølgen de avhenger av hverandre. Swift (CellBase,
 CellScaffold, Binding) er referansen og bygges først i hver pakke. Python og Go porteres fra Swift-genererte
