@@ -1,6 +1,6 @@
 # PLAN — skrivehjelp i delte dokumenter
 
-Status: utkast til G2, 2026-11-15. G1 godkjent 2026-11-15. G1-GUI bedt om på bildene v2.
+Status: G2 godkjent 2026-11-18 med krav om paritet med Binding (WP6b). G1 godkjent 2026-11-15. G1-GUI bedt om på bildene v2.
 Utgangspunkt: CellScaffold `9612217` (origin/main 15.11), CellProtocol `14fd9dc`.
 Arbeidet gjøres på en egen gren fra origin/main i CellScaffold, aldri i hovedcheckouten på Mac-en (`/Users/kjetil/Build/Digipomps/HAVEN/CellScaffold` står på en Codex-gren med ukommitterte endringer).
 
@@ -35,6 +35,7 @@ Mønsteret er kopiert fra `PublicationPortfolioCell.pageAssistant` (CellScaffold
 | WP4 | …shared-log | Assist-loggen i dokumenttilstanden (maks 1000 rader, som `help`): spørrer, leverandør, modell, revisjon, valgt tekst, svar, tilstand. Lagres med samme persistens og Flow som andre hendelser | Claude | test.skrivehjelp.logg-deles, test.skrivehjelp.innsyn | #1, #6 |
 | WP5 | …apply | `document.assist.apply` / `dismiss` / `retry`: delta bare hvis teksten finnes nøyaktig én gang i nåværende dokument, ellers `stale` uten endring | Claude | test.skrivehjelp.bruk-forslag, test.skrivehjelp.foreldet-forslag | #1, #3 |
 | WP6 | …swift-native, purpose://gui.ways-in-are-reachable | `document.assistPanel` (per person: rutelinje, varsler, avsnitt, valgt tekst, utkast, rader) og skrivehjelp-panelet fra `skeleton/skrivehjelp-panel.v1.json` inn i `RichDocumentCell.configuration()`, i stedet for `documentHelp`. Web: markering i editoren sendes som `selectPassage`. Migrering av lagrede Dokument-skjeletter med eksakt digest (som #416) | Claude | test.skeleton.no-unreachable-elements, test.skeleton.purpose-actions-reachable, playwright `rich-document.spec.js` + ny `rich-document-assist.spec.js` | #1–#3 |
+| WP6b | …swift-native | Paritet med Binding (Kjetil 18.11): dokumentchat (meldinger + skriv + send) og dokumentteksten som lesevisning (avsnitt som tekst) av vanlige skeleton-elementer fra `document.assistPanel`/`document.chatPanel`. Web beholder Quill-editoren; Binding får alt unntatt redigering i editoren | Claude | test.gui.parity (Binding), `rich-document-assist.spec.js` | #1–#4 |
 | WP7 | …swift-native | Binding: screenshot av panelet mot en lokal CellScaffold eller staging, via Remote Control på Mac-en | Claude via Remote Control (Kjetils Mac) | test.gui.parity (Binding) | #4 |
 | WP8 | purpose://quality.docs-in-same-change | Oppdater `RichDocumentGuide` (fjern «Ingen automatisk AI-tekstgenerering» der det ikke lenger stemmer), Explore-beskrivelser og `Documentation/` | Claude | test.docs-updated | ACCEPT.md#docs |
 | WP9 | root | FORESPOERSEL til Deploy etter grønn CI og Mac-bygg; e2e mot staging med to studentkontoer når deling (egen tråd) og modellrute finnes | Claude skriver forespørselen; Deploy/Kjetil kjører toget | test.skrivehjelp.e2e-to-studenter, test.gui.load-time | #5 |
