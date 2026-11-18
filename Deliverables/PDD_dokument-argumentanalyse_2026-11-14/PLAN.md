@@ -7,7 +7,7 @@ Baser: CellScaffold `origin/main` `8e8f8e0` (= staging), CellProtocol `origin/ma
 
 - Skyøkten har ingen Swift-verktøykjede (download.swift.org er blokkert). Den skriver kode, JS-tester (Playwright) og Python-paritetsfixtures.
 - Swift-bygg og tester (CellScaffold `ci/run-tests.sh`, CellProtocol `swift test`, Binding XCTest) kjøres på Mac-en via Remote Control i **egne ferske kloner under /tmp**, aldri i `/Users/kjetil/Build/Digipomps/HAVEN/CellScaffold` (den står på en Codex-gren med ukommitterte endringer).
-- PR-CI i CellScaffold kjører bare «Focused control-plane gates» og bilde-sjekker, ikke hele testmengden. Derfor er Mac-kjøringen porten før noe går i Deploy-køen.
+- PR-CI i CellScaffold (`admin-scaffold-image.yml`, jobben «Focused control-plane gates») kjører `swift build --build-tests` og `ci/run-tests.sh` på Linux for testene i `ci/test-filter.txt`. En utkast-PR er derfor byggeporten for App-koden, og nye testklasser legges i `ci/test-filter.txt`. CellApple og Binding bygger ikke på Linux, så Mac-kjøringen (WP3, WP9) er fortsatt porten for dem før noe går i Deploy-køen. CellBase- og analysatortester kan i tillegg kjøres i skyen med Docker `swift:6.1-noble`.
 - Rekkefølge mellom repoer: CellProtocol-endringen (WP1, WP3) må merges og tagges av Kjetil før CellScaffold kan pinne den (WP9). Fram til da peker CellScaffold-grenen på CellProtocol-PR-ens commit bare i Mac-kjøringen, ikke i Package.swift på main.
 
 ## Arbeidspakker (1:1 mot bladformål)
