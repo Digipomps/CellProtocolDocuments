@@ -13,7 +13,11 @@
     "VStack": [
       {
         "Text": {
-          "text": "Mine gjøremål"
+          "text": "Mine gjøremål",
+          "modifiers": {
+            "fontSize": 18,
+            "fontWeight": "semibold"
+          }
         }
       },
       {
@@ -22,25 +26,42 @@
           "flowElementSkeleton": {
             "VStack": [
               {
-                "HStack": [
-                  {
-                    "Text": {
-                      "keypath": "title"
+                "HStack": {
+                  "spacing": 12,
+                  "elements": [
+                    {
+                      "VStack": {
+                        "spacing": 2,
+                        "elements": [
+                          {
+                            "Text": {
+                              "keypath": "title"
+                            }
+                          },
+                          {
+                            "Text": {
+                              "keypath": "dueText",
+                              "modifiers": {
+                                "fontSize": 13,
+                                "foregroundColor": "#64748b"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "Spacer": {}
+                    },
+                    {
+                      "Button": {
+                        "keypath": "todo.toggleTodo",
+                        "label": "Ferdig",
+                        "payloadKeypath": "id"
+                      }
                     }
-                  },
-                  {
-                    "Text": {
-                      "keypath": "dueText"
-                    }
-                  },
-                  {
-                    "Button": {
-                      "keypath": "todo.toggleTodo",
-                      "label": "Ferdig",
-                      "payloadKeypath": "id"
-                    }
-                  }
-                ]
+                  ]
+                }
               }
             ]
           }
@@ -61,7 +82,10 @@
                   "VStack": [
                     {
                       "Text": {
-                        "keypath": "title"
+                        "keypath": "title",
+                        "modifiers": {
+                          "foregroundColor": "#64748b"
+                        }
                       }
                     }
                   ]

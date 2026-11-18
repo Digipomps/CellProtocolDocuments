@@ -74,9 +74,9 @@ Hva dette IKKE er:
 | Studentguide «Lag din egen flate» | fil | /mnt/project-files/masterhaven26/LAG_DIN_EGEN_FLATE.md og CellProtocolDocuments (PR) | — | nei |
 | Oppdatert offentlig skeleton-skill | fil (PR) | CellProtocol commons/skills/cellconfiguration-skeleton-authoring/ | — | nei |
 | `skeleton-check` kjørt på et godt og et dårlig eksempel | testutdata | TESTRESULT.md#local-check | — | nei |
-| Studio med «Beskriv flaten» + «Lag utkast» og nåbarhetsfunn, tom / utfylt / feil | bilde | images/studio-utkast-{tom,utfylt,feil}{,-iphone}-v1.png | skeleton/studio-hjelp.skeleton.json | nei |
-| Workbench-hjelperen svarer på «lag en flate som viser oppgavene mine» | bilde + testutdata | images/hjelper-flate{,-iphone}-v1.png, TESTRESULT.md#helper | images/kilde/states.js (helperSkeleton) | nei |
-| Felles utkast: to redaktører, avvist utdatert lagring, web og Binding | bilde | images/felles-utkast-konflikt{,-iphone}-v1.png (web); Binding etter implementering | skeleton/studio-hjelp.skeleton.json | nei |
+| Studio med «Beskriv flaten» + «Lag utkast» og nåbarhetsfunn, tom / utfylt / feil | bilde | images/v2/v2-{tom,utfylt,feil}{,-iphone}.png (runde 1: images/studio-utkast-*-v1.png) | skeleton/studio-hjelp-v2.skeleton.json, UX_VURDERING.md | nei |
+| Workbench-hjelperen svarer på «lag en flate som viser oppgavene mine» | bilde + testutdata | images/v2/v2-hjelper{,-iphone}.png, TESTRESULT.md#helper | skeleton/hjelper-v2.skeleton.json | nei |
+| Felles utkast: to redaktører, avvist utdatert lagring, web og Binding | bilde | images/v2/v2-{konflikt,del}{,-iphone}.png (web); Binding etter implementering | skeleton/studio-hjelp-v2.skeleton.json | nei |
 | Kjørende flyt på staging for en ny studentkonto | kjørende flate | staging, via FORESPOERSEL til Deploy etter verifisert bygg | — | nei |
 
 ### Hva bildene viser og ikke viser (G1-GUI, 2026-11-15)
@@ -278,3 +278,4 @@ Ingen åpne spørsmål som endrer treet.
 | 1 | 2026-11-14 | §0-§3, §5, §6 skrevet fra kode på origin/main | Claude (tråd «Gi studentene hjelp til å designe egne flater») |
 | 2 | 2026-11-15 | G1 godkjent av Kjetil med svarene i §6: deling endret til felles redigering (co-edit-draft), Mistral i model-route, avhengighet til InvitationAdmission fra PDD_dele-dokumenter | Claude |
 | 3 | 2026-11-15 | G1-GUI-bilder rendret (5 tilstander × laptop/iPhone), skeleton/ og images/kilde/ lagt til | Claude |
+| 4 | 2026-11-18 | Kjetil: runde 1 «ser helt forferdelig ut». UX-vurdering (UX_VURDERING.md) og runde 2: én hovedhandling per steg, klartekst, forhåndsvisning først, detaljer bak fane, rader som kommer og går, tema-fil for web. 6 tilstander × laptop/iPhone | Claude |

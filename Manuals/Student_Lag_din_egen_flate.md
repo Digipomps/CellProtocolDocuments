@@ -61,6 +61,7 @@ Finnes ikke: `Markdown`, `Chart` (bruk `Visualization`), `Video`, `Map`, `Table`
 - En `Button` med `keypath: "todo.toggleTodo"` skriver til cellen. Inne i en liste kan knappen ta verdien fra raden med `payloadKeypath: "id"`.
 - Inne i en `List` leser `keypath` fra raden: `title` er tittelen på det gjøremålet raden viser.
 - `flowElementSkeleton` i en `List` må være en `VStack`. Web-rendereren avviser alt annet, også en `HStack` eller en `Text` alene.
+- Tenk mobil: legg tittel og detalj over hverandre i en `VStack`, og knappen til høyre etter en `Spacer`. Tre tekster ved siden av hverandre brytes midt i ordene på en smal skjerm.
 
 Hvilke keypaths en celle har, finner du i **Cell Configuration Architect** under katalogkontraktene, eller i cellens kildekode.
 
@@ -98,7 +99,11 @@ Ber du assistenten om «et panel som viser gjøremålene mine og lar meg krysse 
     "VStack": [
       {
         "Text": {
-          "text": "Mine gjøremål"
+          "text": "Mine gjøremål",
+          "modifiers": {
+            "fontSize": 18,
+            "fontWeight": "semibold"
+          }
         }
       },
       {
@@ -107,25 +112,42 @@ Ber du assistenten om «et panel som viser gjøremålene mine og lar meg krysse 
           "flowElementSkeleton": {
             "VStack": [
               {
-                "HStack": [
-                  {
-                    "Text": {
-                      "keypath": "title"
+                "HStack": {
+                  "spacing": 12,
+                  "elements": [
+                    {
+                      "VStack": {
+                        "spacing": 2,
+                        "elements": [
+                          {
+                            "Text": {
+                              "keypath": "title"
+                            }
+                          },
+                          {
+                            "Text": {
+                              "keypath": "dueText",
+                              "modifiers": {
+                                "fontSize": 13,
+                                "foregroundColor": "#64748b"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "Spacer": {}
+                    },
+                    {
+                      "Button": {
+                        "keypath": "todo.toggleTodo",
+                        "label": "Ferdig",
+                        "payloadKeypath": "id"
+                      }
                     }
-                  },
-                  {
-                    "Text": {
-                      "keypath": "dueText"
-                    }
-                  },
-                  {
-                    "Button": {
-                      "keypath": "todo.toggleTodo",
-                      "label": "Ferdig",
-                      "payloadKeypath": "id"
-                    }
-                  }
-                ]
+                  ]
+                }
               }
             ]
           }
@@ -146,7 +168,10 @@ Ber du assistenten om «et panel som viser gjøremålene mine og lar meg krysse 
                   "VStack": [
                     {
                       "Text": {
-                        "keypath": "title"
+                        "keypath": "title",
+                        "modifiers": {
+                          "foregroundColor": "#64748b"
+                        }
                       }
                     }
                   ]
