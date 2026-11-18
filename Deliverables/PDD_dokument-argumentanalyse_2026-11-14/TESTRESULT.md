@@ -40,3 +40,11 @@ Faktiske kjøringer. Ingenting her er meldt levert før bygget det gjelder er gr
   - Når en tekst fjernes, følger markeringer, kommentarer og forslag påstanden sin, selv om påstands-id-en flytter seg.
 - **Rødsjekk**: en sitatsjekk som godtar alt gjør ankertesten rød. Satt tilbake.
 - Ikke gjort: panel (T-PANEL) og en ekte modellrute. Rommet har ingen modell installert før tråden om modelltilgang har valgt rute for studentene.
+
+## #build (WP3, WP9), 2026-11-18, Kjetils Mac i /tmp/argumentkart-2026-11-18/
+
+- CellProtocol `claude/argumentmap-visualization` (b133369): `swift test --filter ArgumentMapVisualizationTests` 6/6 grønne.
+- CellApple `xcodebuild` for `generic/platform=macOS` og `generic/platform=iOS`: BUILD SUCCEEDED.
+- CellScaffold `claude/tekstanalyse` (86037c5): `swift build --build-tests` ok (ca. 350 s), `swift test --filter 'TextAnalysisRoomCellTests|TextReliabilityAnalyzerParityTests'` 23/23 grønne.
+- Forbehold: CellScaffold ble bygd mot søsterklonen av CellProtocol (b440462 + argumentkart-commiten), ikke mot pinnen. SwiftPM varslet «Conflicting identity for cellprotocol» fordi DiMyMicropayments henter CellProtocol fra GitHub; i dag en advarsel, senere en feil.
+- Logger på Mac-en: /tmp/argumentkart-2026-11-18/{cp-test,mac,ios,cs-build,cs-test}.log. Ingenting endret i eksisterende mapper, ingenting pushet derfra.
