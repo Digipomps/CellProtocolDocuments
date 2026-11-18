@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — forskningsdata for studentene
 
-Oppgavemappe: `PDD_forskningsdata-verktoy_2026-11-17` · Opprettet 2026-11-17 · Iterasjon 1 (ikke godkjent)
+Oppgavemappe: `PDD_forskningsdata-verktoy_2026-11-17` · Opprettet 2026-11-17 · Iterasjon 2 (G1 og G1-GUI godkjent 2026-11-18)
 
 > Regel: ingen plan før G1 er godkjent av Kjetil. For GUI: ingen implementering før G1-GUI (rendret bilde) er godkjent.
 > Et dokument om leveransen teller aldri som leveransen.
@@ -14,6 +14,14 @@ Vurderingen bak treet, med funn i koden og datatrappen N0–N4, står i `VURDERI
 Kjetil, 17.11.2026 kl. 09.23 (prosjektet «HAVEN Master oppgaver 2026»):
 
 > Vi kan la det være åpent om det skal presenteres som et nytt forskningstema, men du burde spinne ut en ny tråd som vurderer hva studentene vil trenge av verktøy for å ekstrahere data de kan trenge i forskningen sin uansett hva temaet er. Det bør være både helt anonym data som f.eks scaffold admin har tilgang til og mulighet for å be entiteter om tilgang til spørringer og eller lagring. Gjør en grundig vurdering av hva som kan være nyttig i et forskningperspektiv og lag en plan. Vi må ha komponenter for å vise data også. Og kanskje oppgaven med å sette opp sitt eget student-dashboard kan være en del av onboardingen til HAVEN for studentene.
+
+Kjetil, 18.11.2026 kl. 20.29:
+
+> Ja jeg bekrefter at gruppeentiteten Informasjonssystemer (eid av meg og Petter Nielsen) også skal utstede forskerrollen til studentene. Det er den korrekte eierskapsmodellen. Den som eier hardwaren eier sansynligvis scaffoldet men andre kan eie sine egne celler også.
+
+Kjetil, 18.11.2026 kl. 20.44:
+
+> G1 og G1-GUI godkjent. 1. om det er upraktisk å sprørre alle sammen kan man sette opp aggregatorer som lytter på flow hendelser - men Flow krever også signContract. På staging tester vi ut at verktøy og funksjonalitet er klar for å møte virkelige brukere i prod. Studentene bør kunne bygge opp sett med swarm simulerte entiteter fra med eller uten snapshot tilstander fra ekte brukere. Minste gruppestørrelse må sees i forhold til PII og hvilke forskingsspørsmål som skal undersøkes. Vi bør ha funksjonalitet for å vurdere graden av persondata i forhold til begrensinger på hva man kan gjøre med dem.
 
 Stående regler som gjelder: tilgang til en celle avgjøres bare av vilkårene i Agreement, og skal virke likt i Swift, Python og Go (Kjetil 28.10). Swift er referansen og skal virke i hver flyt (Kjetil 28.10).
 
@@ -38,6 +46,9 @@ Revisjoner lest: CellScaffold `main` `57ce8c0`, CellProtocol `main` `14fd9dc`, C
 | Staging kan brukes til ekte persondata | **contradicted** | `KOM_I_GANG.md`: «Ikke legg inn ekte persondata om andre der» |
 | Studentene må melde prosjektet til Sikt | recalled | Ikke sjekket mot UiO denne økten. Brukes ikke som bærende antakelse; se §6 spørsmål 1 |
 | Hva adminflatene returnerer på staging nå | ikke målt | Krever adminrolle. Måles i WP0 |
+| Flow krever kontrakt, også for en lyttende aggregator | retrieved (lest, ikke kjørt) | `CellProtocol/Docs/ActiveFeedAuthorization.md`: `flow(requester:)` krever autorisasjon, og hvert element sjekkes mot gjeldende kontrakt; tilbakekalt eller utløpt kontrakt stopper levering |
+| Det finnes en svermsimulator | retrieved, med forbehold | `CellScaffold/Sources/UserSimulationScaffoldCore/` (`VirtualUser.swift`, `SimulationCoordinator.swift`): virtuelle brukere med `BehaviorScript` (for eksempel `lurker`, `slowSubscriber`, `reconnectingMobile`) mot en node over bro, koordinator og arbeidere. Laget for lasttest, ikke sosial atferd, og tar ikke snapshot som start |
+| Det finnes en vurdering av persondatagrad | **contradicted** | Ingen kode som klassifiserer felt eller maler etter persondata (søk i CellScaffold og CellProtocol). `PersonalDataTrustPackage` har forslag og opphav per felt, men ingen grad eller regler |
 
 ## 1. Formålstre
 
@@ -56,27 +67,32 @@ Gjenbruk fra Book 23: `purpose://self-determination.data.verifiability` (etterpr
 | `…data.exercisability` (kontroll som faktisk kan brukes) | entity-decides, withdraw (ett trykk, synlig status) |
 | `…data.locality` (sted) | entity-storage (dataene blir hos entiteten) |
 
-Faser (forslag, se `PLAN.md`): **F1** katalog, anonyme samletall, visning, dashbord i onboarding. **F2** spørre entitetene (N2, N3). **F3** lagring hos entiteten (N4), syntetisk populasjon, støy og sikker summering.
+Faser (se `PLAN.md`): **F1** katalog med persondatavurdering, anonyme samletall, visning, dashbord i onboarding. **F2** spørre entitetene (N2, N3), lyttende aggregatorer på Flow, svermsimulering med og uten snapshot. **F3** lagring hos entiteten (N4), støy og sikker summering.
 
 | purposeRef | Tittel | Forelder | Goal (outcome) | Verifier | Fase |
 |---|---|---|---|---|---|
 | purpose://candidate.forskningsdata-verktoy.root | Studenter henter forskningsdata med personvernet bygd inn | purpose://self-determination.data.verifiability | En ny studentkonto får forskerrollen, åpner sitt eget dashbord med minst ett samletall fra noden på web og i Binding, sender én forespørsel til medstudenter og ser et samlet svar først når minst k har sagt ja | test.fd.e2e-student | F1+F2 |
-| purpose://candidate.forskningsdata-verktoy.catalog | Katalog over hva som kan måles | root | Én maskinlesbar katalog (`research.metric-catalog.v1`) lister hvert tall og hver spørringsmal med definisjon, kilde, tidsoppløsning, k, enhet og versjon. Den vises i dashbordet og i studentpakken | test.fd.katalog-dekker-kilder | F1 |
+| purpose://candidate.forskningsdata-verktoy.catalog | Katalog over hva som kan måles | root | Én maskinlesbar katalog (`research.metric-catalog.v1`) lister hvert tall og hver spørringsmal med definisjon, kilde, tidsoppløsning, persondatagrad (fra pii-assessment), k, enhet og versjon. Den vises i dashbordet og i studentpakken | test.fd.katalog-dekker-kilder | F1 |
+| purpose://candidate.forskningsdata-verktoy.pii-assessment | Vurdering av persondatagrad | root | Hver mal, hvert felt og hver forespørsel får en persondatagrad: ingen persondata, aggregert, indirekte identifiserende (kvasi-identifikator), direkte identifiserende, eller særlig kategori. Graden og forskningsspørsmålet gir reglene: tillatt svarform, minste k, tidsoppløsning, lagringstid, om eksport er lov, og om UiO-godkjenning kreves før ekte deltakere. Reglene vises i forespørselsbyggeren og på kortet, og cellen håndhever dem | test.fd.pii-grad-gir-regler, test.fd.pii-haandheves | F1 |
+| purpose://candidate.forskningsdata-verktoy.pii-rules-table | Regeltabell som kan leses og endres | pii-assessment | Reglene står i én versjonert tabell (`research.pii-rules.v1`) som eieren av Informasjonssystemer kan endre. En endring får ny versjon, og forespørsler beholder versjonen de ble godkjent under | test.fd.pii-regler-versjon | F1 |
 | purpose://candidate.forskningsdata-verktoy.researcher-role | Forskerrolle via Agreement | root | En researcher-VC utstedt av gruppeentiteten Informasjonssystemer (`PDD_informasjonssystemer-gruppeentitet`, §6 spm. 2; inntil den finnes, av noden). Foreløpige navn fra PR #46: credential-type `InformasjonssystemerRoleCredential`, `subjectClaimPath` = `role` med verdien `researcher`, kull i `cohort`, gyldighet i `validUntil` og godtatte bruksvilkår er vilkårene for all forskningstilgang. Samme vilkår og samme svar i Swift, Python og Go | test.fd.rolle-vilkaar, test.fd.rolle-interop | F1 |
-| purpose://candidate.forskningsdata-verktoy.anonymous-aggregates | Anonyme samletall fra noden (N1) | root | `ResearchAggregateCell` gir tall fra katalogen i faste dag- eller ukebøtter. Ingen utlevering inneholder identitets-uuid, celle-uuid, visningsnavn eller fritekst. Bøtter med færre enn k er merket skjult, ikke utelatt | test.fd.ingen-identifikator, test.fd.k-terskel, test.fd.faste-bokter | F1 |
+| purpose://candidate.forskningsdata-verktoy.anonymous-aggregates | Anonyme samletall fra noden (N1) | root | `ResearchAggregateCell` gir tall fra katalogen i faste dag- eller ukebøtter. Ingen utlevering inneholder identitets-uuid, celle-uuid, visningsnavn eller fritekst. Bøtter med færre enn k er merket skjult, ikke utelatt. k kommer fra persondatavurderingen av malen, ikke fra et fast tall | test.fd.ingen-identifikator, test.fd.k-terskel, test.fd.faste-bokter | F1 |
 | purpose://candidate.forskningsdata-verktoy.release-log | Logg over hver utlevering | anonymous-aggregates | Hver lesing av et samletall eller et svar logges med hvem, mal og versjon, bøtte, k, antall og hash. Studenten ser sin egen logg; nodens eier ser alle | test.fd.utleveringslogg | F1 |
 | purpose://candidate.forskningsdata-verktoy.questionnaire-promise | Spørreskjemaet holder det det lover | root | Med `aggregateOnly` gir innsikt og eksport bare tall, og bare når minst k har svart. Med `pseudonymized` har radene et pseudonym per kampanje og ikke navn. `personLinked` er uendret | test.fd.sporreskjema-synlighet | F1 |
 | purpose://candidate.forskningsdata-verktoy.request | Studenten lager en forespørsel | root | Studenten velger mal fra katalogen, skriver formål, velger gruppe, svarform (samlet eller per person), periode og lagringstid, og ser nøyaktig det kortet entiteten vil se. Cellen avviser forespørsler som bryter regler (gruppe mindre enn k, rad-data uten begrunnelse, mal som ikke finnes) | test.fd.forespørsel-valideres | F2 |
 | purpose://candidate.forskningsdata-verktoy.request-reach | Forespørselen når bare dem den gjelder | request | En forespørsel sendes bare til medlemmer av en gruppe studenten selv er medlem av, eller til dem som åpner en rekrutteringslenke studenten deler. Ingen kan sende til alle brukere | test.fd.rekkevidde | F2 |
 | purpose://candidate.forskningsdata-verktoy.entity-decides | Entiteten bestemmer | root | Entiteten ser hvem som spør, formål, nøyaktig hva, svarform, periode, lagringstid og hva som skjer om den trekker seg, og velger Ja, Ikke nå eller Aldri. Ja signerer en aksept med entitetens egen identitet | test.fd.kort-viser-alt, test.fd.ja-ikke-naa-aldri | F2 |
 | purpose://candidate.forskningsdata-verktoy.consent-as-agreement | Samtykket er en kontrakt via Agreement-vilkår | entity-decides | Aksepten gir kontrakt på entitetens egen forskningscelle med vilkårene signert aksept + forskerrolle, gjennom `automaticWhenConditionsMet`. Kontrakten gir nøyaktig omfanget i forespørselen og varer til sluttdato. Ingen annen vei inn. Bygger på InvitationAdmission fra `PDD_dele-dokumenter` | test.fd.opptak-via-vilkaar, test.cell.auth-negative | F2 |
-| purpose://candidate.forskningsdata-verktoy.query-at-entity | Spørringen går til dataene (N2) | consent-as-agreement | Bidraget regnes ut i entitetens egen celle fra data entiteten selv eier. Bidragene samles i en celle som eies av noden, ikke av studenten. Studenten får bare summen (eller median, fordeling) når minst k har bidratt | test.fd.student-ser-ikke-bidrag, test.fd.k-terskel-svar | F2 |
+| purpose://candidate.forskningsdata-verktoy.query-at-entity | Spørringen går til dataene (N2) | consent-as-agreement | Bidraget regnes ut i entitetens egen celle fra data entiteten selv eier. Bidragene samles i en celle som eies av Informasjonssystemer (§6 spm. 4), ikke av studenten. Studenten får bare summen (eller median, fordeling) når minst k har bidratt | test.fd.student-ser-ikke-bidrag, test.fd.k-terskel-svar | F2 |
+| purpose://candidate.forskningsdata-verktoy.flow-aggregator | Aggregator som lytter på Flow | consent-as-agreement | Når det er upraktisk å spørre hver gang, signerer entiteten én kontrakt (signContract) som lar en aggregator abonnere på bestemte Flow-hendelser fra entitetens celle. Aggregatoren eies av Informasjonssystemer, teller hendelser i faste bøtter og gir bare samletall over k. Når kontrakten trekkes eller utløper, får aggregatoren ingen flere hendelser | test.fd.flow-krever-kontrakt, test.fd.flow-stopper-ved-trekk | F2 |
 | purpose://candidate.forskningsdata-verktoy.pseudonymous-rows | Rad-data med pseudonym per forespørsel (N3) | consent-as-agreement | Når svarformen er «per person», får studenten én rad per entitet med pseudonymet H(hemmelighet, forespørsels-id). To forespørsler kan ikke kobles på pseudonymet | test.fd.pseudonym-ukoblet | F2 |
 | purpose://candidate.forskningsdata-verktoy.withdraw | Trekke seg, og utløp | consent-as-agreement | Entiteten trekker kontrakten med ett trykk. Neste utregning tar den ikke med, feeden stopper, og begge ser ny status. Kontrakten utløper av seg selv på sluttdatoen | test.fd.trekk, test.fd.utlop | F2 |
 | purpose://candidate.forskningsdata-verktoy.entity-storage | Lagring hos entiteten (N4) | consent-as-agreement | Kontrakten kan gi studenten skriving på ett forskningsfelt i entiteten med fast skjema. Entiteten ser alt som er skrevet og kan slette. Lesing går som i N2 eller N3 | test.fd.lagring-skjema-og-sletting | F3 |
 | purpose://candidate.forskningsdata-verktoy.cross-language | Likt i Swift, Python og Go | consent-as-agreement | Felles gyldne fixtures (forespørsel, aksept, opptak, avslag, trekk, k-terskel) gir samme svar i Swift, Python og Go. Swift-fixturene lages først | test.fd.interop-fixtures | F2 |
 | purpose://candidate.forskningsdata-verktoy.export | Eksport med opphav | purpose://self-determination.data.verifiability | Hvert datasett eksporteres som CSV og JSON med manifest (`research.dataset.v2`: kilde, mal og versjon, bøtter, k, antall samtykker, utleveringslogg-id, hash). PyResearchScaffold leser det og lager figur | test.fd.eksport-til-pyresearch | F1 |
-| purpose://candidate.forskningsdata-verktoy.synthetic | Syntetisk populasjon (N0) | root | En generator lager syntetiske entiteter og hendelser med samme skjema som katalogen, med frø, slik at studenten utvikler analysen før ekte data finnes | test.fd.syntetisk-samme-skjema | F3 |
+| purpose://candidate.forskningsdata-verktoy.swarm | Svermsimulerte entiteter (N0) | root | Studenten setter opp et sett svermsimulerte entiteter med atferd, og kjører dem mot en node. Settet bygges fra en generator med frø, eller fra et snapshot av ekte brukere (snapshot-seed). Samme frø og samme snapshot gir samme sverm. Data fra svermen har samme skjema som katalogen | test.fd.sverm-samme-skjema, test.fd.sverm-reproduserbar | F2 |
+| purpose://candidate.forskningsdata-verktoy.swarm-behaviour | Sosial atferd, ikke bare last | swarm | Atferdsskriptene dekker det forskningen trenger: invitere, svare på forespørsler (ja, ikke nå, aldri), sende meldinger, lage og dele dokumenter. Bygger videre på `VirtualUser`/`BehaviorScript` i `UserSimulationScaffoldCore` | test.fd.sverm-atferd | F2 |
+| purpose://candidate.forskningsdata-verktoy.snapshot-seed | Snapshot av ekte brukere som startpunkt | swarm | Et snapshot tas bare av entiteter som har signert kontrakt for det, og bare av felt persondatavurderingen tillater for formålet. Identifikatorer erstattes før snapshotet forlater entiteten. Svermen starter fra snapshotet uten å kunne nå de ekte entitetene | test.fd.snapshot-bare-med-kontrakt, test.fd.snapshot-uten-identifikator | F2 |
 | purpose://candidate.forskningsdata-verktoy.display | Komponenter som viser personvernet | root | Tall-flis, søyle og linje med skjulte bøtter, fordeling, samtykketrakt og opphavskort virker i web og Binding med samme data. Skjult verdi står som «færre enn k» i begge | test.gui.parity, test.fd.skjult-vises | F1 |
 | purpose://candidate.forskningsdata-verktoy.display-suppressed | Skjulte bøtter i diagram | display | `{value: null, suppressed: true}` tegnes som merket hull i søyle og linje i både `skeleton-runtime.js` og CellApple `SkeletonView.swift`. Linjen trekkes ikke forbi hullet | test.fd.skjult-vises | F1 |
 | purpose://candidate.forskningsdata-verktoy.dashboard-template | Mal: Mitt forskningsdashbord | root | En CellConfiguration med tall-fliser, et diagram, opphavskort og «Mine forespørsler» åpnes i Studio som eget utkast og består nåbarhetssjekken | test.fd.mal-naabar | F1 |
@@ -91,7 +107,7 @@ Faser (forslag, se `PLAN.md`): **F1** katalog, anonyme samletall, visning, dashb
 Hva dette IKKE er:
 - Ikke frie spørringer. Bare maler fra katalogen, med versjon.
 - Ikke en vei rundt Agreement. Også anonyme samletall krever forskerrollen.
-- Ikke innsamling av ekte persondata på staging før §6 spørsmål 1 er besvart.
+- Ikke innsamling fra ekte brukere på staging. Staging prøver at verktøyene er klare for ekte brukere i prod (Kjetil 18.11). Ekte innsamling skjer i prod, med UiO-godkjenning der persondatavurderingen krever det.
 - Ikke et anonymisert nettverk av hvem som snakker med hvem. Det er N0 (syntetisk) til noen har vist at det kan gjøres trygt.
 - Ikke analyseverktøy. Analyse og figurer er PyResearchScaffold sin jobb; her lages bare eksporten den leser.
 - Ikke et vedtak om nytt forskningstema.
@@ -109,6 +125,8 @@ Avhengigheter. Hver skal være målt før den bygges på, ellers står «ikke m�
 | Rendering av `table` og `chart` i Binding | CellApple `SkeletonView.swift` | Én serie | Lest, ikke kjørt i Binding denne økten | ja (F1) |
 | PyResearchScaffold datasett og figur | `/Users/kjetil/Build/Digipomps/HAVEN/PyResearchScaffold/` | Datasettkontrakt låst til kalibrering; gren ikke på main | Verifisert av Codex 12.11 (README); ikke kjørt her | ja (eksport) |
 | Kontrakt-tilbakekalling og feed-revalidering | `GeneralCell.swift` rundt 1640 | | Lest, ikke kjørt | ja (F2) |
+| Svermsimulator (`VirtualUser`, `BehaviorScript`, koordinator/arbeider) | `CellScaffold/Sources/UserSimulationScaffoldCore/` | Lasttest; ingen sosial atferd, ingen snapshot | Lest, ikke kjørt | ja (F2 sverm) |
+| Flow med kontrakt per element | `CellProtocol/Docs/ActiveFeedAuthorization.md`, `GeneralCell.flow(requester:)` | Bro bekrefter ikke nedriving av fjern-feed | Lest, ikke kjørt | ja (flow-aggregator) |
 | Swift-bygg | Kjetils Mac (Remote Control) eller CI | Skycontaineren har Swift bare via Docker, og CellScaffold App bygger ikke der (minne `haven-cloud-swift-docker`) | | ja |
 
 ## 3. Forventningskontrakt — «Det du kommer til å se»
@@ -124,6 +142,8 @@ Avhengigheter. Hver skal være målt før den bygges på, ellers står «ikke m�
 | Forespørsel, kort og trekk ende til ende med tre testkontoer | kjørende flate + skjermbilder | staging; `evidence/` | `images/foresporsel-*-v1.png`, `images/kort-*-v1.png` | nei |
 | Interop-fixtures Swift/Python/Go | testutdata | `TESTRESULT.md#interop` | — | nei |
 | Eksport lest av PyResearchScaffold med figur | fil + figur | `evidence/eksport/` | — | nei |
+| Persondataregler v1 og vurdering i bygger og kort | fil + testutdata + skjermbilder | `contract/research-pii-rules.v1.json`, `TESTRESULT.md#pii` | — | nei |
+| Sverm fra frø og fra snapshot, kjørt mot staging | testutdata + eksport | `TESTRESULT.md#sverm`, `evidence/sverm/` | — | nei |
 | Onboardingtrinn i studentpakken, med målt tid | fil + måling | `MasterHAVEN26/KOM_I_GANG.md`, `TESTRESULT.md#onboarding` | — | nei |
 
 ## 4. Tilknyttede formålspakker og lærdommer
@@ -313,7 +333,16 @@ Automatisk liste fra `purpose_dev.py lookup` følger.
 | test.fd.lagring-skjema-og-sletting | entity-storage | Skriving utenfor skjemaet avvises; entiteten ser og sletter det studenten skrev | TESTRESULT.md#n4 | venter |
 | test.fd.interop-fixtures | cross-language | Swift lager fixtures; Py og Go gir samme opptak/avslag på alle | TESTRESULT.md#interop | venter |
 | test.fd.eksport-til-pyresearch | export | Eksport fra staging lastes i PyResearchScaffold med `research.dataset.v2`, hashen stemmer, og en figur lages | TESTRESULT.md#eksport | venter |
-| test.fd.syntetisk-samme-skjema | synthetic | Generator med frø gir data som består samme skjemasjekk som ekte eksport, og samme frø gir samme data | TESTRESULT.md#syntetisk | venter |
+| test.fd.pii-grad-gir-regler | pii-assessment | Tabelltest: hver grad gir forventet svarform, k, oppløsning, lagringstid, eksport og godkjenningskrav; en kvasi-identifikator i samme mal som et lite utvalg gir høyere k | TESTRESULT.md#pii | venter |
+| test.fd.pii-haandheves | pii-assessment | En forespørsel som bryter reglene for sin grad avvises av cellen, ikke bare av flaten | TESTRESULT.md#pii | venter |
+| test.fd.pii-regler-versjon | pii-rules-table | Ny regelversjon endrer ikke en godkjent forespørsel; nye forespørsler får ny versjon | TESTRESULT.md#pii | venter |
+| test.fd.flow-krever-kontrakt | flow-aggregator | Aggregator uten kontrakt får avslag på `flow`; med kontrakt får den bare de avtalte hendelsene | TESTRESULT.md#flow | venter |
+| test.fd.flow-stopper-ved-trekk | flow-aggregator | Etter trekk eller utløp leveres ingen nye hendelser, og samletallet tar ikke entiteten med i nye bøtter | TESTRESULT.md#flow | venter |
+| test.fd.sverm-samme-skjema | swarm | Data fra svermen består samme skjemasjekk som ekte eksport | TESTRESULT.md#sverm | venter |
+| test.fd.sverm-reproduserbar | swarm | Samme frø (eller samme snapshot) to ganger gir like hendelser og like samletall | TESTRESULT.md#sverm | venter |
+| test.fd.sverm-atferd | swarm-behaviour | En sverm på 50 med blandet atferd gir invitasjoner, svar på forespørsler, meldinger og dokumenter på staging, talt i utleveringsloggen | TESTRESULT.md#sverm | venter |
+| test.fd.snapshot-bare-med-kontrakt | snapshot-seed | Snapshot av en entitet uten kontrakt avvises; med kontrakt tas bare tillatte felt | TESTRESULT.md#snapshot | venter |
+| test.fd.snapshot-uten-identifikator | snapshot-seed | Søk etter hver uuid og hvert navn fra de ekte testkontoene i snapshotet: 0 treff | TESTRESULT.md#snapshot | venter |
 | test.fd.skjult-vises | display, display-suppressed | Samme tilstand rendret i web (Playwright) og Binding (snapshot-test): skjult bøtte har merket og teksten «færre enn k»; linjen brytes | TESTRESULT.md#skjult | venter |
 | test.gui.parity | display | Fra pakken: bilde mot godkjent referanse, samme viewport, i web og Binding | ACCEPT.md#gui | venter |
 | test.fd.mal-naabar | dashboard-template | Malen importeres i Studio og nåbarhetssjekken gir 0 funn | TESTRESULT.md#mal | venter |
@@ -329,9 +358,9 @@ Automatisk liste fra `purpose_dev.py lookup` følger.
 
 Bare spørsmål som endrer treet. Hvert har en anbefaling.
 
-1. **Hva får noden telle uten å spørre hver enkelt, og hvor skjer ekte innsamling?** Anbefaling: N1 bare for metadata noden selv lager om drift og om hvilke celletyper som brukes, oppført i en offentlig katalog. Alt om innhold (meldinger, dokumenter) krever samtykke (N2–N4). Ekte deltakere i N2–N4 først når prosjektet er godkjent ved UiO; på staging bare testkontoer og syntetiske data.
+1. **Besvart 18.11 (Kjetil).** Når det er upraktisk å spørre alle, kan aggregatorer lytte på Flow-hendelser, men Flow krever også signContract (flow-aggregator). Staging prøver at verktøy og funksjonalitet er klare for ekte brukere i prod. Studentene skal kunne bygge sett med svermsimulerte entiteter, med eller uten snapshot fra ekte brukere (swarm, snapshot-seed).
 2. **Hvem utsteder forskerrollen?** **Besluttet 18.11.2026 (Kjetil):** gruppeentiteten Informasjonssystemer, eid av Kjetil og Petter Nielsen, utsteder forskerrollen. Kjetil: «Det er den korrekte eierskapsmodellen. Den som eier hardwaren eier sannsynligvis scaffoldet, men andre kan eie sine egne celler også.» Inntil gruppa finnes, utsteder noden.
-3. **Hvilken minste gruppestørrelse k?** Anbefaling: 5 som standard, 2 bare i tester. På staging blir mange tall skjult, og det er riktig.
+3. **Besvart 18.11 (Kjetil).** Minste gruppestørrelse ses i forhold til persondata og forskningsspørsmålet, og det trengs funksjonalitet for å vurdere graden av persondata mot hva man kan gjøre med dem (pii-assessment, pii-rules-table). 5 brukes bare som utgangsverdi i regeltabellen.
 4. **Hvem eier samlecellen i N2?** Anbefaling (endret 18.11): gruppeentiteten Informasjonssystemer eier samlecellen som sin egen celle på scaffoldet. Det følger prinsippet Kjetil ga 18.11 om at andre enn hardware-eieren kan eie egne celler. Noden kjører cellen, men eier den ikke. Ikke bekreftet av Kjetil for dette punktet. Kortet sier rett ut hvem som legger sammen tallene («Tallet ditt legges sammen av Informasjonssystemer; studenten ser bare summen»). Alternativet, sikker summering der ingen ser bidragene, er et forskningsspørsmål (F3), ikke noe vi har.
 
 ## 7. Revisjonslogg
@@ -339,6 +368,7 @@ Bare spørsmål som endrer treet. Hvert har en anbefaling.
 | Iterasjon | Dato | Hva endret seg | Hvem |
 |---|---|---|---|
 | 0 | 2026-11-17 | Opprettet | Losen |
+| 2 | 2026-11-18 | G1 og G1-GUI godkjent. Svarene på §6 spm. 1 og 3 ført inn: nye formål pii-assessment, pii-rules-table, flow-aggregator, swarm, swarm-behaviour, snapshot-seed (erstatter synthetic); k fra persondatavurdering; ekte innsamling i prod, staging for klarhet; 10 nye tester | Claude |
 | 1d | 2026-11-18 | §6 spm. 2 besluttet av Kjetil (Informasjonssystemer utsteder forskerrollen). Spm. 4 anbefaling endret til at gruppa eier samlecellen | Claude |
 | 1c | 2026-11-17 | §2 og researcher-role peker på PDD_informasjonssystemer-gruppeentitet (PR #46) for rolle-VC-er og Py/Go-porten av ProvedClaimCondition, så den ikke bygges to ganger | Claude |
 | 1b | 2026-11-17 | §6 spm. 2 og 4: gruppeentiteten «Informasjonssystemer» (Kjetil + Petter Nielsen) lagt inn som anbefalt utsteder, etter Kjetils forslag i en annen tråd | Claude |
