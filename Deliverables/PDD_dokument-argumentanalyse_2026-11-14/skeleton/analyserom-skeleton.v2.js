@@ -46,9 +46,24 @@ const kommentar = V([
   { TextArea: { modifiers: { ...field, ...when(S + "valgt.harValgt") }, editorMode: "plain", minLines: 2, maxLines: 6, placeholder: "Skriv en kommentar …", targetKeypath: "analyse.kommentar.send", submitOnEnter: true } },
 ], { ...card });
 
+const forslagRad = V([
+  H([T("Modellforslag", { fontSize: 12, foregroundColor: "#B45309", fontWeight: "semibold" }), K("typeEtikett", { fontSize: 12, foregroundColor: "#1D4ED8" })]),
+  K("sitat", ink),
+  K("begrunnelse", subtle),
+  H([B("analyse.forslag.godta", "Godta", { payloadKeypath: "id" }, primary), B("analyse.forslag.avvis", "Avvis", { payloadKeypath: "id" })]),
+], { ...card, background: "#FFFBEB", borderColor: "#FDE68A" }, 6);
+
+const modellHjelp = V([
+  K(S + "modell.forklaring", subtle),
+  H([B("analyse.modell.foreslaa", "Be modellen om forslag", { payload: {} })]),
+], when(S + "modell.tilgjengelig"));
+
 const paastander = V([
   K(S + "oppsummering", subtle),
   modellBanner,
+  modellHjelp,
+  V([T("Til vurdering fra modellen", { ...ink, fontWeight: "semibold" }),
+     { List: { keypath: S + "forslag", elements: [], flowElementSkeleton: forslagRad } }], when(S + "harForslag")),
   kommentar,
   { List: { keypath: S + "paastander", elements: [], flowElementSkeleton: paastandRad } },
 ], {}, 10);

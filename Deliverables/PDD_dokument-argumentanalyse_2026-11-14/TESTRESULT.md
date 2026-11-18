@@ -30,3 +30,13 @@ Faktiske kjøringer. Ingenting her er meldt levert før bygget det gjelder er gr
 - Hver handling skjelettet sender er en medlemsnøkkel i rommet, og hver `analyse.state.*`-sti det leser finnes i tilstanden.
 - Bilder: `images/analyserom-*-v2.png`, rendret med `skeleton/render-v2.js` og ekte web-renderer fra tilstander rommet selv laget (`skeleton/states-v2/`). Bildene avslørte at et `label`-felt i påstandsradene overstyrte knappetekstene; feltet er fjernet og testen sjekker det nå.
 - Åpent: invitasjon fra flaten (eier velger deltakere) finnes ikke ennå. Rommet støtter invitasjonsbevis fra CellBase-chatten, men flaten har ingen knapp for det.
+
+## #modell (WP6, T-MODELL-ANKER, T-MODELL-NEDE)
+
+- Fem nye tester i `TextAnalysisRoomCellTests` (18/18 grønne, 2026-11-18, samme rigg), med falsk modell:
+  - Uten modell og med en modell som feiler står grunnanalysen som før, og rommet sier at modellhjelp ikke er på.
+  - Av seks modellforslag slapp to gjennom. De fire andre ble forkastet med grunn: sitatet fantes ikke i teksten, ukjent påstand, ukjent type, peker på seg selv. Ingenting kom inn i kartet før en deltaker godtok det. Et godtatt motargument ble tegnet som «angriper» (ikke antatt). Et godtatt skjult premiss ble tegnet stiplet som antatt, med navnet på den som godtok det.
+  - `purpose://prompt.unknown` og en fremmed når aldri modellen.
+  - Når en tekst fjernes, følger markeringer, kommentarer og forslag påstanden sin, selv om påstands-id-en flytter seg.
+- **Rødsjekk**: en sitatsjekk som godtar alt gjør ankertesten rød. Satt tilbake.
+- Ikke gjort: panel (T-PANEL) og en ekte modellrute. Rommet har ingen modell installert før tråden om modelltilgang har valgt rute for studentene.
