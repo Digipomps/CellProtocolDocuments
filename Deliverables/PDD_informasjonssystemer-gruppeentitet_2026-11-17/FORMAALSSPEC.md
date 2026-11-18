@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — Informasjonssystemer som gruppeentitet
 
-Oppgavemappe: `PDD_informasjonssystemer-gruppeentitet_2026-11-17` · Opprettet 2026-11-17 · Iterasjon 3 (ikke godkjent)
+Oppgavemappe: `PDD_informasjonssystemer-gruppeentitet_2026-11-17` · Opprettet 2026-11-17 · Iterasjon 4 (ikke godkjent)
 
 > Regel: ingen plan før G1 er godkjent av Kjetil. For GUI: ingen implementering før G1-GUI (rendret bilde) er godkjent.
 > Et dokument om leveransen teller aldri som leveransen.
@@ -14,6 +14,10 @@ Kjetil, 2026-11-17 08:46Z:
 Kjetil, 2026-11-18 19:29Z (i tråden om forskningsdataverktøy):
 
 > Ja jeg bekrefter at gruppeentiteten Informasjonssystemer (eid av meg og Petter Nielsen) også skal utstede forskerrollen til studentene. Det er den korrekte eierskapsmodellen. Den som eier hardwaren eier sansynligvis scaffoldet men andre kan eie sine egne celler også.
+
+Kjetil, 2026-11-18 20:03Z (svar på §6):
+
+> 1. gjør forslaget men det må være konfigurerbart for å støtte ulike eierskapsavtaler. 2. Start meg meg alene. 4. Gå for den 5. Nøkkel på staging.
 
 Sammenheng fra prosjektet (ikke Kjetils ord): gruppa er en naturlig utsteder av forskerrollen i
 `PDD_forskningsdata-verktoy_2026-11-17` (CPD #45, spørsmål 2 «hvem utsteder forskerrollen»), en naturlig
@@ -48,9 +52,10 @@ studentene trenger, og samtidig bygge det samme i Python og Go.
 |---|---|---|---|---|---|---|
 | purpose://candidate.informasjonssystemer-gruppeentitet.root | Informasjonssystemer finnes som egen gruppeentitet, styrt av Kjetil og Petter | purpose://governance | Gruppa har egen nøkkel og egen styringspolicy der Kjetil og Petter er eiere. Den kan gi og trekke tilbake roller som andre celler sjekker gjennom Agreement-vilkår, likt i Swift, Python og Go | Kjetil ser gruppa med to eiere i Binding og på web; en student får rollen «MasterHAVEN26-student», og en celle med vilkåret slipper studenten inn og nekter en fremmed, i alle tre språk | test.ge.e2e | candidate |
 | purpose://candidate.informasjonssystemer-gruppeentitet.genesis | Gruppa blir født med en signert styringspolicy | root | Én `OrganizationGenesisSeal` signert av grunnleggerne peker på `GovernancePolicy` v1. Gruppenøkkelen lages av hvelvet og forlater det aldri. Ingen person blir `same_entity` med gruppa | Seglet verifiseres av en tredjepart; et forsøk på å lenke Kjetils person-identitet som `same_entity` med gruppa avvises | test.ge.genesis, test.ge.no-same-entity | candidate (= organisasjonsplanens PR 2) |
-| purpose://candidate.informasjonssystemer-gruppeentitet.owners | Kjetil og Petter er eiergruppa | genesis | Policyen har to medlemmer med rollen `owner`. Regelen «roller» (gi/trekke rolle) krever én eier. Regelen «styring» (endre policy, legge til eller fjerne eier) krever begge, med distinkte personer | En eier alene kan gi en studentrolle; en eier alene kan **ikke** legge til en tredje eier; begge sammen kan | test.ge.owners-rules | candidate (regel for styring: §6 spm. 1) |
-| purpose://candidate.informasjonssystemer-gruppeentitet.owner-onboarding | Petter kommer inn uten at Kjetil må vente | owners | Gruppa kan starte med Kjetil som eneste eier (v1) og få Petter som eier i v2 når han har en identitet. Overgangen er en ny policyversjon, ikke en ny nøkkel | v1 → v2 ligger i policykjeden med `previousPolicyHash`; roller utstedt under v1 er fortsatt gyldige | test.ge.policy-chain | candidate (§6 spm. 2) |
-| purpose://candidate.informasjonssystemer-gruppeentitet.vault | Gruppenøkkelen brukes bare etter godkjenning | genesis | `OrganizationVaultCell` signerer nøyaktig et forslag som `GovernancePolicyEvaluator` har godtatt, og fører forslag, godkjenninger og signatur i gruppas journal. Nøkkelen kan ikke eksporteres | Signering uten bundle, med brukt nonce, med utløpt forslag eller med fremmed godkjenner avvises; journalen viser hvem som godkjente | test.ge.vault-negative, test.ge.journal | candidate (= organisasjonsplanens PR 3, smalt: bare CellVapor-hvelv på staging) |
+| purpose://candidate.informasjonssystemer-gruppeentitet.owners | Kjetil og Petter er eiergruppa | genesis | Policyen har to medlemmer med rollen `owner`. Regelen «roller» (gi/trekke rolle) krever én eier. Regelen «styring» (endre policy, legge til eller fjerne eier) krever begge, med distinkte personer | En eier alene kan gi en studentrolle; en eier alene kan **ikke** legge til en tredje eier; begge sammen kan | test.ge.owners-rules | candidate (spm. 1 besvart 18.11: forslaget, konfigurerbart) |
+| purpose://candidate.informasjonssystemer-gruppeentitet.ownership-agreement | Eierskapsavtalen er konfigurerbar | owners | Hvilke handlinger som krever én eier, flere eiere eller alle, er data i policyen (`SigningRule.anyOf` per `actionClass`), ikke kode. Gruppa starter med malen «roller: én eier; styring: alle eiere», og kan bytte til en annen avtale (f.eks. «alt krever to», «én eier alene», «to av tre») som en ny policyversjon godkjent etter gjeldende styringsregel | Tre maler gir hver sitt forventede utfall på samme forslag uten kodeendring; et bytte av mal uten godkjenning etter gjeldende regel avvises; Swift, Py og Go gir samme utfall | test.ge.ownership-templates | candidate (Kjetil 18.11) |
+| purpose://candidate.informasjonssystemer-gruppeentitet.owner-onboarding | Petter kommer inn uten at Kjetil må vente | owners | Gruppa kan starte med Kjetil som eneste eier (v1) og få Petter som eier i v2 når han har en identitet. Overgangen er en ny policyversjon, ikke en ny nøkkel | v1 → v2 ligger i policykjeden med `previousPolicyHash`; roller utstedt under v1 er fortsatt gyldige | test.ge.policy-chain | candidate (spm. 2 besvart 18.11: start med Kjetil alene) |
+| purpose://candidate.informasjonssystemer-gruppeentitet.vault | Gruppenøkkelen brukes bare etter godkjenning | genesis | `OrganizationVaultCell` signerer nøyaktig et forslag som `GovernancePolicyEvaluator` har godtatt, og fører forslag, godkjenninger og signatur i gruppas journal. Nøkkelen kan ikke eksporteres | Signering uten bundle, med brukt nonce, med utløpt forslag eller med fremmed godkjenner avvises; journalen viser hvem som godkjente | test.ge.vault-negative, test.ge.journal | candidate (= organisasjonsplanens PR 3, smalt: CellVapor-hvelv med programvarenøkkel på staging, merket testnøkkel; spm. 5 besvart 18.11) |
 | purpose://candidate.informasjonssystemer-gruppeentitet.approve | Eier godkjenner med egen nøkkel | vault | Eieren ser hva som skal signeres (sammendrag laget av hvelvet fra payloaden), og godkjenner i Binding med Face ID eller på web med passkey | Godkjenning fra Binding og fra web gir samme bundle-format; et sammendrag som ikke svarer til payloaden avvises | test.ge.approve-binding, test.ge.approve-web | candidate |
 | purpose://candidate.informasjonssystemer-gruppeentitet.roles | Gruppa gir roller som VC | vault | Gruppa utsteder rolle-VC-er (`InformasjonssystemerRoleCredential` med `role` = `student`, `researcher`, `supervisor`, kull og gyldighet) til en persons domene-identitet. Utstederen er gruppas nøkkel. Forskerrollen til studentene utstedes av gruppa (bekreftet av Kjetil 18.11) | En utstedt VC verifiseres mot gruppas nøkkel i Swift, Python og Go fra samme fixture | test.ge.role-vc-fixture | candidate (`researcher` bekreftet 18.11; øvrige rollenavn: §6 spm. 3) |
 | purpose://candidate.informasjonssystemer-gruppeentitet.revoke | Roller kan trekkes tilbake | roles | Gruppa fører en statusliste. En tilbaketrukket rolle slutter å oppfylle vilkår ved neste tilgang, ikke ved neste innlogging | Etter tilbaketrekking avvises neste kall i en celle som allerede har gitt kontrakt | test.ge.revoke-next-access | candidate |
@@ -356,6 +361,7 @@ Lærdommer som former dette treet (sitert fra `purpose_dev.py lookup`):
 | test.ge.genesis | genesis | XCTest + pytest + go test fra samme fixture: seglet signert av grunnleggerne verifiseres; manipulert policyhash avvises | TESTRESULT.md#genesis | venter |
 | test.ge.no-same-entity | genesis | XCTest: `IdentityLinkRegistry.sameEntityLink` fra person til organisasjonsanker feiler lukket | TESTRESULT.md#genesis | venter |
 | test.ge.owners-rules | owners | XCTest + Py + Go: én eier gir rolle (godtatt); én eier legger til eier (avvist `clauseNotSatisfied`); begge legger til eier (godtatt); samme person to ganger (avvist) | TESTRESULT.md#owners | venter |
+| test.ge.ownership-templates | ownership-agreement | XCTest + Py + Go fra samme fixture: malene «roller én / styring alle», «alt krever to» og «én eier alene» på samme forslag gir forventet godtatt/avvist; malbytte uten gyldig amendment avvises | TESTRESULT.md#ownership | venter |
 | test.ge.policy-chain | owner-onboarding | v1 (Kjetil) → v2 (Kjetil + Petter-testidentitet) med `previousPolicyHash`; rolle utstedt under v1 verifiseres etter v2; v2 uten gyldig amendment avvises | TESTRESULT.md#policy-chain | venter |
 | test.ge.vault-negative | vault | Signering uten bundle, gjenbrukt nonce, utløpt forslag, fremmed godkjenner, endret payload: alle avvist, ingen signatur ut | TESTRESULT.md#vault | venter |
 | test.ge.journal | vault | Journalen etter tre handlinger har tre poster med forslag, godkjennere og regel; hashkjeden verifiseres | TESTRESULT.md#vault | venter |
@@ -386,21 +392,15 @@ Lærdommer som former dette treet (sitert fra `purpose_dev.py lookup`):
 
 ## 6. Åpne spørsmål til Kjetil
 
-Bare spørsmål som endrer treet:
+Besvart 18.11 (sitert i §0):
 
-1. **Hva krever begge eierne?** Forslag: å gi og trekke roller kan én eier gjøre alene. Å endre policyen
-   (legge til eller fjerne eier, endre regler) krever begge. Alternativ: alt krever én, eller alt krever begge.
-2. **Start med deg alene?** Forslag: gruppa opprettes nå med deg som eneste eier (v1), og Petter legges til i
-   v2 når han har en identitet på staging. Da venter ikke studentarbeidet på Petter. Alternativ: vente til
-   begge kan signere seglet sammen.
-3. **Hvilke roller skal gruppa kunne gi?** `researcher` er bekreftet (18.11). Forslag for resten: `student` (med kull, f.eks. MasterHAVEN26), `researcher`
-   (forskerrollen i CPD #45) og `supervisor` (veileder). Flere kan legges til uten kodeendring.
-4. **Navn og referanse.** Forslag: visningsnavn «Informasjonssystemer (Ifi, UiO)» med undertittel
-   «forskningsgruppe ved Institutt for informatikk», referanse `entity:ifi-informasjonssystemer`, ingen
-   organisasjonsnummer.
-5. **Hvelvet på staging.** Organisasjonsplanen sier at programvarenøkkel bare er for test, og at prod skal ha
-   KMS/HSM. Forslag: staging bruker programvarenøkkel i CellVapor-hvelvet, merket `keyIsExportable = true`
-   og synlig som «testnøkkel» på flaten, til KMS finnes. Alternativ: vente på KMS.
+1. Hva krever begge eierne? → Forslaget (roller: én eier; styring: alle eiere), **gjort konfigurerbart** for ulike eierskapsavtaler (nytt formål ownership-agreement).
+2. Start med deg alene? → **Ja.** v1 har Kjetil som eneste eier; Petter legges til i v2.
+3. Hvilke roller? → `researcher` bekreftet. `student` (med kull) og `supervisor` er forslag som står til G1.
+4. Navn og referanse → **Forslaget**: «Informasjonssystemer (Ifi, UiO)», undertittel «forskningsgruppe ved Institutt for informatikk», `entity:ifi-informasjonssystemer`, ingen organisasjonsnummer.
+5. Hvelvet på staging → **Programvarenøkkel på staging**, merket testnøkkel, til KMS finnes.
+
+Ingen åpne spørsmål som endrer treet. G1 venter på Kjetils uttrykkelige ord.
 
 ## 7. Revisjonslogg
 
@@ -410,3 +410,4 @@ Bare spørsmål som endrer treet:
 | 1 | 2026-11-17 | Brief-audit mot kode (Digipomps er bare en registrert referanse, DiMy finnes ikke, organisasjonsmodellen har bare PR 1 i Swift, ingen Py/Go), 14 formål, 29 tester, 5 spørsmål | Claude |
 | 2 | 2026-11-17 | Nytt formål status-offline etter krav fra Mistral-kvote-tråden: sjekk per kall uten nettverk til gruppa, kjent oppførsel når status er ukjent | Claude |
 | 3 | 2026-11-18 | Kjetils bekreftelse 18.11 sitert i §0: gruppa utsteder forskerrollen; nytt formål owns-cells (maskinvareeier eier scaffolden, gruppa eier egne celler); spm. 3 delvis besvart | Claude |
+| 4 | 2026-11-18 | Svar på spm. 1, 2, 4, 5 innarbeidet; nytt formål ownership-agreement (konfigurerbar eierskapsavtale) med test | Claude |
