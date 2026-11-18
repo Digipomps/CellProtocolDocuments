@@ -330,15 +330,16 @@ Automatisk liste fra `purpose_dev.py lookup` følger.
 Bare spørsmål som endrer treet. Hvert har en anbefaling.
 
 1. **Hva får noden telle uten å spørre hver enkelt, og hvor skjer ekte innsamling?** Anbefaling: N1 bare for metadata noden selv lager om drift og om hvilke celletyper som brukes, oppført i en offentlig katalog. Alt om innhold (meldinger, dokumenter) krever samtykke (N2–N4). Ekte deltakere i N2–N4 først når prosjektet er godkjent ved UiO; på staging bare testkontoer og syntetiske data.
-2. **Hvem utsteder forskerrollen?** Anbefaling (endret 17.11): gruppeentiteten «Informasjonssystemer» ved IFI, som Kjetil i en annen tråd foreslo opprettet med Kjetil og Petter Nielsen i eiergruppen. Da utsteder faggruppen rollen, ikke driftsnoden. Inntil den finnes, utsteder noden (Kjetil). Ikke bekreftet for denne oppgaven.
+2. **Hvem utsteder forskerrollen?** **Besluttet 18.11.2026 (Kjetil):** gruppeentiteten Informasjonssystemer, eid av Kjetil og Petter Nielsen, utsteder forskerrollen. Kjetil: «Det er den korrekte eierskapsmodellen. Den som eier hardwaren eier sannsynligvis scaffoldet, men andre kan eie sine egne celler også.» Inntil gruppa finnes, utsteder noden.
 3. **Hvilken minste gruppestørrelse k?** Anbefaling: 5 som standard, 2 bare i tester. På staging blir mange tall skjult, og det er riktig.
-4. **Hvem eier samlecellen i N2?** Anbefaling: noden (alternativ: gruppeentiteten «Informasjonssystemer», se spm. 2), med det sagt rett ut på kortet («Tallet ditt legges sammen av HAVEN-noden; studenten ser bare summen»). Alternativet, sikker summering der ingen ser bidragene, er et forskningsspørsmål (F3), ikke noe vi har.
+4. **Hvem eier samlecellen i N2?** Anbefaling (endret 18.11): gruppeentiteten Informasjonssystemer eier samlecellen som sin egen celle på scaffoldet. Det følger prinsippet Kjetil ga 18.11 om at andre enn hardware-eieren kan eie egne celler. Noden kjører cellen, men eier den ikke. Ikke bekreftet av Kjetil for dette punktet. Kortet sier hvem som legger sammen tallene, med det sagt rett ut på kortet («Tallet ditt legges sammen av HAVEN-noden; studenten ser bare summen»). Alternativet, sikker summering der ingen ser bidragene, er et forskningsspørsmål (F3), ikke noe vi har.
 
 ## 7. Revisjonslogg
 
 | Iterasjon | Dato | Hva endret seg | Hvem |
 |---|---|---|---|
 | 0 | 2026-11-17 | Opprettet | Losen |
+| 1d | 2026-11-18 | §6 spm. 2 besluttet av Kjetil (Informasjonssystemer utsteder forskerrollen). Spm. 4 anbefaling endret til at gruppa eier samlecellen | Claude |
 | 1c | 2026-11-17 | §2 og researcher-role peker på PDD_informasjonssystemer-gruppeentitet (PR #46) for rolle-VC-er og Py/Go-porten av ProvedClaimCondition, så den ikke bygges to ganger | Claude |
 | 1b | 2026-11-17 | §6 spm. 2 og 4: gruppeentiteten «Informasjonssystemer» (Kjetil + Petter Nielsen) lagt inn som anbefalt utsteder, etter Kjetils forslag i en annen tråd | Claude |
 | 1 | 2026-11-17 | Vurdering (`VURDERING.md`), brief-audit med ni funn, tre med 23 formål i tre faser, 33 tester, 4 spørsmål, planutkast. G1 bedt om | Claude |

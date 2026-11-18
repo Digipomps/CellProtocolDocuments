@@ -17,3 +17,4 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
 ## Logg
 - 2026-11-17: opprettet
 - 2026-11-17: VURDERING.md, FORMAALSSPEC iterasjon 1 (23 formål i tre faser, 33 tester, 4 spørsmål), PLAN.md som utkast, 12 bilder til G1-GUI (images/README.md). G1 og G1-GUI bedt om.
+- 2026-11-18: Kjetil besluttet §6 spm. 2: Informasjonssystemer (Kjetil + Petter Nielsen) utsteder forskerrollen. G1 og G1-GUI venter fortsatt.
