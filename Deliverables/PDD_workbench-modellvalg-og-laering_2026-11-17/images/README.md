@@ -28,3 +28,4 @@ Bildene er mockups i HTML, ikke Porthole-preview fra skjelett-JSON. Avvik fra de
 Det skjelettet kan i dag: `Picker` for modell og leverandør, `TextField` med `secure: true` for nøkkelen, `List`, `Button` med keypath.
 
 Alt på bildene som finnes fra før (sett-velgeren, Butler-knappen, «Hjelperen ser») er uendret fra PR #305.
+- Etter bygging (2026-11-18): nøkkelen sendes med Enter i det skjulte feltet. Knappen «Lagre og test» fra `mine-modeller-tom-v1.png` finnes ikke, fordi en knapp ikke kan lese et skjult felt. «Test» står som knapp på hver rad.
