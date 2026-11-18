@@ -79,6 +79,7 @@ Avhengigheter. Hver skal være målt før G1 der det går, ellers står det «ik
 | Varsel om invitasjon (som chat) | `PersonalChatNotifications.swift` | Laget for chat-tråder | Ikke målt for dokumenter | nei (listen i «Dokumenter» er nok for root-testen) |
 | Persistens av mange dokumentceller per student | `RichDocumentCell.finishPendingPersistence`, `SecretCredentialCell` som forbilde | | Ikke målt | ja |
 | Skrivehjelp-nøkler på dokumentet (`assist`, `assistPanel`, `chatPanel`) | CellScaffold PR #466 (ikke merget 18.11), `Tests/AppTests/RichDocumentAssistCellTests.swift` | Rollene må følge de testede grantene der | Ikke målt her | nei, men rollene må ta dem med når PR-en er inne |
+| Analyserommet (tråd C) bruker samme opptak | CellScaffold PR #465, `Sources/App/Cells/TextAnalysis/TextAnalysisRoomCell.swift`: innebygd CellBase ChatCell, vilkår `target.audience.admission.member` | Rommet er `.identityUnique` og har samme adresseringsproblem; skal bytte til den felles delen og adresseringen herfra | Testet i tråd C med ekte nøkler (fremmed avvist, tilbaketrukket mister tilgang) | nei |
 | Staging-bygg via release-toget | minne `haven-staging-release-process` | Claude merger/tagger/deployer aldri; FORESPOERSEL til Deploy etter verifisert bygg | — | ja, for root-testen |
 
 ## 3. Forventningskontrakt — «Det du kommer til å se»
@@ -367,3 +368,4 @@ Alle flatene i rad 1–3 bygges av vanlige skeleton-elementer (liste, tekst, kna
 | 1b | 2026-11-15 | §6 spm. 1 besluttet av Kjetil: felles opptaksdel i CellBase. G1 fortsatt ikke gitt; spm. 2–4 åpne | Claude |
 | 1c | 2026-11-15 | 10 bilder til G1-GUI i `images/`, rendret med ekte web-renderer (`skeleton/render.js`) | Claude |
 | 1d | 2026-11-18 | Roller utvidet med skrivehjelp-nøklene fra CellScaffold PR #466 (melding fra skrivehjelp-tråden) | Claude |
+| 1e | 2026-11-18 | Analyserommet (PR #465) lagt til som andre bruker av opptak og adressering | Claude |
