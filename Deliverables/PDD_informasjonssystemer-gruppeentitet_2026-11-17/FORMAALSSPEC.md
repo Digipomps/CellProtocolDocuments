@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — Informasjonssystemer som gruppeentitet
 
-Oppgavemappe: `PDD_informasjonssystemer-gruppeentitet_2026-11-17` · Opprettet 2026-11-17 · Iterasjon 4 (ikke godkjent)
+Oppgavemappe: `PDD_informasjonssystemer-gruppeentitet_2026-11-17` · Opprettet 2026-11-17 · Iterasjon 4 (G1 godkjent 2026-11-18)
 
 > Regel: ingen plan før G1 er godkjent av Kjetil. For GUI: ingen implementering før G1-GUI (rendret bilde) er godkjent.
 > Et dokument om leveransen teller aldri som leveransen.
