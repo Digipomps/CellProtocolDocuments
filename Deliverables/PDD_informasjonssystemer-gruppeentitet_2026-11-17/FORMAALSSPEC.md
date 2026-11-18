@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — Informasjonssystemer som gruppeentitet
 
-Oppgavemappe: `PDD_informasjonssystemer-gruppeentitet_2026-11-17` · Opprettet 2026-11-17 · Iterasjon 2 (ikke godkjent)
+Oppgavemappe: `PDD_informasjonssystemer-gruppeentitet_2026-11-17` · Opprettet 2026-11-17 · Iterasjon 3 (ikke godkjent)
 
 > Regel: ingen plan før G1 er godkjent av Kjetil. For GUI: ingen implementering før G1-GUI (rendret bilde) er godkjent.
 > Et dokument om leveransen teller aldri som leveransen.
@@ -10,6 +10,10 @@ Oppgavemappe: `PDD_informasjonssystemer-gruppeentitet_2026-11-17` · Opprettet 2
 Kjetil, 2026-11-17 08:46Z:
 
 > Vi bør opprette Informasjons sytemer gruppa på Ifi som egent entitet. Det er en gruppe entitet, i likhet med Digipomps og DiMy, som i  denne sammenhengen er administrert av Petter (Nielsen) og meg. Vi må altså være i eiergruppa til Informasjons Systemer.
+
+Kjetil, 2026-11-18 19:29Z (i tråden om forskningsdataverktøy):
+
+> Ja jeg bekrefter at gruppeentiteten Informasjonssystemer (eid av meg og Petter Nielsen) også skal utstede forskerrollen til studentene. Det er den korrekte eierskapsmodellen. Den som eier hardwaren eier sansynligvis scaffoldet men andre kan eie sine egne celler også.
 
 Sammenheng fra prosjektet (ikke Kjetils ord): gruppa er en naturlig utsteder av forskerrollen i
 `PDD_forskningsdata-verktoy_2026-11-17` (CPD #45, spørsmål 2 «hvem utsteder forskerrollen»), en naturlig
@@ -48,12 +52,13 @@ studentene trenger, og samtidig bygge det samme i Python og Go.
 | purpose://candidate.informasjonssystemer-gruppeentitet.owner-onboarding | Petter kommer inn uten at Kjetil må vente | owners | Gruppa kan starte med Kjetil som eneste eier (v1) og få Petter som eier i v2 når han har en identitet. Overgangen er en ny policyversjon, ikke en ny nøkkel | v1 → v2 ligger i policykjeden med `previousPolicyHash`; roller utstedt under v1 er fortsatt gyldige | test.ge.policy-chain | candidate (§6 spm. 2) |
 | purpose://candidate.informasjonssystemer-gruppeentitet.vault | Gruppenøkkelen brukes bare etter godkjenning | genesis | `OrganizationVaultCell` signerer nøyaktig et forslag som `GovernancePolicyEvaluator` har godtatt, og fører forslag, godkjenninger og signatur i gruppas journal. Nøkkelen kan ikke eksporteres | Signering uten bundle, med brukt nonce, med utløpt forslag eller med fremmed godkjenner avvises; journalen viser hvem som godkjente | test.ge.vault-negative, test.ge.journal | candidate (= organisasjonsplanens PR 3, smalt: bare CellVapor-hvelv på staging) |
 | purpose://candidate.informasjonssystemer-gruppeentitet.approve | Eier godkjenner med egen nøkkel | vault | Eieren ser hva som skal signeres (sammendrag laget av hvelvet fra payloaden), og godkjenner i Binding med Face ID eller på web med passkey | Godkjenning fra Binding og fra web gir samme bundle-format; et sammendrag som ikke svarer til payloaden avvises | test.ge.approve-binding, test.ge.approve-web | candidate |
-| purpose://candidate.informasjonssystemer-gruppeentitet.roles | Gruppa gir roller som VC | vault | Gruppa utsteder rolle-VC-er (`InformasjonssystemerRoleCredential` med `role` = `student`, `researcher`, `supervisor`, kull og gyldighet) til en persons domene-identitet. Utstederen er gruppas nøkkel | En utstedt VC verifiseres mot gruppas nøkkel i Swift, Python og Go fra samme fixture | test.ge.role-vc-fixture | candidate (rollenavn: §6 spm. 3) |
+| purpose://candidate.informasjonssystemer-gruppeentitet.roles | Gruppa gir roller som VC | vault | Gruppa utsteder rolle-VC-er (`InformasjonssystemerRoleCredential` med `role` = `student`, `researcher`, `supervisor`, kull og gyldighet) til en persons domene-identitet. Utstederen er gruppas nøkkel. Forskerrollen til studentene utstedes av gruppa (bekreftet av Kjetil 18.11) | En utstedt VC verifiseres mot gruppas nøkkel i Swift, Python og Go fra samme fixture | test.ge.role-vc-fixture | candidate (`researcher` bekreftet 18.11; øvrige rollenavn: §6 spm. 3) |
 | purpose://candidate.informasjonssystemer-gruppeentitet.revoke | Roller kan trekkes tilbake | roles | Gruppa fører en statusliste. En tilbaketrukket rolle slutter å oppfylle vilkår ved neste tilgang, ikke ved neste innlogging | Etter tilbaketrekking avvises neste kall i en celle som allerede har gitt kontrakt | test.ge.revoke-next-access | candidate |
 | purpose://candidate.informasjonssystemer-gruppeentitet.status-offline | Rollen sjekkes per kall uten å spørre gruppa | revoke | Statuslisten er signert av gruppa og speiles til noden ved hver endring. Vilkåret sjekker VC og status lokalt per kall. Er speilet eldre enn en fast grense (forslag 10 min) eller utilgjengelig, feiler vilkåret lukket med en egen grunn («rollestatus ukjent»), ikke som «ingen rolle» | Med gruppas side nede: gyldig rolle slippes inn mens speilet er ferskt; etter grensen avvises kallet med grunnen «rollestatus ukjent»; ingen nettverkskall til gruppa per kall | test.ge.status-offline | candidate |
 | purpose://candidate.informasjonssystemer-gruppeentitet.condition | Celler sjekker rollen gjennom Agreement-vilkår, likt i tre språk | roles | Ett vilkår «har rolle R fra Informasjonssystemer» (`ProvedClaimCondition` med `requiredCredentialType`, utsteder godkjent i TrustedIssuer). Samme vilkår gir samme svar i Swift, Python og Go. Ingen språkspesifikk snarvei | Én positiv og fire negative (fremmed, feil rolle, tilbaketrukket, utløpt) gir likt utfall i 3 × 5 kjøringer | test.ge.condition-interop | candidate |
 | purpose://candidate.informasjonssystemer-gruppeentitet.trust-anchor | Gruppa er en godkjent utsteder bare der noden sier det | condition | Nodens eier (staging: Digipomps-administratoren) legger gruppas nøkkel inn som godkjent utsteder for rollene, med formål. Å finnes som gruppe gir ingen tillit i seg selv | Uten oppføring i TrustedIssuer avvises en ellers gyldig rolle-VC | test.ge.issuer-not-trusted | candidate |
 | purpose://candidate.informasjonssystemer-gruppeentitet.not-uio | Gruppa later ikke som den er UiO | root | Profilen sier «forskningsgruppe ved Institutt for informatikk, UiO», `legalIdentifier` er tom, og evidensen er en lenke til gruppas side. Ingen flate viser gruppa som UiO eller som juridisk enhet | Inspeksjon av profil og flater; ingen `legalIdentifier`, ingen UiO-logo | test.ge.profile-honest | candidate |
+| purpose://candidate.informasjonssystemer-gruppeentitet.owns-cells | Gruppa eier sine egne celler på en scaffold den ikke eier | root | Den som eier maskinvaren eier scaffolden (staging: Digipomps). Gruppa kan likevel eie egne celler der, blant annet hvelvet sitt, rollecellen og senere N2-samlecellen. Cellens eier er gruppas nøkkel, ikke scaffold-eieren og ikke en enkeltperson. Scaffold-eieren kan drifte og stoppe cellen, men kan ikke signere som gruppa eller gi roller | Gruppecellenes `owner` er gruppas identitet; scaffold-eierens kall til `roles.issue` avvises; scaffold-eieren kan fortsatt stoppe cellen | test.ge.owns-cells | candidate (Kjetil 18.11) |
 | purpose://candidate.informasjonssystemer-gruppeentitet.owner-surface | Eierne ser og styrer gruppa | root | En flate «Informasjonssystemer» viser eiere, policyversjon, utstedte roller og ventende forslag, med handlingene gi rolle, trekke rolle, godkjenne og avvise. Finnes i Binding og på web | Bildene i `images/` godkjent (G1-GUI); handlingene finnes i `reachableActionKeypaths` | test.gui.parity, test.skeleton.purpose-actions-reachable | candidate |
 | purpose://candidate.informasjonssystemer-gruppeentitet.member-view | Studenten ser sin rolle | roles | Studenten ser «Du er MasterHAVEN26-student i Informasjonssystemer, gyldig til …» og hvem som utstedte den, i Binding og på web | Bilde godkjent; teksten kommer fra VC-en, ikke fra en lokal etikett | test.gui.parity | candidate |
 | purpose://candidate.informasjonssystemer-gruppeentitet.consumers | De andre student-PDD-ene kan bruke gruppa | condition | Forskerrollen (CPD #45), studentkullet for modellkvote (Mistral-PDD) og «hvem ser Kjetils laptopmodell» (CPD #44) kan peke på dette vilkåret i stedet for å lage egne | Hver av de tre spesifikasjonene har en rad som peker hit, eller sier hvorfor ikke | test.ge.consumers-linked | candidate |
@@ -361,6 +366,7 @@ Lærdommer som former dette treet (sitert fra `purpose_dev.py lookup`):
 | test.ge.status-offline | status-offline | Swift, Py, Go: speil ferskt → godtatt; speil eldre enn grensen → avvist med `role_status_unknown`; tell nettverkskall til gruppa = 0 per vilkårssjekk | TESTRESULT.md#status-offline | venter |
 | test.ge.condition-interop | condition | Matrise 3 språk × {positiv, fremmed, feil rolle, tilbaketrukket, utløpt}: 15 rader, likt utfall | TESTRESULT.md#condition-interop | venter |
 | test.ge.issuer-not-trusted | trust-anchor | Gyldig rolle-VC fra gruppa uten TrustedIssuer-oppføring: avvist i alle tre | TESTRESULT.md#condition-interop | venter |
+| test.ge.owns-cells | owns-cells | XCTest + Py + Go: gruppecellen har gruppas identitet som eier på en scaffold med annen eier; scaffold-eierens `roles.issue` avvises; stopp fra scaffold-eier lykkes | TESTRESULT.md#owns-cells | venter |
 | test.ge.profile-honest | not-uio | Inspeksjon av profil-JSON og flatebilder | ACCEPT.md#profil | venter |
 | test.ge.consumers-linked | consumers | Inspeksjon: CPD #44, #45 og Mistral-spesifikasjonen har en rad som peker hit, eller en begrunnelse | ACCEPT.md#consumers | venter |
 | test.build | quality.build-and-regression | `swift build` (CellProtocol, CellScaffold), xcodebuild (Binding), pytest, go test | TESTRESULT.md#build | venter |
@@ -387,7 +393,7 @@ Bare spørsmål som endrer treet:
 2. **Start med deg alene?** Forslag: gruppa opprettes nå med deg som eneste eier (v1), og Petter legges til i
    v2 når han har en identitet på staging. Da venter ikke studentarbeidet på Petter. Alternativ: vente til
    begge kan signere seglet sammen.
-3. **Hvilke roller skal gruppa kunne gi?** Forslag: `student` (med kull, f.eks. MasterHAVEN26), `researcher`
+3. **Hvilke roller skal gruppa kunne gi?** `researcher` er bekreftet (18.11). Forslag for resten: `student` (med kull, f.eks. MasterHAVEN26), `researcher`
    (forskerrollen i CPD #45) og `supervisor` (veileder). Flere kan legges til uten kodeendring.
 4. **Navn og referanse.** Forslag: visningsnavn «Informasjonssystemer (Ifi, UiO)» med undertittel
    «forskningsgruppe ved Institutt for informatikk», referanse `entity:ifi-informasjonssystemer`, ingen
@@ -403,3 +409,4 @@ Bare spørsmål som endrer treet:
 | 0 | 2026-11-17 | Opprettet | Claude |
 | 1 | 2026-11-17 | Brief-audit mot kode (Digipomps er bare en registrert referanse, DiMy finnes ikke, organisasjonsmodellen har bare PR 1 i Swift, ingen Py/Go), 14 formål, 29 tester, 5 spørsmål | Claude |
 | 2 | 2026-11-17 | Nytt formål status-offline etter krav fra Mistral-kvote-tråden: sjekk per kall uten nettverk til gruppa, kjent oppførsel når status er ukjent | Claude |
+| 3 | 2026-11-18 | Kjetils bekreftelse 18.11 sitert i §0: gruppa utsteder forskerrollen; nytt formål owns-cells (maskinvareeier eier scaffolden, gruppa eier egne celler); spm. 3 delvis besvart | Claude |
