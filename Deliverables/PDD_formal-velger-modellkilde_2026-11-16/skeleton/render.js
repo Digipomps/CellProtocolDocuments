@@ -59,7 +59,7 @@ const skeleton = { VStack: { spacing: 14, elements: [
 ] } };
 
 const laptop = (owner) => ({ id: 'agent.local-model.kjetil-mbp', title: owner ? 'Din laptop · Gemma 4 12B' : 'Kjetils laptop · Gemma 4 12B',
-  badge: owner ? 'Valgt' : '', whereLabel: owner ? 'Kjører på maskinen din. Spørsmålet forlater ikke maskinen.' : 'Kjører på Kjetils maskin. Spørsmålet sendes dit.',
+  badge: owner ? 'Valgt' : '', whereLabel: owner ? 'Kjører på maskinen din.' : 'Kjører på Kjetils maskin. Spørsmålet sendes dit.',
   factsLabel: 'Svartid ca. 4 s · gratis · kan forsvinne når maskinen sover' });
 const mistral = (badge) => ({ id: 'dimy.mistral-small', title: 'Mistral Small (EU)', badge,
   whereLabel: 'Hostet hos Mistral i EU, tilbudt av DiMy.', factsLabel: 'Svartid ca. 3 s · fra kvoten din · tilgjengelig hele døgnet' });
