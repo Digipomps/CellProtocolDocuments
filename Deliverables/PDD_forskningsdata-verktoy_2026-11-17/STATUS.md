@@ -19,3 +19,4 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
 - 2026-11-17: VURDERING.md, FORMAALSSPEC iterasjon 1 (23 formål i tre faser, 33 tester, 4 spørsmål), PLAN.md som utkast, 12 bilder til G1-GUI (images/README.md). G1 og G1-GUI bedt om.
 - 2026-11-18: Kjetil besluttet §6 spm. 2: Informasjonssystemer (Kjetil + Petter Nielsen) utsteder forskerrollen. G1 og G1-GUI venter fortsatt.
 - 2026-11-18: G1 og G1-GUI godkjent. Iterasjon 2 fører inn svarene på §6 spm. 1 og 3 (seks nye formål). PLAN.md skrevet om; G2 bedt om.
+- 2026-11-18 20:54 Oslo: Kjetil skrev «G1 godkjent» etter iterasjon 2. Ført som G1 for iterasjon 2. G2 er ikke sagt; spurt om han mente G2.
