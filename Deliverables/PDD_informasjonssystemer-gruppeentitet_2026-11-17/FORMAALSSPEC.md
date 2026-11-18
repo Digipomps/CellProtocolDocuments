@@ -101,10 +101,10 @@ Kapabiliteter og avhengigheter oppgaven bygger på:
 
 | Leveranse | Type | Hvor | Referanse | Godkjent |
 |---|---|---|---|---|
-| Eierflaten «Informasjonssystemer», fylt (to eiere, tre roller utstedt) | bilde | images/ | `gruppe-eier-fylt-{laptop,iphone}-v1.png` | nei (lages etter G1) |
-| Eierflaten med ventende forslag («Petter som eier — trenger din godkjenning») | bilde | images/ | `gruppe-forslag-{laptop,iphone}-v1.png` | nei |
-| Gi rolle til en student | bilde | images/ | `gi-rolle-{laptop,iphone}-v1.png` | nei |
-| Studentens visning av egen rolle, gyldig og tilbaketrukket | bilde | images/ | `min-rolle-{gyldig,trukket}-{laptop,iphone}-v1.png` | nei |
+| Eierflaten «Informasjonssystemer», fylt (to eiere, tre roller utstedt) | bilde | images/ | `gruppe-eier-fylt-{laptop,iphone}-v1.png` | nei (rendret 18.11, G1-GUI spurt) |
+| Eierflaten med ventende forslag («Petter som eier — trenger din godkjenning») | bilde | images/ | `gruppe-forslag-{laptop,iphone}-v1.png` | nei (rendret 18.11) |
+| Gi rolle til en student | bilde | images/ | `gi-rolle-{laptop,iphone}-v1.png` | nei (rendret 18.11) |
+| Studentens visning av egen rolle, gyldig og tilbaketrukket | bilde | images/ | `min-rolle-{gyldig,trukket}-{laptop,iphone}-v1.png` | nei (rendret 18.11) |
 | Gruppa finnes på staging med policy v1 (Kjetil) og v2 (Kjetil + Petter) | kjørende flate + testutdata | staging, TESTRESULT.md#e2e | — | nei |
 | Samme vilkår, samme svar i Swift, Python og Go (3 × 5) | testutdata | TESTRESULT.md#condition-interop | — | nei |
 | PR-er: CellProtocol (genesis, hvelv, rolle-VC, vilkår), CellScaffold (hvelv på staging, flater), Binding (godkjenning), PyCellProtocol og GoCellProtocol (policy, evaluator, vilkår) | PR | GitHub | lenker i PLAN.md | nei |

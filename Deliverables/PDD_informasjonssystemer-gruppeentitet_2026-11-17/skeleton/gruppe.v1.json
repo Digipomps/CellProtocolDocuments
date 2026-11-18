@@ -1,0 +1,578 @@
+{
+  "VStack": {
+    "spacing": 14,
+    "elements": [
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Informasjonssystemer (Ifi, UiO)",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontStyle": "title2",
+                  "fontWeight": "700"
+                }
+              }
+            },
+            {
+              "Text": {
+                "text": "Forskningsgruppe ved Institutt for informatikk. Gruppa er ikke UiO og har ikke organisasjonsnummer.",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 14
+                }
+              }
+            },
+            {
+              "Text": {
+                "keypath": "group.state.keyNote",
+                "modifiers": {
+                  "foregroundColor": "#92400E",
+                  "fontSize": 13
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Venter på godkjenning",
+                "modifiers": {
+                  "foregroundColor": "#92400E",
+                  "fontStyle": "headline"
+                }
+              }
+            },
+            {
+              "List": {
+                "elements": [],
+                "keypath": "group.state.proposals",
+                "selectionMode": "none",
+                "modifiers": {
+                  "itemSpacing": 8
+                },
+                "flowElementSkeleton": {
+                  "VStack": {
+                    "spacing": 2,
+                    "elements": [
+                      {
+                        "Text": {
+                          "keypath": "title",
+                          "modifiers": {
+                            "foregroundColor": "#172033",
+                            "fontWeight": "700"
+                          }
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "summary",
+                          "modifiers": {
+                            "foregroundColor": "#172033",
+                            "fontSize": 14
+                          }
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "rule",
+                          "modifiers": {
+                            "foregroundColor": "#556273",
+                            "fontSize": 13
+                          }
+                        }
+                      },
+                      {
+                        "HStack": {
+                          "spacing": 8,
+                          "modifiers": {
+                            "wrap": true
+                          },
+                          "elements": [
+                            {
+                              "Button": {
+                                "keypath": "group.proposal.approve",
+                                "label": "Godkjenn med passkey",
+                                "payload": {}
+                              }
+                            },
+                            {
+                              "Button": {
+                                "keypath": "group.proposal.reject",
+                                "label": "Avvis",
+                                "payload": {},
+                                "modifiers": {
+                                  "background": "#FFFFFF",
+                                  "borderColor": "#FCA5A5",
+                                  "borderWidth": 1,
+                                  "cornerRadius": 6,
+                                  "foregroundColor": "#B91C1C"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#FCD34D",
+            "maxWidthInfinity": true,
+            "visibility": {
+              "when": {
+                "equals": true,
+                "keypath": "group.state.hasProposals",
+                "scope": "root"
+              }
+            }
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "HStack": {
+                "spacing": 8,
+                "elements": [
+                  {
+                    "Text": {
+                      "text": "Eiere",
+                      "modifiers": {
+                        "foregroundColor": "#172033",
+                        "fontStyle": "headline"
+                      }
+                    }
+                  },
+                  {
+                    "Spacer": {}
+                  },
+                  {
+                    "Text": {
+                      "keypath": "group.state.policyLabel",
+                      "modifiers": {
+                        "foregroundColor": "#556273",
+                        "fontSize": 13
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "List": {
+                "elements": [],
+                "keypath": "group.state.owners",
+                "selectionMode": "none",
+                "modifiers": {
+                  "itemSpacing": 8
+                },
+                "flowElementSkeleton": {
+                  "VStack": {
+                    "spacing": 2,
+                    "elements": [
+                      {
+                        "HStack": {
+                          "spacing": 8,
+                          "elements": [
+                            {
+                              "Text": {
+                                "keypath": "name",
+                                "modifiers": {
+                                  "foregroundColor": "#172033",
+                                  "fontWeight": "700"
+                                }
+                              }
+                            },
+                            {
+                              "Spacer": {}
+                            },
+                            {
+                              "Text": {
+                                "keypath": "since",
+                                "modifiers": {
+                                  "foregroundColor": "#0F766E",
+                                  "fontSize": 13
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "Button": {
+                "keypath": "group.owner.propose",
+                "label": "Foreslå ny eier",
+                "payload": {},
+                "modifiers": {
+                  "background": "#FFFFFF",
+                  "borderColor": "#CBD5E1",
+                  "borderWidth": 1,
+                  "cornerRadius": 6,
+                  "foregroundColor": "#334155"
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Eierskapsavtale",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontStyle": "headline"
+                }
+              }
+            },
+            {
+              "List": {
+                "elements": [],
+                "keypath": "group.state.agreement",
+                "selectionMode": "none",
+                "modifiers": {
+                  "itemSpacing": 8
+                },
+                "flowElementSkeleton": {
+                  "VStack": {
+                    "spacing": 2,
+                    "elements": [
+                      {
+                        "HStack": {
+                          "spacing": 8,
+                          "elements": [
+                            {
+                              "Text": {
+                                "keypath": "action",
+                                "modifiers": {
+                                  "foregroundColor": "#172033",
+                                  "fontWeight": "700"
+                                }
+                              }
+                            },
+                            {
+                              "Spacer": {}
+                            },
+                            {
+                              "Text": {
+                                "keypath": "requires",
+                                "modifiers": {
+                                  "foregroundColor": "#172033",
+                                  "fontSize": 13
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "VStack": {
+                "spacing": 4,
+                "elements": [
+                  {
+                    "Text": {
+                      "text": "Bytt til en annen avtale",
+                      "modifiers": {
+                        "foregroundColor": "#556273",
+                        "fontSize": 13
+                      }
+                    }
+                  },
+                  {
+                    "Picker": {
+                      "keypath": "group.state.agreementTemplates",
+                      "optionLabelKeypath": "label",
+                      "selectionStateKeypath": "group.state.selectedTemplate",
+                      "selectionValueKeypath": "id",
+                      "selectionPayloadMode": "item_id",
+                      "placeholder": "Velg mal"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Button": {
+                "keypath": "group.agreement.propose",
+                "label": "Foreslå endring",
+                "payload": {},
+                "modifiers": {
+                  "background": "#FFFFFF",
+                  "borderColor": "#CBD5E1",
+                  "borderWidth": 1,
+                  "cornerRadius": 6,
+                  "foregroundColor": "#334155"
+                }
+              }
+            },
+            {
+              "Text": {
+                "text": "En endring blir en ny policyversjon og må godkjennes etter regelen for styring.",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 12
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "HStack": {
+                "spacing": 8,
+                "elements": [
+                  {
+                    "Text": {
+                      "text": "Utstedte roller",
+                      "modifiers": {
+                        "foregroundColor": "#172033",
+                        "fontStyle": "headline"
+                      }
+                    }
+                  },
+                  {
+                    "Spacer": {}
+                  },
+                  {
+                    "Text": {
+                      "keypath": "group.state.rolesCount",
+                      "modifiers": {
+                        "foregroundColor": "#556273",
+                        "fontSize": 13
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "List": {
+                "elements": [],
+                "keypath": "group.state.roles",
+                "selectionMode": "none",
+                "modifiers": {
+                  "itemSpacing": 8
+                },
+                "flowElementSkeleton": {
+                  "VStack": {
+                    "spacing": 2,
+                    "elements": [
+                      {
+                        "HStack": {
+                          "spacing": 8,
+                          "elements": [
+                            {
+                              "Text": {
+                                "keypath": "holder",
+                                "modifiers": {
+                                  "foregroundColor": "#172033",
+                                  "fontWeight": "700"
+                                }
+                              }
+                            },
+                            {
+                              "Spacer": {}
+                            },
+                            {
+                              "Text": {
+                                "keypath": "status",
+                                "modifiers": {
+                                  "foregroundColor": "#0F766E",
+                                  "fontSize": 13
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "HStack": {
+                          "spacing": 8,
+                          "elements": [
+                            {
+                              "Text": {
+                                "keypath": "detail",
+                                "modifiers": {
+                                  "foregroundColor": "#556273",
+                                  "fontSize": 13
+                                }
+                              }
+                            },
+                            {
+                              "Spacer": {}
+                            },
+                            {
+                              "Button": {
+                                "keypath": "group.role.revoke",
+                                "label": "Trekk tilbake",
+                                "payload": {},
+                                "modifiers": {
+                                  "background": "#FFFFFF",
+                                  "borderColor": "#FCA5A5",
+                                  "borderWidth": 1,
+                                  "cornerRadius": 6,
+                                  "foregroundColor": "#B91C1C",
+                                  "visibility": {
+                                    "when": {
+                                      "equals": true,
+                                      "keypath": "revocable",
+                                      "scope": "item"
+                                    }
+                                  },
+                                  "fontSize": 13
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "Button": {
+                "keypath": "group.role.new",
+                "label": "Gi rolle",
+                "payload": {}
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Journal",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontStyle": "headline"
+                }
+              }
+            },
+            {
+              "List": {
+                "elements": [],
+                "keypath": "group.state.journal",
+                "selectionMode": "none",
+                "modifiers": {
+                  "itemSpacing": 8
+                },
+                "flowElementSkeleton": {
+                  "VStack": {
+                    "spacing": 2,
+                    "elements": [
+                      {
+                        "HStack": {
+                          "spacing": 8,
+                          "elements": [
+                            {
+                              "Text": {
+                                "keypath": "when",
+                                "modifiers": {
+                                  "foregroundColor": "#556273",
+                                  "fontSize": 13
+                                }
+                              }
+                            },
+                            {
+                              "Text": {
+                                "keypath": "what",
+                                "modifiers": {
+                                  "foregroundColor": "#172033",
+                                  "fontSize": 13
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true
+          }
+        }
+      }
+    ]
+  }
+}
