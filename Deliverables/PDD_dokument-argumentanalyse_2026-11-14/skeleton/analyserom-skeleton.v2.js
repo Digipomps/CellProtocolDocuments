@@ -1,4 +1,4 @@
-// Analyserom-skjelettet, v2 (WP8). Samme oppsett som G1-GUI-bildene (v1), med
+// Analyserom-skjelettet, v2 (WP8, sammenligning med og uten modell 18.11). Samme oppsett som G1-GUI-bildene (v1), med
 // keypathene TextAnalysisRoomCell faktisk har, argumentkartet i stedet for
 // nettverket, og chatten som egen fane på smal skjerm.
 // `node skeleton/export-skeleton.js` skriver JSON-en som Swift-fabrikken bygger inn.
@@ -73,6 +73,18 @@ const kart = V([
   { Visualization: { kind: "argumentmap", keypath: S + "graf", stateKeypath: S + "valgt", actionKeypath: "analyse.velgNode" } },
 ]);
 
+// Med og uten modell (Kjetil 18.11): side om side på svært bred skjerm, ellers grunnanalysen øverst og modellkartet under.
+// Kartet har fast bredde per rad, så to kart ved siden av hverandre får ikke plass på en vanlig laptop.
+const kartKolonne = (tittel, keypath) => V([
+  K(S + "sammenligning." + tittel, { ...ink, fontWeight: "semibold" }),
+  { Visualization: { kind: "argumentmap", keypath: S + "sammenligning." + keypath, stateKeypath: S + "valgt", actionKeypath: "analyse.velgNode" } },
+], { ...card, background: "#FFFFFF", flexGrow: 1 });
+const sammenlign = V([
+  K(S + "sammenligning.forklaring", subtle),
+  { HStack: { spacing: 12, elements: [kartKolonne("grunnTittel", "grunn"), kartKolonne("modellTittel", "modell")],
+    modifiers: { vAlignment: "top", layoutVariants: [{ maxAvailableWidth: 1899, axis: "vertical" }] } } },
+]);
+
 const tekst = V([K(S + "tekst.tittel", { ...ink, fontWeight: "semibold" }), K(S + "tekst.meta", subtle), K(S + "tekst.innhold", ink)], { ...card, background: "#FFFFFF" });
 
 const eksport = V([
@@ -102,6 +114,7 @@ const hoved = V([
     panels: [
       { id: "paastander", content: [paastander] },
       { id: "graf", content: [kart] },
+      { id: "sammenlign", content: [sammenlign] },
       { id: "tekst", content: [tekst] },
       { id: "eksport", content: [eksport] },
       { id: "chat", content: [chatFane] },

@@ -12,6 +12,7 @@ const states = {
   fylt: load("fylt"),
   kart: { ...load("fylt"), aktivFane: "graf" },
   chatfane: { ...load("fylt"), aktivFane: "chat" },
+  sammenlign: { ...load("sammenlign"), aktivFane: "sammenlign" },
 };
 (async () => {
   const browser = await chromium.launch();
