@@ -1,6 +1,6 @@
 # TESTRESULT: Informasjonssystemer som gruppeentitet
 
-Status 2026-11-19 (natt). G1, G1-GUI og G2 er godkjent. G3 er ikke vurdert.
+Status 2026-11-19. G1, G1-GUI og G2 er godkjent. G3 er ikke vurdert.
 
 ## Baseline (WP0), før endringer
 
@@ -19,7 +19,27 @@ Status 2026-11-19 (natt). G1, G1-GUI og G2 er godkjent. G3 er ikke vurdert.
 | Python `pytest` | 327 bestått (71 nye), 1 hoppet over | PyCellProtocol #3 |
 | Go `go test ./...` | 95 PASS (9 nye), `go vet` rent | GoCellProtocol #37 |
 
-Swift er ikke kjørt på macOS eller i Xcode ennå. CellApple bygges ikke på Linux, så Binding-bygget på Mac er neste kontroll før noe tagges.
+## På Mac-en, 2026-11-19
+
+Kjørt i nye kloner under `/tmp/orgtest-20261119/` på Kjetils Mac (Xcode 27.2, Swift 6.4.2, macOS 27; CI bruker macos-26). Logger i `/tmp/orgtest-20261119/logs/`, sammendrag i `/tmp/orgtest-20261119/logs/summary.txt`.
+
+| Kontroll | Resultat |
+|---|---|
+| CellProtocol #91 (4878dd5), `swift test --filter InteropFixturesV1Tests` | 2 tester, 0 feil, 1 hoppet over |
+| CellProtocol #91, hele suiten | 1977 tester, 0 feil, 6 hoppet over |
+| CellProtocol #91, TSan-steget fra `security-regression-macos.yml`, 3 ganger | 249/249, 249/249, og 1 feil i tredje kjøring (se under) |
+| `Scripts/verify-transport-security-floor.sh` | PASS |
+| CellProtocol main (1ddf107), hele suiten og TSan én gang | 1967 tester, 0 feil; 249/249 |
+| Binding (scheme HAVEN, macOS) bygget mot 4878dd5 | Bygger. CellApple kompilerer. |
+| BindingTests, pin 36e2959 (dagens) mot 4878dd5 | 707 bestått og 6 feil, mot 706 bestått og 7 feil (738 tester, 25 hoppet over) |
+| PyCellProtocol #3, `pytest` | 327 bestått, 1 hoppet over. Slik CI installerer (`.[scaffold,dev]`): 336 bestått |
+| GoCellProtocol #37, `go vet` og `go test ./...` | rent; 95 PASS |
+
+Feil som ikke kommer fra dette arbeidet:
+
+- `BridgePeerV3Tests.testPeerMuxHeldPhysicalSubmissionFencesReusedIDAndCIDWhileSiblingWorks` (`BridgeMuxSendLifetimeTests.swift:57`) feilet én av tre TSan-kjøringer. Alene er den 10/10 grønn både på #91 og på main. Den leser deinit-telleren rett etter `hold.release()` og taper kappløpet under last. Samme linje har feilet i CI på en annen gren (fd60666) og på main 9a5bae5. #91 rører ingen bro-, mux- eller transportfiler. Testen kan fortsatt gjøre CI rød til den er rettet.
+- To Binding-tester mot `cell://staging.haven.digipomps.org/ConferenceAIGatewayPreview` henger med ny CellProtocol. De henger også med main b9e7576 uten #91, og er grønne med 36e2959. Årsaken ligger i main-endringene mellom de to (bro-livssyklus #87 og admission #90 er nærmest) sammen med levende staging. Binding har ingen CI, så dette møter den som flytter pinnen i Binding.
+- `BindingTests/localStartupPortholeExposesAgentSetupWorkbenchWhenOptedIn()` hang i over 20 minutter på dagens pin og ble hoppet over.
 
 ## Tester knyttet til formålene
 
