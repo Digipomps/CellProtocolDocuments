@@ -12,6 +12,11 @@ WP0, 2026-11-18/19. Ren eksport av `origin/main` (Swift på Macen, Py/Go i skyco
 | PyCellProtocol | b874d65 | grønn: 265 bestått |
 | GoCellProtocol | 9ea5cc9 | grønn: 86 bestått, 0 feil |
 
-Neste: kjør CellScaffold og Binding på nytt fra full klon med submoduler, så de 27 kan skilles fra eksportfeil før baselinen brukes som referanse.
+Kjøring 2 (full klon med submoduler, samme commits): de 13 eksportfeilene består. Igjen står 27 feil i CellScaffold og 4 i Binding, ingen ustabile (alle feiler også alene).
+
+- CellScaffold (27): 402 i stedet for 200 (PaymentProofDoor), 500/503 fra Arendalsuka-rutene, 200 i stedet for 303 (sidetilgang), `persistedIdentityUnavailable`, `registerAtAlreadyTakenEndpoint`, AI-svermen gir 2 runder i stedet for 3.
+- Binding (4): to provenance-tester får ikke kjøre `xcrun` i sandkassen, NearbyScanner får ikke skrive til /tmp (trolig samme sandkasse), og én test mot haven.digipomps.org avvises ved signContract for «Arendalsuka Participant Program».
+
+Regel for resten av PDD-en: en **ny** feil er en feil som ikke står på disse to listene (27 + 4). Logger: `/Users/kjetil/Build/Digipomps/HAVEN/MasterHAVEN26/pdd-forskningsdata-2026-11-17/evidence/wp0/run2/`.
 
 Staging-måling av `AdminResolverStats`, `AdminCellLifecycle`, `AdminMetricsHistory`: venter på observer-rollen.
