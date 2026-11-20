@@ -1,0 +1,271 @@
+{
+  "VStack": {
+    "spacing": 14,
+    "elements": [
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Forskningsforespørsler",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontStyle": "title2",
+                  "fontWeight": "700"
+                }
+              }
+            },
+            {
+              "Text": {
+                "text": "Bare du ser dette. Ingen data deles før du sier ja, og du kan trekke deg når som helst.",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 14
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "keypath": "researchInbox.state.card.who",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontStyle": "headline"
+                }
+              }
+            },
+            {
+              "Text": {
+                "keypath": "researchInbox.state.card.purpose",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontSize": 14
+                }
+              }
+            },
+            {
+              "VStack": {
+                "spacing": 2,
+                "elements": [
+                  {
+                    "Text": {
+                      "text": "Hva det gjelder",
+                      "modifiers": {
+                        "foregroundColor": "#556273",
+                        "fontSize": 12
+                      }
+                    }
+                  },
+                  {
+                    "Text": {
+                      "keypath": "researchInbox.state.card.what",
+                      "modifiers": {
+                        "foregroundColor": "#172033",
+                        "fontSize": 14
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "VStack": {
+                "spacing": 2,
+                "elements": [
+                  {
+                    "Text": {
+                      "text": "Hvem som ser hva",
+                      "modifiers": {
+                        "foregroundColor": "#556273",
+                        "fontSize": 12
+                      }
+                    }
+                  },
+                  {
+                    "Text": {
+                      "keypath": "researchInbox.state.card.recipients",
+                      "modifiers": {
+                        "foregroundColor": "#172033",
+                        "fontSize": 14
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "VStack": {
+                "spacing": 2,
+                "elements": [
+                  {
+                    "Text": {
+                      "text": "Periode og lagring",
+                      "modifiers": {
+                        "foregroundColor": "#556273",
+                        "fontSize": 12
+                      }
+                    }
+                  },
+                  {
+                    "Text": {
+                      "keypath": "researchInbox.state.card.duration",
+                      "modifiers": {
+                        "foregroundColor": "#172033",
+                        "fontSize": 14
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "VStack": {
+                "spacing": 2,
+                "elements": [
+                  {
+                    "Text": {
+                      "text": "Hvis du trekker deg",
+                      "modifiers": {
+                        "foregroundColor": "#556273",
+                        "fontSize": 12
+                      }
+                    }
+                  },
+                  {
+                    "Text": {
+                      "keypath": "researchInbox.state.card.withdraw",
+                      "modifiers": {
+                        "foregroundColor": "#172033",
+                        "fontSize": 14
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "HStack": {
+                "spacing": 8,
+                "modifiers": {
+                  "wrap": true,
+                  "visibility": {
+                    "when": {
+                      "equals": "ny",
+                      "keypath": "researchInbox.state.card.status",
+                      "scope": "root"
+                    }
+                  }
+                },
+                "elements": [
+                  {
+                    "Button": {
+                      "keypath": "researchInbox.decide",
+                      "label": "Ja",
+                      "payload": {
+                        "decision": "yes"
+                      }
+                    }
+                  },
+                  {
+                    "Button": {
+                      "keypath": "researchInbox.decide",
+                      "label": "Ikke nå",
+                      "payload": {
+                        "decision": "notNow"
+                      },
+                      "modifiers": {
+                        "background": "#FFFFFF",
+                        "borderColor": "#CBD5E1",
+                        "borderWidth": 1,
+                        "cornerRadius": 6,
+                        "foregroundColor": "#334155"
+                      }
+                    }
+                  },
+                  {
+                    "Button": {
+                      "keypath": "researchInbox.decide",
+                      "label": "Aldri",
+                      "payload": {
+                        "decision": "never"
+                      },
+                      "modifiers": {
+                        "background": "#FFFFFF",
+                        "borderColor": "#CBD5E1",
+                        "borderWidth": 1,
+                        "cornerRadius": 6,
+                        "foregroundColor": "#334155"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "VStack": {
+                "spacing": 8,
+                "modifiers": {
+                  "visibility": {
+                    "when": {
+                      "equals": "godtatt",
+                      "keypath": "researchInbox.state.card.status",
+                      "scope": "root"
+                    }
+                  }
+                },
+                "elements": [
+                  {
+                    "Text": {
+                      "keypath": "researchInbox.state.card.receipt",
+                      "modifiers": {
+                        "foregroundColor": "#0F766E",
+                        "fontSize": 13
+                      }
+                    }
+                  },
+                  {
+                    "Button": {
+                      "keypath": "researchInbox.withdraw",
+                      "label": "Trekk samtykket",
+                      "payload": {},
+                      "modifiers": {
+                        "background": "#FFFFFF",
+                        "borderColor": "#FCA5A5",
+                        "borderWidth": 1,
+                        "cornerRadius": 6,
+                        "foregroundColor": "#B91C1C"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true
+          }
+        }
+      }
+    ]
+  }
+}
