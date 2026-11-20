@@ -1,0 +1,165 @@
+{
+  "schema": "haven.model-source-eligibility.contract.v1",
+  "revision": "haven.model-source-eligibility.v1",
+  "status": "candidate — PDD_formal-velger-modellkilde_2026-11-16, G2 godkjent 2026-11-17; ikke landet i kode",
+  "summary": "Ren avgjørelse: formål + kildefakta + kontekst → egnet ja/nei + hvilke krav som mangler. Et formål kan bare snevre inn; tilgang gis av Agreement og kommer inn som kontekst.",
+  "source": {
+    "servingClass": [
+      "rules",
+      "requester_device",
+      "personal_device",
+      "operator_host",
+      "hosted_provider",
+      "unknown"
+    ],
+    "servesWhom": [
+      "owner_only",
+      "agreement",
+      "unknown"
+    ],
+    "availableWhenOwnerOffline": [
+      "yes",
+      "no",
+      "unknown"
+    ],
+    "declaredAvailable": "bool, bare for personal_device: eieren har sagt at kilden er tilgjengelig og ikke trukket den tilbake",
+    "health": {
+      "status": [
+        "ok",
+        "failed",
+        "unknown"
+      ],
+      "measuredAtEpoch": "heltall sekunder, valgfri",
+      "p50Ms": "heltall, valgfri"
+    },
+    "region": "streng, f.eks. EU; unknown når ukjent",
+    "pricePerMTokInput": "NOK som desimalstreng, valgfri",
+    "pricePerMTokOutput": "NOK som desimalstreng, valgfri",
+    "offeredByDiMy": "bool, valgfri",
+    "hostFacts": {
+      "gpu": "none|<navn>",
+      "vcpu": "heltall",
+      "freeRamGiB": "heltall",
+      "sharedWith": [
+        "streng"
+      ],
+      "measuredAtEpoch": "heltall",
+      "note": "opplysning; egnethet avgjøres av målt helse, ikke av antakelser om maskinvaren"
+    }
+  },
+  "context": {
+    "nowEpoch": "heltall sekunder",
+    "requesterIsOwner": "bool: spørreren er kildens eier",
+    "requesterHasAccess": "bool: Agreement-vilkårene for kilden er oppfylt for spørreren (avgjort utenfor denne funksjonen)",
+    "explicitChoice": "bool: spørreren har selv valgt denne kilden",
+    "fallbackAvailable": "bool: en annen egnet kilde finnes hvis denne ikke svarer",
+    "surface": "streng, valgfri; velger svartidsgrense fra maxP50MsBySurface"
+  },
+  "purposes": [
+    {
+      "purposeRef": "purpose://candidate.model-source.develop-and-test",
+      "title": "Utvikle og teste",
+      "allowedServingClasses": [
+        "rules",
+        "requester_device",
+        "personal_device",
+        "operator_host",
+        "hosted_provider"
+      ],
+      "requireAvailableWhenOwnerOffline": false,
+      "requireMeasuredHealth": false,
+      "requireFallbackForPersonalDevice": false,
+      "maxHealthAgeSeconds": null,
+      "maxP50MsBySurface": {},
+      "allowedRegions": []
+    },
+    {
+      "purposeRef": "purpose://candidate.model-source.personal-daily-use",
+      "title": "Egen støtte i daglig bruk",
+      "allowedServingClasses": [
+        "rules",
+        "requester_device",
+        "personal_device",
+        "operator_host",
+        "hosted_provider"
+      ],
+      "requireAvailableWhenOwnerOffline": false,
+      "requireMeasuredHealth": false,
+      "requireFallbackForPersonalDevice": true,
+      "maxHealthAgeSeconds": null,
+      "maxP50MsBySurface": {},
+      "allowedRegions": []
+    },
+    {
+      "purposeRef": "purpose://candidate.model-source.service-for-others",
+      "title": "Tjeneste for andre",
+      "allowedServingClasses": [
+        "rules",
+        "operator_host",
+        "hosted_provider"
+      ],
+      "requireAvailableWhenOwnerOffline": true,
+      "requireMeasuredHealth": true,
+      "requireFallbackForPersonalDevice": false,
+      "maxHealthAgeSeconds": 600,
+      "maxP50MsBySurface": {
+        "default": 30000,
+        "kallimachos": 90000
+      },
+      "allowedRegions": []
+    }
+  ],
+  "strictestPurposeRef": "purpose://candidate.model-source.service-for-others",
+  "rules": [
+    "Ukjent eller manglende purposeRef (også purpose://prompt.unknown) vurderes som strictestPurposeRef.",
+    "Kravene vurderes i fast rekkefølge, og unmet listes i samme rekkefølge: access_via_agreement, serving_class_allowed, declared_available, owner_or_explicit_choice, fallback_present, available_when_owner_offline, health_measured_ok, response_time_within_limit, region_allowed.",
+    "access_via_agreement: context.requesterHasAccess må være sann. Gjelder alle kilder unntatt servingClass rules.",
+    "serving_class_allowed: source.servingClass må stå i formålets allowedServingClasses. unknown står aldri der.",
+    "requester_device er enheten spørreren sitter ved akkurat nå (f.eks. Apple Intelligence i Binding). Den er til stede per definisjon og trenger verken erklæring eller reservekilde, men kan ikke bære en tjeneste for andre. personal_device er en enhet som nås over en bro (f.eks. eierens laptop via AgentD) og kan sove.",
+    "declared_available: en personal_device må ha declaredAvailable sann.",
+    "owner_or_explicit_choice: en personal_device brukes bare når spørreren er eieren eller selv har valgt den. Den velges aldri automatisk for andre.",
+    "fallback_present: når formålet krever det, må en personal_device ha context.fallbackAvailable sann.",
+    "available_when_owner_offline: når formålet krever det, må kilden melde yes. unknown er ikke yes.",
+    "health_measured_ok: når formålet krever det, må health.status være ok og målingen ikke eldre enn maxHealthAgeSeconds. En personal_device eller operator_host med health.status failed er aldri egnet, uansett formål.",
+    "response_time_within_limit: når formålet har en grense for flaten (ellers default), må health.p50Ms finnes og være innenfor.",
+    "region_allowed: når allowedRegions ikke er tom, må source.region stå der.",
+    "servingClass rules er alltid egnet (ingen modell, ingen data ut).",
+    "Profilen kan stramme: fjerne servingClass-er, slå på krav, senke grenser, sette allowedRegions. Forsøk på å løsne (legge til servingClass, slå av krav, heve grenser, utvide regioner) ignoreres og rapporteres i rejectedLoosenings."
+  ],
+  "events": {
+    "topic": "haven.agent.local-model.availability.v1",
+    "kinds": {
+      "available": [
+        "owner_declared"
+      ],
+      "unavailable": [
+        "owner_withdrew",
+        "bridge_closed",
+        "contract_expired",
+        "health_failed"
+      ],
+      "health": [
+        "ok",
+        "slow"
+      ],
+      "fallback_used": [
+        "no_response",
+        "not_available"
+      ],
+      "selected": [
+        "owner",
+        "explicit_choice"
+      ]
+    },
+    "fields": [
+      "kind",
+      "reason",
+      "sourceID",
+      "modelID",
+      "atEpoch",
+      "p50Ms (bare health)",
+      "fallbackSourceID (bare fallback_used)"
+    ],
+    "forbidden": "Ingen hendelse bærer spørsmål, svar eller annen brukertekst."
+  }
+}

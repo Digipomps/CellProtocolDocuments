@@ -1,0 +1,1226 @@
+{
+  "schema": "haven.model-source-eligibility.vectors.v1",
+  "contract": "Book/model_source_eligibility_contract_v1.json",
+  "cases": [
+    {
+      "name": "dev: eier, laptop erklært",
+      "purposeRef": "purpose://candidate.model-source.develop-and-test",
+      "source": {
+        "id": "agent.local-model.owner-laptop",
+        "servingClass": "personal_device",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "no",
+        "declaredAvailable": true,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899880,
+          "p50Ms": 3800
+        },
+        "region": "unknown"
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": true,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": true,
+        "unmet": [],
+        "effectivePurposeRef": "purpose://candidate.model-source.develop-and-test",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "dev: eier, laptop ikke erklært",
+      "purposeRef": "purpose://candidate.model-source.develop-and-test",
+      "source": {
+        "id": "agent.local-model.owner-laptop",
+        "servingClass": "personal_device",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "no",
+        "declaredAvailable": false,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899880,
+          "p50Ms": 3800
+        },
+        "region": "unknown"
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": true,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "declared_available"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.develop-and-test",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "dev: eier, laptop helse feilet",
+      "purposeRef": "purpose://candidate.model-source.develop-and-test",
+      "source": {
+        "id": "agent.local-model.owner-laptop",
+        "servingClass": "personal_device",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "no",
+        "declaredAvailable": true,
+        "health": {
+          "status": "failed",
+          "measuredAtEpoch": 1794899970
+        },
+        "region": "unknown"
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": true,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "health_measured_ok"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.develop-and-test",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "dev: hostet uten måling er lov",
+      "purposeRef": "purpose://candidate.model-source.develop-and-test",
+      "source": {
+        "id": "dimy.mistral-small",
+        "servingClass": "hosted_provider",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "yes",
+        "declaredAvailable": false,
+        "health": {
+          "status": "unknown"
+        },
+        "region": "EU",
+        "pricePerMTokInput": "1.60",
+        "pricePerMTokOutput": "6.20",
+        "offeredByDiMy": true
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": true,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": true,
+        "unmet": [],
+        "effectivePurposeRef": "purpose://candidate.model-source.develop-and-test",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "dev: Agreement-holder velger laptopen selv",
+      "purposeRef": "purpose://candidate.model-source.develop-and-test",
+      "source": {
+        "id": "agent.local-model.owner-laptop",
+        "servingClass": "personal_device",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "no",
+        "declaredAvailable": true,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899880,
+          "p50Ms": 3800
+        },
+        "region": "unknown"
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": false,
+        "requesterHasAccess": true,
+        "explicitChoice": true,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": true,
+        "unmet": [],
+        "effectivePurposeRef": "purpose://candidate.model-source.develop-and-test",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "dev: Agreement-holder, laptop ikke valgt selv",
+      "purposeRef": "purpose://candidate.model-source.develop-and-test",
+      "source": {
+        "id": "agent.local-model.owner-laptop",
+        "servingClass": "personal_device",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "no",
+        "declaredAvailable": true,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899880,
+          "p50Ms": 3800
+        },
+        "region": "unknown"
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": false,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "owner_or_explicit_choice"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.develop-and-test",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "dev: fremmed uten Agreement, selv om valgt",
+      "purposeRef": "purpose://candidate.model-source.develop-and-test",
+      "source": {
+        "id": "agent.local-model.owner-laptop",
+        "servingClass": "personal_device",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "no",
+        "declaredAvailable": true,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899880,
+          "p50Ms": 3800
+        },
+        "region": "unknown"
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": false,
+        "requesterHasAccess": false,
+        "explicitChoice": true,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "access_via_agreement"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.develop-and-test",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "daglig: eier, laptop med reserve",
+      "purposeRef": "purpose://candidate.model-source.personal-daily-use",
+      "source": {
+        "id": "agent.local-model.owner-laptop",
+        "servingClass": "personal_device",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "no",
+        "declaredAvailable": true,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899880,
+          "p50Ms": 3800
+        },
+        "region": "unknown"
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": true,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": true,
+        "unmet": [],
+        "effectivePurposeRef": "purpose://candidate.model-source.personal-daily-use",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "daglig: eier, laptop uten reserve",
+      "purposeRef": "purpose://candidate.model-source.personal-daily-use",
+      "source": {
+        "id": "agent.local-model.owner-laptop",
+        "servingClass": "personal_device",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "no",
+        "declaredAvailable": true,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899880,
+          "p50Ms": 3800
+        },
+        "region": "unknown"
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": true,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": false
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "fallback_present"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.personal-daily-use",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "daglig: hostet",
+      "purposeRef": "purpose://candidate.model-source.personal-daily-use",
+      "source": {
+        "id": "dimy.mistral-small",
+        "servingClass": "hosted_provider",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "yes",
+        "declaredAvailable": false,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899940,
+          "p50Ms": 3000
+        },
+        "region": "EU",
+        "pricePerMTokInput": "1.60",
+        "pricePerMTokOutput": "6.20",
+        "offeredByDiMy": true
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": true,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": true,
+        "unmet": [],
+        "effectivePurposeRef": "purpose://candidate.model-source.personal-daily-use",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "tjeneste: laptop aldri, selv for eier",
+      "purposeRef": "purpose://candidate.model-source.service-for-others",
+      "source": {
+        "id": "agent.local-model.owner-laptop",
+        "servingClass": "personal_device",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "no",
+        "declaredAvailable": true,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899880,
+          "p50Ms": 3800
+        },
+        "region": "unknown"
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": true,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "serving_class_allowed",
+          "available_when_owner_offline"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "tjeneste: laptop aldri, selv valgt selv",
+      "purposeRef": "purpose://candidate.model-source.service-for-others",
+      "source": {
+        "id": "agent.local-model.owner-laptop",
+        "servingClass": "personal_device",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "no",
+        "declaredAvailable": true,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899880,
+          "p50Ms": 3800
+        },
+        "region": "unknown"
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": false,
+        "requesterHasAccess": true,
+        "explicitChoice": true,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "serving_class_allowed",
+          "available_when_owner_offline"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "tjeneste: hostet målt ok",
+      "purposeRef": "purpose://candidate.model-source.service-for-others",
+      "source": {
+        "id": "dimy.mistral-small",
+        "servingClass": "hosted_provider",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "yes",
+        "declaredAvailable": false,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899940,
+          "p50Ms": 3000
+        },
+        "region": "EU",
+        "pricePerMTokInput": "1.60",
+        "pricePerMTokOutput": "6.20",
+        "offeredByDiMy": true
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": false,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": true,
+        "unmet": [],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "tjeneste: hostet uten måling",
+      "purposeRef": "purpose://candidate.model-source.service-for-others",
+      "source": {
+        "id": "dimy.mistral-small",
+        "servingClass": "hosted_provider",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "yes",
+        "declaredAvailable": false,
+        "health": {
+          "status": "unknown"
+        },
+        "region": "EU",
+        "pricePerMTokInput": "1.60",
+        "pricePerMTokOutput": "6.20",
+        "offeredByDiMy": true
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": false,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "health_measured_ok",
+          "response_time_within_limit"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "tjeneste: hostet, måling for gammel",
+      "purposeRef": "purpose://candidate.model-source.service-for-others",
+      "source": {
+        "id": "dimy.mistral-small",
+        "servingClass": "hosted_provider",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "yes",
+        "declaredAvailable": false,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899399,
+          "p50Ms": 3000
+        },
+        "region": "EU",
+        "pricePerMTokInput": "1.60",
+        "pricePerMTokOutput": "6.20",
+        "offeredByDiMy": true
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": false,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "health_measured_ok"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "tjeneste: hostet, måling akkurat på grensen",
+      "purposeRef": "purpose://candidate.model-source.service-for-others",
+      "source": {
+        "id": "dimy.mistral-small",
+        "servingClass": "hosted_provider",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "yes",
+        "declaredAvailable": false,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899400,
+          "p50Ms": 3000
+        },
+        "region": "EU",
+        "pricePerMTokInput": "1.60",
+        "pricePerMTokOutput": "6.20",
+        "offeredByDiMy": true
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": false,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": true,
+        "unmet": [],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "tjeneste: hostet for treg i chat",
+      "purposeRef": "purpose://candidate.model-source.service-for-others",
+      "source": {
+        "id": "dimy.mistral-small",
+        "servingClass": "hosted_provider",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "yes",
+        "declaredAvailable": false,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899940,
+          "p50Ms": 45000
+        },
+        "region": "EU",
+        "pricePerMTokInput": "1.60",
+        "pricePerMTokOutput": "6.20",
+        "offeredByDiMy": true
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": false,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "response_time_within_limit"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "tjeneste: samme svartid holder i Kallimachos",
+      "purposeRef": "purpose://candidate.model-source.service-for-others",
+      "source": {
+        "id": "dimy.mistral-small",
+        "servingClass": "hosted_provider",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "yes",
+        "declaredAvailable": false,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899940,
+          "p50Ms": 45000
+        },
+        "region": "EU",
+        "pricePerMTokInput": "1.60",
+        "pricePerMTokOutput": "6.20",
+        "offeredByDiMy": true
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": false,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true,
+        "surface": "kallimachos"
+      },
+      "expect": {
+        "eligible": true,
+        "unmet": [],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "tjeneste: vertsmodell uten måling (staging 16.11)",
+      "purposeRef": "purpose://candidate.model-source.service-for-others",
+      "source": {
+        "id": "local.qwen3.8b",
+        "servingClass": "operator_host",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "yes",
+        "declaredAvailable": false,
+        "health": {
+          "status": "unknown"
+        },
+        "region": "unknown",
+        "hostFacts": {
+          "gpu": "none",
+          "vcpu": 4,
+          "freeRamGiB": 8,
+          "sharedWith": [
+            "staging",
+            "prod"
+          ],
+          "measuredAtEpoch": 1794816000
+        }
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": false,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true,
+        "surface": "kallimachos"
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "health_measured_ok",
+          "response_time_within_limit"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "tjeneste: vertsmodell målt for treg på CPU",
+      "purposeRef": "purpose://candidate.model-source.service-for-others",
+      "source": {
+        "id": "local.qwen3.8b",
+        "servingClass": "operator_host",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "yes",
+        "declaredAvailable": false,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899940,
+          "p50Ms": 240000
+        },
+        "region": "unknown",
+        "hostFacts": {
+          "gpu": "none",
+          "vcpu": 4,
+          "freeRamGiB": 8,
+          "sharedWith": [
+            "staging",
+            "prod"
+          ],
+          "measuredAtEpoch": 1794816000
+        }
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": false,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true,
+        "surface": "kallimachos"
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "response_time_within_limit"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "tjeneste: vertsmodell målt innenfor",
+      "purposeRef": "purpose://candidate.model-source.service-for-others",
+      "source": {
+        "id": "local.qwen3.8b",
+        "servingClass": "operator_host",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "yes",
+        "declaredAvailable": false,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899940,
+          "p50Ms": 20000
+        },
+        "region": "unknown",
+        "hostFacts": {
+          "gpu": "none",
+          "vcpu": 4,
+          "freeRamGiB": 8,
+          "sharedWith": [
+            "staging",
+            "prod"
+          ],
+          "measuredAtEpoch": 1794816000
+        }
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": false,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true,
+        "surface": "kallimachos"
+      },
+      "expect": {
+        "eligible": true,
+        "unmet": [],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "tjeneste: vertsmodell som ikke melder frakoblet-evne",
+      "purposeRef": "purpose://candidate.model-source.service-for-others",
+      "source": {
+        "id": "local.qwen3.8b",
+        "servingClass": "operator_host",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "unknown",
+        "declaredAvailable": false,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899940,
+          "p50Ms": 3000
+        },
+        "region": "unknown",
+        "hostFacts": {
+          "gpu": "none",
+          "vcpu": 4,
+          "freeRamGiB": 8,
+          "sharedWith": [
+            "staging",
+            "prod"
+          ],
+          "measuredAtEpoch": 1794816000
+        }
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": false,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "available_when_owner_offline"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "tjeneste: regler alltid",
+      "purposeRef": "purpose://candidate.model-source.service-for-others",
+      "source": {
+        "id": "chat.local-rules",
+        "servingClass": "rules",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "yes",
+        "declaredAvailable": false,
+        "health": {
+          "status": "unknown"
+        },
+        "region": "unknown"
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": false,
+        "requesterHasAccess": false,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": true,
+        "unmet": [],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "tjeneste: ukjent kildeklasse",
+      "purposeRef": "purpose://candidate.model-source.service-for-others",
+      "source": {
+        "id": "custom.x",
+        "servingClass": "unknown",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "yes",
+        "declaredAvailable": false,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899940,
+          "p50Ms": 3000
+        },
+        "region": "unknown"
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": false,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "serving_class_allowed"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "tjeneste: hostet uten Agreement",
+      "purposeRef": "purpose://candidate.model-source.service-for-others",
+      "source": {
+        "id": "dimy.mistral-small",
+        "servingClass": "hosted_provider",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "yes",
+        "declaredAvailable": false,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899940,
+          "p50Ms": 3000
+        },
+        "region": "EU",
+        "pricePerMTokInput": "1.60",
+        "pricePerMTokOutput": "6.20",
+        "offeredByDiMy": true
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": false,
+        "requesterHasAccess": false,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "access_via_agreement"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "daglig: enheten spørreren sitter ved, uten reserve",
+      "purposeRef": "purpose://candidate.model-source.personal-daily-use",
+      "source": {
+        "id": "chat.apple-intelligence",
+        "servingClass": "requester_device",
+        "servesWhom": "owner_only",
+        "availableWhenOwnerOffline": "no",
+        "declaredAvailable": false,
+        "health": {
+          "status": "unknown"
+        },
+        "region": "unknown"
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": true,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": false
+      },
+      "expect": {
+        "eligible": true,
+        "unmet": [],
+        "effectivePurposeRef": "purpose://candidate.model-source.personal-daily-use",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "tjeneste: enheten spørreren sitter ved kan ikke bære en tjeneste",
+      "purposeRef": "purpose://candidate.model-source.service-for-others",
+      "source": {
+        "id": "chat.apple-intelligence",
+        "servingClass": "requester_device",
+        "servesWhom": "owner_only",
+        "availableWhenOwnerOffline": "no",
+        "declaredAvailable": false,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899940,
+          "p50Ms": 3000
+        },
+        "region": "unknown"
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": true,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "serving_class_allowed",
+          "available_when_owner_offline"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "ukjent formål gir strengeste",
+      "purposeRef": "purpose://prompt.unknown",
+      "source": {
+        "id": "agent.local-model.owner-laptop",
+        "servingClass": "personal_device",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "no",
+        "declaredAvailable": true,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899880,
+          "p50Ms": 3800
+        },
+        "region": "unknown"
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": true,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "serving_class_allowed",
+          "available_when_owner_offline"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "tomt formål gir strengeste",
+      "purposeRef": "",
+      "source": {
+        "id": "dimy.mistral-small",
+        "servingClass": "hosted_provider",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "yes",
+        "declaredAvailable": false,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899940,
+          "p50Ms": 3000
+        },
+        "region": "EU",
+        "pricePerMTokInput": "1.60",
+        "pricePerMTokOutput": "6.20",
+        "offeredByDiMy": true
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": false,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": true,
+        "unmet": [],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": []
+      }
+    },
+    {
+      "name": "profil strammer: bare EU",
+      "purposeRef": "purpose://candidate.model-source.personal-daily-use",
+      "source": {
+        "id": "dimy.mistral-small",
+        "servingClass": "hosted_provider",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "yes",
+        "declaredAvailable": false,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899940,
+          "p50Ms": 3000
+        },
+        "region": "US",
+        "pricePerMTokInput": "1.60",
+        "pricePerMTokOutput": "6.20",
+        "offeredByDiMy": true
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": true,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "region_allowed"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.personal-daily-use",
+        "rejectedLoosenings": []
+      },
+      "profile": {
+        "allowedRegions": [
+          "EU"
+        ]
+      }
+    },
+    {
+      "name": "profil strammer: ingen laptop i daglig bruk",
+      "purposeRef": "purpose://candidate.model-source.personal-daily-use",
+      "source": {
+        "id": "agent.local-model.owner-laptop",
+        "servingClass": "personal_device",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "no",
+        "declaredAvailable": true,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899880,
+          "p50Ms": 3800
+        },
+        "region": "unknown"
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": true,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "serving_class_allowed"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.personal-daily-use",
+        "rejectedLoosenings": []
+      },
+      "profile": {
+        "allowedServingClasses": [
+          "rules",
+          "hosted_provider",
+          "operator_host"
+        ]
+      }
+    },
+    {
+      "name": "profil strammer: krever måling også i utvikling",
+      "purposeRef": "purpose://candidate.model-source.develop-and-test",
+      "source": {
+        "id": "dimy.mistral-small",
+        "servingClass": "hosted_provider",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "yes",
+        "declaredAvailable": false,
+        "health": {
+          "status": "unknown"
+        },
+        "region": "EU",
+        "pricePerMTokInput": "1.60",
+        "pricePerMTokOutput": "6.20",
+        "offeredByDiMy": true
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": true,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "health_measured_ok"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.develop-and-test",
+        "rejectedLoosenings": []
+      },
+      "profile": {
+        "requireMeasuredHealth": true,
+        "maxHealthAgeSeconds": 300
+      }
+    },
+    {
+      "name": "profil prøver å løsne: laptop i tjeneste",
+      "purposeRef": "purpose://candidate.model-source.service-for-others",
+      "source": {
+        "id": "agent.local-model.owner-laptop",
+        "servingClass": "personal_device",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "no",
+        "declaredAvailable": true,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899880,
+          "p50Ms": 3800
+        },
+        "region": "unknown"
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": true,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "serving_class_allowed",
+          "available_when_owner_offline"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": [
+          "allowedServingClasses",
+          "requireAvailableWhenOwnerOffline"
+        ]
+      },
+      "profile": {
+        "allowedServingClasses": [
+          "rules",
+          "requester_device",
+          "personal_device",
+          "operator_host",
+          "hosted_provider"
+        ],
+        "requireAvailableWhenOwnerOffline": false
+      }
+    },
+    {
+      "name": "profil prøver å løsne: høyere svartid og eldre måling",
+      "purposeRef": "purpose://candidate.model-source.service-for-others",
+      "source": {
+        "id": "dimy.mistral-small",
+        "servingClass": "hosted_provider",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "yes",
+        "declaredAvailable": false,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899100,
+          "p50Ms": 45000
+        },
+        "region": "EU",
+        "pricePerMTokInput": "1.60",
+        "pricePerMTokOutput": "6.20",
+        "offeredByDiMy": true
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": false,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "health_measured_ok",
+          "response_time_within_limit"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": [
+          "maxHealthAgeSeconds",
+          "maxP50MsBySurface"
+        ]
+      },
+      "profile": {
+        "maxHealthAgeSeconds": 3600,
+        "maxP50MsBySurface": {
+          "default": 120000
+        }
+      }
+    },
+    {
+      "name": "profil strammer svartid",
+      "purposeRef": "purpose://candidate.model-source.service-for-others",
+      "source": {
+        "id": "dimy.mistral-small",
+        "servingClass": "hosted_provider",
+        "servesWhom": "agreement",
+        "availableWhenOwnerOffline": "yes",
+        "declaredAvailable": false,
+        "health": {
+          "status": "ok",
+          "measuredAtEpoch": 1794899940,
+          "p50Ms": 20000
+        },
+        "region": "EU",
+        "pricePerMTokInput": "1.60",
+        "pricePerMTokOutput": "6.20",
+        "offeredByDiMy": true
+      },
+      "context": {
+        "nowEpoch": 1794900000,
+        "requesterIsOwner": false,
+        "requesterHasAccess": true,
+        "explicitChoice": false,
+        "fallbackAvailable": true
+      },
+      "expect": {
+        "eligible": false,
+        "unmet": [
+          "response_time_within_limit"
+        ],
+        "effectivePurposeRef": "purpose://candidate.model-source.service-for-others",
+        "rejectedLoosenings": []
+      },
+      "profile": {
+        "maxP50MsBySurface": {
+          "default": 10000
+        }
+      }
+    }
+  ]
+}
