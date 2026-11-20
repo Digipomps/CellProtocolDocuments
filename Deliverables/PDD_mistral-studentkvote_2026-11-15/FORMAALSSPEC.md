@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — Mistral med dagsgrense for studentene
 
-Oppgavemappe: `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/PDD_mistral-studentkvote_2026-11-15/` · Opprettet 2026-11-15 · Iterasjon 3 (ikke godkjent)
+Oppgavemappe: `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/PDD_mistral-studentkvote_2026-11-15/` · Opprettet 2026-11-15 · Iterasjon 4 (ikke godkjent)
 
 Målt mot: CellScaffold `9612217` (origin/main 15.11 01:58), CellProtocol `14fd9dc` (main), CellProtocolDocuments `c99467a`. Staging kjører CellScaffold `8e8f8e05` (audit 14.11).
 
@@ -16,6 +16,14 @@ Kjetils valg 15.11.2026 01:12Z på beslutningskortet i tråden «Sikre studenten
 Kjetil 15.11.2026 22:26Z i tråden «Sikre studentene språkmodellverktøy i HAVEN» (ordrett):
 
 > Vi må fange og si ifra på en god måte for brukeren at den ikke er tilgjengelig. Men hvorfor er det nede? Det oppfyller vel neppe formålet dens. Kjører den på ren cpu? Kallimachos bør bruke noe nyere enn 4o-mini. Men vi kan godt få det inn i DiMy's liste over tilgjengelige modeller - sammen med mistral og anthropic, hvor vi belaster mikrobetlinger for tokenbruk. Om det ikke er modent nok til å kjøre mikrobetalinger  må det fikses. Vi må også kjøre kvalitetstester med språkmodell drevet Kallimachos. (Bruk anledningen til å forbedre native matching også. )
+
+Kjetil 20.11.2026 22:52Z, svar på spørsmål 3 (ordrett):
+
+> 3. Kallimachos er en samling insrtuksjoner/prompter og tillatelser som definerer personaen Kallimachos som i prinsippet kan bruke hvilken som helst språkmodell. Altså en generell AI Gateway, kan være lokalt, mistral, openai, anthropic eller en modell på nanoGPT. Valget er opp til den som bruker og betaler for det. Bruk lokal, hostet av DiMy eller egne API nøkler eller abonnement. Vi bør tilgjengeliggjøre å kunne bruke Claude og Codex desktop også (via agent og mcp)
+
+Kjetil 20.11.2026 22:53Z, svar på spørsmål 4 og 5 (ordrett):
+
+> 4. gjør forslaget 5. ja
 
 Denne oppgaven tar delen «hostede modeller i DiMys liste, belastet med mikrobetaling for tokenbruk», med Mistral først og studentenes kvote som første bruker. Den lokale modellen (hvorfor nede, CPU) og kvalitetstestene og native matching i Kallimachos hører til andre tråder (se §2).
 
@@ -52,19 +60,19 @@ Rot: **DiMy tilbyr hostede modeller fra en liste, og hvert kall belastes med mik
 | purposeRef | Tittel | Forelder | Goal (outcome) | Verifier | Status |
 |---|---|---|---|---|---|
 | purpose://candidate.mistral-studentkvote.root | Modell for studentene innen en kjent kostnad | — | En student uten egen nøkkel får svar fra en modell i HAVEN; summen operatøren kan betale per student per døgn og totalt er satt og håndhevet | T-ROT: to studentkontoer bruker modellen på staging, web og Binding; den tredje kontoen (ikke student) får ikke Mistral | candidate |
-| purpose://candidate.mistral-studentkvote.dimy-liste | Modeller DiMy tilbyr | root | Modellkatalogen sier for hver modell om DiMy tilbyr den, med leverandør, endepunkt, region og tokenpris. Bare modeller merket som tilbudt kan kalles på DiMys regning. Mistral `mistral-small-2603` (EU) først; Anthropic og en nyere OpenAI-modell legges til med samme mekanisme og slås på hver for seg | T-LISTE: `catalog.offered` gir bare tilbudte modeller; et kall mot en modell som ikke er tilbudt avvises før transport | candidate |
-| purpose://candidate.mistral-studentkvote.mikrobetaling | Ett målespor for alle hostede modeller | root | Alle kall til en tilbudt modell går gjennom samme målespor: reservasjon i PaymentGate før kall, faktiske tokens fra svaret, pris fra katalogens tariff, avregning og signert kvittering, avstemming ved ukjent utfall. Ingen kall uten reservasjon. Førstepartstjenesten gjøres leverandøruavhengig; Butler-sporet (#435) og dette sporet skal ende som ett | T-MIKRO: samme fixture gir samme belastning og kvittering for Mistral og OpenAI; uten kvote ingen transport | candidate |
-| purpose://candidate.mistral-studentkvote.kallimachos-modell | Kallimachos bruker en nyere modell fra listen | root | Kallimachos «kapabel» velger modell fra DiMys liste (ikke `gpt-4o-mini`) og belastes gjennom målesporet | T-KALLIMACHOS-MODELL | candidate |
-| purpose://candidate.mistral-studentkvote.hvem | Hvem er student | root | En konto er student bare når den oppfyller vilkårene i en Agreement for kullet (invitasjon akseptert, samme vilkårstype som ChatCell). Eieren kan trekke tilbake; da stopper neste kall | T-HVEM: positiv + tre negative (fremmed, tilbaketrukket, utløpt) | candidate |
+| purpose://candidate.mistral-studentkvote.dimy-liste | Modeller DiMy tilbyr | root | Modellkatalogen sier for hver modell om DiMy tilbyr den: `offeredByDiMy`, `servingClass=hosted_provider`, `region`, `pricePerMTokInput`, `pricePerMTokOutput` (NOK, desimalstreng), leverandør og endepunkt. Feltnavnene er avtalt med PDD_formal-velger-modellkilde. Bare tilbudte modeller kan kalles på DiMys regning. Rekkefølge (Kjetil 20.11, sp. 5 «ja»): Mistral `mistral-small-2603` (EU) først, så `claude-haiku-5-5` og en OpenAI-modell som katalogen merker `current`, hver slått på med Kjetils ja og en tariff. nanoGPT kan legges til med samme mekanisme | T-LISTE: `catalog.offered` gir bare tilbudte modeller; et kall mot en modell som ikke er tilbudt avvises før transport | candidate |
+| purpose://candidate.mistral-studentkvote.mikrobetaling | Ett målespor for alle hostede modeller | root | Alle kall til en tilbudt modell går gjennom samme målespor: reservasjon i PaymentGate før kall, faktiske tokens fra svaret, pris fra katalogens tariff, avregning og signert kvittering, avstemming ved ukjent utfall. Ingen kall uten reservasjon. Førstepartstjenesten gjøres leverandøruavhengig og knyttes til katalogen. Codex-eieren av #435 blir bedt om å la Butler bruke samme spor når #435 lander (Kjetil 20.11, sp. 4 «gjør forslaget») | T-MIKRO: samme fixture gir samme belastning og kvittering for Mistral og OpenAI; uten kvote ingen transport | candidate |
+| purpose://candidate.mistral-studentkvote.kallimachos-modell | Kallimachos er en persona, ikke en modell | root | Kallimachos (instruksjoner, prompter, tillatelser) kan kjøre på hvilken som helst modell via AIGateway. Brukeren som betaler velger kilden: lokal, hostet av DiMy (kvote eller mikrobetaling), egen API-nøkkel eller eget abonnement (#433). Valget går gjennom samme kildevelger som PDD_formal-velger-modellkilde. Claude og Codex desktop via agent og MCP hører til tråden for egne agenter og knyttes til her, men bygges ikke her | T-KALLIMACHOS-KILDE: samme spørsmål med fire kilder gir samme persona og kildeinfo i svaret; ingen kilde valgt gir svar uten modell | candidate |
+| purpose://candidate.mistral-studentkvote.hvem | Hvem er student | root | En konto er student når den har rolle-VC-en `InformasjonssystemerRoleCredential` med `role="student"` og `cohort="MasterHAVEN26"`, utstedt av gruppeentiteten Informasjonssystemer og sjekket med ProvedClaimCondition + TrustedIssuer (PDD i PR #46), likt i Swift, Python og Go. Tilbaketrukket eller utløpt VC stopper neste kall. Ukjent status (speilet eldre enn 10 min) gir `role_status_unknown`, ikke «ikke student» | T-HVEM: positiv + negative (fremmed, tilbaketrukket, utløpt, ukjent status) | candidate |
 | purpose://candidate.mistral-studentkvote.mistral | Mistral som leverandør i førstepartstjenesten | mikrobetaling | Tjenesten kan kalle Mistral (chat completions, fast URL, ingen omdirigering, ingen fallback til annen leverandør) og leser faktiske brukstall fra svaret; nøkkelen lagres forseglet og vises aldri | T-MISTRAL (fake transport + fixture), T-MISTRAL-LIVE (ett ekte kall etter Kjetils ja) | candidate |
 | purpose://candidate.mistral-studentkvote.dagsgrense | Dagsgrense per student | root | Ingen student kan bruke mer enn grensen per døgn (Europe/Oslo). Kallet som ville gått over, avvises før leverandøren kalles. Tjenestens samlede døgnbudsjett gjelder i tillegg | T-DAG: 20 kall på grensen gir nøyaktig så mange som får plass; neste avvises uten leverandørkall; ny dag åpner igjen | candidate |
 | purpose://candidate.mistral-studentkvote.tak | Totaltak per student (semester) | root | Operatøren utsteder en ikke-overførbar kvote per student ved opptak; når den er brukt, stopper Mistral for den studenten | T-TAK (bruker eksisterende `issuePrepaid` + `payment_required`) | candidate |
 | purpose://candidate.mistral-studentkvote.lokal-forst | Lokal modell først | root | Når den lokale modellen svarer, brukes den, gratis og uten å røre kvoten. Mistral brukes når studenten velger det eller den lokale er nede. Uten noen modell faller flaten tilbake til svar uten modell, med beskjed | T-LOKAL (lokal oppe / nede / kvote tom) | candidate |
-| purpose://candidate.mistral-studentkvote.openai-stengt | OpenAI-ruten stengt for studentene | root | Kallimachos «kapabel» kaller ikke `api.openai.com` for en studentkonto (eller for noen konto uten særskilt tildeling, se §6 sp. 3); studenten får Mistral-kvoten i stedet | T-STENGT: transportspion viser null kall til OpenAI for studentkonto | candidate |
+| purpose://candidate.mistral-studentkvote.betaler-velger | Ingen kall på operatørens regning uten at brukeren har valgt det | root | Ingen persona eller flate kaller en hostet modell på DiMys nøkkel uten at brukeren har valgt «hostet av DiMy» og har kvote. Kallimachos' faste OpenAI-rute på operatørens nøkkel fjernes. Egen nøkkel belastes brukerens egen konto og rører ikke kvoten | T-BETALER: transportspion viser null kall på operatørens nøkkel for en konto uten valg eller kvote | candidate |
 | purpose://candidate.mistral-studentkvote.synlig | Studenten ser modell og kvote | root | Ved hvert svar står hvilken modell som svarte (lokal / Mistral EU) og hva som er igjen i dag og i semesteret; når kvoten er brukt, står det når den fornyes | T-SYNLIG + bilder (G1-GUI) | candidate |
 | purpose://candidate.mistral-studentkvote.drift | Operatøren styrer og ser kostnaden | root | Kjetil kan slå Mistral av/på, sette dagsgrense og tak, og se forbruk per student og totalt i `/admin/ai-usage`; leverandørmodus krever eksplisitt bekreftelse | T-DRIFT | candidate |
 | purpose://candidate.mistral-studentkvote.en-port | Én port for alle studentverktøy | root | Kallimachos, Butler og de nye flatene (tekstanalyse, skrivehjelp, skeletonhjelp, felles chat) spør samme Swift-funksjon om studentens modell, i stedet for å bygge hver sin rute | T-EN-PORT: grep + test at hvert verktøy går gjennom porten | candidate |
-| purpose://candidate.mistral-studentkvote.svarform | Felles svarform for kvote | en-port | Kallet går alltid med den spørrende studentens identitet og trekker fra hens kvote. Hvert svar og hvert avslag har `quota` med `remainingTodayMinorUnits`, `dailyLimitMinorUnits`, `remainingCallsToday` og `dailyCallLimit` (antatt antall kall ut fra taket per kall), `resetsAt`. Avslag har egen kode: `student_quota_exhausted_today`, `student_quota_exhausted_term`, `service_budget_exhausted`, `not_eligible` | T-SVARFORM | candidate |
+| purpose://candidate.mistral-studentkvote.svarform | Felles svarform for kvote | en-port | Kallet går alltid med den spørrende studentens identitet og trekker fra hens kvote. Hvert svar og hvert avslag har `quota` med `remainingTodayMinorUnits`, `dailyLimitMinorUnits`, `remainingCallsToday` og `dailyCallLimit` (antatt antall kall ut fra taket per kall), `resetsAt`. Avslag har egen kode: `student_quota_exhausted_today`, `student_quota_exhausted_term`, `service_budget_exhausted`, `not_eligible`, `role_status_unknown` | T-SVARFORM | candidate |
 
 ## 2. Avgrensning og avhengigheter
 
@@ -335,15 +343,15 @@ Avhengigheter (hver måles før den egentlige testen):
 |---|---|---|---|---|
 | T-LISTE | dimy-liste | XCTest mot katalogen: tilbudt/ikke tilbudt; kall mot ikke tilbudt modell gir avslag og spion = 0 | TESTRESULT.md#liste | venter |
 | T-MIKRO | mikrobetaling | XCTest: fixture for Mistral og OpenAI gir riktig pris, avregning og kvittering; uten kvote `payment_required` og spion = 0; ukjent utfall går til avstemming | TESTRESULT.md#mikro | venter |
-| T-KALLIMACHOS-MODELL | kallimachos-modell | XCTest: «kapabel» gir en modell fra listen med status `current`, ikke `gpt-4o-mini`, og går gjennom målesporet | TESTRESULT.md#kallimachos | venter |
+| T-KALLIMACHOS-KILDE | kallimachos-modell | XCTest: lokal, DiMy-hostet, egen nøkkel og ingen kilde; persona og kildeinfo i svaret; DiMy-hostet går gjennom målesporet | TESTRESULT.md#kallimachos | venter |
 | T-ROT | root | To studentkontoer og én vanlig konto på staging (web + Binding); spør Kallimachos med «kapabel» | ACCEPT.md#rot | venter |
-| T-HVEM | hvem | XCTest: student med akseptert invitasjon får `mistral-quota`; fremmed, tilbaketrukket og utløpt får `none`; samme vilkår evaluert i PyCellProtocol/GoCellProtocol-fixturen | TESTRESULT.md#hvem | venter |
+| T-HVEM | hvem | XCTest: gyldig rolle-VC gir tilgang til kvoten; fremmed, tilbaketrukket og utløpt gir `not_eligible`; utdatert status gir `role_status_unknown`; samme vilkårsfixturer i Py/Go (fra PR #46) | TESTRESULT.md#hvem | venter |
 | T-MISTRAL | mistral | XCTest med injisert transport: riktig URL, header, body (`max_tokens`, ingen verktøy), parsing av `usage.prompt_tokens/completion_tokens`; omdirigering avvises; manglende usage gir avstemming, ikke gjetting | TESTRESULT.md#mistral | venter |
 | T-MISTRAL-LIVE | mistral | Ett ekte kall på staging etter Kjetils ja; kvittering med `providerModel` og faktiske tokens | TESTRESULT.md#live | venter |
 | T-DAG | dagsgrense | XCTest: fyll opp til grensen, neste avvises før transport kalles (spion = 0); to studenter påvirker ikke hverandre; døgnskifte i Europe/Oslo | TESTRESULT.md#dag | venter |
 | T-TAK | tak | XCTest: kvote brukt opp gir `payment_required` uten leverandørkall | TESTRESULT.md#tak | venter |
 | T-LOKAL | lokal-forst | XCTest: lokal oppe → lokal brukt, kvote urørt; lokal nede → Mistral; kvote tom → svar uten modell med beskjed | TESTRESULT.md#lokal | venter |
-| T-STENGT | openai-stengt | XCTest med transportspion: studentkonto + «kapabel» gir null kall til `api.openai.com` | TESTRESULT.md#stengt | venter |
+| T-BETALER | betaler-velger | XCTest med transportspion: konto uten valg eller kvote gir null kall på operatørens nøkkel; egen nøkkel rører ikke kvoten | TESTRESULT.md#betaler | venter |
 | T-SYNLIG | synlig | Skjermbilde web + Binding mot godkjente bilder | ACCEPT.md#parity | venter |
 | T-DRIFT | drift | XCTest: leverandørmodus uten bekreftelse avvises; Mistral-nøkkel godtas, OpenAI-nøkkel i Mistral-felt avvises; forbruk per student i ledger | TESTRESULT.md#drift | venter |
 | T-SVARFORM | svarform | XCTest: to studenter i samme felles chat; hver trekker fra egen kvote; avslag har riktig kode og tall | TESTRESULT.md#svarform | venter |
@@ -354,17 +362,20 @@ Avhengigheter (hver måles før den egentlige testen):
 
 ## 6. Åpne spørsmål til Kjetil
 
-1. **Beløp.** Forslag: dagsgrense 3 kr per student, semestertak 100 kr per student, samlet døgnbudsjett 50 kr. Med fixtureprisen (≈ 6 kr per million svartokens) er 3 kr i døgnet flere hundre lange svar.
-2. **Hvem er student.** Forslag: en Agreement «MasterHAVEN26-modellkvote» du sender som invitasjon, gyldig til 30.06.2027 eller til du trekker den tilbake.
-3. **OpenAI-ruten i Kallimachos.** Forslag: steng den direkte OpenAI-ruten for alle kontoer, og la «kapabel» gå gjennom DiMys liste og målesporet. Da betaler ingen ny konto med din nøkkel uten kvote.
-4. **Ett målespor.** Det finnes to: førstepartstjenesten og Butler S3c (#435, Codex). Forslag: jeg gjør førstepartstjenesten leverandøruavhengig og knytter den til katalogen, og ber Codex-eieren av #435 om å la Butler bruke samme spor når #435 lander, i stedet for et tredje. Greit, eller vil du at #435 skal være sporet?
-5. **Første modeller i DiMys liste.** Forslag: Mistral `mistral-small-2603` (EU) nå. Deretter `claude-haiku-5-5` og en OpenAI-modell som katalogen merker `current`, hver slått på med ditt ja og en tariff.
+1. **Beløp.** Forslag: dagsgrense 3 kr per student, semestertak 100 kr per student, samlet døgnbudsjett 50 kr. Med fixtureprisen for Mistral small (≈ 6 kr per million svartokens) er 3 kr i døgnet flere hundre lange svar. Merk: Opus 5.5, som Kallimachos nå bruker som standard (CellScaffold #487), kostet ≈ 0,04 USD per svar i testen 19.11; 3 kr er da omtrent 7 svar per dag.
+
+Avgjort:
+- Sp. 2 (hvem er student): rolle-VC fra Informasjonssystemer i stedet for egen Agreement for kullet, avtalt med tråden for gruppeentiteten. Godkjenningen av PR #46 gjelder for selve VC-en.
+- Sp. 3 (OpenAI-ruten): Kallimachos er en persona som brukeren kjører på den kilden hen velger og betaler for (20.11).
+- Sp. 4 (ett målespor): forslaget (20.11).
+- Sp. 5 (første modeller): ja (20.11).
 
 ## 7. Revisjonslogg
 
 | Iterasjon | Dato | Hva endret seg | Hvem |
 |---|---|---|---|
 | 0 | 2026-11-15 | Opprettet | Losen |
+| 4 | 2026-11-20 | Kjetils svar på sp. 3–5. `kallimachos-modell` blir «persona, ikke modell» med brukerens kildevalg; `openai-stengt` blir `betaler-velger`; `hvem` bruker rolle-VC fra Informasjonssystemer; katalogfeltene avtalt med kildevelger-PDD-en; ny avslagskode `role_status_unknown`. Bare sp. 1 (beløp) står åpent | Claude |
 | 3 | 2026-11-15 | Kjetils retning 22:26Z: modeller i DiMys liste med mikrobetaling for tokenbruk. Ny rot, tre nye formål (dimy-liste, mikrobetaling, kallimachos-modell), regulatorisk klassifisering i §2, spørsmål 3–5 skrevet om | Claude |
 | 2 | 2026-11-15 | Nytt formål `svarform` etter ønske fra tråden «La språkmodellen delta i felles chat» (PR #43): identitet per spørrer, egne avslagskoder, gjenstående i kroner og kall | Claude |
 | 1 | 2026-11-15 | Brief-audit mot kode (to påstander motsagt: tjenesten er bare OpenAI, og dagsgrensen er samlet, ikke per student), 10 formål, 11 formålstester, 5 spørsmål | Claude |
