@@ -102,10 +102,10 @@ Avhengigheter (hver måles før den egentlige testen):
 
 | Leveranse | Type | Hvor | Referanse | Godkjent |
 |---|---|---|---|---|
-| Studentens svar med modellnavn og gjenstående kvote (fylt) | bilde, så kjørende flate | Kallimachos på staging, web og Binding | `images/kvote-fylt-laptop-v1.png`, `-iphone-v1.png` (lages etter G1) | nei |
-| Kvoten er brukt opp i dag | bilde, så kjørende flate | samme | `images/kvote-tom-…-v1.png` | nei |
-| Ikke student: ingen Mistral, forklaring | bilde, så kjørende flate | samme | `images/ikke-student-…-v1.png` | nei |
-| Operatørens innstillinger og forbruk per student | bilde, så kjørende flate | `/admin/ai-usage` | `images/drift-…-v1.png` | nei |
+| Studentens svar med modellnavn og gjenstående kvote (fylt) | bilde, så kjørende flate | Kallimachos på staging, web og Binding | `images/kvote-fylt-{laptop,iphone}-v1.png` | nei |
+| Kvoten er brukt opp i dag | bilde, så kjørende flate | samme | `images/kvote-tom-{laptop,iphone}-v1.png` | nei |
+| Ikke student: ingen Mistral, forklaring | bilde, så kjørende flate | samme | `images/ikke-student-{laptop,iphone}-v1.png`, `images/rollestatus-ukjent-{laptop,iphone}-v1.png` | nei |
+| Operatørens innstillinger og forbruk per student | bilde, så kjørende flate | `/admin/ai-usage` | `images/drift-{laptop,iphone}-v1.png` (mockup) | nei |
 | Swift-endringer med tester | PR | CellScaffold (+ CellProtocol hvis vilkåret trenger det) | — | nei |
 | Testutdata for alle §5-rader | fil | `TESTRESULT.md` | — | nei |
 | FORESPOERSEL til HAVEN-Deploy etter grønt bygg | fil | `/Users/kjetil/Build/Digipomps/HAVEN/HAVEN-Deploy/_handoff/RELEASE/` | — | nei |

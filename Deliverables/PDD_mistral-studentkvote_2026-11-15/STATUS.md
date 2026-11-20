@@ -19,3 +19,4 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
 - 2026-11-15: FORMAALSSPEC iterasjon 1 (10 formål, 11 tester, 5 spørsmål). Venter på G1. Bilder til G1-GUI lages etter G1.
 - 2026-11-20: Iterasjon 4 etter Kjetils svar på sp. 3–5. Bare sp. 1 (beløp) står åpent. G1 venter.
 - 2026-11-20: G1 godkjent. Sp. 1: forslaget prøves (3 kr/dag, 100 kr/semester, 50 kr/døgn samlet). Neste: bilder til G1-GUI.
+- 2026-11-20: Bilder til G1-GUI rendret (images/README.md, 10 bilder). Venter på G1-GUI.
