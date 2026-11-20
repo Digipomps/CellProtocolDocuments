@@ -39,6 +39,7 @@ I dag blir laptop-modellen synlig for deg i det øyeblikket AgentD kobler til. E
 | 15 | tilgang-via-agreement | Negative tester på tvers: fremmed, utløpt Agreement, `purpose://prompt.unknown` | tester i WP5/WP10 | test.cell.auth-negative | Claude |
 | 16 | likt-i-alle-sprak | Samme egnethetsfunksjon i PyCellProtocol og GoCellProtocol, testet på WP1-fixturene | PyCellProtocol, GoCellProtocol | T-SPRAK | Claude |
 | 17 | everything-works | Full regresjon, Book 24 (modellkilder) oppdatert med «Last verified against code», TESTRESULT/ACCEPT, FORESPOERSEL til HAVEN-Deploy etter grønt bygg | — | test.build, test.regression, test.docs-updated, test.status-current | Claude; **Mac** for full kjøring |
+| 18 | abonnement-bare-eier | Kontrakt: `source.credentialKind`, `context.audienceIncludesOthers`, kravet `owner_only_subscription` (vurderes rett etter `owner_or_explicit_choice`), nye vektorer, Python-referansen. CellScaffold: feltet på `ChatScopedAIProviderDescriptor` (AgentD-laptopen melder `local_weights` når den kjører llama-server; uten melding `unknown`), felles chat setter `audienceIncludesOthers` når det er flere deltakere enn spørreren. HavenAgentD: erklæringen fra WP7 får `credentialKind`. Py/Go i WP16 | CellProtocolDocuments `Book/model_source_eligibility_contract_v1.json`, `Tools/ModelSourceEligibility/*`; CellScaffold `ModelSourceEligibility.swift`, `ChatScopedAIProviderRouter.swift`; HavenAgentD erklæringen | T-ABONNEMENT | Claude (skyen + CI), Mac for AgentD |
 
 ## Leveranse i PR-er
 
