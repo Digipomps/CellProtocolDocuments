@@ -9,6 +9,7 @@ Målt mot CellScaffold `272580b` (main 20.11). Fakta planen bygger på:
 - `ModelSourceEligibility.swift` finnes (kildevelgeren, #454).
 - Butler har sitt eget målespor på main med 16 `Butler*`-tjenester (#435 og senere), blant annet `ButlerInvocationService`, `ButlerBYOKUsageLimiter` og `ButlerTopUpPolicy`.
 - Rolle-VC-en fra Informasjonssystemer (CellProtocolDocuments #46) er ikke merget.
+- CellScaffold #493 (utkast 20.11, tråden «Gjør Sara klar til å utforske HAVEN») gir alle kontoer på staging uten egen nøkkel Opus 5.5 i Kallimachos og Architect, på operatørens nøkkel (`AI_GATEWAY_OPERATOR_FALLBACK_*`). Den har et eget tak på 2 USD per konto per døgn og 50 USD per måned, og en egen ledger på disk i USD, utenom PaymentGate.
 
 ## Arbeidspakker (1:1 mot bladformål)
 
@@ -22,7 +23,7 @@ Målt mot CellScaffold `272580b` (main 20.11). Fakta planen bygger på:
 | 5 | tak | Semesterkvote: «Gi kvote til kullet» på driftssiden kaller `issuePrepaid` for hver student med rollen. Uten kvote blir svaret `payment_required`, som oversettes til `student_quota_exhausted_term` | Claude | T-TAK | — |
 | 6 | hvem | Vilkår: ProvedClaimCondition på `InformasjonssystemerRoleCredential` (student, MasterHAVEN26) med TrustedIssuer. `role_status_unknown` får egen kode. Mens #46 er åpen, testes det mot en fixture-utsteder, og ekte kobling skjer når #46 lander | Claude | T-HVEM, test.cell.auth-negative | — |
 | 7 | en-port + svarform | Én Swift-port, `HostedModelAccess.resolve(requester:, purpose:)` → kilde eller avslag med `quota`-objekt og kode. Alle studentverktøy kaller den | Claude | T-EN-PORT, T-SVARFORM | dataflow.md |
-| 8 | betaler-velger | Kallimachos' faste rute på operatørens nøkkel fjernes. «Kapabel» går gjennom porten: DiMy-hostet (kvote), egen nøkkel (#433-sporet) eller ingen. **Merk:** Opus 5.5 blir da bare tilgjengelig med egen nøkkel, eller når du slår den på i DiMys liste med en pris | Claude | T-BETALER | — |
+| 8 | betaler-velger | Kallimachos' faste rute på operatørens nøkkel (`capable` uten valg) erstattes av porten: DiMy-hostet (kvote), egen nøkkel (#433-sporet) eller ingen. **#493 rives ikke.** Den er mellomløsningen til porten virker, og flyttes deretter inn: Opus 5.5 blir en DiMy-tilbudt modell i katalogen, #493-ledgeren erstattes av målesporet, og taket på 2 USD per døgn blir dagsgrensen for Opus. Hvem fallbacken gjelder for («alle uten egen nøkkel» eller studentrollen), avgjør du | Claude | T-BETALER, og #493-testene (`AIGatewayOperatorFallbackTests`) grønne til de er erstattet | migreringsnotat |
 | 9 | kallimachos-modell + lokal-forst | Kildevelgeren «Hvem skal svare?» i Kallimachos-skeletonet (som bildet), koblet til `ModelSourceEligibility`. Lokal modell brukes først når den svarer | Claude | T-KALLIMACHOS-KILDE, T-LOKAL | skeleton-JSON |
 | 10 | synlig | Kvotekort, avslagskort og «Svart av …» i Kallimachos, likt på web og i Binding (Swift) | Claude; Binding på Mac via Remote Control | T-SYNLIG, test.gui.parity, test.gui.load-time, test.skeleton.* | skjermbilder ved siden av bildene |
 | 11 | drift | `/admin/ai-usage` utvides som bildet: modeller DiMy tilbyr (på/av, pris), grenser og forbruk per student. Leverandørmodus krever bekreftelse. Siden er fortsatt Leaf-HTML | Claude | T-DRIFT | skjermbilde |
@@ -35,13 +36,15 @@ Målt mot CellScaffold `272580b` (main 20.11). Fakta planen bygger på:
 |---|---|---|---|
 | A | 1–5, 7 | CellScaffold | ingenting |
 | B | 6 | CellScaffold | at #46 lander for ekte kobling (fixture før det) |
-| C | 8–10 | CellScaffold | A |
+| C | 8–10 | CellScaffold | A, og at #493 er merget (C bygger på den) |
 | D | 11 | CellScaffold | A |
 | E | 12 | CellScaffold (Codex) | A |
 
 Hver PR er et utkast til Linux-CI er grønn og Binding er sjekket på Mac. Claude merger, tagger og deployer ikke. Staging går via FORESPOERSEL til HAVEN-Deploy etter verifisert bygg.
 
 ## Det som krever ditt ja underveis
+
+0. **Forholdet til #493.** Studentene har to grenser: Opus med 2 USD (≈ 21 kr) per døgn via #493, og Mistral med 3 kr per døgn i denne planen. Forslag: behold begge. Mistral er standard i studentkvoten, og Opus er et eget valg med sitt eget tak, begge i samme målespor etter WP8.
 
 1. Mistral-nøkkelen og at leverandørmodus slås på (WP3 live, WP11). Inntil da kjører alt i simulert modus.
 2. Prisen (tariffen) for Mistral small, med kilde og dato.
