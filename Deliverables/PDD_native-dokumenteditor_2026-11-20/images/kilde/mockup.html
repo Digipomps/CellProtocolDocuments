@@ -1,0 +1,94 @@
+<!doctype html><html lang="nb"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<style>
+:root{--ink:#1d1d1f;--muted:#6e6e73;--line:#d2d2d7;--bg:#f5f5f7;--paper:#fff;--accent:#28774b;--hl:#fff1b8;--peer:#7a4cc2;--warn:#fff4e5;--warnb:#f0cf9a}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+.doc h1{font-size:24px;margin:0 0 10px;font-weight:700}.doc h2{font-size:18px;margin:18px 0 6px}
+.doc p{margin:0 0 10px;line-height:1.5;font-size:16px}.doc ul{margin:0 0 10px 0;padding-left:22px;line-height:1.5}
+.doc blockquote{margin:0 0 10px;border-left:3px solid var(--line);padding-left:12px;color:#3a3a3c;font-style:italic}
+.doc a{color:#0a64d6}.cmark{background:var(--hl);border-bottom:2px solid #e6c84a}
+.peer{display:inline-block;width:2px;height:19px;background:var(--peer);vertical-align:-4px;position:relative}
+.peer small{position:absolute;top:1px;left:4px;background:var(--peer);color:#fff;font-size:10px;padding:1px 4px;border-radius:3px;white-space:nowrap}
+.me{display:inline-block;width:2px;height:19px;background:#0a64d6;vertical-align:-4px;animation:none}
+.ph{color:#a1a1a6}
+.chart{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:6px 0 12px;background:#fbfbfd}
+.chart b{font-size:13px}.bars{display:flex;align-items:flex-end;gap:12px;height:90px;margin-top:8px}
+.bars div{flex:1;background:#4c8f68;border-radius:4px 4px 0 0;position:relative}.bars span{position:absolute;bottom:-17px;left:0;right:0;text-align:center;font-size:10px;color:var(--muted)}
+.status{font-size:12px;color:var(--muted)}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#34c759;margin-right:5px}
+.warn{background:var(--warn);border:1px solid var(--warnb);border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.4}
+.tb button{border:0;background:transparent;font:inherit;font-size:16px;min-width:34px;height:34px;border-radius:7px;color:var(--ink)}
+.tb button.on{background:#e8e8ed}.tb .sep{width:1px;height:22px;background:var(--line);margin:0 4px}
+.avatars span{display:inline-flex;width:22px;height:22px;border-radius:50%;color:#fff;font-size:11px;align-items:center;justify-content:center;margin-left:-5px;border:2px solid #fff}
+.panelhint{border-top:1px solid var(--line);padding:12px 16px;background:#fff;font-size:15px;display:flex;justify-content:space-between}
+/* iphone */
+.iphone{width:393px;height:852px;display:flex;flex-direction:column;background:#fff;overflow:hidden}
+.sb{height:47px;display:flex;justify-content:space-between;align-items:flex-end;padding:0 28px 6px;font-weight:600;font-size:15px}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:6px 12px 8px;border-bottom:1px solid var(--line)}
+.nav .back{color:#0a64d6;font-size:17px}.nav .t{font-weight:600;font-size:17px}.nav .r{color:#0a64d6;font-size:17px}
+.iphone .doc{flex:1;padding:16px 18px;overflow:hidden}
+.acc{border-top:1px solid var(--line);background:#f2f2f7;display:flex;align-items:center;padding:4px 6px;gap:0}
+.kbd{height:250px;background:#d1d3d9;display:grid;grid-template-rows:repeat(4,1fr);padding:8px 3px 30px;gap:10px}
+.kbd div{display:flex;gap:5px;justify-content:center}.kbd i{flex:0 1 31px;min-width:0;height:42px;background:#fff;border-radius:5px;box-shadow:0 1px 0 #898a8d;font-style:normal;display:flex;align-items:center;justify-content:center;font-size:20px}
+.kbd i.w{flex:0 0 180px}.kbd i.m{flex:0 0 44px;background:#adb1bb}
+.sheet{position:absolute;left:0;right:0;bottom:0;height:520px;background:#fff;border-radius:14px 14px 0 0;box-shadow:0 -6px 30px rgba(0,0,0,.18);padding:8px 16px}
+.grab{width:36px;height:5px;border-radius:3px;background:#c7c7cc;margin:0 auto 10px}
+.cm{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px}.cm small{color:var(--muted);font-size:12px}.cm p{margin:4px 0 8px;font-size:15px}
+.cm .q{font-size:13px;color:#6b6440;background:#fdf8e6;border-radius:6px;padding:4px 6px;margin:6px 0}
+.btn{display:inline-block;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:14px;margin-right:6px;background:#f5f5f7}
+.btn.p{background:var(--accent);border-color:var(--accent);color:#fff}
+textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px;font:inherit;font-size:15px;height:64px}
+/* mac */
+.mac{width:1280px;height:800px;background:#ececec;padding:0;display:flex;flex-direction:column;border-radius:10px;overflow:hidden;border:1px solid #b9b9b9}
+.titlebar{height:52px;background:#f6f6f6;border-bottom:1px solid #d4d4d4;display:flex;align-items:center;padding:0 14px;gap:14px}
+.lights span{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:7px}
+.mac .tb{background:#fafafa;border-bottom:1px solid #ddd;display:flex;align-items:center;padding:6px 14px;gap:2px}
+.sel{border:1px solid var(--line);border-radius:6px;padding:4px 10px;font-size:13px;background:#fff;margin-right:8px}
+.mac .tb button{font-size:14px;height:28px;min-width:30px}
+.mac .tb .txt{font-size:13px;padding:0 10px;border:1px solid var(--line);background:#fff;border-radius:6px;height:28px;margin-left:6px}
+.mac main{flex:1;display:flex;min-height:0}
+.mac .paperwrap{flex:1;overflow:hidden;padding:24px 0;display:flex;justify-content:center;background:#e9e9ee}
+.mac .doc{width:720px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.12);padding:44px 56px;height:fit-content;min-height:640px}
+.mac aside{width:300px;background:#fff;border-left:1px solid #ddd;padding:14px}
+.mac aside h3{font-size:14px;margin:0 0 10px}
+.mac .foot{height:28px;background:#f6f6f6;border-top:1px solid #ddd;display:flex;align-items:center;padding:0 14px;justify-content:space-between}
+</style></head><body><div id="root"></div>
+<script>
+const q=new URLSearchParams(location.search),dev=q.get("d"),st=q.get("s");
+const empty=`<p class="ph"><span class="me"></span>Begynn å skrive …</p>`;
+const filled=`<h1>Personvern i studentprosjekter</h1>
+<p>Når studenter samler inn data om <b>andre personer</b>, gjelder de samme reglene som for forskere. <i>Samtykke</i> må være frivillig, informert og mulig å trekke tilbake.</p>
+<h2>Hva vi foreslår</h2>
+<ul><li>Bare data som trengs for <span class="cmark">problemstillingen</span></li><li>Avidentifisering før deling i gruppa<span class="peer"><small>Sara</small></span></li><li>Sletting når oppgaven er levert</li></ul>
+<blockquote>«Personopplysninger skal være adekvate, relevante og begrenset til det som er nødvendig.»</blockquote>
+<p>Se <a>Datatilsynets veileder</a> for mer.<span class="me"></span></p>
+<div class="chart"><b>Svar i pilotundersøkelsen</b><div class="bars"><div style="height:40%"><span>Uke 1</span></div><div style="height:72%"><span>Uke 2</span></div><div style="height:55%"><span>Uke 3</span></div><div style="height:90%"><span>Uke 4</span></div></div><div style="height:16px"></div></div>`;
+const avatars=`<span class="avatars"><span style="background:#7a4cc2">S</span><span style="background:#c2664c">P</span></span>`;
+const offline=`<div class="warn"><b>Frakoblet.</b> 3 endringer er lagret på denne enheten og sendes når du er på nett igjen. Du kan skrive videre.</div>`;
+function statusLine(){ if(st==="frakoblet") return `<span class="status"><span class="dot" style="background:#ff9f0a"></span>Venter på nett · 3 endringer lagret lokalt</span>`;
+ if(st==="tom") return `<span class="status"><span class="dot"></span>Alle endringer er lagret i dokumentcellen</span>`;
+ return `<span class="status"><span class="dot"></span>Alle endringer er lagret · Sara og Petter er her</span>`;}
+const comments=`<div class="cm"><small>Petter · for 4 min siden</small><div class="q">«problemstillingen»</div><p>Kan vi si hvilken problemstilling? Ellers blir dette vagt.</p><span class="btn">Vis i teksten</span><span class="btn">Løs</span></div>
+<div class="cm"><small>Sara · løst</small><div class="q">«frivillig, informert»</div><p>Lagt til «mulig å trekke tilbake».</p><span class="btn">Vis i teksten</span></div>`;
+function iphone(){
+ const body = st==="tom"?empty:(st==="frakoblet"?filled.replace(/<span class="peer">.*?<\/span><\/span>/,""):filled);
+ const tb=`<div class="acc tb"><button>Aa</button><button class="${st==='fylt'?'on':''}"><b>B</b></button><button><i>I</i></button><button><u>U</u></button><button><s>S</s></button><span class="sep"></span><button>•≡</button><button>1≡</button><button>❝</button><button>🔗</button><span class="sep"></span><button>💬</button><button>＋</button></div>`;
+ const kbd=`<div class="kbd"><div>${"qwertyuiopå".split("").map(c=>`<i>${c}</i>`).join("")}</div><div>${"asdfghjkløæ".split("").map(c=>`<i>${c}</i>`).join("")}</div><div><i class="m">⇧</i>${"zxcvbnm".split("").map(c=>`<i>${c}</i>`).join("")}<i class="m">⌫</i></div><div><i class="m">123</i><i class="m">🙂</i><i class="w">mellomrom</i><i class="m">↵</i></div></div>`;
+ let html=`<div class="iphone" style="position:relative"><div class="sb"><span>9:41</span><span>●●●● 100%</span></div>
+ <div class="nav"><span class="back">‹ Dokumenter</span><span class="t">Personvern</span><span class="r">${(st==='tom'||st==='frakoblet')?'':avatars} ⋯</span></div>
+ <div style="padding:6px 18px 0">${statusLine()}</div>${st==="frakoblet"?`<div style="padding:8px 14px 0">${offline}</div>`:""}
+ <div class="doc">${body}</div>`;
+ if(st==="kommentarer"){ html+=`<div class="panelhint"><span>Skrivehjelp</span><span style="color:var(--muted)">⌄</span></div>`;
+   html+=`<div class="sheet"><div class="grab"></div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><b style="font-size:17px">Kommentarer</b><span style="color:#0a64d6">Ferdig</span></div>
+   <div class="q" style="font-size:13px;color:var(--muted);margin-bottom:6px">Markert: «Sletting når oppgaven er levert»</div><textarea placeholder="Kommentar til markert tekst"></textarea><div style="margin:8px 0 14px"><span class="btn p">Legg til kommentar</span></div>${comments}</div>`;
+ } else html+=tb+kbd;
+ html+=`</div>`; return html;}
+function mac(){
+ const body = st==="tom"?empty:(st==="frakoblet"?filled.replace(/<span class="peer">.*?<\/span><\/span>/,""):filled);
+ return `<div class="mac"><div class="titlebar"><span class="lights"><span style="background:#ff5f57"></span><span style="background:#febc2e"></span><span style="background:#28c840"></span></span><b style="font-size:13px">Binding — Personvern i studentprosjekter</b><span style="flex:1"></span>${(st==='tom'||st==='frakoblet')?'':avatars}</div>
+ <div class="tb"><span class="sel">Brødtekst ⌄</span><button><b>B</b></button><button><i>I</i></button><button><u>U</u></button><button><s>S</s></button><span class="sep"></span><button>•≡</button><button>1≡</button><button>❝</button><button>🔗</button><span class="sep"></span><button class="txt">Kommenter</button><button class="txt">Sett inn bilde</button><button class="txt">Sett inn diagram</button><span style="flex:1"></span><button class="txt">Del / eksporter ⌄</button></div>
+ ${st==="frakoblet"?`<div style="padding:8px 14px;background:#fafafa;border-bottom:1px solid #ddd">${offline}</div>`:""}
+ <main><div class="paperwrap"><div class="doc">${body}</div></div>
+ <aside><h3>Kommentarer</h3><textarea placeholder="Kommentar til markert tekst"></textarea><div style="margin:8px 0 14px"><span class="btn p">Legg til kommentar</span></div>${st==="tom"?`<p style="color:var(--muted);font-size:13px">Marker tekst for å legge til en kommentar.</p>`:comments}
+ <div style="border-top:1px solid #ddd;margin-top:14px;padding-top:12px;font-size:13px;color:var(--muted)">Skrivehjelp og Dokumentchat ligger under dokumentet, som i dag.</div></aside></main>
+ <div class="foot">${statusLine()}<span class="status">${st==='tom'?'0 ord':'92 ord'}</span></div></div>`;}
+document.getElementById("root").innerHTML = dev==="iphone"?iphone():mac();
+</script></body></html>
