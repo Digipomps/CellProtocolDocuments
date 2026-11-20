@@ -370,3 +370,4 @@ Alle flatene i rad 1–3 bygges av vanlige skeleton-elementer (liste, tekst, kna
 | 1d | 2026-11-18 | Roller utvidet med skrivehjelp-nøklene fra CellScaffold PR #466 (melding fra skrivehjelp-tråden) | Claude |
 | 1e | 2026-11-18 | Analyserommet (PR #465) lagt til som andre bruker av opptak og adressering | Claude |
 | 1f | 2026-11-18 | Roller: egen `chat`-grant (rw) fra CellScaffold #468; leser kan chatte | Claude |
+| 2 | 2026-11-20 | G1 og G1-GUI godkjent av Kjetil. §6 spm. 2–4 følger anbefalingene (se PLAN.md) | Claude |

@@ -4,8 +4,8 @@
 - tags: access, agreement, collaboration, invitation, shared-document
 
 ## Porter
-- G1: venter        (formålsspesifikasjon godkjent av Kjetil)
-- G1-GUI: venter        (rendret bilde godkjent — bare for GUI-oppgaver)
+- G1: godkjent 2026-11-20        (formålsspesifikasjon godkjent av Kjetil)
+- G1-GUI: godkjent 2026-11-20        (rendret bilde godkjent — bare for GUI-oppgaver)
 - G2: venter        (plan godkjent; arbeidspakker 1:1 mot bladformål)
 - G3: venter        (akseptanse: forventning mot faktisk, alle avledede tester grønne)
 
@@ -19,3 +19,4 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
 - 2026-11-14: iterasjon 1 av FORMAALSSPEC (audit, tre med 12 formål, §6 fire spørsmål); G1 bedt om. Bilder (G1-GUI) lages etter svar på §6.
 - 2026-11-15: Kjetil valgte «Felles del i CellBase» (§6 spm. 1). G1 venter fortsatt.
 - 2026-11-15: 10 bilder til G1-GUI rendret (images/README.md); G1-GUI bedt om.
+- 2026-11-20: Kjetil: «G1 og G1-GUI Godkjent.» PLAN.md skrevet (WP0–WP14); §6 spm. 2–4 følger anbefalingene. G2 bedt om.
