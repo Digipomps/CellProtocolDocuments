@@ -1,0 +1,1187 @@
+{
+  "VStack": {
+    "spacing": 10,
+    "modifiers": {
+      "styleRole": "conversation-surface",
+      "styleClasses": [
+        "conversation-surface"
+      ]
+    },
+    "elements": [
+      {
+        "Text": {
+          "text": "Samtaler",
+          "modifiers": {
+            "fontSize": 20,
+            "fontWeight": "semibold"
+          }
+        }
+      },
+      {
+        "HStack": {
+          "spacing": 16,
+          "elements": [
+            {
+              "VStack": {
+                "elements": [
+                  {
+                    "Button": {
+                      "keypath": "chatHub.conversation.start",
+                      "label": "Ny samtale",
+                      "payload": {},
+                      "modifiers": {
+                        "background": "#1D4ED8",
+                        "foregroundColor": "#FFFFFF",
+                        "cornerRadius": 6
+                      }
+                    }
+                  },
+                  {
+                    "Text": {
+                      "keypath": "chatHub.state.conversation.emptyHint",
+                      "modifiers": {
+                        "foregroundColor": "#172033",
+                        "visibility": {
+                          "when": {
+                            "scope": "root",
+                            "keypath": "chatHub.state.conversation.hasThreads",
+                            "equals": false
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "List": {
+                      "keypath": "chatHub.state.conversation.threads",
+                      "elements": [],
+                      "modifiers": {
+                        "styleRole": "conversation-list",
+                        "styleClasses": [
+                          "conversation-list"
+                        ]
+                      },
+                      "flowElementSkeleton": {
+                        "VStack": {
+                          "elements": [
+                            {
+                              "Button": {
+                                "keypath": "chatHub.conversation.select",
+                                "label": "Åpne",
+                                "labelKeypath": "title",
+                                "payloadKeypath": "id",
+                                "modifiers": {
+                                  "foregroundColor": "#1D4ED8",
+                                  "fontWeight": "semibold",
+                                  "styleRole": "conversation-row-open-selected",
+                                  "styleClasses": [
+                                    "conversation-row-open",
+                                    "conversation-row-open-selected"
+                                  ],
+                                  "visibility": {
+                                    "when": {
+                                      "scope": "item",
+                                      "keypath": "selected",
+                                      "equals": true
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "Button": {
+                                "keypath": "chatHub.conversation.select",
+                                "label": "Åpne",
+                                "labelKeypath": "title",
+                                "payloadKeypath": "id",
+                                "modifiers": {
+                                  "foregroundColor": "#172033",
+                                  "fontWeight": "semibold",
+                                  "styleRole": "conversation-row-open",
+                                  "styleClasses": [
+                                    "conversation-row-open",
+                                    "conversation-row-open"
+                                  ],
+                                  "visibility": {
+                                    "when": {
+                                      "scope": "item",
+                                      "keypath": "selected",
+                                      "equals": false
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "Text": {
+                                "keypath": "people",
+                                "modifiers": {
+                                  "foregroundColor": "#172033",
+                                  "styleRole": "conversation-row-people",
+                                  "styleClasses": [
+                                    "conversation-row-people"
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "Text": {
+                                "keypath": "preview",
+                                "modifiers": {
+                                  "foregroundColor": "#172033",
+                                  "styleRole": "conversation-row-preview",
+                                  "styleClasses": [
+                                    "conversation-row-preview"
+                                  ]
+                                }
+                              }
+                            }
+                          ],
+                          "spacing": 4,
+                          "modifiers": {
+                            "padding": 10,
+                            "cornerRadius": 10,
+                            "background": "#F8FAFC",
+                            "borderColor": "#E2E8F0",
+                            "borderWidth": 1,
+                            "styleRole": "conversation-row",
+                            "styleClasses": [
+                              "conversation-row"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "VStack": {
+                      "spacing": 6,
+                      "modifiers": {
+                        "foregroundColor": "#172033",
+                        "visibility": {
+                          "when": {
+                            "scope": "root",
+                            "keypath": "chatHub.state.conversation.hasPendingInvites",
+                            "equals": true
+                          }
+                        }
+                      },
+                      "elements": [
+                        {
+                          "Text": {
+                            "text": "Invitasjoner til deg",
+                            "modifiers": {
+                              "foregroundColor": "#475569",
+                              "fontSize": 14,
+                              "styleRole": "secondary-text"
+                            }
+                          }
+                        },
+                        {
+                          "List": {
+                            "keypath": "chatHub.state.conversation.pendingInvites",
+                            "elements": [],
+                            "flowElementSkeleton": {
+                              "VStack": {
+                                "elements": [
+                                  {
+                                    "Text": {
+                                      "keypath": "title",
+                                      "modifiers": {
+                                        "foregroundColor": "#172033"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "Button": {
+                                      "keypath": "chatHub.acceptInvite",
+                                      "label": "Godta",
+                                      "payloadKeypath": "id",
+                                      "modifiers": {
+                                        "background": "#1D4ED8",
+                                        "foregroundColor": "#FFFFFF",
+                                        "cornerRadius": 6
+                                      }
+                                    }
+                                  }
+                                ],
+                                "spacing": 4
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "spacing": 10,
+                "modifiers": {
+                  "styleRole": "conversation-sidebar",
+                  "styleClasses": [
+                    "conversation-sidebar",
+                    "conversation-sidebar-beside"
+                  ],
+                  "minWidth": 240,
+                  "layoutVariants": [
+                    {
+                      "maxAvailableWidth": 720,
+                      "hidden": true
+                    },
+                    {
+                      "width": 300
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "VStack": {
+                "spacing": 10,
+                "elements": [
+                  {
+                    "VStack": {
+                      "spacing": 10,
+                      "modifiers": {
+                        "foregroundColor": "#172033",
+                        "visibility": {
+                          "when": {
+                            "scope": "root",
+                            "keypath": "chatHub.state.conversation.hasCurrent",
+                            "equals": true
+                          }
+                        }
+                      },
+                      "elements": [
+                        {
+                          "Text": {
+                            "keypath": "chatHub.state.conversation.title",
+                            "modifiers": {
+                              "foregroundColor": "#172033",
+                              "styleRole": "conversation-title",
+                              "styleClasses": [
+                                "conversation-title"
+                              ]
+                            }
+                          }
+                        },
+                        {
+                          "Text": {
+                            "keypath": "chatHub.state.conversation.people",
+                            "modifiers": {
+                              "foregroundColor": "#475569",
+                              "fontSize": 14,
+                              "styleRole": "secondary-text"
+                            }
+                          }
+                        },
+                        {
+                          "Button": {
+                            "keypath": "chatHub.conversation.model.propose",
+                            "label": "Ta med en språkmodell",
+                            "payload": {},
+                            "modifiers": {
+                              "background": "#FFFFFF",
+                              "foregroundColor": "#334155",
+                              "borderColor": "#CBD5E1",
+                              "borderWidth": 1,
+                              "cornerRadius": 6,
+                              "visibility": {
+                                "when": {
+                                  "scope": "root",
+                                  "keypath": "chatHub.state.conversation.model.canPropose",
+                                  "equals": true
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "VStack": {
+                            "elements": [
+                              {
+                                "Text": {
+                                  "keypath": "chatHub.state.conversation.model.proposal.title",
+                                  "modifiers": {
+                                    "foregroundColor": "#172033",
+                                    "fontSize": 16,
+                                    "fontWeight": "semibold"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "chatHub.state.conversation.model.proposal.boundary",
+                                  "modifiers": {
+                                    "foregroundColor": "#172033"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "chatHub.state.conversation.model.proposal.progress",
+                                  "modifiers": {
+                                    "foregroundColor": "#5B21B6",
+                                    "fontSize": 13
+                                  }
+                                }
+                              },
+                              {
+                                "VStack": {
+                                  "spacing": 0,
+                                  "elements": [
+                                    {
+                                      "HStack": {
+                                        "elements": [
+                                          {
+                                            "Button": {
+                                              "keypath": "chatHub.conversation.model.consent",
+                                              "label": "Ja, ta med modellen",
+                                              "payload": {},
+                                              "modifiers": {
+                                                "background": "#6D28D9",
+                                                "foregroundColor": "#FFFFFF",
+                                                "cornerRadius": 6
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "Button": {
+                                              "keypath": "chatHub.conversation.model.decline",
+                                              "label": "Nei takk",
+                                              "payload": {},
+                                              "modifiers": {
+                                                "background": "#FFFFFF",
+                                                "foregroundColor": "#334155",
+                                                "borderColor": "#CBD5E1",
+                                                "borderWidth": 1,
+                                                "cornerRadius": 6
+                                              }
+                                            }
+                                          }
+                                        ],
+                                        "spacing": 8,
+                                        "modifiers": {
+                                          "wrap": true
+                                        }
+                                      }
+                                    }
+                                  ],
+                                  "modifiers": {
+                                    "visibility": {
+                                      "when": {
+                                        "scope": "root",
+                                        "keypath": "chatHub.state.conversation.model.proposal.awaitingMe",
+                                        "equals": true
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            ],
+                            "spacing": 8,
+                            "modifiers": {
+                              "padding": 12,
+                              "cornerRadius": 10,
+                              "background": "#F5F3FF",
+                              "borderColor": "#DDD6FE",
+                              "borderWidth": 1,
+                              "visibility": {
+                                "when": {
+                                  "scope": "root",
+                                  "keypath": "chatHub.state.conversation.model.hasProposal",
+                                  "equals": true
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "VStack": {
+                            "elements": [
+                              {
+                                "Text": {
+                                  "keypath": "chatHub.state.conversation.model.activeSummary",
+                                  "modifiers": {
+                                    "foregroundColor": "#172033",
+                                    "fontSize": 16,
+                                    "fontWeight": "semibold"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "chatHub.state.conversation.model.activeBoundary",
+                                  "modifiers": {
+                                    "foregroundColor": "#475569",
+                                    "fontSize": 14,
+                                    "styleRole": "secondary-text"
+                                  }
+                                }
+                              },
+                              {
+                                "HStack": {
+                                  "elements": [
+                                    {
+                                      "Button": {
+                                        "keypath": "chatHub.conversation.model.remove",
+                                        "label": "Fjern modellen",
+                                        "payload": {},
+                                        "modifiers": {
+                                          "background": "#FFFFFF",
+                                          "foregroundColor": "#B42318",
+                                          "borderColor": "#F3C1BC",
+                                          "borderWidth": 1,
+                                          "cornerRadius": 6
+                                        }
+                                      }
+                                    }
+                                  ],
+                                  "spacing": 8,
+                                  "modifiers": {
+                                    "wrap": true
+                                  }
+                                }
+                              }
+                            ],
+                            "spacing": 6,
+                            "modifiers": {
+                              "padding": 12,
+                              "cornerRadius": 10,
+                              "background": "#F5F3FF",
+                              "borderColor": "#DDD6FE",
+                              "borderWidth": 1,
+                              "visibility": {
+                                "when": {
+                                  "scope": "root",
+                                  "keypath": "chatHub.state.conversation.model.isActive",
+                                  "equals": true
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "List": {
+                            "keypath": "chatHub.state.conversation.messages",
+                            "elements": [],
+                            "flowElementSkeleton": {
+                              "VStack": {
+                                "spacing": 4,
+                                "elements": [
+                                  {
+                                    "HStack": {
+                                      "spacing": 8,
+                                      "elements": [
+                                        {
+                                          "Text": {
+                                            "keypath": "author",
+                                            "modifiers": {
+                                              "foregroundColor": "#172033",
+                                              "styleRole": "conversation-message-author",
+                                              "styleClasses": [
+                                                "conversation-message-author"
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "Text": {
+                                            "keypath": "time",
+                                            "modifiers": {
+                                              "foregroundColor": "#172033",
+                                              "styleRole": "conversation-message-time",
+                                              "styleClasses": [
+                                                "conversation-message-time"
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "Text": {
+                                      "keypath": "body",
+                                      "modifiers": {
+                                        "foregroundColor": "#172033",
+                                        "styleRole": "conversation-message-body",
+                                        "styleClasses": [
+                                          "conversation-message-body"
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "Text": {
+                                      "keypath": "source",
+                                      "modifiers": {
+                                        "foregroundColor": "#5B21B6",
+                                        "fontSize": 13,
+                                        "visibility": {
+                                          "when": {
+                                            "scope": "item",
+                                            "keypath": "isModel",
+                                            "equals": true
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                ],
+                                "modifiers": {
+                                  "hAlignmentKeypath": "align",
+                                  "backgroundKeypath": "bubble",
+                                  "padding": 10,
+                                  "cornerRadius": 12
+                                }
+                              }
+                            },
+                            "modifiers": {
+                              "styleRole": "chat-message-list",
+                              "styleClasses": [
+                                "chat-message-list",
+                                "conversation-messages"
+                              ]
+                            }
+                          }
+                        },
+                        {
+                          "TextArea": {
+                            "sourceKeypath": "chatHub.state.composer.body",
+                            "targetKeypath": "chatHub.setComposer",
+                            "placeholder": "Skriv en melding …",
+                            "minLines": 1,
+                            "maxLines": 8,
+                            "submitOnEnter": true,
+                            "submitActionKeypath": "chatHub.conversation.send",
+                            "editorMode": "plain",
+                            "modifiers": {
+                              "padding": 10,
+                              "background": "#FFFFFF",
+                              "foregroundColor": "#172033",
+                              "borderColor": "#D7DCE2",
+                              "borderWidth": 1,
+                              "cornerRadius": 6
+                            }
+                          }
+                        },
+                        {
+                          "VStack": {
+                            "elements": [
+                              {
+                                "Text": {
+                                  "keypath": "chatHub.state.conversation.model.notice.title",
+                                  "modifiers": {
+                                    "foregroundColor": "#172033",
+                                    "fontSize": 16,
+                                    "fontWeight": "semibold"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "chatHub.state.conversation.model.notice.text",
+                                  "modifiers": {
+                                    "foregroundColor": "#172033"
+                                  }
+                                }
+                              },
+                              {
+                                "HStack": {
+                                  "elements": [
+                                    {
+                                      "Button": {
+                                        "keypath": "chatHub.conversation.model.retryWith",
+                                        "label": "Prøv med Mistral",
+                                        "payload": {
+                                          "route": "mistral"
+                                        },
+                                        "modifiers": {
+                                          "background": "#6D28D9",
+                                          "foregroundColor": "#FFFFFF",
+                                          "cornerRadius": 6,
+                                          "visibility": {
+                                            "when": {
+                                              "scope": "root",
+                                              "keypath": "chatHub.state.conversation.model.notice.canRetryMistral",
+                                              "equals": true
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "Button": {
+                                        "keypath": "chatHub.conversation.model.dismissNotice",
+                                        "label": "Lukk",
+                                        "payload": {},
+                                        "modifiers": {
+                                          "background": "#FFFFFF",
+                                          "foregroundColor": "#334155",
+                                          "borderColor": "#CBD5E1",
+                                          "borderWidth": 1,
+                                          "cornerRadius": 6
+                                        }
+                                      }
+                                    }
+                                  ],
+                                  "spacing": 8,
+                                  "modifiers": {
+                                    "wrap": true
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "text": "Bare du ser denne meldingen.",
+                                  "modifiers": {
+                                    "foregroundColor": "#475569",
+                                    "fontSize": 14,
+                                    "styleRole": "secondary-text"
+                                  }
+                                }
+                              }
+                            ],
+                            "spacing": 8,
+                            "modifiers": {
+                              "padding": 12,
+                              "cornerRadius": 10,
+                              "background": "#FFF7ED",
+                              "borderColor": "#FED7AA",
+                              "borderWidth": 1,
+                              "visibility": {
+                                "when": {
+                                  "scope": "root",
+                                  "keypath": "chatHub.state.conversation.model.hasNotice",
+                                  "equals": true
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "HStack": {
+                            "spacing": 8,
+                            "modifiers": {
+                              "wrap": true
+                            },
+                            "elements": [
+                              {
+                                "Button": {
+                                  "keypath": "chatHub.conversation.send",
+                                  "label": "Send",
+                                  "payload": {},
+                                  "modifiers": {
+                                    "background": "#1D4ED8",
+                                    "foregroundColor": "#FFFFFF",
+                                    "cornerRadius": 6
+                                  }
+                                }
+                              },
+                              {
+                                "Button": {
+                                  "keypath": "chatHub.conversation.joinLink.create",
+                                  "label": "Lag invitasjonslenke",
+                                  "payload": {},
+                                  "modifiers": {
+                                    "background": "#FFFFFF",
+                                    "foregroundColor": "#334155",
+                                    "borderColor": "#CBD5E1",
+                                    "borderWidth": 1,
+                                    "cornerRadius": 6,
+                                    "visibility": {
+                                      "when": {
+                                        "scope": "root",
+                                        "keypath": "chatHub.state.conversation.hasJoinLink",
+                                        "equals": false
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "VStack": {
+                            "elements": [
+                              {
+                                "HStack": {
+                                  "elements": [
+                                    {
+                                      "Button": {
+                                        "keypath": "chatHub.conversation.model.ask",
+                                        "label": "Spør modellen",
+                                        "payload": {},
+                                        "modifiers": {
+                                          "background": "#6D28D9",
+                                          "foregroundColor": "#FFFFFF",
+                                          "cornerRadius": 6
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "Text": {
+                                        "text": "eller skriv @modell i meldingen",
+                                        "modifiers": {
+                                          "foregroundColor": "#475569",
+                                          "fontSize": 14,
+                                          "styleRole": "secondary-text"
+                                        }
+                                      }
+                                    }
+                                  ],
+                                  "spacing": 8,
+                                  "modifiers": {
+                                    "wrap": true
+                                  }
+                                }
+                              },
+                              {
+                                "HStack": {
+                                  "elements": [
+                                    {
+                                      "Text": {
+                                        "text": "Modell:",
+                                        "modifiers": {
+                                          "foregroundColor": "#475569",
+                                          "fontSize": 14,
+                                          "styleRole": "secondary-text"
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "Button": {
+                                        "keypath": "chatHub.conversation.model.route",
+                                        "label": "Qwen lokalt (gratis)",
+                                        "payload": {
+                                          "route": "local"
+                                        },
+                                        "modifiers": {
+                                          "background": "#6D28D9",
+                                          "foregroundColor": "#FFFFFF",
+                                          "cornerRadius": 6,
+                                          "fontSize": 13,
+                                          "visibility": {
+                                            "when": {
+                                              "scope": "root",
+                                              "keypath": "chatHub.state.conversation.model.mistralSelected",
+                                              "equals": false
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "Button": {
+                                        "keypath": "chatHub.conversation.model.route",
+                                        "label": "Qwen lokalt (gratis)",
+                                        "payload": {
+                                          "route": "local"
+                                        },
+                                        "modifiers": {
+                                          "background": "#FFFFFF",
+                                          "foregroundColor": "#334155",
+                                          "borderColor": "#CBD5E1",
+                                          "borderWidth": 1,
+                                          "cornerRadius": 6,
+                                          "fontSize": 13,
+                                          "visibility": {
+                                            "when": {
+                                              "scope": "root",
+                                              "keypath": "chatHub.state.conversation.model.mistralSelected",
+                                              "equals": true
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "Button": {
+                                        "keypath": "chatHub.conversation.model.route",
+                                        "label": "Mistral (EU)",
+                                        "payload": {
+                                          "route": "mistral"
+                                        },
+                                        "modifiers": {
+                                          "background": "#6D28D9",
+                                          "foregroundColor": "#FFFFFF",
+                                          "cornerRadius": 6,
+                                          "fontSize": 13,
+                                          "visibility": {
+                                            "when": {
+                                              "scope": "root",
+                                              "keypath": "chatHub.state.conversation.model.mistralSelected",
+                                              "equals": true
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "Button": {
+                                        "keypath": "chatHub.conversation.model.route",
+                                        "label": "Mistral (EU)",
+                                        "payload": {
+                                          "route": "mistral"
+                                        },
+                                        "modifiers": {
+                                          "background": "#FFFFFF",
+                                          "foregroundColor": "#334155",
+                                          "borderColor": "#CBD5E1",
+                                          "borderWidth": 1,
+                                          "cornerRadius": 6,
+                                          "fontSize": 13,
+                                          "visibility": {
+                                            "when": {
+                                              "scope": "root",
+                                              "keypath": "chatHub.state.conversation.model.mistralSelected",
+                                              "equals": false
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  ],
+                                  "spacing": 8,
+                                  "modifiers": {
+                                    "wrap": true
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "chatHub.state.conversation.model.routeSummary",
+                                  "modifiers": {
+                                    "foregroundColor": "#475569",
+                                    "fontSize": 14,
+                                    "styleRole": "secondary-text"
+                                  }
+                                }
+                              }
+                            ],
+                            "spacing": 8,
+                            "modifiers": {
+                              "visibility": {
+                                "when": {
+                                  "scope": "root",
+                                  "keypath": "chatHub.state.conversation.model.isActive",
+                                  "equals": true
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "VStack": {
+                            "spacing": 6,
+                            "modifiers": {
+                              "foregroundColor": "#172033",
+                              "visibility": {
+                                "when": {
+                                  "scope": "root",
+                                  "keypath": "chatHub.state.conversation.hasJoinLink",
+                                  "equals": true
+                                }
+                              }
+                            },
+                            "elements": [
+                              {
+                                "Text": {
+                                  "text": "Invitasjonslenke",
+                                  "modifiers": {
+                                    "foregroundColor": "#475569",
+                                    "fontSize": 14,
+                                    "styleRole": "secondary-text"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "chatHub.state.conversation.joinLink.url",
+                                  "modifiers": {
+                                    "foregroundColor": "#172033",
+                                    "styleRole": "conversation-join-link",
+                                    "styleClasses": [
+                                      "conversation-join-link"
+                                    ]
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "chatHub.state.conversation.joinLink.summary",
+                                  "modifiers": {
+                                    "foregroundColor": "#475569",
+                                    "fontSize": 14,
+                                    "styleRole": "secondary-text"
+                                  }
+                                }
+                              },
+                              {
+                                "Button": {
+                                  "keypath": "chatHub.conversation.joinLink.revoke",
+                                  "label": "Trekk tilbake lenken",
+                                  "payload": {},
+                                  "modifiers": {
+                                    "background": "#FFFFFF",
+                                    "foregroundColor": "#334155",
+                                    "borderColor": "#CBD5E1",
+                                    "borderWidth": 1,
+                                    "cornerRadius": 6,
+                                    "fontSize": 13,
+                                    "styleRole": "conversation-revoke-link",
+                                    "styleClasses": [
+                                      "conversation-revoke-link"
+                                    ]
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "modifiers": {
+                  "styleRole": "conversation-main",
+                  "styleClasses": [
+                    "conversation-main"
+                  ],
+                  "flexGrow": 1,
+                  "minWidth": 0
+                }
+              }
+            },
+            {
+              "VStack": {
+                "elements": [
+                  {
+                    "Button": {
+                      "keypath": "chatHub.conversation.start",
+                      "label": "Ny samtale",
+                      "payload": {},
+                      "modifiers": {
+                        "background": "#1D4ED8",
+                        "foregroundColor": "#FFFFFF",
+                        "cornerRadius": 6
+                      }
+                    }
+                  },
+                  {
+                    "Text": {
+                      "keypath": "chatHub.state.conversation.emptyHint",
+                      "modifiers": {
+                        "foregroundColor": "#172033",
+                        "visibility": {
+                          "when": {
+                            "scope": "root",
+                            "keypath": "chatHub.state.conversation.hasThreads",
+                            "equals": false
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "List": {
+                      "keypath": "chatHub.state.conversation.threads",
+                      "elements": [],
+                      "modifiers": {
+                        "styleRole": "conversation-list",
+                        "styleClasses": [
+                          "conversation-list"
+                        ]
+                      },
+                      "flowElementSkeleton": {
+                        "VStack": {
+                          "elements": [
+                            {
+                              "Button": {
+                                "keypath": "chatHub.conversation.select",
+                                "label": "Åpne",
+                                "labelKeypath": "title",
+                                "payloadKeypath": "id",
+                                "modifiers": {
+                                  "foregroundColor": "#1D4ED8",
+                                  "fontWeight": "semibold",
+                                  "styleRole": "conversation-row-open-selected",
+                                  "styleClasses": [
+                                    "conversation-row-open",
+                                    "conversation-row-open-selected"
+                                  ],
+                                  "visibility": {
+                                    "when": {
+                                      "scope": "item",
+                                      "keypath": "selected",
+                                      "equals": true
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "Button": {
+                                "keypath": "chatHub.conversation.select",
+                                "label": "Åpne",
+                                "labelKeypath": "title",
+                                "payloadKeypath": "id",
+                                "modifiers": {
+                                  "foregroundColor": "#172033",
+                                  "fontWeight": "semibold",
+                                  "styleRole": "conversation-row-open",
+                                  "styleClasses": [
+                                    "conversation-row-open",
+                                    "conversation-row-open"
+                                  ],
+                                  "visibility": {
+                                    "when": {
+                                      "scope": "item",
+                                      "keypath": "selected",
+                                      "equals": false
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "Text": {
+                                "keypath": "people",
+                                "modifiers": {
+                                  "foregroundColor": "#172033",
+                                  "styleRole": "conversation-row-people",
+                                  "styleClasses": [
+                                    "conversation-row-people"
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "Text": {
+                                "keypath": "preview",
+                                "modifiers": {
+                                  "foregroundColor": "#172033",
+                                  "styleRole": "conversation-row-preview",
+                                  "styleClasses": [
+                                    "conversation-row-preview"
+                                  ]
+                                }
+                              }
+                            }
+                          ],
+                          "spacing": 4,
+                          "modifiers": {
+                            "padding": 10,
+                            "cornerRadius": 10,
+                            "background": "#F8FAFC",
+                            "borderColor": "#E2E8F0",
+                            "borderWidth": 1,
+                            "styleRole": "conversation-row",
+                            "styleClasses": [
+                              "conversation-row"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "VStack": {
+                      "spacing": 6,
+                      "modifiers": {
+                        "foregroundColor": "#172033",
+                        "visibility": {
+                          "when": {
+                            "scope": "root",
+                            "keypath": "chatHub.state.conversation.hasPendingInvites",
+                            "equals": true
+                          }
+                        }
+                      },
+                      "elements": [
+                        {
+                          "Text": {
+                            "text": "Invitasjoner til deg",
+                            "modifiers": {
+                              "foregroundColor": "#475569",
+                              "fontSize": 14,
+                              "styleRole": "secondary-text"
+                            }
+                          }
+                        },
+                        {
+                          "List": {
+                            "keypath": "chatHub.state.conversation.pendingInvites",
+                            "elements": [],
+                            "flowElementSkeleton": {
+                              "VStack": {
+                                "elements": [
+                                  {
+                                    "Text": {
+                                      "keypath": "title",
+                                      "modifiers": {
+                                        "foregroundColor": "#172033"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "Button": {
+                                      "keypath": "chatHub.acceptInvite",
+                                      "label": "Godta",
+                                      "payloadKeypath": "id",
+                                      "modifiers": {
+                                        "background": "#1D4ED8",
+                                        "foregroundColor": "#FFFFFF",
+                                        "cornerRadius": 6
+                                      }
+                                    }
+                                  }
+                                ],
+                                "spacing": 4
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "spacing": 10,
+                "modifiers": {
+                  "styleRole": "conversation-sidebar",
+                  "styleClasses": [
+                    "conversation-sidebar",
+                    "conversation-sidebar-below"
+                  ],
+                  "minWidth": 240,
+                  "layoutVariants": [
+                    {
+                      "maxAvailableWidth": 720
+                    },
+                    {
+                      "hidden": true
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "styleRole": "conversation-layout",
+            "styleClasses": [
+              "conversation-layout"
+            ],
+            "vAlignment": "top",
+            "layoutVariants": [
+              {
+                "maxAvailableWidth": 720,
+                "axis": "vertical"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
