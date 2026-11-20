@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — Mistral med dagsgrense for studentene
 
-Oppgavemappe: `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/PDD_mistral-studentkvote_2026-11-15/` · Opprettet 2026-11-15 · Iterasjon 4 (ikke godkjent)
+Oppgavemappe: `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/PDD_mistral-studentkvote_2026-11-15/` · Opprettet 2026-11-15 · Iterasjon 4 (G1 godkjent 2026-11-20)
 
 Målt mot: CellScaffold `9612217` (origin/main 15.11 01:58), CellProtocol `14fd9dc` (main), CellProtocolDocuments `c99467a`. Staging kjører CellScaffold `8e8f8e05` (audit 14.11).
 
@@ -362,9 +362,10 @@ Avhengigheter (hver måles før den egentlige testen):
 
 ## 6. Åpne spørsmål til Kjetil
 
-1. **Beløp.** Forslag: dagsgrense 3 kr per student, semestertak 100 kr per student, samlet døgnbudsjett 50 kr. Med fixtureprisen for Mistral small (≈ 6 kr per million svartokens) er 3 kr i døgnet flere hundre lange svar. Merk: Opus 5.5, som Kallimachos nå bruker som standard (CellScaffold #487), kostet ≈ 0,04 USD per svar i testen 19.11; 3 kr er da omtrent 7 svar per dag.
+Ingen åpne.
 
 Avgjort:
+- Sp. 1 (beløp): «Vi prøver forslaget - så ser vi hvordan det funker» (20.11 22:57Z): 3 kr per student per dag, 100 kr per semester, 50 kr per døgn samlet. Studentenes DiMy-hostede standard er Mistral small (EU), i tråd med sp. 5.
 - Sp. 2 (hvem er student): rolle-VC fra Informasjonssystemer i stedet for egen Agreement for kullet, avtalt med tråden for gruppeentiteten. Godkjenningen av PR #46 gjelder for selve VC-en.
 - Sp. 3 (OpenAI-ruten): Kallimachos er en persona som brukeren kjører på den kilden hen velger og betaler for (20.11).
 - Sp. 4 (ett målespor): forslaget (20.11).
@@ -375,6 +376,7 @@ Avgjort:
 | Iterasjon | Dato | Hva endret seg | Hvem |
 |---|---|---|---|
 | 0 | 2026-11-15 | Opprettet | Losen |
+| 4b | 2026-11-20 | Sp. 1 avgjort, G1 godkjent av Kjetil 22:57Z | Claude |
 | 4 | 2026-11-20 | Kjetils svar på sp. 3–5. `kallimachos-modell` blir «persona, ikke modell» med brukerens kildevalg; `openai-stengt` blir `betaler-velger`; `hvem` bruker rolle-VC fra Informasjonssystemer; katalogfeltene avtalt med kildevelger-PDD-en; ny avslagskode `role_status_unknown`. Bare sp. 1 (beløp) står åpent | Claude |
 | 3 | 2026-11-15 | Kjetils retning 22:26Z: modeller i DiMys liste med mikrobetaling for tokenbruk. Ny rot, tre nye formål (dimy-liste, mikrobetaling, kallimachos-modell), regulatorisk klassifisering i §2, spørsmål 3–5 skrevet om | Claude |
 | 2 | 2026-11-15 | Nytt formål `svarform` etter ønske fra tråden «La språkmodellen delta i felles chat» (PR #43): identitet per spørrer, egne avslagskoder, gjenstående i kroner og kall | Claude |
