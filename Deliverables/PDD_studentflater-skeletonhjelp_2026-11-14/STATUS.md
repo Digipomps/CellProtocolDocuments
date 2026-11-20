@@ -18,3 +18,5 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
 - 2026-11-14: opprettet
 - 2026-11-14: iterasjon 1 av FORMAALSSPEC skrevet; venter på G1. Studentguiden leveres som dokumentasjon uten port.
 - 2026-11-15: G1 godkjent av Kjetil (01:05 UTC). Endringer fra svarene ført inn som iterasjon 2. Neste: G1-GUI-bilder.
+- 2026-11-15: G1-GUI-bilder rendret og sendt til Kjetil; venter på G1-GUI.
+- 2026-11-18: G1-GUI runde 1 avvist av Kjetil (stygt, uklart). Runde 2 rendret med UX-vurdering; venter på G1-GUI.

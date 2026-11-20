@@ -1,0 +1,100 @@
+{
+  "name": "Mitt gjøremålspanel",
+  "cellReferences": [
+    {
+      "endpoint": "cell:///Todo",
+      "label": "todo",
+      "subscribeFeed": true,
+      "subscriptions": [],
+      "setKeysAndValues": []
+    }
+  ],
+  "skeleton": {
+    "VStack": [
+      {
+        "Text": {
+          "text": "Mine gjøremål",
+          "modifiers": {
+            "fontSize": 18,
+            "fontWeight": "semibold"
+          }
+        }
+      },
+      {
+        "List": {
+          "keypath": "todo.activeItems",
+          "flowElementSkeleton": {
+            "VStack": [
+              {
+                "HStack": {
+                  "spacing": 12,
+                  "elements": [
+                    {
+                      "VStack": {
+                        "spacing": 2,
+                        "elements": [
+                          {
+                            "Text": {
+                              "keypath": "title"
+                            }
+                          },
+                          {
+                            "Text": {
+                              "keypath": "dueText",
+                              "modifiers": {
+                                "fontSize": 13,
+                                "foregroundColor": "#64748b"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "Spacer": {}
+                    },
+                    {
+                      "Button": {
+                        "keypath": "todo.toggleTodo",
+                        "label": "Ferdig",
+                        "payloadKeypath": "id"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "Section": {
+          "header": {
+            "Text": {
+              "text": "Fullført"
+            }
+          },
+          "content": [
+            {
+              "List": {
+                "keypath": "todo.completedItems",
+                "flowElementSkeleton": {
+                  "VStack": [
+                    {
+                      "Text": {
+                        "keypath": "title",
+                        "modifiers": {
+                          "foregroundColor": "#64748b"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
