@@ -44,7 +44,7 @@ Hver PR er et utkast til Linux-CI er grønn og Binding er sjekket på Mac. Claud
 
 ## Det som krever ditt ja underveis
 
-0. **Forholdet til #493.** Studentene har to grenser: Opus med 2 USD (≈ 21 kr) per døgn via #493, og Mistral med 3 kr per døgn i denne planen. Forslag: behold begge. Mistral er standard i studentkvoten, og Opus er et eget valg med sitt eget tak, begge i samme målespor etter WP8.
+0. **Forholdet til #493:** avgjort 20.11 23:17Z, «Begge, i samme målespor». Mistral er standard i studentkvoten med 3 kr per dag. Opus er et eget valg med 2 USD per dag fra #493. Begge flyttes inn i målesporet i WP8.
 
 1. Mistral-nøkkelen og at leverandørmodus slås på (WP3 live, WP11). Inntil da kjører alt i simulert modus.
 2. Prisen (tariffen) for Mistral small, med kilde og dato.
