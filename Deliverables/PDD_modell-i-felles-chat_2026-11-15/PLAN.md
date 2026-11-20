@@ -50,6 +50,7 @@ Utfører: **Claude** = denne tråden i skyen (CellBase og ScaffoldKit bygges i D
 |---|---|
 | Lokal Qwen på staging (tråd A) | Alt bygges og testes med falsk leverandør. E2E på staging venter, eller kjøres med Mistral alene |
 | Mistral-kvoten (PR #42, G1 venter fortsatt) | WP10 bygges mot kontrakten i PR #42 (`quota`-objektet og avslagskodene). Mistral-knappen sier «ikke tilgjengelig ennå» til kvoten er levert |
+| Opus 5.5 med dagsgrense per student (tråden «Gjør Sara klar til å utforske HAVEN», besluttet 20.11, nøkkelalias `anthropic` fra CellScaffold #446) | Mulig tredje rute ved siden av Qwen og Mistral. Den er ekstern, så den går under samme gruppe-ja som Mistral (§6 spm. 3a). Den tas bare med i WP10 hvis Kjetil sier ja ved G2 |
 | Studentrollen (Informasjonssystemer, PR #46) | Påvirker bare hvem som får Mistral-kvote, ikke denne PDD-en |
 
 ## Avledede tester mot pakker
