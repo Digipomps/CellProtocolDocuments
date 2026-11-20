@@ -20,3 +20,6 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
 - 2026-11-15 11.31 Oslo: Kjetil valgte §6 spm. 1 (a): Samtaler flyttes til ChatCell. G1 og G1-GUI er fortsatt ikke godkjent.
 - 2026-11-20: G1 og G1-GUI godkjent, §6 spm. 2–4 besluttet (a). PLAN.md (WP0–WP17) skrevet, G2 bedt om.
 - 2026-11-20 23.55: G2 godkjent. Implementering starter: WP0 på Mac, WP1–WP4 i CellProtocol.
+- 2026-11-21 natt: WP1–WP4 i CellProtocol PR #101 (utkast). Modellen slippes inn gjennom chattens eksisterende `member`/`invitationAccepted`-betingelse, som for modellens identitet gjelder bare mens alle medlemmer har sagt ja (Agreement-betingelser er OG-et, så en egen betingelse ville også stengt mennesker). Scenariofixtures i `fixtures/interop/chat-model-v1`. 73 tester grønne på Linux (Docker swift:6.1-noble). Testene ble skrevet sammen med koden, ikke kjørt røde først.
+- 2026-11-21 natt: WP5 PyCellProtocol PR #4 (303 grønne), WP6 GoCellProtocol PR #38 (`go test -race` grønn). Begge sjekker samme fixture og har en falsk modell.
+- 2026-11-21 natt: WP9–WP12 kjernen i CellScaffold startet som `ScaffoldKit/Samtaler/SamtaleModelHost.swift` (bygges og testes i skyen mot CellProtocol-grenen). WP7–WP8 (Samtaler-lageret på ChatCell) krever App-bygg på Mac.
