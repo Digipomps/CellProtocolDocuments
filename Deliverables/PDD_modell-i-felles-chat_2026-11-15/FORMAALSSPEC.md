@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — språkmodell som deltaker i felles chat
 
-Oppgavemappe: `PDD_modell-i-felles-chat_2026-11-15` · Opprettet 2026-11-15 · Iterasjon 1 (G1 bedt om)
+Oppgavemappe: `PDD_modell-i-felles-chat_2026-11-15` · Opprettet 2026-11-15 · Iterasjon 2 (G1 og G1-GUI godkjent 2026-11-20)
 
 > Regel: ingen plan før G1 er godkjent av Kjetil. For GUI: ingen implementering før G1-GUI (rendret bilde) er godkjent.
 > Et dokument om leveransen teller aldri som leveransen.
@@ -359,14 +359,15 @@ Lærdommene som styrer denne PDD-en mest, og hvor de er brukt:
 ## 6. Åpne spørsmål til Kjetil
 
 1. **Hvor bor samtalen?** I dag er Samtaler-tråder lagret tilstand i Co-Pilot-lageret, ikke en Agreement. Din regel sier at tilgang til en chat bare avgjøres av Agreement-vilkår. Valg: (a) Samtaler flyttes over på `ChatCell` (Agreement, finnes i Swift, Python og Go), og modellen kommer inn som deltaker der. Eksisterende tråder flyttes over. (b) Modellen legges inn i dagens Samtaler-lager uten Agreement, raskere men bryter regelen. **Anbefaling: (a).** Det er mer arbeid, men det er det eneste som holder regelen, og det samme trengs for dokumentdeling. **Besluttet 2026-11-15 11.31 Oslo: (a)** (Kjetil, beslutningskort «Ja, flytt Samtaler til ChatCell»).
-2. **Hvem må si ja før modellen kommer inn?** (a) Alle som er med i samtalen. (b) Bare den som eier samtalen. **Anbefaling: (a),** fordi det er alles meldinger modellen får lese.
-3. **Ekstern modell (Mistral) i en gruppesamtale:** (a) krever et eget ja fra alle, utover ja til lokal modell, (b) samme ja dekker begge. **Anbefaling: (a).** Lokal Qwen holder teksten på HAVENs server, Mistral sender den ut av huset (EU).
-4. **Python og Go har ingen AIGateway.** (a) Python og Go får samme vilkår og meldingskontrakt, og modellen kobles inn som en innplugget leverandør (testet med falsk leverandør), (b) Python og Go får også et ekte modellkall. **Anbefaling: (a) nå,** (b) som egen sak.
+2. **Hvem må si ja før modellen kommer inn?** (a) Alle som er med i samtalen. (b) Bare den som eier samtalen. **Anbefaling: (a),** fordi det er alles meldinger modellen får lese. **Besluttet 2026-11-20: (a).**
+3. **Ekstern modell (Mistral) i en gruppesamtale:** (a) krever et eget ja fra alle, utover ja til lokal modell, (b) samme ja dekker begge. **Anbefaling: (a).** Lokal Qwen holder teksten på HAVENs server, Mistral sender den ut av huset (EU). **Besluttet 2026-11-20: (a).**
+4. **Python og Go har ingen AIGateway.** (a) Python og Go får samme vilkår og meldingskontrakt, og modellen kobles inn som en innplugget leverandør (testet med falsk leverandør), (b) Python og Go får også et ekte modellkall. **Anbefaling: (a) nå,** (b) som egen sak. **Besluttet 2026-11-20: (a).**
 
 ## 7. Revisjonslogg
 
 | Iterasjon | Dato | Hva endret seg |
 |---|---|---|
+| 2 | 2026-11-20 | Kjetil 23.43 Oslo: «2. a 3 a a nå G1 G1-GUI Godkjent». §6 spm. 2–4 besluttet (a). G1 og G1-GUI godkjent |
 | 1c | 2026-11-15 | §6 spm. 1 besluttet av Kjetil: Samtaler flyttes til ChatCell (a). Spm. 2–4 og G1 venter |
 | 1b | 2026-11-15 | §2: Mistral-kvotens svar- og avslagskontrakt fra PR #42 lagt inn. Feilmeldingen i chatten bruker avslagskodene derfra |
 | 1 | 2026-11-15 | Første utkast: formålstre, avhengigheter med tilstand, forventningskontrakt, tester, fire åpne spørsmål. Seks bilder rendret fra skeleton-JSON |
