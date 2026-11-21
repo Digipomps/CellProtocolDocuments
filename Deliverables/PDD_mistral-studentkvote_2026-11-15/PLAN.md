@@ -1,6 +1,6 @@
 # PLAN — DiMy-modeller med mikrobetaling, Mistral-kvote for studentene
 
-Oppgavemappe: `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/PDD_mistral-studentkvote_2026-11-15/` · Skrevet 2026-11-21 · G1 godkjent 20.11, G1-GUI godkjent 20.11 · **G2 venter**
+Oppgavemappe: `/Users/kjetil/Build/Digipomps/HAVEN/CellProtocolDocuments/Deliverables/PDD_mistral-studentkvote_2026-11-15/` · Skrevet 2026-11-21 · G1 godkjent 20.11, G1-GUI godkjent 20.11 · **G2 godkjent 2026-11-21**
 
 Målt mot CellScaffold `272580b` (main 20.11). Fakta planen bygger på:
 - `FirstPartyAIProvider.swift:31` har fast `https://api.openai.com/v1/responses`. `FirstPartyAIConfiguration.swift:69` godtar bare nøkler som starter med `sk-`.
