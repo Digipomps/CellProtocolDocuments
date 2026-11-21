@@ -17,3 +17,4 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
 ## Logg
 - 2026-11-20: opprettet
 - 2026-11-20: iterasjon 1 av FORMAALSSPEC.md og 7 mockup-bilder. G1 og G1-GUI spurt
+- 2026-11-21: §6 besvart (1 og 2 ja, alt i én levering). Bekreftelse av G1 og G1-GUI spurt

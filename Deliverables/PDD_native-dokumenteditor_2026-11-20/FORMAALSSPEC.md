@@ -368,9 +368,15 @@ Lærdommene som styrer denne oppgaven mest, og hvor de er tatt inn:
 2. **Eksport til Word.** Markdown og PDF kan lages likt på Mac og iPhone. Word (.docx) kan macOS lage med systemet, iOS kan ikke uten eget bibliotek. Forslag: Markdown og PDF på begge nå, Word på Mac nå, Word på iPhone senere. Greit, eller skal Word vente på begge?
 3. **Hvor mye i første runde?** Forslag til rekkefølge, hver del en egen PR som bygger på Mac: (a) delta-modul + skrive/formatere + sync + utkast, (b) live-oppdatering + kommentarer + markører, (c) bilder/diagrammer + eksport + gamle oppsett. Studentene kan skrive i Binding etter (a). Greit, eller vil du ha alt i én levering?
 
+**Svar fra Kjetil 2026-11-21 22.29: «Ja til 1 og 2 alt i en levering».** Det betyr:
+1. Delta-reglene ligger i CellBase (`RichTextDelta`), testet mot samme fixtures som `quill-delta`.
+2. Markdown og PDF på Mac og iPhone nå, Word på Mac nå, Word på iPhone senere.
+3. Alt leveres samlet: én CellProtocol-PR med delta-modul, editor, sync, utkast, live-oppdatering, kommentarer, markører, bilder/diagrammer, eksport og gamle oppsett, pluss Binding-pinløft. Ingen delleveranse til studentene før alt virker.
+
 ## 7. Revisjonslogg
 
 | Iterasjon | Dato | Hva endret seg | Hvem |
 |---|---|---|---|
 | 0 | 2026-11-20 | Opprettet med `purpose_dev.py new` | Claude |
 | 1 | 2026-11-20 | §0 audit mot CellProtocol main 669850b og CellScaffold main 272580b; funnet at bare `richDocument` gjenstår på main; §1 tre med 11 formål + pakker; §2; §3; §5 14 nye tester; §6 tre spørsmål; 7 mockup-bilder | Claude (tråden «Bygg native dokumenteditor i Binding») |
+| 1b | 2026-11-21 | §6 besvart av Kjetil (spm. 1 og 2 ja, spm. 3: alt i én levering). G1 og G1-GUI ikke uttrykkelig gitt ennå | Claude |
