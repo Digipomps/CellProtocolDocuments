@@ -6,8 +6,9 @@
   "source": "Deliverables/PDD_konferanse-mal-eierskap_2026-11-21 (G1 og G2 godkjent av Kjetil 2026-11-21)",
   "description": "Arrangør som gruppe-entitet, arrangement (konferanse) med eier, skjemamal v0 med faste og reserverte nøkkelstier, utvidelser og forslag til malen, og deltakerens post per konferanse. EntityData er dynamisk (Kjetil 17.11.2026): en nøkkelsti som ikke står i malen er gyldig og merkes som utvidelse. EntityRepresentasjoner ligger ikke under en relasjon; relasjonen har referanser til dem (Kjetil 21.11.2026). Ingen sentralt register: arrangørens liste over arrangementer bygges fra event.ownedBy i de arrangementene som er kjent.",
   "storage": {
-    "status": "uavklart",
-    "note": "EntityAnchor-cellen godtar i dag bare set under person, proofs, relations, identityLinks og signedAgreementEntity.commit; andre røtter gir KeyValueErrors.notFound (lest 2026-11-21, måles i CellProtocol PR #103). Hvor malens røtter lagres er Kjetils valg."
+    "status": "besluttet 2026-11-21, ikke merget",
+    "note": "Kjetil valgte «Malen åpner røtter i EntityAnchor». Røttene ligger i CellProtocol Sources/CellBase/PersistingCells/EntityTemplateRoots.swift og åpnes i begge EntityAnchor-cellene (CellProtocol PR #103). Før det godtok ankrene set bare under person, proofs, relations, identityLinks og signedAgreementEntity.commit; andre røtter ga KeyValueErrors.notFound.",
+    "roots": ["event", "project", "template", "conference", "groups", "surfaces", "flows", "messaging", "assistance", "matching", "incentives"]
   },
   "entities": {
     "Organizer": {

@@ -303,12 +303,12 @@ implementert i Swift.
 | Utvidelser | En nøkkelsti som ikke står i malen er gyldig og merkes som utvidelse (EntityData er dynamisk, Kjetil 17.11.2026). En utvidelse som minst to arrangementer bruker, blir et forslag til neste malversjon. |
 | Deltakerens post | `conference.<konferanse-uuid>` i deltakerens EntityData holder bare deltakerens eget: rolle, agendavalg, `matchConsent`, bevisreferanser og referanser til EntityRepresentasjoner. En EntityRepresentation skal ikke ligge under relasjonen (Kjetil 21.11.2026). Dette erstatter den unøklede `conference`-skiva i v2. |
 
-**Lagring er ikke avklart.** EntityAnchor-cellen godtar i dag set bare under `person`,
-`proofs`, `relations`, `identityLinks` og `signedAgreementEntity.commit`. Andre røtter, også
-`event`, `project`, `template`, `conference` og `groups`, gir `KeyValueErrors.notFound`
-(lest i CellProtocol `Sources/CellBase/Cells/GeneralCell/GeneralCell.swift` og begge
-`EntityAnchorCell.swift` 21.11.2026; målingen er CellProtocol PR #103). Nye stier under
-`person` lagres uten registersjekk.
+**Lagring.** Til 21.11.2026 godtok EntityAnchor-cellen set bare under `person`, `proofs`,
+`relations`, `identityLinks` og `signedAgreementEntity.commit`. Andre røtter ga
+`KeyValueErrors.notFound`. Kjetil valgte 21.11.2026 at malen åpner sine røtter i EntityAnchor.
+Røttene står i CellProtocol `Sources/CellBase/PersistingCells/EntityTemplateRoots.swift` og åpnes i
+begge ankrene med samme tilgang som `person` (CellProtocol PR #103, ikke merget per 21.11).
+Nye stier under en åpen rot lagres uten registersjekk.
 
 ## 8. Kilder
 
