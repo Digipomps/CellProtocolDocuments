@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — Egen Claude og Codex mot HAVEN (MCP-adapter)
 
-Oppgavemappe: `PDD_egen-agent-mcp_2026-11-20` · Opprettet 2026-11-20 · Iterasjon 1 (venter på G1)
+Oppgavemappe: `PDD_egen-agent-mcp_2026-11-20` · Opprettet 2026-11-20 · Iterasjon 1 (G1 godkjent 2026-11-21; venter på G1-GUI)
 
 > Regel: ingen plan før G1 er godkjent av Kjetil. For GUI: ingen implementering før G1-GUI (rendret bilde) er godkjent.
 > Et dokument om leveransen teller aldri som leveransen.
@@ -106,7 +106,7 @@ Hva dette IKKE er:
 |---|---|---|---|---|
 | `.mcp.json`, `AGENTS.md`, `CLAUDE.md` og en kort veiledning for studenter | fil | CellProtocolDocuments rot og `MasterHAVEN26/` | `ACCEPT.md#docs-config` | nei |
 | Skjermbilder av Claude Code og Codex som bruker HavenDocsMCP på et norsk spørsmål | bilde | `images/klient-claude-docs-v1.png`, `images/klient-codex-docs-v1.png` | — | nei |
-| Flaten «Koble til egen agent» i HAVEN: forespørsel, godkjent, frakoblet, logg | bilde (G1-GUI, lages etter G1) | `images/egen-agent-foresporsel-{laptop,iphone}-v1.png`, `-godkjent-`, `-frakoblet-`, `-logg-` | skjelett i `skeleton/` | nei |
+| Flaten «Egne agenter» i HAVEN: forespørsel, godkjent, frakoblet, logg | bilde (G1-GUI) | `images/egen-agent-{foresporsel,godkjent,frakoblet,logg}-{laptop,iphone}-v1.png`, se `images/README.md` | `skeleton/egne-agenter.v1.json`, `skeleton/egne-agenter-tilstander.v1.json` | nei (venter på G1-GUI) |
 | Python-adapter (`pycell mcp`) og Swift-adapter (`haven-mcp`) | kjørende program | plassering etter §6.1 | `TESTRESULT.md#parity` | nei |
 | Felles verktøykontrakt og fixtures | fil | `contract/egen-agent-mcp-tools.v1.json`, `contract/fixtures/` | `TESTRESULT.md#parity` | nei |
 | Testutdata for avvisninger (uten Agreement, tilbaketrukket, andres innhold, forskningsnivå, feil leverandør) | testutdata | `TESTRESULT.md#auth-negative` | — | nei |

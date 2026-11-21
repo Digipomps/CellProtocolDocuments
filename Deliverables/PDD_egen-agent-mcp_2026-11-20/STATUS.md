@@ -4,8 +4,8 @@
 - tags: mcp,agreement,llm,provider,consent,privacy,identity
 
 ## Porter
-- G1: venter        (formålsspesifikasjon godkjent av Kjetil)
-- G1-GUI: venter        (bilder av «Koble til egen agent» lages etter G1)
+- G1: godkjent 2026-11-21 (Kjetil i tråden 21:23Z, «G1 godkjent»; forslagene i §6 gjelder)
+- G1-GUI: venter        (åtte bilder i images/, se images/README.md)
 - G2: venter        (plan godkjent; arbeidspakker 1:1 mot bladformål)
 - G3: venter        (akseptanse: forventning mot faktisk, alle avledede tester grønne)
 
@@ -17,3 +17,5 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
 ## Logg
 - 2026-11-20: opprettet
 - 2026-11-21: FORMAALSSPEC iterasjon 1 (rot + 15 formål, 1 antiformål, 4 spørsmål). Venter på G1.
+- 2026-11-21: G1 godkjent av Kjetil. Forslagene i §6 gjelder: Python i PyCellProtocol, Swift i CellProtocol, Go senere, celler uten mottakervilkår er stengt, bare utkast i egen celle. Neste: bilder til G1-GUI.
+- 2026-11-21: Åtte bilder til G1-GUI rendret med web-rendereren (images/README.md). Venter på G1-GUI.
