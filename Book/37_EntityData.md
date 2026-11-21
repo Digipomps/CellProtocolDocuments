@@ -1,6 +1,6 @@
 # Chapter 37 — EntityData
 
-Last verified against code: 2026-09-16 (målskjema og skill-beslutning kontrollert 2026-09-25)
+Last verified against code: 2026-09-16 (målskjema og skill-beslutning kontrollert 2026-09-25; §7b og EntityAnchor-røttene kontrollert 2026-11-21)
 
 Status: Struktur og nodemodell er kildebekreftet. Beslutningene i §7 er tatt av Kjetil
 16.09.2026, men er **ikke implementert** — de står her fordi et kapittel som beskriver
@@ -285,6 +285,30 @@ Dette står igjen som **ikke avgjort**:
 - Bør `chronicle` peke til en egen celle, eventuelt i et annet scaffold, siden den kan vokse seg
   stor?
 - Hvordan avgjøres det sikkert og utvetydig at to identiteter representerer **samme** entitet?
+
+## 7b. Konferansen som entitet — modell besluttet 21.11.2026, ikke implementert
+<!-- haven:implementation_status=decided -->
+
+Kjetil godkjente 21.11.2026 modellen der en konferanse er en egen entitet som eies av en
+arrangør-entitet, og som starter fra en felles skjemamal. Kontrakten er
+[`conference_entity_template_v0.json`](conference_entity_template_v0.json), med fixtures og
+validator i `Deliverables/PDD_konferanse-mal-eierskap_2026-11-21/`. Ingenting av dette er
+implementert i Swift.
+
+| Del | Form |
+|---|---|
+| Arrangøren | En gruppe i `groups`-formen: uuid, navn, uvektet `members`, `admins` som må være medlemmer, valgfri `partOf` uten sykler. |
+| Arrangementet | `event.ownedBy` peker på arrangøren, valgfri `event.partOf` på en serie. Arrangørens liste over arrangementer bygges ved dekoding fra `event.ownedBy` og lagres ikke. Det finnes ikke noe register over konferanser. |
+| Malen | En versjonert entitet med faste systemnøkkelstier (`event.ownedBy`, `template.ref`, `template.version` er påkrevd) og reserverte stier for fase 2–5 (`event.purposes`, `project.*`, `flows.subscriptions`, `messaging.templates.*`, `surfaces`, `matching.templates` og flere). |
+| Utvidelser | En nøkkelsti som ikke står i malen er gyldig og merkes som utvidelse (EntityData er dynamisk, Kjetil 17.11.2026). En utvidelse som minst to arrangementer bruker, blir et forslag til neste malversjon. |
+| Deltakerens post | `conference.<konferanse-uuid>` i deltakerens EntityData holder bare deltakerens eget: rolle, agendavalg, `matchConsent`, bevisreferanser og referanser til EntityRepresentasjoner. En EntityRepresentation skal ikke ligge under relasjonen (Kjetil 21.11.2026). Dette erstatter den unøklede `conference`-skiva i v2. |
+
+**Lagring er ikke avklart.** EntityAnchor-cellen godtar i dag set bare under `person`,
+`proofs`, `relations`, `identityLinks` og `signedAgreementEntity.commit`. Andre røtter, også
+`event`, `project`, `template`, `conference` og `groups`, gir `KeyValueErrors.notFound`
+(lest i CellProtocol `Sources/CellBase/Cells/GeneralCell/GeneralCell.swift` og begge
+`EntityAnchorCell.swift` 21.11.2026; målingen er CellProtocol PR #103). Nye stier under
+`person` lagres uten registersjekk.
 
 ## 8. Kilder
 

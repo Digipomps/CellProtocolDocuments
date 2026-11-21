@@ -1,0 +1,101 @@
+{
+  "contract": "conference_entity_template",
+  "version": "0.1.0",
+  "status": "candidate",
+  "purposeRef": "purpose://candidate.konferanse-mal-eierskap.root",
+  "source": "Deliverables/PDD_konferanse-mal-eierskap_2026-11-21 (G1 og G2 godkjent av Kjetil 2026-11-21)",
+  "description": "Arrangør som gruppe-entitet, arrangement (konferanse) med eier, skjemamal v0 med faste og reserverte nøkkelstier, utvidelser og forslag til malen, og deltakerens post per konferanse. EntityData er dynamisk (Kjetil 17.11.2026): en nøkkelsti som ikke står i malen er gyldig og merkes som utvidelse. EntityRepresentasjoner ligger ikke under en relasjon; relasjonen har referanser til dem (Kjetil 21.11.2026). Ingen sentralt register: arrangørens liste over arrangementer bygges fra event.ownedBy i de arrangementene som er kjent.",
+  "storage": {
+    "status": "uavklart",
+    "note": "EntityAnchor-cellen godtar i dag bare set under person, proofs, relations, identityLinks og signedAgreementEntity.commit; andre røtter gir KeyValueErrors.notFound (lest 2026-11-21, måles i CellProtocol PR #103). Hvor malens røtter lagres er Kjetils valg."
+  },
+  "entities": {
+    "Organizer": {
+      "description": "Selskapet som arrangerer. Formen følger v2-roten groups: nøklet på uuid, uvektet medlemsliste over entiteter, partOf oppover.",
+      "required": ["uuid", "name", "members", "admins"],
+      "properties": {
+        "uuid": "uuid",
+        "name": "string",
+        "members": "liste av entitets-uuid (uvektet)",
+        "admins": "liste av entitets-uuid; hver må være medlem",
+        "partOf": "valgfri uuid for overordnet gruppe; sykler avvises"
+      },
+      "derived": {
+        "events": "bygges ved dekoding fra event.ownedBy; lagres ikke"
+      }
+    },
+    "Event": {
+      "description": "Arrangementet (konferansen). Nøkkelstiene under er malens; alt annet er utvidelser.",
+      "required": ["uuid"],
+      "properties": {
+        "uuid": "uuid"
+      },
+      "keypathsFrom": "template"
+    },
+    "ParticipantSlice": {
+      "description": "Deltakerens egen post per konferanse i deltakerens EntityData: conference.<konferanse-uuid>. Bare deltakerens eget, og bare referanser til EntityRepresentasjoner.",
+      "keyedBy": "konferanse-entitetens uuid",
+      "properties": {
+        "role": "string",
+        "agendaChoices": "liste av sesjons-uuid",
+        "matchConsent": "objekt: hvilke av deltakerens identiteter som kan matches, og for hvilke formål (fylles i fase 5)",
+        "proofRefs": "liste av referanser til proofs.credentials",
+        "entityRepresentationRefs": "liste av referanser (uuid eller cell:///…) til EntityRepresentasjoner som ligger utenfor posten"
+      },
+      "forbidden": {
+        "embeddedEntityRepresentation": "et objekt med type EntityRepresentation, eller en nøkkel entityRepresentation/entityRepresentations, under posten"
+      }
+    },
+    "TemplateProposal": {
+      "description": "En utvidelse som minst proposalThreshold ulike arrangementer bruker, blir et forslag til neste malversjon. Samme form som person.attributes[].promotedTo.",
+      "properties": {
+        "keypath": "string",
+        "usedBy": "liste av arrangements-uuid",
+        "proposedFor": "neste malversjon",
+        "status": "proposed | accepted | dropped"
+      }
+    }
+  },
+  "proposalThreshold": 2,
+  "template": {
+    "uuid": "8d3e2a61-6b1f-4c1e-9f5e-2c0b7a4d0001",
+    "name": "Konferanse",
+    "version": "0.1.0",
+    "keypaths": [
+      {"keypath": "event.ownedBy", "type": "uuid", "status": "fixed", "required": true, "phase": 1, "description": "Arrangørens entitets-uuid"},
+      {"keypath": "event.partOf", "type": "uuid", "status": "fixed", "required": false, "phase": 1, "description": "Overordnet arrangement eller serie"},
+      {"keypath": "template.ref", "type": "uuid", "status": "fixed", "required": true, "phase": 1, "description": "Malen arrangementet bygger på"},
+      {"keypath": "template.version", "type": "string", "status": "fixed", "required": true, "phase": 1, "description": "Malversjonen"},
+      {"keypath": "event.name", "type": "string", "status": "fixed", "required": false, "phase": 1, "description": "Navn (ConferenceDefinition.name)"},
+      {"keypath": "event.startsAt", "type": "date-time", "status": "fixed", "required": false, "phase": 1, "description": "Start"},
+      {"keypath": "event.endsAt", "type": "date-time", "status": "fixed", "required": false, "phase": 1, "description": "Slutt"},
+      {"keypath": "event.venue", "type": "string", "status": "fixed", "required": false, "phase": 1, "description": "Sted"},
+      {"keypath": "event.purposes", "type": "subtree", "status": "reserved", "required": false, "phase": 2, "description": "Formålstreet: formål, mål og ansvarlig"},
+      {"keypath": "event.sessions.*", "type": "subtree", "status": "reserved", "required": false, "phase": 2, "description": "Sesjoner med egne smalere formål"},
+      {"keypath": "event.roles.*", "type": "subtree", "status": "reserved", "required": false, "phase": 2, "description": "Ansvarlig entitet per formål eller område"},
+      {"keypath": "project.tasks", "type": "subtree", "status": "reserved", "required": false, "phase": 3, "description": "Gjøremål"},
+      {"keypath": "project.milestones", "type": "subtree", "status": "reserved", "required": false, "phase": 3, "description": "Milepæler"},
+      {"keypath": "project.subprojects", "type": "subtree", "status": "reserved", "required": false, "phase": 3, "description": "Underprosjekter"},
+      {"keypath": "project.meetings", "type": "subtree", "status": "reserved", "required": false, "phase": 3, "description": "Møter"},
+      {"keypath": "project.reports", "type": "subtree", "status": "reserved", "required": false, "phase": 3, "description": "Tilstandsrapporter"},
+      {"keypath": "surfaces", "type": "subtree", "status": "reserved", "required": false, "phase": 3, "description": "Referanser (cell:///…) til celler og flater"},
+      {"keypath": "flows.subscriptions", "type": "subtree", "status": "reserved", "required": false, "phase": 4, "description": "Flows konferansen lytter på"},
+      {"keypath": "messaging.templates.*", "type": "subtree", "status": "reserved", "required": false, "phase": 4, "description": "Informasjonsflytmal per rolle, med ansvarlig mottaker"},
+      {"keypath": "assistance.models", "type": "subtree", "status": "reserved", "required": false, "phase": 5, "description": "Modellhjelp per rolle"},
+      {"keypath": "matching.templates", "type": "subtree", "status": "reserved", "required": false, "phase": 5, "description": "Annonserte matchemaler og registeret de gjelder"},
+      {"keypath": "incentives", "type": "subtree", "status": "reserved", "required": false, "phase": 5, "description": "Formål som belønner samhandling"}
+    ]
+  },
+  "errors": {
+    "organizer.missing-field": "Arrangøren mangler uuid, name, members eller admins",
+    "organizer.admin-not-member": "En administrator er ikke medlem",
+    "organizer.partof-cycle": "partOf danner en sykel",
+    "event.missing-owner": "event.ownedBy mangler",
+    "event.missing-template": "template.ref eller template.version mangler",
+    "event.unknown-template-version": "template.ref peker på malen, men versjonen finnes ikke",
+    "event.partof-cycle": "event.partOf danner en sykel",
+    "participant.slice-key-not-uuid": "conference-posten er ikke nøklet på en uuid",
+    "participant.embedded-entity-representation": "En EntityRepresentation ligger under posten i stedet for en referanse"
+  },
+  "validator": "Deliverables/PDD_konferanse-mal-eierskap_2026-11-21/checks/validate_contract.py"
+}
