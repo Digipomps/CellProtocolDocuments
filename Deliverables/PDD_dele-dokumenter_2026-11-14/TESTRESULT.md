@@ -17,4 +17,10 @@ Avvik fra PLAN.md: baselinen er tatt på dagens main (CellScaffold `98c9aed`, Ce
 
 ## workbench
 
-2026-11-22: ikke ført. Broen fra agenten (haven-agentd) har bare `state` og `query` mot `kjetil2-staging-work` og `kjetil2-staging-projects`. `capture` mangler, og `review.import` finnes ikke der. Eneste vei er Kjetils innloggede Chrome-økt mot https://staging.haven.digipomps.org (passkey). Et utkast som ikke er kjørt ligger i `/Volumes/Backup/build/dele-dok-20261122/pdd/workbench-payload-UKJORT.json`. Det er ingen Workbench-post.
+2026-11-22 kl. 21.30, ført i Developer Workbench på https://staging.haven.digipomps.org fra Kjetils innloggede Chrome-økt (requester kjetil2). Lest tilbake etter at siden var lastet på nytt.
+
+- Formål: `review.import` med id `dele-dokumenter-2026-11-14`, revisjon 1 (25 noder, port G3). G1, G1-GUI og G2 er ikke ført som beslutninger i Workbench.
+- Prosjekt `dele-dok-20261114-project`: event `event-12dc60a5-c84b-48db-b77c-cdae8b5c7b97`, stateVersion 135, 15 workItemRefs.
+- WorkItems `dele-dok-20261114-wp0` … `wp14`: stateVersion 678–692 (`eventsSince(676)` → 692). wp0 er done med evidens fra baselinen, wp1 er in-progress, wp2–wp14 er ready. Avhengighetene ligger som dependencyRefs.
+- Skjermbilder på Macen: `/Volumes/Backup/build/dele-dok-20261122/pdd/workbench-formaal-20261122.jpg` og `/Volumes/Backup/build/dele-dok-20261122/pdd/workbench-prosjekt-20261122.jpg`.
+- GraphStore-replay av graphUpdates er ikke verifisert.
