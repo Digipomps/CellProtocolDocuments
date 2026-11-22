@@ -1,6 +1,6 @@
 # PLAN — native dokumenteditor i Binding
 
-Oppgavemappe: `PDD_native-dokumenteditor_2026-11-20` · G1 og G1-GUI godkjent 2026-11-22 · Denne planen venter på G2.
+Oppgavemappe: `PDD_native-dokumenteditor_2026-11-20` · G1 og G1-GUI godkjent 2026-11-22 · G2 godkjent 2026-11-22.
 
 Leveres samlet (Kjetil 21.11: «alt i en levering»): **én CellProtocol-PR** (CellBase + CellApple) og **én Binding-gren** med pinløft. CellScaffold endres ikke: dokumentcellen og kontrakten er som på main 272580b, så staging trenger ingen ny utrulling for at Binding skal kunne skrive. Ingenting går i HAVEN-Deploy-køen fra denne oppgaven.
 
