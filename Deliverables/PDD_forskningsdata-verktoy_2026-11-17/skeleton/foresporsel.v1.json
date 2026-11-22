@@ -1,0 +1,230 @@
+{
+  "VStack": {
+    "spacing": 14,
+    "elements": [
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Ny forespørsel",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontStyle": "title2",
+                  "fontWeight": "700"
+                }
+              }
+            },
+            {
+              "Picker": {
+                "label": "Hva vil du spørre om",
+                "keypath": "researchRequest.state.templates",
+                "optionLabelKeypath": "label",
+                "selectionStateKeypath": "researchRequest.state.selectedTemplate",
+                "selectionValueKeypath": "id",
+                "selectionPayloadMode": "item_id",
+                "placeholder": "Velg mal fra katalogen"
+              }
+            },
+            {
+              "Picker": {
+                "label": "Gruppe",
+                "keypath": "researchRequest.state.groups",
+                "optionLabelKeypath": "label",
+                "selectionStateKeypath": "researchRequest.state.selectedGroup",
+                "selectionValueKeypath": "id",
+                "selectionPayloadMode": "item_id",
+                "placeholder": "Velg gruppe du er med i"
+              }
+            },
+            {
+              "Picker": {
+                "label": "Svarform",
+                "keypath": "researchRequest.state.forms",
+                "optionLabelKeypath": "label",
+                "selectionStateKeypath": "researchRequest.state.selectedForm",
+                "selectionValueKeypath": "id",
+                "selectionPayloadMode": "item_id",
+                "placeholder": "Velg svarform"
+              }
+            },
+            {
+              "TextArea": {
+                "label": "Formål",
+                "sourceKeypath": "researchRequest.state.purpose",
+                "targetKeypath": "researchRequest.purpose.set",
+                "placeholder": "Hva skal tallene brukes til?"
+              }
+            },
+            {
+              "Text": {
+                "keypath": "researchRequest.state.periodLabel",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 13
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Feil i forespørselen",
+                "modifiers": {
+                  "foregroundColor": "#B91C1C",
+                  "fontStyle": "headline"
+                }
+              }
+            },
+            {
+              "List": {
+                "elements": [],
+                "keypath": "researchRequest.state.errors",
+                "selectionMode": "none",
+                "modifiers": {
+                  "itemSpacing": 8
+                },
+                "flowElementSkeleton": {
+                  "VStack": {
+                    "spacing": 2,
+                    "elements": [
+                      {
+                        "Text": {
+                          "keypath": "message",
+                          "modifiers": {
+                            "foregroundColor": "#B91C1C",
+                            "fontSize": 14
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#FCA5A5",
+            "maxWidthInfinity": true,
+            "visibility": {
+              "when": {
+                "equals": false,
+                "keypath": "researchRequest.state.valid",
+                "scope": "root"
+              }
+            }
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Slik ser kortet ut for dem du spør",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontStyle": "headline"
+                }
+              }
+            },
+            {
+              "Text": {
+                "keypath": "researchRequest.state.preview.who",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontWeight": "700"
+                }
+              }
+            },
+            {
+              "Text": {
+                "keypath": "researchRequest.state.preview.what",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontSize": 14
+                }
+              }
+            },
+            {
+              "Text": {
+                "keypath": "researchRequest.state.preview.recipients",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 14
+                }
+              }
+            },
+            {
+              "HStack": {
+                "spacing": 8,
+                "modifiers": {
+                  "wrap": true
+                },
+                "elements": [
+                  {
+                    "Button": {
+                      "keypath": "researchRequest.send",
+                      "label": "Send til gruppen",
+                      "payload": {},
+                      "modifiers": {
+                        "visibility": {
+                          "when": {
+                            "equals": true,
+                            "keypath": "researchRequest.state.valid",
+                            "scope": "root"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "Button": {
+                      "keypath": "researchRequest.saveDraft",
+                      "label": "Lagre utkast",
+                      "payload": {},
+                      "modifiers": {
+                        "background": "#FFFFFF",
+                        "borderColor": "#CBD5E1",
+                        "borderWidth": 1,
+                        "cornerRadius": 6,
+                        "foregroundColor": "#334155"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true
+          }
+        }
+      }
+    ]
+  }
+}
