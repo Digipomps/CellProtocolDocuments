@@ -6,7 +6,7 @@
 ## Porter
 - G1: godkjent 2026-11-20        (formålsspesifikasjon godkjent av Kjetil)
 - G1-GUI: godkjent 2026-11-20        (rendret bilde godkjent — bare for GUI-oppgaver)
-- G2: venter        (plan godkjent; arbeidspakker 1:1 mot bladformål)
+- G2: godkjent 2026-11-22        (plan godkjent; arbeidspakker 1:1 mot bladformål)
 - G3: venter        (akseptanse: forventning mot faktisk, alle avledede tester grønne)
 
 Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py validate <mappe>` nekter porter uten artefakter.
@@ -20,3 +20,4 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
 - 2026-11-15: Kjetil valgte «Felles del i CellBase» (§6 spm. 1). G1 venter fortsatt.
 - 2026-11-15: 10 bilder til G1-GUI rendret (images/README.md); G1-GUI bedt om.
 - 2026-11-20: Kjetil: «G1 og G1-GUI Godkjent.» PLAN.md skrevet (WP0–WP14); §6 spm. 2–4 følger anbefalingene. G2 bedt om.
+- 2026-11-22: Kjetil: «G2 godkjent. (Verifier at dette med alle steg blir oppdatert i utvikler arbeidsbenken.)» tree.json i formaalsside/. Workbench-føring og WP0-baseline startet på Macen.
