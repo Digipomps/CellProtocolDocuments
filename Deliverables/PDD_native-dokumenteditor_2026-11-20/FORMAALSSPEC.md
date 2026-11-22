@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — native dokumenteditor i Binding
 
-Oppgavemappe: `PDD_native-dokumenteditor_2026-11-20` · Opprettet 2026-11-20 · Iterasjon 1 (ikke godkjent)
+Oppgavemappe: `PDD_native-dokumenteditor_2026-11-20` · Opprettet 2026-11-20 · Iterasjon 1 · G1 og G1-GUI godkjent 2026-11-22
 Tråd: «Bygg native dokumenteditor i Binding», startet fra «La studenter dele dokumenter med hverandre» (G1 der 20.11, spm. 4: egen tråd).
 
 > Regel: ingen plan før G1 er godkjent av Kjetil. For GUI: ingen implementering før G1-GUI (rendret bilde) er godkjent.
@@ -76,8 +76,8 @@ Avhengigheter. Hver skal være målt før G1 der det går, ellers står det «ik
 
 | # | Leveranse | Type | Hvor | Referanse | Godkjent |
 |---|---|---|---|---|---|
-| 1 | Editoren på iPhone: tomt dokument, fylt dokument med formatering, kommentar og annen skrivers markør, og frakoblet med utkast som venter | bilde (mockup) | `images/` | `editor-tom-iphone-v1.png`, `editor-fylt-iphone-v1.png`, `editor-frakoblet-iphone-v1.png`, `kommentarer-iphone-v1.png` | nei |
-| 2 | Samme på Mac | bilde (mockup) | `images/` | `editor-tom-mac-v1.png`, `editor-fylt-mac-v1.png`, `editor-frakoblet-mac-v1.png` | nei |
+| 1 | Editoren på iPhone: tomt dokument, fylt dokument med formatering, kommentar og annen skrivers markør, og frakoblet med utkast som venter | bilde (mockup) | `images/` | `editor-tom-iphone-v1.png`, `editor-fylt-iphone-v1.png`, `editor-frakoblet-iphone-v1.png`, `kommentarer-iphone-v1.png` | ja (2026-11-22) |
+| 2 | Samme på Mac | bilde (mockup) | `images/` | `editor-tom-mac-v1.png`, `editor-fylt-mac-v1.png`, `editor-frakoblet-mac-v1.png` | ja (2026-11-22) |
 | 3 | Skjermbilder fra ekte Binding (Mac + iPhone-simulator) i de samme tilstandene | skjermbilde | Binding mot staging | ACCEPT.md#parity | nei |
 | 4 | Opptak: Mac, iPhone og web skriver samtidig i samme dokument, teksten blir lik | video + TESTRESULT | staging | test.native.e2e-tre-klienter | nei |
 | 5 | Grønne tester: delta-fixtures i Swift (CellBase, Linux og macOS) og i node mot `quill-delta`, CellApple-tester for kø/rebase/utkast | testutdata | CI på PR-ene + Mac | TESTRESULT.md#build, #regression, #delta | nei |
@@ -380,3 +380,4 @@ Lærdommene som styrer denne oppgaven mest, og hvor de er tatt inn:
 | 0 | 2026-11-20 | Opprettet med `purpose_dev.py new` | Claude |
 | 1 | 2026-11-20 | §0 audit mot CellProtocol main 669850b og CellScaffold main 272580b; funnet at bare `richDocument` gjenstår på main; §1 tre med 11 formål + pakker; §2; §3; §5 14 nye tester; §6 tre spørsmål; 7 mockup-bilder | Claude (tråden «Bygg native dokumenteditor i Binding») |
 | 1b | 2026-11-21 | §6 besvart av Kjetil (spm. 1 og 2 ja, spm. 3: alt i én levering). G1 og G1-GUI ikke uttrykkelig gitt ennå | Claude |
+| 1c | 2026-11-22 | G1 og G1-GUI godkjent av Kjetil. PLAN.md skrevet | Claude |

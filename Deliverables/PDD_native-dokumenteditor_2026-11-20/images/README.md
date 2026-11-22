@@ -13,3 +13,10 @@
 | editor-frakoblet-mac-v1.png | Mac | Frakoblet-banner og status nederst |
 
 Hva mockupen ikke viser, men som gjelder i Binding: systemets tastatur og tekstmarkering (håndtak, forstørrelse), systemets delingsark for eksport, systemfonter (SF) i stedet for nettleserens. Skrivehjelp- og chatpanelet ligger under dokumentet som i dag og er ikke tegnet på nytt her.
+
+## RENDERINGSERKLÆRING
+
+Bildene er mockups, ikke Porthole-preview. Editoren er en native visualisering (`richDocument`) og kan ikke uttrykkes som skeleton-JSON. Det skjelettet og mockupen ikke kan vise:
+- Systemets tastatur, tekstmarkering med håndtak og forstørrelsesglass (iOS).
+- Systemets delingsark og eksportdialoger.
+- SF-systemfonten og nøyaktig linjeavstand fra TextKit.
