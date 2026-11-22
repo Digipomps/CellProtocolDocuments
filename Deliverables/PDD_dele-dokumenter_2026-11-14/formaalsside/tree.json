@@ -1,0 +1,288 @@
+{
+  "id": "dele-dokumenter-2026-11-14",
+  "title": "Dele dokumenter mellom studenter",
+  "pdd": "PDD_dele-dokumenter_2026-11-14",
+  "gate": "G3",
+  "anchorRef": "purpose://digital-work",
+  "anchorNote": null,
+  "rootRef": "purpose://candidate.dele-dokumenter.root",
+  "nodes": [
+    {
+      "ref": "purpose://candidate.dele-dokumenter.root",
+      "parentRef": null,
+      "code": "root",
+      "title": "Studenter deler dokumenter med hverandre",
+      "outcome": "På staging: student A lager et nytt dokument, inviterer B, B godtar og skriver en setning, A ser setningen. En tredje student C får avslag",
+      "verifier": "test.dele.e2e-to-studenter",
+      "status": "candidate"
+    },
+    {
+      "ref": "purpose://candidate.dele-dokumenter.many-documents",
+      "parentRef": "purpose://candidate.dele-dokumenter.root",
+      "code": "many-documents",
+      "title": "Flere dokumenter per student",
+      "outcome": "En student kan lage, gi navn til og åpne flere dokumenter. Hvert dokument er sin egen celle (cell:///<uuid>), eid av studenten. Det gamle cell:///RichDocument vises som ett av dokumentene, med innholdet urørt",
+      "verifier": "test.dele.flere-dokumenter, test.dele.gammelt-dokument-bevart",
+      "status": "candidate"
+    },
+    {
+      "ref": "purpose://candidate.dele-dokumenter.library",
+      "parentRef": "purpose://candidate.dele-dokumenter.root",
+      "code": "library",
+      "title": "Mine dokumenter og Delt med meg",
+      "outcome": "Én flate «Dokumenter» viser egne dokumenter, dokumenter andre har delt med meg, og ventende invitasjoner. Ingen liste viser et dokument studenten ikke har tilgang til",
+      "verifier": "test.dele.bibliotek-viser-riktig",
+      "status": "candidate"
+    },
+    {
+      "ref": "purpose://candidate.dele-dokumenter.invite",
+      "parentRef": "purpose://candidate.dele-dokumenter.root",
+      "code": "invite",
+      "title": "Eieren inviterer en bestemt person",
+      "outcome": "Eieren velger en person (fra Samtaler-kontaktene eller profilkatalogen) og en rolle (skrive eller lese). Cellen lager en signert invitasjon bundet til den personens identitet, med utløpstid",
+      "verifier": "test.dele.invitasjon-signert-og-bundet",
+      "status": "candidate"
+    },
+    {
+      "ref": "purpose://candidate.dele-dokumenter.admission",
+      "parentRef": "purpose://candidate.dele-dokumenter.root",
+      "code": "admission",
+      "title": "Tilgang bare gjennom Agreement-vilkår",
+      "outcome": "Dokumentets Agreement-mal har vilkåret target.audience.admission.invitationAccepted (og …member for gjenbesøk), med automaticWhenConditionsMet. Den inviterte får kontrakt når den signerte aksepten verifiseres, ellers avslag. Ingen annen vei inn",
+      "verifier": "test.dele.opptak-via-vilkaar, test.cell.auth-negative",
+      "status": "candidate"
+    },
+    {
+      "ref": "purpose://candidate.dele-dokumenter.shared-admission",
+      "parentRef": "purpose://candidate.dele-dokumenter.admission",
+      "code": "shared-admission",
+      "title": "Samme opptaksmekanisme som chat, ett sted",
+      "outcome": "Invitasjons- og opptakslogikken som i dag ligger i CellBase ChatCell blir en gjenbrukbar del av CellBase som både ChatCell og dokumentet bruker. ChatCell-testene er uendret grønne",
+      "verifier": "test.dele.chat-uendret, test.regression",
+      "status": "candidate (§6 spm. 1 besluttet 2026-11-15: felles del i CellBase)"
+    },
+    {
+      "ref": "purpose://candidate.dele-dokumenter.cross-language",
+      "parentRef": "purpose://candidate.dele-dokumenter.shared-admission",
+      "code": "cross-language",
+      "title": "Likt i Swift, Python og Go",
+      "outcome": "Felles gyldne fixtures (invitasjon, aksept, forventet opptak/avslag) gir samme svar i Swift, Python og Go. Python og Go får samme gjenbrukbare del, slik at et dokument bygget der oppfører seg likt",
+      "verifier": "test.dele.interop-fixtures",
+      "status": "candidate"
+    },
+    {
+      "ref": "purpose://candidate.dele-dokumenter.accept",
+      "parentRef": "purpose://candidate.dele-dokumenter.root",
+      "code": "accept",
+      "title": "Den inviterte ser og godtar",
+      "outcome": "Den inviterte får invitasjonen i «Dokumenter» (og som varsel, slik chat-invitasjoner varsles), ser hvem som inviterer, hvilket dokument og hvilken rolle, og velger Godta eller Avslå. Godta signerer aksepten med den invitertes egen identitet",
+      "verifier": "test.dele.godta-avslaa",
+      "status": "candidate"
+    },
+    {
+      "ref": "purpose://candidate.dele-dokumenter.roles",
+      "parentRef": "purpose://candidate.dele-dokumenter.admission",
+      "code": "roles",
+      "title": "Skrive eller lese",
+      "outcome": "Rolle «skrive» gir current (r), feed (r), change (rw), og med CellScaffold #466/#468 også assist (rw), chat (rw), assistPanel (r), chatPanel (r). Rolle «lese» gir current (r), feed (r), chat (rw), chatPanel (r), assistPanel (r), ikke change eller assist. Bare eieren slår på modellhjelp. En leser som prøver change eller assist får avslag",
+      "verifier": "test.dele.roller",
+      "status": "candidate"
+    },
+    {
+      "ref": "purpose://candidate.dele-dokumenter.revoke",
+      "parentRef": "purpose://candidate.dele-dokumenter.root",
+      "code": "revoke",
+      "title": "Eieren kan fjerne en deltaker",
+      "outcome": "Eieren fjerner en deltaker eller trekker en ventende invitasjon. Neste get/set fra den personen avvises, og feeden stopper",
+      "verifier": "test.dele.tilbakekall",
+      "status": "candidate"
+    },
+    {
+      "ref": "purpose://candidate.dele-dokumenter.chat-link",
+      "parentRef": "purpose://candidate.dele-dokumenter.root",
+      "code": "chat-link",
+      "title": "Dokument og samtale henger sammen",
+      "outcome": "Fra en samtale i Samtaler kan en deltaker lage et dokument og invitere alle i samtalen i ett steg. Dokumentchatten finnes i dokumentet som før",
+      "verifier": "test.dele.fra-samtale",
+      "status": "candidate (§6 spm. 3)"
+    },
+    {
+      "ref": "purpose://candidate.dele-dokumenter.swift-native",
+      "parentRef": "purpose://candidate.dele-dokumenter.root",
+      "code": "swift-native",
+      "title": "Delingen virker i Binding",
+      "outcome": "«Dokumenter»-flaten, invitasjon, godta/avslå og fjern deltaker er bygget av vanlige skeleton-elementer som Binding (Swift) tegner, og virker der. Selve editoren i Binding er §6 spm. 4",
+      "verifier": "test.gui.parity (Binding)",
+      "status": "candidate"
+    },
+    {
+      "ref": "purpose://quality.build-and-regression",
+      "parentRef": "purpose://candidate.dele-dokumenter.pkg.std",
+      "code": null,
+      "title": "Alt bygger, eksisterende tester passerer",
+      "outcome": "Som i pakken",
+      "verifier": "test.build, test.regression",
+      "status": "fra pakke",
+      "reused": "purpose://quality.build-and-regression"
+    },
+    {
+      "ref": "purpose://gui.expectation-agreed-before-build",
+      "parentRef": "purpose://candidate.dele-dokumenter.pkg.std",
+      "code": null,
+      "title": "Bildene er godkjent før koding",
+      "outcome": "Bildene i images/ er godkjent av Kjetil",
+      "verifier": "test.gui.reference-image-exists",
+      "status": "fra pakke",
+      "reused": "purpose://gui.expectation-agreed-before-build"
+    },
+    {
+      "ref": "purpose://candidate.dele-dokumenter.pkg.std",
+      "parentRef": "purpose://candidate.dele-dokumenter.root",
+      "code": "pkg.std",
+      "title": "Standardpakker (gjenbrukt)",
+      "outcome": "Alle standardformål grønne",
+      "verifier": "§5 standardrader",
+      "status": "candidate",
+      "signals": []
+    },
+    {
+      "ref": "purpose://quality.docs-in-same-change",
+      "parentRef": "purpose://candidate.dele-dokumenter.pkg.std",
+      "code": "quality.docs-in-same-change",
+      "title": "Dokumentasjon følger endringen",
+      "reused": "purpose://quality.docs-in-same-change",
+      "outcome": "Alle dokumenter som beskriver endret oppførsel er oppdatert og datert 'Last verified against code'.",
+      "signals": [
+        "Diff inneholder doc-endringer for hver endret kontrakt.",
+        "Ingen setning beskriver uimplementert oppførsel i presens."
+      ],
+      "verifier": "Manuell inspeksjon av diff + cellprotocol-docs-and-rag-maintenance-sjekkliste.",
+      "status": "candidate"
+    },
+    {
+      "ref": "purpose://quality.work-is-visible",
+      "parentRef": "purpose://candidate.dele-dokumenter.pkg.std",
+      "code": "quality.work-is-visible",
+      "title": "Arbeidet er synlig",
+      "reused": "purpose://quality.work-is-visible",
+      "outcome": "Oppgavemappen har oppdatert STATUS.md med gate-tilstand, og et eventuelt planbytte er datert og begrunnet.",
+      "signals": [
+        "STATUS.md nevner alle porter med dato.",
+        "Planbytte har egen linje med 'hvorfor'."
+      ],
+      "verifier": "Inspeksjon av STATUS.md ved G3.",
+      "status": "candidate"
+    },
+    {
+      "ref": "purpose://gui.parity-with-approved-image",
+      "parentRef": "purpose://candidate.dele-dokumenter.pkg.std",
+      "code": "gui.parity-with-approved-image",
+      "title": "Resultatet ligner det godkjente bildet",
+      "reused": "purpose://gui.parity-with-approved-image",
+      "outcome": "Screenshot av faktisk flate ligger side om side med referansebildet i ACCEPT.md, og alle avvik er enten rettet eller godkjent av Kjetil med begrunnelse.",
+      "signals": [
+        "ACCEPT.md har par (referanse, faktisk) per flate.",
+        "Avvikslisten er tom eller hvert avvik har 'godkjent av Kjetil <dato>'."
+      ],
+      "verifier": "Manuell side-om-side-inspeksjon; pikseldiff når begge bildene har samme størrelse.",
+      "status": "candidate"
+    },
+    {
+      "ref": "purpose://gui.surface-loads-in-time",
+      "parentRef": "purpose://candidate.dele-dokumenter.pkg.std",
+      "code": "gui.surface-loads-in-time",
+      "title": "Flaten laster uten timeout",
+      "reused": "purpose://gui.surface-loads-in-time",
+      "outcome": "Flaten er synlig innen terskelen angitt i FORMAALSSPEC.md (standard 5 s) på det avtalte miljøet.",
+      "signals": [
+        "Målt lastetid ≤ terskel i tre påfølgende forsøk.",
+        "resolveCellConfiguration treffer på første oppslag (ingen navne-/aliasbom i logg)."
+      ],
+      "verifier": "Tidsmåling i Porthole/Binding + logginspeksjon.",
+      "status": "candidate"
+    },
+    {
+      "ref": "purpose://gui.ways-in-are-reachable",
+      "parentRef": "purpose://candidate.dele-dokumenter.pkg.std",
+      "code": "gui.ways-in-are-reachable",
+      "title": "Flaten skjuler ikke sine egne veier inn",
+      "reused": "purpose://gui.ways-in-are-reachable",
+      "outcome": "SkeletonReachabilityAudit rapporterer ingen elementer som aldri kan sees, og handlingene FORMAALSSPEC §3 navngir finnes i reachableActionKeypaths.",
+      "signals": [
+        "test.skeleton.no-unreachable-elements er gronn for hver flate i det utsendte korpuset.",
+        "Hver handling forventningskontrakten navngir staar i reachableActionKeypaths for flaten."
+      ],
+      "verifier": "SkeletonReachabilityAudit.audit + reachableActionKeypaths, kjort over menykonfigurasjoner og navigasjonsdestinasjoner - ikke bare over verifiseringshjelperens liste.",
+      "status": "candidate"
+    },
+    {
+      "ref": "purpose://cell.contract-explicit",
+      "parentRef": "purpose://candidate.dele-dokumenter.pkg.std",
+      "code": "cell.contract-explicit",
+      "title": "Kontrakten er eksplisitt og testet",
+      "reused": "purpose://cell.contract-explicit",
+      "outcome": "Book/<celle>_contract_v<n>.json finnes, og en validator kjører grønt på alle fixtures.",
+      "signals": [
+        "Minst én negativ fixture per beskyttet operasjon.",
+        "Validator returnerer 0."
+      ],
+      "verifier": "Kontraktvalidator (mønster: Purpose_Bound_External_Action_Contract/checks/validate_contract.py).",
+      "status": "candidate"
+    },
+    {
+      "ref": "purpose://cell.authorization-honours-keypath",
+      "parentRef": "purpose://candidate.dele-dokumenter.pkg.std",
+      "code": "cell.authorization-honours-keypath",
+      "title": "Autorisasjon respekterer nøkkelstien",
+      "reused": "purpose://cell.authorization-honours-keypath",
+      "outcome": "Negative tester viser at feil requester, feil keypath og purpose://prompt.unknown alle avvises.",
+      "signals": [
+        "Tre negative tester finnes og passerer.",
+        "Ingen kodevei kaster keypath før sjekk."
+      ],
+      "verifier": "Enhetstester + kodegjennomgang av autorisasjonsstien.",
+      "status": "candidate"
+    },
+    {
+      "ref": "purpose://cell.no-empty-stubs",
+      "parentRef": "purpose://candidate.dele-dokumenter.pkg.std",
+      "code": "cell.no-empty-stubs",
+      "title": "Ingen tomme stubber leveres som ferdig",
+      "reused": "purpose://cell.no-empty-stubs",
+      "outcome": "Ingen endepunkt i kontrakten er implementert som no-op uten status 'not-implemented'.",
+      "signals": [
+        "grep etter tomme handlere gir null treff, eller hvert treff er listet i Gap_Analysis.md."
+      ],
+      "verifier": "Kodegjennomgang + Gap_Analysis-oppføring.",
+      "status": "candidate"
+    },
+    {
+      "ref": "purpose://cells.dataflow-declared",
+      "parentRef": "purpose://candidate.dele-dokumenter.pkg.std",
+      "code": "cells.dataflow-declared",
+      "title": "Dataflyten er tegnet og navngitt",
+      "reused": "purpose://cells.dataflow-declared",
+      "outcome": "dataflow.md (eller .graffle/.json) finnes med alle kanter navngitt med endepunkt/event.",
+      "signals": [
+        "Hver kant i diagrammet gjenfinnes i en kontrakt.",
+        "Ingen kant uten navngitt event/keypath."
+      ],
+      "verifier": "Kryssjekk diagram mot kontrakter ved G2.",
+      "status": "candidate"
+    },
+    {
+      "ref": "purpose://cells.capabilities-declared-with-boundary",
+      "parentRef": "purpose://candidate.dele-dokumenter.pkg.std",
+      "code": "cells.capabilities-declared-with-boundary",
+      "title": "Kapabiliteter er erklært, med avgrensning",
+      "reused": "purpose://cells.capabilities-declared-with-boundary",
+      "outcome": "FORMAALSSPEC.md §2 lister hver antatt kapabilitet med kildefil og hva den ikke dekker.",
+      "signals": [
+        "Ingen 'antar at' uten kilde.",
+        "Hver kapabilitet har Avgrensning-linje."
+      ],
+      "verifier": "Brief-audit ved G1 (retrieved/recalled/unavailable/contradicted).",
+      "status": "candidate"
+    }
+  ]
+}
