@@ -14,10 +14,10 @@ sequenceDiagram
   A->>B: opptak: signert utfordring (bridge-channel.v1)
   A->>O: forespørsel (agentnøkkel, maskin, leverandør, celler) — gir ingen tilgang
   S->>O: ser forespørsel, sammenligner fingeravtrykk, godkjenner med passkey
-  O->>O: lagrer AgentDelegation signert av studenten
+  O->>O: lagrer avgrenset lenke (extensionKind scoped, scopeGrants, mottaker, utløp)
   C->>A: verktøykall (MCP)
   A->>X: get/set som agentnøkkel
-  X->>X: Agreement: DelegatedAgentCondition + RecipientCondition + resten av vilkårene
+  X->>X: lenken aktiv + kallet i scopeGrants + entiteten har tilgangen + RecipientCondition i Agreement
   X-->>A: svar, eller avvisning med kode
   X->>O: logghendelse (tid, verktøy, celle, utfall) — aldri innhold
   A-->>C: verktøysvar
@@ -27,4 +27,4 @@ sequenceDiagram
 
 Det som aldri går gjennom HAVEN eller adapteren: studentens Claude- eller ChatGPT-innlogging, OAuth-token eller API-nøkkel. Adapteren kaller aldri en modell selv.
 
-Det som aldri går ut av HAVEN til modelleverandøren: innhold i celler uten `RecipientCondition` som tillater leverandøren, andres innslag uten deres tillatelse, forskningsdata over delegeringens N-nivå, privatnøkler.
+Det som aldri går ut av HAVEN til modelleverandøren: innhold i celler uten `RecipientCondition` som tillater leverandøren, andres innslag uten deres tillatelse, forskningsdata over lenkens N-nivå, privatnøkler.
