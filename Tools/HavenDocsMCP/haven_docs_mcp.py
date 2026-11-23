@@ -287,6 +287,38 @@ def tokenize(text: str) -> list[str]:
     return [token.lower() for token in re.findall(r"[\w:/.-]+", text, flags=re.UNICODE) if len(token) > 1]
 
 
+TERM_BRIDGES_PATH = Path(__file__).resolve().parent / "term_bridges.v1.json"
+# Kopi fra CellScaffold #446 (Sources/ScaffoldKit/CommonsLibrarian/commons_librarian_term_bridges.v1.json).
+
+
+def load_term_bridges(path: Path = TERM_BRIDGES_PATH) -> tuple[dict[str, frozenset[str]], frozenset[str]]:
+    """Ett begrep per gruppe: norske og engelske ord som telles som samme treff."""
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}, frozenset()
+    groups: dict[str, frozenset[str]] = {}
+    for group in data.get("groups", []):
+        words = frozenset(str(word).lower() for word in group if str(word).strip())
+        for word in words:
+            groups[word] = groups.get(word, frozenset()) | words
+    neutral = frozenset(str(word).lower() for word in data.get("rankingNeutral", []))
+    return groups, neutral
+
+
+TERM_GROUPS, RANKING_NEUTRAL = load_term_bridges()
+
+
+def query_concepts(tokens: set[str]) -> list[tuple[frozenset[str], float]]:
+    """Gjør spørreordene om til begreper; et begrep gir høyst ett treff uansett hvor mange ord i gruppa som står i teksten."""
+    concepts: dict[frozenset[str], float] = {}
+    for token in sorted(tokens):
+        words = TERM_GROUPS.get(token, frozenset({token}))
+        weight = 0.25 if token in RANKING_NEUTRAL else 1.0
+        concepts[words] = max(concepts.get(words, 0.0), weight)
+    return list(concepts.items())
+
+
 class DocsIndex:
     def __init__(self, with_sources: bool | None = None, sources_config: dict[str, Any] | None = None) -> None:
         self.catalog, self.docs = load_catalog()
@@ -459,6 +491,7 @@ class DocsIndex:
             raise DocsError("Search query is required.")
         max_results = max(1, min(max_results, MAX_SEARCH_RESULTS))
         tokens = set(tokenize(query))
+        snippet_tokens = set().union(*(words for words, _weight in query_concepts(tokens))) if tokens else set()
         scored: list[tuple[float, Section, str]] = []
 
         for doc in self.list_docs(status=status, group=group, source=source):
@@ -472,7 +505,7 @@ class DocsIndex:
                 score = score_section(query, tokens, section)
                 if score <= 0:
                     continue
-                scored.append((score, section, make_snippet(section.text, tokens)))
+                scored.append((score, section, make_snippet(section.text, snippet_tokens)))
 
         scored.sort(key=lambda item: (-item[0], item[1].doc.order, item[1].line_start))
         results = [
@@ -579,11 +612,11 @@ def score_section(query: str, tokens: set[str], section: Section) -> float:
         score += 12.0
     elif phrase in haystack:
         score += 6.0
-    for token in tokens:
-        if token in heading_haystack:
-            score += 4.0
-        count = haystack.count(token)
-        score += min(count, 6) * 0.75
+    for words, weight in query_concepts(tokens):
+        if any(word in heading_haystack for word in words):
+            score += 4.0 * weight
+        count = max(haystack.count(word) for word in words)
+        score += min(count, 6) * 0.75 * weight
     if section.doc.status == "active":
         score += 0.2
     return score

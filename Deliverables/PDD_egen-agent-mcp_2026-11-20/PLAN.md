@@ -1,6 +1,6 @@
 # PLAN — Egen Claude og Codex mot HAVEN (MCP-adapter)
 
-Oppgavemappe: `PDD_egen-agent-mcp_2026-11-20` · Skrevet 2026-11-23 · Venter på G2
+Oppgavemappe: `PDD_egen-agent-mcp_2026-11-20` · Skrevet 2026-11-23 · G2 godkjent 2026-11-23
 Bygger på FORMAALSSPEC.md iterasjon 1 (G1 2026-11-21) og bildene i `images/` (G1-GUI 2026-11-23).
 
 ## Fakta planen bygger på (lest 23.11 i kode)

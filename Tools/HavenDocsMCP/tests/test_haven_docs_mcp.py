@@ -79,6 +79,46 @@ class HavenDocsMCPTests(unittest.TestCase):
         self.assertFalse(called["result"]["isError"])
         self.assertGreater(called["result"]["structuredContent"]["result_count"], 0)
 
+    def test_term_bridge_counts_norwegian_and_english_as_one_concept(self):
+        concepts = dict(mcp.query_concepts({"avtale", "agreement"}))
+        self.assertEqual(len(concepts), 1)
+        words = next(iter(concepts))
+        self.assertIn("avtale", words)
+        self.assertIn("agreements", words)
+
+    def test_norwegian_query_finds_english_chapter(self):
+        result = self.index.search("avtaler og kontrakter", max_results=3)
+        paths = [item["citation"]["path"] for item in result["results"]]
+        self.assertIn("Book/04_Agreements_Contracts.md", paths)
+
+    def test_student_questions_top5_floor(self):
+        # test.egen-agent.docs-norsk: 13/31 uten begrepsbro, 19/31 med (2026-11-23). Gulvet hindrer tilbakegang.
+        cases = json.loads((ROOT / "tests" / "fixtures" / "student-questions.v1.json").read_text(encoding="utf-8"))["cases"]
+        hits = total = 0
+        for case in cases:
+            expected = set(case.get("expectedSources") or [])
+            if not expected:
+                continue
+            total += 1
+            result = self.index.search(case["question"], max_results=5)
+            if {item["citation"]["path"] for item in result["results"]} & expected:
+                hits += 1
+        self.assertEqual(total, 31)
+        self.assertGreaterEqual(hits, 19)
+
+    def test_client_configs_start_this_server(self):
+        # test.egen-agent.docs-config (filsiden): Claude Code og Codex peker på samme skrivebeskyttede server.
+        import tomllib
+        repo = ROOT.parents[1]
+        claude = json.loads((repo / ".mcp.json").read_text(encoding="utf-8"))["mcpServers"]["haven-docs"]
+        with open(repo / ".codex" / "config.toml", "rb") as handle:
+            codex = tomllib.load(handle)["mcp_servers"]["haven-docs"]
+        for config in (claude, codex):
+            self.assertEqual(config["command"], "python3")
+            self.assertTrue((repo / config["args"][0]).is_file())
+        self.assertIn("haven-docs", (repo / "AGENTS.md").read_text(encoding="utf-8"))
+        self.assertEqual((repo / "CLAUDE.md").read_text(encoding="utf-8").strip(), "@AGENTS.md")
+
     def test_stdio_smoke_line_delimited_json(self):
         request = {
             "jsonrpc": "2.0",
