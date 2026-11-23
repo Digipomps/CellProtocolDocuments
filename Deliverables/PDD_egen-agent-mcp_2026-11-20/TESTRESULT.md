@@ -27,3 +27,14 @@ Merknad: målet i FORMAALSSPEC er «norsk ≥ engelsk». Settet finnes bare på 
 ## docs-config
 
 Filsiden er testet (`test_client_configs_start_this_server`): `.mcp.json` (Claude Code) og `.codex/config.toml` (Codex, bare i klarerte prosjekter) starter `Tools/HavenDocsMCP/haven_docs_mcp.py`; stdio-svar på `initialize` og `tools/list` gir de fire `haven_docs_*`-verktøyene. Ekte klienter: venter på WP13 (Macen).
+
+## WP3 + WP4 (CellBase, Swift på Linux, 2026-11-23)
+
+CellProtocol PR #114 (utkast), commit `1320a34`, grein `claude/egen-agent-avgrenset-lenke` fra main `b5f467a`.
+
+| Hva | Resultat |
+|---|---|
+| `ScopedIdentityLinkTests` (8 nye: test.egen-agent.connect, auth-negative, recipient) | 8/8 grønne |
+| `IdentityLinkRegistryTests` (hel lenke uendret) | 4/4 grønne |
+| 190 CellBaseTests-filer uten CellApple/CellVapor, Docker `swift:6.1-noble` | 1489 tester, 27 røde; samme 27 røde på main uten endringen → ingen nye røde |
+| Full `swift test` på macOS | venter: Macen var offline |
