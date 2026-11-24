@@ -1,6 +1,6 @@
 # Unik representasjon i HAVEN: hva finnes, og hva er åpent
 
-Status: batch 2 · utkast, ikke godkjent · ankre kontrollert ordrett 2026-11-20 · godkjenner: Kjetil (per batch)
+Status: batch 2 · godkjent av Kjetil 2026-11-24 · ankre kontrollert ordrett 2026-11-20 · godkjenner: Kjetil (per batch)
 
 Dette kapittelet er for deg som skal forske på *unik representasjon*: å vise at en entitet (en person, en organisasjon) er representert bare én gang i en gruppe, for eksempel når gruppen stemmer. Kapittelet forteller hva HAVEN har å bygge på i dag, og hva som ikke finnes ennå.
 
