@@ -2,7 +2,7 @@
 
 **Dato:** 2026-08-09
 **Status:** Omfang og kontekstkontrakt besluttet 2026-08-09 (§8, §8b). Ikke påbegynt.
-**Avhengighet:** submodulen `Binding/CellProtocolDocuments` bør fjernes før Fase 1 (§10).
+**Avhengighet:** ~~submodulen `Binding/CellProtocolDocuments` bør fjernes før Fase 1~~ — oppfylt 2026-08-10, Binding `056d74ad8` (#19). Se §10.5.
 **Utløst av:** Spørsmål om graflagring kan holde midlertidig kontekst slik at kodeagenter slipper å sende hele transkriptet til modellen hver tur.
 
 ---
@@ -414,3 +414,13 @@ Ikke i denne planen, og ikke av denne tråden: å fjerne en submodul er en git-o
 3. `Prompts/SystemPrompt-Codex.md` og `SystemPrompts.md` får eksplisitt sti til søsken-utsjekk med feilmelding hvis den mangler — samme prinsipp som §8b: feil eksplisitt fremfor å lese noe foreldet.
 
 **Effekt på planen:** `mirrors`-kanten i §4.1.1 var innført nettopp for denne submodulen. Fjernes den før Fase 1, utgår kanttypen, og dokumentnoder får én kanonisk kilde. Det er en forenkling av indeksen, ikke bare en opprydning.
+
+### 10.5 Utført — og en rettelse (lagt til 2026-11-10)
+
+Opprydningen ble gjort dagen etter handoffen: Binding `056d74ad8`, «Remove stale CellProtocolDocuments submodule wiring (#19)», merget til `main` 2026-08-10. Den fjernet `.gitmodules`, begge `project.pbxproj`-linjene og workspace-gruppen, rettet lenkene i 19 dokument- og promptfiler til søsken-utsjekken, og lot agent-inngangene feile eksplisitt når søsken-utsjekken mangler. Ingen symlink. Alle punktene i §10.4 er dermed oppfylt, og `mirrors`-kanten i §4.1.1 utgår.
+
+Rettelse til §10.2: «pinnet til `e138166`» var upresist. Ingen branch hadde en committet gitlink for stien; `e138166` var HEAD i utsjekken på disk, og `.gitmodules` var en deklarasjon uten gitlink bak. Konklusjonen — at Binding serverte ikke-kanonisk dokumentasjon — står.
+
+Branches som ble kuttet før #19 har fortsatt den gamle tilstanden til de synkes mot `main`. Det gjaldt hovedutsjekken av Binding og seks worktrees per 2026-11-10.
+
+Planen for øvrig er ikke påbegynt: ingen `CodeGraph`-celle og ingen `ContextBench` finnes på `origin/main` i noe repo.
