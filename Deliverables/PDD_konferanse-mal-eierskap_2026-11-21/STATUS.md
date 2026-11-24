@@ -18,3 +18,5 @@ Sett en port til `godkjent <dato>` kun når Kjetil har sagt det. `purpose_dev.py
 - 2026-11-21: opprettet
 - 2026-11-21: FORMAALSSPEC iterasjon 1 og PLAN.md med lanebilde skrevet; G2 spurt
 - 2026-11-21: G2 godkjent; WP1 og WP2 startet
+- 2026-11-21: WP2/WP5 (#58), WP3 (CellScaffold #498), WP1/WP4 (CellProtocol #103) levert og merget; lagring valgt av Kjetil 13:39Z
+- 2026-11-24: «Slipp inn»; macOS-testene grønne (CP 4/4 + 38/38, CS 3/3). ACCEPT.md skrevet; G3 spurt
