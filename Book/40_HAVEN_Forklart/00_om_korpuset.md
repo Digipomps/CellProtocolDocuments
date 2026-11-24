@@ -27,3 +27,4 @@ Kallimachos foreslår; mennesker beslutter. Ingenting her er juridisk rådgivnin
 - `06_hva_kallimachos_ikke_kan.md`: Hva Kallimachos ikke kan (5 påstander)
 - `07_modenhet_og_prototype.md`: Hvor modent er HAVEN? (6 påstander)
 - `08_hvorfor_haven_argumenter.md`: Hvorfor HAVEN? Argumenter med motargumenter (12 påstander)
+- `09_unik_representasjon.md`: Unik representasjon: hva finnes, og hva er åpent (6 påstander, batch 2, godkjent av Kjetil 2026-11-24)
