@@ -5,8 +5,8 @@
  "anchorRef": "purpose://governance",
  "anchorNote": "Forslag 2026-11-24. Endre om det hører hjemme et annet sted.",
  "rootRef": "purpose://candidate.medlemsbevis-gruppe.root",
- "updatedAt": "2026-11-24T13:10:00Z",
- "updatedBy": "Claude (fra FORMAALSSPEC §1)",
+ "updatedAt": "2026-11-24T13:05:00Z",
+ "updatedBy": "Claude (fra FORMAALSSPEC §1, iterasjon 2)",
  "nodes": [
   {
    "ref": "purpose://candidate.medlemsbevis-gruppe.root",
@@ -69,13 +69,13 @@
   {
    "ref": "purpose://candidate.medlemsbevis-gruppe.national-id-admits.eid-source",
    "parentRef": "purpose://candidate.medlemsbevis-gruppe.national-id-admits",
-   "title": "Hvor attesten kommer fra",
+   "title": "Hvor beviset kommer fra",
    "code": "3b",
-   "outcome": "v1: en test-utsteder på staging som utsteder en signert «eier dette nummeret»-attest for syntetiske testnumre. Ekte eID (ID-porten/BankID, senere EUDI-lommebok via OpenID4VP) er en egen avhengighet, ikke del av v1",
-   "verifier": "test.nid.test-issuer-staging-only",
+   "outcome": "v1 gjenbruker CellScaffolds eID-kobling (ID-porten/OIDC-megler) med den falske IdP-en i testene og en test-IdP på staging med syntetiske numre. I tillegg til dagens saltede bevis regner gruppa sitt stabile pseudonym i samme kall, slik at subjektet aldri forlater eID-kallet. Ekte eID krever leverandøravtale, klientregistrering og personvernvurdering (se §2)",
+   "verifier": "test.nid.test-issuer-staging-only, test.nid.same-call",
    "status": "candidate",
    "signals": [
-    "Test-utsteder er merket test overalt og godtas bare på staging; prod godtar den ikke"
+    "Test-IdP godtas bare på staging; prod-konfigurasjon uten ekte leverandør avviser eID-veien"
    ]
   },
   {
@@ -95,11 +95,23 @@
    "parentRef": "purpose://candidate.medlemsbevis-gruppe.root",
    "title": "Tilbaketrekking",
    "code": "5",
-   "outcome": "Moderator kan trekke tilbake; medlemmet kan melde seg ut; fødselsnummer-pseudonymet frigjøres da",
+   "outcome": "Moderator kan trekke tilbake; medlemmet kan melde seg ut; pseudonymet **slettes** da straks (ikke bare frigjøres)",
    "verifier": "test.revoke.status, test.revoke.free-pseudonym",
    "status": "candidate",
    "signals": [
-    "Trukket bevis gir `revoked` innen ett statuslisteintervall; utmeldt nummer kan melde seg inn igjen"
+    "Trukket bevis gir `revoked` innen ett statuslisteintervall; pseudonymet finnes ikke lenger i lagret tilstand; utmeldt nummer kan melde seg inn igjen"
+   ]
+  },
+  {
+   "ref": "purpose://candidate.medlemsbevis-gruppe.privacy",
+   "parentRef": "purpose://candidate.medlemsbevis-gruppe.root",
+   "title": "Samtykke og hva beviset bærer",
+   "code": "5a",
+   "outcome": "Søkeren ser og godtar hva som lagres (pseudonym, tidspunkt) før eID-veien. Selve medlemsbeviset inneholder **ikke** pseudonymet, så den som sjekker beviset kan ikke koble det til andre grupper",
+   "verifier": "test.priv.no-pseudonym-in-credential, test.priv.consent-first",
+   "status": "candidate",
+   "signals": [
+    "Beviset som sendes ut har ikke pseudonymfeltet; samtykke er lagret før pseudonymet"
    ]
   },
   {
@@ -112,6 +124,18 @@
    "status": "candidate",
    "signals": [
     "Godkjente G1-GUI-bilder; flatene har alle handlinger nåbare"
+   ]
+  },
+  {
+   "ref": "purpose://candidate.medlemsbevis-gruppe.one-vote-example",
+   "parentRef": "purpose://candidate.medlemsbevis-gruppe.root",
+   "title": "Én stemme per bevis (eksempel, avhenger av §6 q6)",
+   "code": "8",
+   "outcome": "En avstemming i en gruppecelle kan kreve medlemsbevis og telle én stemme per aktivt bevis, ikke per identitetsnøkkel (i dag: per nøkkel, `LiveInteractionCell.swift:1711`)",
+   "verifier": "test.vote.one-per-credential",
+   "status": "candidate",
+   "signals": [
+    "To identiteter med samme pseudonym gir én stemme; to moderator-godtatte identiteter for samme person gir fortsatt to (og det står i studentteksten)"
    ]
   },
   {

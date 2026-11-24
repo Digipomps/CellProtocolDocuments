@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — Signert medlemsbevis i en gruppeentitet
 
-Oppgavemappe: `PDD_medlemsbevis-gruppe_2026-11-24` · Opprettet 2026-11-24 · Iterasjon 1 (G1 ikke gitt)
+Oppgavemappe: `PDD_medlemsbevis-gruppe_2026-11-24` · Opprettet 2026-11-24 · Iterasjon 2 (G1 ikke gitt)
 
 > Regel: ingen plan før G1 er godkjent av Kjetil. For GUI: ingen implementering før G1-GUI (rendret bilde) er godkjent.
 > Et dokument om leveransen teller aldri som leveransen.
@@ -17,7 +17,7 @@ er et konkret eksempel for Saras Tema A (unik representasjon). Kapittel 09 (CPD 
 HAVEN i dag **ikke** har sybil-motstand. Denne PDD-en skal ikke endre det utsagnet til mer enn det koden viser.
 
 Kodestand som er lest: CellProtocol `12fa8bf` (main 24.11), PyCellProtocol `826db6a` (main), GoCellProtocol
-`c0274c2` (main), CellProtocolDocuments main 24.11 + PR #52.
+`c0274c2` (main), CellScaffold `6e2f667` (main 24.11), CellProtocolDocuments main 24.11 + PR #52.
 
 | Påstand i intensjonen / antatt kapabilitet | Audit | Kilde |
 |---|---|---|
@@ -26,7 +26,8 @@ Kodestand som er lest: CellProtocol `12fa8bf` (main 24.11), PyCellProtocol `826d
 | Det finnes «medlem» som begrep i gruppa | **contradicted.** `OrganizationRole` har `owner, chair, boardMember, ceo, procurist`; rollebevisene i Informasjonssystemer er student/forsker/veileder. Ingen `member`-rolle, ingen «godtatt som entitet» | `GovernancePolicy.swift:22–33`; `OwnershipAgreement.swift:15–26` |
 | Det finnes en moderator-rolle | **contradicted.** Ingen `moderator` i `OrganizationRole`. Handlingsklassene er `role.issue`, `role.revoke`, `role.status.publish`, `policy.amend`. En moderator med `role.issue` ville kunne utstede *alle* roller, også forsker; det må skilles ut | `OwnershipAgreement.swift:15–26` |
 | Tilgang kan kreve et slikt bevis via Agreement | **retrieved i Swift, Python og Go.** Swift `ProvedClaimCondition` (VC, subjekt = requester, gyldig bevis, utsteder godkjent av TrustedIssuer). Py/Go har organisasjonsmodellen og rollebevis/statusliste-sjekk i `interop/organization.*`, med felles fixtures (`org.role.valid`, `org.role.tampered`, `org.status.*`, `org.access-matrix`) | `CellProtocol/Sources/CellBase/Agreement/Condition/Implementation/ProvedClaimCondition.swift`; `PyCellProtocol/src/cellprotocol/interop/organization.py`; `GoCellProtocol/interop/organization.go`; `PyCellProtocol/tests/fixtures/interop/v1/` |
-| HAVEN kan verifisere at noen eier et fødselsnummer | **contradicted.** Ingen ID-porten-, BankID- eller annen eID-integrasjon i CellProtocol (grep `idporten|bankid|fødselsnummer|fodselsnummer` i `Sources/`: 0 treff). OpenID4VP-laget (forespørsel, DCQL, direct_post) er «strong foundation», men uten transportlim; SD-JWT VC og mdoc (formatene en EUDI-lommebok bruker for PID) er «missing» | `CellProtocol/Docs/VerifiableCredentials_EUDI_Gap_Checklist.md` (OpenID4VP- og Credential Formats-tabellene) |
+| HAVEN kan verifisere at noen eier et fødselsnummer | **retrieved, delvis** (rettet i iterasjon 2; iterasjon 1 sa «contradicted» etter å bare ha lest CellProtocol). CellScaffold har en eID-kobling via ID-porten direkte eller en OIDC-megler (`Sources/App/EID/`). Den kobler eID til en *eksisterende* innlogget entitet, gir ingen tilgang, og har **ingen leverandøravtale eller klientregistrering**; alle tester bruker en falsk IdP. I CellProtocol finnes ingen eID-kode; OpenID4VP er delvis, SD-JWT VC og mdoc (EUDI-PID) mangler | `CellScaffold/Documentation/EID.md:1–6`; `CellScaffold/Sources/App/EID/VaporEID.swift`; `CellProtocol/Docs/VerifiableCredentials_EUDI_Gap_Checklist.md` |
+| eID-koblingen kan oppdage at samme person kommer to ganger | **contradicted, med vilje.** Pseudonymet er HMAC over eier/entitet/utsteder/subjekt **pluss et ferskt tilfeldig salt** for hver kobling, så samme nummer gir nytt pseudonym hver gang. Unikhet i en gruppe krever et nytt, *stabilt* pseudonym per gruppe; den som har gruppas nøkkel (driftsoperatøren) kan regne det ut. Oppbevaring og rotasjon av hash-nøkkelen er ikke avgjort | `CellScaffold/Documentation/EID.md:75–80, 89–91` |
 | HAVEN kan i dag hindre at én person blir medlem to ganger | **contradicted.** Kapittel 09 HF-09-06 [ikke ennå]: ingen sybil-motstand, ingen nullifiers, ingen anonyme medlemsbevis | `CellProtocolDocuments` PR #52 `Book/40_HAVEN_Forklart/09_unik_representasjon.md` |
 | Fødselsnummer gir én identifikator per person i Norge «ganske godt, ikke 100 %» | **recalled** (ikke målt her). Kjente brudd: D-nummer som senere blir fødselsnummer, nytt fødselsnummer ved endret juridisk kjønn, ny nummerstruktur fra 2032, personer uten norsk eID, lånt/delt BankID. Dobbelt statsborgerskap gir to nasjonale identifikatorer (Kjetils eksempel). Skal verifiseres mot Skatteetaten/Digdir før teksten til studentene skrives | — (åpen kilde i WP for studentteksten) |
 | Fødselsnummer er personopplysning som krever særskilt vern | **recalled.** Personopplysningsloven § 12: fødselsnummer kan bare behandles når det er saklig behov for sikker identifisering. Gruppa trenger *unikhet*, ikke selve nummeret, så nummeret skal ikke lagres | — (verifiseres i WP for personvern) |
@@ -43,10 +44,12 @@ og det står ærlig hva beviset ikke garanterer. Forelder: `purpose://governance
 | 2 | `moderator-admits` — moderator godtar | En moderator (ny rolle i `GovernancePolicy`) kan godta eller avvise en søknad. Moderator kan *bare* utstede og trekke tilbake `member`, aldri andre roller (ny handlingsklasse `membership.admit` / `membership.revoke`, adskilt fra `role.issue`) | Moderator-godkjent søknad gir bevis; moderator som prøver å utstede `researcher` avvises; moderator kan ikke godta seg selv | test.mod.admit, test.mod.scope-negative, test.mod.self-negative |
 | 3 | `national-id-admits` — fødselsnummer-veien | Et medlem som beviser at det eier et norsk fødselsnummer/D-nummer gjennom en eID-utsteder gruppa stoler på (TrustedIssuer), får beviset uten moderator. Gruppa lagrer **aldri** nummeret | Gyldig eID-attest gir bevis automatisk; attest fra ukjent utsteder avvises; fødselsnummeret finnes ikke i noen lagret tilstand eller logg | test.nid.admit, test.nid.untrusted-issuer, test.nid.no-plaintext |
 | 3a | `national-id-admits.one-per-number` — én gang per nummer | Gruppa holder et register med en gruppe-spesifikk pseudonym (HMAC med gruppas hemmelige nøkkel over `NO:` + nummer). Samme nummer kan ha bare ett gyldig medlemsbevis i gruppa | Andre forsøk med samme nummer fra en annen identitet gir «allerede medlem» (eller flytting, se §6 q2); pseudonymet kan ikke regnes tilbake uten gruppas nøkkel; to grupper får ulike pseudonymer for samme person | test.nid.duplicate, test.nid.unlinkable |
-| 3b | `national-id-admits.eid-source` — hvor attesten kommer fra | v1: en test-utsteder på staging som utsteder en signert «eier dette nummeret»-attest for syntetiske testnumre. Ekte eID (ID-porten/BankID, senere EUDI-lommebok via OpenID4VP) er en egen avhengighet, ikke del av v1 | Test-utsteder er merket test overalt og godtas bare på staging; prod godtar den ikke | test.nid.test-issuer-staging-only |
+| 3b | `national-id-admits.eid-source` — hvor beviset kommer fra | v1 gjenbruker CellScaffolds eID-kobling (ID-porten/OIDC-megler) med den falske IdP-en i testene og en test-IdP på staging med syntetiske numre. I tillegg til dagens saltede bevis regner gruppa sitt stabile pseudonym i samme kall, slik at subjektet aldri forlater eID-kallet. Ekte eID krever leverandøravtale, klientregistrering og personvernvurdering (se §2) | Test-IdP godtas bare på staging; prod-konfigurasjon uten ekte leverandør avviser eID-veien | test.nid.test-issuer-staging-only, test.nid.same-call |
 | 4 | `agreement-gates` — beviset gir tilgang bare via Agreement | En gruppecelle (f.eks. en avstemming eller felles chat) kan kreve «gyldig medlemsbevis fra gruppa» som Agreement-betingelse, og kan i tillegg kreve `admittedVia = national-id:NO` | Samme tilgangsmatrise (gyldig/endret/trukket/ukjent status/feil utsteder) gir samme svar i Swift, Python og Go; ingen språkspesifikk snarvei | test.access.matrix (felles fixture) |
-| 5 | `revoke-and-leave` — tilbaketrekking | Moderator kan trekke tilbake; medlemmet kan melde seg ut; fødselsnummer-pseudonymet frigjøres da | Trukket bevis gir `revoked` innen ett statuslisteintervall; utmeldt nummer kan melde seg inn igjen | test.revoke.status, test.revoke.free-pseudonym |
+| 5 | `revoke-and-leave` — tilbaketrekking | Moderator kan trekke tilbake; medlemmet kan melde seg ut; pseudonymet **slettes** da straks (ikke bare frigjøres) | Trukket bevis gir `revoked` innen ett statuslisteintervall; pseudonymet finnes ikke lenger i lagret tilstand; utmeldt nummer kan melde seg inn igjen | test.revoke.status, test.revoke.free-pseudonym |
+| 5a | `privacy` — samtykke og hva beviset bærer | Søkeren ser og godtar hva som lagres (pseudonym, tidspunkt) før eID-veien. Selve medlemsbeviset inneholder **ikke** pseudonymet, så den som sjekker beviset kan ikke koble det til andre grupper | Beviset som sendes ut har ikke pseudonymfeltet; samtykke er lagret før pseudonymet | test.priv.no-pseudonym-in-credential, test.priv.consent-first |
 | 6 | `surfaces` — flatene | Medlem: «Medlemsbevis» (søk via moderator / bevis med eID, venter, godtatt, avvist, allerede medlem). Moderator: kø med søknader, godta/avvis. Vises i web og Binding (Swift) | Godkjente G1-GUI-bilder; flatene har alle handlinger nåbare | test.gui.parity, test.skeleton.purpose-actions-reachable |
+| 8 | `one-vote-example` — én stemme per bevis (eksempel, avhenger av §6 q6) | En avstemming i en gruppecelle kan kreve medlemsbevis og telle én stemme per aktivt bevis, ikke per identitetsnøkkel (i dag: per nøkkel, `LiveInteractionCell.swift:1711`) | To identiteter med samme pseudonym gir én stemme; to moderator-godtatte identiteter for samme person gir fortsatt to (og det står i studentteksten) | test.vote.one-per-credential |
 | 7 | `limits-stated` — det beviset ikke garanterer | Kapittel 09 får et nytt avsnitt [med forbehold] som sier nøyaktig hva medlemsbeviset gir, og en liste over der det ikke holder; et studentark bruker dette som eksempel | Ingen tekst sier «én person, én stemme»; hver begrensning har kilde; Kjetil har godkjent teksten | test.docs.claims (claims.json), test.docs.no-overclaim |
 
 Begrensningene formål 7 skal skrive ned (utkast, til verifisering):
@@ -56,6 +59,7 @@ Begrensningene formål 7 skal skrive ned (utkast, til verifisering):
 - **Samme person kan få nytt nummer:** D-nummer som blir fødselsnummer, nytt nummer ved endret juridisk kjønn. Uten oppslag i Folkeregisteret ser gruppa to ulike personer.
 - **eID kan lånes.** Beviset viser at noen med tilgang til eID-en var med, ikke hvem som sitter ved tastaturet senere.
 - **Tillit flyttes til staten og eID-leverandøren.** Leverandøren kan se at du logger inn mot gruppa.
+- **Driftsoperatøren kan regne ut pseudonymet**, fordi den holder gruppas nøkkel. Det er ikke anonymt overfor den som drifter noden.
 - **Pseudonymet er bare trygt så lenge gruppas nøkkel er hemmelig.** Fødselsnumre er få nok til å prøves ut; en vanlig hash uten hemmelig nøkkel kan regnes tilbake.
 - **Det er ikke anonymt.** Gruppa vet hvilken identitet som er medlem; den vet ikke nummeret. Anonyme medlemsbevis og nullifiers (Tema A) er fortsatt [ikke ennå].
 - **Andre steder i verden finnes ikke et slikt nummer**, eller det er ikke knyttet til en eID.
@@ -72,7 +76,10 @@ ID-porten/BankID i v1; lagring eller visning av fødselsnummer; en endring i hve
 | Gruppa finnes på staging (WP11–13 i informasjonssystemer-PDD) | **ikke landet**: CellScaffold-branch `claude/informasjonssystemer-gruppeentitet`, ingen PR | flaten kan ikke måles på staging før dette er der; G1-GUI bruker web-rendereren |
 | Rollebevis og statusliste i Python og Go | på main (Py `826db6a`, Go `c0274c2`) | felles fixtures `tests/fixtures/interop/v1/org.*` |
 | eID-attest for fødselsnummer | **finnes ikke** | v1 bruker test-utsteder (3b); ekte eID er åpent spørsmål q1 |
-| Juridisk grunnlag for å behandle fødselsnummer (selv flyktig) | **ikke vurdert** | egen kort vurdering før fødselsnummer-veien går til prod; staging bruker bare syntetiske numre |
+| Rettslig grunnlag og personvernvurdering (DPIA) for å behandle fødselsnummer, også flyktig | **finnes ikke** (ingen DPIA funnet; `EID.md:89–91` sier oppbevaring må avgjøres før ekte innrulling) | Kjetils ansvar; til det finnes bygges og testes eID-veien bare med falsk IdP / syntetiske numre |
+| CellScaffolds eID-kobling (falsk IdP i tester) | på main `6e2f667` | `CellScaffold/Sources/App/EID/`, eID-testene |
+| Medlemsopptak etter regel i gruppeeid celle (`PDD_gruppeeid-celle`, G1 19.11, G2 venter) | egen tråd | ord og flyt koordineres med den; ikke to ulike opptaksmodeller |
+| Gruppeflaten (Informasjonssystemer på staging) | **finnes ikke ennå** | WP11–13 i informasjonssystemer-PDD |
 
 ## 3. Forventningskontrakt — «Det du kommer til å se»
 
@@ -352,7 +359,11 @@ Lærdommer som former treet:
 | test.nid.test-issuer-staging-only | command | Prod-konfigurasjon avviser test-utstederen | TESTRESULT.md#auth |
 | test.access.matrix | command | Felles fixture `org.membership.access-matrix.json` kjørt i Swift, Python og Go; Swift rapporteres først | TESTRESULT.md#parity |
 | test.revoke.status | command | Tilbaketrukket bevis → `revoked` etter ny statusliste | TESTRESULT.md#swift |
-| test.revoke.free-pseudonym | command | Utmeldt nummer kan melde seg inn igjen | TESTRESULT.md#nid |
+| test.revoke.free-pseudonym | command | Etter utmelding: pseudonymet finnes ikke i lagret tilstand; samme nummer kan melde seg inn igjen | TESTRESULT.md#nid |
+| test.nid.same-call | inspection + command | Gruppepseudonymet regnes i eID-kallet; subjekt/pid finnes ikke i noe som returneres derfra | TESTRESULT.md#nid |
+| test.priv.no-pseudonym-in-credential | command | Utstedt medlemsbevis har ikke pseudonymet | TESTRESULT.md#nid |
+| test.priv.consent-first | command | Uten samtykke lagres ingen pseudonym | TESTRESULT.md#nid |
+| test.vote.one-per-credential | command | Avstemmingscelle: to identiteter, samme pseudonym → én stemme (bare hvis ja på q6) | TESTRESULT.md#vote |
 | test.gui.reference-image-exists | artifact | Bilder per flate og tilstand | images/ |
 | test.gui.parity | inspection | Staging-skjermbilde (web + Binding) ved siden av godkjent bilde | ACCEPT.md#parity |
 | test.skeleton.purpose-actions-reachable | inspection | `søk`, `godta`, `avvis`, `meld ut`, `trekk tilbake` finnes i reachableActionKeypaths | ACCEPT.md#ways-in |
@@ -362,14 +373,16 @@ Lærdommer som former treet:
 
 ## 6. Åpne spørsmål til Kjetil
 
-1. **Hvor kommer fødselsnummer-beviset fra i første versjon?** Forslag: en test-utsteder på staging med syntetiske numre nå, og ID-porten som neste steg (krever avtale med Digdir og en organisasjon som kunde). Alternativ: BankID via en megler (koster per innlogging), eller vente på EUDI-lommeboka (OpenID4VP finnes delvis, PID-formatene mangler).
+1. **Hvor kommer fødselsnummer-beviset fra i første versjon?** Forslag: CellScaffolds eID-kobling med falsk IdP / test-IdP på staging nå, ekte ID-porten (eller OIDC-megler) når leverandøravtale, klientregistrering og personvernvurdering finnes. Det betyr også et nytt valg: et *stabilt* pseudonym per gruppe ved siden av dagens saltede, som driftsoperatøren kan regne ut. Alternativ: vente på EUDI-lommeboka (OpenID4VP finnes delvis, PID-formatene mangler).
 2. **Hva skjer når et nummer som allerede er medlem kommer fra en ny identitet?** Forslag: flytting. Det gamle beviset trekkes tilbake og det nye utstedes, etter fersk eID, og moderator får beskjed. Det dekker tapt telefon. Alternativ: avvis og send til moderator.
 3. **Skal beviset si hvilken vei medlemmet kom inn?** Forslag: ja (`admittedVia`), slik at en avstemming kan kreve fødselsnummer-veien mens en chat godtar begge.
 4. **Hvem er moderator i Informasjonssystemer?** Forslag: du alene nå, Petter når han er med. Moderatorrollen gis av én eier (samme regel som andre roller).
 5. **Skal andre lands eID godtas nå?** Forslag: nei i v1, men nummeret lagres i pseudonymet med landskode (`NO:`), slik at dobbelt statsborgerskap blir en synlig, dokumentert svakhet og ikke en skjult en.
+6. **Skal en avstemming telle én stemme per medlemsbevis, som eksempel for studentene (formål 8)?** Forslag: ja, i én avstemmingscelle på staging, med teksten om at moderator-veien fortsatt kan gi to stemmer.
 
 ## 7. Revisjonslogg
 
 | Iterasjon | Dato | Hva endret seg |
 |---|---|---|
 | 1 | 2026-11-24 | Første utkast fra Kjetils melding 12:35Z |
+| 2 | 2026-11-24 | Rettet audit: CellScaffold har eID-kobling (falsk IdP, saltet pseudonym, ingen leverandør). 3b gjenbruker den; nye formål 5a (personvern, beviset bærer ikke pseudonymet) og 8 (én stemme per bevis, q6); pseudonym slettes ved utmelding; DPIA, gruppeeid-celle-PDD og manglende gruppeflate lagt i §2; driftsoperatør kan regne pseudonymet lagt i begrensningene. Innspill fra et parallelt utkast (`claude/pdd-gruppebevis-unik-entitet-20261124`), verifisert mot CellScaffold `6e2f667` |
