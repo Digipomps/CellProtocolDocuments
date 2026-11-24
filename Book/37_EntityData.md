@@ -1,10 +1,11 @@
 # Chapter 37 — EntityData
 
-Last verified against code: 2026-09-16 (målskjema og skill-beslutning kontrollert 2026-09-25; §7b og EntityAnchor-røttene kontrollert 2026-11-21)
+Last verified against code: 2026-11-23 (§7 og §7b kontrollert mot CellProtocol `origin/main` 4f099cc; målskjema og skill-beslutning kontrollert 2026-09-25)
 
 Status: Struktur og nodemodell er kildebekreftet. Beslutningene i §7 er tatt av Kjetil
-16.09.2026, men er **ikke implementert** — de står her fordi et kapittel som beskriver
-dagens form uten å si hvor den er på vei, blir feil neste måned. Feltbeskrivelser i
+16.09.2026. De fleste er **ikke implementert**; noen få er delvis implementert, og §7
+sier hvilke per rad. De står her fordi et kapittel som beskriver dagens form uten å si
+hvor den er på vei, blir feil neste måned. Feltbeskrivelser i
 skjemaets runtime-grunnlag er på engelsk for å bevare betydningen; forklaringen her er på norsk.
 Målskjemaet videreføres etter 22.09, bevisavklaringen 23.09 og skill-beslutningen 25.09; se
 [gjeldende målform](../../CellProtocol/Docs/EntityData-Review-2026-09-11/V2-BESLUTTET-FORM.md).
@@ -232,11 +233,19 @@ flow førsteklasses, og i OpenAPI ville de blitt fritekst. OpenAPI 3.1 bygger p�
 2020-12, så schema-komponentene kan gjenbrukes uten omskriving den dagen en ekstern
 HTTP-grense faktisk skal dokumenteres for noen utenfor HAVEN.
 
-## 7. Besluttet 16.09.2026 — ikke implementert
-<!-- haven:implementation_status=decided -->
+## 7. Besluttet 16.09.2026 — status per beslutning
+<!-- haven:implementation_status=mixed -->
 
 Kjetil gikk gjennom alle 253 elementene i `EntityData.review.schema.json` og besvarte hvert
-enkelt. Dette er beslutningene som endrer strukturen. **Ingen av dem er implementert i kode.**
+enkelt. Dette er beslutningene som endrer strukturen. Kolonnen **Status** sier hvor koden
+står, kontrollert mot CellProtocol `origin/main` (4f099cc) 23.11.2026:
+
+- **decided**: besluttet, ikke implementert. Koden skriver fortsatt den gamle formen.
+- **partially-implemented**: en del finnes i kode. Kolonnen sier hvilken del, og hva som mangler.
+
+Siden 17.11.2026 er EntityData **dynamisk** (Kjetil): systemnøkkelstiene ligger fast, og alt
+under en åpen rot kan skrives uten at stien er registrert først. Det gjelder også stiene i
+tabellen under. En ny sti under en åpen rot er gyldig og regnes som utvidelse, ikke som feil.
 
 Beslutningene er ført inn i et eget skjema og eksempel, så det finnes en form å bygge mot.
 Alle filene ligger i `CellProtocol/Docs/EntityData-Review-2026-09-11/`:
@@ -253,26 +262,26 @@ v1-filene er beholdt ved siden av og beskriver fortsatt **dagens** lagring, alts
 faktisk skriver. Fullt referat av beslutningene:
 `CellProtocol/Docs/EntityData-Review-2026-09-11/GJENNOMGANG_KJETIL_2026-09-16.md`.
 
-| Område | Beslutning |
-|---|---|
-| Kontaktopplysninger | Skalarfeltene `person.contact.email` og `person.contact.phone` utgår. **Endpoints** er retningen for alt: telefon, e-post, SoMe-nick, URL, cellereferanse. De strukturerte `emails[]` og `phones[]` blir stående inntil forholdet deres til endpoints er avklart; `phones[].label = primary` viser foretrukket telefon. |
-| Relasjonenes kontakt | `relations.people[].contact.*` skal ha **samme struktur som person** — endpoints, ikke egne felter. |
-| `endpointCell` | Vurderes omdøpt til `cellReference`. |
-| Foretrukket kanal | `person.contact.preferredChannel` beholdes; dubletten i `person.preferences.communication.preferredChannel` utgår. |
-| Standard synlighet | `person.preferences.privacy.defaultVisibility` = **private**. |
-| Konferanse | `person.conference` skal ut av `person` og bli **egen rot**. Domeneskiver hører ikke under person. |
-| Organisasjon | Vurderes: `organization` som egen rot for organisasjonsentiteter, i stedet for å presse dem inn i `person`. |
-| `relations` | Blir **object** med reserverte nøkler, slik at brukeren kan legge til egne navngitte relasjonslister. |
-| Relasjonsform | `relations.people[]` vikes for `relations.records` / `entityRepresentation`. |
-| `ownerUUID` | **Obsolet.** uuid hører i Identity. En EntityRepresentation peker på en entitet, som holder listen over hvilke identiteter vi har oppfattet at entiteten bruker. |
-| Relasjonens formål | `purposeRefs` erstattes av grafen. |
-| `EntityRelationInterests` | Erstattes av Interest/Purpose. |
-| `EntityRelationChannel` | Erstattes av endpoints i EntityRepresentation. |
-| `EntityRelationStanding` | Status og tillit måles i om relasjonens uttalte formål er oppfylt (vektet), ikke som eget felt. |
-| `EntityRelationEvidence` | Erstattes av `proofs` med keypaths, som for egne bevis. |
-| `signedAgreementEntity.records` | Forblir en **liste**. Dictionary-formen ble vurdert og forkastet: et JSON-objekt har ingen rekkefølge, og posten er en revisjonskjede der «hva skjedde først» må bevares. |
-| `chronicle` | Legacy-initialiseringen med tomt objekt ryddes. |
-| `scaffoldPresence.staging` | For spesifikk for utviklingsmiljøet; tatt ut. Målskjemaet foreslår `scaffoldPresence.mounts` som generell form — et **forslag**, ikke en avgjort detaljkontrakt. |
+| Område | Beslutning | Status |
+|---|---|---|
+| Kontaktopplysninger | Skalarfeltene `person.contact.email` og `person.contact.phone` utgår. **Endpoints** er retningen for alt: telefon, e-post, SoMe-nick, URL, cellereferanse. De strukturerte `emails[]` og `phones[]` blir stående inntil forholdet deres til endpoints er avklart; `phones[].label = primary` viser foretrukket telefon. | **decided** |
+| Relasjonenes kontakt | `relations.people[].contact.*` skal ha **samme struktur som person** — endpoints, ikke egne felter. | **partially-implemented** Kontaktverdiene er flyttet ut av relasjonsposten til `relations.validatedContacts.<id>` (`EntityValidatedContactRecordV1`, fail-closed). Posten peker dit eller til et endpoint-token. Samme endpoint-struktur som `person` finnes ikke. |
+| `endpointCell` | Vurderes omdøpt til `cellReference`. | **decided** Navnet `endpointCell` brukes fortsatt i `ContactInboxCell`. |
+| Foretrukket kanal | `person.contact.preferredChannel` beholdes; dubletten i `person.preferences.communication.preferredChannel` utgår. | **decided** |
+| Standard synlighet | `person.preferences.privacy.defaultVisibility` = **private**. | **decided** |
+| Konferanse | `person.conference` skal ut av `person` og bli **egen rot**. Domeneskiver hører ikke under person. | **partially-implemented** `EntityTemplateRoots` (CellProtocol #103, merget) åpner `conference`, `event`, `template` og de andre malrøttene i begge EntityAnchor-cellene. Malvalidering og eierskap fra §7b er ikke implementert. |
+| Organisasjon | Vurderes: `organization` som egen rot for organisasjonsentiteter, i stedet for å presse dem inn i `person`. | **decided** Organisasjonsentiteter finnes nå i kode (`Sources/CellBase/Organization/`, CellProtocol #91), men ikke som egen `organization`-rot i EntityData. |
+| `relations` | Blir **object** med reserverte nøkler, slik at brukeren kan legge til egne navngitte relasjonslister. | **partially-implemented** `relations` er et objekt med reserverte nøkler `records`, `validatedContacts` og `entities`, med egen opptakskontroll for de to første. Brukerens egne navngitte relasjonslister er ikke kontrollert i kode. |
+| Relasjonsform | `relations.people[]` vikes for `relations.records` / `entityRepresentation`. | **partially-implemented** `relations.records.<relationID>` (`EntityRelationRecordV1`) finnes, med valgfri `entityRepresentation` som kanonisk eierkunnskap. De gamle feltene (`subject`, `tags`, `purposeRefs`) står fortsatt for eksisterende klienter. |
+| `ownerUUID` | **Obsolet.** uuid hører i Identity. En EntityRepresentation peker på en entitet, som holder listen over hvilke identiteter vi har oppfattet at entiteten bruker. | **decided** |
+| Relasjonens formål | `purposeRefs` erstattes av grafen. | **decided** `purposeRefs` står fortsatt i `EntityRelationRecordV1`. |
+| `EntityRelationInterests` | Erstattes av Interest/Purpose. | **decided** Typen er del av `EntityRelationRecordV1`. |
+| `EntityRelationChannel` | Erstattes av endpoints i EntityRepresentation. | **decided** Typen er del av `EntityRelationRecordV1`. |
+| `EntityRelationStanding` | Status og tillit måles i om relasjonens uttalte formål er oppfylt (vektet), ikke som eget felt. | **decided** Typen er del av `EntityRelationRecordV1`. |
+| `EntityRelationEvidence` | Erstattes av `proofs` med keypaths, som for egne bevis. | **decided** Typen er del av `EntityRelationRecordV1`. |
+| `signedAgreementEntity.records` | ~~Forblir en **liste**.~~ **Endret 23.11.2026 (Kjetil):** beholdes som objekt **nøklet på kontrakt-uuid** (`signedAgreementEntity.records.<uuid>`), slik koden allerede skriver. Revisjonskjeden bevares i postene: hver ny post får `sequence` (løpenummer) og `previousRecordHash` (hash av forrige post), og `committedAt` skrives med millisekunder (`yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`). Den opprinnelige grunnen til listen (rekkefølge og «hva skjedde først») ivaretas dermed av kjeden, ikke av containeren. | **decided** Nøkling på kontrakt-uuid er implementert. Kjeden, millisekundene og Swift-modellen `SignedAgreementEntity` som følger lagringen ligger i CellProtocol #113 (draft, ikke merget). |
+| `chronicle` | Legacy-initialiseringen med tomt objekt ryddes. | **decided** |
+| `scaffoldPresence.staging` | For spesifikk for utviklingsmiljøet; tatt ut. Målskjemaet foreslår `scaffoldPresence.mounts` som generell form — et **forslag**, ikke en avgjort detaljkontrakt. | **decided** `scaffoldPresence` er fortsatt en rot som ankrene eier selv (`EntityTemplateRoots.anchorOwnedRoots`). |
 
 Dette står igjen som **ikke avgjort**:
 
@@ -286,14 +295,14 @@ Dette står igjen som **ikke avgjort**:
   stor?
 - Hvordan avgjøres det sikkert og utvetydig at to identiteter representerer **samme** entitet?
 
-## 7b. Konferansen som entitet — modell besluttet 21.11.2026, ikke implementert
-<!-- haven:implementation_status=decided -->
+## 7b. Konferansen som entitet — modell besluttet 21.11.2026, delvis implementert
+<!-- haven:implementation_status=mixed -->
 
 Kjetil godkjente 21.11.2026 modellen der en konferanse er en egen entitet som eies av en
 arrangør-entitet, og som starter fra en felles skjemamal. Kontrakten er
 [`conference_entity_template_v0.json`](conference_entity_template_v0.json), med fixtures og
-validator i `Deliverables/PDD_konferanse-mal-eierskap_2026-11-21/`. Ingenting av dette er
-implementert i Swift.
+validator i `Deliverables/PDD_konferanse-mal-eierskap_2026-11-21/`. I Swift er bare
+rotåpningen implementert (se **Lagring** under); mal, eierskap og validering er det ikke.
 
 | Del | Form |
 |---|---|
@@ -307,7 +316,7 @@ implementert i Swift.
 `relations`, `identityLinks` og `signedAgreementEntity.commit`. Andre røtter ga
 `KeyValueErrors.notFound`. Kjetil valgte 21.11.2026 at malen åpner sine røtter i EntityAnchor.
 Røttene står i CellProtocol `Sources/CellBase/PersistingCells/EntityTemplateRoots.swift` og åpnes i
-begge ankrene med samme tilgang som `person` (CellProtocol PR #103, ikke merget per 21.11).
+begge ankrene med samme tilgang som `person` (CellProtocol PR #103, merget som 4235510).
 Nye stier under en åpen rot lagres uten registersjekk.
 
 ## 8. Kilder
