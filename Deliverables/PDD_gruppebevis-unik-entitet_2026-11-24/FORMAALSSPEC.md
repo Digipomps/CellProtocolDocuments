@@ -15,15 +15,15 @@ Lesere: Losen (Claude) leste filene merket «Losen»; en lesetråd (Explore, 202
 
 | Påstand i intensjonen / antatt kapabilitet | Audit | Kilde |
 |---|---|---|
-| En gruppe kan signere med egen nøkkel i et hvelv, med regel (1-av-n eller quorum) | retrieved (Losen) | CellProtocol `origin/main` `Sources/CellBase/Organization/OrganizationVault.swift:83` (`actor OrganizationVault`), `:199` (`issueRole`), `:212` (`revoke`); CellProtocol #91 merget 2026-11-22 |
+| En gruppe kan signere med egen nøkkel i et hvelv, etter en regel for hvem som må godkjenne | retrieved (Losen) | CellProtocol `origin/main` `Sources/CellBase/Organization/OrganizationVault.swift:83` (`actor OrganizationVault`), `:88-90` (regelen, `GovernancePolicy`), `:199` (`issueRole`), `:212` (`revoke`); CellProtocol #91 merget 2026-11-22T18:09Z (`gh pr view 91`, Losen). At én moderator kan være «1 av n» i regelen er en lesning, ikke kontrollert |
 | Gruppen kan utstede et signert rollebevis (VC) til en medlemsidentitet og trekke det tilbake | retrieved (lesetråd) | `Sources/CellBase/Organization/OrganizationRoles.swift:31` (`OrganizationRoleCredential.unsigned`), `:81` (`OrganizationRoleStatusList`), `:157` (`CredentialStatusRegistry`) |
 | Andre kan kreve et slikt bevis før de gir tilgang | retrieved (lesetråd) | `ProvedClaimCondition` (`requiredCredentialType`, `subjectClaimPath`) mot `cell:///TrustedIssuers` (`TrustedIssuerCell.swift:265`, `:1024-1037`) |
 | Det finnes en celle i CellScaffold som eier gruppehvelvet og en flate for medlemmer | **unavailable** | Ingen CellScaffold-kode refererer `OrganizationVault`; WP11–WP14 i PDD_informasjonssystemer-gruppeentitet (PR #46-grenen) er ikke startet (lesetråd) |
 | «Moderator» finnes som begrep | retrieved, delvis | Ingen egen moderatorrolle; 1-av-n-regelen i hvelvet kan stå for en moderator (lesetråd). OrganizationScaffold har `org.members.admit/revoke` med tidsbegrenset Agreement (README.md:3, :35-36), men utsteder ikke VC |
-| HAVEN kan få bevis på at noen eier et fødselsnummer | retrieved, delvis | CellScaffold `origin/main` `Documentation/EID.md:1-6` (Losen): eID-kobling via ID-porten eller OIDC-megler finnes (CS #412), **uten leverandøravtale eller klientregistrering**; testene bruker en falsk IdP |
+| HAVEN kan få bevis på at noen eier et fødselsnummer | retrieved, delvis | CellScaffold `origin/main` `Documentation/EID.md:1-6` (Losen): eID-kobling via ID-porten eller OIDC-megler finnes, **uten leverandøravtale eller klientregistrering**; testene bruker en falsk IdP. At den kom med CS #412 er fra lesetråden |
 | eID-koblingen kan oppdage at samme person kommer to ganger | **contradicted** | `Documentation/EID.md:75-78` (Losen): pseudonymet er HMAC over eier/entitet/utsteder/subjekt **pluss et ferskt tilfeldig salt**. Samme fødselsnummer gir nytt pseudonym hver gang, med vilje |
 | Fødselsnummer lagres ikke i klartekst | retrieved | `EID.md:78` («No raw pid/sub, token, …» persisteres); `EID.md:89-91`: rotasjon av hash-nøkkel og oppbevaring er ikke avgjort |
-| Avstemninger teller én stemme per person | **contradicted** | `LiveInteractionCell.swift:1711`: én stemme per identitetsnøkkel; godkjent påstand HF-09-05 i kapittel 09 |
+| Avstemninger teller én stemme per person | **contradicted** | CellScaffold `LiveInteractionCell.swift:1711` definerer nøkkelen (identitetens UUID + fingeravtrykk av signeringsnøkkelen); stemmen lagres per nøkkel på `:862` og `:869`. Godkjent påstand HF-09-05 i kapittel 09 |
 | Det finnes noe som hindrer samme person i å være med to ganger | **contradicted** | Godkjent påstand HF-09-06: ingen sybil-motstand, nullifiers eller anonyme medlemsbevis |
 | Fødselsnummer fungerer «ganske godt i Norge, ikke 100 %», andre steder ikke, og dobbelt statsborgerskap gir to identifikatorer | recalled (Kjetils vurdering) | Ikke kontrollert her. Kjent unntak som bør med i forklaringen til studentene: D-nummer for personer uten fødselsnummer, og at ett fødselsnummer ikke sier noe om identifikatorer i andre land |
 
@@ -31,6 +31,8 @@ Funn som former treet:
 1. Signering, utstedelse, tilbaketrekking og verifisering finnes i CellProtocol. **Det som mangler er unikheten** og en celle i scaffolden som eier gruppehvelvet.
 2. Dagens eID-kobling er laget for å *ikke* kunne gjenkjenne samme person. Unikhet per gruppe krever et **stabilt pseudonym per gruppe**. Det er en ny beslutning, ikke en innstilling, og den er §6 spørsmål 1.
 3. Unikheten er bare så god som kilden: moderatorens skjønn, eller eID-kilden. Det er nettopp det studentene skal kunne se og diskutere.
+4. Kjetil ba om et **bevis** for at et medlem er godtatt som én entitet. At gruppen også skal **nekte** samme entitet en gang til, er en tolkning ut fra tema A (unik representasjon). Den står som §6 spørsmål 2, ikke som en premiss.
+5. Moderatorveien har ingen teknisk måte å se at to identiteter er samme person. Der hviler unikheten på moderatorens skjønn; systemet viser bare om *denne identiteten* alt har et bevis.
 
 ## 1. Formålstre
 
@@ -38,15 +40,16 @@ Bygger på `PDD_informasjonssystemer-gruppeentitet_2026-11-17` (G1, G1-GUI og G2
 
 | purposeRef | Tittel | Forelder | Goal (outcome) | Verifier | Status |
 |---|---|---|---|---|---|
-| purpose://candidate.gruppebevis-unik-entitet.root | Én entitet, ett gruppebevis | purpose://governance | Et medlem kan vise et bevis signert av gruppen for at gruppen har godtatt det som **én** entitet, og gruppen nekter å godta samme entitet en gang til. | Alle blad under er grønne | candidate |
+| purpose://candidate.gruppebevis-unik-entitet.root | Én entitet, ett gruppebevis | purpose://governance | Et medlem kan vise et bevis signert av gruppen for at gruppen har godtatt det som **én** entitet. Om gruppen også skal nekte samme entitet en gang til, avgjøres i §6 spørsmål 2. | Alle blad under er grønne | candidate |
 | purpose://candidate.gruppebevis-unik-entitet.opptaksregel | Gruppen velger opptaksregel | root | Gruppen bestemmer, signert etter sin egen regel, om opptak skjer ved moderator, ved eID, eller ved begge. Regelen kan leses av den som søker. | Test: regel satt av gruppens regel; endring uten godkjenning nektes | candidate |
-| purpose://candidate.gruppebevis-unik-entitet.moderatoropptak | Opptak ved moderator | opptaksregel | En søker ber om opptak; en moderator (1-av-n i gruppens hvelv) godtar eller avslår; ved godkjenning utstedes et signert gruppebevis til søkerens identitet. Moderatoren ser om søkeren alt har et aktivt bevis i gruppen. | Ende-til-ende-test: søk → godta → bevis verifiserer; avslag gir intet bevis | candidate |
+| purpose://candidate.gruppebevis-unik-entitet.moderatoropptak | Opptak ved moderator | opptaksregel | En søker ber om opptak; en moderator godtar eller avslår; ved godkjenning utstedes et signert gruppebevis til søkerens identitet. Moderatoren ser om *denne identiteten* alt har et aktivt bevis. Om to identiteter er samme person, avgjør moderatoren selv; systemet kan ikke se det. | Ende-til-ende-test: søk → godta → bevis verifiserer; avslag gir intet bevis | candidate |
 | purpose://candidate.gruppebevis-unik-entitet.eidopptak | Opptak ved eID | opptaksregel | En søker beviser eierskap til et norsk fødselsnummer (eller D-nummer) via eID; gruppen regner et **stabilt pseudonym for denne gruppen** og utsteder gruppebeviset uten moderator. | Test med falsk IdP: samme pid gir samme pseudonym i gruppe A, ulikt i gruppe B; bevis utstedes | candidate |
-| purpose://candidate.gruppebevis-unik-entitet.ett-aktivt-bevis | Ett aktivt bevis per entitet | root | Gruppen har høyst ett aktivt bevis per pseudonym (eID) eller per godkjent entitet (moderator). Et nytt opptak med samme pseudonym nektes, eller krever at det gamle trekkes tilbake først (bytte av identitet). | Test: andre identitet med samme pid nektes; etter tilbaketrekking går det | candidate |
+| purpose://candidate.gruppebevis-unik-entitet.ett-aktivt-bevis | Ett aktivt bevis per entitet (avhenger av §6 spørsmål 2) | root | Gruppen har høyst ett aktivt bevis per pseudonym (eID-veien) og per identitet (moderatorveien). Et nytt opptak med samme pseudonym nektes, eller krever at det gamle trekkes tilbake først (bytte av identitet). | Test: andre identitet med samme pid nektes; etter tilbaketrekking går det | candidate |
 | purpose://candidate.gruppebevis-unik-entitet.ingen-fodselsnummer | Fødselsnummer lagres aldri | root | (antiformål, `prohibited`) Fødselsnummer, pid eller eID-token lagres, logges, vises eller sendes **aldri** ut av eID-kallet. Bare pseudonymet per gruppe lagres, og pseudonymer fra to grupper kan ikke kobles uten begge gruppenes nøkler. | Test: søk i lagret tilstand, logger og svar etter et opptak finner ikke pid; to grupper gir ulike pseudonymer | candidate |
+| purpose://candidate.gruppebevis-unik-entitet.personvern | Samtykke, oppbevaring og sletting | root | Søkeren ser og godtar hva som lagres før eID-opptak (pseudonym, tidspunkt). Pseudonymet slettes når beviset trekkes tilbake eller medlemmet melder seg ut, etter en oppbevaringsregel Kjetil bestemmer. **Selve beviset inneholder ikke pseudonymet**, så de som sjekker beviset, kan ikke koble det til andre grupper. | Test: beviset som sendes ut, inneholder ikke pseudonymet; utmelding sletter pseudonymet etter regelen | candidate |
 | purpose://candidate.gruppebevis-unik-entitet.verifiserbart | Hvem som helst kan sjekke beviset | root | En celle eller person med gruppens tillitsanker kan sjekke at beviset er signert av gruppen, gjelder denne identiteten og ikke er trukket tilbake. | Test via `ProvedClaimCondition` + `TrustedIssuers`, inkl. tilbaketrukket og ukjent status | candidate |
 | purpose://candidate.gruppebevis-unik-entitet.utmelding | Utmelding og tilbaketrekking | root | Medlemmet kan melde seg ut, og en moderator kan trekke beviset tilbake. Et tilbaketrukket bevis godtas ikke lenger, og pseudonymet kan tas opp på nytt. | Test: etter tilbaketrekking avviser verifiseringen beviset | candidate |
-| purpose://candidate.gruppebevis-unik-entitet.en-stemme | Én stemme per bevis (eksempel) | root | En avstemning kan kreve gruppebevis og teller én stemme per aktivt bevis, ikke per identitetsnøkkel. Samme person med to identiteter får én stemme. | Test i avstemningscellen: to identiteter, samme pseudonym → én stemme | candidate |
+| purpose://candidate.gruppebevis-unik-entitet.en-stemme | Én stemme per bevis (eksempel; avhenger av §6 spørsmål 5) | root | En avstemning kan kreve gruppebevis og teller én stemme per aktivt bevis, ikke per identitetsnøkkel. Samme person med to identiteter får én stemme. | Test i avstemningscellen: to identiteter, samme pseudonym → én stemme | candidate |
 | purpose://candidate.gruppebevis-unik-entitet.forklart-for-studenter | Metoden og grensene forklart | root | Studentene kan lese hvordan det virker og hvor det svikter: tillit til moderator, eID bare i Norge, D-nummer, dobbelt statsborgerskap, at driftsoperatøren holder pseudonymnøkkelen, og at dette ikke er anonymt. | Inspeksjon: ny påstand(er) i kapittel 09 eller nytt kapittel, godkjent av Kjetil | candidate |
 | purpose://candidate.gruppebevis-unik-entitet.flater | Flater for søker, moderator og medlem | root | Søker kan søke (moderator eller eID), moderator ser og avgjør søknader, medlemmet ser «Mitt gruppebevis» og kan vise det. Alle flater har Butler-tilgang. | G1-GUI-bilder godkjent; paritet ved G3 | candidate |
 
@@ -69,6 +72,8 @@ Kapabiliteter og avhengigheter (hver må måles før G2 der det står «ja»):
 | eID-kobling | CellScaffold `Sources/App/EID/*`, `Documentation/EID.md` | Tilfeldig salt (ingen gjenkjenning); ingen ekte leverandør; oppbevaring ikke avgjort | ja, med falsk IdP |
 | Avstemning | `LiveInteractionCell.swift:1711` | Teller per nøkkel | for `en-stemme` |
 | Medlemsopptak etter regel | PDD_gruppeeid-celle (G1 2026-11-19, G2 venter) | Egen tråd; ord og flyt må stemme med den | nei, men koordineres |
+| Rettslig grunnlag for å behandle fødselsnummer og en personvernvurdering | Finnes ikke (lesetråd fant ingen DPIA); `EID.md:89-91` sier at oppbevaring må avgjøres før ekte innrulling | Kjetils ansvar; denne oppgaven kan bare bygge og teste med falsk IdP til den finnes | ja, før ekte eID |
+| Gruppenøkkelen for pseudonymet tapes eller byttes | Ikke beskrevet noe sted | Taper gruppen nøkkelen, gjenkjennes ingen gamle medlemmer; bytte krever at alle tas opp på nytt. Står som kjent grense i forklaringen til studentene | nei |
 
 ## 3. Forventningskontrakt — «Det du kommer til å se»
 
@@ -79,7 +84,7 @@ Kapabiliteter og avhengigheter (hver må måles før G2 der det står «ja»):
 | «Mitt gruppebevis»: bevis, hvem som signerte, status, utmelding | bilde (aktivt, tilbaketrukket) | `images/` | `images/mittbevis-*-v1.png` | nei |
 | Kontrakt for cellen(e) med fixtures | fil | `contract/` | — | nei |
 | Testutdata for alle blad i §5 | testutdata | `TESTRESULT.md` | — | nei |
-| Avstemning som teller én stemme per bevis, kjørende på staging | kjørende flate | staging | — | nei |
+| Avstemning som teller én stemme per bevis, kjørende på staging (bare hvis ja på §6 spørsmål 5) | kjørende flate | staging | — | nei |
 | Forklaring for studentene (påstander med merker, godkjent av deg) | fil | `Book/40_HAVEN_Forklart/` | — | nei |
 
 ## 4. Tilknyttede formålspakker og lærdommer (auto fra purpose_dev.py lookup)
@@ -343,6 +348,7 @@ Kapabiliteter og avhengigheter (hver må måles før G2 der det står «ja»):
 | test.gruppebevis.eid-pseudonym | eidopptak | Falsk IdP: samme pid → samme pseudonym i gruppe A; ulikt i gruppe B | TESTRESULT.md#eid | venter |
 | test.gruppebevis.duplikat-nektes | ett-aktivt-bevis | Andre identitet med samme pid nektes; etter tilbaketrekking godtas den | TESTRESULT.md#duplikat | venter |
 | test.gruppebevis.ingen-pid | ingen-fodselsnummer | Etter opptak: søk etter test-pid i lagret tilstand, logger og alle svar → 0 treff | TESTRESULT.md#ingen-pid | venter |
+| test.gruppebevis.personvern | personvern | Beviset som utstedes, inneholder ikke pseudonymet; utmelding sletter det; samtykketeksten vises før eID | TESTRESULT.md#personvern | venter |
 | test.gruppebevis.verifisering | verifiserbart | Gyldig, tilbaketrukket, ukjent status og feil utsteder | TESTRESULT.md#verifisering | venter |
 | test.gruppebevis.utmelding | utmelding | Utmelding og tilbaketrekking; pseudonym kan tas opp igjen | TESTRESULT.md#utmelding | venter |
 | test.gruppebevis.en-stemme | en-stemme | Avstemning med krav om bevis: to identiteter, samme pseudonym → én stemme | TESTRESULT.md#en-stemme | venter |
@@ -351,11 +357,14 @@ Kapabiliteter og avhengigheter (hver må måles før G2 der det står «ja»):
 
 ## 6. Åpne spørsmål til Kjetil
 
-1. **Hvordan skal pseudonymet regnes?** Anbefalt: HMAC med en nøkkel per gruppe, holdt av gruppens hvelv. Samme fødselsnummer gir samme pseudonym i én gruppe og ulike pseudonymer i to grupper, og driftsoperatøren kan regne det ut. Alternativ: én felles HAVEN-nøkkel (enklere, men alle grupper blir koblbare), eller å la studentene utforske nullifiers/nullkunnskapsbevis som oppgave i stedet.
-2. **Hva skjer når samme person kommer igjen med en ny identitet?** Anbefalt: nektes med beskjed om at et aktivt bevis finnes, og at det gamle kan trekkes tilbake først. Alternativ: det nye beviset erstatter det gamle automatisk.
-3. **Hvem bygger gruppecellen i scaffolden?** WP11–WP14 i PDD_informasjonssystemer-gruppeentitet er ikke startet. Anbefalt: denne oppgaven bygger det minste som trengs (én gruppecelle med hvelv og de tre flatene) og koordinerer med den tråden. Alternativ: vente på at den tråden bygger dem.
-4. **Skal eID-veien kunne prøves med ekte ID-porten (testmiljø)?** Det krever klientregistrering hos Digdir. Anbefalt: falsk IdP i første runde, ID-portens testmiljø når registreringen finnes.
-5. **Skal «én stemme per bevis» være med nå?** Anbefalt: ja, fordi det er eksemplet studentene trenger.
+1. **Skal samme fødselsnummer kunne gjenkjennes på tvers av grupper?** Anbefalt: **nei**. Hver gruppe har sin egen hemmelige nøkkel, så samme person får et fast kjennetegn i én gruppe og et annet i neste. Den som drifter HAVEN, kan likevel regne det ut. Alternativ: ett felles kjennetegn for alle grupper (enklere, men da kan grupper se at de har samme medlem).
+2. **Skal gruppen nekte å ta opp samme person to ganger?** Anbefalt: **ja**, og si fra at et aktivt bevis finnes. Det gamle beviset må trekkes tilbake før personen kan tas opp med en ny identitet. Alternativ: bare utstede beviset, uten å nekte.
+3. **Hvem bygger selve gruppen i HAVEN?** I dag finnes signeringen bare som kode, ikke som en gruppe man kan åpne. Den andre tråden («informasjonssystemer-gruppeentitet») har det i planen, men har ikke startet. Anbefalt: denne oppgaven bygger det minste som trengs (én gruppe med søker-, moderator- og medlemsflate) og avtaler det med den tråden. Alternativ: vente på den tråden.
+4. **Skal eID-veien prøves mot ekte ID-porten (testmiljøet)?** Det krever at Digipomps registrerer en klient hos Digdir. Anbefalt: falsk innlogging i første runde, ID-portens testmiljø når registreringen finnes.
+5. **Skal avstemningen telle én stemme per gruppebevis nå?** Anbefalt: **ja**, fordi det er eksemplet studentene trenger.
+6. **Hvor lenge skal kjennetegnet fra fødselsnummeret lagres etter utmelding?** Anbefalt: slettes straks beviset trekkes tilbake. Alternativ: beholdes en periode, så samme person ikke kan melde seg ut og inn for å få nytt bevis.
+
+Sier du bare «godkjent», godtar du anbefalingene over, alle tolv formålene i §1 (også utmelding, personvern, Butler-tilgang og en forklaring for studentene i boka), og at unikheten bare gjelder innen én gruppe.
 
 ## 7. Revisjonslogg
 
@@ -363,3 +372,4 @@ Kapabiliteter og avhengigheter (hver må måles før G2 der det står «ja»):
 |---|---|---|---|
 | 0 | 2026-11-24 | Opprettet | Losen |
 | 1 | 2026-11-24 | §0–§3, §5 og §6 skrevet fra Kjetils ordlyd, lesetrådens rapport og Losens egen lesing | Losen |
+| 2 | 2026-11-24 | Uavhengig kontroll (Explore, 12:44Z): to §0-rader presisert, nekting av duplikat gjort til spørsmål 2, moderatorveiens grense skrevet ut, nytt blad «personvern», avhengigheter for rettslig grunnlag og nøkkeltap, §6 skrevet uten repo-ord, nytt spørsmål 6. Endringene etter kontrollen er ikke kontrollert på nytt. | Losen |
