@@ -25,12 +25,33 @@ Sjekk av at validatoren kan bli rød: to fixtures ble endret i en kopi (forventn
 
 ## lagring
 
-Ikke kjørt. Testen er `EntityAnchorUnregisteredKeypathTests` i CellProtocol PR #103 og kjøres i køen på Macen etter «Slipp inn». Lest i koden 2026-11-21 (CellProtocol 669850b): set-intercepts bare for person, proofs, relations, identityLinks, signedAgreementEntity.commit; andre røtter gir `KeyValueErrors.notFound` i `GeneralCell.set` (Sources/CellBase/Cells/GeneralCell/GeneralCell.swift). Forventet måling: kontrollen lagres, de nye røttene avvises.
+Kjørt 2026-11-24 på Kjetils Mac (Remote Control, backupdisken, byggevindu v-kmecp-2), CellProtocol origin/main b5f467a5 (inneholder #103).
+
+`swift test --filter EntityAnchorUnregisteredKeypathTests`: exit 0, 4 tester, 0 feil (testWriteEitherReadsBackOrFailsLoudly, testTemplateRootsAreStoredAndSurviveRestart, testTemplateRootsRefuseAnotherEntity, testTemplateRootsDoNotReopenAnchorRoots).
+
+```
+MÅLING CellApple | person.attributes.konferanseKontroll | lagret
+MÅLING CellApple | event.ownedBy | lagret
+MÅLING CellApple | project.milestones | lagret
+MÅLING CellApple | conference.6f1c2d3e-0000-4000-8000-000000000001.role | lagret
+MÅLING CellApple | groups.6f1c2d3e-0000-4000-8000-000000000002.name | lagret
+MÅLING CellApple | template.ref | lagret
+MÅLING CellVapor | person.attributes.konferanseKontroll | lagret
+MÅLING CellVapor | event.ownedBy | lagret
+MÅLING CellVapor | project.milestones | lagret
+MÅLING CellVapor | conference.6f1c2d3e-0000-4000-8000-000000000001.role | lagret
+MÅLING CellVapor | groups.6f1c2d3e-0000-4000-8000-000000000002.name | lagret
+MÅLING CellVapor | template.ref | lagret
+```
+
+Målingen er tatt etter WP4, så den viser at malens røtter lagres. Før WP4 viser koden (lest 21.11) `KeyValueErrors.notFound` for de nye røttene; det ble ikke målt før endringen.
+
+`swift test --filter EntityAnchor`: exit 0, 38 tester, 0 feil (AccessBoundary 10, Encryption 3, EnrollmentContract 4, FlowPlacement 3, Genesis 9, UnregisteredKeypath 4, og 5 tester i andre suiter som filteret traff).
 
 ## build
 
-Venter (WP3).
+CellProtocol: Linux-CI grønn på #103 (regression, Persisted Cell file bounds, CellBase static Linux musl, Vapor identity vault strict storage, bounded synthetic runtime matrix). CellScaffold: «Focused control-plane gates» grønn på #498 (5d191e6a), etter at en feil som også var på main (ObjectStorageMultipartTests.swift:308) ble rettet i samme PR.
 
 ## regression
 
-Venter (WP3).
+CellScaffold, Kjetils Mac 2026-11-24, origin/main 3d487b5d, CellProtocol-pin dc1de6f: `CELLPROTOCOL_PUBLISHED_API=1 swift test --filter ConferenceDefinitionOwnershipTests` → exit 0, 3/3. Hele testmengden i CellScaffold er ikke kjørt lokalt; CI-porten over bygger alle mål.
