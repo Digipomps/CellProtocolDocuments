@@ -11,7 +11,7 @@ Forventning (FORMAALSSPEC §3) mot det som faktisk ble levert. Skrevet 2026-11-2
 | Lagring av malens røtter (WP4, lagt til etter Kjetils valg 21.11) | ikke i §3 opprinnelig | `EntityTemplateRoots.swift` + intercepts i begge EntityAnchor (CellProtocol #103); 4/4 + 38/38 på Mac | levert |
 | `ConferenceDefinition` med eier og mal | CellScaffold-PR, grønn testmengde | #498 merget; 3/3 på Mac; CI-port grønn | levert |
 | Book 37 oppdatert | diff i `Book/37_EntityData.md` | §7b, «Last verified» oppdatert | levert |
-| Brevet til Vegar | sendt brev med messageID | Utkast klart; venter på Kjetils «send» | ikke levert |
+| Brevet til Vegar | sendt brev med messageID | Sendt 24.11, seq 39, messageID 6EFDA6B3-A6D1-49D7-A616-FE981870B6FD | levert |
 
 ## Avvik
 
@@ -27,7 +27,7 @@ Forventning (FORMAALSSPEC §3) mot det som faktisk ble levert. Skrevet 2026-11-2
 
 ## status
 
-STATUS.md speiler G1, G2 og leveransene. G3 venter på Kjetil.
+STATUS.md speiler G1, G2, G3 og leveransene. G3 godkjent av Kjetil 24.11.
 
 ## stubs
 
@@ -35,4 +35,4 @@ Ingen tomme stubber i endrede filer (`EntityTemplateRoots.swift`, begge `EntityA
 
 ## svar-vegar
 
-Venter på «send».
+Sendt 24.11 etter Kjetils «G3 godkjent og send»: relasjon vegar, seq 39, messageID 6EFDA6B3-A6D1-49D7-A616-FE981870B6FD. Agenda-deling på tvers av vaults besvares separat.
