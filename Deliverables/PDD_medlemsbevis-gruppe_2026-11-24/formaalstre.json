@@ -1,0 +1,130 @@
+{
+ "title": "Signert medlemsbevis i en gruppeentitet",
+ "pdd": "PDD_medlemsbevis-gruppe_2026-11-24",
+ "source": "Deliverables/PDD_medlemsbevis-gruppe_2026-11-24/FORMAALSSPEC.md",
+ "anchorRef": "purpose://governance",
+ "anchorNote": "Forslag 2026-11-24. Endre om det hører hjemme et annet sted.",
+ "rootRef": "purpose://candidate.medlemsbevis-gruppe.root",
+ "updatedAt": "2026-11-24T13:10:00Z",
+ "updatedBy": "Claude (fra FORMAALSSPEC §1)",
+ "nodes": [
+  {
+   "ref": "purpose://candidate.medlemsbevis-gruppe.root",
+   "parentRef": null,
+   "title": "Et medlem kan vise et gruppesignert bevis for at det er godtatt som én entitet i gruppa",
+   "code": "",
+   "outcome": "Gruppa signerer beviset, andre celler krever det via Agreement, og det står ærlig hva det ikke garanterer.",
+   "verifier": "Alle bladene under er grønne",
+   "status": "candidate",
+   "signals": []
+  },
+  {
+   "ref": "purpose://candidate.medlemsbevis-gruppe.credential",
+   "parentRef": "purpose://candidate.medlemsbevis-gruppe.root",
+   "title": "Medlemsbeviset",
+   "code": "1",
+   "outcome": "Gruppa utsteder `GroupMembershipCredential`: en `OrganizationRoleCredential` med rolle `member`, signert av hvelvets nøkkel, subjekt = medlemmets domene-identitet. Feltet `admittedVia` (`moderator` eller `national-id:NO`) og `validUntil` ligger i `credentialSubject`",
+   "verifier": "test.cred.roundtrip, test.cred.tampered",
+   "status": "candidate",
+   "signals": [
+    "Bevis verifiseres i Swift, Python og Go fra samme fixture; endret `admittedVia` gir ugyldig bevis"
+   ]
+  },
+  {
+   "ref": "purpose://candidate.medlemsbevis-gruppe.moderator-admits",
+   "parentRef": "purpose://candidate.medlemsbevis-gruppe.root",
+   "title": "Moderator godtar",
+   "code": "2",
+   "outcome": "En moderator (ny rolle i `GovernancePolicy`) kan godta eller avvise en søknad. Moderator kan *bare* utstede og trekke tilbake `member`, aldri andre roller (ny handlingsklasse `membership.admit` / `membership.revoke`, adskilt fra `role.issue`)",
+   "verifier": "test.mod.admit, test.mod.scope-negative, test.mod.self-negative",
+   "status": "candidate",
+   "signals": [
+    "Moderator-godkjent søknad gir bevis; moderator som prøver å utstede `researcher` avvises; moderator kan ikke godta seg selv"
+   ]
+  },
+  {
+   "ref": "purpose://candidate.medlemsbevis-gruppe.national-id-admits",
+   "parentRef": "purpose://candidate.medlemsbevis-gruppe.root",
+   "title": "Fødselsnummer-veien",
+   "code": "3",
+   "outcome": "Et medlem som beviser at det eier et norsk fødselsnummer/D-nummer gjennom en eID-utsteder gruppa stoler på (TrustedIssuer), får beviset uten moderator. Gruppa lagrer **aldri** nummeret",
+   "verifier": "test.nid.admit, test.nid.untrusted-issuer, test.nid.no-plaintext",
+   "status": "candidate",
+   "signals": [
+    "Gyldig eID-attest gir bevis automatisk; attest fra ukjent utsteder avvises; fødselsnummeret finnes ikke i noen lagret tilstand eller logg"
+   ]
+  },
+  {
+   "ref": "purpose://candidate.medlemsbevis-gruppe.national-id-admits.one-per-number",
+   "parentRef": "purpose://candidate.medlemsbevis-gruppe.national-id-admits",
+   "title": "Én gang per nummer",
+   "code": "3a",
+   "outcome": "Gruppa holder et register med en gruppe-spesifikk pseudonym (HMAC med gruppas hemmelige nøkkel over `NO:` + nummer). Samme nummer kan ha bare ett gyldig medlemsbevis i gruppa",
+   "verifier": "test.nid.duplicate, test.nid.unlinkable",
+   "status": "candidate",
+   "signals": [
+    "Andre forsøk med samme nummer fra en annen identitet gir «allerede medlem» (eller flytting, se §6 q2); pseudonymet kan ikke regnes tilbake uten gruppas nøkkel; to grupper får ulike pseudonymer for samme person"
+   ]
+  },
+  {
+   "ref": "purpose://candidate.medlemsbevis-gruppe.national-id-admits.eid-source",
+   "parentRef": "purpose://candidate.medlemsbevis-gruppe.national-id-admits",
+   "title": "Hvor attesten kommer fra",
+   "code": "3b",
+   "outcome": "v1: en test-utsteder på staging som utsteder en signert «eier dette nummeret»-attest for syntetiske testnumre. Ekte eID (ID-porten/BankID, senere EUDI-lommebok via OpenID4VP) er en egen avhengighet, ikke del av v1",
+   "verifier": "test.nid.test-issuer-staging-only",
+   "status": "candidate",
+   "signals": [
+    "Test-utsteder er merket test overalt og godtas bare på staging; prod godtar den ikke"
+   ]
+  },
+  {
+   "ref": "purpose://candidate.medlemsbevis-gruppe.agreement-gates",
+   "parentRef": "purpose://candidate.medlemsbevis-gruppe.root",
+   "title": "Beviset gir tilgang bare via Agreement",
+   "code": "4",
+   "outcome": "En gruppecelle (f.eks. en avstemming eller felles chat) kan kreve «gyldig medlemsbevis fra gruppa» som Agreement-betingelse, og kan i tillegg kreve `admittedVia = national-id:NO`",
+   "verifier": "test.access.matrix (felles fixture)",
+   "status": "candidate",
+   "signals": [
+    "Samme tilgangsmatrise (gyldig/endret/trukket/ukjent status/feil utsteder) gir samme svar i Swift, Python og Go; ingen språkspesifikk snarvei"
+   ]
+  },
+  {
+   "ref": "purpose://candidate.medlemsbevis-gruppe.revoke-and-leave",
+   "parentRef": "purpose://candidate.medlemsbevis-gruppe.root",
+   "title": "Tilbaketrekking",
+   "code": "5",
+   "outcome": "Moderator kan trekke tilbake; medlemmet kan melde seg ut; fødselsnummer-pseudonymet frigjøres da",
+   "verifier": "test.revoke.status, test.revoke.free-pseudonym",
+   "status": "candidate",
+   "signals": [
+    "Trukket bevis gir `revoked` innen ett statuslisteintervall; utmeldt nummer kan melde seg inn igjen"
+   ]
+  },
+  {
+   "ref": "purpose://candidate.medlemsbevis-gruppe.surfaces",
+   "parentRef": "purpose://candidate.medlemsbevis-gruppe.root",
+   "title": "Flatene",
+   "code": "6",
+   "outcome": "Medlem: «Medlemsbevis» (søk via moderator / bevis med eID, venter, godtatt, avvist, allerede medlem). Moderator: kø med søknader, godta/avvis. Vises i web og Binding (Swift)",
+   "verifier": "test.gui.parity, test.skeleton.purpose-actions-reachable",
+   "status": "candidate",
+   "signals": [
+    "Godkjente G1-GUI-bilder; flatene har alle handlinger nåbare"
+   ]
+  },
+  {
+   "ref": "purpose://candidate.medlemsbevis-gruppe.limits-stated",
+   "parentRef": "purpose://candidate.medlemsbevis-gruppe.root",
+   "title": "Det beviset ikke garanterer",
+   "code": "7",
+   "outcome": "Kapittel 09 får et nytt avsnitt [med forbehold] som sier nøyaktig hva medlemsbeviset gir, og en liste over der det ikke holder; et studentark bruker dette som eksempel",
+   "verifier": "test.docs.claims (claims.json), test.docs.no-overclaim",
+   "status": "candidate",
+   "signals": [
+    "Ingen tekst sier «én person, én stemme»; hver begrensning har kilde; Kjetil har godkjent teksten"
+   ]
+  }
+ ]
+}
