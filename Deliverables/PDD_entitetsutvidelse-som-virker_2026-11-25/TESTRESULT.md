@@ -1,11 +1,12 @@
 # TESTRESULT — Entitetsutvidelse som virker
 
 Ført 2026-11-25. Alt under er kjørt på Linux i skyen (Docker `swift:6.1-noble`), mot
-CellProtocol-grenen `claude/entitetsutvidelse-leveranse-1` (tre commits oppå `origin/main` `80f87ce`).
+CellProtocol-grenen `claude/entitetsutvidelse-leveranse-1` (tre commits oppå `origin/main` `80f87ce`, pluss WP4 og
+prøvesettet fra WP5 som ikke er committet), og mot lokale grener med samme navn i PyCellProtocol og gocellprotocol.
 **Ikke kjørt på Mac ennå.** CellApple bygges ikke på Linux, så ankercellen i CellApple er skrevet,
 men ikke kompilert. På Linux står CellVapor-ankeret inn for begge i ankertestene.
 Grenen er ikke pushet og har ingen PR. Lappene ligger i prosjektfilene under
-`masterhaven26/pdd-entitetsutvidelse-som-virker/cellprotocol-patches/`.
+`masterhaven26/pdd-entitetsutvidelse-som-virker/cellprotocol-patches/`, `pycellprotocol-patches/` og `go-patches/`.
 
 | Test | Formål | Status | Bevis |
 |---|---|---|---|
@@ -15,8 +16,10 @@ Grenen er ikke pushet og har ingen PR. Lappene ligger i prosjektfilene under
 | test.utvidelse.portable-negative | B1 | grønn på Linux | [#portable-negative](#portable-negative) |
 | test.utvidelse.fresh-passkey | B2 | grønn på Linux | [#fresh-passkey](#fresh-passkey) |
 | test.utvidelse.host-sets-audience | B2 | grønn på Linux | [#host-sets-audience](#host-sets-audience) |
-| test.utvidelse.revoke-propagates, stale-status-denied | B3 | venter (WP4) | — |
-| test.utvidelse.parity-fixtures, vocabulary, any-scaffold | C1–C3 | venter (WP5) | — |
+| test.utvidelse.revoke-propagates | B3 | grønn på Linux, ikke committet | [#revoke-propagates](#revoke-propagates) |
+| test.utvidelse.stale-status-denied | B3 | grønn på Linux, ikke committet | [#stale-status-denied](#stale-status-denied) |
+| test.utvidelse.parity-fixtures | C1 | grønn i Swift, Python og Go | [#parity-fixtures](#parity-fixtures) |
+| test.utvidelse.vocabulary, any-scaffold | C2, C3 | venter | — |
 
 ## baseline
 
@@ -111,9 +114,81 @@ opphav, avvises. Samme konvolutt laget for denne verten fullføres.
 `IdentityLinkRuntimePolicy`. En vert som ikke har satt dem, leser fortsatt konvoluttens egne
 verdier, som før. CellScaffold må sette dem ved oppstart; det er kobling, ikke en tilgangsregel.
 
+## revoke-propagates
+
+`EntityLinkStatusListTests.testARevokedLinkStopsWorkingOnTheNextHostWithinTenMinutes`. Klokken er registerets egen,
+flyttet av testen. t er tiden siden vert 2 fikk sin første liste.
+
+```
+ENTITY-EXTENSION revoke-propagates t+0s no list: allowed=false code=linked_identity_status_list_stale
+ENTITY-EXTENSION revoke-propagates t+0s fresh list: allowed=true code=linked_identity_proof
+ENTITY-EXTENSION revoke-propagates t+60s revoked at home, old list: allowed=true code=linked_identity_proof
+ENTITY-EXTENSION revoke-propagates t+601s no new list: allowed=false code=linked_identity_status_list_stale
+ENTITY-EXTENSION revoke-propagates t+601s new list: allowed=false code=linked_identity_not_on_status_list
+```
+
+Lenken ble trukket på vert 1 ved t+60 s. Uten ny liste sluttet den å virke på vert 2 ved t+601 s, altså
+9 minutter og 1 sekund etter trekkingen, og aldri senere enn 10 minutter. Med en ny liste slutter den straks.
+
+**Funn som endret formen på listen:** en trukket enhet er fortsatt en hel nøkkel på vert 2 til listen blir
+gammel, og kan i de minuttene signere et bevis for enda en nøkkel som vert 1 aldri ser. En liste over trukne
+lenker kunne aldri nevnt den. Listen er derfor en liste over **gyldige** bevis, og bare **eiernøkkelen** kan peke
+ut hvem som signerer den. Prøvd i `testALinkTheHomeHostNeverSawIsNeverUsableOnTheNextHost`:
+
+```
+ENTITY-EXTENSION status-list link the home never saw: allowed=false code=linked_identity_not_on_status_list
+```
+
+Ved ankercellen (`EntityAnchorLinkStatusTests`, 2 tester): `identityLinks.designateStatusAuthority` godtas bare
+fra eiernøkkelen, `identityLinks.statusList` gir en signert liste, tilbakekalling tar beviset av listen, og
+`identityLinks.acceptStatus` tar imot listen på neste vert.
+
+**Antakelser:** listen signeres av en egen statusnøkkel i vertens nøkkelhvelv, pekt ut av eiernøkkelen én gang.
+Hvordan listen kommer fra vert til vert er ikke bygget; etter G1 bærer entitetens egen klient den.
+
+**Ikke committet:** fire av mine egne tester fra WP2 blir røde av denne pakken, fordi en lenke på neste vert nå
+også trenger en fersk liste: `EntityLinkAdmissionTests` (3) og `EntityAnchorLinkAdmissionTests` (1). Etter
+stoppregelen i PLAN.md er de ikke rørt. Kjetil er spurt 2026-11-25.
+
+## stale-status-denied
+
+`EntityLinkStatusListTests.testWithoutAFreshListTheNextHostRefusesAndTheHomeHostDoesNot`.
+
+```
+ENTITY-EXTENSION stale-status-denied admitted key, list 11 min old: own=allowed=false code=linked_identity_status_list_stale agreement=allowed=false code=linked_identity_status_list_stale
+ENTITY-EXTENSION stale-status-denied key linked on this host, same moment: own=allowed=true code=linked_identity_proof agreement=allowed=true code=linked_identity_agreement
+```
+
+Hver annen liste avvises med egen kode (`testEveryOtherListIsRefusedWithItsOwnCode`): ukjent eiernøkkel, annen
+entitet, signert av feil nøkkel, endret etter signering, datert fram i tid, for gammel ved mottak, eldre enn den
+verten har, og eldre utpeking enn den verten har.
+
+## parity-fixtures
+
+`fixtures/entity-link/v1/link-fixtures.v1.json` lages av Swift-testen `EntityLinkParityFixturesTests`: 13 rader om
+å slippe inn en lenke og 9 rader om statuslisten, signert med de offentlige testnøklene fra `fixtures/interop/v1`.
+Filen er kopiert uendret til PyCellProtocol (`tests/fixtures/entity-link/v1/`) og gocellprotocol
+(`interop/testdata/entity-link/v1/`).
+
+| Språk | Rader | Samme svar og kode som raden sier |
+|---|---|---|
+| Swift (`EntityLinkParityFixturesTests`) | 22 | 22 |
+| Python (`tests/test_link_admission_fixtures.py`) | 22 | 22 |
+| Go (`interop/link_admission_test.go`) | 22 | 22 |
+
+Hele Python-suiten: 352 bestått, 1 hoppet over. Hele Go-suiten: ok.
+
+**Rekkevidde, sagt rett ut:** Python og Go har avgjørelsene som funksjoner (`interop/link_admission.py`,
+`interop/link_admission.go`). Cellene i de to scaffoldene bruker dem ikke ennå, så `test.utvidelse.any-scaffold`
+venter. `test.utvidelse.vocabulary` venter også; de to ordene for hel lenke står i dag ett sted i hvert språk.
+
 ## Kjøringer
 
 | Kjøring | Tester | Feil |
 |---|---|---|
 | CellBase, filter `EntityLink\|EntityExtensionAgreement\|IdentityLink` | 52 | 0 |
 | Ankertester (CellVapor-ankeret) | 30 | 0 |
+| Etter WP4: `EntityLinkStatusListTests` | 4 | 0 |
+| Etter WP4: ankertester | 32 | 6 påstander i 1 test fra WP2, som ventet |
+| Etter WP4: CellBase, samme filter som over | 56 | 3 tester fra WP2 røde, som ventet |
+| `EntityLinkParityFixturesTests` | 3 (1 hoppet over) | 0 |
