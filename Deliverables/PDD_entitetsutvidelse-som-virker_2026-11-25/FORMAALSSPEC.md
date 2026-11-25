@@ -51,6 +51,7 @@ Forkortelser: U = `purpose://candidate.entitetsutvidelse`, K = `purpose://candid
 | purpose://candidate.entitetsutvidelse.one-mechanism | C Én mekanisme, lik i Swift, Python og Go | R | Samme lenke gir samme svar i alle tre, og flatene viser bare det som håndheves. | test.utvidelse.parity-* | candidate |
 | purpose://candidate.entitetsutvidelse.parity-fixtures | C1 Felles prøvesett | C | Ett sett signerte prøver (hel lenke, avgrenset lenke, trukket, utløpt, feil utsteder, kopiert post uten nøkkel) gir samme avgjørelse og samme kode i Swift, Python og Go. | test.utvidelse.parity-fixtures | candidate |
 | purpose://candidate.entitetsutvidelse.one-vocabulary | C2 Ett ordforråd for hva en lenke gir | C | Det finnes én liste over scopes. Flaten for utvidelse i Binding og på web viser bare scopes CellBase håndhever, og ber aldri om andre. | test.utvidelse.vocabulary | candidate |
+| purpose://candidate.entitetsutvidelse.any-scaffold | C3 Felles for alle scaffolds | C | Reglene, kartet og flatene ligger i protokollbibliotekene. En scaffold som ikke er CellScaffold, får det samme uten egen kode for tilgang. Kjetil 2026-11-25: «dette er generell funskjonalitet som alle scaffolds kan ha nytte av». | test.utvidelse.any-scaffold | candidate |
 | purpose://candidate.entitetsutvidelse.frictionless | D Få håndgrep | R | Å lenke en enhet koster eieren ett sett håndgrep én gang. Neste vert koster ingen. | test.utvidelse.handgrips | candidate |
 | purpose://candidate.entitetsutvidelse.handgrips-counted | D1 Håndgrep er talt for hver part | D | Tallet på håndgrep for eieren og for den nye enheten står i §3, talt fra bildene: første lenking, neste vert, fornyelse, tilbakekalling. Neste vert er null for begge. | test.utvidelse.handgrips | candidate |
 | purpose://candidate.entitetsutvidelse.refusal-says-what-to-do | D2 En avvisning sier hva som skal til | D | Hver avvisningskode har en tekst i klart språk og ett neste steg, og flaten viser den. | test.utvidelse.refusal-texts, bilde (G1-GUI) | candidate |
@@ -104,9 +105,9 @@ De to radene «ikke målt» for A og B måles før planen: én test i CellBase f
 | En trukket lenke slutter å virke på den andre verten innen ti minutter | testutdata med tider | `TESTRESULT.md#revoke-propagates` | — | nei |
 | Samme prøvesett, samme svar i Swift, Python og Go | testutdata, tre kjøringer | `TESTRESULT.md#parity-fixtures` | `contract/link-fixtures.v1.json` | nei |
 | Håndgrep per part, talt fra bildene: eieren 3 trykk og 1 passkey én gang, den nye enheten 1 | tabell | `images/README.md` | bildene under | nei |
-| Flaten «Koble til enhet» med avvisningstekster | bilde | `images/koble-enhet-*-v1.png` (10 bilder, ark `oversikt-koble-enhet-v1.png`) | `skeleton/koble-enhet.cellconfiguration.json` | nei |
-| Flaten «Min entitet» med kartet: alt nåbart, ett sted utilgjengelig, én lenke trukket | bilde | `images/min-entitet-*-v1.png` (6 bilder, ark `oversikt-min-entitet-v1.png`) | `skeleton/min-entitet.cellconfiguration.json` | nei |
-| Lenking av hjemmescaffoldet med passkey | bilde | `images/hjemmescaffold-*-v1.png` (3 bilder, ark `oversikt-hjemmescaffold-v1.png`) | `skeleton/hjemmescaffold.cellconfiguration.json` | nei |
+| Flaten «Koble til enhet» med avvisningstekster | bilde | `images/koble-enhet-*-v1.png` (10 bilder, ark `oversikt-koble-enhet-v1.png`) | `skeleton/koble-enhet.cellconfiguration.json` | G1-GUI 2026-11-25 |
+| Flaten «Min entitet» med kartet: alt nåbart, ett sted utilgjengelig, én lenke trukket | bilde | `images/min-entitet-*-v1.png` (6 bilder, ark `oversikt-min-entitet-v1.png`) | `skeleton/min-entitet.cellconfiguration.json` | G1-GUI 2026-11-25 |
+| Lenking av hjemmescaffoldet med passkey | bilde | `images/hjemmescaffold-*-v1.png` (3 bilder, ark `oversikt-hjemmescaffold-v1.png`) | `skeleton/hjemmescaffold.cellconfiguration.json` | G1-GUI 2026-11-25 |
 | Kartet i entitetsdataene på to scaffolds, med kopi av hverandres post | testutdata | `TESTRESULT.md#entitetskart` | `contract/scaffold-presence.v1.json` | nei |
 
 Håndgrep i dag, lest fra koden i `VaporIdentityLink.swift` og ikke talt på en skjerm: eieren lager en billett, den nye enheten sender forespørsel, eieren sammenligner ordene og godkjenner med passkey, den nye enheten fullfører. Det gjentas for hver vert. Talt fra bildene 2026-11-25 (`images/README.md`): eieren 3 trykk og 1 passkey, den nye enheten 1 håndgrep, én gang for alle steder.
@@ -277,6 +278,7 @@ Håndgrep i dag, lest fra koden i `VaporIdentityLink.swift` og ikke talt på en 
 | test.utvidelse.stale-status-denied | B3 | Vert 2 med statusliste eldre enn ti minutter: avvist med kode. Vert 1, der ankeret ligger: fortsatt tilgang. | TESTRESULT.md#stale-status-denied | venter |
 | test.utvidelse.parity-fixtures | C1 | Kjør `contract/link-fixtures.v1.json` i Swift, Python og Go. Sammenlign avgjørelse og kode rad for rad. | TESTRESULT.md#parity-fixtures | venter |
 | test.utvidelse.vocabulary | C2 | Skript som henter alle scopes flatene i Binding og web kan be om, og sammenligner med listen CellBase håndhever. Forventet: ingen utenfor. | TESTRESULT.md#vocabulary | venter |
+| test.utvidelse.any-scaffold | C3 | Samme ende-til-ende-prøve mot en Python-scaffold (`cellprotocol_scaffold`) uten kode fra CellScaffold. Skript: endringen i CellScaffold inneholder ingen tilgangsavgjørelse. | TESTRESULT.md#any-scaffold | venter |
 | test.utvidelse.handgrips | D1 | Tell håndgrep fra bildene. Etter bygging: opptak på en ren maskin, talt på nytt. | images/README.md, TESTRESULT.md#handgrips | venter |
 | test.utvidelse.refusal-texts | D2 | Hver avvisningskode i koden har en rad i teksttabellen. Skript sammenligner. | TESTRESULT.md#refusal-texts | venter |
 | test.utvidelse.never-wider | antiformål | For hver celle i prøvesettet: en lenket nøkkel får aldri ja der eiernøkkelen får nei. | TESTRESULT.md#never-wider | venter |
@@ -307,3 +309,4 @@ Sier du bare «G1 godkjent», gjelder de fire forslagene.
 | 1 | 2026-11-25 | Første tre. A og B fra analysens funn F1, C fra F3 til F7, E fra F11 i utkastet til iterasjon 2 for egne agenter, F fra restene i sikkerhetsrevisjonen. |
 | 1 | 2026-11-25 | G1 godkjent av Kjetil. De fire forslagene i §6 er avgjort som foreslått. Treet er uendret. |
 | 1 | 2026-11-25 | Bilder til G1-GUI: 19 bilder av tre flater, rendret med web-rendereren fra `skeleton/`. Håndgrep talt. To spørsmål i `images/README.md`. G1-GUI spurt. |
+| 2 | 2026-11-25 | G1-GUI godkjent av Kjetil («G1-GUI Godkjent. 1 ja 2 ja.»): bekreftelse før «Trekk tilbake», de tre ordene beholdes. Nytt bladformål C3 og `test.utvidelse.any-scaffold` etter Kjetils ord om at dette er felles for alle scaffolds. PLAN.md skrevet, G2 spurt. |

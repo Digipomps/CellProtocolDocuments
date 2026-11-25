@@ -61,7 +61,7 @@ Med tre steder blir det 4 håndgrep for eieren mot 9 i dag, og 1 for den nye enh
 - En tom `List` beholder avstanden til naboen i en `VStack` med `spacing`. Luften ligger derfor på raden (`gap()` i `gen_skeleton.py`),
   ikke på forelderen (`lesson.empty-list-keeps-its-slot`).
 
-## Spørsmål til Kjetil ved G1-GUI
+## Spørsmål til Kjetil ved G1-GUI (besvart 2026-11-25: 1 ja, 2 ja)
 
 1. **Skal «Trekk tilbake» spørre én gang til før det skjer?** Forslag: ja, én bekreftelse uten passkey, fordi et feiltrykk ellers
    stenger en enhet ute. Uten bekreftelse er det 1 håndgrep, med er det 2. Bildene viser knappen, ikke bekreftelsen.
