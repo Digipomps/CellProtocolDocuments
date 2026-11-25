@@ -1,4 +1,4 @@
-# PLAN — Entitetsutvidelse som virker (P2, venter på G2)
+# PLAN — Entitetsutvidelse som virker (P2, G2 godkjent 2026-11-25)
 
 Grunnlag: FORMAALSSPEC.md iterasjon 2. **G1 godkjent av Kjetil 2026-11-25 12:49. G1-GUI godkjent 2026-11-25 15:14** («G1-GUI Godkjent. 1 ja 2 ja.»): «Trekk tilbake» spør én gang til uten passkey, og de tre ordene beholdes.
 
