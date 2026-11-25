@@ -1,0 +1,308 @@
+{
+  "name": "Hjemmescaffold",
+  "description": "Koble hjemmescaffoldet til entiteten med en signert lenke godkjent med passkey.",
+  "discovery": {
+    "sourceCellEndpoint": "cell:///FlowPlacementHome",
+    "sourceCellName": "FlowPlacementHomeCell",
+    "purpose": "Hjemmescaffold",
+    "purposeDescription": "La hjemmescaffoldet handle som entiteten.",
+    "interests": [
+      "entitet",
+      "hjemmescaffold"
+    ],
+    "menuSlots": []
+  },
+  "cellReferences": [
+    {
+      "endpoint": "cell:///FlowPlacementHome",
+      "label": "home"
+    },
+    {
+      "endpoint": "cell:///EntityAnchor",
+      "label": "me"
+    }
+  ],
+  "skeleton": {
+    "VStack": {
+      "spacing": 0,
+      "elements": [
+        {
+          "VStack": {
+            "spacing": 4,
+            "elements": [
+              {
+                "Text": {
+                  "text": "Hjemmescaffoldet",
+                  "modifiers": {
+                    "fontStyle": "title",
+                    "fontWeight": "bold"
+                  }
+                }
+              },
+              {
+                "Text": {
+                  "text": "Stedet der cellene dine kjører når du ikke har en enhet på.",
+                  "modifiers": {
+                    "fontStyle": "body",
+                    "foregroundColor": "#5F6B7A"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "List": {
+            "keypath": "home.linkView.rejections",
+            "flowElementSkeleton": {
+              "VStack": {
+                "elements": [
+                  {
+                    "VStack": {
+                      "elements": [
+                        {
+                          "VStack": {
+                            "spacing": 4,
+                            "elements": [
+                              {
+                                "Text": {
+                                  "keypath": "title",
+                                  "modifiers": {
+                                    "fontStyle": "headline",
+                                    "fontWeight": "semibold",
+                                    "foregroundColorKeypath": "color"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "text",
+                                  "modifiers": {
+                                    "fontStyle": "callout"
+                                  }
+                                }
+                              }
+                            ],
+                            "modifiers": {
+                              "background": "#FFF4E0",
+                              "cornerRadius": 10,
+                              "padding": 12,
+                              "maxWidthInfinity": true,
+                              "borderWidth": 1,
+                              "borderColor": "#E8C98A"
+                            }
+                          }
+                        }
+                      ],
+                      "modifiers": {
+                        "paddingInsets": {
+                          "top": 16,
+                          "bottom": 0,
+                          "leading": 0,
+                          "trailing": 0
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "modifiers": {
+              "itemSpacing": 0,
+              "rowDecoration": "none"
+            }
+          }
+        },
+        {
+          "List": {
+            "keypath": "home.linkView.unlinked",
+            "flowElementSkeleton": {
+              "VStack": {
+                "elements": [
+                  {
+                    "VStack": {
+                      "elements": [
+                        {
+                          "VStack": {
+                            "spacing": 6,
+                            "elements": [
+                              {
+                                "Text": {
+                                  "keypath": "name",
+                                  "modifiers": {
+                                    "fontStyle": "headline",
+                                    "fontWeight": "semibold"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "address",
+                                  "modifiers": {
+                                    "fontStyle": "caption",
+                                    "foregroundColor": "#5F6B7A"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "text": "Hjemmescaffoldet er ikke koblet til entiteten din. Til det er gjort, kan det ikke handle som deg.",
+                                  "modifiers": {
+                                    "fontStyle": "callout"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "text": "Koblingen signeres med passkey, akkurat som for en ny enhet. Du kan trekke den tilbake fra «Min entitet».",
+                                  "modifiers": {
+                                    "fontStyle": "callout",
+                                    "foregroundColor": "#5F6B7A"
+                                  }
+                                }
+                              },
+                              {
+                                "HStack": {
+                                  "elements": [
+                                    {
+                                      "Button": {
+                                        "keypath": "home.link.anchor",
+                                        "label": "Koble til med passkey",
+                                        "payloadKeypath": "payload"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ],
+                            "modifiers": {
+                              "background": "#F4F6F8",
+                              "cornerRadius": 12,
+                              "padding": 18,
+                              "maxWidthInfinity": true
+                            }
+                          }
+                        }
+                      ],
+                      "modifiers": {
+                        "paddingInsets": {
+                          "top": 16,
+                          "bottom": 0,
+                          "leading": 0,
+                          "trailing": 0
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "modifiers": {
+              "itemSpacing": 0,
+              "rowDecoration": "none"
+            }
+          }
+        },
+        {
+          "List": {
+            "keypath": "home.linkView.linked",
+            "flowElementSkeleton": {
+              "VStack": {
+                "elements": [
+                  {
+                    "VStack": {
+                      "elements": [
+                        {
+                          "VStack": {
+                            "spacing": 6,
+                            "elements": [
+                              {
+                                "Text": {
+                                  "keypath": "name",
+                                  "modifiers": {
+                                    "fontStyle": "headline",
+                                    "fontWeight": "semibold"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "address",
+                                  "modifiers": {
+                                    "fontStyle": "caption",
+                                    "foregroundColor": "#5F6B7A"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "statusText",
+                                  "modifiers": {
+                                    "fontStyle": "callout",
+                                    "fontWeight": "semibold",
+                                    "foregroundColor": "#1B7F3B"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "detailText",
+                                  "modifiers": {
+                                    "fontStyle": "callout"
+                                  }
+                                }
+                              },
+                              {
+                                "HStack": {
+                                  "elements": [
+                                    {
+                                      "Button": {
+                                        "keypath": "me.entityMap.open",
+                                        "label": "Se «Min entitet»"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ],
+                            "modifiers": {
+                              "background": "#F4F6F8",
+                              "cornerRadius": 12,
+                              "padding": 18,
+                              "maxWidthInfinity": true
+                            }
+                          }
+                        }
+                      ],
+                      "modifiers": {
+                        "paddingInsets": {
+                          "top": 16,
+                          "bottom": 0,
+                          "leading": 0,
+                          "trailing": 0
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "modifiers": {
+              "itemSpacing": 0,
+              "rowDecoration": "none"
+            }
+          }
+        }
+      ],
+      "modifiers": {
+        "padding": 20,
+        "layoutVariants": [
+          {
+            "minAvailableWidth": 701,
+            "width": 640
+          }
+        ]
+      }
+    }
+  }
+}
