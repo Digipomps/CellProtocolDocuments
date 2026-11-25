@@ -1,0 +1,128 @@
+{
+  "schema": "haven.own-agent-mcp.tools.v1",
+  "status": "utkast — PDD_egen-agent-mcp_2026-11-20, G2 godkjent 2026-11-23, planbytte 1 (avgrenset lenke); ikke i kode",
+  "transport": "MCP over stdio; adapteren kobler seg ut til CellScaffold /bridgehead/session",
+  "tools": [
+    {
+      "name": "haven_docs_search",
+      "access": "read",
+      "source": "HavenDocsMCP (uendret)",
+      "needsScopedLink": false
+    },
+    {
+      "name": "haven_docs_read",
+      "access": "read",
+      "source": "HavenDocsMCP (uendret)",
+      "needsScopedLink": false
+    },
+    {
+      "name": "haven_my_documents_list",
+      "access": "read",
+      "purposeRef": "purpose://candidate.egen-agent-mcp.read-documents",
+      "output": {
+        "items": [
+          {
+            "cell": "cell:///<uuid>",
+            "documentID": "string",
+            "title": "string",
+            "version": "int",
+            "owner": "self|<visningsnavn>"
+          }
+        ]
+      }
+    },
+    {
+      "name": "haven_document_read",
+      "access": "read",
+      "purposeRef": "purpose://candidate.egen-agent-mcp.read-documents",
+      "input": {
+        "cell": "string",
+        "documentID": "string"
+      },
+      "output": {
+        "cell": "string",
+        "documentID": "string",
+        "version": "int",
+        "text": "string",
+        "withheld": [
+          "string"
+        ]
+      }
+    },
+    {
+      "name": "haven_draft_save",
+      "access": "write",
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "purposeRef": "purpose://candidate.egen-agent-mcp.write-back",
+      "input": {
+        "title": "string",
+        "text": "string",
+        "basedOn": "cell:///<uuid> (valgfri)"
+      },
+      "output": {
+        "cell": "string",
+        "documentID": "string",
+        "status": "draft"
+      }
+    },
+    {
+      "name": "haven_chat_read",
+      "access": "read",
+      "purposeRef": "purpose://candidate.egen-agent-mcp.others-consent",
+      "input": {
+        "cell": "string",
+        "limit": "int ≤ 50"
+      },
+      "output": {
+        "messages": [
+          {
+            "author": "self|<visningsnavn>",
+            "text": "string"
+          }
+        ],
+        "withheldCount": "int",
+        "withheldReason": "recipient_not_allowed"
+      }
+    },
+    {
+      "name": "haven_research_data_get",
+      "access": "read",
+      "purposeRef": "purpose://candidate.egen-agent-mcp.research-data-level",
+      "input": {
+        "cell": "string",
+        "level": "N0|N1|N2|N3|N4"
+      }
+    }
+  ],
+  "refusalCodes": [
+    "link_scope_missing",
+    "extension_revoked",
+    "extension_expired",
+    "agreement_not_met",
+    "recipient_not_allowed",
+    "research_level_exceeded",
+    "write_not_allowed",
+    "not_available"
+  ],
+  "conditions": {
+    "RecipientCondition": "allowedRecipients: [local, anthropic, openai, ...] og valgfri region. Mangler vilkåret, får en agent nei."
+  },
+  "scopedIdentityLink": {
+    "carrier": "IdentityLinkRecord i CellBase (samme lenkeflyt som i dag: forespørsel, SAS-kode, fersk passkey)",
+    "newFields": [
+      "extensionKind (whole|scoped; gamle poster = whole)",
+      "scopeGrants [{cell, keypath, permission (read|draft), researchLevel?}]",
+      "recipient (local|anthropic|openai)",
+      "deviceLabel",
+      "expiresAt"
+    ],
+    "decision": [
+      "lenken er aktiv, ikke utløpt og ikke trukket",
+      "kallet ligger innenfor scopeGrants",
+      "entiteten selv har tilgangen (eier eller kontrakt med entiteten som subjekt)",
+      "cellens Agreement har RecipientCondition som tillater lenkens recipient"
+    ],
+    "rule": "En avgrenset lenke gir aldri eiermakt, aldri mer enn entiteten selv har, og aldri skrivetilgang utover å lage utkast i egne celler."
+  }
+}

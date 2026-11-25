@@ -1,0 +1,658 @@
+{
+  "VStack": {
+    "spacing": 14,
+    "elements": [
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Egne agenter",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontStyle": "title2",
+                  "fontWeight": "700"
+                }
+              }
+            },
+            {
+              "Text": {
+                "text": "Her kobler du din egen Claude Code eller Codex til entiteten din. Agenten kjører på din maskin med ditt eget abonnement. HAVEN ser aldri innloggingen din, og agenten får aldri mer tilgang enn du har selv.",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 14
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Ny forespørsel",
+                "modifiers": {
+                  "foregroundColor": "#92400E",
+                  "fontStyle": "headline"
+                }
+              }
+            },
+            {
+              "Text": {
+                "keypath": "ownAgents.state.request.title",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontWeight": "700"
+                }
+              }
+            },
+            {
+              "Text": {
+                "keypath": "ownAgents.state.request.machine",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontSize": 14
+                }
+              }
+            },
+            {
+              "Text": {
+                "keypath": "ownAgents.state.request.fingerprint",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 13
+                }
+              }
+            },
+            {
+              "Text": {
+                "keypath": "ownAgents.state.request.provider",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontSize": 14
+                }
+              }
+            },
+            {
+              "Text": {
+                "keypath": "ownAgents.state.request.leavesNote",
+                "modifiers": {
+                  "foregroundColor": "#92400E",
+                  "fontSize": 13
+                }
+              }
+            },
+            {
+              "Text": {
+                "text": "Agenten ber om",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 13,
+                  "fontWeight": "700"
+                }
+              }
+            },
+            {
+              "List": {
+                "elements": [],
+                "keypath": "ownAgents.state.request.cells",
+                "selectionMode": "none",
+                "modifiers": {
+                  "itemSpacing": 8
+                },
+                "flowElementSkeleton": {
+                  "VStack": {
+                    "spacing": 2,
+                    "elements": [
+                      {
+                        "HStack": {
+                          "spacing": 8,
+                          "elements": [
+                            {
+                              "Text": {
+                                "keypath": "name",
+                                "modifiers": {
+                                  "foregroundColor": "#172033",
+                                  "fontWeight": "700"
+                                }
+                              }
+                            },
+                            {
+                              "Spacer": {}
+                            },
+                            {
+                              "Text": {
+                                "keypath": "access",
+                                "modifiers": {
+                                  "foregroundColor": "#172033",
+                                  "fontSize": 13
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "note",
+                          "modifiers": {
+                            "foregroundColor": "#556273",
+                            "fontSize": 13
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "Text": {
+                "text": "Holdes tilbake",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 13,
+                  "fontWeight": "700"
+                }
+              }
+            },
+            {
+              "List": {
+                "elements": [],
+                "keypath": "ownAgents.state.request.withheld",
+                "selectionMode": "none",
+                "modifiers": {
+                  "itemSpacing": 8
+                },
+                "flowElementSkeleton": {
+                  "VStack": {
+                    "spacing": 2,
+                    "elements": [
+                      {
+                        "Text": {
+                          "keypath": "name",
+                          "modifiers": {
+                            "foregroundColor": "#172033",
+                            "fontWeight": "700"
+                          }
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "reason",
+                          "modifiers": {
+                            "foregroundColor": "#556273",
+                            "fontSize": 13
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "VStack": {
+                "spacing": 4,
+                "elements": [
+                  {
+                    "Text": {
+                      "text": "Gyldig i",
+                      "modifiers": {
+                        "foregroundColor": "#556273",
+                        "fontSize": 13
+                      }
+                    }
+                  },
+                  {
+                    "Picker": {
+                      "keypath": "ownAgents.state.durations",
+                      "optionLabelKeypath": "label",
+                      "selectionStateKeypath": "ownAgents.state.selectedDuration",
+                      "selectionValueKeypath": "id",
+                      "selectionPayloadMode": "item_id",
+                      "placeholder": "Velg varighet"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "HStack": {
+                "spacing": 8,
+                "modifiers": {
+                  "wrap": true
+                },
+                "elements": [
+                  {
+                    "Button": {
+                      "keypath": "ownAgents.request.approve",
+                      "label": "Godkjenn med passkey",
+                      "payload": {}
+                    }
+                  },
+                  {
+                    "Button": {
+                      "keypath": "ownAgents.request.reject",
+                      "label": "Avvis",
+                      "payload": {},
+                      "modifiers": {
+                        "background": "#FFFFFF",
+                        "borderColor": "#FCA5A5",
+                        "borderWidth": 1,
+                        "cornerRadius": 6,
+                        "foregroundColor": "#B91C1C"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Text": {
+                "text": "Sjekk at fingeravtrykket er det samme som agenten viser i terminalen din.",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 12
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#FCD34D",
+            "maxWidthInfinity": true,
+            "visibility": {
+              "when": {
+                "equals": true,
+                "keypath": "ownAgents.state.hasRequest",
+                "scope": "root"
+              }
+            }
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "HStack": {
+                "spacing": 8,
+                "elements": [
+                  {
+                    "Text": {
+                      "text": "Tilkoblede agenter",
+                      "modifiers": {
+                        "foregroundColor": "#172033",
+                        "fontStyle": "headline"
+                      }
+                    }
+                  },
+                  {
+                    "Spacer": {}
+                  },
+                  {
+                    "Text": {
+                      "keypath": "ownAgents.state.countLabel",
+                      "modifiers": {
+                        "foregroundColor": "#556273",
+                        "fontSize": 13
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "List": {
+                "elements": [],
+                "keypath": "ownAgents.state.agents",
+                "selectionMode": "none",
+                "modifiers": {
+                  "itemSpacing": 8
+                },
+                "flowElementSkeleton": {
+                  "VStack": {
+                    "spacing": 2,
+                    "elements": [
+                      {
+                        "HStack": {
+                          "spacing": 8,
+                          "elements": [
+                            {
+                              "Text": {
+                                "keypath": "title",
+                                "modifiers": {
+                                  "foregroundColor": "#172033",
+                                  "fontWeight": "700"
+                                }
+                              }
+                            },
+                            {
+                              "Spacer": {}
+                            },
+                            {
+                              "Text": {
+                                "keypath": "status",
+                                "modifiers": {
+                                  "foregroundColor": "#0F766E",
+                                  "fontSize": 13
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "provider",
+                          "modifiers": {
+                            "foregroundColor": "#172033",
+                            "fontSize": 14
+                          }
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "validity",
+                          "modifiers": {
+                            "foregroundColor": "#556273",
+                            "fontSize": 13
+                          }
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "cellsLabel",
+                          "modifiers": {
+                            "foregroundColor": "#556273",
+                            "fontSize": 13
+                          }
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "lastUse",
+                          "modifiers": {
+                            "foregroundColor": "#556273",
+                            "fontSize": 13
+                          }
+                        }
+                      },
+                      {
+                        "HStack": {
+                          "spacing": 8,
+                          "modifiers": {
+                            "wrap": true,
+                            "visibility": {
+                              "when": {
+                                "equals": true,
+                                "keypath": "active",
+                                "scope": "item"
+                              }
+                            }
+                          },
+                          "elements": [
+                            {
+                              "Button": {
+                                "keypath": "ownAgents.agent.showLog",
+                                "label": "Vis logg",
+                                "payload": {},
+                                "modifiers": {
+                                  "background": "#FFFFFF",
+                                  "borderColor": "#CBD5E1",
+                                  "borderWidth": 1,
+                                  "cornerRadius": 6,
+                                  "foregroundColor": "#334155"
+                                }
+                              }
+                            },
+                            {
+                              "Button": {
+                                "keypath": "ownAgents.agent.disconnect",
+                                "label": "Koble fra",
+                                "payload": {},
+                                "modifiers": {
+                                  "background": "#FFFFFF",
+                                  "borderColor": "#FCA5A5",
+                                  "borderWidth": 1,
+                                  "cornerRadius": 6,
+                                  "foregroundColor": "#B91C1C"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "revokedNote",
+                          "modifiers": {
+                            "foregroundColor": "#B91C1C",
+                            "fontSize": 13,
+                            "visibility": {
+                              "when": {
+                                "equals": false,
+                                "keypath": "active",
+                                "scope": "item"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "HStack": {
+                          "spacing": 8,
+                          "modifiers": {
+                            "wrap": true,
+                            "visibility": {
+                              "when": {
+                                "equals": false,
+                                "keypath": "active",
+                                "scope": "item"
+                              }
+                            }
+                          },
+                          "elements": [
+                            {
+                              "Button": {
+                                "keypath": "ownAgents.agent.showLog",
+                                "label": "Vis logg",
+                                "payload": {},
+                                "modifiers": {
+                                  "background": "#FFFFFF",
+                                  "borderColor": "#CBD5E1",
+                                  "borderWidth": 1,
+                                  "cornerRadius": 6,
+                                  "foregroundColor": "#334155"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "Text": {
+                "text": "Ingen agenter er koblet til.",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 14,
+                  "visibility": {
+                    "when": {
+                      "equals": false,
+                      "keypath": "ownAgents.state.hasAgents",
+                      "scope": "root"
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true,
+            "visibility": {
+              "when": {
+                "equals": false,
+                "keypath": "ownAgents.state.showLog",
+                "scope": "root"
+              }
+            }
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "HStack": {
+                "spacing": 8,
+                "elements": [
+                  {
+                    "Text": {
+                      "keypath": "ownAgents.state.log.title",
+                      "modifiers": {
+                        "foregroundColor": "#172033",
+                        "fontStyle": "headline"
+                      }
+                    }
+                  },
+                  {
+                    "Spacer": {}
+                  },
+                  {
+                    "Button": {
+                      "keypath": "ownAgents.log.close",
+                      "label": "Tilbake",
+                      "payload": {},
+                      "modifiers": {
+                        "background": "#FFFFFF",
+                        "borderColor": "#CBD5E1",
+                        "borderWidth": 1,
+                        "cornerRadius": 6,
+                        "foregroundColor": "#334155"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Text": {
+                "keypath": "ownAgents.state.log.summary",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 13
+                }
+              }
+            },
+            {
+              "List": {
+                "elements": [],
+                "keypath": "ownAgents.state.log.events",
+                "selectionMode": "none",
+                "modifiers": {
+                  "itemSpacing": 8
+                },
+                "flowElementSkeleton": {
+                  "VStack": {
+                    "spacing": 2,
+                    "elements": [
+                      {
+                        "HStack": {
+                          "spacing": 8,
+                          "elements": [
+                            {
+                              "Text": {
+                                "keypath": "tool",
+                                "modifiers": {
+                                  "foregroundColor": "#172033",
+                                  "fontWeight": "700"
+                                }
+                              }
+                            },
+                            {
+                              "Spacer": {}
+                            },
+                            {
+                              "Text": {
+                                "keypath": "outcome",
+                                "modifiers": {
+                                  "foregroundColor": "#0F766E",
+                                  "fontSize": 13
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "detail",
+                          "modifiers": {
+                            "foregroundColor": "#556273",
+                            "fontSize": 13
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "Text": {
+                "text": "Loggen ligger hos entiteten din. Agenten kan ikke endre den.",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 12
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true,
+            "visibility": {
+              "when": {
+                "equals": true,
+                "keypath": "ownAgents.state.showLog",
+                "scope": "root"
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
