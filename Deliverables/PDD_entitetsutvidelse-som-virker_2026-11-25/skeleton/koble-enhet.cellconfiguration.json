@@ -1,0 +1,647 @@
+{
+  "name": "Koble til enhet",
+  "description": "Gjør en ny enhet til en del av entiteten din, én gang for alle steder, godkjent med passkey på en enhet som allerede er deg.",
+  "discovery": {
+    "sourceCellEndpoint": "cell:///EntityAnchor",
+    "sourceCellName": "EntityAnchorCell",
+    "purpose": "Koble til enhet",
+    "purposeDescription": "Utvide entiteten med en ny enhet.",
+    "interests": [
+      "entitet",
+      "enheter",
+      "kobling"
+    ],
+    "menuSlots": []
+  },
+  "cellReferences": [
+    {
+      "endpoint": "cell:///EntityAnchor",
+      "label": "me"
+    }
+  ],
+  "skeleton": {
+    "VStack": {
+      "spacing": 0,
+      "elements": [
+        {
+          "VStack": {
+            "spacing": 4,
+            "elements": [
+              {
+                "Text": {
+                  "keypath": "me.identityLinks.enrollmentView.title",
+                  "modifiers": {
+                    "fontStyle": "title",
+                    "fontWeight": "bold"
+                  }
+                }
+              },
+              {
+                "Text": {
+                  "keypath": "me.identityLinks.enrollmentView.subtitle",
+                  "modifiers": {
+                    "fontStyle": "body",
+                    "foregroundColor": "#5F6B7A"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "List": {
+            "keypath": "me.identityLinks.enrollmentView.rejections",
+            "flowElementSkeleton": {
+              "VStack": {
+                "elements": [
+                  {
+                    "VStack": {
+                      "elements": [
+                        {
+                          "VStack": {
+                            "spacing": 4,
+                            "elements": [
+                              {
+                                "Text": {
+                                  "keypath": "title",
+                                  "modifiers": {
+                                    "fontStyle": "headline",
+                                    "fontWeight": "semibold",
+                                    "foregroundColorKeypath": "color"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "text",
+                                  "modifiers": {
+                                    "fontStyle": "callout"
+                                  }
+                                }
+                              }
+                            ],
+                            "modifiers": {
+                              "background": "#FFF4E0",
+                              "cornerRadius": 10,
+                              "padding": 12,
+                              "maxWidthInfinity": true,
+                              "borderWidth": 1,
+                              "borderColor": "#E8C98A"
+                            }
+                          }
+                        }
+                      ],
+                      "modifiers": {
+                        "paddingInsets": {
+                          "top": 16,
+                          "bottom": 0,
+                          "leading": 0,
+                          "trailing": 0
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "modifiers": {
+              "itemSpacing": 0,
+              "rowDecoration": "none"
+            }
+          }
+        },
+        {
+          "List": {
+            "keypath": "me.identityLinks.enrollmentView.ownerStart",
+            "flowElementSkeleton": {
+              "VStack": {
+                "elements": [
+                  {
+                    "VStack": {
+                      "elements": [
+                        {
+                          "VStack": {
+                            "spacing": 6,
+                            "elements": [
+                              {
+                                "Text": {
+                                  "text": "Hva skal den nye enheten være?",
+                                  "modifiers": {
+                                    "fontStyle": "headline",
+                                    "fontWeight": "semibold"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "text": "En hel enhet er deg: den får de samme avtalene som du har, på alle stedene dine. Du kobler den til én gang.",
+                                  "modifiers": {
+                                    "fontStyle": "callout"
+                                  }
+                                }
+                              },
+                              {
+                                "HStack": {
+                                  "spacing": 10,
+                                  "elements": [
+                                    {
+                                      "Button": {
+                                        "keypath": "me.identityLinks.startEnrollment",
+                                        "label": "Lag koblingskode",
+                                        "payloadKeypath": "payload"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ],
+                            "modifiers": {
+                              "background": "#F4F6F8",
+                              "cornerRadius": 12,
+                              "padding": 18,
+                              "maxWidthInfinity": true
+                            }
+                          }
+                        }
+                      ],
+                      "modifiers": {
+                        "paddingInsets": {
+                          "top": 16,
+                          "bottom": 0,
+                          "leading": 0,
+                          "trailing": 0
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "modifiers": {
+              "itemSpacing": 0,
+              "rowDecoration": "none"
+            }
+          }
+        },
+        {
+          "List": {
+            "keypath": "me.identityLinks.enrollmentView.ownerCode",
+            "flowElementSkeleton": {
+              "VStack": {
+                "elements": [
+                  {
+                    "VStack": {
+                      "elements": [
+                        {
+                          "VStack": {
+                            "spacing": 6,
+                            "elements": [
+                              {
+                                "Text": {
+                                  "text": "Skriv denne koden på den nye enheten",
+                                  "modifiers": {
+                                    "fontStyle": "headline",
+                                    "fontWeight": "semibold"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "code",
+                                  "modifiers": {
+                                    "fontSize": 34,
+                                    "fontWeight": "bold"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "expiresText",
+                                  "modifiers": {
+                                    "fontStyle": "caption",
+                                    "foregroundColor": "#5F6B7A"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "text": "Du trenger ikke gjøre mer her før den nye enheten har svart.",
+                                  "modifiers": {
+                                    "fontStyle": "callout",
+                                    "foregroundColor": "#5F6B7A"
+                                  }
+                                }
+                              }
+                            ],
+                            "modifiers": {
+                              "background": "#F4F6F8",
+                              "cornerRadius": 12,
+                              "padding": 18,
+                              "maxWidthInfinity": true
+                            }
+                          }
+                        }
+                      ],
+                      "modifiers": {
+                        "paddingInsets": {
+                          "top": 16,
+                          "bottom": 0,
+                          "leading": 0,
+                          "trailing": 0
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "modifiers": {
+              "itemSpacing": 0,
+              "rowDecoration": "none"
+            }
+          }
+        },
+        {
+          "List": {
+            "keypath": "me.identityLinks.enrollmentView.ownerApprove",
+            "flowElementSkeleton": {
+              "VStack": {
+                "elements": [
+                  {
+                    "VStack": {
+                      "elements": [
+                        {
+                          "VStack": {
+                            "spacing": 6,
+                            "elements": [
+                              {
+                                "Text": {
+                                  "keypath": "requestText",
+                                  "modifiers": {
+                                    "fontStyle": "headline",
+                                    "fontWeight": "semibold"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "text": "Sjekk at de samme tre ordene står på den nye enheten:",
+                                  "modifiers": {
+                                    "fontStyle": "callout"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "words",
+                                  "modifiers": {
+                                    "fontSize": 30,
+                                    "fontWeight": "bold"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "grantText",
+                                  "modifiers": {
+                                    "fontStyle": "callout"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "originText",
+                                  "modifiers": {
+                                    "fontStyle": "caption",
+                                    "foregroundColor": "#5F6B7A"
+                                  }
+                                }
+                              },
+                              {
+                                "HStack": {
+                                  "spacing": 10,
+                                  "elements": [
+                                    {
+                                      "Button": {
+                                        "keypath": "me.identityLinks.approveEnrollment",
+                                        "label": "Godkjenn med passkey",
+                                        "payloadKeypath": "approvePayload"
+                                      }
+                                    },
+                                    {
+                                      "Button": {
+                                        "keypath": "me.identityLinks.declineEnrollment",
+                                        "label": "Avvis",
+                                        "payloadKeypath": "declinePayload",
+                                        "modifiers": {
+                                          "controlStyle": "plain",
+                                          "foregroundColor": "#B00020",
+                                          "fontWeight": "semibold"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ],
+                            "modifiers": {
+                              "background": "#F4F6F8",
+                              "cornerRadius": 12,
+                              "padding": 18,
+                              "maxWidthInfinity": true
+                            }
+                          }
+                        }
+                      ],
+                      "modifiers": {
+                        "paddingInsets": {
+                          "top": 16,
+                          "bottom": 0,
+                          "leading": 0,
+                          "trailing": 0
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "modifiers": {
+              "itemSpacing": 0,
+              "rowDecoration": "none"
+            }
+          }
+        },
+        {
+          "List": {
+            "keypath": "me.identityLinks.enrollmentView.deviceStart",
+            "flowElementSkeleton": {
+              "VStack": {
+                "elements": [
+                  {
+                    "VStack": {
+                      "elements": [
+                        {
+                          "VStack": {
+                            "spacing": 6,
+                            "elements": [
+                              {
+                                "Text": {
+                                  "text": "Skriv koden som står på enheten du allerede bruker",
+                                  "modifiers": {
+                                    "fontStyle": "headline",
+                                    "fontWeight": "semibold"
+                                  }
+                                }
+                              },
+                              {
+                                "TextField": {
+                                  "targetKeypath": "me.identityLinks.requestEnrollment",
+                                  "placeholder": "Kode, for eksempel 4F7K-92QD",
+                                  "modifiers": {
+                                    "maxWidthInfinity": true
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "text": "Trykk Enter. Du kan også åpne lenken du fikk på den andre enheten.",
+                                  "modifiers": {
+                                    "fontStyle": "caption",
+                                    "foregroundColor": "#5F6B7A"
+                                  }
+                                }
+                              }
+                            ],
+                            "modifiers": {
+                              "background": "#F4F6F8",
+                              "cornerRadius": 12,
+                              "padding": 18,
+                              "maxWidthInfinity": true
+                            }
+                          }
+                        }
+                      ],
+                      "modifiers": {
+                        "paddingInsets": {
+                          "top": 16,
+                          "bottom": 0,
+                          "leading": 0,
+                          "trailing": 0
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "modifiers": {
+              "itemSpacing": 0,
+              "rowDecoration": "none"
+            }
+          }
+        },
+        {
+          "List": {
+            "keypath": "me.identityLinks.enrollmentView.deviceWaiting",
+            "flowElementSkeleton": {
+              "VStack": {
+                "elements": [
+                  {
+                    "VStack": {
+                      "elements": [
+                        {
+                          "VStack": {
+                            "spacing": 6,
+                            "elements": [
+                              {
+                                "Text": {
+                                  "text": "Sjekk at de samme tre ordene står på den andre enheten",
+                                  "modifiers": {
+                                    "fontStyle": "headline",
+                                    "fontWeight": "semibold"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "words",
+                                  "modifiers": {
+                                    "fontSize": 30,
+                                    "fontWeight": "bold"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "text": "Godkjenn der med passkey. Denne siden går videre av seg selv.",
+                                  "modifiers": {
+                                    "fontStyle": "callout"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "expiresText",
+                                  "modifiers": {
+                                    "fontStyle": "caption",
+                                    "foregroundColor": "#5F6B7A"
+                                  }
+                                }
+                              }
+                            ],
+                            "modifiers": {
+                              "background": "#F4F6F8",
+                              "cornerRadius": 12,
+                              "padding": 18,
+                              "maxWidthInfinity": true
+                            }
+                          }
+                        }
+                      ],
+                      "modifiers": {
+                        "paddingInsets": {
+                          "top": 16,
+                          "bottom": 0,
+                          "leading": 0,
+                          "trailing": 0
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "modifiers": {
+              "itemSpacing": 0,
+              "rowDecoration": "none"
+            }
+          }
+        },
+        {
+          "List": {
+            "keypath": "me.identityLinks.enrollmentView.done",
+            "flowElementSkeleton": {
+              "VStack": {
+                "elements": [
+                  {
+                    "VStack": {
+                      "elements": [
+                        {
+                          "VStack": {
+                            "spacing": 6,
+                            "elements": [
+                              {
+                                "Text": {
+                                  "keypath": "title",
+                                  "modifiers": {
+                                    "fontStyle": "headline",
+                                    "fontWeight": "semibold",
+                                    "foregroundColor": "#1B7F3B"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "text",
+                                  "modifiers": {
+                                    "fontStyle": "callout"
+                                  }
+                                }
+                              },
+                              {
+                                "List": {
+                                  "keypath": "placeRows",
+                                  "flowElementSkeleton": {
+                                    "VStack": {
+                                      "elements": [
+                                        {
+                                          "HStack": {
+                                            "spacing": 8,
+                                            "elements": [
+                                              {
+                                                "Text": {
+                                                  "keypath": "name",
+                                                  "modifiers": {
+                                                    "fontStyle": "callout"
+                                                  }
+                                                }
+                                              },
+                                              {
+                                                "Spacer": {}
+                                              },
+                                              {
+                                                "Text": {
+                                                  "keypath": "statusText",
+                                                  "modifiers": {
+                                                    "fontStyle": "callout",
+                                                    "foregroundColorKeypath": "statusColor"
+                                                  }
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "modifiers": {
+                                    "itemSpacing": 4,
+                                    "rowDecoration": "none"
+                                  }
+                                }
+                              },
+                              {
+                                "HStack": {
+                                  "elements": [
+                                    {
+                                      "Button": {
+                                        "keypath": "me.entityMap.open",
+                                        "label": "Se «Min entitet»"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ],
+                            "modifiers": {
+                              "background": "#F4F6F8",
+                              "cornerRadius": 12,
+                              "padding": 18,
+                              "maxWidthInfinity": true
+                            }
+                          }
+                        }
+                      ],
+                      "modifiers": {
+                        "paddingInsets": {
+                          "top": 16,
+                          "bottom": 0,
+                          "leading": 0,
+                          "trailing": 0
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "modifiers": {
+              "itemSpacing": 0,
+              "rowDecoration": "none"
+            }
+          }
+        }
+      ],
+      "modifiers": {
+        "padding": 20,
+        "layoutVariants": [
+          {
+            "minAvailableWidth": 701,
+            "width": 640
+          }
+        ]
+      }
+    }
+  }
+}

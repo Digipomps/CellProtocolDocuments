@@ -1,0 +1,516 @@
+{
+  "name": "Min entitet",
+  "description": "Enhetene som er entiteten din, og stedene der entiteten din finnes. Les kartet, trekk en enhet tilbake, koble til en ny.",
+  "discovery": {
+    "sourceCellEndpoint": "cell:///EntityAnchor",
+    "sourceCellName": "EntityAnchorCell",
+    "purpose": "Min entitet",
+    "purposeDescription": "Se og styre hvilke enheter som er meg, og hvor entiteten min finnes.",
+    "interests": [
+      "entitet",
+      "enheter",
+      "identitet",
+      "kart"
+    ],
+    "menuSlots": [
+      "lowerMid"
+    ]
+  },
+  "cellReferences": [
+    {
+      "endpoint": "cell:///EntityAnchor",
+      "label": "me"
+    }
+  ],
+  "skeleton": {
+    "VStack": {
+      "spacing": 0,
+      "elements": [
+        {
+          "VStack": {
+            "spacing": 4,
+            "elements": [
+              {
+                "Text": {
+                  "text": "Min entitet",
+                  "modifiers": {
+                    "fontStyle": "title",
+                    "fontWeight": "bold"
+                  }
+                }
+              },
+              {
+                "Text": {
+                  "keypath": "me.entityMap.state.summaryText",
+                  "modifiers": {
+                    "fontStyle": "body"
+                  }
+                }
+              },
+              {
+                "Text": {
+                  "keypath": "me.entityMap.state.revocationText",
+                  "modifiers": {
+                    "fontStyle": "caption",
+                    "foregroundColor": "#5F6B7A"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "List": {
+            "keypath": "me.entityMap.state.notices",
+            "flowElementSkeleton": {
+              "VStack": {
+                "elements": [
+                  {
+                    "VStack": {
+                      "elements": [
+                        {
+                          "VStack": {
+                            "spacing": 4,
+                            "elements": [
+                              {
+                                "Text": {
+                                  "keypath": "title",
+                                  "modifiers": {
+                                    "fontStyle": "headline",
+                                    "fontWeight": "semibold",
+                                    "foregroundColorKeypath": "color"
+                                  }
+                                }
+                              },
+                              {
+                                "Text": {
+                                  "keypath": "text",
+                                  "modifiers": {
+                                    "fontStyle": "callout"
+                                  }
+                                }
+                              }
+                            ],
+                            "modifiers": {
+                              "background": "#FFF4E0",
+                              "cornerRadius": 10,
+                              "padding": 12,
+                              "maxWidthInfinity": true,
+                              "borderWidth": 1,
+                              "borderColor": "#E8C98A"
+                            }
+                          }
+                        }
+                      ],
+                      "modifiers": {
+                        "paddingInsets": {
+                          "top": 16,
+                          "bottom": 0,
+                          "leading": 0,
+                          "trailing": 0
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "modifiers": {
+              "itemSpacing": 0,
+              "rowDecoration": "none"
+            }
+          }
+        },
+        {
+          "VStack": {
+            "elements": [
+              {
+                "HStack": {
+                  "spacing": 24,
+                  "elements": [
+                    {
+                      "VStack": {
+                        "spacing": 10,
+                        "elements": [
+                          {
+                            "HStack": {
+                              "elements": [
+                                {
+                                  "Text": {
+                                    "text": "Enhetene mine",
+                                    "modifiers": {
+                                      "fontStyle": "title2",
+                                      "fontWeight": "semibold"
+                                    }
+                                  }
+                                },
+                                {
+                                  "Spacer": {}
+                                },
+                                {
+                                  "Button": {
+                                    "keypath": "me.entityMap.device.add",
+                                    "label": "Koble til en ny enhet"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "Text": {
+                              "text": "Hver enhet har sin egen nøkkel. Alle hele enheter er deg, og har de samme avtalene.",
+                              "modifiers": {
+                                "fontStyle": "callout",
+                                "foregroundColor": "#5F6B7A"
+                              }
+                            }
+                          },
+                          {
+                            "List": {
+                              "keypath": "me.entityMap.state.devices",
+                              "flowElementSkeleton": {
+                                "VStack": {
+                                  "elements": [
+                                    {
+                                      "VStack": {
+                                        "spacing": 6,
+                                        "elements": [
+                                          {
+                                            "HStack": {
+                                              "spacing": 10,
+                                              "elements": [
+                                                {
+                                                  "VStack": {
+                                                    "spacing": 2,
+                                                    "elements": [
+                                                      {
+                                                        "Text": {
+                                                          "keypath": "name",
+                                                          "modifiers": {
+                                                            "fontStyle": "headline",
+                                                            "fontWeight": "semibold"
+                                                          }
+                                                        }
+                                                      },
+                                                      {
+                                                        "Text": {
+                                                          "keypath": "scopeText",
+                                                          "modifiers": {
+                                                            "fontStyle": "callout"
+                                                          }
+                                                        }
+                                                      },
+                                                      {
+                                                        "Text": {
+                                                          "keypath": "detailText",
+                                                          "modifiers": {
+                                                            "fontStyle": "caption",
+                                                            "foregroundColor": "#5F6B7A"
+                                                          }
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                },
+                                                {
+                                                  "Spacer": {}
+                                                },
+                                                {
+                                                  "VStack": {
+                                                    "spacing": 6,
+                                                    "elements": [
+                                                      {
+                                                        "Text": {
+                                                          "keypath": "statusText",
+                                                          "modifiers": {
+                                                            "fontStyle": "callout",
+                                                            "fontWeight": "semibold",
+                                                            "foregroundColorKeypath": "statusColor"
+                                                          }
+                                                        }
+                                                      },
+                                                      {
+                                                        "List": {
+                                                          "keypath": "revokeRows",
+                                                          "flowElementSkeleton": {
+                                                            "VStack": {
+                                                              "elements": [
+                                                                {
+                                                                  "Button": {
+                                                                    "keypath": "me.entityMap.device.revoke",
+                                                                    "label": "Trekk tilbake",
+                                                                    "payloadKeypath": "payload",
+                                                                    "modifiers": {
+                                                                      "controlStyle": "plain",
+                                                                      "foregroundColor": "#B00020",
+                                                                      "fontWeight": "semibold",
+                                                                      "accessibilityLabel": "Trekk tilbake denne enheten"
+                                                                    }
+                                                                  }
+                                                                }
+                                                              ]
+                                                            }
+                                                          },
+                                                          "modifiers": {
+                                                            "itemSpacing": 0,
+                                                            "rowDecoration": "none"
+                                                          }
+                                                        }
+                                                      }
+                                                    ],
+                                                    "modifiers": {
+                                                      "hAlignment": "trailing"
+                                                    }
+                                                  }
+                                                }
+                                              ],
+                                              "modifiers": {
+                                                "vAlignment": "top",
+                                                "layoutVariants": [
+                                                  {
+                                                    "maxAvailableWidth": 700,
+                                                    "axis": "vertical"
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        ],
+                                        "modifiers": {
+                                          "background": "#F4F6F8",
+                                          "cornerRadius": 12,
+                                          "padding": 14,
+                                          "maxWidthInfinity": true
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              "modifiers": {
+                                "itemSpacing": 10,
+                                "rowDecoration": "none"
+                              }
+                            }
+                          }
+                        ],
+                        "modifiers": {
+                          "maxWidthInfinity": true
+                        }
+                      }
+                    },
+                    {
+                      "VStack": {
+                        "spacing": 10,
+                        "elements": [
+                          {
+                            "HStack": {
+                              "elements": [
+                                {
+                                  "Text": {
+                                    "text": "Stedene mine",
+                                    "modifiers": {
+                                      "fontStyle": "title2",
+                                      "fontWeight": "semibold"
+                                    }
+                                  }
+                                },
+                                {
+                                  "Spacer": {}
+                                },
+                                {
+                                  "Button": {
+                                    "keypath": "me.entityMap.refresh",
+                                    "label": "Sjekk nå"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "Text": {
+                              "text": "Kartet ligger bare i dine egne data. Hvert sted har en kopi av de andre stedenes post.",
+                              "modifiers": {
+                                "fontStyle": "callout",
+                                "foregroundColor": "#5F6B7A"
+                              }
+                            }
+                          },
+                          {
+                            "List": {
+                              "keypath": "me.entityMap.state.places",
+                              "flowElementSkeleton": {
+                                "VStack": {
+                                  "elements": [
+                                    {
+                                      "VStack": {
+                                        "spacing": 6,
+                                        "elements": [
+                                          {
+                                            "HStack": {
+                                              "spacing": 10,
+                                              "elements": [
+                                                {
+                                                  "VStack": {
+                                                    "spacing": 2,
+                                                    "elements": [
+                                                      {
+                                                        "Text": {
+                                                          "keypath": "name",
+                                                          "modifiers": {
+                                                            "fontStyle": "headline",
+                                                            "fontWeight": "semibold"
+                                                          }
+                                                        }
+                                                      },
+                                                      {
+                                                        "Text": {
+                                                          "keypath": "address",
+                                                          "modifiers": {
+                                                            "fontStyle": "caption",
+                                                            "foregroundColor": "#5F6B7A"
+                                                          }
+                                                        }
+                                                      },
+                                                      {
+                                                        "Text": {
+                                                          "keypath": "roleText",
+                                                          "modifiers": {
+                                                            "fontStyle": "callout"
+                                                          }
+                                                        }
+                                                      },
+                                                      {
+                                                        "Text": {
+                                                          "keypath": "detailText",
+                                                          "modifiers": {
+                                                            "fontStyle": "caption",
+                                                            "foregroundColor": "#5F6B7A"
+                                                          }
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                },
+                                                {
+                                                  "Spacer": {}
+                                                },
+                                                {
+                                                  "VStack": {
+                                                    "spacing": 2,
+                                                    "elements": [
+                                                      {
+                                                        "Text": {
+                                                          "keypath": "statusText",
+                                                          "modifiers": {
+                                                            "fontStyle": "callout",
+                                                            "fontWeight": "semibold",
+                                                            "foregroundColorKeypath": "statusColor"
+                                                          }
+                                                        }
+                                                      },
+                                                      {
+                                                        "Text": {
+                                                          "keypath": "seenText",
+                                                          "modifiers": {
+                                                            "fontStyle": "caption",
+                                                            "foregroundColor": "#5F6B7A"
+                                                          }
+                                                        }
+                                                      }
+                                                    ],
+                                                    "modifiers": {
+                                                      "hAlignment": "trailing"
+                                                    }
+                                                  }
+                                                }
+                                              ],
+                                              "modifiers": {
+                                                "vAlignment": "top",
+                                                "layoutVariants": [
+                                                  {
+                                                    "maxAvailableWidth": 700,
+                                                    "axis": "vertical"
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        ],
+                                        "modifiers": {
+                                          "background": "#F4F6F8",
+                                          "cornerRadius": 12,
+                                          "padding": 14,
+                                          "maxWidthInfinity": true
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              "modifiers": {
+                                "itemSpacing": 10,
+                                "rowDecoration": "none"
+                              }
+                            }
+                          },
+                          {
+                            "List": {
+                              "keypath": "me.entityMap.state.emptyPlaces",
+                              "flowElementSkeleton": {
+                                "VStack": {
+                                  "elements": [
+                                    {
+                                      "Text": {
+                                        "keypath": "text",
+                                        "modifiers": {
+                                          "fontStyle": "callout",
+                                          "foregroundColor": "#5F6B7A"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              "modifiers": {
+                                "itemSpacing": 8,
+                                "rowDecoration": "none"
+                              }
+                            }
+                          }
+                        ],
+                        "modifiers": {
+                          "maxWidthInfinity": true
+                        }
+                      }
+                    }
+                  ],
+                  "modifiers": {
+                    "vAlignment": "top",
+                    "layoutVariants": [
+                      {
+                        "maxAvailableWidth": 700,
+                        "axis": "vertical"
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "modifiers": {
+              "paddingInsets": {
+                "top": 20,
+                "bottom": 0,
+                "leading": 0,
+                "trailing": 0
+              }
+            }
+          }
+        }
+      ],
+      "modifiers": {
+        "padding": 20
+      }
+    }
+  }
+}

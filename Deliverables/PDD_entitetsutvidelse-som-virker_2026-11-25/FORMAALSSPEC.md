@@ -103,13 +103,13 @@ De to radene «ikke målt» for A og B måles før planen: én test i CellBase f
 | Samme telefon når entitetens celler på en annen vert uten ny lenking | testutdata | `TESTRESULT.md#portable-admit` | — | nei |
 | En trukket lenke slutter å virke på den andre verten innen ti minutter | testutdata med tider | `TESTRESULT.md#revoke-propagates` | — | nei |
 | Samme prøvesett, samme svar i Swift, Python og Go | testutdata, tre kjøringer | `TESTRESULT.md#parity-fixtures` | `contract/link-fixtures.v1.json` | nei |
-| Håndgrep per part, talt fra bildene | tabell | `images/README.md` | bildene under | nei |
-| Flaten «Koble til enhet» med avvisningstekster | bilde | `images/koble-enhet-*-v1.png` | — | nei |
-| Flaten «Min entitet» med kartet: alt nåbart, ett sted utilgjengelig, én lenke trukket | bilde | `images/min-entitet-*-v1.png` | — | nei |
-| Lenking av hjemmescaffoldet med passkey | bilde | `images/hjemmescaffold-*-v1.png` | — | nei |
+| Håndgrep per part, talt fra bildene: eieren 3 trykk og 1 passkey én gang, den nye enheten 1 | tabell | `images/README.md` | bildene under | nei |
+| Flaten «Koble til enhet» med avvisningstekster | bilde | `images/koble-enhet-*-v1.png` (10 bilder, ark `oversikt-koble-enhet-v1.png`) | `skeleton/koble-enhet.cellconfiguration.json` | nei |
+| Flaten «Min entitet» med kartet: alt nåbart, ett sted utilgjengelig, én lenke trukket | bilde | `images/min-entitet-*-v1.png` (6 bilder, ark `oversikt-min-entitet-v1.png`) | `skeleton/min-entitet.cellconfiguration.json` | nei |
+| Lenking av hjemmescaffoldet med passkey | bilde | `images/hjemmescaffold-*-v1.png` (3 bilder, ark `oversikt-hjemmescaffold-v1.png`) | `skeleton/hjemmescaffold.cellconfiguration.json` | nei |
 | Kartet i entitetsdataene på to scaffolds, med kopi av hverandres post | testutdata | `TESTRESULT.md#entitetskart` | `contract/scaffold-presence.v1.json` | nei |
 
-Håndgrep i dag, lest fra koden i `VaporIdentityLink.swift` og ikke talt på en skjerm: eieren lager en billett, den nye enheten sender forespørsel, eieren sammenligner ordene og godkjenner med passkey, den nye enheten fullfører. Det gjentas for hver vert. Tallene settes når bildene finnes.
+Håndgrep i dag, lest fra koden i `VaporIdentityLink.swift` og ikke talt på en skjerm: eieren lager en billett, den nye enheten sender forespørsel, eieren sammenligner ordene og godkjenner med passkey, den nye enheten fullfører. Det gjentas for hver vert. Talt fra bildene 2026-11-25 (`images/README.md`): eieren 3 trykk og 1 passkey, den nye enheten 1 håndgrep, én gang for alle steder.
 
 ## 4. Tilknyttede formålspakker og lærdommer (auto fra purpose_dev.py lookup)
 
@@ -298,8 +298,12 @@ Håndgrep i dag, lest fra koden i `VaporIdentityLink.swift` og ikke talt på en 
 
 Sier du bare «G1 godkjent», gjelder de fire forslagene.
 
+**Avgjort 2026-11-25:** Kjetil skrev «G1 godkjent». De fire forslagene gjelder: (1) alle avtaler, også de gamle, gjelder for alle entitetens hele nøkler; (2) entitetens egen lenkede klient bærer kartpostene mellom scaffolds; (3) en vert uten fersk statusliste avviser lenkede nøkler, unntatt verten der ankeret ligger; (4) «Min entitet» er med i første leveranse, i enkel form.
+
 ## 7. Revisjonslogg
 
 | Iterasjon | Dato | Hva endret |
 |---|---|---|
 | 1 | 2026-11-25 | Første tre. A og B fra analysens funn F1, C fra F3 til F7, E fra F11 i utkastet til iterasjon 2 for egne agenter, F fra restene i sikkerhetsrevisjonen. |
+| 1 | 2026-11-25 | G1 godkjent av Kjetil. De fire forslagene i §6 er avgjort som foreslått. Treet er uendret. |
+| 1 | 2026-11-25 | Bilder til G1-GUI: 19 bilder av tre flater, rendret med web-rendereren fra `skeleton/`. Håndgrep talt. To spørsmål i `images/README.md`. G1-GUI spurt. |
