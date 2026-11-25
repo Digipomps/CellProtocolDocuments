@@ -38,3 +38,14 @@ CellProtocol PR #114 (utkast), commit `1320a34`, grein `claude/egen-agent-avgren
 | `IdentityLinkRegistryTests` (hel lenke uendret) | 4/4 grønne |
 | 190 CellBaseTests-filer uten CellApple/CellVapor, Docker `swift:6.1-noble` | 1489 tester, 27 røde; samme 27 røde på main uten endringen → ingen nye røde |
 | Full `swift test` på macOS | venter: Macen var offline |
+
+## Lukking av revisjonsfunn E1–E4 (Linux, 2026-11-25)
+
+| Hva | Resultat |
+|---|---|
+| PyCellProtocol #5, hele suiten | 328 grønne, 1 hoppet over |
+| CellProtocol #117 `EntityAnchorLinkGuardTests` (5 nye) | 5/5 grønne |
+| CellProtocol #117 `EntityAnchorEnrollmentContractTests` (8, 4 nye), `EntityAnchorGenesisTests` (9), `EntityAnchorAccessBoundaryTests` (10), kjørt i riggpakke uten `#if os(macOS)` mot CellVapor-ankeret | 27/27 grønne |
+| CellScaffold #514 `FlowPlacementHomeVenueTests` (7, 2 nye), ScaffoldKit bygget mot CellProtocol-greina | 7/7 grønne |
+| CellApple-ankeret, App-målet i CellScaffold, full `swift test` på macOS | ikke kjørt |
+
