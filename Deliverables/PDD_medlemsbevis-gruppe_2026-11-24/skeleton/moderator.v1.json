@@ -1,0 +1,408 @@
+{
+  "VStack": {
+    "spacing": 14,
+    "elements": [
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Medlemmer i Informasjonssystemer",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontStyle": "title2",
+                  "fontWeight": "700"
+                }
+              }
+            },
+            {
+              "Text": {
+                "keypath": "moderation.state.summary",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 14
+                }
+              }
+            },
+            {
+              "Text": {
+                "text": "Som moderator kan du bare godta og trekke tilbake medlemskap. Andre roller gis av eierne.",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 13
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Søknader",
+                "modifiers": {
+                  "foregroundColor": "#92400E",
+                  "fontStyle": "headline"
+                }
+              }
+            },
+            {
+              "List": {
+                "elements": [],
+                "keypath": "moderation.state.requests",
+                "selectionMode": "none",
+                "modifiers": {
+                  "itemSpacing": 8
+                },
+                "flowElementSkeleton": {
+                  "VStack": {
+                    "spacing": 4,
+                    "elements": [
+                      {
+                        "HStack": {
+                          "spacing": 8,
+                          "elements": [
+                            {
+                              "Text": {
+                                "keypath": "who",
+                                "modifiers": {
+                                  "foregroundColor": "#172033",
+                                  "fontWeight": "700"
+                                }
+                              }
+                            },
+                            {
+                              "Spacer": {}
+                            },
+                            {
+                              "Text": {
+                                "keypath": "when",
+                                "modifiers": {
+                                  "foregroundColor": "#556273",
+                                  "fontSize": 13
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "note",
+                          "modifiers": {
+                            "foregroundColor": "#172033",
+                            "fontSize": 14
+                          }
+                        }
+                      },
+                      {
+                        "HStack": {
+                          "spacing": 8,
+                          "modifiers": {
+                            "wrap": true
+                          },
+                          "elements": [
+                            {
+                              "Button": {
+                                "keypath": "moderation.admit",
+                                "label": "Godta med passkey",
+                                "payload": {}
+                              }
+                            },
+                            {
+                              "Button": {
+                                "keypath": "moderation.reject",
+                                "label": "Avvis",
+                                "payload": {},
+                                "modifiers": {
+                                  "background": "#FFFFFF",
+                                  "borderColor": "#FCA5A5",
+                                  "borderWidth": 1,
+                                  "cornerRadius": 6,
+                                  "foregroundColor": "#B91C1C"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "Text": {
+                          "text": "Du kan ikke godta din egen søknad.",
+                          "modifiers": {
+                            "foregroundColor": "#556273",
+                            "fontSize": 12,
+                            "visibility": {
+                              "when": {
+                                "equals": true,
+                                "keypath": "own",
+                                "scope": "item"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#FCD34D",
+            "maxWidthInfinity": true,
+            "visibility": {
+              "when": {
+                "equals": true,
+                "keypath": "moderation.state.hasRequests",
+                "scope": "root"
+              }
+            }
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Ingen søknader venter.",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 14
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true,
+            "visibility": {
+              "when": {
+                "equals": false,
+                "keypath": "moderation.state.hasRequests",
+                "scope": "root"
+              }
+            }
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Meldinger",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontStyle": "headline"
+                }
+              }
+            },
+            {
+              "List": {
+                "elements": [],
+                "keypath": "moderation.state.notices",
+                "selectionMode": "none",
+                "modifiers": {
+                  "itemSpacing": 8
+                },
+                "flowElementSkeleton": {
+                  "VStack": {
+                    "spacing": 4,
+                    "elements": [
+                      {
+                        "Text": {
+                          "keypath": "when",
+                          "modifiers": {
+                            "foregroundColor": "#556273",
+                            "fontSize": 13
+                          }
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "what",
+                          "modifiers": {
+                            "foregroundColor": "#172033",
+                            "fontSize": 14
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true,
+            "visibility": {
+              "when": {
+                "equals": true,
+                "keypath": "moderation.state.hasNotices",
+                "scope": "root"
+              }
+            }
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "HStack": {
+                "spacing": 8,
+                "elements": [
+                  {
+                    "Text": {
+                      "text": "Medlemmer",
+                      "modifiers": {
+                        "foregroundColor": "#172033",
+                        "fontStyle": "headline"
+                      }
+                    }
+                  },
+                  {
+                    "Spacer": {}
+                  },
+                  {
+                    "Text": {
+                      "keypath": "moderation.state.count",
+                      "modifiers": {
+                        "foregroundColor": "#556273",
+                        "fontSize": 13
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "List": {
+                "elements": [],
+                "keypath": "moderation.state.members",
+                "selectionMode": "none",
+                "modifiers": {
+                  "itemSpacing": 8
+                },
+                "flowElementSkeleton": {
+                  "VStack": {
+                    "spacing": 4,
+                    "elements": [
+                      {
+                        "HStack": {
+                          "spacing": 8,
+                          "elements": [
+                            {
+                              "Text": {
+                                "keypath": "who",
+                                "modifiers": {
+                                  "foregroundColor": "#172033",
+                                  "fontWeight": "700"
+                                }
+                              }
+                            },
+                            {
+                              "Spacer": {}
+                            },
+                            {
+                              "Text": {
+                                "keypath": "via",
+                                "modifiers": {
+                                  "foregroundColor": "#0F766E",
+                                  "fontSize": 13
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "HStack": {
+                          "spacing": 8,
+                          "elements": [
+                            {
+                              "Text": {
+                                "keypath": "detail",
+                                "modifiers": {
+                                  "foregroundColor": "#556273",
+                                  "fontSize": 13
+                                }
+                              }
+                            },
+                            {
+                              "Spacer": {}
+                            },
+                            {
+                              "Button": {
+                                "keypath": "moderation.revoke",
+                                "label": "Trekk tilbake",
+                                "payload": {},
+                                "modifiers": {
+                                  "background": "#FFFFFF",
+                                  "borderColor": "#FCA5A5",
+                                  "borderWidth": 1,
+                                  "cornerRadius": 6,
+                                  "foregroundColor": "#B91C1C",
+                                  "fontSize": 13,
+                                  "visibility": {
+                                    "when": {
+                                      "equals": true,
+                                      "keypath": "revocable",
+                                      "scope": "item"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true
+          }
+        }
+      }
+    ]
+  }
+}

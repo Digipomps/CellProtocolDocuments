@@ -1,0 +1,697 @@
+{
+  "VStack": {
+    "spacing": 14,
+    "elements": [
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Medlemsbevis",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontStyle": "title2",
+                  "fontWeight": "700"
+                }
+              }
+            },
+            {
+              "Text": {
+                "keypath": "membership.state.groupName",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 14
+                }
+              }
+            },
+            {
+              "Text": {
+                "text": "Beviset viser at gruppa har godtatt deg som én entitet i gruppa. Det gir ingen tilgang alene; en celle må kreve det i avtalen sin.",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 13
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Hvordan vil du bli godtatt?",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontStyle": "headline"
+                }
+              }
+            },
+            {
+              "VStack": {
+                "spacing": 10,
+                "elements": [
+                  {
+                    "Text": {
+                      "text": "Bevis med eID (fødselsnummer eller D-nummer)",
+                      "modifiers": {
+                        "foregroundColor": "#172033",
+                        "fontWeight": "700"
+                      }
+                    }
+                  },
+                  {
+                    "Text": {
+                      "text": "Du blir godtatt med en gang. Gruppa lagrer aldri nummeret ditt, bare et pseudonym som gjelder i denne gruppa. Ett nummer kan ha ett medlemskap.",
+                      "modifiers": {
+                        "foregroundColor": "#556273",
+                        "fontSize": 13
+                      }
+                    }
+                  },
+                  {
+                    "Text": {
+                      "keypath": "membership.state.eidNote",
+                      "modifiers": {
+                        "foregroundColor": "#92400E",
+                        "fontSize": 12
+                      }
+                    }
+                  },
+                  {
+                    "Button": {
+                      "keypath": "membership.eid.start",
+                      "label": "Fortsett med eID",
+                      "payload": {}
+                    }
+                  }
+                ],
+                "modifiers": {
+                  "padding": 12,
+                  "background": "#F8FAFC",
+                  "cornerRadius": 12,
+                  "borderWidth": 1,
+                  "borderColor": "#E2E8F0",
+                  "maxWidthInfinity": true
+                }
+              }
+            },
+            {
+              "VStack": {
+                "spacing": 10,
+                "elements": [
+                  {
+                    "Text": {
+                      "text": "Be en moderator",
+                      "modifiers": {
+                        "foregroundColor": "#172033",
+                        "fontWeight": "700"
+                      }
+                    }
+                  },
+                  {
+                    "Text": {
+                      "text": "En moderator ser søknaden din og godtar eller avviser den. Denne veien sjekker ikke om du allerede er medlem med en annen identitet.",
+                      "modifiers": {
+                        "foregroundColor": "#556273",
+                        "fontSize": 13
+                      }
+                    }
+                  },
+                  {
+                    "Button": {
+                      "keypath": "membership.moderator.request",
+                      "label": "Send søknad til moderator",
+                      "payload": {},
+                      "modifiers": {
+                        "background": "#FFFFFF",
+                        "borderColor": "#CBD5E1",
+                        "borderWidth": 1,
+                        "cornerRadius": 6,
+                        "foregroundColor": "#334155"
+                      }
+                    }
+                  }
+                ],
+                "modifiers": {
+                  "padding": 12,
+                  "background": "#F8FAFC",
+                  "cornerRadius": 12,
+                  "borderWidth": 1,
+                  "borderColor": "#E2E8F0",
+                  "maxWidthInfinity": true
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true,
+            "visibility": {
+              "when": {
+                "equals": "choose",
+                "keypath": "membership.state.phase",
+                "scope": "root"
+              }
+            }
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Før du går videre til eID",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontStyle": "headline"
+                }
+              }
+            },
+            {
+              "Text": {
+                "text": "Dette lagrer gruppa hvis du fortsetter:",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontSize": 14
+                }
+              }
+            },
+            {
+              "List": {
+                "elements": [],
+                "keypath": "membership.state.stored",
+                "selectionMode": "none",
+                "modifiers": {
+                  "itemSpacing": 8
+                },
+                "flowElementSkeleton": {
+                  "VStack": {
+                    "spacing": 4,
+                    "elements": [
+                      {
+                        "Text": {
+                          "keypath": "line",
+                          "modifiers": {
+                            "foregroundColor": "#172033",
+                            "fontSize": 14
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "Text": {
+                "text": "Dette lagres ikke:",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontSize": 14
+                }
+              }
+            },
+            {
+              "List": {
+                "elements": [],
+                "keypath": "membership.state.notStored",
+                "selectionMode": "none",
+                "modifiers": {
+                  "itemSpacing": 8
+                },
+                "flowElementSkeleton": {
+                  "VStack": {
+                    "spacing": 4,
+                    "elements": [
+                      {
+                        "Text": {
+                          "keypath": "line",
+                          "modifiers": {
+                            "foregroundColor": "#556273",
+                            "fontSize": 14
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "Text": {
+                "text": "Medlemsbeviset du får inneholder ikke pseudonymet. Melder du deg ut, slettes pseudonymet med en gang.",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 13
+                }
+              }
+            },
+            {
+              "HStack": {
+                "spacing": 8,
+                "modifiers": {
+                  "wrap": true
+                },
+                "elements": [
+                  {
+                    "Button": {
+                      "keypath": "membership.eid.consent",
+                      "label": "Jeg godtar, gå til eID",
+                      "payload": {}
+                    }
+                  },
+                  {
+                    "Button": {
+                      "keypath": "membership.eid.cancel",
+                      "label": "Avbryt",
+                      "payload": {},
+                      "modifiers": {
+                        "background": "#FFFFFF",
+                        "borderColor": "#CBD5E1",
+                        "borderWidth": 1,
+                        "cornerRadius": 6,
+                        "foregroundColor": "#334155"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true,
+            "visibility": {
+              "when": {
+                "equals": "consent",
+                "keypath": "membership.state.phase",
+                "scope": "root"
+              }
+            }
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Søknaden venter på en moderator",
+                "modifiers": {
+                  "foregroundColor": "#92400E",
+                  "fontStyle": "headline"
+                }
+              }
+            },
+            {
+              "Text": {
+                "keypath": "membership.state.pendingDetail",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontSize": 14
+                }
+              }
+            },
+            {
+              "Button": {
+                "keypath": "membership.moderator.withdraw",
+                "label": "Trekk søknaden",
+                "payload": {},
+                "modifiers": {
+                  "background": "#FFFFFF",
+                  "borderColor": "#CBD5E1",
+                  "borderWidth": 1,
+                  "cornerRadius": 6,
+                  "foregroundColor": "#334155"
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#FCD34D",
+            "maxWidthInfinity": true,
+            "visibility": {
+              "when": {
+                "equals": "pending",
+                "keypath": "membership.state.phase",
+                "scope": "root"
+              }
+            }
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Søknaden ble avvist",
+                "modifiers": {
+                  "foregroundColor": "#B91C1C",
+                  "fontStyle": "headline"
+                }
+              }
+            },
+            {
+              "Text": {
+                "keypath": "membership.state.rejectedDetail",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontSize": 14
+                }
+              }
+            },
+            {
+              "HStack": {
+                "spacing": 8,
+                "modifiers": {
+                  "wrap": true
+                },
+                "elements": [
+                  {
+                    "Button": {
+                      "keypath": "membership.eid.start",
+                      "label": "Prøv med eID",
+                      "payload": {}
+                    }
+                  },
+                  {
+                    "Button": {
+                      "keypath": "membership.moderator.request",
+                      "label": "Søk på nytt",
+                      "payload": {},
+                      "modifiers": {
+                        "background": "#FFFFFF",
+                        "borderColor": "#CBD5E1",
+                        "borderWidth": 1,
+                        "cornerRadius": 6,
+                        "foregroundColor": "#334155"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#FCA5A5",
+            "maxWidthInfinity": true,
+            "visibility": {
+              "when": {
+                "equals": "rejected",
+                "keypath": "membership.state.phase",
+                "scope": "root"
+              }
+            }
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Dette nummeret er allerede medlem",
+                "modifiers": {
+                  "foregroundColor": "#92400E",
+                  "fontStyle": "headline"
+                }
+              }
+            },
+            {
+              "Text": {
+                "keypath": "membership.state.duplicateDetail",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontSize": 14
+                }
+              }
+            },
+            {
+              "Text": {
+                "text": "Flytter du medlemskapet, trekkes det gamle beviset tilbake og du får et nytt her. Moderator får beskjed. Det vanligste er en ny eller tapt telefon.",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 13
+                }
+              }
+            },
+            {
+              "HStack": {
+                "spacing": 8,
+                "modifiers": {
+                  "wrap": true
+                },
+                "elements": [
+                  {
+                    "Button": {
+                      "keypath": "membership.eid.move",
+                      "label": "Flytt medlemskapet hit",
+                      "payload": {}
+                    }
+                  },
+                  {
+                    "Button": {
+                      "keypath": "membership.eid.cancel",
+                      "label": "Avbryt",
+                      "payload": {},
+                      "modifiers": {
+                        "background": "#FFFFFF",
+                        "borderColor": "#CBD5E1",
+                        "borderWidth": 1,
+                        "cornerRadius": 6,
+                        "foregroundColor": "#334155"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#FCD34D",
+            "maxWidthInfinity": true,
+            "visibility": {
+              "when": {
+                "equals": "duplicate",
+                "keypath": "membership.state.phase",
+                "scope": "root"
+              }
+            }
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "HStack": {
+                "spacing": 8,
+                "elements": [
+                  {
+                    "Text": {
+                      "text": "Du er medlem",
+                      "modifiers": {
+                        "foregroundColor": "#0F766E",
+                        "fontStyle": "headline"
+                      }
+                    }
+                  },
+                  {
+                    "Spacer": {}
+                  },
+                  {
+                    "Text": {
+                      "keypath": "membership.state.credential.status",
+                      "modifiers": {
+                        "foregroundColor": "#0F766E",
+                        "fontSize": 13
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Text": {
+                "keypath": "membership.state.credential.issuer",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontSize": 14
+                }
+              }
+            },
+            {
+              "Text": {
+                "keypath": "membership.state.credential.via",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontSize": 14
+                }
+              }
+            },
+            {
+              "Text": {
+                "keypath": "membership.state.credential.validity",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 13
+                }
+              }
+            },
+            {
+              "Text": {
+                "keypath": "membership.state.credential.usedBy",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 13
+                }
+              }
+            },
+            {
+              "HStack": {
+                "spacing": 8,
+                "modifiers": {
+                  "wrap": true
+                },
+                "elements": [
+                  {
+                    "Button": {
+                      "keypath": "membership.credential.show",
+                      "label": "Vis beviset",
+                      "payload": {},
+                      "modifiers": {
+                        "background": "#FFFFFF",
+                        "borderColor": "#CBD5E1",
+                        "borderWidth": 1,
+                        "cornerRadius": 6,
+                        "foregroundColor": "#334155"
+                      }
+                    }
+                  },
+                  {
+                    "Button": {
+                      "keypath": "membership.leave",
+                      "label": "Meld deg ut",
+                      "payload": {},
+                      "modifiers": {
+                        "background": "#FFFFFF",
+                        "borderColor": "#FCA5A5",
+                        "borderWidth": 1,
+                        "cornerRadius": 6,
+                        "foregroundColor": "#B91C1C"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#99F6E4",
+            "maxWidthInfinity": true,
+            "visibility": {
+              "when": {
+                "equals": "member",
+                "keypath": "membership.state.phase",
+                "scope": "root"
+              }
+            }
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Hva beviset ikke garanterer",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontStyle": "headline"
+                }
+              }
+            },
+            {
+              "List": {
+                "elements": [],
+                "keypath": "membership.state.limits",
+                "selectionMode": "none",
+                "modifiers": {
+                  "itemSpacing": 8
+                },
+                "flowElementSkeleton": {
+                  "VStack": {
+                    "spacing": 4,
+                    "elements": [
+                      {
+                        "Text": {
+                          "keypath": "line",
+                          "modifiers": {
+                            "foregroundColor": "#556273",
+                            "fontSize": 13
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true
+          }
+        }
+      }
+    ]
+  }
+}
