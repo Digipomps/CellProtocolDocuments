@@ -1,6 +1,6 @@
 # Formålsspesifikasjon — Signert medlemsbevis i en gruppeentitet
 
-Oppgavemappe: `PDD_medlemsbevis-gruppe_2026-11-24` · Opprettet 2026-11-24 · Iterasjon 2 (G1 ikke gitt)
+Oppgavemappe: `PDD_medlemsbevis-gruppe_2026-11-24` · Opprettet 2026-11-24 · Iterasjon 2 (G1 godkjent 2026-11-25)
 
 > Regel: ingen plan før G1 er godkjent av Kjetil. For GUI: ingen implementering før G1-GUI (rendret bilde) er godkjent.
 > Et dokument om leveransen teller aldri som leveransen.
@@ -386,3 +386,4 @@ Lærdommer som former treet:
 |---|---|---|
 | 1 | 2026-11-24 | Første utkast fra Kjetils melding 12:35Z |
 | 2 | 2026-11-24 | Rettet audit: CellScaffold har eID-kobling (falsk IdP, saltet pseudonym, ingen leverandør). 3b gjenbruker den; nye formål 5a (personvern, beviset bærer ikke pseudonymet) og 8 (én stemme per bevis, q6); pseudonym slettes ved utmelding; DPIA, gruppeeid-celle-PDD og manglende gruppeflate lagt i §2; driftsoperatør kan regne pseudonymet lagt i begrensningene. Innspill fra et parallelt utkast (`claude/pdd-gruppebevis-unik-entitet-20261124`), verifisert mot CellScaffold `6e2f667` |
+| — | 2026-11-25 | G1 godkjent av Kjetil (08:40Z, «G1 godkjent»). Han svarte ikke på §6 enkeltvis; forslagene i §6 (q1 falsk/test-IdP nå, q2 flytting med beskjed til moderator, q3 `admittedVia`, q4 Kjetil alene som moderator, q5 bare norsk eID med landskode, q6 én stemme per bevis) legges til grunn og kan endres ved G1-GUI |
