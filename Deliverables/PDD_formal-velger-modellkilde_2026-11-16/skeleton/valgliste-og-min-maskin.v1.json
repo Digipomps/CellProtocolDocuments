@@ -1,0 +1,298 @@
+{
+  "VStack": {
+    "spacing": 14,
+    "elements": [
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Velg modell",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontStyle": "headline"
+                }
+              }
+            },
+            {
+              "HStack": {
+                "spacing": 8,
+                "elements": [
+                  {
+                    "Text": {
+                      "text": "Valgt modell",
+                      "modifiers": {
+                        "foregroundColor": "#172033"
+                      }
+                    }
+                  },
+                  {
+                    "Text": {
+                      "keypath": "chatHub.state.ui.selectedProviderTitle",
+                      "modifiers": {
+                        "foregroundColor": "#172033",
+                        "fontWeight": "700"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "List": {
+                "elements": [],
+                "keypath": "chatHub.state.assistant.providerChoices",
+                "selectionActionKeypath": "chatHub.assistant.provider.select",
+                "selectionMode": "single",
+                "selectionPayloadMode": "item_id",
+                "selectionStateKeypath": "chatHub.state.ui.selectedProviderID",
+                "selectionValueKeypath": "id",
+                "modifiers": {
+                  "styleRole": "admin-table",
+                  "itemSpacing": 8
+                },
+                "flowElementSkeleton": {
+                  "VStack": {
+                    "spacing": 4,
+                    "elements": [
+                      {
+                        "HStack": {
+                          "spacing": 8,
+                          "elements": [
+                            {
+                              "Text": {
+                                "keypath": "title",
+                                "modifiers": {
+                                  "foregroundColor": "#172033",
+                                  "fontWeight": "700"
+                                }
+                              }
+                            },
+                            {
+                              "Spacer": {}
+                            },
+                            {
+                              "Text": {
+                                "keypath": "badge",
+                                "modifiers": {
+                                  "foregroundColor": "#0F766E",
+                                  "fontSize": 12
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "whereLabel",
+                          "modifiers": {
+                            "foregroundColor": "#556273",
+                            "fontSize": 13
+                          }
+                        }
+                      },
+                      {
+                        "Text": {
+                          "keypath": "factsLabel",
+                          "modifiers": {
+                            "foregroundColor": "#556273",
+                            "fontSize": 13
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "Text": {
+                "keypath": "chatHub.state.ui.selectedProviderReview",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 13
+                }
+              }
+            },
+            {
+              "HStack": {
+                "spacing": 8,
+                "modifiers": {
+                  "wrap": true
+                },
+                "elements": [
+                  {
+                    "Button": {
+                      "keypath": "chatHub.assistant.provider.confirm",
+                      "label": "Godkjenn én sending",
+                      "payload": {
+                        "confirm": true
+                      }
+                    }
+                  },
+                  {
+                    "Button": {
+                      "keypath": "chatHub.assistant.provider.select",
+                      "label": "Bruk lokale regler",
+                      "payload": "none",
+                      "modifiers": {
+                        "background": "#FFFFFF",
+                        "borderColor": "#CBD5E1",
+                        "borderWidth": 1,
+                        "cornerRadius": 6,
+                        "foregroundColor": "#334155"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Min maskin",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontStyle": "headline"
+                }
+              }
+            },
+            {
+              "Text": {
+                "keypath": "chatHub.state.localModelAvailability.statusTitle",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontWeight": "700"
+                }
+              }
+            },
+            {
+              "Text": {
+                "keypath": "chatHub.state.localModelAvailability.statusDetail",
+                "modifiers": {
+                  "foregroundColor": "#556273",
+                  "fontSize": 13
+                }
+              }
+            },
+            {
+              "Button": {
+                "keypath": "chatHub.localModelAvailability.withdraw",
+                "label": "Gjør utilgjengelig",
+                "payload": {},
+                "modifiers": {
+                  "background": "#FFFFFF",
+                  "borderColor": "#FCA5A5",
+                  "borderWidth": 1,
+                  "cornerRadius": 6,
+                  "foregroundColor": "#B91C1C",
+                  "visibility": {
+                    "when": {
+                      "equals": true,
+                      "keypath": "chatHub.state.localModelAvailability.available",
+                      "scope": "root"
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true,
+            "visibility": {
+              "when": {
+                "equals": true,
+                "keypath": "chatHub.state.localModelAvailability.isOwner",
+                "scope": "root"
+              }
+            }
+          }
+        }
+      },
+      {
+        "VStack": {
+          "spacing": 10,
+          "elements": [
+            {
+              "Text": {
+                "text": "Hendelser",
+                "modifiers": {
+                  "foregroundColor": "#172033",
+                  "fontStyle": "headline"
+                }
+              }
+            },
+            {
+              "List": {
+                "elements": [],
+                "keypath": "chatHub.state.localModelAvailability.events",
+                "selectionMode": "none",
+                "flowElementSkeleton": {
+                  "VStack": {
+                    "spacing": 0,
+                    "elements": [
+                      {
+                        "HStack": {
+                          "spacing": 10,
+                          "elements": [
+                            {
+                              "Text": {
+                                "keypath": "time",
+                                "modifiers": {
+                                  "foregroundColor": "#556273",
+                                  "fontSize": 13
+                                }
+                              }
+                            },
+                            {
+                              "Text": {
+                                "keypath": "label",
+                                "modifiers": {
+                                  "foregroundColor": "#172033",
+                                  "fontSize": 13
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "modifiers": {
+            "padding": 16,
+            "background": "#FFFFFF",
+            "cornerRadius": 12,
+            "borderWidth": 1,
+            "borderColor": "#E2E8F0",
+            "maxWidthInfinity": true
+          }
+        }
+      }
+    ]
+  }
+}
